@@ -6,6 +6,8 @@
     inputs.nixos-hardware.nixosModules.common-cpu-amd-pstate
     inputs.nixos-hardware.nixosModules.common-pc-ssd
     inputs.nixos-hardware.nixosModules.common-hidpi
+
+    ../common/optional/impermanence.nix
   ];
 
   boot = {
@@ -35,15 +37,24 @@
   };
 
   fileSystems = {
-    "/" = {
-      device = "none";
-      fsType = "tmpfs";
-      options = [ "size=16GB" "mode=755" ];
-    };
-
     "/boot" = {
       device = "/dev/disk/by-label/ESP";
       fsType = "vfat";
+    };
+
+    #? Is this the way to do this?
+    "/persist/logs" = {
+      device = "/dev/disk/by-label/arch-os";
+      fsType = "btrfs";
+      options = [ "subvol=./nix/@logs" ];
+      neededForBoot = true;
+    };
+
+    "/persist/sys" = {
+      device = "/dev/disk/by-label/arch-os";
+      fsType = "btrfs";
+      options = [ "subvol=./nix/@sys" ];
+      neededForBoot = true;
     };
   };
 

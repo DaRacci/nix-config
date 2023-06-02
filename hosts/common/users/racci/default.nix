@@ -24,7 +24,7 @@ in {
 
     # openssh.authorizedKeys.keys = [ (builtins.readFile ../../../../home/${username}/ssh.pub) ];
     # passwordFile = config.age.secrets."${username}-passwd".path;
-    hashedPassword = "$6$sqBxegZBhK94z/hT$nHMZdr51KMDPl0/ZhGqqnilsLMavskMYeAsvdLEIXYwbhaXcDXAz4Pp4iQxeprKCD6NA1joTvrLpknTentWY..";
+    initialHashedPassword = "$6$mEsyBvTsO13yA6zw$aAlH6R25H2EEmOp9b5oLfonCxd2fV0zd3AMTrOUtKn0KgXIlsnhCB2DZXioR3aVbCVtbADvchMK/at7ZFGof/.";
     packages = [ pkgs.home-manager ];
   };
 
@@ -33,7 +33,7 @@ in {
   #   neededForUsers = true;
   # };
 
-  # home-manager.users.${username} = import ../../../../home/${username}/${hostName}.nix;
+  home-manager.users.${username} = import ../../../../home/${username}/${hostName}.nix;
 
   services = {
     geoclue2.enable = true;

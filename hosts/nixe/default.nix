@@ -1,5 +1,6 @@
-{ ... }: {
-  imports = [ 
+{ inputs, ... }: {
+  imports = [
+    inputs.impermanence.nixosModules.impermanence
     ./hardware-configuration.nix
     
     ../common/global

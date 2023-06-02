@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+{ pkgs, ... }:
 {
   console = {
     useXkbConfig = true;
@@ -10,8 +10,8 @@
       enable = true;
       theme = "spinner-monochrome";
       themePackages = [
-        (pkgs.plymouth-spinner-monochrome.override {
-          inherit (config.boot.plymouth) logo;
+        (pkgs.adi1090x-plymouth-themes.override {
+          selected_themes = [ "spinner_alt" ];
         })
       ];
     };

@@ -1,7 +1,7 @@
 { inputs, lib, config, outputs, ... }:
 
 let
-  inherit (inputs.nix-colours.colourSchemes) onedark;
+  inherit (inputs.nix-colours.colorSchemes) onedark;
 in {
   imports = [
     #? TODO :: Globalise
@@ -32,18 +32,18 @@ in {
     stateVersion = lib.mkDefault "22.11";
     sessionPath = [ "$HOME/.local/bin" ];
 
-    persistence = {
-      "/persist/${config.home.homeDirectory}" = {
-        directories = [
-          "Documents"
-          "Downloads"
-          "Media"
-        ];
+    # persistence = {
+    #   "/persist/${config.home.homeDirectory}" = {
+    #     directories = [
+    #       "Documents"
+    #       "Downloads"
+    #       "Media"
+    #     ];
 
-        allowOther = true;
-      };
-    };
+    #     allowOther = true;
+    #   };
+    # };
 
-    home.file.".colorscheme".text = onedark.slug;
+    file.".colorscheme".text = onedark.slug;
   };
 }
