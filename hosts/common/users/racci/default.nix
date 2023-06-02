@@ -22,24 +22,27 @@ in {
       "libvirtd"
     ];
 
-    openssh.authorizedKeys.keys = [ (builtins.readFile ../../../../home/${username}/ssh.pub) ];
-    passwordFile = config.age.secrets."${username}-passwd".path;
+    # openssh.authorizedKeys.keys = [ (builtins.readFile ../../../../home/${username}/ssh.pub) ];
+    # passwordFile = config.age.secrets."${username}-passwd".path;
+    hashedPassword = "$6$sqBxegZBhK94z/hT$nHMZdr51KMDPl0/ZhGqqnilsLMavskMYeAsvdLEIXYwbhaXcDXAz4Pp4iQxeprKCD6NA1joTvrLpknTentWY..";
     packages = [ pkgs.home-manager ];
   };
 
-  sops.secrets."${username}-passwd" = {
-    sopsFile = ../../secrets.yaml;
-    neededForUsers = true;
-  };
+  # sops.secrets."${username}-passwd" = {
+  #   sopsFile = ../../secrets.yaml;
+  #   neededForUsers = true;
+  # };
 
-  home-manager.users.${username} = import ../../../../home/racci/${hostName}.nix;
+  # home-manager.users.${username} = import ../../../../home/${username}/${hostName}.nix;
 
   services = {
     geoclue2.enable = true;
     openssh = {
       enable = true;
-      permitRootLogin = "no";
-      passwordAuthentication = false;
+      settings = {
+        PermitRootLogin = "no";
+        PasswordAuthentication = false;
+      };
     };
   };
 }

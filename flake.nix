@@ -18,9 +18,8 @@
       forEachSystem = nixpkgs.lib.genAttrs [ "aarch64-linux" "x86_64-linux" ];
       forEachPkgs = fn: forEachSystem (system: fn nixpkgs.legacyPackages.${system});
       
-      mkNixos = input-modules: nixpkgs.lib.nixosSystem {
-        # inherit (sops-nix.nixModules) sops;
-        modules = input-modules ++ [ sops-nix.nixModules.sops ];
+      mkNixos = modules: nixpkgs.lib.nixosSystem {
+        inherit modules;
         specialArgs = { inherit inputs outputs; };
       };
       mkHome = modules: home-manager.lib.homeManagerConfiguration {

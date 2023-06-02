@@ -1,4 +1,4 @@
-{ inputs, lib, pkgs, config, outputs, ... }:
+{ inputs, lib, config, outputs, ... }:
 
 let
   inherit (inputs.nix-colours.colourSchemes) onedark;
@@ -44,6 +44,6 @@ in {
       };
     };
 
-    home.file.".colorscheme".text = config.colorscheme.slug;
+    home.file.".colorscheme".text = onedark.slug;
   };
 }

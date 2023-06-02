@@ -1,10 +1,9 @@
-{ lib, inputs, pkgs }: {
+{ lib, inputs, pkgs, ... }: {
   imports = [
     # ../common/optional/ephemeral-btrfs.nix
     # ../common/optional/encrypted-root.nix
     inputs.nixos-hardware.nixosModules.common-cpu-amd
     inputs.nixos-hardware.nixosModules.common-cpu-amd-pstate
-    inputs.nixos-hardware.nixosModules.common-gpu-nvidia
     inputs.nixos-hardware.nixosModules.common-pc-ssd
     inputs.nixos-hardware.nixosModules.common-hidpi
   ];
@@ -22,10 +21,15 @@
         enable = true;
         consoleMode = "max"; # TODO : Whats this do?
       };
+
+      #? TODO :: Globalise
       grub = {
         default = "saved";
-        useOsProber = true;
+        useOSProber = true;
         device = "nodev"; # TODO : Disable when ready for bootloader install
+
+        theme = pkgs.nixos-grub2-theme;
+        memtest86.enable = true;
       };
     };
   };

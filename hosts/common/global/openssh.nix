@@ -11,9 +11,11 @@ let
 in {
   services.openssh = {
     enable = true;
-    passwordAuthentication = false;
-    permitRootLogin = "no";
-    gatewayPorts = "clientspecified";
+    settings = {
+      PasswordAuthentication = false;
+      PermitRootLogin = "no";
+      GatewayPorts = "clientspecified";
+    };
 
     hostKeys = [{
       path = "${lib.optionalString hasOptinPersistence "/persist"}/etc/ssh/ssh_host_ed25519_key";

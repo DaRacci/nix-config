@@ -1,11 +1,5 @@
-{ pkgs, inputs, ...}: {
-  imports = [
-    inputs.nixos-hardware.nixosModules.common-cpu-amd
-    inputs.nixos-hardware.nixosModules.common-cpu-amd-pstate
-    inputs.nixos-hardware.nixosModules.common-gpu-nvidia
-    inputs.nixos-hardware.nixosModules.common-pc-ssd
-    inputs.nixos-hardware.nixosModules.common-hidpi
-    
+{ ... }: {
+  imports = [ 
     ./hardware-configuration.nix
     
     ../common/global
@@ -19,7 +13,6 @@
   networking = {
     hostName = "nixe";
     useDHCP = true;
-    tcpcrypt.enable = true;
     enableIPv6 = false; #? TODO :: Learn IPv6 
 
     nameservers = [ "1.1.1.1" "1.0.0.1" ];
@@ -31,7 +24,6 @@
           {
             address = "192.168.2.156";
             prefixLength = 24;
-            via = "192.168.2.1";
           }
           ## USA Network
           {
