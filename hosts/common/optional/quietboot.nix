@@ -8,7 +8,7 @@
   boot = {
     plymouth = {
       enable = true;
-      theme = "spinner-monochrome";
+      # theme = "spinner-monochrome";
       themePackages = [
         (pkgs.adi1090x-plymouth-themes.override {
           selected_themes = [ "spinner_alt" ];

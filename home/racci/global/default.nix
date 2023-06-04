@@ -1,25 +1,17 @@
-{ inputs, lib, config, outputs, ... }:
+{ inputs, lib, config, outputs, pkgs, ... }:
 
 let
-  inherit (inputs.nix-colours.colorSchemes) onedark;
+  colourScheme = inputs.nix-colours.colorSchemes.onedark;
 in {
   imports = [
     #? TODO :: Globalise
     inputs.impermanence.nixosModules.home-manager.impermanence
-    inputs.nix-colours.homeManagerModule
+    inputs.nix-colours.homeManagerModules.default
+    ./nix.nix
+    ./features/cli
   ] ++ (builtins.attrValues outputs.homeManagerModules);
 
-  nixpkgs = {
-    overlays = builtins.attrValues outputs.overlays;
-
-    config = {
-      allowUnfree = true;
-      # Workaround for https://github.com/nix-community/home-manager/issues/2942
-      allowUnfreePredicate = (_: true);
-    };
-  };
-
-  # Enable home-manager and git
+  # TODO :: Globalise?
   programs.home-manager.enable = true;
   programs.git.enable = true;
 
@@ -28,22 +20,23 @@ in {
 
   home = {
     username = lib.mkDefault "racci";
-    homeDirectory = lib.mkDefault "/home/${config.home.username}";
-    stateVersion = lib.mkDefault "22.11";
+    homeDirectory = lib.mkDefault "/home/racci";
+    stateVersion = lib.mkDefault "23.05";
     sessionPath = [ "$HOME/.local/bin" ];
 
-    # persistence = {
-    #   "/persist/${config.home.homeDirectory}" = {
-    #     directories = [
-    #       "Documents"
-    #       "Downloads"
-    #       "Media"
-    #     ];
+    persistence."/persist/home/racci" = {
+      directories = [
+        "Documents"
+        "Downloads"
+        "Media"
+        ".local/share/keyrings"
+      ];
 
-    #     allowOther = true;
-    #   };
-    # };
+      allowOther = true;
+    };
 
-    file.".colorscheme".text = onedark.slug;
+    file.".colorscheme".text = colourScheme.slug;
   };
+
+  colorscheme = lib.mkDefault colourScheme;
 }
