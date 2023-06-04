@@ -6,13 +6,16 @@
     nixpkgs-unstable = { url = "github:nixos/nixpkgs/nixos-unstable"; };
 
     home-manager = { url = "github:nix-community/home-manager/release-23.05"; inputs.nixpkgs.follows = "nixpkgs"; };
-    sops-nix = { url = "github:Mic92/sops-nix"; };
     nixos-hardware = { url = "github:nixos/nixos-hardware"; };
+
+    # TODO!!
+    # sops-nix = { url = "github:Mic92/sops-nix"; };
     nix-colours = { url = "github:misterio77/nix-colors"; };
     impermanence = { url = "github:nix-community/impermanence"; };
+    firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
   };
 
-  outputs = { self, nixpkgs, home-manager, sops-nix, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, ... }@inputs:
     let
       inherit (self) outputs;
       forEachSystem = nixpkgs.lib.genAttrs [ "aarch64-linux" "x86_64-linux" ];
@@ -23,6 +26,7 @@
         specialArgs = { inherit inputs outputs; };
       };
       mkHome = modules: home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.x86_64-linux; # TODO : Dont hardcode arch
         inherit modules nixpkgs;
         extraSpecialArgs = { inherit inputs outputs; };
       };
@@ -53,14 +57,7 @@
       # Standalone home-manager configuration entrypoint
       # Available through 'home-manager --flake .#your-username@your-hostname'
       homeConfigurations = {
-        # TODO :: Theres probably a better way to set the packages arch without having to manually set it.
-        "racci@nixe" = mkHome [ ./home/racci/nixe.nix ] nixpkgs.legacyPackages.x86_64-linux;
-        
-        # "racci@NixBox" = home-manager.lib.homeManagerConfiguration {
-        #   pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
-        #   extraSpecialArgs = { inherit inputs outputs; };
-        #   modules = [ ./home-manager/home.nix ];
-        # };
+        "racci@nixe" = mkHome [ ./home/racci/nixe.nix ];
       };
     };
 }
