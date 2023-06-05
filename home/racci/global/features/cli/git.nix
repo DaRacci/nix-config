@@ -23,8 +23,6 @@
         retag = "!ret() { git checkout -q '\${1}' && GIT_COMMITER_DATE=$(git show --format=%aD | head -1) && git tag -a '\${2}' -m '\${3}' -s -f && git checkout -q master; }; ret";
       };
 
-      ignores = [ ".idea" ];
-
       delta = {
         enable = true;
         options = {
@@ -32,7 +30,7 @@
           whitespace-error-style = "22 reverse";
 
           decorations = {
-            commit-decoration-style = "bond yellow box ul";
+            commit-decoration-style = "bold yellow box ul";
             file-decoration-style = "none";
             file-style = "bold yellow ul";
             syntax-theme = "TwoDark";
