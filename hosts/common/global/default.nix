@@ -1,7 +1,6 @@
 { inputs, outputs, ... }: {
   imports = [
     inputs.home-manager.nixosModules.home-manager
-    # inputs.nix-index-database.nixosModules.nix-index
 
     # ./auto-upgrade.nix
     ./locale.nix

@@ -4,9 +4,12 @@
     ./direnv.nix
     ./git.nix
     # ./gpg.nix
+    ./keyring.nix
     ./micro.nix
+    ./nushell.nix
     ./ssh.nix
     ./xplr.nix
+    ./zoxide.nix
   ];
 
   home.packages = with pkgs; [
