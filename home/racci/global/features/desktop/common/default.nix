@@ -1,9 +1,9 @@
 {
   imports = [
-    # ./1password.nix
     ./discord.nix
     ./firefox.nix
     ./spotify.nix
+    ./pass.nix
     
     # Theme related
     ./font.nix

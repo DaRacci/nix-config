@@ -4,5 +4,5 @@
   #   package = (pkgs.spotifyd.override { withKeyring = true; });
   # };
 
-  home.packages = with pkgs; [ spot ];
+  home.packages = with pkgs; [ spot spotify spicetify-cli ];
 }
