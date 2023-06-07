@@ -1,4 +1,6 @@
-{
+{ pkgs, ... }: {
+  environment.systemPackages = with pkgs; [ noise-supression ];
+
   security.rtkit.enable = true;
   hardware.pulseaudio.enable = false;
 
@@ -9,4 +11,6 @@
     pulse.enable = true;
     jack.enable = false;
   };
+
+  
 }

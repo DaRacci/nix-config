@@ -6,4 +6,5 @@
   # nix-software-center = pkgs.callPackage ./nix-software-center { };
   # protonup-rs = pkgs.callPackage ./protonup-rs { };
   ficsit-cli = pkgs.callPackage ./ficsit-cli { };
+  noise-supression = pkgs.callPackage ./noise-suppression-for-voice { };
 }

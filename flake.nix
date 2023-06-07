@@ -13,6 +13,7 @@
     nix-colours = { url = "github:misterio77/nix-colors"; };
     impermanence = { url = "github:nix-community/impermanence"; };
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
+    # inputs.xremap-flake.url = "github:xremap/nix-flake";
   };
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs:

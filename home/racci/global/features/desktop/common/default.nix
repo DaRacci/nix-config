@@ -3,6 +3,7 @@
     ./discord.nix
     ./firefox.nix
     ./spotify.nix
+    ./obsidian.nix
     ./pass.nix
     
     # Theme related

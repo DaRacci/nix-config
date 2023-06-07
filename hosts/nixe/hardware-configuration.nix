@@ -9,6 +9,7 @@
     ../common/optional/impermanence.nix
     ../common/optional/nvidia.nix
     ../common/optional/virtualisation.nix
+    ../common/optional/fan2go.nix
   ];
 
   boot = {

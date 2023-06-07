@@ -9,14 +9,19 @@
     gnomeExtensions.username-and-hostname-to-panel
     gnomeExtensions.useless-gaps
     gnomeExtensions.tray-icons-reloaded
+    gnomeExtensions.gsconnect
+    gnomeExtensions.lock-keys
+    gnomeExtensions.grand-theft-focus
+    gnomeExtensions.clipboard-indicator
+    gnomeExtensions.gamemode # TODO : Conditionally enable this
   ];
 
   dconf.settings = {
-    "org.gnome.desktop.datetime" = {
+    "org/gnome/desktop/datetime" = {
       automatic-timezone = true;
     };
 
-    "org.gnome.desktop.interface" = {
+    "org/gnome/desktop/interface" = {
       clock-format = "24h";
       clock-show-date = true;
       clock-show-seconds = true;
@@ -25,29 +30,29 @@
       gtk-enable-primary-paste = false;
     };
 
-    "org.gnome.desktop.peripherals.mouse" = {
+    "org/gnome/desktop/peripherals/mouse" = {
       accel-profile = "flat";
     };
 
-    "org.gnome.shell.weather" = {
+    "org/gnome/shell/weather" = {
       #? TODO
     };
     
-    "org.gnome.shell.world-clocks" = {
+    "org/gnome/shell/world-clocks" = {
       #? TODO
     };
 
-    "org.gnome.system.location" = {
+    "org/gnome/system/location" = {
       enabled = true;
       max-accuracy-level = "exact";
     };
 
-    "org.gtk.gtk4.Settings.FileChooser" = {
+    "org/gtk/gtk4/Settings/FileChooser" = {
       show-hidden = true;
       sort-directories-first = true;
     };
 
-    "org.gnome.shell.keybindings" = {
+    "org/gnome/shell/keybindings" = {
       switch-to-application-1 = [];
       switch-to-application-2 = [];
       switch-to-application-3 = [];
@@ -61,12 +66,12 @@
       toggle-overview = [];
     };
 
-    "org.gnome.settings-daemon.plugins.power" = {
+    "org/gnome/settings-daemon/plugins/power" = {
       sleep-inactive-ac-timeout = 900;
       sleep-inactive-ac-type = "nothing";
     };
     
-    "org.gnome.settings-daemon.plugins.media-keys" = {
+    "org/gnome/settings-daemon/plugins/media-keys" = {
       help = [];
       logout = [];
       magnifier = [];
@@ -75,7 +80,7 @@
       screensaver = [];
     };
 
-    "org.gnome.desktop.wm.keybindings" = {
+    "org/gnome/desktop/wm/keybindings" = {
       switch-input-source = [];
       switch-input-source-backward = [];
       switch-panels = [];
@@ -98,7 +103,7 @@
       cycle-windows-backward = [];
     };
 
-    "org.gnome.desktop.wm.preferences" = {
+    "org/gnome/desktop/wm/preferences" = {
       action-middle-click-titlebar = "none";
       action-right-click-titlebar = "none";
       button-layout = "appmenu:close";
@@ -115,6 +120,7 @@
       ".local/share/geary" #? Whats stored here?
       ".local/share/gnome-control-center-goa-helper" # ? Whats stored here?
       ".local/share/Trash" #? Do i really need this?
+      ".cache/clipboard-indicator@tudmotu.com/registry.txt" # Clipboard history
     ];
   };
 
