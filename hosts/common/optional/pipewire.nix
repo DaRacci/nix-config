@@ -10,7 +10,5 @@
     alsa.support32Bit = false;
     pulse.enable = true;
     jack.enable = false;
-  };
-
-  
+  };  
 }

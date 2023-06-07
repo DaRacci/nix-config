@@ -37,6 +37,8 @@ in {
     };
 
     file.".colorscheme".text = colourScheme.slug;
+
+    # TODO :: Can i do this globally?
     file.".config/pipewire/pipewire.conf.d/99-noise-suppression.conf".text = ''
     context.modules = [
 {   name = libpipewire-module-filter-chain
@@ -48,7 +50,7 @@ in {
                 {
                     type = ladspa
                     name = rnnoise
-                    plugin = /usr/lib/ladspa/librnnoise_ladspa.so
+                    plugin = ${pkgs.noise-supression}/lib/ladspa/librnnoise_ladspa.so
                     label = noise_suppressor_stereo
                     control = {
                         "VAD Threshold (%)" 50.0
