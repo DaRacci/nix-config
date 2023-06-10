@@ -5,6 +5,7 @@
     ./spotify.nix
     ./obsidian.nix
     ./pass.nix
+    ./wine.nix
     
     # Theme related
     ./font.nix

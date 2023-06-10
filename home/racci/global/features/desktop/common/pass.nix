@@ -1,7 +1,7 @@
 { pkgs, ...}: {
-  home.packages = with pkgs; [
-    _1password-gui
-  ];
+  # home.packages = with pkgs; [
+  #   _1password-gui
+  # ];
 
   home.persistence."/persist/home/racci" = {
     directories = [

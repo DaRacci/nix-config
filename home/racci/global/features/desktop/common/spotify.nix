@@ -8,5 +8,6 @@
 
   home.persistence."/persist/home/racci".directories = [
     ".config/spotify"
+    ".cache/spot"
   ];
 }
