@@ -28,7 +28,7 @@
       "-r 165"  # Limited Framerate
       "-o 30"   # Limited Framerate when unfocused
       # "-Y"      # Use NVIDIA Upscalingc
-      "-f"      # Fullscreen on launch
+      # "-f"      # Fullscreen on launch
     ];
   };
 
@@ -36,7 +36,7 @@
     enable = true;
     package = pkgs.steam.override {
       extraEnv = {
-        # MANGOHUD = true;
+        MANGOHUD = true;
       };
     };
 
