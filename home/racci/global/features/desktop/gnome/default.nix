@@ -120,7 +120,7 @@
       ".local/share/geary" #? Whats stored here?
       ".local/share/gnome-control-center-goa-helper" # ? Whats stored here?
       ".local/share/Trash" #? Do i really need this?
-      ".cache/clipboard-indicator@tudmotu.com/registry.txt" # Clipboard history
+      ".cache/clipboard-indicator@tudmotu.com" # Clipboard history
     ];
   };
 
