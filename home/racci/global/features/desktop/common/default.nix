@@ -1,10 +1,11 @@
-{
+{ pkgs, ... }: {
   imports = [
     ./discord.nix
     ./firefox.nix
     ./spotify.nix
     ./obsidian.nix
     ./pass.nix
+    ./podman.nix
     ./wine.nix
     
     # Theme related
@@ -15,4 +16,6 @@
 
   # tf is this
   xdg.mimeApps.enable = true;
+
+  home.packages = with pkgs; [ eltrafico ];
 }

@@ -1,6 +1,8 @@
 { pkgs, ... }: {
   imports = [
+    ./atuin.nix
     ./bat.nix
+    ./bottom.nix
     ./direnv.nix
     ./git.nix
     # ./gpg.nix
@@ -8,6 +10,7 @@
     ./micro.nix
     ./nushell.nix
     ./ssh.nix
+    ./starship.nix
     ./xplr.nix
     ./zoxide.nix
   ];
@@ -18,7 +21,6 @@
     nvtop
     ctop
 
-    ripgrep
     fd
     du-dust
     duf
