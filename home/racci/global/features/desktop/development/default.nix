@@ -1,5 +1,6 @@
 { pkgs, ... }: {
   imports = [
+    ./emacs
     ./jetbrains.nix
   ];
 
