@@ -25,6 +25,7 @@ in {
     ../common/optional/pipewire.nix
     ../common/optional/quietboot.nix
     ../common/optional/gaming.nix
+    ../common/optional/waydroid.nix
     ../../containers
   ];
 
