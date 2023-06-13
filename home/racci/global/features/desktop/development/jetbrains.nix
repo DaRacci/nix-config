@@ -12,6 +12,7 @@
     directories = [
       ".local/share/JetBrains"
       ".cache/JetBrains" # TODO :: use version from pkg to limit further
+      ".config/JetBrains" # Needed?
     ];
   };
 }
