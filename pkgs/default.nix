@@ -7,4 +7,12 @@
   # protonup-rs = pkgs.callPackage ./protonup-rs { };
   ficsit-cli = pkgs.callPackage ./ficsit-cli { };
   noise-supression = pkgs.callPackage ./noise-suppression-for-voice { };
+  eltrafico = pkgs.callPackage ./eltrafico { };
+  # coolercontrol = pkgs.callPackage ./coolercontrol { };
+
+  idea-community = pkgs.buildFHSEnv {
+    name = "idea";
+    targetPkgs = pkgs: (with pkgs; [ jetbrains.idea-community ]);
+    runScript = "idea-community";
+  };
 }
