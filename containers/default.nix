@@ -1,51 +1,48 @@
-# { config, lib }:
+{ config, lib, pkgs, inputs, ... }: {
+  imports = [ inputs.arion.nixosModules.arion ];
 
-# with lib; let
-#   cfg = config.containers.podman-runner;
-#   user = "podman-runner";
-# in {
-#   options.containers = {
-#     enable = mkEnableOption "containers";
+  environment.systemPackages = with pkgs; [
+    podman-tui
+    docker-client
+  ];
 
-#     reverse-proxy = {
-#       enable = mkOption {
-#         type = types.bool;
-#         default = false;
-#       };
+  virtualisation = {
+    docker.enable = false; # Just in case // All my homies hate docker // Podman is better
+    oci-containers.backend = "podman";
 
-#       provider = mkOption {
-#         type = types.str;
-#         default = "traefik";
-#       };
-#     }
-#   };
+    podman = {
+      enable = true;
+      package = pkgs.podman;
+      extraPackages = with pkgs; [ ];
 
-#   config = mkIf cfg.enable {
-#     virtualisation.oci-containers.backend = "podman";
+      defaultNetwork.settings.dns_name = true;
 
-#     virtualisation.podman = {
-#       enable = true;
+      dockerCompat = true;
+      dockerSocket.enable = true;
 
-#       defaultNetwork.dnsname.enable = true;
+      # TODO: Check for nvidia gpu
+      enableNvidia = true;
 
-#       # TODO: Check for nvidia gpu
-#       enableNvidia = true;
-#       dockerCompat = false;
+      networkSocket = {
+        enable = false; # TODO?
+        listenAddress = "0.0.0.0";
+      };
 
-#       networkSocket = {
-#         enable = false; # TODO?
-#         listenAddress = "0.0.0.0";
-#       };
+      autoPrune = {
+        enable = true;
+        dates = "weekly";
+        flags = [ ];
+      };
+    };
+  };
 
-#       autoPrune = {
-#         enable = true;
-#         dates = "weekly";
-#         flags = [ ];
-#       };
-#     };
-#   };
-
-#   meta = {
-#     maintainers = with lib.maintainers; [ racci ];
-#   };
-# }
+  virtualisation.arion = {
+    backend = "podman-socket";
+    projects = {
+      global.settings = {
+        enableDefaultNetwork = false;
+        imports = [ ./caddy ./minio ];
+      };
+    };
+  };
+}

@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, pkgs, ... }:
 
 let
   IPv4-Australia = "192.168.2.156";
@@ -25,7 +25,7 @@ in {
     ../common/optional/pipewire.nix
     ../common/optional/quietboot.nix
     ../common/optional/gaming.nix
-    ../../containers/minio.nix
+    ../../containers
   ];
 
   networking = {

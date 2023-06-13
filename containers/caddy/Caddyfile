@@ -1,0 +1,50 @@
+{
+	email {$EMAIL}
+    acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+
+	servers {
+		timeouts {
+			read_body 10s
+			read_header 10s
+			write 10s
+			idle 2m
+		}
+
+		max_header_size 16384
+	}
+}
+
+(base) {
+    # Caching rules
+    header {
+		Cache-Control "public, max-age=604800, must-revalidate"
+	}
+
+    # Compression rules
+    encode zstd gzip
+
+    # Logging
+    log {
+		output file /var/log/caddy/caddy.log
+	}
+}
+
+h3://s3.{$DOMAIN} {
+    import base
+
+    @console {
+        path /console
+    }
+
+    handle @console {
+        reverse_proxy minio:9001
+    }
+
+    @api {
+        path /api
+    }
+
+    handle @api {
+        reverse_proxy minio:9000
+    }
+}
