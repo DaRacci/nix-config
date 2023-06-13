@@ -14,6 +14,9 @@
     impermanence = { url = "github:nix-community/impermanence"; };
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
     # inputs.xremap-flake.url = "github:xremap/nix-flake";
+    rust-overlay.url = "github:oxalica/rust-overlay";
+    xremap-flake.url = "github:xremap/nix-flake";
+    nix-doom-emacs.url = "github:nix-community/nix-doom-emacs";
   };
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs:
@@ -21,7 +24,7 @@
       inherit (self) outputs;
       forEachSystem = nixpkgs.lib.genAttrs [ "aarch64-linux" "x86_64-linux" ];
       forEachPkgs = fn: forEachSystem (system: fn nixpkgs.legacyPackages.${system});
-      
+
       mkNixos = modules: nixpkgs.lib.nixosSystem {
         inherit modules;
         specialArgs = { inherit inputs outputs; };
