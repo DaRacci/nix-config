@@ -10,6 +10,8 @@
     ../common/optional/nvidia.nix
     ../common/optional/virtualisation.nix
     ../common/optional/fan2go.nix
+    ../common/optional/backlight.nix
+    ../common/optional/openrgb.nix
   ];
 
   boot = {
@@ -75,14 +77,6 @@
 
     #? TODO :: Globalise
     bluetooth.enable = true;
-  };
-
-  services = {
-    hardware.openrgb = {
-      enable = true;
-      motherboard = "amd";
-      package = pkgs.openrgb-with-all-plugins;
-    };
   };
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
