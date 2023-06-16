@@ -1,7 +1,7 @@
 { pkgs, ... }: {
   home.packages = with pkgs.unstable; [ lapce ];
 
-  home.persistent."/persist/home/racci".directories = [
+  home.persistence."/persist/home/racci".directories = [
     ".config/lapce-stable/lapce.db"
   ];
 
