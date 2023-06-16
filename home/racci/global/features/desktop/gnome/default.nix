@@ -3,6 +3,7 @@
 
   home.packages = with pkgs; [
     glib
+    # Extensions
     gnome-extension-manager
     gnomeExtensions.vitals
     gnomeExtensions.utcclock
@@ -14,6 +15,12 @@
     gnomeExtensions.grand-theft-focus
     gnomeExtensions.clipboard-indicator
     gnomeExtensions.gamemode # TODO : Conditionally enable this
+    # Other
+    curtail
+    gnome-decoder
+    eyedropper
+    raider
+    junction
   ];
 
   dconf.settings = {

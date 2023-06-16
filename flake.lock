@@ -290,21 +290,6 @@
       }
     },
     "flake-utils_3": {
-      "locked": {
-        "lastModified": 1653893745,
-        "narHash": "sha256-0jntwV3Z8//YwuOjzhV2sgJJPt+HY6KhU7VZUL0fKZQ=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "1ed9fb1935d260de5fe1c2f7ee0ebaae17ed2fa1",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
-    "flake-utils_4": {
       "inputs": {
         "systems": "systems_2"
       },
@@ -379,7 +364,7 @@
     "hyprland": {
       "inputs": {
         "hyprland-protocols": "hyprland-protocols",
-        "nixpkgs": "nixpkgs_7",
+        "nixpkgs": "nixpkgs_6",
         "wlroots": "wlroots",
         "xdph": "xdph"
       },
@@ -436,7 +421,7 @@
     },
     "naersk": {
       "inputs": {
-        "nixpkgs": "nixpkgs_8"
+        "nixpkgs": "nixpkgs_7"
       },
       "locked": {
         "lastModified": 1679567394,
@@ -529,23 +514,6 @@
         "owner": "nix-community",
         "repo": "nix-straight.el",
         "type": "github"
-      }
-    },
-    "nix2container": {
-      "inputs": {
-        "flake-utils": "flake-utils_3",
-        "nixpkgs": "nixpkgs_4"
-      },
-      "locked": {
-        "lastModified": 1685771919,
-        "narHash": "sha256-3lVKWrhNXjHJB6QkZ2SJaOs4X/mmYXtY6ovPVpDMOHc=",
-        "path": "/nix/store/rgd4s5ylv38p94wi6vays6wc1a0l5iyf-source",
-        "rev": "95e2220911874064b5d809f8d35f7835184c4ddf",
-        "type": "path"
-      },
-      "original": {
-        "id": "nix2container",
-        "type": "indirect"
       }
     },
     "nixos-hardware": {
@@ -643,21 +611,6 @@
     },
     "nixpkgs_4": {
       "locked": {
-        "lastModified": 1677612629,
-        "narHash": "sha256-yC+9LfhfwOd5sXFW8TLnDmqVMNYiHXYPGy9BbdpRqfU=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "111ca8e0378e88d9decaa1c6dd7597f35d8bc67f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_5": {
-      "locked": {
         "lastModified": 1686431482,
         "narHash": "sha256-oPVQ/0YP7yC2ztNsxvWLrV+f0NQ2QAwxbrZ+bgGydEM=",
         "owner": "nixos",
@@ -672,7 +625,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_6": {
+    "nixpkgs_5": {
       "locked": {
         "lastModified": 1681358109,
         "narHash": "sha256-eKyxW4OohHQx9Urxi7TQlFBTDWII+F+x2hklDOQPB50=",
@@ -688,7 +641,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_7": {
+    "nixpkgs_6": {
       "locked": {
         "lastModified": 1679172431,
         "narHash": "sha256-XEh5gIt5otaUbEAPUY5DILUTyWe1goAyeqQtmwaFPyI=",
@@ -704,7 +657,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_8": {
+    "nixpkgs_7": {
       "locked": {
         "lastModified": 1680303149,
         "narHash": "sha256-JQO/mAWguuN0VPRxDrYDw6LtyVpFgf3w6TR5MraF9kg=",
@@ -718,7 +671,7 @@
         "type": "indirect"
       }
     },
-    "nixpkgs_9": {
+    "nixpkgs_8": {
       "locked": {
         "lastModified": 1680303149,
         "narHash": "sha256-JQO/mAWguuN0VPRxDrYDw6LtyVpFgf3w6TR5MraF9kg=",
@@ -854,9 +807,8 @@
         "impermanence": "impermanence",
         "nix-colours": "nix-colours",
         "nix-doom-emacs": "nix-doom-emacs",
-        "nix2container": "nix2container",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs_5",
+        "nixpkgs": "nixpkgs_4",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "rust-overlay": "rust-overlay",
         "xremap-flake": "xremap-flake"
@@ -880,8 +832,8 @@
     },
     "rust-overlay": {
       "inputs": {
-        "flake-utils": "flake-utils_4",
-        "nixpkgs": "nixpkgs_6"
+        "flake-utils": "flake-utils_3",
+        "nixpkgs": "nixpkgs_5"
       },
       "locked": {
         "lastModified": 1686623191,
@@ -1041,7 +993,7 @@
       "inputs": {
         "hyprland": "hyprland",
         "naersk": "naersk",
-        "nixpkgs": "nixpkgs_9",
+        "nixpkgs": "nixpkgs_8",
         "xremap": "xremap"
       },
       "locked": {
