@@ -2,7 +2,8 @@
   imports = [
     inputs.home-manager.nixosModules.home-manager
 
-    # ./auto-upgrade.nix
+    ./auto-upgrade.nix
+    ./btrfs.nix
     ./locale.nix
     ./nix.nix
     # ./openssh.nix

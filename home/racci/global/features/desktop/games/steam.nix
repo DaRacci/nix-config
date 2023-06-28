@@ -5,7 +5,7 @@
   # ];
 
   programs.mangohud = {
-    enable = true;
+    enable = false;
     
     settings = {
       fps_limit = [ 0 60 144 165 240 ];

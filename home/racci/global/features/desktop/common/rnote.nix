@@ -1,7 +1,7 @@
 { pkgs, ... }: {
-  home.packages = with pkgs; [ obsidian ];
+  home.packages = with pkgs; [ rnote ];
 
   home.persistence."/persist/home/racci".directories = [
-    ".config/obsidian"
+    # TODO
   ];
 }

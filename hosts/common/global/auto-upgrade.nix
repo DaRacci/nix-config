@@ -10,7 +10,7 @@ in {
     flags = [ "--refresh" ];
     flake = "github:DaRacci/nix-config#${hostName}";
     
-    allowReboot = true;
+    allowReboot = false;
     rebootWindow = { lower = "02:00"; upper = "05:00"; };
   };
 }

@@ -3,6 +3,7 @@
     ./atuin.nix
     ./bat.nix
     ./bottom.nix
+    ./broot.nix
     ./direnv.nix
     ./git.nix
     # ./gpg.nix

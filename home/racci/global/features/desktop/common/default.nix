@@ -1,11 +1,14 @@
 { pkgs, ... }: {
   imports = [
+    ./denaro.nix
     ./discord.nix
     ./firefox.nix
+    ./flowtime.nix
     ./spotify.nix
     ./obsidian.nix
-    ./pass.nix
     ./podman.nix
+    ./rnote.nix
+    ./secrets.nix
     ./wine.nix
     
     # Theme related

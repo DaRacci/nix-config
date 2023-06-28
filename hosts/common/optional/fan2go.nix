@@ -1,4 +1,6 @@
 { pkgs, lib, ... }: {
+  boot.kernelModules = [ "nct6775" ];
+
   environment.systemPackages = with pkgs; [
     fan2go
     lm_sensors

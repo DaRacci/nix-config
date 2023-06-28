@@ -21,7 +21,7 @@
 
       files = [
         "/etc/machine-id"
-        { file = "/etc/nix/id_rsa"; parentDirectory = { mode = "u=rwx,g=,o="; }; }
+        { file = "/etc/nix/id_rsa"; parentDirectory = { mode = "u=rwx,g=rx,o=rx"; }; }
       ];
     };
   };

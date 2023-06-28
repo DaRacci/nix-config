@@ -29,7 +29,10 @@ in {
       directories = [
         "Documents"
         "Downloads"
-        "Media"
+        "Pictures"
+        "Videos"
+        "Music"
+        "Templates"
         ".local/share/keyrings"
       ];
 

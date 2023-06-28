@@ -1,5 +1,7 @@
 { pkgs, ... }: {
   imports = [
+    ./builder.nix
+    ./code.nix
     ./emacs
     ./jetbrains.nix
     ./lapce.nix

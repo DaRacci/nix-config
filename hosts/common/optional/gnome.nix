@@ -21,7 +21,6 @@
 	};
 
 	environment.gnome.excludePackages = with pkgs; [
-		gnome.epiphany
 		gnome-tour
 		gnome-text-editor
 		gnome.gnome-calculator

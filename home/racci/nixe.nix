@@ -5,8 +5,10 @@ let
 in {
   imports = [
     ./global
+
     ./global/features/desktop/gnome
-    ./global/features/desktop/editor/code.nix
+    ./global/features/desktop/hyprland
+
     ./global/features/desktop/games/osu.nix
     ./global/features/desktop/games/steam.nix
     ./global/features/desktop/games/satisfactory.nix

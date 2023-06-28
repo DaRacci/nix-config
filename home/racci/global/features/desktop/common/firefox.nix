@@ -17,7 +17,7 @@ in {
         i-dont-care-about-cookies
         clearurls
         # enhancer-for-youtube
-      ];
+      ] ++ ;
     };
 
     # settings = {

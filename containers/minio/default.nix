@@ -3,7 +3,7 @@
   image = "minio/minio:latest";
 in rec {
   services.minio = {
-    inherit (import ../common);
+    # inherit (import ../common);
 
     service = {
       inherit image;
