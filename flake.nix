@@ -18,6 +18,7 @@
     xremap-flake.url = "github:xremap/nix-flake";
     arion.url = "github:hercules-ci/arion";
     nix-doom-emacs.url = "github:nix-community/nix-doom-emacs";
+    hyprland.url = "github:hyprwm/Hyprland";
   };
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs:
