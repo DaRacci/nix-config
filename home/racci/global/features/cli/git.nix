@@ -1,6 +1,4 @@
 { pkgs, config, ...  }: {
-	home.packages = with pkgs; [ git-credential-1password ];
-
 	programs = {
     git = {
       enable = true;
@@ -41,7 +39,6 @@
       extraConfig = {
         init.defaultBranch = "master";
       
-        credential.helper = "!git-credential-1password";
         gpg = {
           format = "ssh";
           ssh.program = "${pkgs._1password-gui}/bin/op-ssh-sign";
@@ -52,7 +49,7 @@
     gh = {
       enable = true;
       extensions = with pkgs; [ gh-markdown-preview ];
-      enableGitCredentialHelper = false;
+      enableGitCredentialHelper = true;
       settings = {
         git_protocol = "ssh";
         prompt = "enabled";
@@ -63,8 +60,4 @@
       enable = true;
     };
   };
-
-  # home.persistence = {
-  #   "/persist/home/racci".directories = [ ".config/gh" ];
-  # };
 }
