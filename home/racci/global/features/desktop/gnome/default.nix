@@ -8,7 +8,7 @@
     eyedropper
     raider
     junction
-  ] ++ (with pkgs.gnomeExtensions [
+  ] ++ (with pkgs.gnomeExtensions; [
     vitals
     gsconnect
     lock-keys
