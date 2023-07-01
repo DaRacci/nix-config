@@ -8,4 +8,8 @@
   ];
 
   home.packages = with pkgs; [ nix-init ];
+
+  home.persistence."/persist/home/racci".directories = [
+    "Projects"
+  ];
 }
