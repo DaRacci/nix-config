@@ -218,10 +218,10 @@
     ];
   };
 
-  xdg.mimeApps.associations.added = [
+  xdg.mimeApps.associations.added = {
     "x-scheme-handler/sms" = [ "org.gnome.Shell.Extensions.GSConnect.desktop" ];
     "x-scheme-handler/tel" = [ "org.gnome.Shell.Extensions.GSConnect.desktop" ];
-  ];
+  };
 
   home.file.".config/monitors.xml".text = ''
 <monitors version="2">
