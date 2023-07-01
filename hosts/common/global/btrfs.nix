@@ -2,7 +2,7 @@
 {
   services.btrfs.autoScrub = {
     enable = true;
-    fileSystems = "/persist";
+    fileSystems = [ "/persist" ];
     interval = "monthly";
   };
 
