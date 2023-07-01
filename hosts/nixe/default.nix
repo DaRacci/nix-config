@@ -48,6 +48,10 @@ in {
         # KDE Connect
         { from = 1714; to = 1764; }
       ];
+      allowedTCPPortRanges = [
+        # KDE Connect
+        { from = 1714; to = 1764; }
+      ];
     };
   };
 
