@@ -1,9 +1,9 @@
-{ pkgs, ... }: {
+{ pkgs, lib, ... }: {
 	programs.xwayland.enable = true;
 
 	xdg.portal = {
-		enable = true;
-		wlr.enable = true;
+		enable = lib.mkForce false;
+    # xdgOpenUsePortal = true;
     # extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
 	};
 
@@ -19,6 +19,11 @@
 			enable = true;
 		};
 	};
+
+  services.gnome = {
+    gnome-browser-connector.enable = true;
+    sushi.enable = true;
+  };
 
 	environment.gnome.excludePackages = with pkgs; [
 		gnome-tour
