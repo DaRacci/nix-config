@@ -27,7 +27,6 @@ in {
     sessionPath = [ "$HOME/.local/bin" ];
 
     persistence."/persist/home/racci" = {
-      hideMounts = true;
       allowOther = true;
 
       directories = [
