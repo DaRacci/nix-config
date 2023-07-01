@@ -12,7 +12,7 @@
     # sops-nix = { url = "github:Mic92/sops-nix"; };
     nix-colours = { url = "github:misterio77/nix-colors"; };
     impermanence = { url = "github:nix-community/impermanence"; };
-    firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
+    nur.url = github:nix-community/NUR;
     # inputs.xremap-flake.url = "github:xremap/nix-flake";
     rust-overlay.url = "github:oxalica/rust-overlay";
     xremap-flake.url = "github:xremap/nix-flake";
@@ -21,19 +21,20 @@
     hyprland.url = "github:hyprwm/Hyprland";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, nur, ... }@inputs:
     let
       inherit (self) outputs;
       forEachSystem = nixpkgs.lib.genAttrs [ "aarch64-linux" "x86_64-linux" ];
       forEachPkgs = fn: forEachSystem (system: fn nixpkgs.legacyPackages.${system});
 
-      mkNixos = modules: nixpkgs.lib.nixosSystem {
-        inherit modules;
+      mkNixos = base-modules: nixpkgs.lib.nixosSystem {
+        modules = base-modules ++ [ nur.nixosModules.nur ];
         specialArgs = { inherit inputs outputs; };
       };
       mkHome = modules: home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-linux; # TODO : Dont hardcode arch
         inherit modules nixpkgs;
+        pkgs = nixpkgs.legacyPackages.x86_64-linux; # TODO : Dont hardcode arch
+        # imports = [ nur.HmModules.nur ];
         extraSpecialArgs = { inherit inputs outputs; };
       };
     in rec {
@@ -49,8 +50,11 @@
       overlays = import ./overlays { inherit inputs outputs; };
       # Reusable nixos modules you might want to export; These are usually stuff you would upstream into nixpkgs
       nixosModules = import ./modules/nixos;
-      # Reusable home-manager modules you might want to export; These are usually stuff you would upstream into home-manager
+
       homeManagerModules = import ./modules/home-manager;
+      # homeManagerModules = (import ./modules/home-manager) ++ [
+      #   nur.hmModules.nur
+      # ];
 
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'
