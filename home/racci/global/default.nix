@@ -7,6 +7,7 @@ in {
     #? TODO :: Globalise
     inputs.impermanence.nixosModules.home-manager.impermanence
     inputs.nix-colours.homeManagerModules.default
+    inputs.nur.hmModules.nur
     ./nix.nix
     ./features/cli
     ./features/daemons
@@ -26,6 +27,9 @@ in {
     sessionPath = [ "$HOME/.local/bin" ];
 
     persistence."/persist/home/racci" = {
+      hideMounts = true;
+      allowOther = true;
+
       directories = [
         "Documents"
         "Downloads"
@@ -35,8 +39,6 @@ in {
         "Templates"
         ".local/share/keyrings"
       ];
-
-      allowOther = true;
     };
 
     file.".colorscheme".text = colourScheme.slug;
