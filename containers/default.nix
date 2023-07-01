@@ -50,7 +50,7 @@
           enable_ipv6 = false; # TODO :: Learn IPv6
           ipam.config = [{
             subnet = "10.10.9.0/24";
-            ip_range = "10.10.0.0/24";
+            ip_range = "10.10.9.0/24";
             gateway = "10.10.9.1";
           }];
         };
