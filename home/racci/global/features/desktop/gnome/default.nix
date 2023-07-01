@@ -3,23 +3,23 @@
 
   home.packages = with pkgs; [
     glib
-    # Extensions
-    gnomeExtensions.vitals
-    gnomeExtensions.gsconnect
-    gnomeExtensions.lock-keys
-    gnomeExtensions.clipboard-indicator
-    gnomeExtensions.pop-shell
-    # Other
     curtail
     gnome-decoder
     eyedropper
     raider
     junction
-  ];
+  ] ++ (with pkgs.gnomeExtensions [
+    vitals
+    gsconnect
+    lock-keys
+    clipboard-indicator
+    pop-shell
+    blur-my-shell
+    tactile
+  ]);
 
   home.sessionVariables = {
     MOZ_ENABLE_WAYLAND = 1;
-    XDG_CURRENT_DESKTOP = "gnome"; 
   };
 
   dconf.settings = {
