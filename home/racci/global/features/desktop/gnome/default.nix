@@ -218,8 +218,70 @@
     ];
   };
 
+  xdg.mimeApps.associations.added = [
+    "x-scheme-handler/sms" = [ "org.gnome.Shell.Extensions.GSConnect.desktop" ];
+    "x-scheme-handler/tel" = [ "org.gnome.Shell.Extensions.GSConnect.desktop" ];
+  ];
+
   home.file.".config/monitors.xml".text = ''
 <monitors version="2">
+  <configuration>
+    <logicalmonitor>
+      <x>0</x>
+      <y>0</y>
+      <scale>1</scale>
+      <monitor>
+        <monitorspec>
+          <connector>DP-0</connector>
+          <vendor>AOC</vendor>
+          <product>AG271QG4</product>
+          <serial>0x00000010</serial>
+        </monitorspec>
+        <mode>
+          <width>2560</width>
+          <height>1440</height>
+          <rate>143.912</rate>
+        </mode>
+      </monitor>
+    </logicalmonitor>
+    <logicalmonitor>
+      <x>2560</x>
+      <y>0</y>
+      <scale>1</scale>
+      <primary>yes</primary>
+      <monitor>
+        <monitorspec>
+          <connector>DP-2</connector>
+          <vendor>AUS</vendor>
+          <product>ROG PG27V</product>
+          <serial>#ASNtjK9gdB7d</serial>
+        </monitorspec>
+        <mode>
+          <width>2560</width>
+          <height>1440</height>
+          <rate>165.000</rate>
+        </mode>
+      </monitor>
+    </logicalmonitor>
+    <logicalmonitor>
+      <x>5120</x>
+      <y>0</y>
+      <scale>1</scale>
+      <monitor>
+        <monitorspec>
+          <connector>DP-4</connector>
+          <vendor>AOC</vendor>
+          <product>AG271QG4</product>
+          <serial>0x000000aa</serial>
+        </monitorspec>
+        <mode>
+          <width>2560</width>
+          <height>1440</height>
+          <rate>143.912</rate>
+        </mode>
+      </monitor>
+    </logicalmonitor>
+  </configuration>
   <configuration>
     <logicalmonitor>
       <x>0</x>
