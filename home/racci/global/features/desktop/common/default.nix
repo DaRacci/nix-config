@@ -3,7 +3,7 @@
     ./denaro.nix
     ./discord.nix
     ./firefox.nix
-    ./flowtime.nix
+    ./nextcloud.nix
     ./spotify.nix
     ./obsidian.nix
     ./podman.nix

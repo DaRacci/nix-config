@@ -1,6 +1,6 @@
-let
-  directory = "Nextcloud - James";
-in {
+{ pkgs, config, ... }: {
+  home.packages = with pkgs; [ nextcloud-client ];
+
   services.nextcloud-client = {
     enable = true;
     startInBackground = true;
@@ -8,21 +8,5 @@ in {
 
   home.persistence."/persist/home/racci".directories = [
     ".config/Nextcloud"
-    "${directory}"
   ];
-
-  home.file = {
-    Documents = {
-      source = "Documents";
-      target = "${directory}/Documents";
-    };
-    Pictures = {
-      source = "Pictures";
-      target = "${directory}/Pictures";
-    };
-    Templates = {
-      source = "Templates";
-      target = "${directory}/Templates";
-    };
-  };
 }

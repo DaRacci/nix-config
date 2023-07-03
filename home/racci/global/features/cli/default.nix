@@ -1,5 +1,6 @@
 { pkgs, ... }: {
   imports = [
+    ./ai.nix
     ./atuin.nix
     ./bat.nix
     ./bottom.nix

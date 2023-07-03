@@ -32,6 +32,8 @@ in {
     ../../containers
   ];
 
+  programs.sniffnet.enable = true;
+
   networking = {
     hostName = "nixe";
     # useDHCP = true;

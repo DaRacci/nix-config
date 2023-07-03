@@ -83,7 +83,7 @@
         # Persistent Information
         ".mozilla/firefox/racci/sessionstore.jsonlz4"   # Session restore
         ".mozilla/firefox/racci/prefs.js"               # User preferences // TODO -> Needed?
-        ".mozilla/firefox/racci/xulstore.json"          # Window size and position
+        # ".mozilla/firefox/racci/xulstore.json"          # Window size and position
         # Extension Specific
         ".mozilla/firefox/racci/extension-settings.json"
         ".mozilla/firefox/racci/extension-preferences.json"
