@@ -1,5 +1,5 @@
 { pkgs, ... }: {
-  # TODO : Maybe auto run proton-rs?
+  # TODO -> auto run proton-rs to install latest ge version?
   # home.packages = with pkgs; [
   #   steam
   # ];
