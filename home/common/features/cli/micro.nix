@@ -1,9 +1,4 @@
-{ config, ...}: {
-  home.persistence."/persist/home/${config.home.username}".directories = [
-    ".config/micro/buffers"
-    ".config/micro/backup"
-  ];
-
+{ persistencePath, ... }: {
   programs.micro = {
     enable = true;
     settings = {
@@ -16,4 +11,9 @@
       tabstospaces = true;
     };
   };
+
+  home.persistence."${persistencePath}".directories = [
+    ".config/micro/buffers"
+    ".config/micro/backup"
+  ];
 }

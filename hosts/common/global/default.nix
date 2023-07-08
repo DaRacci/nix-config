@@ -1,7 +1,5 @@
 { inputs, outputs, ... }: {
   imports = [
-    inputs.home-manager.nixosModules.home-manager
-
     ./auto-upgrade.nix
     ./btrfs.nix
     ./locale.nix

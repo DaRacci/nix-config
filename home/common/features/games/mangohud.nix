@@ -1,12 +1,8 @@
 { pkgs, ... }: {
-  # TODO -> auto run proton-rs to install latest ge version?
-  # home.packages = with pkgs; [
-  #   steam
-  # ];
-
   programs.mangohud = {
-    enable = false;
-    
+    enable = true;
+    package = pkgs.unstable.mangohud;
+
     settings = {
       fps_limit = [ 0 60 144 165 240 ];
 
@@ -32,17 +28,8 @@
       wine = true;
 
       frame_timing = true;
-      
+
       gamemode = true;
     };
   };
-  
-
-  home.persistence."/persist/home/racci" = {
-    directories = [ ".local/share/Steam" ];
-  };
-
-  # TODO :: Force restart steam on rebuild if its open
-  # TODO :: Block switch if steam has game open
-  # TODO :: Mangohud
 }

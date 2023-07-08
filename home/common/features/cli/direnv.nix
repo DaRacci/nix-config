@@ -1,4 +1,4 @@
-{ lib, config, ... }: {
+{ lib, config, persistencePath, ... }: {
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;
@@ -8,7 +8,7 @@
     ignores = [ ".direnv" ];
   };
 
-  home.persistence."/persist/home/racci".directories = [
-    "/.local/share/direnv"
+  home.persistence."${persistencePath}".directories = [
+    ".local/share/direnv"
   ];
 }

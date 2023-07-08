@@ -1,7 +1,8 @@
 { config, ... }:
 let
   dockerEnabled = config.virtualisation.docker.enable;
-in {
+in
+{
   virtualisation.podman = {
     enable = true;
     dockerCompat = !dockerEnabled;
@@ -9,9 +10,7 @@ in {
     defaultNetwork.settings.dns_enabled = true;
   };
 
-  environment.persistence = {
-    "/persist".directories = [
-      "/var/lib/containers"
-    ];
-  };
+  environment.persistence."/persist".directories = [
+    "/var/lib/containers"
+  ];
 }

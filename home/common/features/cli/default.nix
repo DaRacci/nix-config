@@ -2,12 +2,12 @@
   imports = [
     ./ai.nix
     ./atuin.nix
+    ./azure.nix
     ./bat.nix
     ./bottom.nix
     ./broot.nix
     ./carapace.nix
     ./direnv.nix
-    ./git.nix
     # ./gpg.nix
     ./keyring.nix
     ./micro.nix
@@ -29,6 +29,7 @@
     du-dust
     duf
     procs
+    doggo
 
     nil
     nixfmt

@@ -7,19 +7,18 @@ let
   mkNetwork = interfaceName: {
     useDHCP = false;
     name = interfaceName;
-  	ipv4 = {
-  		addresses = [
-  			{ address = "${IPv4-Australia}"; prefixLength = 24; }
-  			{ address = "${IPv4-USA}"; prefixLength = 24; }
-  		];
-  	};
+    ipv4 = {
+      addresses = [
+        { address = "${IPv4-Australia}"; prefixLength = 24; }
+        { address = "${IPv4-USA}"; prefixLength = 24; }
+      ];
+    };
   };
-in {
+in
+{
   imports = [
-    inputs.impermanence.nixosModules.impermanence
     ./hardware-configuration.nix
-    
-    ../common/global
+
     ../common/users/racci
 
     ../common/optional/gnome.nix
@@ -32,6 +31,7 @@ in {
     ../../containers
   ];
 
+  services.teamviewer.enable = true;
   programs.sniffnet.enable = true;
 
   networking = {
@@ -72,5 +72,5 @@ in {
   # }
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  system.stateVersion = "22.11";
+  system.stateVersion = "23.05";
 }

@@ -1,7 +1,8 @@
-{ outputs, lib, config, ... }:
+{ outputs, persistencePath, ... }:
 let
   hostnames = builtins.attrNames outputs.nixosConfigurations;
-in {
+in
+{
   programs.ssh = {
     enable = true;
 
@@ -23,5 +24,5 @@ in {
     };
   };
 
-  home.persistence."/persist/home/racci".directories = [ ".ssh" ];
+  home.persistence."${persistencePath}".directories = [ ".ssh" ];
 }
