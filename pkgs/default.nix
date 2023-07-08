@@ -4,7 +4,7 @@
 { pkgs ? (import ../nixpkgs.nix) { } }: {
   # nixos-conf-editor = pkgs.callPackage ./nixos-conf-editor { };
   # nix-software-center = pkgs.callPackage ./nix-software-center { };
-  # protonup-rs = pkgs.callPackage ./protonup-rs { };
+  protonup-rs = pkgs.callPackage ./protonup-rs { };
   ficsit-cli = pkgs.callPackage ./ficsit-cli { };
   noise-supression = pkgs.callPackage ./noise-suppression-for-voice { };
   eltrafico = pkgs.callPackage ./eltrafico { };
