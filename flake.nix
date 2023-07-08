@@ -2,42 +2,66 @@
   description = "The nix-config of an Idiot";
 
   inputs = {
+    # Packages
     nixpkgs = { url = "github:nixos/nixpkgs/nixos-23.05"; };
     nixpkgs-unstable = { url = "github:nixos/nixpkgs/nixos-unstable"; };
+    nur = { url = "github:nix-community/NUR"; };
 
+    # Base Modules
     home-manager = { url = "github:nix-community/home-manager/release-23.05"; inputs.nixpkgs.follows = "nixpkgs"; };
     nixos-hardware = { url = "github:nixos/nixos-hardware"; };
-
-    # TODO!!
-    # sops-nix = { url = "github:Mic92/sops-nix"; };
-    nix-colours = { url = "github:misterio77/nix-colors"; };
+    sops-nix = { url = "github:Mic92/sops-nix"; inputs.nixpkgs.follows = "nixpkgs"; };
     impermanence = { url = "github:nix-community/impermanence"; };
-    nur.url = github:nix-community/NUR;
+    nix-colours = { url = "github:misterio77/nix-colors"; };
+
+    # Containers & Stuff
+    arion = { url = "github:hercules-ci/arion"; };
+
+    # Optional Modules
+    hyprland = { url = "github:hyprwm/Hyprland"; };
+    nix-doom-emacs = { url = "github:nix-community/nix-doom-emacs"; };
     # inputs.xremap-flake.url = "github:xremap/nix-flake";
-    rust-overlay.url = "github:oxalica/rust-overlay";
-    xremap-flake.url = "github:xremap/nix-flake";
-    arion.url = "github:hercules-ci/arion";
-    nix-doom-emacs.url = "github:nix-community/nix-doom-emacs";
-    hyprland.url = "github:hyprwm/Hyprland";
+    # rust-overlay.url = "github:oxalica/rust-overlay";
+    # xremap-flake.url = "github:xremap/nix-flake";
   };
 
-  outputs = { self, nixpkgs, home-manager, nur, ... }@inputs:
+  outputs = { self, nixpkgs, nur, home-manager, impermanence, sops-nix, nix-colours, ... }@inputs:
     let
       inherit (self) outputs;
+      inherit (self) system;
       forEachSystem = nixpkgs.lib.genAttrs [ "aarch64-linux" "x86_64-linux" ];
       forEachPkgs = fn: forEachSystem (system: fn nixpkgs.legacyPackages.${system});
 
-      mkNixos = base-modules: nixpkgs.lib.nixosSystem {
-        modules = base-modules ++ [ nur.nixosModules.nur ];
+      # Modules which are inherited by all system configurations
+      systemModules = [
+        # (builtins.toString ./hosts/common/global)
+        nur.nixosModules.nur
+        home-manager.nixosModules.home-manager
+        impermanence.nixosModules.impermanence
+      ];
+
+      # Modules which are inherited by all home-manager configurations
+      homeModules = [
+        # (builtins.toString ./home/common/global)
+        nur.hmModules.nur
+        sops-nix.homeManagerModule
+        impermanence.nixosModules.home-manager.impermanence
+        nix-colours.homeManagerModules.default
+      ];
+
+      mkNixos = unique-modules: nixpkgs.lib.nixosSystem {
+        modules = systemModules ++ unique-modules;
         specialArgs = { inherit inputs outputs; };
       };
-      mkHome = modules: home-manager.lib.homeManagerConfiguration {
-        inherit modules nixpkgs;
-        pkgs = nixpkgs.legacyPackages.x86_64-linux; # TODO : Dont hardcode arch
-        # imports = [ nur.HmModules.nur ];
+
+      mkHome = unique-modules: home-manager.lib.homeManagerConfiguration {
+        inherit nixpkgs;
+        pkgs = nixpkgs.legacyPackages."${system}";
+        modules = homeModules ++ unique-modules;
         extraSpecialArgs = { inherit inputs outputs; };
       };
-    in rec {
+    in
+    {
       # Custom packages; Acessible through 'nix build', 'nix shell', etc
       packages = forEachPkgs (pkgs: (import ./pkgs { inherit pkgs; }) // { });
 
@@ -48,13 +72,9 @@
 
       # Your custom packages and modifications, exported as overlays
       overlays = import ./overlays { inherit inputs outputs; };
-      # Reusable nixos modules you might want to export; These are usually stuff you would upstream into nixpkgs
-      nixosModules = import ./modules/nixos;
 
+      nixosModules = import ./modules/nixos;
       homeManagerModules = import ./modules/home-manager;
-      # homeManagerModules = (import ./modules/home-manager) ++ [
-      #   nur.hmModules.nur
-      # ];
 
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'

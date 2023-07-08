@@ -1,6 +1,7 @@
 let
   image = "caddy:alpine";
-in rec {
+in
+{
   networks.proxy = {
     name = "proxy";
     internal = true;
