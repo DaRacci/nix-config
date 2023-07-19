@@ -1,5 +1,5 @@
-{ persistencePath, ... }: {
-  home.persistence."${persistencePath}".directory = [
+{ persistenceDirectory, ... }: {
+  home.persistence."${persistenceDirectory}".directories = [
     ".local/share/Steam"
   ];
 

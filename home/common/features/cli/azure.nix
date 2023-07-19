@@ -1,8 +1,8 @@
-{ config, pkgs, persistencePath, ... }: {
+{ config, pkgs, persistenceDirectory, ... }: {
   home.packages = with pkgs; [ azure-cli ];
 
   home.sessionVariables.AZURE_CONFIG_DIR = "${config.xdg.configHome}/.azure";
-  home.persistence."${persistencePath}".directories = [
+  home.persistence."${persistenceDirectory}".directories = [
     ".azure"
   ];
 }

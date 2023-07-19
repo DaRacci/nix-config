@@ -1,4 +1,4 @@
-{ persistencePath, ... }: {
+{ persistenceDirectory, ... }: {
   programs.micro = {
     enable = true;
     settings = {
@@ -12,7 +12,7 @@
     };
   };
 
-  home.persistence."${persistencePath}".directories = [
+  home.persistence."${persistenceDirectory}".directories = [
     ".config/micro/buffers"
     ".config/micro/backup"
   ];

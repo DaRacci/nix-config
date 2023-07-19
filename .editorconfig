@@ -13,3 +13,6 @@ insert_final_newline = false
 
 [*.nix]
 indent_size = 2
+
+[*.{yaml,yml}]
+indent_size = 2

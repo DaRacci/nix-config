@@ -1,0 +1,24 @@
+keys:
+  - &users :
+    - &james "age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a"
+  - &hosts :
+    - &nixe "age1rm3j9r0fulw4c2l9cfa9tvrznzw2aehgy2xc700lxrxqq00efghsy9wgv7"
+    - &surnixe "blahblah"
+
+
+creation_rules:
+  - path_regex: home/racci/secrets.yaml$
+    key_groups:
+    - age: [ *james ]
+
+  - path_regex: hosts/nixe/secrets.yaml$
+    key_groups:
+    - age: [ *nixe, *james ]
+
+  - path_regex: hosts/surnix/secrets.yaml$
+    key_groups:
+    - age: [ *surnixe, *james ]
+
+  - path_regex: hosts/common/secrets.yaml$
+    key_groups:
+    - age: [ *nixe, *james]

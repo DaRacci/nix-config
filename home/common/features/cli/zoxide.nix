@@ -1,7 +1,7 @@
-{ persistencePath, ... }: {
+{ persistenceDirectory, ... }: {
   programs.zoxide.enable = true;
 
-  home.persistence."${persistencePath}".directories = [
+  home.persistence."${persistenceDirectory}".directories = [
     ".local/share/zoxide/"
   ];
 }

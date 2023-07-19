@@ -34,6 +34,6 @@ stdenv.mkDerivation rec {
     description = "Noise suppression plugin based on Xiph's RNNoise";
     homepage = "https://github.com/werman/noise-suppression-for-voice";
     license = licenses.gpl3Only;
-    maintainers = with maintainers; [ ];
+    maintainers = with maintainers; [ Racci ];
   };
 }

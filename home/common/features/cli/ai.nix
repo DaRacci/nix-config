@@ -1,9 +1,9 @@
-{ pkgs, persistencePath, ... }: {
+{ pkgs, persistenceDirectory, ... }: {
   home.packages = with pkgs; [
     unstable.tgpt
   ];
 
-  home.persist."${persistencePath}".directories = [
+  home.persistence."${persistenceDirectory}".directories = [
     ".config/tgpt"
   ];
 }

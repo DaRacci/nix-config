@@ -1,5 +1,5 @@
 # TODO :: Auto subvolume setup
-{ config, lib, inputs, pkgs, ... }: {
+{ inputs, pkgs, ... }: {
   imports = [
     inputs.nixos-hardware.nixosModules.common-cpu-amd
     inputs.nixos-hardware.nixosModules.common-cpu-amd-pstate
@@ -32,7 +32,7 @@
       grub = {
         efiSupport = true;
 
-		    # TODO :: Better theme
+        # TODO :: Better theme
         theme = pkgs.nixos-grub2-theme;
         memtest86.enable = true;
       };
@@ -60,24 +60,11 @@
     };
   };
 
-  zramSwap = {
-    enable = true;
-    priority = 5;
-    algorithm = "zstd";
-    memoryMax = null;
-    memoryPercent = 50;
-  };
-
-  # TODO :: Disk swap
-  swapDevices = [];
-
   hardware = {
     #? TODO :: Globalise
-    keyboard.qmk.enable = true;
+    # keyboard.qmk.enable = true;
 
     #? TODO :: Globalise
     bluetooth.enable = true;
   };
-
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 }

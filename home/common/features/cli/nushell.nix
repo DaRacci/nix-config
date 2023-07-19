@@ -1,4 +1,4 @@
-{ lib, config, ... }: {
+{ lib, config, persistenceDirectory, ... }: {
   programs.nushell = {
     enable = true;
 
@@ -82,7 +82,7 @@
     enableNushellIntegration = true;
   };
 
-  home.persistence."/persist/home/racci" = {
+  home.persistence."${persistenceDirectory}" = {
     files = [
       ".config/nushell/history.txt"
     ];

@@ -9,4 +9,6 @@
     { a = { b = "foo"; c = "bar"; }; }
   */
   recursiveMergeAttrs = builtins.foldl' lib.recursiveUpdate { };
+
+  ifTheyExist = attrs: possible_attrs: builtins.filter (attr: builtins.hasAttr attr attrs) possible_attrs;
 }

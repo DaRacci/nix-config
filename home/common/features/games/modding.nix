@@ -1,9 +1,9 @@
 # Provides a general area for modding packages,
 # and their persistent directories.
-{ pkgs, persistencePath, ... }: {
-  home.packages = with pkgs.unstable; [ ficsit-cli ];
+{ pkgs, persistenceDirectory, ... }: {
+  home.packages = with pkgs; [ ficsit-cli ];
 
-  home.persistence."${persistencePath}".directories = [
+  home.persistence."${persistenceDirectory}".directories = [
     ".local/share/ficsit"
   ];
 }

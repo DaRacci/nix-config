@@ -1,5 +1,4 @@
-{ inputs, pkgs, ... }:
-
+{ pkgs, ... }:
 let
   IPv4-Australia = "192.168.2.156";
   IPv4-USA = "10.0.0.2";
@@ -16,10 +15,9 @@ let
   };
 in
 {
-  imports = [
-    ./hardware-configuration.nix
 
-    ../common/users/racci
+  imports = [
+    ./hardware.nix
 
     ../common/optional/gnome.nix
     ../common/optional/hyprland.nix
@@ -28,19 +26,15 @@ in
     ../common/optional/quietboot.nix
     ../common/optional/gaming.nix
     ../common/optional/waydroid.nix
-    ../../containers
+    # ../../containers
   ];
+
+  boot.kernelPackages = pkgs.linuxPackages_xanmod_stable;
 
   services.teamviewer.enable = true;
   programs.sniffnet.enable = true;
 
   networking = {
-    hostName = "nixe";
-    # useDHCP = true;
-    enableIPv6 = false; #? TODO :: Learn IPv6 
-
-    nameservers = [ "1.1.1.1" "1.0.0.1" ];
-
     interfaces.enp5so = mkNetwork "eth0";
     interfaces.enp6so = mkNetwork "eth1";
 
@@ -70,7 +64,4 @@ in
   #     }
   #   }
   # }
-
-  # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  system.stateVersion = "23.05";
 }

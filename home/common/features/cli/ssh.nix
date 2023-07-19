@@ -1,4 +1,4 @@
-{ outputs, persistencePath, ... }:
+{ outputs, persistenceDirectory, ... }:
 let
   hostnames = builtins.attrNames outputs.nixosConfigurations;
 in
@@ -24,5 +24,5 @@ in
     };
   };
 
-  home.persistence."${persistencePath}".directories = [ ".ssh" ];
+  home.persistence."${persistenceDirectory}".directories = [ ".ssh" ];
 }

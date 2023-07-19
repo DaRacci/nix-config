@@ -8,7 +8,7 @@
     nur = { url = "github:nix-community/NUR"; };
 
     # Utils
-    systems = { url = "github:nix-systems/current-system"; };
+    systems = { url = "github:nix-systems/X86_64-linux"; }; # TODO - Add Darwin
     flake-utils = { url = "github:numtide/flake-utils"; inputs.systems.follows = "systems"; };
 
     # Base Modules
@@ -19,7 +19,7 @@
     nix-colours = { url = "github:misterio77/nix-colors"; };
 
     # Containers & Stuff
-    arion = { url = "github:hercules-ci/arion"; };
+    # arion = { url = "github:hercules-ci/arion"; };
 
     # Optional Modules
     hyprland = { url = "github:hyprwm/Hyprland"; };
@@ -29,30 +29,29 @@
     # xremap-flake.url = "github:xremap/nix-flake";
   };
 
-  outputs = { self, nixpkgs, flake-utils, ... }@inputs:
+  outputs = { self, nixpkgs, flake-utils, systems, ... }@inputs:
     let
-      forEachPkgs = fn: flake-utils.lib.eachDefaultSystem (system: fn nixpkgs.legacyPackages.${system});
-
       inherit (self) outputs;
-      inherit (import ./lib/attrsets.nix { inherit (nixpkgs) lib; }) recursiveMergeAttrs;
-      inherit (import ./lib/mk.nix inputs) mkNixosConfig mkHomeConfig;
+      inherit (import ./lib/mk.nix inputs) mkSystem mkHome;
     in
-    (recursiveMergeAttrs [
-      (mkNixosConfig { hostname = "nixe"; })
-      (mkNixosConfig { hostname = "surnix"; })
+    {
+      nixosConfigurations = builtins.mapAttrs mkSystem {
+        nixe = { users = [ "racci" ]; };
+        # surnix = { };
+      };
 
-      (mkHomeConfig { username = "racci"; hostname = "nixe"; })
-      (mkHomeConfig { username = "racci"; hostname = "surnix"; })
-    ]) // {
-      # Custom packages; Acessible through 'nix build', 'nix shell', etc
-      packages = forEachPkgs (pkgs: (import ./pkgs { inherit pkgs; }));
-
-      # Devshell for bootstrapping; Acessible through 'nix develop' or 'nix-shell' (legacy)
-      devShells = forEachPkgs (pkgs: (import ./shell.nix { inherit pkgs; }));
-
-      formatter = forEachPkgs (pkgs: pkgs.nixpkgs-fmt); #?? TF is this?
-
-      # Your custom packages and modifications, exported as overlays
+      homeConfigurations = builtins.mapAttrs mkHome {
+        racci = { host = "nixe"; };
+      };
+    } // flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = import nixpkgs { inherit system; };
+      in
+      {
+        packages = import ./pkgs { inherit pkgs; };
+        devShells = import ./shell.nix { inherit pkgs; };
+        formatter = pkgs.nixpkgs-fmt;
+      }) // {
       overlays = import ./overlays { inherit inputs outputs; };
 
       nixosModules = import ./modules/nixos;

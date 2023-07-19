@@ -10,8 +10,6 @@ in
     (modulesPath + /home/${username}/features/daemons)
   ];
 
-  programs.git.enable = true;
-
   home = {
     file.".colorscheme".text = colourScheme.slug;
 

@@ -1,4 +1,4 @@
-{ lib, config, persistencePath, ... }: {
+{ lib, config, persistenceDirectory, ... }: {
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;
@@ -8,7 +8,7 @@
     ignores = [ ".direnv" ];
   };
 
-  home.persistence."${persistencePath}".directories = [
+  home.persistence."${persistenceDirectory}".directories = [
     ".local/share/direnv"
   ];
 }

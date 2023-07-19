@@ -1,10 +1,10 @@
-{ lib, config, pkgs, ... }: {
+{ config, pkgs, ... }: {
   environment.systemPackages = with pkgs; [
     ddcutil
   ];
 
   boot.extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
-  boot.kernelModules = ["i2c-dev" "ddcci_backlight"];
+  boot.kernelModules = [ "i2c-dev" "ddcci_backlight" ];
 
   services.udev.extraRules = ''
     SUBSYSTEM=="i2c-dev", ACTION=="add",\
@@ -26,5 +26,4 @@
     '';
     serviceConfig.Type = "oneshot";
   };
-
 }

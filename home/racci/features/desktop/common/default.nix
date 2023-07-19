@@ -1,5 +1,6 @@
-{ pkgs, ... }: {
+{ ... }: {
   imports = [
+    ./background.nix
     ./denaro.nix
     ./discord.nix
     ./firefox.nix
@@ -10,7 +11,7 @@
     ./rnote.nix
     ./secrets.nix
     ./wine.nix
-    
+
     # Theme related
     ./font.nix
     ./gtk.nix
@@ -20,5 +21,5 @@
   # tf is this
   xdg.mimeApps.enable = true;
 
-  home.packages = with pkgs; [ eltrafico ];
+  # home.packages = with pkgs; [ eltrafico ];
 }

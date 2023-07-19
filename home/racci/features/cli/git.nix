@@ -1,5 +1,5 @@
-{ pkgs, config, ...  }: {
-	programs = {
+{ pkgs, ... }: {
+  programs = {
     git = {
       enable = true;
       package = pkgs.gitAndTools.gitFull;
@@ -38,14 +38,14 @@
 
       extraConfig = {
         init.defaultBranch = "master";
-      
+
         gpg = {
           format = "ssh";
           ssh.program = "${pkgs._1password-gui}/bin/op-ssh-sign";
         };
       };
-  	};
-  
+    };
+
     gh = {
       enable = true;
       extensions = with pkgs; [ gh-markdown-preview ];

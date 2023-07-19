@@ -1,16 +1,18 @@
-{ pkgs, config, nur, ... }:
+{ pkgs, ... }:
 
 let
-  nur-no-pkgs = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {};
+  nur-no-pkgs = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") { };
   bridgeInterface = "br0";
   ethInterface = "eth0";
-in {
+in
+{
   imports = [
-    nur-no-pkgs.repos.crtified.modules.vfio
+    # ../../modules/nixos
+    # nur-no-pkgs.repos.crtified.modules.vfio
     nur-no-pkgs.repos.crtified.modules.virtualisation.nix
   ];
 
-	virtualisation = {
+  virtualisation = {
     vfio = {
       enable = true;
       IOMMUType = "amd";
@@ -43,7 +45,7 @@ in {
       #   "/dev/shm/looking-glass"
       # ];
     };
-	};
+  };
 
   networking = {
     interfaces."${bridgeInterface}".useDHCP = true;
@@ -56,7 +58,9 @@ in {
       virt-manager
       virtiofsd
       looking-glass-client
-      win-virtio win-spice win-qemu
+      win-virtio
+      win-spice
+      win-qemu
     ];
 
     persistence."/persist" = {
