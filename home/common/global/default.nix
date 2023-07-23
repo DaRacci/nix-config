@@ -9,6 +9,7 @@ in
     inputs.impermanence.nixosModules.home-manager.impermanence
     inputs.nix-colours.homeManagerModules.default
   ] ++ [
+    ./audio.nix
     ./nix.nix
     ./sops.nix
     ./xdg.nix
