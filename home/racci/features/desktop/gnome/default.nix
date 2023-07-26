@@ -15,7 +15,6 @@
     clipboard-indicator
     pop-shell
     blur-my-shell
-    tactile
     brightness-control-using-ddcutil
   ]);
 
@@ -33,6 +32,7 @@
         "lockkeys@vaina.lt"
         "pop-shell@system76.com"
         "Vitals@CoreCoding.com"
+        "blur-my-shell@aunetx"
       ];
     };
 
