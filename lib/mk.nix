@@ -47,12 +47,13 @@
         })
       ] ++
       (builtins.map
-        (username: { flake, config, ... }:
-          let inherit (flake) inputs; in {
-            imports = [ inputs.sops-nix.nixosModules.sops ];
+        (username: { flake, config, pkgs, ... }:
+          let inherit (flake) inputs; homeDirectory = if pkgs.stdenv.isDarwin then "/Users/${username}" else "/home/${username}"; persistenceDirectory = "/persist${homeDirectory}"; in {
+            imports = [ inputs.home-manager.nixosModule inputs.sops-nix.nixosModules.sops ];
 
             users.users.${username} = {
               isNormalUser = mkDefault true;
+              shell = pkgs.nushell;
               # TODO :: Not fucking this shit
               extraGroups = [ "video" "audio" ] ++ [ "wheel" "network" "i2c" "docker" "podman" "git" "libvirtd" ];
 
@@ -64,27 +65,16 @@
               sopsFile = ../hosts/${hostName}/secrets.yaml;
               neededForUsers = true;
             };
-          })
-        users);
-      specialArgs = {
-        flake = self;
-        inherit (self) inputs outputs;
-      };
-    };
 
-  mkHome = username: { system ? "x86_64-linux", host }:
-    let
-      pkgs = import self.inputs.nixpkgs { inherit system; };
-      homeDirectory = if pkgs.stdenv.isDarwin then "/Users/${username}" else "/home/${username}";
-      persistenceDirectory = "/persist${homeDirectory}";
-    in
-    inputs.home-manager.lib.homeManagerConfiguration {
-      inherit pkgs;
-      modules = [
-        ({ ... }:
+            home-manager.extraSpecialArgs = {
+              flake = self;
+              inherit (self) inputs outputs;
+              inherit persistenceDirectory;
+            };
+            home-manager.users."${username}" = ({ pkgs, ... }:
           let
-            hostname = host; #config.system.name;
-            configuration = ../home/${username}/${hostname}.nix;
+            # hostname = host; #config.system.name;
+            configuration = ../home/${username}/${hostName}.nix;
             persistenceDirectories = [
               "Documents"
               "Downloads"
@@ -110,7 +100,23 @@
               ../home/common/global
               configuration
             ];
+          });
           })
+        users);
+      specialArgs = {
+        flake = self;
+        inherit (self) inputs outputs;
+      };
+    };
+
+  mkHome = username: { system ? "x86_64-linux", host }:
+    let
+      pkgs = import self.inputs.nixpkgs { inherit system; };
+    in
+    inputs.home-manager.lib.homeManagerConfiguration {
+      inherit pkgs;
+      modules = [
+
       ];
       extraSpecialArgs = {
         flake = self;
