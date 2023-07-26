@@ -3,7 +3,7 @@
     ddcutil
   ];
 
-  boot.extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
+  # boot.extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
   boot.kernelModules = [ "i2c-dev" "ddcci_backlight" ];
 
   services.udev.extraRules = ''

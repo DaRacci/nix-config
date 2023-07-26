@@ -1,7 +1,7 @@
-{ config, lib, pkgs, inputs, ... }: {
-  imports = [
-    inputs.arion.nixosModules.arion
-  ];
+{ pkgs, inputs, ... }: {
+  # imports = [
+  #   inputs.arion.nixosModules.arion
+  # ];
 
   environment.systemPackages = with pkgs; [
     podman-tui
@@ -38,31 +38,31 @@
     };
   };
 
-  virtualisation.arion = {
-    backend = "podman-socket";
-    projects = {
-      global.settings = {
-        enableDefaultNetwork = false;
-        networks.outside = {
-          name = "outside";
-          internal = false;
-          attachable = false;
-          enable_ipv6 = false; # TODO :: Learn IPv6
-          ipam.config = [{
-            subnet = "10.10.9.0/24";
-            ip_range = "10.10.9.0/24";
-            gateway = "10.10.9.1";
-          }];
-        };
-        
-        imports = [ ./caddy ./adguardhome ];
-      };
-    };
-  };
+  # virtualisation.arion = {
+  #   backend = "podman-socket";
+  #   projects = {
+  #     global.settings = {
+  #       enableDefaultNetwork = false;
+  #       networks.outside = {
+  #         name = "outside";
+  #         internal = false;
+  #         attachable = false;
+  #         enable_ipv6 = false; # TODO :: Learn IPv6
+  #         ipam.config = [{
+  #           subnet = "10.10.9.0/24";
+  #           ip_range = "10.10.9.0/24";
+  #           gateway = "10.10.9.1";
+  #         }];
+  #       };
+
+  #       imports = [ ./caddy ./adguardhome ];
+  #     };
+  #   };
+  # };
 
   networking.nat = {
     enable = true;
-    internalInterfaces = ["ve-+"];
+    internalInterfaces = [ "ve-+" ];
     externalInterface = "eth0";
     enableIPv6 = false;
   };

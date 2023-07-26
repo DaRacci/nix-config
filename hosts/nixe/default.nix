@@ -26,10 +26,8 @@ in
     ../common/optional/quietboot.nix
     ../common/optional/gaming.nix
     ../common/optional/waydroid.nix
-    # ../../containers
+    ../../containers
   ];
-
-  boot.kernelPackages = pkgs.linuxPackages_xanmod_stable;
 
   services.teamviewer.enable = true;
   programs.sniffnet.enable = true;
