@@ -19,7 +19,7 @@
     nix-colours = { url = "github:misterio77/nix-colors"; };
 
     # Containers & Stuff
-    # arion = { url = "github:hercules-ci/arion"; };
+    arion = { url = "github:hercules-ci/arion"; };
 
     # Optional Modules
     hyprland = { url = "github:hyprwm/Hyprland"; };
