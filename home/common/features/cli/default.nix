@@ -8,8 +8,8 @@
     ./broot.nix
     ./carapace.nix
     ./direnv.nix
-    # ./gpg.nix
     ./keyring.nix
+    ./nix.nix
     ./micro.nix
     ./nushell.nix
     ./ripgrep.nix
@@ -21,7 +21,6 @@
 
   home.packages = with pkgs; [
     btop
-    glances
     nvtop
     ctop
 
