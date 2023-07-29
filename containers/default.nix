@@ -1,11 +1,13 @@
 { pkgs, inputs, ... }: {
-  # imports = [
-  #   inputs.arion.nixosModules.arion
-  # ];
+  imports = [
+    inputs.arion.nixosModules.arion
+  ];
 
   environment.systemPackages = with pkgs; [
     podman-tui
-    docker-client
+    podman-compose
+    lollms-webui
+    lollms
   ];
 
   virtualisation = {
@@ -38,27 +40,27 @@
     };
   };
 
-  # virtualisation.arion = {
-  #   backend = "podman-socket";
-  #   projects = {
-  #     global.settings = {
-  #       enableDefaultNetwork = false;
-  #       networks.outside = {
-  #         name = "outside";
-  #         internal = false;
-  #         attachable = false;
-  #         enable_ipv6 = false; # TODO :: Learn IPv6
-  #         ipam.config = [{
-  #           subnet = "10.10.9.0/24";
-  #           ip_range = "10.10.9.0/24";
-  #           gateway = "10.10.9.1";
-  #         }];
-  #       };
+  virtualisation.arion = {
+    backend = "podman-socket";
+    projects = {
+      global.settings = {
+        enableDefaultNetwork = false;
+        networks.outside = {
+          name = "outside";
+          internal = false;
+          attachable = false;
+          enable_ipv6 = false; # TODO :: Learn IPv6
+          ipam.config = [{
+            subnet = "10.10.9.0/24";
+            ip_range = "10.10.9.0/24";
+            gateway = "10.10.9.1";
+          }];
+        };
 
-  #       imports = [ ./caddy ./adguardhome ];
-  #     };
-  #   };
-  # };
+        imports = [ ./caddy ./lollms ];
+      };
+    };
+  };
 
   networking.nat = {
     enable = true;

@@ -24,7 +24,7 @@ in
 
       environment = {
         EMAIL = "admin@racci.dev";
-        DOMAIN = "home";
+        DOMAIN = "racci.dev";
       };
     };
   };

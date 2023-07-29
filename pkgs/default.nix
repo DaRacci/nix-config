@@ -15,4 +15,7 @@
     targetPkgs = pkgs: (with pkgs; [ jetbrains.idea-community ]);
     runScript = "idea-community";
   };
+
+  lollms = pkgs.callPackage ./lollms { };
+  lollms-webui = pkgs.callPackage ./lollms/webui.nix { };
 }
