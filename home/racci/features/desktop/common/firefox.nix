@@ -37,7 +37,7 @@
           in
           {
             "Nix Packages" = {
-              urls = [{ template = "${searchNixURL}packages?type=packages?query={searchTerms}"; }];
+              urls = [{ template = "${searchNixURL}packages?type=packages&query={searchTerms}"; }];
               icon = searchNixIcon;
               definedAliases = [ "@np" ];
             };
@@ -121,12 +121,6 @@
         ".mozilla/firefox/racci/chromeappstore.sqlite" # Offline Storage
         # Persistent Information
         ".mozilla/firefox/racci/sessionstore.jsonlz4" # Session restore
-        ".mozilla/firefox/racci/prefs.js" # User preferences // TODO -> Needed?
-        # ".mozilla/firefox/racci/xulstore.json"          # Window size and position
-        # Extension Specific
-        ".mozilla/firefox/racci/extension-settings.json"
-        ".mozilla/firefox/racci/extension-preferences.json"
-        ".mozilla/firefox/racci/extensions.json"
       ];
     };
   };
