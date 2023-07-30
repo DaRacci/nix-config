@@ -1,0 +1,73 @@
+# TODO - Nixify this
+
+name: Create Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+
+jobs:
+  prepare:
+    strategy:
+      matrix:
+        build: [linux, windows]
+        include:
+          - target: windows
+            os: windows-latest
+            extra: ".exe"
+          - target: linux
+            os: ubuntu-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Rust Toolchain and Cache
+        uses: actions-rust-lang/setup-rust-toolchain@v1.4.4
+        with:
+          toolchain: nightly
+
+      - name: Run
+        run: |
+          cargo build --workspace --release
+
+      - name: Publish
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/release/backup${{ matrix.extra }}
+          file_glob: true
+          asset_name: tools-${{ matrix.os }}${{ matrix.extra }}
+          tag: ${{ github.ref }}
+
+  changelog:
+    name: Generate Changelog
+    runs-on: ubuntu-latest
+    outputs:
+      release_body: ${{ steps.git-cliff.outputs.content }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Generate the Changelog
+        uses: orhun/git-cliff-action@v2
+        id: git-cliff
+        with:
+          config: cliff.toml
+          args: -vv --latest --strip header
+
+  publish:
+    name: Publish Release
+    needs: [prepare, changelog]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish Release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+          body: ${{ needs.changelog.outputs.release_body }}

@@ -1,0 +1,3 @@
+{
+  rust.path = ./rust;
+}

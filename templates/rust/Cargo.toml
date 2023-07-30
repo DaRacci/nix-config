@@ -1,0 +1,30 @@
+[package]
+name = "foo-bar"
+version = "0.1.0"
+license = "MIT"
+edition = "2021"
+authors = ["Racci"]
+
+[workspace]
+members = ["crates/*"]
+resolver = "2"
+
+[profile.release]
+opt-level = 2
+lto = true
+strip = true
+panic = "abort"
+
+# Build with `cargo build --profile profiling`
+# For analying performance with tooling like linux perf
+[profile.profiling]
+inherits = "release"
+strip = false
+debug = true
+
+# Build with `cargo build --profile ci`
+# For running tests in CI
+[profile.ci]
+inherits = "dev"
+strip = false
+debug = false
