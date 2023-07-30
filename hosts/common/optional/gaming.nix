@@ -20,27 +20,23 @@
 
   programs.gamescope = {
     enable = true;
+    package = pkgs.unstable.gamescope;
     args = [
-      # "-w 1920" # Upscaled from Resolution
-      # "-h 1080" # Upscaled from Resolution
-      # "-W 2560" # Real Resolution
-      # "-H 1440" # Real Resolution
-      # "-r 165"  # Limited Framerate
-      # "-o 30"   # Limited Framerate when unfocused
-      # "-Y"      # Use NVIDIA Upscalingc
-      # "-f"      # Fullscreen on launch
+      "-w 2560" # Upscaled from Resolution
+      "-h 1440" # Upscaled from Resolution
+      "-W 2560" # Real Resolution
+      "-H 1440" # Real Resolution
+      # "-r 0" # Uncap framerate
+      "--rt"
+      # "--adaptive-sync"
+      "--xwayland-count 1"
     ];
   };
 
   programs.steam = {
     enable = true;
-    package = pkgs.steam.override {
-    #   extraEnv = {
-    #     MANGOHUD = true;
-    #   };
-    };
 
     remotePlay.openFirewall = true;
-    gamescopeSession.enable = true;
+    gamescopeSession.enable = false;
   };
 }

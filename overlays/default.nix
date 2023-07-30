@@ -8,9 +8,12 @@
   # You can change versions, add patches, set compilation flags, anything really.
   # https://nixos.wiki/wiki/Overlays
   modifications = final: prev: {
-    # example = prev.example.overrideAttrs (oldAttrs: rec {
-    # ...
-    # });
+    steamPackages = prev.steamPackages.overrideScope (steamFinal: steamPrev: {
+      # Appends the -novery flag to steam so we can modify some if its files :)
+      steam = steamPrev.steam.overrideAttrs (oldAttrs: {
+        postInstall = builtins.replaceStrings [ "'s,/usr/bin/steam,steam,g'" ] [ "'s,/usr/bin/steam,${final.unstable.gamemode}/bin/gamemoderun steam -bigpicture -noverifyfiles,g'" ] oldAttrs.postInstall;
+      });
+    });
   };
 
   # When applied, the unstable nixpkgs set (declared in the flake inputs) will
