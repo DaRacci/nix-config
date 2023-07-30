@@ -29,7 +29,7 @@
       search = {
         default = "Google";
         force = true;
-        order = [ "Google" "Nix Packages" "NixOS Wiki" ];
+        order = [ "Google" "Nix Packages" "Nix Options" "NixOS Wiki" "Home Manager Options" "Proton DB" ];
         engines =
           let
             searchNixURL = "https://search.nixos.org/";
@@ -59,6 +59,13 @@
               urls = [{ template = "https://mipmip.github.io/home-manager-option-search/?query={searchTerms}"; }];
               icon = searchNixIcon;
               definedAliases = [ "@hmo" ];
+            };
+
+            "Proton DB" = {
+              urls = [{ template = "https://www.protondb.com/search?q={searchTerms}"; }];
+              iconUpdateURL = "https://www.protondb.com/favicon.ico";
+              updateInterval = 24 * 60 * 60 * 1000; # every day
+              definedAliases = [ "@pdb" ];
             };
 
             "Google".metaData.alias = "@g"; # builtin engines only support specifying one additional alias
