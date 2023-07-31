@@ -48,10 +48,19 @@ let
     then pkgs.pkgsCross.aarch64-multiplatform
     else pkgs.pkgsCross.${crossSystem};
 
-  commonArgs = {
-    src = craneLib.cleanCargoSource (craneLib.path ./.);
-    cargoLock = craneLib.path ./Cargo.lock;
-  };
+  commonArgs =
+    let
+      tomlPath = craneLib.path (if workspace == null then ./Cargo.toml else ./crates/${workspace}/Cargo.toml);
+      cargoToml = builtins.fromTOML (builtins.readFile tomlPath);
+      inherit (cargoToml.package) name version;
+    in
+    {
+      pname = name;
+      inherit version;
+
+      src = craneLib.cleanCargoSource (craneLib.path ./.);
+      cargoLock = craneLib.path ./Cargo.lock;
+    };
 
   cargoCrate =
     let
