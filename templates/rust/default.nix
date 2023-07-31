@@ -29,6 +29,8 @@ let
       "cargo"
       "rustc"
       "rust-src"
+      "clippy-preview"
+      "rustfmt-preview"
     ])
   ];
 
@@ -51,43 +53,54 @@ let
     cargoLock = craneLib.path ./Cargo.lock;
   };
 
-  cargoCrate = let inherit (crossPackages) targetPlatform; in craneLib.buildPackage (commonArgs // rec {
-    cargoExtraArgs = if workspace != null then "--package ${workspace}" else "";
+  cargoCrate =
+    let
+      inherit (crossPackages) targetPlatform;
 
-    strictDeps = true;
-    doCheck = true;
+      isNative = localSystem == crossSystem;
+      useMold = isNative && targetPlatform.isLinux;
+      useWine = targetPlatform.isWindows && localSystem == flake-utils.lib.system.x86_64-linux;
+    in
+    craneLib.buildPackage (commonArgs // {
+      cargoExtraArgs = if workspace != null then "--package ${workspace}" else "";
 
-    passthru = { inherit craneLib commonArgs; };
+      strictDeps = true;
+      doCheck = true;
 
-    depsBuildBuild = [ ]
-      ++ lib.optionals (localSystem != crossSystem) (with pkgs; [ qemu ])
-      ++ lib.optionals (targetPlatform.isWindows) (with crossPackages; [ stdenv.cc windows.mingw_w64_pthreads windows.pthreads ]);
+      passthru = { inherit craneLib commonArgs; };
 
-    buildInputs = with crossPackages; [ openssl ]
-      ++ lib.optionals (targetPlatform.isLinux) (with crossPackages; [ clang mold ]);
+      depsBuildBuild = [ ]
+        ++ lib.optionals (!isNative) (with pkgs; [ qemu ])
+        ++ lib.optionals (targetPlatform.isWindows) (with crossPackages; [ stdenv.cc windows.mingw_w64_pthreads windows.pthreads ]);
 
-    nativeBuildInputs = with pkgs; [ pkg-config ]
-      ++ lib.optionals (targetPlatform.isWindows && doCheck) ([ (pkgs.wine.override { wineBuild = "wine64"; }) ]);
+      buildInputs = with crossPackages; [ openssl ]
+        ++ lib.optionals (useMold) (with pkgs; [ clang mold ]);
 
-    "CARGO_BUILD_TARGET" = target;
+      nativeBuildInputs = with pkgs; [ pkg-config ]
+        ++ lib.optionals (useWine) ([ (pkgs.wine.override { wineBuild = "wine64"; }) ]);
 
-    "CARGO_TARGET_${TARGET}_LINKER" =
-      if targetPlatform.isLinux then "${crossPackages.clang}/bin/${crossPackages.clang.targetPrefix}clang"
-      else "${crossPackages.stdenv.cc.targetPrefix}cc";
+      "CARGO_BUILD_TARGET" = target;
 
-    "CARGO_TARGET_${TARGET}_RUSTFLAGS" =
-      if targetPlatform.isLinux then "-C link-arg=-fuse-ld=${crossPackages.mold}/bin/mold"
-      else null;
+      "CARGO_TARGET_${TARGET}_LINKER" =
+        if useMold
+        then "${crossPackages.clang}/bin/${crossPackages.clang.targetPrefix}clang"
+        else let inherit (crossPackages.stdenv) cc; in "${cc}/bin/${cc.targetPrefix}cc";
 
-    "CARGO_TARGET_${TARGET}_RUNNER" =
-      if localSystem == crossSystem then null
-      else if targetPlatform.isWindows then
-        pkgs.writeScript "wine-wrapper" ''
-          #!${pkgs.bash}/bin/bash
-          export WINEPREFIX="$(mktemp -d)"
-          exec ${(pkgs.wine.override { wineBuild = "wine64"; })}/bin/wine64 $@
-        ''
-      else "qemu-${crossSystem}";
-  });
+      "CARGO_TARGET_${TARGET}_RUSTFLAGS" =
+        if useMold then "-C link-arg=-fuse-ld=${crossPackages.mold}/bin/mold"
+        else null;
+
+      "CARGO_TARGET_${TARGET}_RUNNER" =
+        if isNative
+        then null
+        else if useWine
+        then
+          pkgs.writeScript "wine-wrapper" ''
+            #!${pkgs.bash}/bin/bash
+            export WINEPREFIX="$(mktemp -d)"
+            exec ${(pkgs.wine.override { wineBuild = "wine64"; })}/bin/wine64 $@
+          ''
+        else "${pkgs.qemu}/bin/qemu-${targetPlatform.qemuArch}";
+    });
 in
 cargoCrate

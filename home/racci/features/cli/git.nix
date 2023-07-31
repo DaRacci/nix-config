@@ -5,7 +5,7 @@
       package = pkgs.gitAndTools.gitFull;
       userEmail = "me@racci.dev";
       userName = "DaRacci";
-      lfs.enable = true;
+      lfs.enable = false;
 
       signing = {
         signByDefault = false;
