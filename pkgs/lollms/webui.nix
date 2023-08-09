@@ -27,19 +27,19 @@ let
 
   configFile = pkgs.writeText "global_paths_cfg.yaml" ''
     lollms_path: ${pkgs.lollms}/lib/python3.10/site-packages/lollms
-    lollms_personal_path: /root/Documents/lollms
+    # lollms_personal_path: /root/Documents/lollms
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   pname = "lollms-webui";
-  version = "3.5";
+  version = "unstable-2023-08-01";
   format = "setuptools";
 
   src = fetchFromGitHub {
     owner = "ParisNeo";
     repo = "lollms-webui";
-    rev = "v${version}";
-    hash = "sha256-BqcmRehAmW3XkJlsHQSNxcpZ2rQM783oB/nmJxMeDsw=";
+    rev = "c68138042cb84a0f2f43f0dec5a690631603c2eb";
+    hash = "sha256-fpj+RQc50P9YnwKXz5vM48wDI1fnv4Eb4tD7PLCSjbQ=";
   };
 
   nativeBuildInputs = [ makeWrapper ];
@@ -56,6 +56,8 @@ stdenv.mkDerivation rec {
     cp -r ./static $dir
     cp -r ./templates $dir
     cp -r ./web $dir
+    cp -r ./configs $dir
+    cp -r ./assets $dir
     cp -r ${configFile} $dir/global_paths_cfg.yaml
 
     mkdir -p $out/bin

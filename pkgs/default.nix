@@ -16,6 +16,10 @@
     runScript = "idea-community";
   };
 
-  lollms = pkgs.callPackage ./lollms { };
-  lollms-webui = pkgs.callPackage ./lollms/webui.nix { };
+  dualsensectl = pkgs.callPackage ./dualsensectl { };
+
+  # simple-websocket = pkgs.callPackage ./lollms/simple-websocket.nix { };
+  # mplcursors = pkgs.callPackage ./lollms/mplcursors.nix { };
+  # lollms = pkgs.callPackage ./lollms { };
+  # lollms-webui = pkgs.callPackage ./lollms/webui.nix { };
 }

@@ -1,6 +1,6 @@
 { pkgs, ... }: {
   imports = [
-    ./builder.nix
+    ./emacs
     ./code.nix
     ./emacs
     ./jetbrains.nix

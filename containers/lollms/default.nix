@@ -11,14 +11,21 @@ in
 
     service = {
       # useHostStore = true;
-      working_dir = "/opt/lollms";
+      working_dir = "/srv";
 
-      volumes = let containerDirectory = "/root/Documents/lollms"; in [
+      volumes = let containerDirectory = "/srv"; in [
         "${persistDirectory}/models:${containerDirectory}/models"
         "${persistDirectory}/configs:${containerDirectory}/configs"
-        "${persistDirectory}/models:${containerDirectory}/assets"
+        "${persistDirectory}/data:${containerDirectory}/help"
         "${persistDirectory}/data:${containerDirectory}/data"
+        "${persistDirectory}/data/.pariseno:/root/.pariseno"
       ];
+
+      #       - ./data:/srv/help
+      # - ./data:/srv/data
+      # - ./data/.parisneo:/root/.parisneo/
+      # - ./configs:/srv/configs
+      # - ./web:/srv/web
 
       networks = [ "proxy" ];
       ports = [ "9600:9600/tcp" ];

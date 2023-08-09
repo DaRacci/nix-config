@@ -1,4 +1,4 @@
-{
+{ pkgs, ... }: {
   imports = [
     ./lutris.nix
     ./mangohud.nix
@@ -8,4 +8,6 @@
     ./vintagestory.nix
     ./wine.nix
   ];
+
+  # home.packages = with pkgs; [ dualsensectl ];
 }

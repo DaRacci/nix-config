@@ -6,11 +6,11 @@
     ./firefox.nix
     ./nextcloud.nix
     ./spotify.nix
+    ./piper.nix
     ./obsidian.nix
     ./podman.nix
-    ./rnote.nix
+    # ./rnote.nix
     ./secrets.nix
-    ./wine.nix
 
     # Theme related
     ./font.nix

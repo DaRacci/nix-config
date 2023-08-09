@@ -6,16 +6,14 @@
     inputs.nixos-hardware.nixosModules.common-pc-ssd
     inputs.nixos-hardware.nixosModules.common-hidpi
 
-    ../common/optional/impermanence.nix
     ../common/optional/nvidia.nix
-    ../common/optional/virtualisation.nix
     ../common/optional/fan2go.nix
     ../common/optional/backlight.nix
     ../common/optional/openrgb.nix
   ];
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_xanmod_stable;
+    kernelPackages = pkgs.linuxPackages_xanmod_latest;
 
     initrd = {
       # TODO :: Needed? ahci, sd_mod usbhid usb_storage

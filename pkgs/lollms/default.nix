@@ -3,24 +3,20 @@
 , python3
 , fetchFromGitHub
 }:
-let
-  simple-websocket = pkgs.callPackage ./simple-websocket.nix { };
-in
 python3.pkgs.buildPythonPackage {
   pname = "lollms";
-  version = "unstable-2023-07-25";
   format = "setuptools";
 
   src = fetchFromGitHub {
     owner = "ParisNeo";
     repo = "lollms";
-    rev = "5ff24a4db06f7a40855e4ec500653eaf656f06ae";
-    hash = "sha256-17jztiRqiQWg9wSv87U8Oa109YswzO0bHtNzhzSWYBI=";
+    rev = "d21ba70dff809429a504ae374da1b57356e29080";
+    hash = "sha256-ft/gDxbmGKRSxx/ftVQ+Q0szRLoUnuBH32fuIXVA/u4=";
   };
 
-  patches = [
-    ./lollms-paths.patch
-  ];
+  # patches = [
+  #   ./lollms-paths.patch
+  # ];
 
   propagatedBuildInputs = with python3.pkgs; [
     eventlet
@@ -34,8 +30,7 @@ python3.pkgs.buildPythonPackage {
     requests
     setuptools
     tqdm
-    wget
-  ] ++ [ simple-websocket ];
+  ] ++ (with pkgs; [ simple-websocket ]);
 
   pythonImportsCheck = [ "lollms" ];
 

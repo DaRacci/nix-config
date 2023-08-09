@@ -1,6 +1,11 @@
 {
   description = "The nix-config of an Idiot";
 
+  nixConfig = {
+    extra-substituters = [ "https://racci.cachix.org" ];
+    extra-trusted-public-keys = [ "racci.cachix.org-1:Kl4opLxvTV9c77DpoKjUOMLDbCv6wy3GVHWxB384gxg=" ];
+  };
+
   inputs = {
     # Packages
     nixpkgs = { url = "github:nixos/nixpkgs/nixos-23.05"; };
@@ -24,8 +29,8 @@
     # Optional Modules
     hyprland = { url = "github:hyprwm/Hyprland"; };
     nix-doom-emacs = { url = "github:nix-community/nix-doom-emacs"; };
-    # inputs.xremap-flake.url = "github:xremap/nix-flake";
-    # rust-overlay.url = "github:oxalica/rust-overlay";
+    fenix = { url = "github:nix-community/fenix"; inputs.nixpkgs.follows = "nixpkgs"; };
+    # emacs-overlay = { url = "github:nix-community/emacs-overlay"; };
     # xremap-flake.url = "github:xremap/nix-flake";
   };
 

@@ -48,14 +48,14 @@
       ] ++
       (builtins.map
         (username: { flake, config, pkgs, ... }:
-          let inherit (flake) inputs; homeDirectory = if pkgs.stdenv.isDarwin then "/Users/${username}" else "/home/${username}"; persistenceDirectory = "/persist${homeDirectory}"; in {
+          let inherit (flake) inputs;homeDirectory = if pkgs.stdenv.isDarwin then "/Users/${username}" else "/home/${username}"; persistenceDirectory = "/persist${homeDirectory}"; in {
             imports = [ inputs.home-manager.nixosModule inputs.sops-nix.nixosModules.sops ];
 
             users.users.${username} = {
               isNormalUser = mkDefault true;
               shell = pkgs.nushell;
               # TODO :: Not fucking this shit
-              extraGroups = [ "video" "audio" ] ++ [ "wheel" "network" "i2c" "docker" "podman" "git" "libvirtd" ];
+              extraGroups = [ "video" "audio" "wheel" "network" "i2c" "docker" "podman" "git" "libvirtd" ];
 
               passwordFile = config.sops.secrets."${username}-passwd".path;
               openssh.authorizedKeys.keys = [ (builtins.readFile ../home/${username}/id_ed25519.pub) ];
@@ -72,35 +72,35 @@
               inherit persistenceDirectory;
             };
             home-manager.users."${username}" = ({ pkgs, ... }:
-          let
-            # hostname = host; #config.system.name;
-            configuration = ../home/${username}/${hostName}.nix;
-            persistenceDirectories = [
-              "Documents"
-              "Downloads"
-              "Pictures"
-              "Videos"
-              "Music"
-              "Templates"
-              ".local/share/keyrings"
-            ];
-          in
-          {
-            home = {
-              inherit username homeDirectory;
-              stateVersion = "23.05";
-              sessionPath = [ "$HOME/.local/bin" ];
-              persistence."${persistenceDirectory}" = {
-                allowOther = true;
-                directories = persistenceDirectories;
-              };
-            };
+              let
+                # hostname = host; #config.system.name;
+                configuration = ../home/${username}/${hostName}.nix;
+                persistenceDirectories = [
+                  "Documents"
+                  "Downloads"
+                  "Pictures"
+                  "Videos"
+                  "Music"
+                  "Templates"
+                  ".local/share/keyrings"
+                ];
+              in
+              {
+                home = {
+                  inherit username homeDirectory;
+                  stateVersion = "23.05";
+                  sessionPath = [ "$HOME/.local/bin" ];
+                  persistence."${persistenceDirectory}" = {
+                    allowOther = true;
+                    directories = persistenceDirectories;
+                  };
+                };
 
-            imports = [
-              ../home/common/global
-              configuration
-            ];
-          });
+                imports = [
+                  ../home/common/global
+                  configuration
+                ];
+              });
           })
         users);
       specialArgs = {

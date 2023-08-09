@@ -3,6 +3,7 @@
 }: python3.pkgs.buildPythonPackage rec {
   pname = "simple-websocket";
   version = "0.10.1";
+  format = "setuptools";
 
   src = fetchPypi {
     inherit pname version;
@@ -13,4 +14,6 @@
   propagatedBuildInputs = with python3.pkgs; [
     wsproto
   ];
+
+  pythonImportsCheck = [ "simple-websocket" ];
 }

@@ -86,6 +86,8 @@
       fi;
     '';
 
+  home.packages = with pkgs; [ steamtinkerlaunch ];
+
   home.persistence."${persistenceDirectory}".directories = [
     ".local/share/Steam"
   ];

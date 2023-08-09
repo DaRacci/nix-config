@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 let
   IPv4-Australia = "192.168.2.156";
   IPv4-USA = "10.0.0.2";
@@ -19,6 +19,10 @@ in
   imports = [
     ./hardware.nix
 
+    ../common/optional/impermanence.nix
+    ../common/optional/containers.nix
+    ../common/optional/virtualisation.nix
+
     ../common/optional/gnome.nix
     ../common/optional/hyprland.nix
 
@@ -30,14 +34,14 @@ in
   ];
 
   services.teamviewer.enable = true;
-  programs.sniffnet.enable = true;
+  services.ratbagd.enable = true;
 
   networking = {
-    interfaces.enp5so = mkNetwork "eth0";
-    interfaces.enp6so = mkNetwork "eth1";
+    # interfaces.enp5so = mkNetwork "eth0";
+    # interfaces.enp6so = mkNetwork "eth1";
 
     firewall = {
-      allowedTCPPorts = [ 9999 ];
+      allowedTCPPorts = [ 9999 22 ];
       allowedUDPPortRanges = [
         # KDE Connect
         { from = 1714; to = 1764; }
@@ -48,18 +52,4 @@ in
       ];
     };
   };
-
-  # services.autorandr = {
-  #   enable = true;
-  #   profiles = {
-  #     AUS = {
-  #       fingerprint = {
-
-  #       };
-  #       config = {
-
-  #       };
-  #     }
-  #   }
-  # }
 }
