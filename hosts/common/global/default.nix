@@ -43,7 +43,21 @@ in
       type = "hard";
       value = "1048576";
     }
+    {
+      domain = "*";
+      type = "-";
+      item = "nofile";
+      value = "unlimited";
+    }
+    {
+      domain = "*";
+      type = "soft";
+      item = "nofile";
+      value = "1048576";
+    }
   ];
+
+  programs.nix-ld.enable = true;
 
   environment.persistence."/persist".files = [
     "/etc/ssh/ssh_host_ed25519_key"

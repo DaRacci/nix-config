@@ -1,7 +1,7 @@
 { pkgs, ... }: {
-  home.packages = with pkgs; [ denaro ];
+  home.packages = with pkgs.unstable; [ denaro ];
 
   home.persistence."/persist/home/racci".directories = [
-    # TODO
+    # ".config/Nickvision/Nickvision Denaro"
   ];
 }

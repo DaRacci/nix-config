@@ -8,7 +8,7 @@
       lfs.enable = false;
 
       signing = {
-        signByDefault = false;
+        signByDefault = true;
         # TODO dynamic
         key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPVVzqHYt34dMsaFkX3K8m2vtam/RcUHiS00CBtLpolh";
       };

@@ -10,11 +10,13 @@
     # Packages
     nixpkgs = { url = "github:nixos/nixpkgs/nixos-23.05"; };
     nixpkgs-unstable = { url = "github:nixos/nixpkgs/nixos-unstable"; };
+    nixpkgs-rustrover-pr = { url = "github:sylk0s/nixpkgs/rustrover"; };
     nur = { url = "github:nix-community/NUR"; };
 
     # Utils
     systems = { url = "github:nix-systems/X86_64-linux"; }; # TODO - Add Darwin
     flake-utils = { url = "github:numtide/flake-utils"; inputs.systems.follows = "systems"; };
+    flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
 
     # Base Modules
     home-manager = { url = "github:nix-community/home-manager/release-23.05"; inputs.nixpkgs.follows = "nixpkgs"; };
@@ -28,20 +30,42 @@
 
     # Optional Modules
     hyprland = { url = "github:hyprwm/Hyprland"; };
+    hyprland-plugins = { url = "github:hyprwm/hyprland-plugins"; };
     nix-doom-emacs = { url = "github:nix-community/nix-doom-emacs"; };
     fenix = { url = "github:nix-community/fenix"; inputs.nixpkgs.follows = "nixpkgs"; };
+    getchoo = { url = "github:getchoo/nix-exprs"; };
     # emacs-overlay = { url = "github:nix-community/emacs-overlay"; };
     # xremap-flake.url = "github:xremap/nix-flake";
+
+    # Cosmic Desktop
+    cosmic-applets.url = "github:pop-os/cosmic-applets";
+    cosmic-applibrary.url = "github:pop-os/cosmic-applibrary";
+    cosmic-bg.url = "github:pop-os/cosmic-bg";
+    cosmic-comp.url = "github:pop-os/cosmic-comp";
+    cosmic-launcher.url = "github:pop-os/cosmic-launcher";
+    cosmic-notifications.url = "github:pop-os/cosmic-notifications";
+    # TODO Use master branch when flake pr is merged
+    # cosmic-osd.url = "github:pop-os/cosmic-osd/update-flake_jammy";
+    cosmic-panel.url = "github:pop-os/cosmic-panel";
+    # cosmic-session.url = "github:pop-os/cosmic-session";
+    cosmic-settings.url = "github:pop-os/cosmic-settings";
+    cosmic-settings-daemon.url = "github:pop-os/cosmic-settings-daemon";
+    # TODO Use master branch when flake pr is merged
+    # cosmic-workspaces.url = "github:pop-os/cosmic-workspaces-epoch/nix-flake_jammy";
+    # TODO Use master branch when flake pr is merged
+    # cosmic-portal.url = "github:pop-os/xdg-desktop-portal-cosmic/update-flake_jammy";
   };
 
-  outputs = { self, nixpkgs, flake-utils, systems, ... }@inputs:
+  outputs = { self, nixpkgs, flake-utils, systems, getchoo, ... }@inputs:
     let
       inherit (self) outputs;
       inherit (import ./lib/mk.nix inputs) mkSystem mkHome;
     in
     {
       nixosConfigurations = builtins.mapAttrs mkSystem {
-        nixe = { users = [ "racci" ]; };
+        nixe = {
+          users = [ "racci" ];
+        };
         # surnix = { };
       };
 
@@ -53,11 +77,11 @@
         pkgs = import nixpkgs { inherit system; };
       in
       {
-        packages = import ./pkgs { inherit pkgs; };
+        packages = import ./pkgs { inherit pkgs getchoo; };
         devShells = import ./shell.nix { inherit pkgs; };
         formatter = pkgs.nixpkgs-fmt;
       }) // {
-      overlays = import ./overlays { inherit inputs outputs; };
+      overlays = import ./overlays { inherit inputs outputs getchoo; };
 
       nixosModules = import ./modules/nixos;
 

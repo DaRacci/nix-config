@@ -1,20 +1,4 @@
 { pkgs, ... }: {
-  programs.gamemode = {
-    enable = true;
-
-    settings = {
-      general = {
-        softrealtime = "on";
-        inhibit_screensaver = 1;
-      };
-
-      gpu = {
-        apply_gpu_optimisations = "accept-responsibility";
-        gpu_device = 0;
-      };
-    };
-  };
-
   hardware.steam-hardware.enable = true;
   hardware.opengl.driSupport32Bit = true;
 
@@ -26,9 +10,9 @@
       "-h 1440" # Upscaled from Resolution
       "-W 2560" # Real Resolution
       "-H 1440" # Real Resolution
-      # "-r 0" # Uncap framerate
+      "-r 0" # Uncap framerate
       "--rt"
-      # "--adaptive-sync"
+      "--adaptive-sync"
       "--xwayland-count 1"
     ];
   };
@@ -39,4 +23,8 @@
     remotePlay.openFirewall = true;
     gamescopeSession.enable = false;
   };
+
+  services.udev.extraRules = ''
+    SUBSYSTEM=="sound", ACTION=="change", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ce6", ENV{SOUND_DESCRIPTION}="Wireless Controller"
+  '';
 }

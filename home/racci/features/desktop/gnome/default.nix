@@ -7,7 +7,6 @@
     gnome-decoder
     eyedropper
     raider
-    junction
   ] ++ (with pkgs.gnomeExtensions; [
     vitals
     gsconnect
@@ -16,6 +15,7 @@
     pop-shell
     blur-my-shell
     brightness-control-using-ddcutil
+    easyeffects-preset-selector
   ]);
 
   home.sessionVariables = {
@@ -36,6 +36,37 @@
       ];
     };
 
+    "org/gnome/shell/extensions/clipboard-indicator" = {
+      strip-text = true;
+      history-size = 1000;
+      move-item-first = true;
+    };
+
+    "org/gnome/shell/extensions/pop-shell" = {
+      fullscreen-launcher = true;
+      smart-gaps = true;
+      snap-to-grid = true;
+    };
+
+    "org/gnome/shell/extensions/vitals" = {
+      update-time = 1;
+      network-speed-format = 1;
+      fixed-width = false;
+      hide-zeros = true;
+      show-fan = false;
+      show-system = false;
+      show-storage = false;
+      show-voltage = false;
+      hot-sensors = [ "_temperature_asusec_t_sensor_" "_temperature_asusec_cpu_" "_processor_usage_" "_processor_frequency_" "_memory_usage_" "__network-rx_max__" "__network-tx_max__" ];
+    };
+
+    # TODO
+    "org/gnome/desktop/background" = {
+      # picture-uri = "" # File Uri, Select random from backgrounds folder
+      primary-color = "#023c88";
+      secondary-color = "#5789ca";
+    };
+
     "org/gnome/desktop/datetime" = {
       automatic-timezone = true;
     };
@@ -45,6 +76,7 @@
       clock-show-date = true;
       clock-show-seconds = true;
       clock-show-weekday = true;
+      color-scheme = "prefer-dark";
       enable-hot-corners = false;
       gtk-enable-primary-paste = false;
     };

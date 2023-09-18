@@ -6,6 +6,8 @@
     ./features/cli
     ../common/features/games
     ./features/desktop/development
+    ../common/applications/obs.nix
+    ../common/applications/gimp.nix
   ];
 
   programs.autorandr = {

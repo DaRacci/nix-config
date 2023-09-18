@@ -34,7 +34,7 @@
       ];
     };
 
-  mkSystem = hostName: { users ? [ ], system ? "x86_64-linux" }:
+  mkSystem = hostName: { users ? [ ], system ? "x86_64-linux", module ? { } }:
     nixosSystem {
       inherit system;
       modules = [
@@ -45,6 +45,7 @@
           networking.hostName = hostName;
           passthru.enable = false; # Why does build break without this?
         })
+        module
       ] ++
       (builtins.map
         (username: { flake, config, pkgs, ... }:

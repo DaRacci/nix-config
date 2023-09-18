@@ -2,10 +2,10 @@
   programs.hyprland = {
     enable = true;
     nvidiaPatches = true;
+    xwayland.enable = true;
     package = pkgs.unstable.hyprland.override {
       enableXWayland = config.programs.hyprland.xwayland.enable;
-      hidpiXWayland = config.programs.hyprland.xwayland.hidpi;
-      nvidiaPatches = config.programs.hyprland.nvidiaPatches;
+      enableNvidiaPatches = config.programs.hyprland.nvidiaPatches;
     };
   };
 }

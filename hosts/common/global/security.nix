@@ -8,10 +8,5 @@
     rtkit.enable = true;
 
     polkit.enable = true;
-
-    # TODO - Disable sudo
-    doas = {
-      enable = true;
-    };
   };
 }

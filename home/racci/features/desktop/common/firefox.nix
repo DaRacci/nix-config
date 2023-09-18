@@ -1,7 +1,7 @@
 { pkgs, config, ... }: {
   programs.firefox = {
     enable = true;
-    package = pkgs.wrapFirefox pkgs.firefox-unwrapped {
+    package = pkgs.unstable.wrapFirefox pkgs.unstable.firefox-beta-unwrapped {
       cfg = {
         enableGnomeExtensions = true;
       };

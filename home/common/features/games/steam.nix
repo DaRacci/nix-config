@@ -90,6 +90,7 @@
 
   home.persistence."${persistenceDirectory}".directories = [
     ".local/share/Steam"
+    ".config/steamtinkerlaunch"
   ];
 
   # TODO :: Force restart steam on rebuild if its open

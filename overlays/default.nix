@@ -1,8 +1,9 @@
 # This file defines overlays
-{ inputs, ... }: {
+{ inputs, getchoo, ... }: {
   # This one brings our custom packages from the 'pkgs' directory
   additions = final: _prev: import ../pkgs {
     pkgs = final;
+    inherit getchoo;
   };
 
   # This one contains whatever you want to overlay
@@ -10,10 +11,17 @@
   # https://nixos.wiki/wiki/Overlays
   modifications = final: prev: {
     steamPackages = prev.steamPackages.overrideScope (steamFinal: steamPrev: {
-      # Appends the -novery flag to steam so we can modify some if its files :)
+      # Appends the -noverify flag to steam so we can modify some if its files :)
       steam = steamPrev.steam.overrideAttrs (oldAttrs: {
-        postInstall = builtins.replaceStrings [ "'s,/usr/bin/steam,steam,g'" ] [ "'s,/usr/bin/steam,${final.unstable.gamemode}/bin/gamemoderun steam -bigpicture -noverifyfiles,g'" ] oldAttrs.postInstall;
+        postInstall = builtins.replaceStrings [ "'s,/usr/bin/steam,steam,g'" ] [ "'s,/usr/bin/steam,steam -bigpicture -noverifyfiles,g'" ] oldAttrs.postInstall;
       });
+    });
+
+    steamtinkerlaunch = prev.steamtinkerlaunch.overrideAttrs (oldAttrs: {
+      postPatch = ''
+        substituteInPlace steamtinkerlaunch --replace 'PROGCMD="''${0##*/}"' 'PROGCMD="steamtinkerlaunch"'
+        substituteInPlace steamtinkerlaunch --replace 'YAD=yad' 'YAD=${final.yad}'
+      '';
     });
   };
 

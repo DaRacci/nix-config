@@ -1,15 +1,6 @@
-{ config, pkgs, inputs, ... }:
-
-let
-  inherit (inputs.nix-colours.lib-contrib { inherit pkgs; }) gtkThemeFromScheme;
-in rec {
+{ pkgs, ... }: rec {
   gtk = {
     enable = true;
-
-    font = {
-      name = config.fontProfiles.regular.family;
-      size = 12;
-    };
 
     theme = {
       name = "Adwaita-dark";

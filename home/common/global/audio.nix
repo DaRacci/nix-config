@@ -1,4 +1,11 @@
-{ pkgs, ... }: {
+{ config, pkgs, persistenceDirectory, ... }: {
+  home.packages = [ config.services.easyeffects.package ];
+
+  services.easyeffects = {
+    enable = true;
+    package = pkgs.easyeffects;
+  };
+
   home.file.".config/pipewire/pipewire.conf.d/99-noise-suppression.conf".text = ''
     context.modules = [{
       name = libpipewire-module-filter-chain
@@ -31,4 +38,8 @@
       }
     }]
   '';
+
+  home.persistence."${persistenceDirectory}".directories = [
+    ".config/easyeffects"
+  ];
 }

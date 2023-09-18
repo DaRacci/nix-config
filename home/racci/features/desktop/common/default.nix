@@ -3,6 +3,7 @@
     ./background.nix
     ./denaro.nix
     ./discord.nix
+    ./email.nix
     ./firefox.nix
     ./nextcloud.nix
     ./spotify.nix
