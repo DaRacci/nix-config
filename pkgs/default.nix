@@ -5,7 +5,6 @@
   protonup-rs = pkgs.callPackage ./protonup-rs { };
   ficsit-cli = pkgs.callPackage ./ficsit-cli { };
   noise-supression = pkgs.callPackage ./noise-suppression-for-voice { };
-  dualsensectl = pkgs.callPackage ./dualsensectl { };
 
   inherit (getchoo.packages.${builtins.currentSystem}) modrinth-app;
 }

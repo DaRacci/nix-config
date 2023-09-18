@@ -11,6 +11,6 @@
     ./wine.nix
   ];
 
-  home.packages = with pkgs; [ dualsensectl trigger-control ];
+  home.packages = with pkgs.unstable; [ dualsensectl trigger-control ];
   home.persistence."${persistenceDirectory}".directories = [ "Games" ];
 }
