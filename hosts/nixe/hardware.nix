@@ -7,7 +7,7 @@
     inputs.nixos-hardware.nixosModules.common-hidpi
 
     ../common/optional/nvidia.nix
-    ../common/optional/fan2go.nix
+    # ../common/optional/fan2go.nix
     ../common/optional/backlight.nix
     ../common/optional/openrgb.nix
   ];
