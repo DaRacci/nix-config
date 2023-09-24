@@ -1,7 +1,6 @@
 {
   imports = [
     ./features/desktop/gnome
-    ./features/desktop/hyprland
 
     ./features/cli
     ../common/features/games

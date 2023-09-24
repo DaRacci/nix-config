@@ -29,8 +29,8 @@
     arion = { url = "github:hercules-ci/arion"; };
 
     # Optional Modules
-    hyprland = { url = "github:hyprwm/Hyprland"; };
-    hyprland-plugins = { url = "github:hyprwm/hyprland-plugins"; };
+    # hyprland = { url = "github:hyprwm/Hyprland"; };
+    # hyprland-plugins = { url = "github:hyprwm/hyprland-plugins"; };
     nix-doom-emacs = { url = "github:nix-community/nix-doom-emacs"; };
     fenix = { url = "github:nix-community/fenix"; inputs.nixpkgs.follows = "nixpkgs"; };
     getchoo = { url = "github:getchoo/nix-exprs"; };
@@ -38,22 +38,19 @@
     # xremap-flake.url = "github:xremap/nix-flake";
 
     # Cosmic Desktop
-    cosmic-applets.url = "github:pop-os/cosmic-applets";
-    cosmic-applibrary.url = "github:pop-os/cosmic-applibrary";
-    cosmic-bg.url = "github:pop-os/cosmic-bg";
-    cosmic-comp.url = "github:pop-os/cosmic-comp";
-    cosmic-launcher.url = "github:pop-os/cosmic-launcher";
-    cosmic-notifications.url = "github:pop-os/cosmic-notifications";
-    # TODO Use master branch when flake pr is merged
-    # cosmic-osd.url = "github:pop-os/cosmic-osd/update-flake_jammy";
-    cosmic-panel.url = "github:pop-os/cosmic-panel";
+    # cosmic-applets.url = "github:pop-os/cosmic-applets";
+    # cosmic-applibrary.url = "github:pop-os/cosmic-applibrary";
+    # cosmic-bg.url = "github:pop-os/cosmic-bg";
+    # cosmic-comp.url = "github:pop-os/cosmic-comp";
+    # cosmic-launcher.url = "github:pop-os/cosmic-launcher";
+    # cosmic-notifications.url = "github:pop-os/cosmic-notifications";
+    # cosmic-osd.url = "github:pop-os/cosmic-osd";
+    # cosmic-panel.url = "github:pop-os/cosmic-panel";
     # cosmic-session.url = "github:pop-os/cosmic-session";
-    cosmic-settings.url = "github:pop-os/cosmic-settings";
-    cosmic-settings-daemon.url = "github:pop-os/cosmic-settings-daemon";
-    # TODO Use master branch when flake pr is merged
-    # cosmic-workspaces.url = "github:pop-os/cosmic-workspaces-epoch/nix-flake_jammy";
-    # TODO Use master branch when flake pr is merged
-    # cosmic-portal.url = "github:pop-os/xdg-desktop-portal-cosmic/update-flake_jammy";
+    # cosmic-settings.url = "github:pop-os/cosmic-settings";
+    # cosmic-settings-daemon.url = "github:pop-os/cosmic-settings-daemon";
+    # cosmic-workspaces.url = "github:pop-os/cosmic-workspaces-epoch";
+    # cosmic-portal.url = "github:pop-os/xdg-desktop-portal-cosmic";
   };
 
   outputs = { self, nixpkgs, flake-utils, systems, getchoo, ... }@inputs:

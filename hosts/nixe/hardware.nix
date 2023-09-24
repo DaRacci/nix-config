@@ -13,7 +13,7 @@
   ];
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_xanmod_latest;
+    kernelPackages = pkgs.unstable.linuxPackages_6_5;
 
     initrd = {
       # TODO :: Needed? ahci, sd_mod usbhid usb_storage

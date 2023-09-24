@@ -8,7 +8,7 @@
   nix = {
     settings = {
       trusted-users = [ "root" "@wheel" ];
-      auto-optimise-store = lib.mkDefault true;
+      auto-optimise-store = lib.mkForce true;
       experimental-features = [ "nix-command" "flakes" "repl-flake" ];
       system-features = [ "kvm" "big-parallel" "nixos-test" ];
     };
@@ -17,7 +17,7 @@
       automatic = true;
       dates = "daily";
       # Delete older generations too
-      options = "--delete-older-than 30d";
+      options = "--delete-older-than 14d";
     };
 
     # This will add each flake input as a registry

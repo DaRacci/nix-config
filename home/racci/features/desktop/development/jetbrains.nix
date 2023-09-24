@@ -11,8 +11,8 @@
     in
     [
       (self: super: {
-        review = import pkgsReview { overlays = [ ]; config = super.config; };
-        jetbrains = self.review.jetbrains;
+        # review = import pkgsReview { overlays = [ ]; config = super.config; };
+        jetbrains = (import pkgsReview { overlays = [ ]; config = super.config; }).jetbrains;
       })
     ];
 
