@@ -1,7 +1,7 @@
-let
-  image = "caddy:alpine";
-in
-{
+{ image ? "caddy"
+, version ? "latest"
+, extraConfig ? [ ]
+}: {
   networks.proxy = {
     name = "proxy";
     internal = true;
@@ -16,7 +16,7 @@ in
 
   services.caddy = { pkgs, lib, ... }: {
     service = {
-      inherit image;
+      image = "${image}:${version}";
       volumes = [ "${toString ./.}/Caddyfile:/etc/caddy/Caddyfile:ro" ];
 
       networks = [ "proxy" ];
