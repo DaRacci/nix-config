@@ -41,7 +41,19 @@
 
         gpg = {
           format = "ssh";
-          ssh.program = "${pkgs._1password-gui}/bin/op-ssh-sign";
+          ssh = {
+            program = "${pkgs._1password-gui}/bin/op-ssh-sign";
+            allowedSignersFile =
+              let
+                file = pkgs.writeTextFile {
+                  name = "allowed-signers";
+                  text = pkgs.lib.concatStringsSep "\n" [
+                    "me@racci.dev ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPVVzqHYt34dMsaFkX3K8m2vtam/RcUHiS00CBtLpolh"
+                  ];
+                };
+              in
+              file.outPath;
+          };
         };
       };
     };

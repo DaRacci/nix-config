@@ -8,6 +8,7 @@
     ./broot.nix
     ./carapace.nix
     ./direnv.nix
+    ./info.nix
     ./keyring.nix
     ./nix.nix
     ./micro.nix

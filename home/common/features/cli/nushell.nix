@@ -1,4 +1,4 @@
-{ lib, config, persistenceDirectory, ... }: {
+{ lib, config, pkgs, persistenceDirectory, ... }: {
   programs.nushell = {
     enable = true;
 
@@ -75,7 +75,19 @@
     '';
 
     extraConfig = ''
+      let-env config = {
+        show_banner: false
+
+        rm: {
+          always_trash: true
+        }
+      }
     '';
+
+    shellAliases = {
+      neofetch = "${pkgs.hyfetch}/bin/neowofetch";
+      nuut = "sudo nu -i --env-config $nu.env-path --config $nu.config-path";
+    };
   };
 
   programs.zoxide = lib.mkIf config.programs.zoxide.enable {

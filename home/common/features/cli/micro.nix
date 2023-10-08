@@ -1,4 +1,4 @@
-{ persistenceDirectory, ... }: {
+{ pkgs, persistenceDirectory, ... }: {
   programs.micro = {
     enable = true;
     settings = {
@@ -16,4 +16,8 @@
     ".config/micro/buffers"
     ".config/micro/backup"
   ];
+
+  home.sessionVariables = {
+    EDITOR = "${pkgs.micro}/bin/micro";
+  };
 }
