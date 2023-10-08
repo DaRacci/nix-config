@@ -8,6 +8,7 @@
     ../common/applications/cooler_control.nix
     ../common/applications/obs.nix
     ../common/applications/gimp.nix
+    ../common/applications/done.nix
   ];
 
   programs.autorandr = {

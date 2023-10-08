@@ -13,7 +13,7 @@
     ../common/optional/pipewire.nix
     ../common/optional/quietboot.nix
     ../common/optional/gaming.nix
-    ../../containers
+    # ../../containers
   ];
 
   services.teamviewer.enable = true;

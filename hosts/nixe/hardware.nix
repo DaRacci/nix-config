@@ -7,7 +7,6 @@
     inputs.nixos-hardware.nixosModules.common-hidpi
 
     ../common/optional/nvidia.nix
-    # ../common/optional/fan2go.nix
     ../common/optional/backlight.nix
     ../common/optional/openrgb.nix
   ];
@@ -57,6 +56,18 @@
       fsType = "btrfs";
       options = [ "subvol=@store" ];
       neededForBoot = true;
+    };
+
+    "/mnt/mega" = {
+      device = "/dev/disk/by-partlabel/mega-hdd";
+      fsType = "btrfs";
+      options = [ "nofail" ];
+    };
+
+    "/mnt/btrfs-pool" = {
+      device = "/dev/disk/by-label/btrfs-pool";
+      fsType = "btrfs";
+      options = [ "nofail" ];
     };
   };
 

@@ -622,22 +622,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-rustrover-pr": {
-      "locked": {
-        "lastModified": 1694718859,
-        "narHash": "sha256-gdcoP0yTmFjlQOMoqxFSZnhQf/41fnx2XnQWOReaR7Q=",
-        "owner": "sylk0s",
-        "repo": "nixpkgs",
-        "rev": "7439363991e816895dcbd202f8f3c84300365c30",
-        "type": "github"
-      },
-      "original": {
-        "owner": "sylk0s",
-        "ref": "rustrover",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs-stable": {
       "locked": {
         "lastModified": 1694908564,
@@ -893,7 +877,6 @@
         "nix-doom-emacs": "nix-doom-emacs",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_5",
-        "nixpkgs-rustrover-pr": "nixpkgs-rustrover-pr",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nur": "nur",
         "sops-nix": "sops-nix",

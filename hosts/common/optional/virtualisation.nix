@@ -4,6 +4,7 @@ let
   nur-no-pkgs = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") { };
   bridgeInterface = "br0";
   ethInterface = "eth0";
+  cores = 24;
 in
 {
   imports = [
@@ -52,56 +53,97 @@ in
     bridges."${bridgeInterface}".interfaces = [ "${ethInterface}" ];
   };
 
-  environment = {
-    sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
-    systemPackages =
+  systemd = {
+    services."libvirt-nosleep@" = {
+      description = "Preventing sleep while libvirt domain \"%i\" is running";
+      serviceConfig = {
+        Type = "simple";
+        ExecStart = "${pkgs.systemd}/bin/systemd-inhibit --what=sleep --why=\"Libvirt domain \"%i\" is running\" --who=%U --mode=block sleep infinity";
+      };
+    };
+
+    tmpfiles.rules =
       let
-        per-machine = pkgs.writeText "/var/run/libvirt/hooks/qemu" ''
-          #!/run/current-system/sw/bin/bash
+        per-machine = pkgs.writeShellApplication {
+          name = "per-machine";
 
-          GUEST_NAME="$1"
-          HOOK_NAME="$2"
-          STATE_NAME="$3"
-          MISC="''${@:4}"
+          runtimeInputs = [ ];
 
-          BASEDIR="$(dirname $0)"
-          HOOKPATH="$BASEDIR/qemu.d/$GUEST_NAME/$HOOK_NAME/$STATE_NAME"
+          text = ''
+            #!${pkgs.stdenv.shell}
 
-          set -e # If a script exits with an error, we should as well.
+            GUEST_NAME="$1"
+            HOOK_NAME="$2"
+            STATE_NAME="$3"
 
-          # check if it's a non-empty executable file
-          if [ -f "$HOOKPATH" ] && [ -s "$HOOKPATH"] && [ -x "$HOOKPATH" ]; then
-            eval \"$HOOKPATH\" "$@"
-          elif [ -d "$HOOKPATH" ]; then
-            while read file; do
-              # check for null string
-              if [ ! -z "$file" ]; then
-                eval \"$file\" "$@"
-              fi
-            done <<< "$(find -L "$HOOKPATH" -maxdepth 1 -type f -executable -print;)"
-          fi
-        '';
+            # Inhibit sleep
+            case "$HOOK_NAME" in
+              start)
+                systemctl start "libvirt-nosleep@$GUEST_NAME" 2>&1 | tee -a /var/log/libvirt/hooks.log
+                ;;
+              stopped)
+                systemctl stop "libvirt-nosleep@$GUEST_NAME" 2>&1 | tee -a /var/log/libvirt/hooks.log
+                ;;
+            esac
 
-        # TODO: Don't hardcode the allowed cores
-        core-isolation = pkgs.writeText "/var/run/libvirt/hooks/qemu.d/core-isolation" ''
-          #!/run/current-system/sw/bin/bash
+            BASEDIR="$(dirname "$0")"
+            HOOKPATH="$BASEDIR/qemu.d/$GUEST_NAME/$HOOK_NAME/$STATE_NAME"
 
-          HOOK_NAME="$2"
-          STATE_NAME="$3"
+            set -e # If a script exits with an error, we should as well.
 
-          if [ "$HOOK_NAME" = "start" ] && [ "$STATE_NAME" = "begin" ]; then
-            ALLOWED="6-11,18-23"
-          elif [ "$STATE_NAME" = "release" ] && [ "$STATE_NAME" = "end" ]; then
-            ALLOWED="0-23"
-          fi
+            # check if it's a non-empty executable file
+            if [ -f "$HOOKPATH" ] && [ -s "$HOOKPATH" ] && [ -x "$HOOKPATH" ]; then
+              "$HOOKPATH" "$@"
+            elif [ -d "$HOOKPATH" ]; then
+              while read -r file; do
+                # check for null string
+                if [ -n "$file" ]; then
+                  "$file" "$@"
+                fi
+              done <<< "$(find -L "$HOOKPATH" -maxdepth 1 -type f -executable -print;)"
+            fi
+          '';
+        };
 
-          systemctl set-property --runtime -- user.slice AllowedCPUs=$ALLOWED
-          systemctl set-property --runtime -- system.slice AllowedCPUs=$ALLOWED
-          systemctl set-property --runtime -- init.scope AllowedCPUs=$ALLOWED
-        '';
+        win-isolation-start = pkgs.writeShellApplication {
+          name = "windows-isolation-start";
 
-        # detach-gpu = pkgs.writeText "/var/run/libvirt/hooks/qemu.d/detach-gpu" ''
-        #   #!/run/current-system/sw/bin/bash
+          # runtimeInputs = with pkgs; [ awk dmidecode ];
+
+          text = ''
+            #!${pkgs.stdenv.shell}
+
+            # Numa node formula
+            # CORES=$(dmidecode -t processor | grep "Core Count" | awk '{print $3}')
+            # THREADS=$(dmidecode -t processor | grep "Thread Count" | awk '{print $3}')
+            
+            # ALLOWED="$($CORES / 2)-$($CORES - 1),$($THREADS - (($CORES / 2) - 1))-$(($THREADS - 1))"
+            ALLOWED="${toString (cores / 4)}-${toString ((cores / 2) - 1)},${toString (cores - (cores / 4))}-${toString (cores - 1)}"
+
+            systemctl set-property --runtime -- user.slice AllowedCPUs=$ALLOWED
+            systemctl set-property --runtime -- system.slice AllowedCPUs=$ALLOWED
+            systemctl set-property --runtime -- init.scope AllowedCPUs=$ALLOWED
+          '';
+        };
+
+        win-isolation-release = pkgs.writeShellApplication {
+          name = "windows-isolation-release";
+
+          # runtimeInputs = [ ];
+
+          text = ''
+            #!${pkgs.stdenv.shell}
+
+            ALLOWED="0-${toString (cores - 1)}"
+
+            systemctl set-property --runtime -- user.slice AllowedCPUs=$ALLOWED
+            systemctl set-property --runtime -- system.slice AllowedCPUs=$ALLOWED
+            systemctl set-property --runtime -- init.scope AllowedCPUs=$ALLOWED
+          '';
+        };
+
+        # detach-gpu = pkgs.writeText "detach-gpu" ''
+        #   #!${pkgs.stdenv.shell}
 
         #   # Load variables we defined
         #   source "/var/lib/libvirt/hooks/kvm.conf"
@@ -130,8 +172,8 @@ in
         #   modprobe vfio-pci
         # '';
 
-        # attach-gpu = pkgs.writeText "/var/run/libvirt/hooks/qemu.d/attach-gpu" ''
-        #   #!/run/current-system/sw/bin/bash
+        # attach-gpu = pkgs.writeText "attach-gpu" ''
+        #   #!${pkgs.stdenv.shell}
 
         #   # Load variables we defined
         #   source "/var/lib/libvirt/hooks/kvm.conf"
@@ -160,14 +202,27 @@ in
         #   systemctl start display-manager.service
         # '';
       in
-      [ ] ++ (with pkgs; [
-        virt-manager
-        virtiofsd
-        looking-glass-client
-        win-virtio
-        win-spice
-        win-qemu
-      ]);
+      [
+        "L+ /run/libvirt/hooks/qemu - - - - ${pkgs.lib.getExe per-machine}"
+
+        "L+ /run/libvirt/hooks/qemu.d/win11/start/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
+        "L+ /run/libvirt/hooks/qemu.d/win11/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"
+
+        "L+ /run/libvirt/hooks/qemu.d/win11-gaming/start/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
+        "L+ /run/libvirt/hooks/qemu.d/win11-gaming/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"
+      ];
+  };
+
+  environment = {
+    sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
+    systemPackages = (with pkgs; [
+      virt-manager
+      virtiofsd
+      looking-glass-client
+      win-virtio
+      win-spice
+      win-qemu
+    ]);
 
     persistence."/persist" = {
       directories = [

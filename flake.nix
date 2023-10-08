@@ -10,7 +10,6 @@
     # Packages
     nixpkgs = { url = "github:nixos/nixpkgs/nixos-23.05"; };
     nixpkgs-unstable = { url = "github:nixos/nixpkgs/nixos-unstable"; };
-    nixpkgs-rustrover-pr = { url = "github:sylk0s/nixpkgs/rustrover"; };
     nur = { url = "github:nix-community/NUR"; };
 
     # Utils
