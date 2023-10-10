@@ -5,10 +5,7 @@
     ./features/cli
     ../common/features/games
     ./features/desktop/development
-    ../common/applications/cooler_control.nix
-    ../common/applications/obs.nix
-    ../common/applications/gimp.nix
-    ../common/applications/done.nix
+    ../common/applications
   ];
 
   programs.autorandr = {
