@@ -62,7 +62,9 @@
         nixe = {
           users = [ "racci" ];
         };
-        # surnix = { };
+        surnix = {
+          users = [ "racci" ];
+        };
       };
 
       homeConfigurations = builtins.mapAttrs mkHome {

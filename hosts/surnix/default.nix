@@ -2,6 +2,7 @@
   imports = [
     ./hardware.nix
 
+    ../common/optional/ephemeral-btrfs.nix
     ../common/optional/pipewire.nix
     ../common/optional/quietboot.nix
     ../common/optional/gnome.nix

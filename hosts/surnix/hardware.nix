@@ -12,14 +12,12 @@
     kernelModules = [ "kvm-intel" ];
   };
 
-  fileSystems = {
-    "/" = {
-      device = "/dev/disk/by-uuid/88fc3edb-0750-40de-9f8e-db6891d1a3db";
-      fsType = "btrfs";
-    };
-
+  fileSystems = let
+    bootPart = "/dev/disk/by-partlabel/ESP";
+    primaryPart = "/dev/disk/by-partlabel/surnix";
+  in {
     "/boot" = {
-      device = "/dev/disk/by-uuid/E0E0-ED76";
+      device = bootPart;
       fsType = "vfat";
     };
   };

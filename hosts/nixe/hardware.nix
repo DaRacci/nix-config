@@ -39,6 +39,12 @@
   };
 
   fileSystems = {
+    "/" = {
+      device = "none";
+      fsType = "tmpfs";
+      options = [ "defaults" "size=16G" "mode=755" ];
+    };
+
     "/boot" = {
       device = "/dev/disk/by-partlabel/ESP";
       fsType = "vfat";
@@ -54,7 +60,7 @@
     "/nix" = {
       device = "dev/disk/by-partlabel/Nix";
       fsType = "btrfs";
-      options = [ "subvol=@store" ];
+      options = [ "subvol=@store" "noatime" ];
       neededForBoot = true;
     };
 

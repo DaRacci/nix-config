@@ -4,8 +4,6 @@ let
 in
 {
   imports = [
-    inputs.impermanence.nixosModule
-  ] ++ [
     ./auto-upgrade.nix
     ./btrfs.nix
     ./cooler_control.nix
@@ -14,6 +12,7 @@ in
     ./nix.nix
     ./openssh.nix
     ./passwords.nix
+    ./persistance.nix
     ./sops.nix
     ./security.nix
     ./zram.nix
@@ -23,7 +22,6 @@ in
 
   # programs.nix-index.enable = true;
   # programs.nix-index-database.comma.enable = true;
-  programs.fuse.userAllowOther = true;
 
   environment.enableAllTerminfo = true;
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
@@ -62,7 +60,7 @@ in
 
   environment.persistence."/persist".files = [
     "/etc/ssh/ssh_host_ed25519_key"
-    "/etc/ssh/ssh_host_ed25519_key.pub"
+    "/etc/ssh/ssh_host_ed25519_key.pub" # Maybe copy from repo?
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion

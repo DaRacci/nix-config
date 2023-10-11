@@ -3,7 +3,7 @@ keys:
     - &james "age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a"
   - &hosts :
     - &nixe "age1rm3j9r0fulw4c2l9cfa9tvrznzw2aehgy2xc700lxrxqq00efghsy9wgv7"
-    - &surnixe "blahblah"
+    - &surnix "age1hxxjcpvm9cz88xu6d5jv82uavhqg3jjk4e770a0pc2gzak5gs4zsp4798j"
 
 
 creation_rules:
@@ -17,7 +17,7 @@ creation_rules:
 
   - path_regex: hosts/surnix/secrets.yaml$
     key_groups:
-    - age: [ *surnixe, *james ]
+    - age: [ *surnix, *james ]
 
   - path_regex: hosts/common/secrets.yaml$
     key_groups:

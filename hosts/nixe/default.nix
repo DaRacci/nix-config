@@ -3,7 +3,6 @@
   imports = [
     ./hardware.nix
 
-    ../common/optional/impermanence.nix
     ../common/optional/containers.nix
     ../common/optional/virtualisation.nix
 
