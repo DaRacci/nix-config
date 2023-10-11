@@ -9,7 +9,7 @@
     ../common/optional/gaming.nix
   ];
 
-  microsoft-surface.kernelVersion = "6.1.18";
+  microsoft-surface.kernelVersion = "6.4.16";
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
