@@ -1,7 +1,7 @@
 { pkgs, lib, config, ... }: {
   home.packages = with pkgs; [
     jetbrains.idea-community
-    jetbrains.rust-rover
+    unstable.jetbrains.rust-rover
   ];
 
   programs.git = lib.mkIf config.programs.git.enable {
