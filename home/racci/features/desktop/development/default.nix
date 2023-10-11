@@ -1,10 +1,9 @@
 { pkgs, ... }: {
   imports = [
-    ./emacs
+    # ./emacs
     ./code.nix
-    ./emacs
     ./jetbrains.nix
-    ./lapce.nix
+    # ./lapce.nix
   ];
 
   home.packages = with pkgs; [ nix-init ];
