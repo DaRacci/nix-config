@@ -38,7 +38,7 @@ in
       allowedBridges = [ "${bridgeInterface}" ];
 
       qemu = {
-        runAsRoot = false;
+        runAsRoot = true;
         ovmf.enable = true;
       };
 
@@ -69,11 +69,9 @@ in
         per-machine = pkgs.writeShellApplication {
           name = "per-machine";
 
-          runtimeInputs = [ ];
+          runtimeInputs = with pkgs; [ systemd findutils ];
 
           text = ''
-            #!${pkgs.stdenv.shell}
-
             GUEST_NAME="$1"
             HOOK_NAME="$2"
             STATE_NAME="$3"
@@ -95,12 +93,14 @@ in
 
             # check if it's a non-empty executable file
             if [ -f "$HOOKPATH" ] && [ -s "$HOOKPATH" ] && [ -x "$HOOKPATH" ]; then
-              "$HOOKPATH" "$@"
+              echo "Running $HOOKPATH" 2>&1 | tee -a /var/log/libvirt/hooks.log
+              "$HOOKPATH" "$@" 2>&1 | tee -a /var/log/libvirt/hooks.log
             elif [ -d "$HOOKPATH" ]; then
               while read -r file; do
                 # check for null string
                 if [ -n "$file" ]; then
-                  "$file" "$@"
+                  echo "Running $file" 2>&1 | tee -a /var/log/libvirt/hooks.log
+                  "$file" "$@" 2>&1 | tee -a /var/log/libvirt/hooks.log
                 fi
               done <<< "$(find -L "$HOOKPATH" -maxdepth 1 -type f -executable -print;)"
             fi
@@ -110,11 +110,9 @@ in
         win-isolation-start = pkgs.writeShellApplication {
           name = "windows-isolation-start";
 
-          # runtimeInputs = with pkgs; [ awk dmidecode ];
+          runtimeInputs = with pkgs; [ systemd ];
 
           text = ''
-            #!${pkgs.stdenv.shell}
-
             # Numa node formula
             # CORES=$(dmidecode -t processor | grep "Core Count" | awk '{print $3}')
             # THREADS=$(dmidecode -t processor | grep "Thread Count" | awk '{print $3}')
@@ -131,11 +129,9 @@ in
         win-isolation-release = pkgs.writeShellApplication {
           name = "windows-isolation-release";
 
-          # runtimeInputs = [ ];
+          runtimeInputs = with pkgs; [ systemd ];
 
           text = ''
-            #!${pkgs.stdenv.shell}
-
             ALLOWED="0-${toString (cores - 1)}"
 
             systemctl set-property --runtime -- user.slice AllowedCPUs=$ALLOWED
@@ -144,97 +140,91 @@ in
           '';
         };
 
-        detach-gpu = pkgs.writeText "detach-gpu" ''
-          #!${pkgs.stdenv.shell}
+        # TODO - Only if one gpu is present on machine
+        # TODO - Save open applications and restore them on release
+        detach-gpu = pkgs.writeShellApplication {
+          name = "detach-gpu";
+          runtimeInputs = with pkgs; [ systemd pciutils gnugrep findutils kmod ];
+          text = ''
+            ################################# Variables #################################
 
-          # Load variables we defined
-          # source "/var/lib/libvirt/hooks/kvm.conf"
+            ## Adds current time to var for use in echo for a cleaner log and script ##
+            DATE=$(date +"%m/%d/%Y %R:%S :")
 
-          # Logout
-          # source "/home/owner/Desktop/Sync/Files/Tools/logout.sh"
+            ################################# Helpers ###################################
 
-          # Stop display manager
-          # systemctl stop display-manager.service
+            # Save service state into /tmp/vfio-store-services for later restore
+            function stop-save-service {
+              if systemctl is-active --quiet "$1"; then
+                output="/tmp/vfio-store-''${2:-services}"
+                
+                # Create file if it doesn't exist
+                if test ! -e "$output"; then
+                  touch "$output"
+                fi
 
-          # Unbind VTconsoles
-          # echo 0 > /sys/class/vtconsole/vtcon0/bind
-          # echo 0 > /sys/class/vtconsole/vtcon1/bind
+                # Skip if already saved, otherwise append to file
+                grep -qsF "$1" "$output" || echo "$1" >> "$output"
 
-          # Unbind EFI Framebuffer
-          # echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
+                echo "$DATE Stopping $1"
+                systemctl stop "$1"
 
-          # Unload NVIDIA kernel modules
-          # modprobe -r nvidia_drm nvidia_modeset nvidia_uvm nvidia
-
-          # Detach GPU devices from host
-          # virsh nodedev-detach $VIRSH_GPU_VIDEO
-          # virsh nodedev-detach $VIRSH_GPU_AUDIO
-
-          # Load vfio module
-          # modprobe vfio-pci
-
-          ################################# Variables #################################
-
-          ## Adds current time to var for use in echo for a cleaner log and script ##
-          DATE=$(date +"%m/%d/%Y %R:%S :")
-
-          ## Sets dispmgr var as null ##
-          DISPMGR="null"
-
-          ################################## Script ###################################
-
-          echo "$DATE Beginning of Startup!"
-
-          function stop_display_manager_if_running {
-
-              echo "$DATE Display Manager = display-manager"
-
-              ## Stop display manager using systemd ##
-              if systemctl is-active --quiet "display-manager.service"; then
-                  grep -qsF "display-manager" "/tmp/vfio-store-display-manager"  || echo "display-manager" >/tmp/vfio-store-display-manager
-                  systemctl stop "display-manager.service"
+                while systemctl is-active --quiet "$1"; do
+                  echo "$DATE Waiting for $1 to stop"
+                  sleep 0.5
+                done
               fi
+            }
 
-              while systemctl is-active --quiet "display-manager.service"; do
-                  sleep 1
-              done
+            ################################## Script ###################################
 
-              return
-          }
+            echo "$DATE Beginning of Startup!"
 
-          function unbind-framebuffer {
-            if test -e "/tmp/vfio-is-nvidia"; then
-                rm -f /tmp/vfio-is-nvidia
-            else
-                test -e "/tmp/vfio-is-amd"
-                rm -f /tmp/vfio-is-amd
-            fi
-          }
+            # Stops services that may be using the GPU
+            function stop-services {
+              stop-save-service "display-manager.service"
+              systemctl isolate multi-user.target
 
-          ##############################################################################################################################
-          ## Unbind VTconsoles if currently bound (adapted and modernised from https://www.kernel.org/doc/Documentation/fb/fbcon.txt) ##
-          ##############################################################################################################################
-          function unbind-vtconsoles {
+              stop-save-service "openrgb.service"
+            }
+
+            ##############################################################################################################################
+            ## Unbind VTconsoles if currently bound (adapted and modernised from https://www.kernel.org/doc/Documentation/fb/fbcon.txt) ##
+            ##############################################################################################################################
+            function unbind-vtconsoles {
               if test -e "/tmp/vfio-bound-consoles"; then
-                  rm -f /tmp/vfio-bound-consoles
+                rm -f /tmp/vfio-bound-consoles
               fi
-           
+          
               for (( i = 0; i < 16; i++)); do
-                  if test -x /sys/class/vtconsole/vtcon"$i"; then
-                      if [ "$(grep -c "frame buffer" /sys/class/vtconsole/vtcon"$i"/name)" = 1 ]; then
-                          echo 0 > /sys/class/vtconsole/vtcon"$i"/bind
-                          echo "$DATE Unbinding Console $i"
-                          echo "$i" >> /tmp/vfio-bound-consoles
-                      fi
+                if test -x /sys/class/vtconsole/vtcon"$i"; then
+                  if [ "$(grep -c "frame buffer" /sys/class/vtconsole/vtcon"$i"/name)" = 1 ]; then
+                    echo 0 > /sys/class/vtconsole/vtcon"$i"/bind
+                    echo "$DATE Unbinding Console $i"
+                    echo "$i" >> /tmp/vfio-bound-consoles
                   fi
+                fi
               done
-          }
+            }
 
-          function unload-drivers {
+            function unload-gpu-drivers {
+              while read -r file; do
+                # check for null string
+                if [ -n "$file" ]; then
+                  rm -f "$file"
+                fi
+              done <<< "$(find -L /tmp/ -maxdepth 1 -type f -name 'vfio-is-*' -print;)"
+
               if lspci -nn | grep -e VGA | grep -s NVIDIA ; then
                 echo "$DATE System has an NVIDIA GPU"
-                grep -qsF "true" "/tmp/vfio-is-nvidia" || echo "true" >/tmp/vfio-is-nvidia
-                echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
+                echo "true" > /tmp/vfio-is-nvidia
+                
+                if ! (echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind); then
+                  echo "$DATE Failed to unbind frame buffer"
+                fi 
+
+                stop-save-service "nvidia-persistenced.service" "nvidia"
+                sleep 1
 
                 ## Unload NVIDIA GPU drivers ##
                 modprobe -r nvidia_uvm
@@ -246,11 +236,11 @@ in
                 modprobe -r drm
 
                 echo "$DATE NVIDIA GPU Drivers Unloaded"
-            fi
+              fi
 
-            if lspci -nn | grep -e VGA | grep -s AMD ; then
+              if lspci -nn | grep -e VGA | grep -s AMD ; then
                 echo "$DATE System has an AMD GPU"
-                grep -qsF "true" "/tmp/vfio-is-amd" || echo "true" >/tmp/vfio-is-amd
+                echo "true" >/tmp/vfio-is-amd
                 echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
 
                 ## Unload AMD GPU drivers ##
@@ -260,145 +250,140 @@ in
                 modprobe -r drm
 
                 echo "$DATE AMD GPU Drivers Unloaded"
-            fi
-          }
+              fi
+            }
 
-          function load-vfio-drivers {
+            function load-vfio-drivers {
               modprobe vfio
               modprobe vfio_pci
               modprobe vfio_iommu_type1
-          }
+            }
 
-          stop_display_manager_if_running
-          sleep 1
-          unbind-framebuffer
-          sleep 1
-          unbind-vtconsoles
-          sleep 1
-          unload-gpu-drivers
-          load-vfio-drivers
+            stop-services
+            sleep 1
+            unbind-vtconsoles
+            sleep 1
+            unload-gpu-drivers
+            load-vfio-drivers
 
-          # Detach GPU devices from host
-          # virsh nodedev-detach ${GPU_VIDEO}
-          # virsh nodedev-detach ${GPU_AUDIO}
+            # Detach GPU devices from host
+            # virsh nodedev-detach ${GPU_VIDEO}
+            # virsh nodedev-detach ${GPU_AUDIO}
 
-          echo "$DATE End of Startup!"
-        '';
+            echo "$DATE End of Startup!"
+          '';
+        };
 
-        attach-gpu = pkgs.writeText "attach-gpu" ''
-          #!${pkgs.stdenv.shell}
+        attach-gpu = pkgs.writeShellApplication {
+          name = "attach-gpu";
+          runtimeInputs = with pkgs; [ systemd gnugrep findutils kmod ];
+          text = ''
+            ################################# Variables #################################
 
-          # # Load variables we defined
-          # source "/var/lib/libvirt/hooks/kvm.conf"
+            ## Adds current time to var for use in echo for a cleaner log and script ##
+            DATE=$(date +"%m/%d/%Y %R:%S :")
 
-          # # Unload vfio module
-          # modprobe -r vfio-pci
+            ################################## Helpers ##################################
 
-          # # Attach GPU devices from host
-          # virsh nodedev-reattach ${GPU_VIDEO}
-          # virsh nodedev-reattach ${GPU_AUDIO}
+            function start-service-from-input {
+              input="/tmp/vfio-store-$1"
 
-          # # Read nvidia x config
-          # nvidia-xconfig --query-gpu-info > /dev/null 2>&1
+              if test -e "$input"; then
+                while read -r SERVICE; do
+                  if command -v systemctl; then
+                    ## Make sure the variable got collected ##
+                    echo "$DATE Var has been collected from file: $SERVICE"
 
-          # # Load NVIDIA kernel modules
-          # modprobe nvidia_drm nvidia_modeset nvidia_uvm nvidia
+                    echo "$DATE Starting $SERVICE"
+                    systemctl start "$SERVICE"
+                  fi
+                done < "$input"
+              fi
+            }
 
-          # # Bind EFI Framebuffer
-          # echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/bind
+            ################################## Script ###################################
 
-          # # Bind VTconsoles
-          # echo 1 > /sys/class/vtconsole/vtcon0/bind
-          # echo 1 > /sys/class/vtconsole/vtcon1/bind
+            echo "$DATE Beginning of Teardown!"
 
-          # # Start display manager
-          # systemctl start display-manager.service
+            function unload-vfio-drivers {
+              modprobe -r vfio_pci
+              modprobe -r vfio_iommu_type1
+              modprobe -r vfio
+            }
 
-          ################################# Variables #################################
+            function load-gpu-drivers {
+              if test -e "/tmp/vfio-is-nvidia" && grep -q "true" "/tmp/vfio-is-nvidia"; then
+                echo "$DATE Loading NVIDIA GPU Drivers"
+        
+                modprobe drm
+                modprobe drm_kms_helper
+                modprobe i2c_nvidia_gpu
+                modprobe nvidia
+                modprobe nvidia_modeset
+                modprobe nvidia_drm
+                modprobe nvidia_uvm
 
-          ## Adds current time to var for use in echo for a cleaner log and script ##
-          DATE=$(date +"%m/%d/%Y %R:%S :")
+                start-service-from-input "nvidia"
 
-          ################################## Script ###################################
+                echo "$DATE NVIDIA GPU Drivers Loaded"
+              fi
 
-          echo "$DATE Beginning of Teardown!"
-
-          function unload-vfio-drivers {
-            modprobe -r vfio_pci
-            modprobe -r vfio_iommu_type1
-            modprobe -r vfio
-          }
-
-          function load-gpu-drivers {
-            if grep -q "true" "/tmp/vfio-is-nvidia" ; then
-              echo "$DATE Loading NVIDIA GPU Drivers"
+              if test -e "/tmp/vfio-is-amd" && grep -q "true" "/tmp/vfio-is-amd"; then
+                echo "$DATE Loading AMD GPU Drivers"
       
-              modprobe drm
-              modprobe drm_kms_helper
-              modprobe i2c_nvidia_gpu
-              modprobe nvidia
-              modprobe nvidia_modeset
-              modprobe nvidia_drm
-              modprobe nvidia_uvm
-
-              echo "$DATE NVIDIA GPU Drivers Loaded"
-            fi
-
-            if grep -q "true" "/tmp/vfio-is-amd" ; then
-              echo "$DATE Loading AMD GPU Drivers"
-    
-              modprobe drm
-              modprobe amdgpu
-              modprobe radeon
-              modprobe drm_kms_helper
-    
-              echo "$DATE AMD GPU Drivers Loaded"
-            fi
-          }
-
-          function start-display-manager {
-            input="/tmp/vfio-store-display-manager"
-            while read -r DISPMGR; do
-              if command -v systemctl; then
-                ## Make sure the variable got collected ##
-                echo "$DATE Var has been collected from file: $DISPMGR"
-
-                systemctl start "$DISPMGR.service"
-              else
-                if command -v sv; then
-                  sv start "$DISPMGR"
-                fi
+                modprobe drm
+                modprobe amdgpu
+                modprobe radeon
+                modprobe drm_kms_helper
+      
+                echo "$DATE AMD GPU Drivers Loaded"
               fi
-            done < "$input"
-          }
+            }
 
-          function bind-vtconsoles {
-            input="/tmp/vfio-bound-consoles"
-            while read -r consoleNumber; do
-              if test -x /sys/class/vtconsole/vtcon"$consoleNumber"; then
-                if [ "$(grep -c "frame buffer" "/sys/class/vtconsole/vtcon$consoleNumber/name")" = 1 ]; then
-                  echo "$DATE Rebinding console $consoleNumber"
-                  echo 1 > /sys/class/vtconsole/vtcon"$consoleNumber"/bind
-                fi
+            function bind-vtconsoles {
+              if test ! -e "/tmp/vfio-bound-consoles"; then
+                echo "$DATE No consoles to rebind"
+                return
               fi
-            done < "$input"
-          }
 
-          echo "$DATE End of Teardown!"
-        '';
+              input="/tmp/vfio-bound-consoles"
+              while read -r consoleNumber; do
+                if test -x /sys/class/vtconsole/vtcon"$consoleNumber"; then
+                  if [ "$(grep -c "frame buffer" "/sys/class/vtconsole/vtcon$consoleNumber/name")" = 1 ]; then
+                    echo "$DATE Rebinding console $consoleNumber"
+                    echo 1 > /sys/class/vtconsole/vtcon"$consoleNumber"/bind
+                  fi
+                fi
+              done < "$input"
+            }
+
+            unload-vfio-drivers
+            load-gpu-drivers
+            start-service-from-input "services"
+            bind-vtconsoles
+
+            echo "$DATE End of Teardown!"
+          '';
+        };
       in
       [
         "L+ /run/libvirt/hooks/qemu - - - - ${pkgs.lib.getExe per-machine}"
 
-        "L+ /run/libvirt/hooks/qemu.d/win11/start/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
+        "L+ /run/libvirt/hooks/qemu.d/win11/prepare/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
         "L+ /run/libvirt/hooks/qemu.d/win11/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"
-        "L+ /run/libvirt/hooks/qemu.d/win11/start/begin/detach-gpu - - - - ${pkgs.lib.getExe detach-gpu}" # TODO - Only if one gpu is present on machine
-        "L+ /run/libvirt/hooks/qemu.d/win11/release/end/attach-gpu - - - - ${pkgs.lib.getExe attach-gpu}" # TODO - Only if one gpu is present on machine
 
-        "L+ /run/libvirt/hooks/qemu.d/win11-gaming/start/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
+        "L+ /run/libvirt/hooks/qemu.d/win11-single/prepare/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
+        "L+ /run/libvirt/hooks/qemu.d/win11-single/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"
+        "L+ /run/libvirt/hooks/qemu.d/win11-single/prepare/begin/detach-gpu - - - - ${pkgs.lib.getExe detach-gpu}" # TODO - Only if one gpu is present on machine
+        "L+ /run/libvirt/hooks/qemu.d/win11-single/release/end/attach-gpu - - - - ${pkgs.lib.getExe attach-gpu}" # TODO - Only if one gpu is present on machine
+
+        "L+ /run/libvirt/hooks/qemu.d/win11-gaming/prepare/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
         "L+ /run/libvirt/hooks/qemu.d/win11-gaming/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"
-        "L+ /run/libvirt/hooks/qemu.d/win11-gaming/start/begin/detach-gpu - - - - ${pkgs.lib.getExe detach-gpu}" # TODO - Only if one gpu is present on machine
-        "L+ /run/libvirt/hooks/qemu.d/win11-gaming/release/end/attach-gpu - - - - ${pkgs.lib.getExe attach-gpu}" # TODO - Only if one gpu is present on machine
+
+        "L+ /run/libvirt/hooks/qemu.d/win11-gaming-single/prepare/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
+        "L+ /run/libvirt/hooks/qemu.d/win11-gaming-single/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"
+        "L+ /run/libvirt/hooks/qemu.d/win11-gaming-single/prepare/begin/detach-gpu - - - - ${pkgs.lib.getExe detach-gpu}" # TODO - Only if one gpu is present on machine
+        "L+ /run/libvirt/hooks/qemu.d/win11-gaming-single/release/end/attach-gpu - - - - ${pkgs.lib.getExe attach-gpu}" # TODO - Only if one gpu is present on machine
       ];
   };
 
