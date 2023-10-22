@@ -116,7 +116,7 @@
         ".mozilla/firefox/racci/sessionstore-backups" # Session restore
         ".mozilla/firefox/racci/bookmarkbackups" # Bookmarks
       ];
-      files = [
+      files = let dir = ".mozilla/firefox/racci"; in [
         # Bookmarks
         ".mozilla/firefox/racci/places.sqlite" # Bookmarks // TODO -> Mozilla Sync
         ".mozilla/firefox/racci/favicons.sqlite" # Favicons for bookmarks // TODO -> Needed?
@@ -128,6 +128,9 @@
         ".mozilla/firefox/racci/chromeappstore.sqlite" # Offline Storage
         # Persistent Information
         ".mozilla/firefox/racci/sessionstore.jsonlz4" # Session restore
+        "${dir}/signedInUser.json" # Mozilla Sync
+        "${dir}/containers.json" # Containers
+
       ];
     };
   };
