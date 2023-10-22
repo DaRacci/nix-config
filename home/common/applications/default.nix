@@ -6,6 +6,4 @@
     ./notes.nix
     ./recording.nix
   ];
-
-  home.packages = with pkgs; [ okteta ];
 }

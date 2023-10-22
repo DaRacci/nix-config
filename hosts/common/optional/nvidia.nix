@@ -1,5 +1,5 @@
-{ config, pkgs, ... }: {
-  environment.systemPackages = with pkgs; [ gwe nvtop ];
+{ pkgs, ... }: {
+  environment.systemPackages = with pkgs; [ nvtop ];
 
   services.xserver.videoDrivers = [ "nvidia" ];
 
@@ -8,7 +8,7 @@
 
     nvidia = {
       # package = config.boot.kernelPackages.nvidiaPackages.stable;
-      open = true; # TODO :: Set to true once all features are present!
+      open = true;
       nvidiaSettings = true;
       nvidiaPersistenced = true;
       modesetting.enable = true;
