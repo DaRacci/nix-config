@@ -20,6 +20,7 @@
     # Base Modules
     home-manager = { url = "github:nix-community/home-manager/release-23.05"; inputs.nixpkgs.follows = "nixpkgs"; };
     nixos-hardware = { url = "github:nixos/nixos-hardware"; };
+    nixos-wsl = { url = "github:nix-community/NixOS-WSL"; };
     sops-nix = { url = "github:Mic92/sops-nix"; inputs.nixpkgs.follows = "nixpkgs"; };
     impermanence = { url = "github:nix-community/impermanence"; };
     nix-colours = { url = "github:misterio77/nix-colors"; };
@@ -52,7 +53,7 @@
     # cosmic-portal.url = "github:pop-os/xdg-desktop-portal-cosmic";
   };
 
-  outputs = { self, nixpkgs, flake-utils, systems, getchoo, ... }@inputs:
+  outputs = { self, nixpkgs, flake-utils, systems, getchoo, nixos-wsl, ... }@inputs:
     let
       inherit (self) outputs;
       inherit (import ./lib/mk.nix inputs) mkSystem mkHome;
@@ -63,6 +64,9 @@
           users = [ "racci" ];
         };
         surnix = {
+          users = [ "racci" ];
+        };
+        winix = {
           users = [ "racci" ];
         };
       };

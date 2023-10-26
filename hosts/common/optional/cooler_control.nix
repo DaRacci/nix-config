@@ -18,11 +18,10 @@
   environment.systemPackages = with pkgs; [ lm_sensors ];
 
   systemd = {
-    packages = with pkgs.coolercontrol;
-      [
-        coolercontrol-liqctld
-        coolercontrold
-      ];
+    packages = with pkgs.coolercontrol; [
+      coolercontrol-liqctld
+      coolercontrold
+    ];
     services = {
       coolercontrol-liqctld.wantedBy = [ "multi-user.target" ];
       coolercontrold.wantedBy = [ "multi-user.target" ];

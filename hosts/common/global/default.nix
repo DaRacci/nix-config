@@ -6,7 +6,6 @@ in
   imports = [
     ./auto-upgrade.nix
     ./btrfs.nix
-    ./cooler_control.nix
     ./locale.nix
     ./networking.nix
     ./nix.nix

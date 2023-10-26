@@ -9,6 +9,7 @@
     ../common/optional/nvidia.nix
     ../common/optional/backlight.nix
     ../common/optional/openrgb.nix
+    ../common/optional/cooler_control.nix
   ];
 
   boot = {
