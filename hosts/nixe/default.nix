@@ -20,7 +20,7 @@
 
   networking = {
     firewall = {
-      allowedTCPPorts = [ 9999 22 ];
+      allowedTCPPorts = [ 9999 22 5990 ];
       allowedUDPPortRanges = [
         # KDE Connect
         { from = 1714; to = 1764; }

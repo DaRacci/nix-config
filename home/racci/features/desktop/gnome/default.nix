@@ -9,13 +9,9 @@
     raider
   ] ++ (with pkgs.gnomeExtensions; [
     vitals
-    gsconnect
-    lock-keys
     clipboard-indicator
     pop-shell
     blur-my-shell
-    brightness-control-using-ddcutil
-    easyeffects-preset-selector
   ]);
 
   home.sessionVariables = {
@@ -29,7 +25,6 @@
         "clipboard-indicator@tudmotu.com"
         "gsconnect@andyholmes.github.io"
         "launch-new-instance@gnome-shell-extensions.gcampax.github.com"
-        "lockkeys@vaina.lt"
         "pop-shell@system76.com"
         "Vitals@CoreCoding.com"
         "blur-my-shell@aunetx"
@@ -261,113 +256,38 @@
       <configuration>
         <logicalmonitor>
           <x>0</x>
-          <y>0</y>
+          <y>191</y>
           <scale>1</scale>
           <monitor>
             <monitorspec>
-              <connector>DP-0</connector>
-              <vendor>AOC</vendor>
-              <product>AG271QG4</product>
-              <serial>0x00000010</serial>
+              <connector>HDMI-3</connector>
+              <vendor>GSM</vendor>
+              <product>LG FULL HD</product>
+              <serial>0x01010101</serial>
             </monitorspec>
             <mode>
-              <width>2560</width>
-              <height>1440</height>
-              <rate>143.912</rate>
+              <width>1920</width>
+              <height>1080</height>
+              <rate>74.973</rate>
             </mode>
           </monitor>
         </logicalmonitor>
         <logicalmonitor>
-          <x>2560</x>
+          <x>1920</x>
           <y>0</y>
           <scale>1</scale>
           <primary>yes</primary>
-          <monitor>
-            <monitorspec>
-              <connector>DP-2</connector>
-              <vendor>AUS</vendor>
-              <product>ROG PG27V</product>
-              <serial>#ASNtjK9gdB7d</serial>
-            </monitorspec>
-            <mode>
-              <width>2560</width>
-              <height>1440</height>
-              <rate>165.000</rate>
-            </mode>
-          </monitor>
-        </logicalmonitor>
-        <logicalmonitor>
-          <x>5120</x>
-          <y>0</y>
-          <scale>1</scale>
-          <monitor>
-            <monitorspec>
-              <connector>DP-4</connector>
-              <vendor>AOC</vendor>
-              <product>AG271QG4</product>
-              <serial>0x000000aa</serial>
-            </monitorspec>
-            <mode>
-              <width>2560</width>
-              <height>1440</height>
-              <rate>143.912</rate>
-            </mode>
-          </monitor>
-        </logicalmonitor>
-      </configuration>
-      <configuration>
-        <logicalmonitor>
-          <x>0</x>
-          <y>0</y>
-          <scale>1</scale>
-          <monitor>
-            <monitorspec>
-              <connector>DP-1</connector>
-              <vendor>AOC</vendor>
-              <product>AG271QG4</product>
-              <serial>0x00000010</serial>
-            </monitorspec>
-            <mode>
-              <width>2560</width>
-              <height>1440</height>
-              <rate>143.912</rate>
-            </mode>
-          </monitor>
-        </logicalmonitor>
-        <logicalmonitor>
-          <x>5120</x>
-          <y>0</y>
-          <scale>1</scale>
           <monitor>
             <monitorspec>
               <connector>DP-3</connector>
-              <vendor>AOC</vendor>
-              <product>AG271QG4</product>
-              <serial>0x000000aa</serial>
+              <vendor>SAM</vendor>
+              <product>Odyssey G50A</product>
+              <serial>H4ZRB04080</serial>
             </monitorspec>
             <mode>
               <width>2560</width>
               <height>1440</height>
-              <rate>143.912</rate>
-            </mode>
-          </monitor>
-        </logicalmonitor>
-        <logicalmonitor>
-          <x>2560</x>
-          <y>0</y>
-          <scale>1</scale>
-          <primary>yes</primary>
-          <monitor>
-            <monitorspec>
-              <connector>DP-2</connector>
-              <vendor>AUS</vendor>
-              <product>ROG PG27V</product>
-              <serial>#ASNtjK9gdB7d</serial>
-            </monitorspec>
-            <mode>
-              <width>2560</width>
-              <height>1440</height>
-              <rate>165.000</rate>
+              <rate>164.999</rate>
             </mode>
           </monitor>
         </logicalmonitor>
