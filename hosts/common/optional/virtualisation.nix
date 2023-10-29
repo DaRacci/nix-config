@@ -87,7 +87,7 @@ in
             esac
 
             BASEDIR="$(dirname "$0")"
-            HOOKPATH="$BASEDIR/qemu.d/$GUEST_NAME/$HOOK_NAME/$STATE_NAME"
+            HOOKPATH="$BASEDIR/guests/$GUEST_NAME/$HOOK_NAME/$STATE_NAME"
 
             set -e # If a script exits with an error, we should as well.
 
@@ -365,26 +365,23 @@ in
             echo "$DATE End of Teardown!"
           '';
         };
+
+        machines =
+          let
+            prefix = "L+ /var/lib/libvirt/hooks/guests/";
+          in
+          builtins.foldl' (existing: new: existing ++ new) [ ] (builtins.map
+            (guest: [
+              "${prefix}${guest}/prepare/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
+              "${prefix}${guest}/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"
+
+              "${prefix}${guest}-single/prepare/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
+              "${prefix}${guest}-single/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"
+              "${prefix}${guest}-single/prepare/begin/detach-gpu - - - - ${pkgs.lib.getExe detach-gpu}" # TODO - Only if one gpu is present on machine
+              "${prefix}${guest}-single/release/end/attach-gpu - - - - ${pkgs.lib.getExe attach-gpu}" # TODO - Only if one gpu is present on machine
+            ]) [ "win11" "win11-gaming" ]);
       in
-      [
-        "L+ /run/libvirt/hooks/qemu - - - - ${pkgs.lib.getExe per-machine}"
-
-        "L+ /run/libvirt/hooks/qemu.d/win11/prepare/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
-        "L+ /run/libvirt/hooks/qemu.d/win11/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"
-
-        "L+ /run/libvirt/hooks/qemu.d/win11-single/prepare/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
-        "L+ /run/libvirt/hooks/qemu.d/win11-single/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"
-        "L+ /run/libvirt/hooks/qemu.d/win11-single/prepare/begin/detach-gpu - - - - ${pkgs.lib.getExe detach-gpu}" # TODO - Only if one gpu is present on machine
-        "L+ /run/libvirt/hooks/qemu.d/win11-single/release/end/attach-gpu - - - - ${pkgs.lib.getExe attach-gpu}" # TODO - Only if one gpu is present on machine
-
-        "L+ /run/libvirt/hooks/qemu.d/win11-gaming/prepare/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
-        "L+ /run/libvirt/hooks/qemu.d/win11-gaming/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"
-
-        "L+ /run/libvirt/hooks/qemu.d/win11-gaming-single/prepare/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
-        "L+ /run/libvirt/hooks/qemu.d/win11-gaming-single/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"
-        "L+ /run/libvirt/hooks/qemu.d/win11-gaming-single/prepare/begin/detach-gpu - - - - ${pkgs.lib.getExe detach-gpu}" # TODO - Only if one gpu is present on machine
-        "L+ /run/libvirt/hooks/qemu.d/win11-gaming-single/release/end/attach-gpu - - - - ${pkgs.lib.getExe attach-gpu}" # TODO - Only if one gpu is present on machine
-      ];
+      [ "L+ /var/lib/libvirt/hooks/qemu - - - - ${pkgs.lib.getExe per-machine}" ] ++ machines;
   };
 
   environment = {

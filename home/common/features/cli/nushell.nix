@@ -96,7 +96,12 @@
 } // lib.optionalAttrs (hasPersistence) {
   home.persistence."${persistenceDirectory}".files = [
       ".config/nushell/history.txt"
-  ];
+    ];
+  };
+
+  home.file.".config/nushell/login.nu".text = ''
+     
+  '';
 }
 
 
