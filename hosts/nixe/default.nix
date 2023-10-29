@@ -3,6 +3,7 @@
   imports = [
     ./hardware.nix
 
+    ../common/optional/ephemeral-tmpfs.nix
     ../common/optional/containers.nix
     ../common/optional/virtualisation.nix
 

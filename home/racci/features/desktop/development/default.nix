@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ config, pkgs, lib, persistenceDirectory, hasPersistence, ... }: {
   imports = [
     # ./emacs
     ./code.nix
@@ -7,8 +7,8 @@
   ];
 
   home.packages = with pkgs; [ nix-init ];
-
-  home.persistence."/persist/home/racci".directories = [
+} // lib.optionalAttrs (hasPersistence) {
+  home.persistence."${persistenceDirectory}".directories = [
     "Projects"
   ];
 }

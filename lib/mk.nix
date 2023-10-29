@@ -1,40 +1,40 @@
-{ self, ... }@inputs: with inputs.nixpkgs.lib; {
+{ self, ... }@inputs: with inputs.nixpkgs.lib; rec {
 
-  mkUserModule = { username }:
-    { pkgs, config, ... }:
-    let
-      hostname = config.system.name;
-      configuration = ../home/${username}/${hostname}.nix;
-      homeDirectory = if pkgs.stdenv.isDarwin then "/Users/${username}" else "/home/${username}";
-      persistenceDirectory = "/persist${homeDirectory}";
-      persistenceDirectories = [
-        "Documents"
-        "Downloads"
-        "Pictures"
-        "Videos"
-        "Music"
-        "Templates"
-        ".local/share/keyrings"
-      ];
-    in
-    {
-      home = {
-        inherit username homeDirectory;
-        stateVersion = "23.05";
-        sessionPath = [ "$HOME/.local/bin" ];
-        persistence."${persistenceDirectory}" = {
-          allowOther = true;
-          directories = persistenceDirectories;
-        };
-      };
+  # mkUserModule = { username }:
+  #   { pkgs, config, ... }:
+  #   let
+  #     hostname = config.system.name;
+  #     configuration = ../home/${username}/${hostname}.nix;
+  #     homeDirectory = if pkgs.stdenv.isDarwin then "/Users/${username}" else "/home/${username}";
+  #     persistenceDirectory = "/persist${homeDirectory}";
+  #     persistenceDirectories = [
+  #       "Documents"
+  #       "Downloads"
+  #       "Pictures"
+  #       "Videos"
+  #       "Music"
+  #       "Templates"
+  #       ".local/share/keyrings"
+  #     ];
+  #   in
+  #   {
+  #     home = {
+  #       inherit username homeDirectory;
+  #       stateVersion = "23.05";
+  #       sessionPath = [ "$HOME/.local/bin" ];
+  #       persistence."${persistenceDirectory}" = {
+  #         allowOther = true;
+  #         directories = persistenceDirectories;
+  #       };
+  #     };
 
-      imports = [
-        ../home/common/global
-        configuration
-      ];
-    };
+  #     imports = [
+  #       ../home/common/global
+  #       configuration
+  #     ];
+  #   };
 
-  mkSystem = hostName: { users ? [ ], system ? "x86_64-linux", module ? { } }:
+  mkSystem = hostName: { users ? [ ], system ? "x86_64-linux", persistenceType ? "none" }:
     nixosSystem {
       inherit system;
       modules = [
@@ -45,12 +45,20 @@
           networking.hostName = hostName;
           passthru.enable = false; # Why does build break without this?
         })
-        module
-      ] ++
+      ] ++ (
+        if persistenceType == "none" then [ ]
+        else if persistenceType == "tmpfs"
+        then ../hosts/optional/ephemeral-tmpfs.nix
+        else if persistenceType == "btrfs"
+        then ../hosts/optional/ephemeral-btrfs.nix
+        else throw "Unknown persistence type: ${persistenceType}"
+      ) ++
       (builtins.map
         (username: { flake, config, pkgs, ... }:
-          let inherit (flake) inputs;homeDirectory = if pkgs.stdenv.isDarwin then "/Users/${username}" else "/home/${username}"; persistenceDirectory = "/persist${homeDirectory}"; in {
-            imports = [ inputs.home-manager.nixosModule inputs.sops-nix.nixosModules.sops ];
+          let inherit (flake) inputs; homeDirectory = if pkgs.stdenv.isDarwin then "/Users/${username}" else "/home/${username}"; persistenceDirectory = "/persist${homeDirectory}"; in {
+            imports = [
+              inputs.home-manager.nixosModule
+            ] ++ optional (persistenceType != "none") inputs.impermanence.nixosModules.home-manager.impermanence;
 
             users.users.${username} = {
               isNormalUser = mkDefault true;
@@ -69,12 +77,13 @@
 
             home-manager.extraSpecialArgs = {
               flake = self;
+              hasPersistence = persistenceType != "none";
               inherit (self) inputs outputs;
               inherit persistenceDirectory;
             };
+
             home-manager.users."${username}" = ({ pkgs, ... }:
               let
-                # hostname = host; #config.system.name;
                 configuration = ../home/${username}/${hostName}.nix;
                 persistenceDirectories = [
                   "Documents"
@@ -91,6 +100,7 @@
                   inherit username homeDirectory;
                   stateVersion = "23.05";
                   sessionPath = [ "$HOME/.local/bin" ];
+                } // optionalAttrs (persistenceType != "none") {
                   persistence."${persistenceDirectory}" = {
                     allowOther = true;
                     directories = persistenceDirectories;
@@ -107,23 +117,24 @@
       specialArgs = {
         flake = self;
         inherit (self) inputs outputs;
+        hasPersistence = persistenceType != "none";
       };
     };
 
-  mkHome = username: { system ? "x86_64-linux", host }:
-    let
-      pkgs = import self.inputs.nixpkgs { inherit system; };
-    in
-    inputs.home-manager.lib.homeManagerConfiguration {
-      inherit pkgs;
-      modules = [
+  # mkHome = username: { system ? "x86_64-linux", host }:
+  #   let
+  #     pkgs = import self.inputs.nixpkgs { inherit system; };
+  #   in
+  #   inputs.home-manager.lib.homeManagerConfiguration {
+  #     inherit pkgs;
+  #     modules = [
 
-      ];
-      extraSpecialArgs = {
-        flake = self;
-        inherit (self) inputs outputs;
-        inherit persistenceDirectory;
-      };
-    };
+  #     ];
+  #     extraSpecialArgs = {
+  #       flake = self;
+  #       inherit (self) inputs outputs;
+  #       inherit persistenceDirectory;
+  #     };
+  #   };
 }
 

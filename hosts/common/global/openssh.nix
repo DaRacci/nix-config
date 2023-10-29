@@ -1,4 +1,4 @@
-{ outputs, lib, config, ... }:
+{ outputs, lib, config, hasPersistence, ... }:
 
 let
   inherit (config.networking) hostName;
@@ -7,7 +7,7 @@ let
 
   # Sops needs acess to the keys before the persist dirs are even mounted; so
   # just persisting the keys won't work, we must point at /persist
-  inherit (import ../../../lib/persistence.nix { inherit lib config; }) persistablePath;
+  inherit (import ../../../lib/persistence.nix { inherit lib hasPersistence; }) persistable;
 in
 {
   services.openssh = {
@@ -19,7 +19,7 @@ in
     };
 
     hostKeys = [{
-      path = persistablePath "/etc/ssh/ssh_host_ed25519_key";
+      path = persistable "/etc/ssh/ssh_host_ed25519_key";
       type = "ed25519";
     }];
   };

@@ -26,6 +26,8 @@ let
   phase1Systemd = config.boot.initrd.systemd.enable;
 in
 {
+  imports = [ ./btrfs.nix ./persistence.nix ];
+
   boot.initrd = {
     supportedFilesystems = [ "btrfs" ];
     postDeviceCommands = lib.mkIf (!phase1Systemd) (lib.mkBefore wipeScript);

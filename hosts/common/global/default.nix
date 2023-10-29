@@ -5,13 +5,11 @@ in
 {
   imports = [
     ./auto-upgrade.nix
-    ./btrfs.nix
     ./locale.nix
     ./networking.nix
     ./nix.nix
     ./openssh.nix
     ./passwords.nix
-    ./persistance.nix
     ./sops.nix
     ./security.nix
     ./zram.nix
@@ -56,11 +54,6 @@ in
   ];
 
   programs.nix-ld.enable = true;
-
-  environment.persistence."/persist".files = [
-    "/etc/ssh/ssh_host_ed25519_key"
-    "/etc/ssh/ssh_host_ed25519_key.pub" # Maybe copy from repo?
-  ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "23.05";

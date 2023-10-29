@@ -1,4 +1,4 @@
-{ lib, config, pkgs, persistenceDirectory, ... }: {
+{ config, pkgs, lib, persistenceDirectory, hasPersistence, ... }: {
   programs.nushell = {
     enable = true;
 
@@ -93,12 +93,10 @@
   programs.zoxide = lib.mkIf config.programs.zoxide.enable {
     enableNushellIntegration = true;
   };
-
-  home.persistence."${persistenceDirectory}" = {
-    files = [
+} // lib.optionalAttrs (hasPersistence) {
+  home.persistence."${persistenceDirectory}".files = [
       ".config/nushell/history.txt"
-    ];
-  };
+  ];
 }
 
 

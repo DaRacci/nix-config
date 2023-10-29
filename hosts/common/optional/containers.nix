@@ -1,4 +1,4 @@
-{ config, pkgs, ... }: with pkgs.lib; {
+{ config, pkgs, lib, hasPersistence, ... }: with pkgs.lib; {
   environment.systemPackages = with pkgs; [
     podman-tui
     podman-compose
@@ -40,7 +40,7 @@
       };
     };
   };
-
+} // lib.optionalAttrs (hasPersistence) {
   environment.persistence."/persist" = let docker = "/var/lib/docker"; in {
     directories = [
       "${docker}/overlay2"

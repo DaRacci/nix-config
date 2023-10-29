@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ config, pkgs, lib, hasPersistence, ... }: {
   nixpkgs.overlays =
     let
       owner = "codifryed";
@@ -27,7 +27,7 @@
       coolercontrold.wantedBy = [ "multi-user.target" ];
     };
   };
-
+} // lib.optionalAttrs (hasPersistence) {
   environment.persistence."/persist".directories = [
     "/etc/coolercontrol"
   ];

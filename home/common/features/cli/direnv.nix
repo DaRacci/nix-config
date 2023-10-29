@@ -1,4 +1,4 @@
-{ config, lib, persistenceDirectory, ... }: {
+{ config, lib, persistenceDirectory, hasPersistence, ... }: {
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;
@@ -12,7 +12,7 @@
   programs.git = lib.mkIf config.programs.git.enable {
     ignores = [ ".direnv" ];
   };
-
+} // lib.optionalAttrs (hasPersistence) {
   home.persistence."${persistenceDirectory}".directories = [
     ".local/share/direnv"
   ];

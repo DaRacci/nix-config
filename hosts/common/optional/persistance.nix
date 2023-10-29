@@ -4,9 +4,7 @@
 #
 # It works even if / is tmpfs, btrfs snapshot, or even not ephemeral at all.
 { lib, flake, config, ... }: {
-  imports = [
-    flake.inputs.impermanence.nixosModules.impermanence
-  ];
+  imports = [ flake.inputs.impermanence.nixosModules.impermanence ];
 
   environment.persistence = {
     "/persist" = {
