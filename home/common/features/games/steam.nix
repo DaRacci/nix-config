@@ -1,4 +1,4 @@
-{ lib, pkgs, config, persistenceDirectory, ... }: {
+{ config, pkgs, lib, persistenceDirectory, hasPersistence, ... }: {
   home.file.".config/steam-flags-blocklist.conf".text = ''
     --disable-gpu
     --disable-gpu-compositing
@@ -87,7 +87,7 @@
     '';
 
   home.packages = with pkgs; [ steamtinkerlaunch ];
-
+} // lib.optionalAttrs (hasPersistence) {
   home.persistence."${persistenceDirectory}".directories = [
     ".local/share/Steam"
     ".config/steamtinkerlaunch"

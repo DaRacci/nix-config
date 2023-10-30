@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ pkgs, lib, persistenceDirectory, hasPersistence, ... }: {
   imports = [ ../common ];
 
   home.packages = with pkgs; [
@@ -232,20 +232,6 @@
     };
   };
 
-  home.persistence."/persist/home/racci" = {
-    directories = [
-      ".config/evolution"
-      ".config/geary"
-      ".config/goa-1.0"
-      ".local/share/geary" #? Whats stored here?
-      ".local/share/gnome-control-center-goa-helper" # ? Whats stored here?
-      ".local/share/Trash" #? Do i really need this?
-      # Gnome Extensions and settings
-      ".cache/clipboard-indicator@tudmotu.com" # Clipboard history
-      ".config/gsconnect" # Gsconnect
-    ];
-  };
-
   xdg.mimeApps.associations.added = {
     "x-scheme-handler/sms" = [ "org.gnome.Shell.Extensions.GSConnect.desktop;" ];
     "x-scheme-handler/tel" = [ "org.gnome.Shell.Extensions.GSConnect.desktop;" ];
@@ -294,4 +280,18 @@
       </configuration>
     </monitors>
   '';
+} // lib.optionalAttrs (hasPersistence) {
+    home.persistence."${persistenceDirectory}" = {
+    directories = [
+      ".config/evolution"
+      ".config/geary"
+      ".config/goa-1.0"
+      ".local/share/geary" #? Whats stored here?
+      ".local/share/gnome-control-center-goa-helper" # ? Whats stored here?
+      ".local/share/Trash" #? Do i really need this?
+      # Gnome Extensions and settings
+      ".cache/clipboard-indicator@tudmotu.com" # Clipboard history
+      ".config/gsconnect" # Gsconnect
+    ];
+  };
 }

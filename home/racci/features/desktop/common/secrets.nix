@@ -1,9 +1,9 @@
-{ pkgs, ...}: {
+{ pkgs, lib, persistenceDirectory, hasPersistence, ...}: {
   home.packages = with pkgs; [
     gnome-secrets
   ];
-
-  home.persistence."/persist/home/racci" = {
+} // lib.optionalAttrs (hasPersistence) {
+  home.persistence."${persistenceDirectory}" = {
     directories = [
       ".config/1Password/settings"
     ];

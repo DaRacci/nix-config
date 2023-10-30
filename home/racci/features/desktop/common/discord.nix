@@ -1,5 +1,4 @@
-{ pkgs, ... }: {
-
+{ pkgs, lib, persistenceDirectory, hasPersistence, ... }: {
   home.packages = with pkgs; [
     (discord.overrideAttrs (oldAttrs: {
       desktopItem = (oldAttrs.desktopItem // {
@@ -7,8 +6,8 @@
       });
     }))
   ];
-
-  home.persistence = {
-    "/persist/home/racci".directories = [ ".config/discord" ];
-  };
+} // lib.optionalAttrs (hasPersistence) {
+  home.persistence."${persistenceDirectory}".directories = [
+    ".config/discord"
+  ];
 }

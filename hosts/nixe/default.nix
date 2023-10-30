@@ -3,7 +3,7 @@
   imports = [
     ./hardware.nix
 
-    ../common/optional/ephemeral-tmpfs.nix
+    # ../common/optional/ephemeral-tmpfs.nix
     ../common/optional/containers.nix
     ../common/optional/virtualisation.nix
 
@@ -14,6 +14,9 @@
     ../common/optional/quietboot.nix
     ../common/optional/gaming.nix
     # ../../containers
+    
+    ../common/optional/btrfs.nix
+    ../common/optional/persistence.nix
   ];
 
   services.teamviewer.enable = true;

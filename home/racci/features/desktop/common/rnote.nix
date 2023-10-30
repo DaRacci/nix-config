@@ -1,7 +1,7 @@
-{ pkgs, ... }: {
+{ pkgs, lib, persistenceDirectory, hasPersistence, ... }: {
   home.packages = with pkgs; [ rnote ];
-
-  home.persistence."/persist/home/racci".directories = [
+} // lib.optionalAttrs (hasPersistence) {
+  home.persistence."${persistenceDirectory}".directories = [
     # TODO
   ];
 }

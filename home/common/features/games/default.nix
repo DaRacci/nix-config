@@ -1,4 +1,4 @@
-{ pkgs, persistenceDirectory, ... }: {
+{ pkgs, lib, persistenceDirectory, hasPersistence, ... }: {
   imports = [
     ./lutris.nix
     ./mangohud.nix
@@ -12,5 +12,6 @@
   ];
 
   home.packages = with pkgs.unstable; [ dualsensectl trigger-control ];
+} // lib.optionalAttrs (hasPersistence) {
   home.persistence."${persistenceDirectory}".directories = [ "Games" ];
 }

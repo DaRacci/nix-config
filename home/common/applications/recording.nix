@@ -1,4 +1,4 @@
-{ pkgs, persistenceDirectory, ... }: {
+{ pkgs, lib, persistenceDirectory, hasPersistence, ... }: {
   programs.obs-studio = {
     enable = true;
     package = pkgs.obs-studio;
@@ -12,7 +12,7 @@
       advanced-scene-switcher
     ];
   };
-
+} // lib.optionalAttrs (hasPersistence) {
   home.persistence."${persistenceDirectory}" = let dir = ".config/obs-studio"; in {
     directories = [ "${dir}/basic" ];
     files = [ "${dir}/global.ini" ];

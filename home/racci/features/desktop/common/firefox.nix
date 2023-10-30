@@ -1,4 +1,4 @@
-{ pkgs, config, ... }: {
+{ config, pkgs, lib, persistenceDirectory, hasPersistence, ... }: {
   programs.firefox = {
     enable = true;
     package = pkgs.unstable.wrapFirefox pkgs.unstable.firefox-beta-unwrapped {
@@ -106,40 +106,37 @@
     };
   };
 
-  home = {
-    sessionVariables.BROWSER = "firefox";
-    persistence."/persist/home/racci" = {
-      # For information about what the folders are for, see:
-      # https://support.mozilla.org/en-US/kb/profiles-where-firefox-stores-user-data
-
-      directories = [
-        ".mozilla/firefox/racci/sessionstore-backups" # Session restore
-        ".mozilla/firefox/racci/bookmarkbackups" # Bookmarks
-      ];
-      files = let dir = ".mozilla/firefox/racci"; in [
-        # Bookmarks
-        ".mozilla/firefox/racci/places.sqlite" # Bookmarks // TODO -> Mozilla Sync
-        ".mozilla/firefox/racci/favicons.sqlite" # Favicons for bookmarks // TODO -> Needed?
-        # Site Specific
-        ".mozilla/firefox/racci/permissions.sqlite" # Permissions
-        ".mozilla/firefox/racci/content-prefs.sqlite" # Permissions
-        ".mozilla/firefox/racci/cookies.sqlite" # Offline Storage
-        ".mozilla/firefox/racci/webappsstore.sqlite" # Offline Storage
-        ".mozilla/firefox/racci/chromeappstore.sqlite" # Offline Storage
-        # Persistent Information
-        ".mozilla/firefox/racci/sessionstore.jsonlz4" # Session restore
-        "${dir}/signedInUser.json" # Mozilla Sync
-        "${dir}/containers.json" # Containers
-
-      ];
-    };
-  };
-
+  home.sessionVariables.BROWSER = "firefox";
 
   xdg.mimeApps.defaultApplications = {
     "text/html" = [ "firefox.desktop" ];
     "text/xml" = [ "firefox.desktop" ];
     "x-scheme-handler/http" = [ "firefox.desktop" ];
     "x-scheme-handler/https" = [ "firefox.desktop" ];
+  };
+} // lib.optionalAttrs (hasPersistence) {
+  home.persistence."${persistenceDirectory}" = {
+    # For information about what the folders are for, see:
+    # https://support.mozilla.org/en-US/kb/profiles-where-firefox-stores-user-data
+
+    directories = [
+      ".mozilla/firefox/racci/sessionstore-backups" # Session restore
+      ".mozilla/firefox/racci/bookmarkbackups" # Bookmarks
+    ];
+    files = let dir = ".mozilla/firefox/racci"; in [
+      # Bookmarks
+      ".mozilla/firefox/racci/places.sqlite" # Bookmarks // TODO -> Mozilla Sync
+      ".mozilla/firefox/racci/favicons.sqlite" # Favicons for bookmarks // TODO -> Needed?
+      # Site Specific
+      ".mozilla/firefox/racci/permissions.sqlite" # Permissions
+      ".mozilla/firefox/racci/content-prefs.sqlite" # Permissions
+      ".mozilla/firefox/racci/cookies.sqlite" # Offline Storage
+      ".mozilla/firefox/racci/webappsstore.sqlite" # Offline Storage
+      ".mozilla/firefox/racci/chromeappstore.sqlite" # Offline Storage
+      # Persistent Information
+      ".mozilla/firefox/racci/sessionstore.jsonlz4" # Session restore
+      "${dir}/signedInUser.json" # Mozilla Sync
+      "${dir}/containers.json" # Containers
+    ];
   };
 }
