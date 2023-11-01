@@ -1,11 +1,12 @@
-{ lib, config, ... }: let inherit (config.networking) hostName; in {
+{ config, ... }:
+let inherit (config.networking) hostName; in {
   imports = [ ./btrfs.nix ./persistence.nix ];
 
   fileSystems = {
     "/" = {
       device = "none";
       fsType = "tmpfs";
-      options = [ "defaults" "size=8G" "mode=755" ];
+      options = [ "defaults" "size=16G" "mode=755" ];
     };
 
     "/nix" = {

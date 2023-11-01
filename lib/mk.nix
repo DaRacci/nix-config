@@ -48,17 +48,15 @@
       ] ++ (
         if persistenceType == "none" then [ ]
         else if persistenceType == "tmpfs"
-        then ../hosts/optional/ephemeral-tmpfs.nix
+        then [ ../hosts/common/optional/ephemeral-tmpfs.nix ]
         else if persistenceType == "btrfs"
-        then ../hosts/optional/ephemeral-btrfs.nix
+        then [ ../hosts/common/optional/ephemeral-btrfs.nix ]
         else throw "Unknown persistence type: ${persistenceType}"
       ) ++
       (builtins.map
         (username: { flake, config, pkgs, ... }:
-          let inherit (flake) inputs; homeDirectory = if pkgs.stdenv.isDarwin then "/Users/${username}" else "/home/${username}"; persistenceDirectory = "/persist${homeDirectory}"; in {
-            imports = [
-              inputs.home-manager.nixosModule
-            ] ++ optional (persistenceType != "none") inputs.impermanence.nixosModules.home-manager.impermanence;
+          let inherit (flake) inputs;homeDirectory = if pkgs.stdenv.isDarwin then "/Users/${username}" else "/home/${username}"; persistenceDirectory = "/persist${homeDirectory}"; in {
+            imports = [ inputs.home-manager.nixosModule ];
 
             users.users.${username} = {
               isNormalUser = mkDefault true;

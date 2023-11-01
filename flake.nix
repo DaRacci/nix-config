@@ -62,9 +62,11 @@
     {
       nixosConfigurations = builtins.mapAttrs mkSystem {
         nixe = {
+          persistenceType = "tmpfs";
           users = [ "racci" ];
         };
         surnix = {
+          persistenceType = "btrfs";
           users = [ "racci" ];
         };
         winix = {

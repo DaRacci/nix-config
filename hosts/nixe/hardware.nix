@@ -40,30 +40,30 @@
   };
 
   fileSystems = {
-    "/" = {
-      device = "none";
-      fsType = "tmpfs";
-      options = [ "defaults" "size=16G" "mode=755" ];
-    };
+    # "/" = {
+    #   device = "none";
+    #   fsType = "tmpfs";
+    #   options = [ "defaults" "size=16G" "mode=755" ];
+    # };
 
     "/boot" = {
       device = "/dev/disk/by-partlabel/ESP";
       fsType = "vfat";
     };
 
-    "/persist" = {
-      device = "/dev/disk/by-partlabel/Nix";
-      fsType = "btrfs";
-      options = [ "subvol=@persist" ];
-      neededForBoot = true;
-    };
+    # "/persist" = {
+    #   device = "/dev/disk/by-partlabel/Nix";
+    #   fsType = "btrfs";
+    #   options = [ "subvol=@persist" ];
+    #   neededForBoot = true;
+    # };
 
-    "/nix" = {
-      device = "dev/disk/by-partlabel/Nix";
-      fsType = "btrfs";
-      options = [ "subvol=@store" "noatime" ];
-      neededForBoot = true;
-    };
+    # "/nix" = {
+    #   device = "dev/disk/by-partlabel/Nix";
+    #   fsType = "btrfs";
+    #   options = [ "subvol=@store" "noatime" ];
+    #   neededForBoot = true;
+    # };
 
     "/mnt/mega" = {
       device = "/dev/disk/by-partlabel/mega-hdd";

@@ -3,6 +3,10 @@
     overlays = builtins.attrValues outputs.overlays;
     config.allowUnfree = true;
     config.allowUnfreePredicate = _: true;
+
+    config.permittedInsecurePackages = [
+      "electron-24.8.6"
+    ];
   };
 
   nix = {
