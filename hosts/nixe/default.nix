@@ -14,9 +14,10 @@
     ../common/optional/quietboot.nix
     ../common/optional/gaming.nix
     # ../../containers
-    
+
     ../common/optional/btrfs.nix
     ../common/optional/persistence.nix
+    ../common/optional/secureboot.nix
   ];
 
   services.teamviewer.enable = true;

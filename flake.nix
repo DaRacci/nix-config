@@ -24,6 +24,7 @@
     sops-nix = { url = "github:Mic92/sops-nix"; inputs.nixpkgs.follows = "nixpkgs"; };
     impermanence = { url = "github:nix-community/impermanence"; };
     nix-colours = { url = "github:misterio77/nix-colors"; };
+    lanzaboote = { url = "github:nix-community/lanzaboote/v0.3.0"; inputs.nixpkgs.follows = "nixpkgs"; };
 
     # Containers & Stuff
     arion = { url = "github:hercules-ci/arion"; };
