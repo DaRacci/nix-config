@@ -1,6 +1,6 @@
 { flake, ... }:
 let
-  inherit (flake) inputs outputs;
+  inherit (flake) outputs;
 in
 {
   imports = [
