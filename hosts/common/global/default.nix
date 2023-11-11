@@ -4,6 +4,7 @@ let
 in
 {
   imports = [
+    ./appimage.nix
     ./auto-upgrade.nix
     ./locale.nix
     ./networking.nix
