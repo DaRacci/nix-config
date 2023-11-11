@@ -15,6 +15,14 @@
       steam = steamPrev.steam.overrideAttrs (oldAttrs: {
         postInstall = builtins.replaceStrings [ "'s,/usr/bin/steam,steam,g'" ] [ "'s,/usr/bin/steam,steam -bigpicture -noverifyfiles,g'" ] oldAttrs.postInstall;
       });
+      steam-runtime = steamPrev.steam-runtime.overrideAttrs (oldAttrs: rec {
+        version = "0.20230801.56012";
+        # src.sha256 = "sha256-34EL8Rv3WfMv6cg+lKqmOFrP1RTnsElbv6t+a30S4wY=";
+        src = inputs.nixpkgs-unstable.lib.fetchUrl {
+          url = "https://repo.steampowered.com/steamrt-images-scout/snapshots/${version}/steam-runtime.tar.xz";
+          sha256 = "sha256-34EL8Rv3WfMv6cg+lKqmOFrP1RTnsElbv6t+a30S4wY=";
+        };
+      });
     });
 
     steamtinkerlaunch = prev.steamtinkerlaunch.overrideAttrs (oldAttrs: {
@@ -23,6 +31,10 @@
         substituteInPlace steamtinkerlaunch --replace 'YAD=yad' 'YAD=${final.yad}'
       '';
     });
+
+    lib = prev.lib // {
+      recursiveMergeAttrs = builtins.foldl' prev.lib.recursiveUpdate { };
+    };
   };
 
   # When applied, the unstable nixpkgs set (declared in the flake inputs) will

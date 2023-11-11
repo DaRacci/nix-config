@@ -65,24 +65,16 @@
     #   neededForBoot = true;
     # };
 
-    "/mnt/mega" = {
-      device = "/dev/disk/by-partlabel/mega-hdd";
-      fsType = "btrfs";
-      options = [ "nofail" ];
-    };
+    # "/mnt/mega" = {
+    #   device = "/dev/disk/by-partlabel/mega-hdd";
+    #   fsType = "btrfs";
+    #   options = [ "nofail" ];
+    # };
 
-    "/mnt/btrfs-pool" = {
-      device = "/dev/disk/by-label/btrfs-pool";
-      fsType = "btrfs";
-      options = [ "nofail" ];
-    };
-  };
-
-  hardware = {
-    #? TODO :: Globalise
-    # keyboard.qmk.enable = true;
-
-    #? TODO :: Globalise
-    bluetooth.enable = true;
+    # "/mnt/btrfs-pool" = {
+    #   device = "/dev/disk/by-label/btrfs-pool";
+    #   fsType = "btrfs";
+    #   options = [ "nofail" ];
+    # };
   };
 }

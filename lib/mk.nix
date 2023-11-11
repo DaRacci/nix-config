@@ -62,7 +62,7 @@
               isNormalUser = mkDefault true;
               shell = pkgs.nushell;
               # TODO :: Not fucking this shit
-              extraGroups = [ "video" "audio" "wheel" "network" "i2c" "docker" "podman" "git" "libvirtd" ];
+              extraGroups = [ "video" "audio" "wheel" "network" "i2c" "docker" "podman" "git" "libvirtd" "plugdev" ];
 
               passwordFile = config.sops.secrets."${username}-passwd".path;
               openssh.authorizedKeys.keys = [ (builtins.readFile ../home/${username}/id_ed25519.pub) ];
@@ -108,7 +108,7 @@
                 imports = [
                   ../home/common/global
                   configuration
-                ];
+                ] ++ optional (persistenceType != "none") inputs.impermanence.nixosModules.home-manager.impermanence;
               });
           })
         users);

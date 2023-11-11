@@ -1,7 +1,10 @@
-{ pkgs, lib, persistenceDirectory, hasPersistence, ... }: {
-  home.packages = with pkgs; [ rnote ];
-} // lib.optionalAttrs (hasPersistence) {
-  home.persistence."${persistenceDirectory}".directories = [
-    # TODO
-  ];
-}
+{ pkgs, lib, persistenceDirectory, hasPersistence, ... }: builtins.foldl' lib.recursiveUpdate { } [
+  {
+    home.packages = with pkgs; [ rnote ];
+  }
+  (lib.optionalAttrs (hasPersistence) {
+    home.persistence."${persistenceDirectory}".directories = [
+      # TODO
+    ];
+  })
+]
