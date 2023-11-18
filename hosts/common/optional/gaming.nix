@@ -22,7 +22,7 @@
     package = pkgs.unstable.steam;
 
     remotePlay.openFirewall = true;
-    gamescopeSession.enable = false;
+    gamescopeSession.enable = true;
   };
 
   services.udev.extraRules = ''

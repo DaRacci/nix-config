@@ -1,5 +1,6 @@
 { config, ... }:
-let inherit (config.networking) hostName; in {
+# let inherit (config.networking) hostName; in {
+let hostName = "Nix"; in {
   imports = [ ./btrfs.nix ./persistence.nix ];
 
   fileSystems = {
@@ -12,7 +13,7 @@ let inherit (config.networking) hostName; in {
     "/nix" = {
       device = "/dev/disk/by-partlabel/${hostName}";
       fsType = "btrfs";
-      options = [ "subvol=@nix" "noatime" "compress=zstd" ];
+      options = [ "subvol=@store" "noatime" "compress=zstd" ];
       neededForBoot = true;
     };
 

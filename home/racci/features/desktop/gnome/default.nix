@@ -243,6 +243,61 @@
         <configuration>
           <logicalmonitor>
             <x>0</x>
+            <y>1257</y>
+            <scale>1</scale>
+            <monitor>
+              <monitorspec>
+                <connector>HDMI-3</connector>
+                <vendor>AOC</vendor>
+                <product>27G1G4</product>
+                <serial>0x0002071c</serial>
+              </monitorspec>
+              <mode>
+                <width>1920</width>
+                <height>1080</height>
+                <rate>119.982</rate>
+              </mode>
+            </monitor>
+          </logicalmonitor>
+          <logicalmonitor>
+            <x>2189</x>
+            <y>0</y>
+            <scale>1</scale>
+            <monitor>
+              <monitorspec>
+                <connector>HDMI-2</connector>
+                <vendor>GSM</vendor>
+                <product>LG FULL HD</product>
+                <serial>0x01010101</serial>
+              </monitorspec>
+              <mode>
+                <width>1920</width>
+                <height>1080</height>
+                <rate>74.973</rate>
+              </mode>
+            </monitor>
+          </logicalmonitor>
+          <logicalmonitor>
+            <x>1920</x>
+            <y>1080</y>
+            <scale>1</scale>
+            <primary>yes</primary>
+            <monitor>
+              <monitorspec>
+                <product>Odyssey G50A</product>
+                <serial>H4ZRB04080</serial>
+              </monitorspec>
+              <mode>
+                <width>2560</width>
+                <height>1440</height>
+                <rate>164.999</rate>
+              </mode>
+            </monitor>
+          </logicalmonitor>
+        </configuration>
+        <configuration>
+          <logicalmonitor>
+            <x>0</x>
             <y>191</y>
             <scale>1</scale>
             <monitor>

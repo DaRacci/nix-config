@@ -10,10 +10,11 @@
     ../common/optional/backlight.nix
     ../common/optional/openrgb.nix
     ../common/optional/cooler_control.nix
+    ../common/optional/secureboot.nix
   ];
 
   boot = {
-    kernelPackages = pkgs.unstable.linuxPackages_latest;
+    kernelPackages = pkgs.linuxPackages_6_5;
 
     initrd = {
       # TODO :: Needed? ahci, sd_mod usbhid usb_storage
@@ -22,10 +23,6 @@
 
     loader = {
       efi.canTouchEfiVariables = true;
-      systemd-boot = {
-        enable = true;
-        consoleMode = "max"; # TODO : Whats this do?
-      };
 
       #? TODO :: Globalise
       #? TODO :: Custom Windows Entry

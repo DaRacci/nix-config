@@ -1,4 +1,4 @@
-{
+{ pkgs, lib, ... }: {
   imports = [
     ./features/desktop/gnome
 
@@ -7,6 +7,21 @@
     ./features/desktop/development
     ../common/applications
   ];
+
+  # home.sessionVariables = {
+  #   NIX_LD_LIBRARY_PATH = with pkgs; lib.makeLibraryPath [
+  #     stdenv.cc.cc
+  #     glibc
+  #     glib
+  #     libelf
+  #   ];
+
+  #   NIX_LD = builtins.readFile "${pkgs.stdenv.cc}/nix-support/dynamic-linker";
+  # };
+
+  purposes = { };
+
+  home.packages = with pkgs.unstable; [ immersed-vr ];
 
   programs.autorandr = {
     enable = true;

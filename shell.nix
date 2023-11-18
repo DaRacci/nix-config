@@ -10,6 +10,10 @@
       home-manager
       git
 
+      # For Secure Boot Debugging
+      sbctl
+
+      # For sops-nix
       sops
       ssh-to-age
       age
