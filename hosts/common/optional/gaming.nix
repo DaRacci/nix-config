@@ -28,4 +28,6 @@
   services.udev.extraRules = ''
     SUBSYSTEM=="sound", ACTION=="change", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ce6", ENV{SOUND_DESCRIPTION}="Wireless Controller"
   '';
+
+  networking.firewall.allowedTCPPorts = [ 24070 ];
 }

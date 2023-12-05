@@ -8,6 +8,8 @@
     ];
   };
 
-  # TODO :: Use location service to update this automatically.
-  time.timeZone = "Australia/Sydney";
+  # # TODO :: Use location service to update this automatically.
+  # time.timeZone = "Australia/Sydney";
+
+  services.localtimed.enable = true;
 }
