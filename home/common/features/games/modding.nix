@@ -1,12 +1,10 @@
 # Provides a general area for modding packages,
 # and their persistent directories.
-{ pkgs, lib, persistenceDirectory, hasPersistence, ... }: builtins.foldl' lib.recursiveUpdate { } [
-  {
-    home.packages = with pkgs; [ ficsit-cli ];
-  }
-  (lib.optionalAttrs (hasPersistence) {
-    home.persistence."${persistenceDirectory}".directories = [
-      ".local/share/ficsit"
-    ];
-  })
-]
+# TODO - Only install if satisfactory is installed on steam
+{ pkgs, ... }: {
+  home.packages = with pkgs; [ ficsit-cli ];
+
+  user.persistence.directories = [
+    ".local/share/ficsit"
+  ];
+}

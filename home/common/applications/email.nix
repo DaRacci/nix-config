@@ -1,24 +1,21 @@
-{ pkgs, lib, persistenceDirectory, hasPersistence, ... }: builtins.foldl' lib.recursiveUpdate { } [
-  {
-    home.packages = with pkgs; [ protonmail-bridge thunderbird ];
+{ pkgs, ... }: {
+  home.packages = with pkgs; [ protonmail-bridge thunderbird ];
 
-    systemd.user.services.protonmail-bridge = {
-      Unit = {
-        Description = "Protonmail Bridge";
-        After = [ "network.target" ];
-      };
-
-      Service = {
-        Restart = "always";
-        ExecStart = "${pkgs.protonmail-bridge}/bin/protonmail-bridge --no-window --noninteractive --log-level info";
-      };
-
-      Install = {
-        WantedBy = [ "default.target" ];
-      };
+  systemd.user.services.protonmail-bridge = {
+    Unit = {
+      Description = "Protonmail Bridge";
+      After = [ "network.target" ];
     };
-  }
-  (lib.optionalAttrs (hasPersistence) {
-    home.persistence."${persistenceDirectory}".directories = [ ".local/share/protonmail" ];
-  })
-]
+
+    Service = {
+      Restart = "always";
+      ExecStart = "${pkgs.protonmail-bridge}/bin/protonmail-bridge --no-window --noninteractive --log-level info";
+    };
+
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+  };
+
+  user.persistence.directories = [ ".local/share/protonmail" ];
+}

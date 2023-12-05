@@ -394,11 +394,8 @@ in
       win-spice
       win-qemu
     ]);
-
-    persistence."/persist" = {
-      directories = [
-        { directory = "/var/lib/libvirt/qemu"; user = "qemu-libvirtd"; group = "qemu-libvirtd"; mode = "u=rwx,g=rx,o=rx"; }
-      ];
-    };
   };
+  host.persistence.directories = [
+    { directory = "/var/lib/libvirt/qemu"; user = "qemu-libvirtd"; group = "qemu-libvirtd"; mode = "u=rwx,g=rx,o=rx"; }
+  ];
 }

@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }: {
+{ pkgs, ... }: {
   imports = [
     ./features/desktop/gnome
 
@@ -8,20 +8,66 @@
     ../common/applications
   ];
 
-  # home.sessionVariables = {
-  #   NIX_LD_LIBRARY_PATH = with pkgs; lib.makeLibraryPath [
-  #     stdenv.cc.cc
-  #     glibc
-  #     glib
-  #     libelf
+  home.packages = with pkgs.unstable; [ trayscale ];
+  user.persistence.enable = true;
+
+  # display = {
+  #   enable = true;
+
+  #   monitors = [
+  #     {
+  #       spec = {
+  #         vendor = "SAM";
+  #         product = "Odyssey-G50A";
+  #         serial = "H4ZRB04080";
+  #       };
+
+  #       mode = {
+  #         width = 2560;
+  #         height = 1440;
+  #         rate = 164.999;
+  #       };
+
+  #       position.primary = true;
+  #     }
+  #     {
+  #       spec = {
+  #         vendor = "LG";
+  #         product = "LG FULL HD";
+  #         serial = "0x01010101";
+  #       };
+
+  #       mode = {
+  #         width = 1920;
+  #         height = 1080;
+  #         rate = 74.973;
+  #       };
+
+  #       position = {
+  #         direction = "above";
+  #         target = "Odyssey-G50A";
+  #       };
+  #     }
+  #     {
+  #       spec = {
+  #         vendor = "AOC";
+  #         product = "27G1G4";
+  #         serial = "0x0002071c";
+  #       };
+
+  #       mode = {
+  #         width = 1920;
+  #         height = 1080;
+  #         rate = 119.879;
+  #       };
+
+  #       position = {
+  #         direction = "left-of";
+  #         target = "Odyssey-G50A";
+  #       };
+  #     }
   #   ];
-
-  #   NIX_LD = builtins.readFile "${pkgs.stdenv.cc}/nix-support/dynamic-linker";
   # };
-
-  purposes = { };
-
-  home.packages = with pkgs.unstable; [ immersed-vr ];
 
   programs.autorandr = {
     enable = true;

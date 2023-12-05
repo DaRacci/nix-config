@@ -1,4 +1,4 @@
-{ config, flake, options, lib, hasPersistence, ... }:
+{ config, flake, ... }:
 let
   isEd25519 = k: k.type == "ed25519";
   getKeyPath = k: k.path;
@@ -10,8 +10,8 @@ in
   sops = {
     age.sshKeyPaths = map getKeyPath keys;
   };
-} // lib.optionalAttrs (hasPersistence) {
-  environment.persistence."/persist".files = [
+
+  host.persistence.files = [
     "/etc/ssh/ssh_host_ed25519_key"
     "/etc/ssh/ssh_host_ed25519_key.pub" # Maybe copy from repo?
   ];

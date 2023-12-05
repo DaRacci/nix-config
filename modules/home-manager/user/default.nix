@@ -1,4 +1,4 @@
-{ flake, config, lib, ... }: with lib; let cfg = config.user; in {
+{ config, lib, ... }: with lib; let cfg = config.user; in {
   imports = [
     ./persistence.nix
   ];

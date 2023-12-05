@@ -1,6 +1,4 @@
-{ config, lib, pkgs, persistenceDirectory, hasPersistence, ... }:
-
-{
+{ pkgs, ... }: {
   programs.vscode = {
     enable = true;
     package = pkgs.unstable.vscode;
@@ -89,8 +87,8 @@
       "redhat.telemetry.enabled" = false;
     };
   };
-} // lib.optionalAttrs (hasPersistence) {
-  home.persistence."${persistenceDirectory}".directories = [
+
+  user.persistence.directories = [
     ".config/Code/User/"
   ];
 }

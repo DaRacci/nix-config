@@ -1,22 +1,19 @@
-{ config, lib, persistenceDirectory, hasPersistence, ... }: builtins.foldl' lib.recursiveUpdate { } [
-  {
-    programs.direnv = {
-      enable = true;
-      nix-direnv.enable = true;
+{ config, lib, ... }: {
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
 
-      enableBashIntegration = config.programs.bash.enable;
-      enableFishIntegration = config.programs.fish.enable;
-      enableNushellIntegration = config.programs.nushell.enable;
-      enableZshIntegration = config.programs.zsh.enable;
-    };
+    enableBashIntegration = config.programs.bash.enable;
+    enableFishIntegration = config.programs.fish.enable;
+    enableNushellIntegration = config.programs.nushell.enable;
+    enableZshIntegration = config.programs.zsh.enable;
+  };
 
-    programs.git = lib.mkIf config.programs.git.enable {
-      ignores = [ ".direnv" ];
-    };
-  }
-  (lib.optionalAttrs (hasPersistence) {
-    home.persistence."${persistenceDirectory}".directories = [
-      ".local/share/direnv"
-    ];
-  })
-]
+  programs.git = lib.mkIf config.programs.git.enable {
+    ignores = [ ".direnv" ];
+  };
+
+  user.persistence.directories = [
+    ".local/share/direnv"
+  ];
+}

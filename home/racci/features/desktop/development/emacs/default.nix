@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, persistenceDirectory, ... }: {
+{ config, pkgs, inputs, ... }: {
   imports = [ inputs.nix-doom-emacs.hmModule ];
 
   programs.doom-emacs = {
@@ -46,7 +46,7 @@
 
   services.emacs.enable = true;
 
-  home.persistence.${persistenceDirectory} = {
+  user.persistence = {
     files = [
       # Undo/Redo History
       ".local/share/doom/transient/history"

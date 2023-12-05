@@ -45,14 +45,7 @@
           networking.hostName = hostName;
           passthru.enable = false; # Why does build break without this?
         })
-      ] ++ (
-        if persistenceType == "none" then [ ]
-        else if persistenceType == "tmpfs"
-        then [ ../hosts/common/optional/ephemeral-tmpfs.nix ]
-        else if persistenceType == "btrfs"
-        then [ ../hosts/common/optional/ephemeral-btrfs.nix ]
-        else throw "Unknown persistence type: ${persistenceType}"
-      ) ++
+      ] ++
       (builtins.map
         (username: { flake, config, pkgs, ... }:
           let inherit (flake) inputs;homeDirectory = if pkgs.stdenv.isDarwin then "/Users/${username}" else "/home/${username}"; persistenceDirectory = "/persist${homeDirectory}"; in {
@@ -80,42 +73,23 @@
               inherit persistenceDirectory;
             };
 
-            home-manager.users."${username}" = ({ pkgs, ... }:
-              let
-                configuration = ../home/${username}/${hostName}.nix;
-                persistenceDirectories = [
-                  "Documents"
-                  "Downloads"
-                  "Pictures"
-                  "Videos"
-                  "Music"
-                  "Templates"
-                  ".local/share/keyrings"
-                ];
-              in
-              {
-                home = {
-                  inherit username homeDirectory;
-                  stateVersion = "23.05";
-                  sessionPath = [ "$HOME/.local/bin" ];
-                } // optionalAttrs (persistenceType != "none") {
-                  persistence."${persistenceDirectory}" = {
-                    allowOther = true;
-                    directories = persistenceDirectories;
-                  };
-                };
+            home-manager.users."${username}" = ({ pkgs, ... }: {
+              home = {
+                inherit username homeDirectory;
+                stateVersion = "23.05";
+                sessionPath = [ "$HOME/.local/bin" ];
+              };
 
-                imports = [
-                  ../home/common/global
-                  configuration
-                ] ++ optional (persistenceType != "none") inputs.impermanence.nixosModules.home-manager.impermanence;
-              });
+              imports = [
+                ../home/common/global
+                ../home/${username}/${hostName}.nix
+              ];
+            });
           })
         users);
       specialArgs = {
         flake = self;
         inherit (self) inputs outputs;
-        hasPersistence = persistenceType != "none";
       };
     };
 

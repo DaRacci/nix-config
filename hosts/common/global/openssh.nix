@@ -1,4 +1,4 @@
-{ outputs, lib, config, hasPersistence, ... }:
+{ outputs, config, lib, ... }:
 
 let
   inherit (config.networking) hostName;
@@ -7,7 +7,7 @@ let
 
   # Sops needs acess to the keys before the persist dirs are even mounted; so
   # just persisting the keys won't work, we must point at /persist
-  inherit (import ../../../lib/persistence.nix { inherit lib hasPersistence; }) persistable;
+  inherit (import ../../../lib/persistence.nix { inherit lib; inherit (config) host; }) persistable;
 in
 {
   services.openssh = {

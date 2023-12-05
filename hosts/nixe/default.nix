@@ -16,6 +16,20 @@
   services.ratbagd.enable = true;
   programs.nix-ld.enable = true;
 
+  host = {
+    drive.format = "btrfs";
+
+    persistence = {
+      enable = true;
+      type = "tmpfs";
+    };
+  };
+
+  services.tailscale = {
+    enable = true;
+    useRoutingFeatures = "client";
+  };
+
   networking = {
     firewall = {
       allowedUDPPorts = [ 9944 8082 9942 9943 ];

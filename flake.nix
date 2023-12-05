@@ -13,8 +13,8 @@
     nur = { url = "github:nix-community/NUR"; };
 
     # Utils
-    systems = { url = "github:nix-systems/X86_64-linux"; }; # TODO - Add Darwin
-    flake-utils = { url = "github:numtide/flake-utils"; inputs.systems.follows = "systems"; };
+    # systems = { url = "github:nix-systems/X86_64-linux"; }; # TODO - Add Darwin
+    flake-utils = { url = "github:numtide/flake-utils"; };
     flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
 
     # Base Modules
@@ -57,16 +57,16 @@
   outputs = { self, nixpkgs, flake-utils, systems, getchoo, nixos-wsl, ... }@inputs:
     let
       inherit (self) outputs;
-      inherit (import ./lib/mk.nix inputs) mkSystem mkHome;
+      inherit (import ./lib/mkV2.nix inputs) mkHomeManagerConfiguration mkSystemConfiguration;
     in
     {
-      nixosConfigurations = builtins.mapAttrs mkSystem {
+      nixosConfigurations = builtins.mapAttrs mkSystemConfiguration {
         nixe = {
-          persistenceType = "tmpfs";
-          users = [ "racci" ];
+          users = {
+            racci = { };
+          };
         };
         surnix = {
-          persistenceType = "btrfs";
           users = [ "racci" ];
         };
         winix = {
@@ -74,8 +74,8 @@
         };
       };
 
-      homeConfigurations = builtins.mapAttrs mkHome {
-        racci = { host = "nixe"; };
+      homeConfigurations = builtins.mapAttrs mkHomeManagerConfiguration {
+        racci = { };
       };
     } // flake-utils.lib.eachDefaultSystem (system:
       let

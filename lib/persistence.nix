@@ -1,4 +1,4 @@
-{ lib, hasPersistence, ... }: rec {
+{ lib, host, ... }: {
   # persistablePath = path:
   #   let
   #     hasOptinPersistence = environment.persistence ? "/persist";
@@ -7,8 +7,8 @@
 
   # hasPersistence = (builtins.hasAttr "persistence" options.environment);
 
-  persistable = path: "${lib.optionalString hasPersistence "/persist"}${path}";
-    # if (hasPersistence)
-    # then persistablePath path
-    # else path;
+  persistable = path: "${lib.optionalString host.persistence.enable "/persist"}${path}";
+  # if (hasPersistence)
+  # then persistablePath path
+  # else path;
 }

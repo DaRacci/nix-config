@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{
   imports = [
     ./cooling.nix
     ./email.nix

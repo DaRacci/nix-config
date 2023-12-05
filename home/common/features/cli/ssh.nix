@@ -1,7 +1,8 @@
-{ config, lib, outputs, persistenceDirectory, hasPersistence, ... }:
+{ outputs, ... }:
 let
   hostnames = builtins.attrNames outputs.nixosConfigurations;
-in {
+in
+{
   programs.ssh = {
     enable = true;
 
@@ -22,6 +23,6 @@ in {
       };
     };
   };
-} // lib.optionalAttrs (hasPersistence) {
-  home.persistence."${persistenceDirectory}".directories = [ ".ssh" ];
+
+  user.persistence.directories = [ ".ssh" ];
 }
