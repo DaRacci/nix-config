@@ -17,7 +17,10 @@
   programs.nix-ld.enable = true;
 
   host = {
-    drive.format = "btrfs";
+    drive = {
+      format = "btrfs";
+      name = "Nix";
+    };
 
     persistence = {
       enable = true;
