@@ -32,10 +32,6 @@
         substituteInPlace steamtinkerlaunch --replace 'YAD=yad' 'YAD=${final.yad}'
       '';
     });
-
-    lib = prev.lib // {
-      recursiveMergeAttrs = builtins.foldl' prev.lib.recursiveUpdate { };
-    };
   };
 
   # When applied, the unstable nixpkgs set (declared in the flake inputs) will
