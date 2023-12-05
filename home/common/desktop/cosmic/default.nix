@@ -22,7 +22,7 @@ let
   # xdg-desktop-portal-cosmic = mkPatched;
 in
 {
-  imports = [ ../common ];
+  imports = [ ../wayland ];
 
   home.packages = builtins.map
     (flake: flake.outputs.packages.${builtins.currentSystem}.default) [

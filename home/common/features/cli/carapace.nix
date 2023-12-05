@@ -21,6 +21,7 @@
       }
       ${pkgs.unstable.carapace}/bin/carapace _carapace nushell | str replace 'def --env' 'def' --all | save -f ${"$"}"($carapace_cache)/init.nu"
     '';
+
     extraConfig = ''
       source ${config.xdg.cacheHome}/carapace/init.nu
     '';

@@ -6,8 +6,8 @@ in
   imports = [
     inputs.nur.hmModules.nur
     inputs.sops-nix.homeManagerModule
-    inputs.nix-colours.homeManagerModules.default
   ] ++ [
+    ./dynamic-linker.nix
     ./nix.nix
     ./sops.nix
     ./xdg.nix

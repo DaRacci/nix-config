@@ -1,6 +1,6 @@
-{
+{ flake, ... }: {
   imports = [
-    ../../../common/features/cli
+    "${flake}/home/common/features/cli"
     ./git.nix
   ];
 }
