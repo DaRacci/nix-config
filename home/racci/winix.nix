@@ -137,15 +137,15 @@
           case "''${POSITIONAL[0]}" in
           start)
               fg_opts
-              ${pkgs.dpkg}/bin/start-stop-daemon --start --oknodo --pidfile "${PIDFILE}" --name wsl-ssh-agent-r --make-pidfile --background --startas "$0" ''${VERBOSE:+--verbose} ''${QUIET:+--quiet} -- foreground "''${FG_OPTS[@]}"
+              ${pkgs.busybox}/bin/start-stop-daemon --start --oknodo --pidfile "${PIDFILE}" --name wsl-ssh-agent-r --make-pidfile --background --startas "$0" ''${VERBOSE:+--verbose} ''${QUIET:+--quiet} -- foreground "''${FG_OPTS[@]}"
               ;;
 
           stop)
-              ${pkgs.dpkg}/bin/start-stop-daemon --pidfile "${PIDFILE}" --stop --remove-pidfile ''${VERBOSE:+--verbose} ''${QUIET:+--quiet}
+              ${pkgs.busybox}/bin/start-stop-daemon --pidfile "${PIDFILE}" --stop --remove-pidfile ''${VERBOSE:+--verbose} ''${QUIET:+--quiet}
               ;;
 
           status)
-              ${pkgs.dpkg}/bin/start-stop-daemon --pidfile "${PIDFILE}" --status ''${VERBOSE:+--verbose} ''${QUIET:+--quiet}
+              ${pkgs.busybox}/bin/start-stop-daemon --pidfile "${PIDFILE}" --status ''${VERBOSE:+--verbose} ''${QUIET:+--quiet}
               local result=$?
               case $result in
               0) log "$0 is running" ;;

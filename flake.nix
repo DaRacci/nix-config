@@ -8,7 +8,7 @@
 
   inputs = {
     # Packages
-    nixpkgs = { url = "github:nixos/nixpkgs/nixos-23.05"; };
+    nixpkgs = { url = "github:nixos/nixpkgs/nixos-23.11"; };
     nixpkgs-unstable = { url = "github:nixos/nixpkgs/nixos-unstable"; };
     nur = { url = "github:nix-community/NUR"; };
 
@@ -18,7 +18,7 @@
     flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
 
     # Base Modules
-    home-manager = { url = "github:nix-community/home-manager/release-23.05"; inputs.nixpkgs.follows = "nixpkgs"; };
+    home-manager = { url = "github:nix-community/home-manager/release-23.11"; inputs.nixpkgs.follows = "nixpkgs"; };
     nixos-hardware = { url = "github:nixos/nixos-hardware"; };
     nixos-wsl = { url = "github:nix-community/NixOS-WSL"; };
     sops-nix = { url = "github:Mic92/sops-nix"; inputs.nixpkgs.follows = "nixpkgs"; };
@@ -67,10 +67,14 @@
           };
         };
         surnix = {
-          users = [ "racci" ];
+          users = {
+            racci = { };
+          };
         };
         winix = {
-          users = [ "racci" ];
+          users = {
+            racci = { };
+          };
         };
       };
 

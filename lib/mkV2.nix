@@ -39,7 +39,7 @@
           inherit username;
           homeDirectory = mkForce "/home/${username}";
 
-          stateVersion = mkForce "23.05";
+          stateVersion = mkForce "23.11";
           sessionPath = [ "$HOME/.local/bin" ];
         };
 
@@ -67,7 +67,7 @@
           inherit username;
           homeDirectory = "/home/${username}";
 
-          stateVersion = "23.05";
+          stateVersion = "23.11";
           sessionPath = [ "$HOME/.local/bin" ];
         };
       })
@@ -98,7 +98,7 @@
         host.name = hostName;
         passthru.enable = false; # Why does build break without this?
 
-        system.stateVersion = "23.05";
+        system.stateVersion = "23.11";
       })
     ] ++ (builtins.attrValues (builtins.mapAttrs (username: value: (mkUserHome username hostName value)) users));
 
