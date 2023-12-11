@@ -186,7 +186,7 @@ in
     flake.inputs.impermanence.nixosModules.impermanence
   ];
 
-  config = {
+  config = mkIf cfg.enable {
     programs.fuse.userAllowOther = true;
 
     system.activationScripts.persistent-dirs.text =

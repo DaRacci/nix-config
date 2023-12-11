@@ -5,6 +5,8 @@
 in
 {
   options.host.drive = {
+    enable = mkEnableOption "drive";
+
     name = mkOption {
       type = types.str;
       default = config.networking.hostName;
@@ -15,14 +17,12 @@ in
     };
   };
 
-  config = builtins.foldl' recursiveUpdate { } [
-    (mkIf (cfg.format == "btrfs") {
-      fileSystems."/nix" = {
-        device = "/dev/disk/by-partlabel/${cfg.name}";
-        fsType = cfg.format;
-        options = [ "subvol=@nix" "noatime" "compress=zstd" ];
-        neededForBoot = true;
-      };
-    })
-  ];
+  config = mkIf cfg.enable {
+    fileSystems."/nix" = mkIf (cfg.format == "btrfs") {
+      device = "/dev/disk/by-partlabel/${cfg.name}";
+      fsType = cfg.format;
+      options = [ "subvol=@nix" "noatime" "compress=zstd" ];
+      neededForBoot = true;
+    };
+  };
 }

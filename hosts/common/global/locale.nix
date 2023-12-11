@@ -8,8 +8,11 @@
     ];
   };
 
-  # # TODO :: Use location service to update this automatically.
-  # time.timeZone = "Australia/Sydney";
-
-  services.localtimed.enable = true;
+  services = {
+    localtimed.enable = true;
+    geoclue2 = {
+      enable = true;
+      enableWifi = false;
+    };
+  };
 }

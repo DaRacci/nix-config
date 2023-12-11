@@ -5,6 +5,7 @@
   wsl.nativeSystemd = true;
   users.allowNoPasswordLogin = true;
 
+  wsl.interop.register = true;
   wsl.wslConf.interop.enabled = true;
   wsl.wslConf.interop.appendWindowsPath = true;
 
