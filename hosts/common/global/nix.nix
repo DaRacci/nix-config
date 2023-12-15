@@ -5,7 +5,7 @@
     config.allowUnfreePredicate = _: true;
 
     config.permittedInsecurePackages = [
-      "electron-24.8.6"
+      "electron-25.9.0"
     ];
   };
 
@@ -15,7 +15,12 @@
       auto-optimise-store = lib.mkForce true;
       experimental-features = [ "nix-command" "flakes" "repl-flake" ];
       system-features = [ "kvm" "big-parallel" "nixos-test" ];
+
+      trusted-substituters = [ "https://racci.cachix.org" ];
+      trusted-public-keys = [ "racci.cachix.org-1:Kl4opLxvTV9c77DpoKjUOMLDbCv6wy3GVHWxB384gxg=" ];
     };
+
+    # TODO :: Ssh Serve store
 
     gc = {
       automatic = false;

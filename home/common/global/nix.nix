@@ -5,7 +5,7 @@
       allowUnfree = true;
       allowUnfreePredicate = (_: true);
       permittedInsecurePackages = [
-        "electron-24.8.6"
+        "electron-25.9.0"
       ];
     };
   };
