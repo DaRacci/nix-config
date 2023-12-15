@@ -21,7 +21,10 @@
     let
       file = "${config.home.homeDirectory}/.local/share/Steam/ubuntu12_64/steam-runtime-heavy/run.sh";
       fixString = "# CFG FIX BELOW";
-      remoteUrl = "https://raw.githubusercontent.com/ValveSoftware/steam-runtime/master/templates/run.sh";
+      remoteArchive = fetchGit {
+        url = "https://github.com/ValveSoftware/steam-runtime.git";
+        ref = "master";
+      };
       actualFix = ''
         # Not steamwebhelper so skip
         if [[ "$1" != *steamwebhelper* ]]; then
@@ -81,7 +84,7 @@
         fi;
       else
         # If the file does not exist, create and fix it
-        ${pkgs.curl}/bin/curl '${remoteUrl}' -o '${file}'
+        ${remoteArchive.outPath}/templates/run.sh > '${file}'
         fix
       fi;
     '';
