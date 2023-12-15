@@ -18,6 +18,8 @@
 
   host = {
     drive = {
+      enable = true;
+
       format = "btrfs";
       name = "Nix";
     };

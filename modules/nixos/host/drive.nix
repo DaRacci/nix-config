@@ -21,7 +21,7 @@ in
     fileSystems."/nix" = mkIf (cfg.format == "btrfs") {
       device = "/dev/disk/by-partlabel/${cfg.name}";
       fsType = cfg.format;
-      options = [ "subvol=@nix" "noatime" "compress=zstd" ];
+      options = [ "subvol=@store" "noatime" "compress=zstd" ];
       neededForBoot = true;
     };
   };

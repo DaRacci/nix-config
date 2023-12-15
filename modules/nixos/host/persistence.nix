@@ -256,7 +256,7 @@ in
           )
         '';
       in
-      mkIf (drive.format == "btrfs") {
+      mkIf (drive.format == "btrfs" && cfg.type == "snapshot") {
         supportedFilesystems = [ "btrfs" ];
         postDeviceCommands = lib.mkIf (!phase1Systemd) (mkBefore wipeScript);
         systemd.services.restore-root = mkIf phase1Systemd {
