@@ -392,7 +392,7 @@ in
       looking-glass-client
       win-virtio
       win-spice
-      win-qemu
+      virtio-win
     ]);
   };
   host.persistence.directories = [
