@@ -7,7 +7,7 @@
     };
 
     extraEnv = ''
-      def-env load-sh-env [path: path] {
+      def --env load-sh-env [path: path] {
         let columns = (open $path
           | lines
           | filter {|line| (not ($line | is-empty)) and ($line | str starts-with "export ") }
@@ -17,7 +17,7 @@
           | upsert value {|e| replace_env_vars $e.value })
 
         for element in $columns {
-          let-env $element.name = $element.value
+          $env.$element.name = $element.value
         }
       }
 
@@ -65,7 +65,7 @@
 
           $last_key = $match.key
           $last_matched = ($value != null)
-          $string = ($string | str replace -ns $match.original $value)
+          $string = ($string | str replace -n $match.original $value)
         }
 
         $string
@@ -75,12 +75,12 @@
     '';
 
     extraConfig = ''
-      let-env config = {
+      $env.config = {
         show_banner: false
 
-        rm: {
-          always_trash: true
-        }
+        # rm: {
+        #   always_trash: true
+        # }
       }
     '';
 
