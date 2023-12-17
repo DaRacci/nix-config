@@ -13,7 +13,7 @@
     nur = { url = "github:nix-community/NUR"; };
 
     # Utils
-    # systems = { url = "github:nix-systems/X86_64-linux"; }; # TODO - Add Darwin
+    deploy-rs = { url = "github:serokell/deploy-rs"; };
     flake-utils = { url = "github:numtide/flake-utils"; };
     flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
 
@@ -57,13 +57,17 @@
   outputs = { self, nixpkgs, flake-utils, systems, getchoo, nixos-wsl, ... }@inputs:
     let
       inherit (self) outputs;
-      inherit (import ./lib/mkV2.nix inputs) mkHomeManagerConfiguration mkSystemConfiguration;
+      inherit (import ./lib/mk.nix inputs) mkHomeManagerConfiguration mkSystemConfiguration;
     in
     {
       nixosConfigurations = builtins.mapAttrs mkSystemConfiguration {
         nixe = {
           users = {
-            racci = { };
+            racci = {
+              extraHome = { pkgs }: {
+                shell = pkgs.nushell;
+              };
+            };
           };
         };
         surnix = {
