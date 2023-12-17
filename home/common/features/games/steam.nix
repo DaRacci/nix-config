@@ -84,7 +84,7 @@
         fi;
       else
         # If the file does not exist, create and fix it
-        ${remoteArchive.outPath}/templates/run.sh > '${file}'
+        cp '${remoteArchive.outPath}/templates/run.sh' '${file}'
         fix
       fi;
     '';
