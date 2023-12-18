@@ -19,7 +19,7 @@
       if not ($carapace_cache | path exists) {
         mkdir $carapace_cache
       }
-      ${pkgs.unstable.carapace}/bin/carapace _carapace nushell | str replace 'def --env' 'def' --all | save -f ${"$"}"($carapace_cache)/init.nu"
+      ${pkgs.unstable.carapace}/bin/carapace _carapace nushell | str replace 'def-env' 'def --env' --all | save -f ${"$"}"($carapace_cache)/init.nu"
     '';
 
     extraConfig = ''
