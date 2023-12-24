@@ -23,8 +23,9 @@
     # TODO :: Ssh Serve store
 
     gc = {
-      automatic = false;
+      automatic = true;
       dates = "daily";
+
       # Delete older generations too
       options = "--delete-older-than 14d";
     };

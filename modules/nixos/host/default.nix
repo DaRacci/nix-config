@@ -1,5 +1,6 @@
 { config, lib, ... }: with lib; let cfg = config.host; in {
   imports = [
+    ./device.nix
     ./drive.nix
     ./persistence.nix
   ];

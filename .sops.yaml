@@ -5,7 +5,8 @@ keys:
     - &nixe "age1rm3j9r0fulw4c2l9cfa9tvrznzw2aehgy2xc700lxrxqq00efghsy9wgv7"
     - &surnix "age1hxxjcpvm9cz88xu6d5jv82uavhqg3jjk4e770a0pc2gzak5gs4zsp4798j"
     - &winix "age10f7nnwsce2zj8905m7xelejm37uckp6tn7jk0eteghprjg2uducsgs9yss"
-
+  - &servers :
+    - &nixcloud "age1vn626zvqf9hhnwur37fzww0xqts5jp45uuhetk2caggx75wp4umshj235u"
 
 creation_rules:
   - path_regex: home/racci/secrets.yaml$
@@ -24,6 +25,6 @@ creation_rules:
     key_groups:
     - age: [ *winix, *james ]
 
-#  - path_regex: hosts/common/secrets.yaml$
-#    key_groups:
-#    - age: [ *nixe, *james]
+  - path_regex: hosts/servers/nixcloud/secrets.yaml$
+    key_groups:
+    - age: [ *nixcloud ]

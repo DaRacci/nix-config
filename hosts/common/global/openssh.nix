@@ -1,9 +1,9 @@
-{ outputs, config, lib, ... }:
+{ hostDir, outputs, config, lib, ... }:
 
 let
   inherit (config.networking) hostName;
   hosts = outputs.nixosConfigurations;
-  pubKey = host: ../../${host}/ssh_host_ed25519_key.pub;
+  pubKey = host: "${hostDir}/ssh_host_ed25519_key.pub";
 
   # Sops needs acess to the keys before the persist dirs are even mounted; so
   # just persisting the keys won't work, we must point at /persist
@@ -32,6 +32,10 @@ in
         extraHostNames = (lib.optional (name == hostName) "localhost"); # Alias for localhost if it's the same host
       })
       hosts;
+  };
+
+  users.users.root = {
+    openssh.authorizedKeys.keys = [ (builtins.readFile "${hostDir}/ssh_host_ed25519_key.pub") ];
   };
 
   # Passwordless sudo when SSH'ing with keys

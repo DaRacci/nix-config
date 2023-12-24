@@ -16,6 +16,7 @@
     deploy-rs = { url = "github:serokell/deploy-rs"; };
     flake-utils = { url = "github:numtide/flake-utils"; };
     flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
+    nixos-generators = { url = "github:nix-community/nixos-generators"; inputs.nixpkgs.follows = "nixpkgs"; };
 
     # Base Modules
     home-manager = { url = "github:nix-community/home-manager/release-23.11"; inputs.nixpkgs.follows = "nixpkgs"; };
@@ -54,14 +55,15 @@
     # cosmic-portal.url = "github:pop-os/xdg-desktop-portal-cosmic";
   };
 
-  outputs = { self, nixpkgs, flake-utils, systems, getchoo, nixos-wsl, ... }@inputs:
+  outputs = { self, nixpkgs, flake-utils, systems, getchoo, nixos-wsl, nixos-generators, ... }@inputs:
     let
       inherit (self) outputs;
-      inherit (import ./lib/mk.nix inputs) mkHomeManagerConfiguration mkSystemConfiguration;
+      inherit (import ./lib/mk.nix inputs) mkHomeManagerConfiguration mkSystemConfiguration mkRawConfiguration;
     in
     {
-      nixosConfigurations = builtins.mapAttrs mkSystemConfiguration {
+      nixosConfigurations = (builtins.mapAttrs mkSystemConfiguration {
         nixe = {
+          role = "desktop";
           users = {
             racci = {
               extraHome = { pkgs }: {
@@ -71,30 +73,37 @@
           };
         };
         surnix = {
+          role = "laptop";
           users = {
             racci = { };
           };
         };
         winix = {
+          role = "desktop";
           users = {
             racci = { };
           };
         };
-      };
+
+        nixcloud = {
+          role = "server";
+        };
+      });
 
       homeConfigurations = builtins.mapAttrs mkHomeManagerConfiguration {
         racci = { };
       };
-    } // flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-      in
-      {
-        packages = import ./pkgs { inherit pkgs getchoo; };
-        devShells = import ./shell.nix { inherit pkgs; };
-        formatter = pkgs.nixpkgs-fmt;
-      }) // {
-      overlays = import ./overlays { inherit inputs outputs getchoo; };
+    } // flake-utils.lib.eachDefaultSystem
+      (system:
+        let pkgs = import nixpkgs { inherit system; }; in
+        {
+          packages = import ./pkgs { inherit system pkgs getchoo nixos-generators mkRawConfiguration; };
+          devShells = import ./shell.nix { inherit pkgs; };
+          formatter = pkgs.nixpkgs-fmt;
+        }) // {
+      overlays = import ./overlays {
+        inherit inputs outputs getchoo nixos-generators mkRawConfiguration;
+      };
 
       nixosModules = import ./modules/nixos;
 

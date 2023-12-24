@@ -1,7 +1,11 @@
 { config, ... }:
 let
-  opGuiUsers = builtins.length (builtins.map (user: builtins.elem "_1password-gui" user.home-manager.programs) (builtins.attrValues config.users.users));
-  opCliUsers = builtins.length (builtins.map (user: builtins.elem "_1password" user.home-manager.programs) (builtins.attrValues config.users.users));
+  hmUsers = builtins.filter (user: (builtins.hasAttr user config.home-manager.users)) (builtins.attrNames config.users.users);
+  hasPackage = pkg: username: builtins.elem pkg config.home-manager.users.${username}.home.packages;
+  usersWithPackage = pkg: builtins.filter (username: hasPackage pkg username) hmUsers;
+
+  opGuiUsers = builtins.length (usersWithPackage "_1password-gui");
+  opCliUsers = builtins.length (usersWithPackage "_1password");
 in
 {
   programs._1password.enable = opCliUsers > 0;

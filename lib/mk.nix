@@ -82,29 +82,73 @@
     } // args;
   };
 
+  mkRawConfiguration = hostName: { users ? { }
+                                 , role
+                                 , system ? inputs.flake-utils.lib.system.x86_64-linux
+                                 }:
+    let
+      hostDir =
+        let
+          opt1 = "${self}/hosts/${hostName}";
+          opt2 = "${self}/hosts/servers/${hostName}";
+        in
+        if (builtins.pathExists opt1) then opt1 else opt2;
+    in
+    {
+      inherit system;
+
+      modules = [
+        "${self}/hosts/common/global"
+        "${self}/hosts/roles/common"
+        "${self}/hosts/roles/${role}"
+        "${hostDir}"
+
+        ({ ... }: {
+          imports = [ inputs.home-manager.nixosModule ];
+
+          host.name = hostName;
+          passthru.enable = false; # Why does build break without this?
+
+          system.stateVersion = "23.11";
+        })
+      ] ++ (builtins.attrValues (builtins.mapAttrs (username: value: (mkUserHome username hostName value)) users));
+
+      specialArgs = {
+        flake = self;
+        inherit hostDir;
+        inherit (self) inputs outputs;
+      };
+    };
+
   # Define the system configuration in nixos.
   mkSystemConfiguration = hostName: { users ? { }
+                                    , role
                                     , system ? inputs.flake-utils.lib.system.x86_64-linux
-                                    }: nixosSystem {
-    inherit system;
+                                    }: nixosSystem (mkRawConfiguration hostName { inherit users role system; });
+  #   inherit system;
 
-    modules = [
-      "${self}/hosts/common/global"
-      "${self}/hosts/${hostName}"
+  #   modules = [
+  #     "${self}/hosts/common/global"
 
-      ({ ... }: {
-        imports = [ inputs.home-manager.nixosModule ];
+  #     (if (builtins.pathExists "${self}/hosts/${hostName}")
+  #     then "${self}/hosts/${hostName}"
+  #     else if (builtins.pathExists "${self}/hosts/servers/${hostName}")
+  #     then "${self}/hosts/servers/${hostName}"
+  #     else throw "No host configuration found for ${hostName}.")
 
-        host.name = hostName;
-        passthru.enable = false; # Why does build break without this?
+  #     ({ ... }: {
+  #       imports = [ inputs.home-manager.nixosModule ];
 
-        system.stateVersion = "23.11";
-      })
-    ] ++ (builtins.attrValues (builtins.mapAttrs (username: value: (mkUserHome username hostName value)) users));
+  #       host.name = hostName;
+  #       passthru.enable = false; # Why does build break without this?
 
-    specialArgs = {
-      flake = self;
-      inherit (self) inputs outputs;
-    };
-  };
+  #       system.stateVersion = "23.11";
+  #     })
+  #   ] ++ (builtins.attrValues (builtins.mapAttrs (username: value: (mkUserHome username hostName value)) users));
+
+  #   specialArgs = {
+  #     flake = self;
+  #     inherit (self) inputs outputs;
+  #   };
+  # };
 }
