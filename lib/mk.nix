@@ -125,30 +125,21 @@
                                     , role
                                     , system ? inputs.flake-utils.lib.system.x86_64-linux
                                     }: nixosSystem (mkRawConfiguration hostName { inherit users role system; });
-  #   inherit system;
 
-  #   modules = [
-  #     "${self}/hosts/common/global"
+  mkConfigurations = hostName: { users ? { }
+                               , role
+                               , isoFormat
+                               , system ? inputs.flake-utils.lib.system.x86_64-linux
+                               }:
+    let
+      raw = mkRawConfiguration hostName { inherit users role system; };
+    in
+    {
+      nixosSystem = nixosSystem raw;
 
-  #     (if (builtins.pathExists "${self}/hosts/${hostName}")
-  #     then "${self}/hosts/${hostName}"
-  #     else if (builtins.pathExists "${self}/hosts/servers/${hostName}")
-  #     then "${self}/hosts/servers/${hostName}"
-  #     else throw "No host configuration found for ${hostName}.")
-
-  #     ({ ... }: {
-  #       imports = [ inputs.home-manager.nixosModule ];
-
-  #       host.name = hostName;
-  #       passthru.enable = false; # Why does build break without this?
-
-  #       system.stateVersion = "23.11";
-  #     })
-  #   ] ++ (builtins.attrValues (builtins.mapAttrs (username: value: (mkUserHome username hostName value)) users));
-
-  #   specialArgs = {
-  #     flake = self;
-  #     inherit (self) inputs outputs;
-  #   };
-  # };
+      iso = inputs.nixos-generators.nixosGenerate {
+        inherit (raw) system modules specialArgs;
+        format = isoFormat;
+      };
+    };
 }

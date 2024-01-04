@@ -1,10 +1,10 @@
 # This file defines overlays
-{ inputs, getchoo, nixos-generators, mkRawConfiguration, ... }: {
+{ inputs, getchoo, ... }: {
   # This one brings our custom packages from the 'pkgs' directory
   additions = final: _prev: import ../pkgs {
     system = final.system;
     pkgs = final;
-    inherit getchoo nixos-generators mkRawConfiguration;
+    inherit getchoo;
   };
 
   # This one contains whatever you want to overlay

@@ -58,12 +58,12 @@
   outputs = { self, nixpkgs, flake-utils, systems, getchoo, nixos-wsl, nixos-generators, ... }@inputs:
     let
       inherit (self) outputs;
-      inherit (import ./lib/mk.nix inputs) mkHomeManagerConfiguration mkSystemConfiguration mkRawConfiguration;
-    in
-    {
-      nixosConfigurations = (builtins.mapAttrs mkSystemConfiguration {
+      inherit (import ./lib/mk.nix inputs) mkHomeManagerConfiguration mkConfigurations;
+
+      configurations = builtins.mapAttrs mkConfigurations {
         nixe = {
           role = "desktop";
+          isoFormat = "iso";
           users = {
             racci = {
               extraHome = { pkgs }: {
@@ -72,14 +72,18 @@
             };
           };
         };
+
         surnix = {
           role = "laptop";
+          isoFormat = "iso";
           users = {
             racci = { };
           };
         };
+
         winix = {
           role = "desktop";
+          isoFormat = "iso";
           users = {
             racci = { };
           };
@@ -87,9 +91,12 @@
 
         nixcloud = {
           role = "server";
+          isoFormat = "proxmox-lxc";
         };
-      });
-
+      };
+    in
+    {
+      nixosConfigurations = builtins.mapAttrs (n: v: v.nixosSystem) configurations;
       homeConfigurations = builtins.mapAttrs mkHomeManagerConfiguration {
         racci = { };
       };
@@ -97,12 +104,15 @@
       (system:
         let pkgs = import nixpkgs { inherit system; }; in
         {
-          packages = import ./pkgs { inherit system pkgs getchoo nixos-generators mkRawConfiguration; };
+          packages = import ./pkgs { inherit system pkgs getchoo; } // {
+            nixcloud = configurations.nixcloud.iso;
+          };
+
           devShells = import ./shell.nix { inherit pkgs; };
           formatter = pkgs.nixpkgs-fmt;
         }) // {
       overlays = import ./overlays {
-        inherit inputs outputs getchoo nixos-generators mkRawConfiguration;
+        inherit inputs outputs getchoo;
       };
 
       nixosModules = import ./modules/nixos;
