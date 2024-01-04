@@ -1,4 +1,4 @@
-{ config, lib, ... }: with lib; let
+{ config, pkgs, lib, ... }: with lib; let
   cfg = config.display;
 
   spec = {
@@ -38,7 +38,7 @@
       };
 
       refresh = mkOption {
-        type = with types; float;
+        type = with types; either float str;
         default = "60";
       };
     };
@@ -131,17 +131,45 @@ in
         }
       ];
 
+      home.activation.monitor-edids = hm.dag.entryAfter [ "writeBoundry" ] ''
+        out=~/.cache/monitor-edids;
+        rm -f $out;
+        touch $out;
+
+        for edid in /sys/class/drm/*/edid; do
+          echo "Looking at $edid";
+          monitor=$(dirname $edid);
+          connector=$(basename $monitor | sed -e 's/card0-//; s/-.-/-/');
+          status=$(cat $monitor/status);
+
+          if [ "$status" = "connected" ]; then
+            set +e;
+            set +o pipefail;
+            serial="$(${pkgs.edid-decode}/bin/edid-decode $edid | ${pkgs.ripgrep}/bin/rg -oe "^\s+Serial Number:\s([\d]+)$" -r '$1')";
+            display="$(${pkgs.edid-decode}/bin/edid-decode $edid | ${pkgs.ripgrep}/bin/rg -oe "^\s+Display Product Serial Number:\s'([A-Z\d]+)'$" -r '$1')";
+            set -e;
+            set -o pipefail;
+
+            echo "$connector:$serial''${display:+:$display}" >> $out;
+          else
+            echo "$edid is not connected";
+          fi
+
+          echo "done with $edid";
+        done
+      '';
+
       # Gnome Display Manager
-      home.file.".config/monitors.xml".text =
+      home.activation.gnome-monitors =
         let
-          getXY = monitor:
+          getRelativeXY = monitor:
             let
               target = builtins.head (builtins.filter (m: m.spec.serial == monitor.position.relative.target || m.spec.productId == monitor.position.relative.target) cfg.monitors);
 
               beforeXY =
                 if primaryMonitor.spec.serial == monitor.position.relative.target
                 then { x = 0; y = 0; }
-                else getXY target;
+                else getRelativeXY target;
 
               newXY =
                 if primaryMonitor.spec.serial == monitor.spec.serial
@@ -158,36 +186,62 @@ in
             in
             newXY;
 
-          mkLogicalMonitor = monitor:
-            let inherit (getXY monitor) x y; in
-            ''
-              <logicalmonitor>
-                <x>${toString x}</x>
-                <y>${toString y}</y>
-                <scale>1</scale>
-                <monitor>
-                  <monitorspec>
-                    ${lib.strings.optionalString (monitor.position.primary) "<primary>yes</primary>"}
-                    ${lib.strings.optionalString ((builtins.stringLength monitor.spec.connector) != 0) "<connector>${monitor.spec.connector}</connector>"}
-                    <vendor>${monitor.spec.vendorId}</vendor>
-                    <product>${monitor.spec.productId}</product>
-                    <serial>${monitor.spec.serial}</serial>
-                  </monitorspec>
-                  <mode>
-                    <width>${toString monitor.mode.width}</width>
-                    <height>${toString monitor.mode.height}</height>
-                    <rate>${toString monitor.mode.refresh}</rate>
-                  </mode>
-                </monitor>
-              </logicalmonitor>
-            '';
+          monitorsWithCoordinates = builtins.map (monitor: monitor // { coordinates = (getRelativeXY monitor); }) cfg.monitors;
+          minX = builtins.foldl' (a: b: if a.coordinates.x < b.coordinates.x then a else b) (builtins.head monitorsWithCoordinates) monitorsWithCoordinates;
+          minY = builtins.foldl' (a: b: if a.coordinates.y < b.coordinates.y then a else b) (builtins.head monitorsWithCoordinates) monitorsWithCoordinates;
+
+          removeHexPrefix = hex: builtins.readFile "${pkgs.runCommand "get-hex" {} "touch $out; echo -n ${hex} | sed 's/^0x0*//' > $out"}";
+
+          # The fucked looking indentation is required for XML formatting to be correct!
+          mkLogicalMonitor = monitor: ''
+            "    <logicalmonitor>
+                  <x>${toString (monitor.coordinates.x - minX.coordinates.x)}</x>
+                  <y>${toString (monitor.coordinates.y - minY.coordinates.y)}</y>
+                  <scale>1</scale>${strings.optionalString (monitor.position.primary) "\n      <primary>yes</primary>"}
+                  <monitor>
+                    <monitorspec>
+                      <connector>''${monitors["${removeHexPrefix monitor.spec.serial}"]}</connector>
+                      <vendor>${monitor.spec.vendorId}</vendor>
+                      <product>${monitor.spec.productId}</product>
+                      <serial>${monitor.spec.serial}</serial>
+                    </monitorspec>
+                    <mode>
+                      <width>${toString monitor.mode.width}</width>
+                      <height>${toString monitor.mode.height}</height>
+                      <rate>${toString monitor.mode.refresh}</rate>
+                    </mode>
+                  </monitor>
+                </logicalmonitor>
+            ";
+          '';
         in
-        ''
-          <monitors version="2">
+        hm.dag.entryAfter [ "monitor-edids" "writeBoundry" ] ''
+          in=~/.cache/monitor-edids;
+          out=~/.config/monitors.xml;
+
+          lines=($(cat $in));
+          declare -A monitors=();
+          for i in "''${!lines[@]}"; do
+              raw="''${lines[$i]}";
+              array=($(echo "$raw" | tr ':' '\n'));
+
+              connector="''${array[0]}";
+              declare serial;
+              printf -v serial '%x' "''${array[1]}";
+              display="''${array[2]:-$serial}";
+    
+              monitors["$display"]="$connector";
+              echo "Found monitor $i with connector $connector, serial $serial, and display $display";
+          done
+
+          monitorContent="";
+          ${builtins.concatStringsSep "\n" (builtins.map (monitor: "monitorContent+=${mkLogicalMonitor monitor}") monitorsWithCoordinates)}
+
+          echo "<monitors version=\"2\">
             <configuration>
-              ${lib.strings.concatMapStrings (m: mkLogicalMonitor m) cfg.monitors}
+          ''${monitorContent}
             </configuration>
-          </monitors>
+          </monitors>" > $out;
         '';
     };
 }
