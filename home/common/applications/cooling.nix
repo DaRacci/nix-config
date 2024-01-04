@@ -6,7 +6,7 @@
       pkgsReview = pkgs.fetchzip {
         url = "https://github.com/${owner}/nixpkgs/archive/${branchname}.tar.gz";
         # Change to 52 zeroes when the archive needs to be redownloaded
-        sha256 = "sha256-bHJxvDBiQKaT1uDSj9yFDHAdlx++7vvrjTN6opKuUyY=";
+        sha256 = "sha256-AKAIYAvo60wqKbOYwnUI7Q9IIVTcA1zYWow85zeqf4o=";
       };
     in
     [
