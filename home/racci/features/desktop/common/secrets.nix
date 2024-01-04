@@ -1,6 +1,8 @@
 { pkgs, ... }: {
   home.packages = with pkgs; [
     gnome-secrets
+    _1password-gui
+    _1password
   ];
 
   user.persistence = {
