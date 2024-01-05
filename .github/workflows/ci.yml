@@ -30,10 +30,10 @@ jobs:
           #- eval .#apps.$_system.setup.program
 
         include:
-          - nix-command: develop .#rust-stable --profile profile
-            system: x86_64
-          - nix-command: develop .#rust-nightly --profile profile
-            system: x86_64
+          # - nix-command: develop .#rust-stable --profile profile
+          #   system: x86_64
+          # - nix-command: develop .#rust-nightly --profile profile
+          #   system: x86_64
 
           - nix-command: build .#homeConfigurations.racci.activationPackage
             system: x86_64
@@ -41,8 +41,8 @@ jobs:
           - nix-command: build .#nixosConfigurations.nixe.config.system.build.toplevel --impure
             system: x86_64
 
-          - nix-command: build .#packages.$_system.installer-image
-            system: x86_64
+          # - nix-command: build .#packages.$_system.installer-image
+          #   system: x86_64
 
     steps:
       - name: Checkout repository
@@ -65,7 +65,7 @@ jobs:
       - name: Setup cachix
         uses: cachix/cachix-action@v13
         with:
-          name: gerschtli
+          name: racci
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
       - name: Build command (aarch64)
@@ -148,7 +148,7 @@ jobs:
                   spec="$(run nix build --print-out-paths ".#cachix-deploy-spec-{0}")"
 
                   echo "::group::Upload spec"
-                  run cachix push gerschtli "$spec"
+                  run cachix push racci "$spec"
 
                   echo "::group::Activate deployment"
                   run cachix deploy activate --agent "{0}" {1} "$spec"
@@ -174,7 +174,7 @@ jobs:
           spec="$(nix build --print-out-paths ".#cachix-deploy-spec-${{ matrix.deploy-agent }}")"
 
           echo "::group::Upload spec"
-          cachix push gerschtli "$spec"
+          cachix push racci "$spec"
 
           echo "::group::Activate deployment"
           cachix deploy activate --agent "${{ matrix.deploy-agent }}" ${{ matrix.deploy-args }} "$spec"

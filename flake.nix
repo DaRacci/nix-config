@@ -57,9 +57,10 @@
 
   outputs = { self, nixpkgs, flake-utils, systems, getchoo, nixos-wsl, nixos-generators, ... }@inputs:
     let
+      forEachSystem = nixpkgs.lib.genAttrs [ "aarch64-linux" "x86_64-linux" ];
+
       inherit (self) outputs;
       inherit (nixpkgs.lib) listToAttrs;
-      inherit (flake-utils.lib) eachDefaultSystem;
       inherit (import ./lib/mk.nix inputs) mkHomeManagerConfiguration mkConfigurations;
       inherit (import ./lib inputs) mkDevShell mkDevShellRust;
 
@@ -105,18 +106,19 @@
         (mkHomeManagerConfiguration { racci = { }; })
       ];
 
-      devShells = eachDefaultSystem (system: listToAttrs [
+      devShells = forEachSystem (system: listToAttrs [
+        # (nameValuePair "default" (import ./shell.nix { pkgs = nixpkgs.legacyPackages.${system}; }))
         # (mkDevShell system "default")
-        # (mkDevShellRust system "rust-stable" { rustChannel = "stable"; })
-        # (mkDevShellRust system "rust-nightly" { rustChannel = "nightly"; })
+        (mkDevShellRust system "rust-stable" { rustChannel = "stable"; })
+        (mkDevShellRust system "rust-nightly" { rustChannel = "nightly"; })
       ]);
 
-      checks = eachDefaultSystem (system: { });
+      checks = forEachSystem (system: { });
 
-      formatter = eachDefaultSystem (system: nixpkgs.legacyPackages.${system}.nixpkgs-fmt);
+      formatter = forEachSystem (system: nixpkgs.legacyPackages.${system}.nixpkgs-fmt);
 
       packages = nixpkgs.lib.foldl' nixpkgs.lib.recursiveUpdate { } [
-        (eachDefaultSystem (system: import ./pkgs { inherit system nixpkgs getchoo; }))
+        (forEachSystem (system: import ./pkgs { inherit system nixpkgs getchoo; }))
 
         # Image Generators
         # (nixpkgs.lib.mapAttrsToList (name: conf: conf.iso) configurations)

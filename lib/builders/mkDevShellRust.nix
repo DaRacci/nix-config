@@ -11,8 +11,8 @@ let
   pkgs = pkgsFor system;
   inherit (pkgs.lib) optionals;
 
-  cocogitto = import (fetchGit "github:DaRacci/cocogitto") { inherit system pkgs; };
-  fenix = import (fetchGit "github:nix-community/fenix") { inherit system pkgs; };
+  cocogitto = import (fetchTarball "https://api.github.com/repos/DaRacci/cocogitto/tarball/main") { inherit system pkgs; };
+  fenix = import (fetchTarball "https://api.github.com/repos/nix-community/fenix/tarball/master") { inherit system pkgs; };
 
   channel =
     if rustChannel == "nightly"
@@ -89,7 +89,7 @@ pkgs.mkShell {
 
     # Rust Components
     rustToolchain
-  ] ++ optionals (useWine) ([ (pkgs.wine.override { wineBuild = "wine64"; }) ]);
+  ]; # ++ optionals (useWine) ([ (pkgs.wine.override { wineBuild = "wine64"; }) ]);
 
   depsBuildBuild = [ ]
     ++ optionals (!isNative) (with pkgs; [ qemu ])
