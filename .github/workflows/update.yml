@@ -1,0 +1,94 @@
+name: Update inputs
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 0 0 * * 1
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    outputs:
+      branch: ${{ steps.branch.outputs.branch }}
+      update_available: ${{ steps.changes.outputs.update_available }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install nix
+        uses: cachix/install-nix-action@v24
+
+      - name: Set branch name output
+        id: branch
+        run: echo "branch=ci/automatic-update-$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+
+      - name: Create branch locally
+        run: git switch -c ${{ steps.branch.outputs.branch }}
+
+      - name: Setup git
+        run: |
+          git config --global user.email "me@racci.dev"
+          git config --global user.name "James Draycott"
+
+      - name: Update inputs
+        run: |
+          nix \
+            --option commit-lockfile-summary 'flake.inputs: automatic update' \
+            flake update \
+            --commit-lock-file
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --exit-code origin/master...; then
+            echo "update_available=false" >> $GITHUB_OUTPUT
+          else
+            echo "update_available=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Push changes
+        if: steps.changes.outputs.update_available == 'true'
+        run: git push --force origin ${{ steps.branch.outputs.branch }}
+
+  build:
+    uses: ./.github/workflows/ci.yml
+    needs: update
+    if: needs.update.outputs.update_available == 'true'
+    with:
+      branch: ${{ needs.update.outputs.branch }}
+    secrets:
+      CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+  merge:
+    runs-on: ubuntu-latest
+    needs: [update, build]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if update branch is behind master
+        run: git diff origin/${{ needs.update.outputs.branch }}...origin/master --exit-code
+
+      - name: Merge update into master
+        run: git merge origin/${{ needs.update.outputs.branch }}
+
+      - name: Push master
+        run: git push origin master
+
+      - name: Delete update branch
+        run: git push --delete origin ${{ needs.update.outputs.branch }}
+
+  # needed for cachix agent deployments
+  final-build:
+    uses: ./.github/workflows/ci.yml
+    needs: merge
+    secrets:
+      CACHIX_ACTIVATE_TOKEN: ${{ secrets.CACHIX_ACTIVATE_TOKEN }}
+      CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}

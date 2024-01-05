@@ -58,7 +58,10 @@
   outputs = { self, nixpkgs, flake-utils, systems, getchoo, nixos-wsl, nixos-generators, ... }@inputs:
     let
       inherit (self) outputs;
+      inherit (nixpkgs.lib) listToAttrs;
+      inherit (flake-utils.lib) eachDefaultSystem;
       inherit (import ./lib/mk.nix inputs) mkHomeManagerConfiguration mkConfigurations;
+      inherit (import ./lib inputs) mkDevShell mkDevShellRust;
 
       configurations = builtins.mapAttrs mkConfigurations {
         nixe = {
@@ -97,26 +100,37 @@
     in
     {
       nixosConfigurations = builtins.mapAttrs (n: v: v.nixosSystem) configurations;
-      homeConfigurations = builtins.mapAttrs mkHomeManagerConfiguration {
-        racci = { };
-      };
-    } // flake-utils.lib.eachDefaultSystem
-      (system:
-        let pkgs = import nixpkgs { inherit system; }; in
-        {
-          packages = import ./pkgs { inherit system pkgs getchoo; } // {
-            nixcloud = configurations.nixcloud.iso;
-          };
 
-          devShells = import ./shell.nix { inherit pkgs; };
-          formatter = pkgs.nixpkgs-fmt;
-        }) // {
+      homeConfigurations = listToAttrs [
+        (mkHomeManagerConfiguration { racci = { }; })
+      ];
+
+      devShells = eachDefaultSystem (system: listToAttrs [
+        # (mkDevShell system "default")
+        # (mkDevShellRust system "rust-stable" { rustChannel = "stable"; })
+        # (mkDevShellRust system "rust-nightly" { rustChannel = "nightly"; })
+      ]);
+
+      checks = eachDefaultSystem (system: { });
+
+      formatter = eachDefaultSystem (system: nixpkgs.legacyPackages.${system}.nixpkgs-fmt);
+
+      packages = nixpkgs.lib.foldl' nixpkgs.lib.recursiveUpdate { } [
+        (eachDefaultSystem (system: import ./pkgs { inherit system nixpkgs getchoo; }))
+
+        # Image Generators
+        # (nixpkgs.lib.mapAttrsToList (name: conf: conf.iso) configurations)
+
+        # NixOS Outputs
+        # (nixpkgs.lib.mapAttrsToList (name: conf: conf.nixosSystem.config.system.build.toplevel) configurations)
+      ] // builtins.mapAttrs (n: v: v.iso) configurations;
+
       overlays = import ./overlays {
         inherit inputs outputs getchoo;
       };
 
+      # Custom Modules
       nixosModules = import ./modules/nixos;
-
       homeManagerModules = import ./modules/home-manager;
     };
 }

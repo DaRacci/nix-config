@@ -1,0 +1,180 @@
+name: Build and test flake outputs
+
+on:
+  push:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      branch:
+        description: Branch name to build on
+        default: ""
+        required: false
+        type: string
+    secrets:
+      CACHIX_ACTIVATE_TOKEN:
+      CACHIX_AUTH_TOKEN:
+        required: true
+
+jobs:
+  nix:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        system:
+          - aarch64
+          - x86_64
+        nix-command:
+          - fmt -- --check
+          #- eval .#apps.$_system.nixos-shell.program
+          #- eval .#apps.$_system.setup.program
+
+        include:
+          - nix-command: develop .#rust-stable --profile profile
+            system: x86_64
+          - nix-command: develop .#rust-nightly --profile profile
+            system: x86_64
+
+          - nix-command: build .#homeConfigurations.racci.activationPackage
+            system: x86_64
+
+          - nix-command: build .#nixosConfigurations.nixe.config.system.build.toplevel --impure
+            system: x86_64
+
+          - nix-command: build .#packages.$_system.installer-image
+            system: x86_64
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        continue-on-error: true
+        with:
+          tool-cache: true
+
+      - name: Install nix
+        uses: cachix/install-nix-action@v24
+        with:
+          extra_nix_config: |
+            keep-going = true
+
+      - name: Setup cachix
+        uses: cachix/cachix-action@v13
+        with:
+          name: gerschtli
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Build command (aarch64)
+        if: matrix.system == 'aarch64'
+        # FIXME: use upstream once --tty is removed
+        #uses: uraimo/run-on-arch-action@v2
+        uses: Gerschtli/run-on-arch-action@tty
+        with:
+          arch: aarch64
+          distro: alpine_latest
+          githubToken: ${{ github.token }}
+          dockerRunArgs: --volume /nix:/nix
+          install: |
+            apk --no-cache add curl git xz
+            adduser --disabled-password ci
+          env: |
+            _system: ${{ matrix.system }}-linux
+            CACHIX_ACTIVATE_TOKEN: ${{ secrets.CACHIX_ACTIVATE_TOKEN || 'no-value' }}
+            CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            set -euo pipefail
+
+            mkdir -p /home/ci/.config/nix
+
+            cat <<EOF > /home/ci/.config/nix/nix.conf
+            experimental-features = nix-command flakes
+            keep-going = true
+            show-trace = true
+            access-tokens = github.com=$GITHUB_TOKEN
+            EOF
+
+            chown --recursive ci:ci /nix /home/ci
+            chgrp --recursive ci "$(pwd)"
+            chmod -R g+w "$(pwd)"
+
+            echo "::group::Install nix"
+
+            curl \
+              --silent \
+              --show-error \
+              --output /tmp/install \
+              --retry 5 \
+              --retry-all-errors \
+              --fail \
+              --location \
+              "https://nixos.org/nix/install"
+
+            su ci -c "sh /tmp/install --no-channel-add --no-daemon"
+            rm /tmp/install
+
+            function run() {
+              su ci -c ". /home/ci/.nix-profile/etc/profile.d/nix.sh; $*"
+            }
+
+            # FIXME: setting build-hook is needed because default hook `nix __build-remote` is not available
+            function build_hook() {
+              local nix_path="$(run which nix)"
+              echo "${nix_path/bin\/nix/libexec/nix/build-remote}"
+            }
+            run echo "build-hook = $(build_hook)" >> /home/ci/.config/nix/nix.conf
+
+
+            echo "::group::Setup cachix"
+            run nix-env --quiet -j8 -iA cachix -f https://cachix.org/api/v1/install
+            run cachix --version
+            run cachix use racci
+
+
+            echo "::group::Build command"
+            run git config --global --add safe.directory "$(pwd)"
+
+            run nix ${{ matrix.nix-command }}
+
+
+            ${{ github.ref == 'refs/heads/master' && inputs.branch == '' && matrix.deploy-agent &&
+              format(
+                '
+                  echo "::group::Build spec"
+                  spec="$(run nix build --print-out-paths ".#cachix-deploy-spec-{0}")"
+
+                  echo "::group::Upload spec"
+                  run cachix push gerschtli "$spec"
+
+                  echo "::group::Activate deployment"
+                  run cachix deploy activate --agent "{0}" {1} "$spec"
+                ',
+                matrix.deploy-agent,
+                matrix.deploy-args
+              )
+              || 'echo "::group::Skip spec deploy"'
+            }}
+
+      - name: Build command (x86_64)
+        if: matrix.system == 'x86_64'
+        env:
+          _system: ${{ matrix.system }}-linux
+        run: nix ${{ matrix.nix-command }}
+
+      - name: Deploy cachix-agent spec (x86_64)
+        if: matrix.system == 'x86_64' && github.ref == 'refs/heads/master' && inputs.branch == '' && matrix.deploy-agent
+        env:
+          CACHIX_ACTIVATE_TOKEN: ${{ secrets.CACHIX_ACTIVATE_TOKEN }}
+        run: |
+          echo "::group::Build spec"
+          spec="$(nix build --print-out-paths ".#cachix-deploy-spec-${{ matrix.deploy-agent }}")"
+
+          echo "::group::Upload spec"
+          cachix push gerschtli "$spec"
+
+          echo "::group::Activate deployment"
+          cachix deploy activate --agent "${{ matrix.deploy-agent }}" ${{ matrix.deploy-args }} "$spec"
