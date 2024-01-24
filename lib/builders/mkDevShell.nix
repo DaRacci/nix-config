@@ -4,10 +4,12 @@
 , ...
 }:
 let
-  pkgs = pkgsFor.${system};
+  pkgs = pkgsFor system;
 in
 pkgs.mkShell {
   inherit name;
+
+  NIX_CONFIG = "extra-experimental-features = nix-command flakes repl-flake";
 
   nativeBuildInputs = with pkgs; [
     # Cli Tools

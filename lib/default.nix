@@ -5,9 +5,10 @@ let
   wrapper = builder: system: name: args: inputs.nixpkgs.lib.nameValuePair name (import builder (args // {
     inherit system pkgsFor name;
   }));
-  simpleWrapper = builder: system: name: args: wrapper builder system name args { };
+  simpleWrapper = builder: system: name: wrapper builder system name { };
 in
 {
-  mkDevShell = simpleWrapper ./builders/mkDevShell.nix;
+  mkDevShellNix = simpleWrapper ./builders/mkDevShellNix.nix;
   mkDevShellRust = wrapper ./builders/mkDevShellRust.nix;
-}# // simpleWrapper ./attrsets.nix // simpleWrapper ./hardware.nix
+}
+# // simpleWrapper ./attrsets.nix // simpleWrapper ./hardware.nix

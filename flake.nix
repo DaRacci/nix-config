@@ -62,7 +62,7 @@
       inherit (self) outputs;
       inherit (nixpkgs.lib) listToAttrs;
       inherit (import ./lib/mk.nix inputs) mkHomeManagerConfiguration mkConfigurations;
-      inherit (import ./lib inputs) mkDevShell mkDevShellRust;
+      inherit (import ./lib inputs) mkDevShellNix mkDevShellRust;
 
       configurations = builtins.mapAttrs mkConfigurations {
         nixe = {
@@ -107,8 +107,7 @@
       ];
 
       devShells = forEachSystem (system: listToAttrs [
-        # (nameValuePair "default" (import ./shell.nix { pkgs = nixpkgs.legacyPackages.${system}; }))
-        # (mkDevShell system "default")
+        (mkDevShellNix system "default")
         (mkDevShellRust system "rust-stable" { rustChannel = "stable"; })
         (mkDevShellRust system "rust-nightly" { rustChannel = "nightly"; })
       ]);
@@ -118,7 +117,7 @@
       formatter = forEachSystem (system: nixpkgs.legacyPackages.${system}.nixpkgs-fmt);
 
       packages = nixpkgs.lib.foldl' nixpkgs.lib.recursiveUpdate { } [
-        (forEachSystem (system: import ./pkgs { inherit system nixpkgs getchoo; }))
+        (forEachSystem (system: import ./pkgs { pkgs = nixpkgs.legacyPackages.${system}; inherit system getchoo; }))
 
         # Image Generators
         # (nixpkgs.lib.mapAttrsToList (name: conf: conf.iso) configurations)
@@ -127,9 +126,7 @@
         # (nixpkgs.lib.mapAttrsToList (name: conf: conf.nixosSystem.config.system.build.toplevel) configurations)
       ] // builtins.mapAttrs (n: v: v.iso) configurations;
 
-      overlays = import ./overlays {
-        inherit inputs outputs getchoo;
-      };
+      overlays = forEachSystem (system: import ./overlays { pkgs = nixpkgs.legacyPackages.${system}; inherit inputs system outputs getchoo; });
 
       # Custom Modules
       nixosModules = import ./modules/nixos;
