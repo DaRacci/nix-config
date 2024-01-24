@@ -31,13 +31,13 @@ jobs:
 
       - name: Setup git
         run: |
-          git config --global user.email "me@racci.dev"
-          git config --global user.name "James Draycott"
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
 
       - name: Update inputs
         run: |
           nix \
-            --option commit-lockfile-summary 'flake.inputs: automatic update' \
+            --option commit-lockfile-summary 'chore(flake.inputs): automatic update' \
             flake update \
             --commit-lock-file
 

@@ -30,14 +30,15 @@ jobs:
           #- eval .#apps.$_system.setup.program
 
         include:
-          # - nix-command: develop .#rust-stable --profile profile
-          #   system: x86_64
-          # - nix-command: develop .#rust-nightly --profile profile
-          #   system: x86_64
+          - nix-command: develop .#default --profile profile
+            system: x86_64
+          - nix-command: develop .#rust-stable --profile profile
+            system: x86_64
+          - nix-command: develop .#rust-nightly --profile profile
+            system: x86_64
 
           - nix-command: build .#homeConfigurations.racci.activationPackage
             system: x86_64
-
           - nix-command: build .#nixosConfigurations.nixe.config.system.build.toplevel --impure
             system: x86_64
 
@@ -140,41 +141,8 @@ jobs:
 
             run nix ${{ matrix.nix-command }}
 
-
-            ${{ github.ref == 'refs/heads/master' && inputs.branch == '' && matrix.deploy-agent &&
-              format(
-                '
-                  echo "::group::Build spec"
-                  spec="$(run nix build --print-out-paths ".#cachix-deploy-spec-{0}")"
-
-                  echo "::group::Upload spec"
-                  run cachix push racci "$spec"
-
-                  echo "::group::Activate deployment"
-                  run cachix deploy activate --agent "{0}" {1} "$spec"
-                ',
-                matrix.deploy-agent,
-                matrix.deploy-args
-              )
-              || 'echo "::group::Skip spec deploy"'
-            }}
-
       - name: Build command (x86_64)
         if: matrix.system == 'x86_64'
         env:
           _system: ${{ matrix.system }}-linux
         run: nix ${{ matrix.nix-command }}
-
-      - name: Deploy cachix-agent spec (x86_64)
-        if: matrix.system == 'x86_64' && github.ref == 'refs/heads/master' && inputs.branch == '' && matrix.deploy-agent
-        env:
-          CACHIX_ACTIVATE_TOKEN: ${{ secrets.CACHIX_ACTIVATE_TOKEN }}
-        run: |
-          echo "::group::Build spec"
-          spec="$(nix build --print-out-paths ".#cachix-deploy-spec-${{ matrix.deploy-agent }}")"
-
-          echo "::group::Upload spec"
-          cachix push racci "$spec"
-
-          echo "::group::Activate deployment"
-          cachix deploy activate --agent "${{ matrix.deploy-agent }}" ${{ matrix.deploy-args }} "$spec"
