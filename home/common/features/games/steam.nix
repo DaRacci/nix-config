@@ -97,6 +97,7 @@
 
     # Games
     ".barony"
+    ".local/share/Colossal Order/Cities_Skylines"
   ];
 
   # TODO :: Force restart steam on rebuild if its open
