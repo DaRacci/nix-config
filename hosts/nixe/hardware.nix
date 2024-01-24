@@ -11,10 +11,11 @@
     ../common/optional/openrgb.nix
     ../common/optional/cooler_control.nix
     ../common/optional/secureboot.nix
+    ../common/optional/biometrics.nix
   ];
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_6_5;
+    kernelPackages = pkgs.linuxPackages_6_7;
 
     initrd = {
       # TODO :: Needed? ahci, sd_mod usbhid usb_storage

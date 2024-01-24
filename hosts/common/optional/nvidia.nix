@@ -8,7 +8,7 @@
 
     nvidia = {
       # package = config.boot.kernelPackages.nvidiaPackages.stable;
-      open = true;
+      open = false;
       nvidiaSettings = true;
       nvidiaPersistenced = true;
       modesetting.enable = true;
