@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }: {
+{ pkgs, ... }: {
   nixpkgs.overlays =
     let
       owner = "codifryed";
@@ -6,7 +6,7 @@
       pkgsReview = pkgs.fetchzip {
         url = "https://github.com/${owner}/nixpkgs/archive/${branchname}.tar.gz";
         # Change to 52 zeroes when the archive needs to be redownloaded
-        sha256 = "sha256-AKAIYAvo60wqKbOYwnUI7Q9IIVTcA1zYWow85zeqf4o=";
+        sha256 = "sha256-IJ/U2sof3PVhkeXQzNoDS8PRFdgl2/5s8ZGgJt7ANps=";
       };
     in
     [
@@ -14,8 +14,6 @@
         coolercontrol = (import pkgsReview { overlays = [ ]; config = super.config; }).coolercontrol;
       })
     ];
-
-  environment.systemPackages = with pkgs; [ lm_sensors ];
 
   systemd = {
     packages = with pkgs.coolercontrol; [
