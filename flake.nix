@@ -26,6 +26,7 @@
     impermanence = { url = "github:nix-community/impermanence"; };
     nix-colours = { url = "github:misterio77/nix-colors"; };
     lanzaboote = { url = "github:nix-community/lanzaboote/v0.3.0"; inputs.nixpkgs.follows = "nixpkgs"; };
+    nix-ld-rs = { url = "github:nix-community/nix-ld-rs"; inputs.nixpkgs.follows = "nixpkgs"; };
 
     # Containers & Stuff
     arion = { url = "github:hercules-ci/arion"; };
@@ -89,7 +90,7 @@
           role = "desktop";
           isoFormat = "iso";
           users = {
-            racci = { };
+            racci.extraHome = { pkgs }: { shell = pkgs.nushell; };
           };
         };
 

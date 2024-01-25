@@ -1,4 +1,4 @@
-{ flake, ... }: {
+{ flake, pkgs, ... }: {
 
   imports = [
     flake.inputs.nixos-wsl.nixosModules.wsl
@@ -12,6 +12,8 @@
       name = "Nix";
     };
   };
+
+  environment.systemPackages = with pkgs; [ wget ];
 
   services.tailscale = {
     enable = true;

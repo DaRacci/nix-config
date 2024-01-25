@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }: with builtins; with lib; {
+{ flake, config, pkgs, lib, ... }: with builtins; with lib; {
   wsl.enable = true;
   wsl.defaultUser = "racci";
   wsl.startMenuLaunchers = true;
@@ -8,6 +8,39 @@
   wsl.interop.register = true;
   wsl.wslConf.interop.enabled = true;
   wsl.wslConf.interop.appendWindowsPath = true;
+
+  # Fixes VSCode not being able to run.
+  wsl.extraBin = [
+    # Required by VS Code's Remote WSL extension
+    { src = "${pkgs.coreutils}/bin/dirname"; }
+    { src = "${pkgs.coreutils}/bin/readlink"; }
+    { src = "${pkgs.coreutils}/bin/uname"; }
+  ];
+
+  programs.nix-ld = {
+    enable = true;
+    libraries = [
+      # Required by NodeJS installed by VS Code's Remote WSL extension
+      pkgs.stdenv.cc.cc
+    ];
+
+    # Use `nix-ld-rs` instead of `nix-ld`, because VS Code's Remote WSL extension launches a non-login non-interactive shell, which is not supported by `nix-ld`, while `nix-ld-rs` works in non-login non-interactive shells.
+    package = flake.inputs.nix-ld-rs.packages.${pkgs.system}.nix-ld-rs;
+  };
+
+  systemd.user = {
+      paths.vscode-remote-workaround = {
+        wantedBy = ["default.target"];
+        pathConfig.PathChanged = "%h/.vscode-server/bin";
+      };
+
+      services.vscode-remote-workaround.script = ''
+        for i in ~/.vscode-server/bin/*; do
+          echo "Fixing vscode-server in $i..."
+          ln -sf ${pkgs.nodejs-18_x}/bin/node $i/node
+        done
+      '';
+    };
 
   # Fixes Home-Manager applications not appearing in Start Menu
   system.activationScripts.copy-user-launchers = stringAfter [ ] ''
