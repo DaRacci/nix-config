@@ -1,6 +1,6 @@
 {
   imports = [
-    ./features/desktop/gnome
+    ./features/desktop/gnome.nix
 
     ./features/cli
     ../common/features/games
