@@ -1,22 +1,30 @@
 { flake, lib, ... }: {
   imports = [ "${flake}/home/common/desktop/gnome" ];
 
-  dconf.settings = with lib.hm.gvariant; {
-    "org/gnome/Weather" = {
-      locations = [ (mkVariant [ (mkUint32 2) (mkVariant [ "Sydney" "YSSY" true [ (mkTuple [ (-0.592539281052075) 2.638646934988996 ]) ] [ (mkTuple [ (-0.5913757223996479) 2.639228723041856 ]) ] ]) ]) ];
+  dconf.settings = with lib.hm.gvariant; let
+    mkLocation = name: short: location: mkVariant [
+      (mkUint32 2)
+      (mkVariant [
+        name
+        short
+        true
+        [ (mkTuple [ location.latitude location.longitude ]) ]
+        [ (mkTuple [ location.latitude location.longitude ]) ]
+      ])
+    ];
+
+    sydney = mkLocation "Sydney" "YSSY" { latitude = -0.592539281052075; longitude = 2.638646934988996; };
+  in
+  {
+    "org/gnome/weather" = {
+      locations = [ sydney ];
     };
 
     "org/gnome/clocks" = {
       world-clocks = [
-        {
-          location = mkVariant [ (mkUint32 2) (mkVariant [ "Sydney" "YSSY" true [ (mkTuple [ (-0.592539281052075) 2.638646934988996 ]) ] [ (mkTuple [ (-0.5913757223996479) 2.639228723041856 ]) ] ]) ];
-        }
-        {
-          location = mkVariant [ (mkUint32 2) (mkVariant [ "Portland" "KPDX" true [ (mkTuple [ 0.795710144576884 (-2.1397785149603687) ]) ] [ (mkTuple [ 0.7945341242735976 (-2.1411037260081156) ]) ] ]) ];
-        }
-        {
-          location = mkVariant [ (mkUint32 2) (mkVariant [ "Dubai" "OMDB" true [ (mkTuple [ 0.4406956361285682 0.9657488469524315 ]) ] [ (mkTuple [ 0.4407344173445475 0.9648180105024653 ]) ] ]) ];
-        }
+        sydney
+        (mkLocation "Portland" "KPDX" { latitude = 0.795710144576884; longitude = -2.1397785149603687; })
+        (mkLocation "Dubai" "OMDB" { latitude = 0.4406956361285682; longitude = 0.9657488469524315; })
       ];
     };
   };
