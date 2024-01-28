@@ -13,5 +13,10 @@
     })
   ];
 
-  home.packages = with pkgs; [ spotube ];
+  home.packages = with pkgs; [ spotify spotube ];
+
+  user.persistence.directories = [
+    ".local/share/spotube"
+    ".config/spotify"
+  ];
 }

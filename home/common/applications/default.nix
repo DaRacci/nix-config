@@ -3,7 +3,7 @@
     ./cooling.nix
     ./email.nix
     ./image-editor.nix
-    ./music.nix
+    ./media.nix
     ./notes.nix
     ./recording.nix
   ];
