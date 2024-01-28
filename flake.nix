@@ -13,7 +13,6 @@
     nur = { url = "github:nix-community/NUR"; };
 
     # Utils
-    deploy-rs = { url = "github:serokell/deploy-rs"; };
     flake-utils = { url = "github:numtide/flake-utils"; };
     flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
     nixos-generators = { url = "github:nix-community/nixos-generators"; inputs.nixpkgs.follows = "nixpkgs"; };
@@ -24,36 +23,18 @@
     nixos-wsl = { url = "github:nix-community/NixOS-WSL"; };
     sops-nix = { url = "github:Mic92/sops-nix"; inputs.nixpkgs.follows = "nixpkgs"; };
     impermanence = { url = "github:nix-community/impermanence"; };
-    nix-colours = { url = "github:misterio77/nix-colors"; };
     lanzaboote = { url = "github:nix-community/lanzaboote/v0.3.0"; inputs.nixpkgs.follows = "nixpkgs"; };
     nix-ld-rs = { url = "github:nix-community/nix-ld-rs"; inputs.nixpkgs.follows = "nixpkgs"; };
 
-    # Containers & Stuff
+    # Other misc modules
     arion = { url = "github:hercules-ci/arion"; };
-
-    # Optional Modules
-    # hyprland = { url = "github:hyprwm/Hyprland"; };
-    # hyprland-plugins = { url = "github:hyprwm/hyprland-plugins"; };
     nix-doom-emacs = { url = "github:nix-community/nix-doom-emacs"; };
+
+    # DevShell modules
+    pre-commit = { url = "github:cachix/pre-commit-hooks.nix"; inputs.nixpkgs.follows = "nixpkgs"; };
+    cocogitto = { url = "github:DaRacci/cocogitto"; inputs.nixpkgs.follows = "nixpkgs"; };
     fenix = { url = "github:nix-community/fenix"; inputs.nixpkgs.follows = "nixpkgs"; };
     getchoo = { url = "github:getchoo/nix-exprs"; };
-    # emacs-overlay = { url = "github:nix-community/emacs-overlay"; };
-    # xremap-flake.url = "github:xremap/nix-flake";
-
-    # Cosmic Desktop
-    # cosmic-applets.url = "github:pop-os/cosmic-applets";
-    # cosmic-applibrary.url = "github:pop-os/cosmic-applibrary";
-    # cosmic-bg.url = "github:pop-os/cosmic-bg";
-    # cosmic-comp.url = "github:pop-os/cosmic-comp";
-    # cosmic-launcher.url = "github:pop-os/cosmic-launcher";
-    # cosmic-notifications.url = "github:pop-os/cosmic-notifications";
-    # cosmic-osd.url = "github:pop-os/cosmic-osd";
-    # cosmic-panel.url = "github:pop-os/cosmic-panel";
-    # cosmic-session.url = "github:pop-os/cosmic-session";
-    # cosmic-settings.url = "github:pop-os/cosmic-settings";
-    # cosmic-settings-daemon.url = "github:pop-os/cosmic-settings-daemon";
-    # cosmic-workspaces.url = "github:pop-os/cosmic-workspaces-epoch";
-    # cosmic-portal.url = "github:pop-os/xdg-desktop-portal-cosmic";
   };
 
   outputs = { self, nixpkgs, flake-utils, systems, getchoo, nixos-wsl, nixos-generators, ... }@inputs:
@@ -63,7 +44,7 @@
       inherit (self) outputs;
       inherit (nixpkgs.lib) listToAttrs;
       inherit (import ./lib/mk.nix inputs) mkHomeManagerConfiguration mkConfigurations;
-      inherit (import ./lib inputs) mkDevShellNix mkDevShellRust;
+      inherit ((import ./lib inputs).shell) mkNix mkRust;
 
       configurations = builtins.mapAttrs mkConfigurations {
         nixe = {
@@ -108,9 +89,9 @@
       ];
 
       devShells = forEachSystem (system: listToAttrs [
-        (mkDevShellNix system "default")
-        (mkDevShellRust system "rust-stable" { rustChannel = "stable"; })
-        (mkDevShellRust system "rust-nightly" { rustChannel = "nightly"; })
+        (mkNix system "default")
+        (mkRust system "rust-stable" { rustChannel = "stable"; })
+        (mkRust system "rust-nightly" { rustChannel = "nightly"; })
       ]);
 
       checks = forEachSystem (system: { });

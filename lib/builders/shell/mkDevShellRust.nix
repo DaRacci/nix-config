@@ -1,4 +1,5 @@
-{ system
+{ inputs
+, system
 , name
 , pkgsFor
 
@@ -10,9 +11,7 @@
 let
   pkgs = pkgsFor system;
   inherit (pkgs.lib) optionals;
-
-  cocogitto = import (fetchTarball "https://api.github.com/repos/DaRacci/cocogitto/tarball/main") { inherit system pkgs; };
-  fenix = import (fetchTarball "https://api.github.com/repos/nix-community/fenix/tarball/master") { inherit system pkgs; };
+  inherit (inputs) cocogitto fenix;
 
   channel =
     if rustChannel == "nightly"
