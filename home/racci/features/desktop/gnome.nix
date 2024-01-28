@@ -17,15 +17,15 @@
   in
   {
     "org/gnome/weather" = {
-      locations = [ sydney ];
+      # locations = [ sydney ];
     };
 
-    "org/gnome/clocks" = {
-      world-clocks = [
-        sydney
-        (mkLocation "Portland" "KPDX" { latitude = 0.795710144576884; longitude = -2.1397785149603687; })
-        (mkLocation "Dubai" "OMDB" { latitude = 0.4406956361285682; longitude = 0.9657488469524315; })
-      ];
-    };
+    # "org/gnome/clocks" = {
+    #   world-clocks = [
+    #     sydney
+    #     (mkLocation "Portland" "KPDX" { latitude = 0.795710144576884; longitude = -2.1397785149603687; })
+    #     (mkLocation "Dubai" "OMDB" { latitude = 0.4406956361285682; longitude = 0.9657488469524315; })
+    #   ];
+    # };
   };
 }
