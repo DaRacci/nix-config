@@ -1,5 +1,4 @@
-{ flake, pkgs, ... }:
-let inherit (pkgs) lib; in {
+{ flake, lib, ... }: {
   imports = [ "${flake}/home/common/desktop/gnome" ];
 
   dconf.settings = with lib.hm.gvariant; {
