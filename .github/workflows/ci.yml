@@ -32,6 +32,8 @@ jobs:
         include:
           - nix-command: develop .#default --profile profile
             system: x86_64
+          - nix-command: develop .#nix --profile profile
+            system: x86_64
           - nix-command: develop .#rust-stable --profile profile
             system: x86_64
           - nix-command: develop .#rust-nightly --profile profile
@@ -57,11 +59,8 @@ jobs:
         with:
           tool-cache: true
 
-      - name: Install nix
-        uses: cachix/install-nix-action@v24
-        with:
-          extra_nix_config: |
-            keep-going = true
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
 
       - name: Setup cachix
         uses: cachix/cachix-action@v13
@@ -71,9 +70,7 @@ jobs:
 
       - name: Build command (aarch64)
         if: matrix.system == 'aarch64'
-        # FIXME: use upstream once --tty is removed
-        #uses: uraimo/run-on-arch-action@v2
-        uses: Gerschtli/run-on-arch-action@tty
+        uses: uraimo/run-on-arch-action@master
         with:
           arch: aarch64
           distro: alpine_latest
@@ -84,7 +81,6 @@ jobs:
             adduser --disabled-password ci
           env: |
             _system: ${{ matrix.system }}-linux
-            CACHIX_ACTIVATE_TOKEN: ${{ secrets.CACHIX_ACTIVATE_TOKEN || 'no-value' }}
             CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           run: |
