@@ -1,6 +1,5 @@
 { ... }: {
   imports = [
-    ./background.nix
     ./denaro.nix
     ./firefox.nix
     ./nextcloud.nix
