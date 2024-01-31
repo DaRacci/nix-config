@@ -32,8 +32,6 @@ jobs:
         include:
           - nix-command: develop .#default --profile profile
             system: x86_64
-          - nix-command: develop .#nix --profile profile
-            system: x86_64
           - nix-command: develop .#rust-stable --profile profile
             system: x86_64
           - nix-command: develop .#rust-nightly --profile profile
