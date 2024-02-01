@@ -2,8 +2,14 @@
   description = "The nix-config of an Idiot";
 
   nixConfig = {
-    extra-substituters = [ "https://racci.cachix.org" ];
-    extra-trusted-public-keys = [ "racci.cachix.org-1:Kl4opLxvTV9c77DpoKjUOMLDbCv6wy3GVHWxB384gxg=" ];
+    extra-substituters = [
+      "https://nix-community.cachix.org"
+      "https://racci.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" 
+      "racci.cachix.org-1:Kl4opLxvTV9c77DpoKjUOMLDbCv6wy3GVHWxB384gxg="
+    ];
   };
 
   inputs = {
@@ -71,7 +77,7 @@
           role = "desktop";
           isoFormat = "iso";
           users = {
-            racci.extraHome = { pkgs }: { shell = pkgs.nushell; };
+            racci.extraHome = { pkgs }: { shell = pkgs.bash; };
           };
         };
 
