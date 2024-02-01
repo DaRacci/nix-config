@@ -28,20 +28,6 @@
     package = flake.inputs.nix-ld-rs.packages.${pkgs.system}.nix-ld-rs;
   };
 
-  systemd.user = {
-      paths.vscode-remote-workaround = {
-        wantedBy = ["default.target"];
-        pathConfig.PathChanged = "%h/.vscode-server/bin";
-      };
-
-      services.vscode-remote-workaround.script = ''
-        for i in ~/.vscode-server/bin/*; do
-          echo "Fixing vscode-server in $i..."
-          ln -sf ${pkgs.nodejs-18_x}/bin/node $i/node
-        done
-      '';
-    };
-
   # Fixes Home-Manager applications not appearing in Start Menu
   system.activationScripts.copy-user-launchers = stringAfter [ ] ''
     for x in applications icons; do
