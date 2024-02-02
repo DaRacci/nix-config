@@ -36,18 +36,15 @@ let
     then "aarch64-apple-darwin"
     else abort "Unsupported system ${crossSystem}, must be one of x86_64-linux, x86_64-darwin, x86_64-windows, aarch64-linux, or aarch64-darwin";
 
-  rustToolchain =
-    (with fenix.packages.${system}; combine [
-      targets."${rust-target}".${channel}.rust-std
-      (fenix.${channel}.withComponents [
-        "cargo"
-        "rustc"
-        "rust-src"
-        "rust-analyzer"
-        "clippy"
-        "rustfmt"
-      ])
-    ]);
+  rustToolchain = let fenixPkgs = fenix.packages.${system}; in fenixPkgs.combine [
+    fenixPkgs.targets."${rust-target}".${channel}.rust-std
+    fenixPkgs.${channel}.cargo
+    fenixPkgs.${channel}.rustc
+    fenixPkgs.${channel}.rust-src
+    fenixPkgs.${channel}.rust-analyzer
+    fenixPkgs.${channel}.clippy
+    fenixPkgs.${channel}.rustfmt
+  ];
 
   crossPackages =
     if system == crossSystem
@@ -83,7 +80,7 @@ pkgs.mkShell {
     # Cli Tools
     act # For Github Action testing
     hyperfine # For benchmarking
-    cocogitto # For Conventional Commits
+    # inputs.cocogitto # For Conventional Commits
     cargo-nextest # Better cargo test output
 
     # Rust Components
