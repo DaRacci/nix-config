@@ -1,12 +1,12 @@
 { pkgs, lib, config, ... }: {
   nixpkgs.overlays =
     let
-      owner = "DaRacci";
-      branchname = "jetbrains-update";
+      owner = "ners";
+      branchname = "jetbrains";
       pkgsReview = pkgs.fetchzip {
         url = "https://github.com/${owner}/nixpkgs/archive/${branchname}.tar.gz";
         # Change to 52 zeroes when the archive needs to be redownloaded
-        sha256 = "sha256-M/KzmDbQeFWeuyL0Dj9eu8KAmM9ae78AD5D1FNnDJSE=";
+        sha256 = "sha256-L1Z3WLN00TLIOU95wqoVdkP38shMxfhzpDxoBv3Gzck=";
       };
     in
     [
@@ -16,7 +16,7 @@
     ];
 
   home.packages = with pkgs; [
-    # jetbrains.idea-community
+    jetbrains.idea-community
     jetbrains.rust-rover
   ];
 

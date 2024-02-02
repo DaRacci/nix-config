@@ -20,7 +20,6 @@ nixpkgs.overlays = [
       { overlays = [ ]; config = super.config; }).<your-package>;
   })
 ];
-in
 ```
 
 In this example, replace `<your-package>`, `<owner>`, `<branch>`, and `<sha256>` with the actual values from the forked repository.
