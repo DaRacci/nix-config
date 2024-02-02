@@ -11,7 +11,7 @@
 let
   pkgs = pkgsFor system;
   inherit (pkgs.lib) optionals;
-  inherit (inputs) cocogitto fenix;
+  inherit (inputs) fenix;
 
   channel =
     if rustChannel == "nightly"
@@ -80,13 +80,21 @@ pkgs.mkShell {
     # Cli Tools
     act # For Github Action testing
     hyperfine # For benchmarking
-    # inputs.cocogitto # For Conventional Commits
+    cocogitto # For conventional commits
     cargo-nextest # Better cargo test output
 
     # Rust Components
     rustToolchain
-  ]; # ++ optionals (useWine) ([ (pkgs.wine.override { wineBuild = "wine64"; }) ]);
 
+    cargo-udeps
+    cargo-audit
+    cargo-expand
+    cargo-nextest
+    cargo-expand
+    cargo-cranky
+    cargo-edit
+  ];
+ # ++ optionals (useWine) ([ (pkgs.wine.override { wineBuild = "wine64"; }) ]);
   depsBuildBuild = [ ]
     ++ optionals (!isNative) (with pkgs; [ qemu ])
     ++ optionals (targetPlatform.isWindows) (with crossPackages; [ stdenv.cc windows.mingw_w64_pthreads windows.pthreads ]);
