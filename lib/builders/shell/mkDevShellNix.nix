@@ -4,10 +4,8 @@
 , ...
 }:
 let
-  baseShell = import ./mkDevShell.nix { inherit system name pkgsFor; };
   pkgs = pkgsFor system;
-in
-baseShell // {
+in (import ./mkDevShell.nix { inherit system name pkgsFor; }).overrideAttrs(oldAttrs: {
   nativeBuildInputs = with pkgs; [
     nix
     home-manager
@@ -20,5 +18,5 @@ baseShell // {
     sops
     ssh-to-age
     age
-  ] ++ baseShell.nativeBuildInputs;
-}
+  ] ++ oldAttrs.nativeBuildInputs;
+})

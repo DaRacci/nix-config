@@ -63,8 +63,7 @@ let
   useMold = isNative && targetPlatform.isLinux;
   useWine = targetPlatform.isWindows && system == "x86_64-linux";
   TARGET = (builtins.replaceStrings [ "-" ] [ "_" ] (pkgs.lib.toUpper rust-target));
-in
-pkgs.mkShell {
+in (import ./mkDevShell.nix { inherit system name pkgsFor; }).overrideAttrs(oldAttrs: {
   inherit name;
 
   # Arguments that can be reused in a flake or something.
@@ -134,4 +133,4 @@ pkgs.mkShell {
         exec ${(pkgs.wine.override { wineBuild = "wine64"; })}/bin/wine64 $@
       ''
     else "${pkgs.qemu}/bin/qemu-${targetPlatform.qemuArch}";
-}
+})
