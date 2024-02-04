@@ -5,7 +5,7 @@
 }:
 let
   baseShell = import ./mkDevShell.nix { inherit system name pkgsFor; };
-  inherit (baseShell) pkgs;
+  pkgs = pkgsFor system;
 in
 baseShell // {
   nativeBuildInputs = with pkgs; [
