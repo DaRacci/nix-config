@@ -3,7 +3,7 @@
 in
 {
   imports = [
-    ./development.nix
+    ./development
   ];
 
   options.purposes = {

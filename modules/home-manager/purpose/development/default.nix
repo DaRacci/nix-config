@@ -32,6 +32,6 @@ in
       inherit packages;
     };
 
-    
+
   };
 }
