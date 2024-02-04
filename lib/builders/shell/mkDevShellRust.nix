@@ -94,7 +94,7 @@ pkgs.mkShell {
     cargo-cranky
     cargo-edit
   ];
- # ++ optionals (useWine) ([ (pkgs.wine.override { wineBuild = "wine64"; }) ]);
+  # ++ optionals (useWine) ([ (pkgs.wine.override { wineBuild = "wine64"; }) ]);
   depsBuildBuild = [ ]
     ++ optionals (!isNative) (with pkgs; [ qemu ])
     ++ optionals (targetPlatform.isWindows) (with crossPackages; [ stdenv.cc windows.mingw_w64_pthreads windows.pthreads ]);

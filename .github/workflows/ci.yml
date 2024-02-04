@@ -37,9 +37,9 @@ jobs:
           - nix-command: develop .#rust-nightly --profile profile
             system: x86_64
 
-          - nix-command: build .#homeConfigurations.racci.activationPackage
+          - nix-command: build .#homeConfigurations.x86_64-linux.racci.activationPackage
             system: x86_64
-          - nix-command: build .#nixosConfigurations.nixe.config.system.build.toplevel --impure
+          - nix-command: build .#nixosConfigurations.x86_64-linux.nixe.config.system.build.toplevel --impure
             system: x86_64
 
           # - nix-command: build .#packages.$_system.installer-image

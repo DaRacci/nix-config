@@ -1,35 +1,47 @@
 # This file defines overlays
-{ inputs, getchoo, ... }: {
-  # This one brings our custom packages from the 'pkgs' directory
-  additions = final: _prev: import ../pkgs {
-    system = final.system;
-    pkgs = final;
-    inherit getchoo;
+{ self, inputs, getchoo, ... }:
+let
+  usePRRaw = final: prev: name: owner: branch: sha256: {
+    ${name} = (import
+      (final.fetchzip {
+        inherit sha256;
+        url = "https://github.com/${owner}/nixpkgs/archive/${branch}.tar.gz";
+      })
+      { overlays = [ ]; config = prev.config; }).${name};
   };
+in
+{
+  # This one brings our custom packages from the 'pkgs' directory
+  additions = final: prev:
+    let usePR = usePRRaw final prev; in prev.lib.foldl' prev.lib.recursiveUpdate { } [
+      (import ../pkgs { system = final.system; pkgs = final; inherit getchoo; })
+      (usePR "coolercontrol" "codifryed" "coolercontrol-0.17.0" "sha256-wfjrWqfpL5qVnc6DVKlsO9a+U7QX/DipbtRYwiO1MGY=")
+    ];
 
   # This one contains whatever you want to overlay
   # You can change versions, add patches, set compilation flags, anything really.
   # https://nixos.wiki/wiki/Overlays
-  modifications = final: prev: {
-    steamPackages = prev.steamPackages.overrideScope (steamFinal: steamPrev: {
-      # Appends the -noverify flag to steam so we can modify some if its files :)
-      steam = steamPrev.steam.overrideAttrs (oldAttrs: {
-        # postInstall = builtins.replaceStrings [ "'s,/usr/bin/steam,steam,g'" ] [ "'s,/usr/bin/steam,steam -bigpicture -noverifyfiles,g'" ] oldAttrs.postInstall;
-        postInstall = builtins.replaceStrings [ "'s,/usr/bin/steam,steam,g'" ] [ "'s,/usr/bin/steam,${final.gamescope}/bin/gamescope -e -f -- steam -tenfoot -noverifyfiles,g'" ] oldAttrs.postInstall;
+  modifications = final: prev:
+    let usePR = usePRRaw final prev; in {
+      steamPackages = prev.steamPackages.overrideScope (steamFinal: steamPrev: {
+        # Appends the -noverify flag to steam so we can modify some if its files :)
+        steam = steamPrev.steam.overrideAttrs (oldAttrs: {
+          # postInstall = builtins.replaceStrings [ "'s,/usr/bin/steam,steam,g'" ] [ "'s,/usr/bin/steam,steam -bigpicture -noverifyfiles,g'" ] oldAttrs.postInstall;
+          postInstall = builtins.replaceStrings [ "'s,/usr/bin/steam,steam,g'" ] [ "'s,/usr/bin/steam,${final.gamescope}/bin/gamescope -e -f -- steam -tenfoot -noverifyfiles,g'" ] oldAttrs.postInstall;
+        });
       });
-    });
 
-    steamtinkerlaunch = prev.steamtinkerlaunch.overrideAttrs (oldAttrs: {
-      postPatch = ''
-        substituteInPlace steamtinkerlaunch --replace 'PROGCMD="''${0##*/}"' 'PROGCMD="steamtinkerlaunch"'
-        substituteInPlace steamtinkerlaunch --replace 'YAD=yad' 'YAD=${final.yad}'
-      '';
-    });
+      steamtinkerlaunch = prev.steamtinkerlaunch.overrideAttrs (oldAttrs: {
+        postPatch = ''
+          substituteInPlace steamtinkerlaunch --replace 'PROGCMD="''${0##*/}"' 'PROGCMD="steamtinkerlaunch"'
+          substituteInPlace steamtinkerlaunch --replace 'YAD=yad' 'YAD=${final.yad}'
+        '';
+      });
 
-    lib = prev.lib // {
-      mine = (import ../lib inputs).lib;
+      lib = prev.lib // {
+        mine = (import ../lib { inherit (final) system; inherit self inputs; }).lib;
+      };
     };
-  };
 
   # When applied, the unstable nixpkgs set (declared in the flake inputs) will
   # be accessible through 'pkgs.unstable'

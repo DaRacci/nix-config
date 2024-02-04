@@ -3,9 +3,7 @@
     inherit (import ../common);
 
     config = { ... }: {
-      services.prometheus = {
-
-      };
+      services.prometheus = { };
     };
   };
 }

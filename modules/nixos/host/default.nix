@@ -11,6 +11,12 @@
       default = throw "host.name is required";
       description = "The name of the host.";
     };
+
+    system = mkOption {
+      type = types.str;
+      default = throw "host.system is required";
+      description = "The system type.";
+    };
   };
 
   config = {

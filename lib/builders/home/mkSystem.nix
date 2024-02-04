@@ -3,13 +3,13 @@
 , pkgsFor ? null
 , pkgs ? pkgsFor system
 
-, username
+, name
 , groups ? [ ]
 , shell ? pkgs.fish
 , ...
 }: { flake, host, config, ... }:
 let inherit (pkgs.lib) mkDefault; in {
-  users.users.${username} = {
+  users.users.${name} = {
     inherit shell;
     isNormalUser = mkDefault true;
 
@@ -27,18 +27,18 @@ let inherit (pkgs.lib) mkDefault; in {
       "libvirtd"
     ] ++ groups);
 
-    hashedPasswordFile = config.sops.secrets."${username}-passwd".path;
-    openssh.authorizedKeys.keys = [ (builtins.readFile "${flake}/home/${username}/id_ed25519.pub") ];
+    hashedPasswordFile = config.sops.secrets."${name}-passwd".path;
+    openssh.authorizedKeys.keys = [ (builtins.readFile "${flake}/home/${name}/id_ed25519.pub") ];
   };
 
-  sops.secrets."${username}-passwd" = {
+  sops.secrets."${name}-passwd" = {
     sopsFile = "${flake}/hosts/${host.name}/secrets.yaml";
     neededForUsers = true;
   };
 
-  home-manager = let hmBase = import ./mkHmHome.nix { inherit self pkgs username; args = { host = { host = config.host; }; }; }; in {
+  home-manager = let hmBase = import ./mkHm.nix { inherit self pkgs name; args = { host = config.host; }; }; in {
     inherit (hmBase) extraSpecialArgs;
 
-    users.${username} = builtins.elemAt hmBase.modules 0;
+    users.${name} = builtins.elemAt hmBase.modules 0;
   };
 }

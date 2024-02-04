@@ -1,3 +1,3 @@
 { ... }: {
-  inherit (import  { });
+  inherit (import { });
 }

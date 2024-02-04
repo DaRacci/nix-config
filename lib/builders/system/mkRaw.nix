@@ -28,12 +28,15 @@ in
     ({ inputs, ... }: {
       imports = [ inputs.home-manager.nixosModule ];
 
-      host.name = name;
+      host = {
+        inherit name system;
+      };
+
       passthru.enable = false; # Why does build break without this?
 
       system.stateVersion = "23.11";
     })
-  ] ++ (builtins.map (username: (import ../home/mkSystemHome.nix { inherit self pkgs username; })) users);
+  ] ++ (builtins.map (name: (import ../home/mkSystem.nix { inherit self pkgs name; })) users);
 
   specialArgs = {
     flake = self;

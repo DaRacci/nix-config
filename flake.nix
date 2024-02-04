@@ -7,7 +7,7 @@
       "https://racci.cachix.org"
     ];
     extra-trusted-public-keys = [
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" 
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "racci.cachix.org-1:Kl4opLxvTV9c77DpoKjUOMLDbCv6wy3GVHWxB384gxg="
     ];
   };
@@ -45,106 +45,70 @@
 
   outputs = { self, nixpkgs, flake-utils, systems, getchoo, nixos-wsl, nixos-generators, ... }@inputs:
     let
-      forEachSystem = nixpkgs.lib.genAttrs [ "aarch64-linux" "x86_64-linux" ];
-      lib = import ./lib inputs;
-
       inherit (self) outputs;
       inherit (nixpkgs.lib) listToAttrs;
-
-      inherit (lib.shell) mkNix mkRust;
-      # inherit (import ./lib/mk.nix inputs) mkHomeManagerConfiguration mkConfigurations;
-
-      configurations = forEachSystem (system: builtins.mapAttrs (v: lib.system.mkSystem system v) {
-        nixe = {
-          deviceType = "desktop";
-          isoFormat = "iso";
-          users = [ "racci" ];
-        };
-
-        surnix = {
-          deviceType = "laptop";
-          isoFormat = "iso";
-          users = [ "racci" ];
-        };
-
-        winix = {
-          deviceType = "desktop";
-          isoFormat = "iso";
-          users = [ "racci" ];
-        };
-
-        nixcloud = {
-          deviceType = "server";
-          isoFormat = "proxmox-lxc";
-        };
-      });
-
-      # configurations = builtins.mapAttrs mkConfigurations {
-      #   nixe = {
-      #     role = "desktop";
-      #     isoFormat = "iso";
-      #     users = {
-      #       racci = {
-      #         extraHome = { pkgs }: {
-      #           shell = pkgs.nushell;
-      #         };
-      #       };
-      #     };
-      #   };
-
-      #   surnix = {
-      #     role = "laptop";
-      #     isoFormat = "iso";
-      #     users = {
-      #       racci = { };
-      #     };
-      #   };
-
-      #   winix = {
-      #     role = "desktop";
-      #     isoFormat = "iso";
-      #     users = {
-      #       racci.extraHome = { pkgs }: { shell = pkgs.nushell; };
-      #     };
-      #   };
-
-      #   nixcloud = {
-      #     role = "server";
-      #     isoFormat = "proxmox-lxc";
-      #   };
-      # };
     in
-    {
-      configurations = configurations;
-      nixosConfigurations = forEachSystem (system: builtins.mapAttrs (n: v: inputs.nixpkgs.lib.nixosSystem v.value) configurations.${system});
+    flake-utils.lib.eachDefaultSystem
+      (system:
+        let
+          lib = import ./lib { inherit self inputs system; };
+          inherit (lib.shell) mkNix mkRust;
 
-      # homeConfigurations = forEachSystem (system: listToAttrs [
-      #   (mkHomeManagerConfiguration { racci = { }; })
-      # ]);
+          homeConfigurations = builtins.mapAttrs (n: v: lib.home.mkHm system n v) {
+            racci = { };
+          };
 
-      devShells = forEachSystem (system: listToAttrs [
-        (mkNix system "default")
-        (mkRust system "rust-stable" { rustChannel = "stable"; })
-        (mkRust system "rust-nightly" { rustChannel = "nightly"; })
-      ]);
+          configurations = builtins.mapAttrs (n: v: lib.system.build system n v) {
+            nixe = {
+              deviceType = "desktop";
+              isoFormat = "iso";
+              users = [ "racci" ];
+            };
 
-      checks = forEachSystem (system: { });
+            surnix = {
+              deviceType = "laptop";
+              isoFormat = "iso";
+              users = [ "racci" ];
+            };
 
-      formatter = forEachSystem (system: nixpkgs.legacyPackages.${system}.nixpkgs-fmt);
+            winix = {
+              deviceType = "desktop";
+              isoFormat = "iso";
+              users = [ "racci" ];
+            };
 
-      packages = nixpkgs.lib.foldl' nixpkgs.lib.recursiveUpdate { } [
-        (forEachSystem (system: import ./pkgs { pkgs = nixpkgs.legacyPackages.${system}; inherit system getchoo; }))
+            nixcloud = {
+              deviceType = "server";
+              isoFormat = "proxmox-lxc";
+            };
+          };
+        in
+        {
+          nixosConfigurations = builtins.mapAttrs (n: v: v.system) configurations;
+          homeConfigurations = builtins.mapAttrs (n: v: inputs.home-manager.lib.homeManagerConfiguration v) homeConfigurations;
 
-        # Image Generators
-        # (nixpkgs.lib.mapAttrsToList (name: conf: conf.iso) configurations)
+          devShells = listToAttrs [
+            (mkNix system "default")
+            (mkRust system "rust-stable" { rustChannel = "stable"; })
+            (mkRust system "rust-nightly" { rustChannel = "nightly"; })
+          ];
 
-        # NixOS Outputs
-        # (nixpkgs.lib.mapAttrsToList (name: conf: conf.nixosSystem.config.system.build.toplevel) configurations)
-      ] // builtins.mapAttrs (n: v: v.iso) configurations;
+          packages = lib.lib.attrsets.recursiveMergeAttrs [
+            (import ./pkgs { pkgs = nixpkgs.legacyPackages.${system}; inherit system getchoo; })
 
-      overlays = forEachSystem (system: import ./overlays { pkgs = nixpkgs.legacyPackages.${system}; inherit inputs system outputs getchoo; });
+            {
+              # Image Generators
+              images = (builtins.mapAttrs (n: v: v.iso) configurations);
 
-      # Custom Modules
+              # NixOS Outputs
+              outputs = (builtins.mapAttrs (n: v: v.system.config.system.build.toplevel) configurations);
+            }
+          ];
+
+          checks = { };
+          formatter = nixpkgs.legacyPackages.${system}.nixpkgs-fmt;
+          overlays = import ./overlays { pkgs = nixpkgs.legacyPackages.${system}; inherit self inputs system outputs getchoo; };
+        }) // {
       nixosModules = import ./modules/nixos;
       homeManagerModules = import ./modules/home-manager;
     };

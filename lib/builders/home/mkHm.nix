@@ -4,18 +4,17 @@
 , system ? null
 , pkgs ? pkgsFor system
 
-, username
+, name
 , args ? { }
 , ...
-}:
-let inherit (pkgs.lib) optional; in {
+}: {
   inherit pkgs;
 
   modules = [
     ({ flake, host, config, lib, ... }: {
       home = {
-        inherit username;
-        homeDirectory = lib.mkForce "/home/${username}";
+        username = name;
+        homeDirectory = lib.mkForce "/home/${name}";
 
         stateVersion = lib.mkForce "23.11";
         sessionPath = [ "$HOME/.local/bin" ];
@@ -23,7 +22,7 @@ let inherit (pkgs.lib) optional; in {
 
       imports = [
         "${flake}/home/common/global"
-      ] ++ optional (host != null && (builtins.hasAttr "name" host) && host.name != null) [ "${flake}/home/${host.name}.nix" ];
+      ] ++ (pkgs.lib.optionals (host != null && host.name != null) [ "${flake}/home/${name}/${host.name}.nix" ]);
     })
   ];
 

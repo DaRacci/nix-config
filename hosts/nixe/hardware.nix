@@ -9,7 +9,7 @@
     ../common/optional/nvidia.nix
     ../common/optional/backlight.nix
     ../common/optional/openrgb.nix
-    ../common/optional/cooler_control.nix
+    ../common/optional/cooling.nix
     ../common/optional/secureboot.nix
     ../common/optional/biometrics.nix
   ];

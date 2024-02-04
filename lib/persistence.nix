@@ -8,7 +8,4 @@
   # hasPersistence = (builtins.hasAttr "persistence" options.environment);
 
   persistable = path: "${lib.optionalString host.persistence.enable "/persist"}${path}";
-  # if (hasPersistence)
-  # then persistablePath path
-  # else path;
 }

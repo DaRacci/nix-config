@@ -1,7 +1,9 @@
-{ config, ... }: let
+{ config, ... }:
+let
   persistDir = "/persist/container/minio/data";
   image = "minio/minio:latest";
-in rec {
+in
+rec {
   services.minio = {
     # inherit (import ../common);
 

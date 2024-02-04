@@ -1,4 +1,4 @@
-{ flake, pkgs, w... }:
+{ flake, pkgs, ... }:
 let inherit (pkgs) lib; in {
   imports = [
     "${flake}/home/common/desktop/common"

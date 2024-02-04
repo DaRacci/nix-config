@@ -2,7 +2,8 @@
 
 with lib; let
   hostname = config.networking.hostName;
-in {
+in
+{
   options.hardware.encrypted-root = {
     enable = mkEnableOption "encrypted-root";
   };

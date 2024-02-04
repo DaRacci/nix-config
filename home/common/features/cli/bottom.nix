@@ -1,7 +1,6 @@
 {
   programs.bottom = {
     enable = true;
-    settings = {
-    };
+    settings = { };
   };
 }
