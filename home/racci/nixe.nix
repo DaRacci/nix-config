@@ -4,7 +4,6 @@
 
     ./features/cli
     ../common/features/games
-    ./features/desktop/development
     ../common/applications
   ];
 
@@ -24,6 +23,11 @@
     };
 
     Install.WantedBy = [ "graphical-session.target" ];
+  };
+
+  purpose.development = {
+    enable = true;
+    rust.enable = true;
   };
 
   programs.autorandr = {

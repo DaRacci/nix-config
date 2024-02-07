@@ -1,7 +1,6 @@
 { pkgs, lib, ... }: rec {
   imports = [
     ./features/cli
-    ./features/desktop/development
   ];
 
   home.sessionVariables = {
@@ -20,6 +19,13 @@
       ${pkgs.nushell}/bin/nu -il
     '';
   };
+
+  purpose.development = {
+    enable = true;
+    rust.enable = true;
+  };
+
+  users.users.racci.home.shell = pkgs.nushell;
 
   programs.git = {
     signing.key = lib.mkForce "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDqwbL8BvpSKb1AYbHOIv3sM+QDNLZfAaSJnBZcOl71C";

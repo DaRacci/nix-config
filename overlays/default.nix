@@ -16,6 +16,7 @@ in
     let usePR = usePRRaw final prev; in prev.lib.foldl' prev.lib.recursiveUpdate { } [
       (import ../pkgs { system = final.system; pkgs = final; inherit getchoo; })
       (usePR "coolercontrol" "codifryed" "coolercontrol-0.17.0" "sha256-wfjrWqfpL5qVnc6DVKlsO9a+U7QX/DipbtRYwiO1MGY=")
+      (usePR "jetbrains" "ners" "jetbrains" "sha256-3H9TYiygYrzL6mdLFFHFiah4wSvOyAQJzMoRC2W+x6A=")
     ];
 
   # This one contains whatever you want to overlay

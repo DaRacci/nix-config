@@ -5,9 +5,9 @@
 
 , name
 , groups ? [ ]
-, shell ? pkgs.fish
+, shell ? pkgs.nushell
 , ...
-}: { flake, host, config, ... }:
+}: { flake, config, ... }:
 let inherit (pkgs.lib) mkDefault; in {
   users.users.${name} = {
     inherit shell;
@@ -32,7 +32,7 @@ let inherit (pkgs.lib) mkDefault; in {
   };
 
   sops.secrets."${name}-passwd" = {
-    sopsFile = "${flake}/hosts/${host.name}/secrets.yaml";
+    sopsFile = "${flake}/hosts/${config.host.name}/secrets.yaml";
     neededForUsers = true;
   };
 

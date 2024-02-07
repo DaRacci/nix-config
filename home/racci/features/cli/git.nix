@@ -7,6 +7,8 @@
       userName = "DaRacci";
       lfs.enable = false;
 
+      ignores = [ ".idea" ];
+
       signing = {
         signByDefault = true;
         # TODO dynamic

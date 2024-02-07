@@ -35,6 +35,7 @@
     # Other misc modules
     arion = { url = "github:hercules-ci/arion"; };
     nix-doom-emacs = { url = "github:nix-community/nix-doom-emacs"; };
+    vscode-extensions = { url = "github:nix-community/nix-vscode-extensions"; };
 
     # DevShell modules
     pre-commit = { url = "github:cachix/pre-commit-hooks.nix"; inputs.nixpkgs.follows = "nixpkgs"; };
@@ -46,13 +47,29 @@
   outputs = { self, nixpkgs, flake-utils, systems, getchoo, nixos-wsl, nixos-generators, ... }@inputs:
     let
       inherit (self) outputs;
-      inherit (nixpkgs.lib) listToAttrs;
+      inherit (nixpkgs.lib) listToAttrs foldl' recursiveUpdate;
     in
-    flake-utils.lib.eachDefaultSystem
-      (system:
+    foldl' recursiveUpdate { } [
+      (flake-utils.lib.eachDefaultSystem (system:
         let
           lib = import ./lib { inherit self inputs system; };
           inherit (lib.shell) mkNix mkRust;
+        in
+        {
+          devShells = listToAttrs [
+            (mkNix system "default")
+            (mkRust system "rust-stable" { rustChannel = "stable"; })
+            (mkRust system "rust-nightly" { rustChannel = "nightly"; })
+          ];
+
+          formatter = nixpkgs.legacyPackages.${system}.nixpkgs-fmt;
+          packages = (import ./pkgs { pkgs = nixpkgs.legacyPackages.${system}; inherit system getchoo; });
+          overlays = import ./overlays { pkgs = nixpkgs.legacyPackages.${system}; inherit self inputs system outputs getchoo; };
+        }))
+      (
+        let
+          system = "x86_64-linux";
+          lib = import ./lib { inherit self inputs system; };
 
           homeConfigurations = builtins.mapAttrs (n: v: lib.home.mkHm system n v) {
             racci = { };
@@ -60,26 +77,29 @@
 
           configurations = builtins.mapAttrs (n: v: lib.system.build system n v) {
             nixe = {
-              deviceType = "desktop";
-              isoFormat = "iso";
               users = [ "racci" ];
+
+              isoFormat = "iso";
+              deviceType = "desktop";
             };
 
             surnix = {
-              deviceType = "laptop";
-              isoFormat = "iso";
               users = [ "racci" ];
+
+              isoFormat = "iso";
+              deviceType = "laptop";
             };
 
             winix = {
-              deviceType = "desktop";
-              isoFormat = "iso";
               users = [ "racci" ];
+
+              isoFormat = "iso";
+              deviceType = "desktop";
             };
 
             nixcloud = {
-              deviceType = "server";
               isoFormat = "proxmox-lxc";
+              deviceType = "server";
             };
           };
         in
@@ -87,29 +107,17 @@
           nixosConfigurations = builtins.mapAttrs (n: v: v.system) configurations;
           homeConfigurations = builtins.mapAttrs (n: v: inputs.home-manager.lib.homeManagerConfiguration v) homeConfigurations;
 
-          devShells = listToAttrs [
-            (mkNix system "default")
-            (mkRust system "rust-stable" { rustChannel = "stable"; })
-            (mkRust system "rust-nightly" { rustChannel = "nightly"; })
-          ];
+          packages = {
+            # Image Generators
+            images = (builtins.mapAttrs (n: v: v.iso) configurations);
 
-          packages = lib.lib.attrsets.recursiveMergeAttrs [
-            (import ./pkgs { pkgs = nixpkgs.legacyPackages.${system}; inherit system getchoo; })
+            # NixOS Outputs
+            outputs = (builtins.mapAttrs (n: v: v.system.config.system.build.toplevel) configurations);
+          };
 
-            {
-              # Image Generators
-              images = (builtins.mapAttrs (n: v: v.iso) configurations);
-
-              # NixOS Outputs
-              outputs = (builtins.mapAttrs (n: v: v.system.config.system.build.toplevel) configurations);
-            }
-          ];
-
-          checks = { };
-          formatter = nixpkgs.legacyPackages.${system}.nixpkgs-fmt;
-          overlays = import ./overlays { pkgs = nixpkgs.legacyPackages.${system}; inherit self inputs system outputs getchoo; };
-        }) // {
-      nixosModules = import ./modules/nixos;
-      homeManagerModules = import ./modules/home-manager;
-    };
+          nixosModules = import ./modules/nixos;
+          homeManagerModules = import ./modules/home-manager;
+        }
+      )
+    ];
 }
