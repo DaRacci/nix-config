@@ -38,6 +38,15 @@ in
         '';
       });
 
+      discord =
+        let
+          nss =
+            if final.stdenv.buildPlatform.isLinux
+            then { nss = final.nss_latest; }
+            else { };
+        in
+        final.discord.override ({ withOpenASAR = true; } // nss);
+
       lib = prev.lib // {
         mine = (import ../lib { inherit (final) system; inherit self inputs; }).lib;
       };
