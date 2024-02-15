@@ -119,7 +119,7 @@ let cfg = config.purpose.gaming.steam; in {
       #region - Fix download speed issues
       # Line 1: Disables HTTP/2
       # Line 2: Allows concurrent server connections
-      home.file.".local/share/steam/steam-dev.cfg" = ''
+      home.file.".local/share/steam/steam-dev.cfg".text = ''
         @nClientDownloadEnableHTTP2PlatformLinux 0
         @fDownloadRateImprovementToAddAnotherConnection 1.0
       '';
