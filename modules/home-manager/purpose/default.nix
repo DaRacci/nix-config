@@ -4,6 +4,7 @@ in
 {
   imports = [
     ./development
+    ./gaming
   ];
 
   options.purposes = {

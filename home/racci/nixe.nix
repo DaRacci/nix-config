@@ -26,9 +26,23 @@
     Install.WantedBy = [ "graphical-session.target" ];
   };
 
-  purpose.development = {
-    enable = true;
-    rust.enable = true;
+  purpose = {
+    development = {
+      enable = true;
+      rust.enable = true;
+    };
+
+    gaming = {
+      enable = true;
+      osu.enable = true;
+      roblox.enable = true;
+      steam.enable = true;
+
+      modding = {
+        enable = true;
+        enableSatisfactory = true;
+      };
+    };
   };
 
   programs.autorandr = {
