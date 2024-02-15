@@ -1,11 +1,16 @@
-{ inputs, pkgs, ... }: {
+{ inputs, config, pkgs, ... }: {
   imports = [
     ../../../../common/desktop/hyprland
+    ./anyrun.nix
     ./mako.nix
+    ./waybar.nix
   ];
 
   wayland.windowManager.hyprland = {
-    plugins = [ inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars ];
+    plugins = with inputs.hyprland-plugins.packages.${pkgs.system}; [
+      borders-plus-plus
+      hyprtrails
+    ];
 
     extraConfig =
       let
@@ -27,25 +32,42 @@
             animation = fade, 1, 10, default
             animation = workspaces, 1, 5, wind
           }
-
-          # animations {
-          #   bezier = myBezier, 0.05, 0.9, 0.1, 1.05
-          #   animation = windows, 1, 5, myBezier
-          #   animation = windowsOut, 1, 7, default, popin 80%
-          #   animation = border, 1, 10, default
-          #   animation = fade, 1, 7, default
-          #   animation = workspaces, 1, 6, default
-          # }
         '';
 
         daemons = ''
           exec-once = ${pkgs.libsForQt5.polkit-kde-agent}/lib/polkit-kde-authentication-agent-1
+          exec-once = ${config.programs.waybar.package}/bin/waybar
+          
+          # Wallpaper
+          exec-once = ${pkgs.swww}/bin/swww init
+          exec-once = ${pkgs.writeShellScriptBin "sww-random-wallpaper" ''
+            export SWWW_TRANSITION=random
+            export SWWW_TRANSITION_STEP=2
+            export SWWW_TRANSITION_DURATION=4
+            export SWWW_TRANSITION_FPS=165
+            export SWWW_TRANSITION_ANGLE=90
+            export SWWW_TRANSITION_POS=left
+            export SWWW_TRANSITION_BEZIER=.07,.56,1,.25
+
+            # This controls (in seconds) when to switch to the next image
+            INTERVAL=10
+            DIRECTORY=$HOME/Pictures/Wallpapers
+
+            while true; do
+              find "$1" | while read -r img; do
+                echo "$((RANDOM % 1000)):$img"
+              done | sort -n | cut -d':' -f2- | while read -r img; do
+                ${pkgs.swww} img "$img"
+                sleep $INTERVAL
+              done
+            done
+          ''}
         '';
 
         monitors = ''
-          monitor=DP-0,2560x1440@144,0x0,1
-          monitor=DP-2,2560x1440@165,2560x0,0
-          monitor=DP-4,2560x1440@144,5120x0,0
+          monitor=DP-1,2560x1440@144,-2560x0,1
+          monitor=DP-2,2560x1440@165,0x0,1
+          monitor=DP-3,2560x1440@144,2560x0,1
           monitor=,highrr,auto,1
         '';
 
@@ -66,14 +88,22 @@
           };
 
           global = {
+            env = ''
+              env = LIBVA_DRIVER_NAME,nvidia
+              env = XDG_SESSION_TYPE,wayland
+              env = GBM_BACKEND,nvidia-drm
+              env = __GLX_VENDOR_LIBRARY_NAME,nvidia
+              env = WLR_NO_HARDWARE_CURSORS,1
+            '';
+
             shortcuts = ''
               bind=${mod},RETURN,exec,${pkgs.alacritty}/bin/alacritty
             '';
 
             rofi = ''
-              bind = $mainMod, A, exec, pkill rofi || ~/.config/hypr/scripts/rofilaunch.sh d    # launch desktop applications
-              bind = $mainMod, tab, exec, pkill rofi || ~/.config/hypr/scripts/rofilaunch.sh w  # switch between desktop applications
-              bind = $mainMod, R, exec, pkill rofi || ~/.config/hypr/scripts/rofilaunch.sh f    # browse system files
+              bind = ${mod}, A, exec, pkill rofi || ~/.config/hypr/scripts/rofilaunch.sh d    # launch desktop applications
+              bind = ${mod}, tab, exec, pkill rofi || ~/.config/hypr/scripts/rofilaunch.sh w  # switch between desktop applications
+              bind = ${mod}, R, exec, pkill rofi || ~/.config/hypr/scripts/rofilaunch.sh f    # browse system files
             '';
 
             audio = ''
@@ -92,6 +122,13 @@
               bind = ${mod},right,movefocus,r
               bind = ${mod},up,movefocus,u
               bind = ${mod},down,movefocus,d
+            '';
+
+            movement = ''
+              bind = ${mod} SHIFT,left,movewindow,l
+              bind = ${mod} SHIFT,right,movewindow,r
+              bind = ${mod} SHIFT,up,movewindow,u
+              bind = ${mod} SHIFT,down,movewindow,d
             '';
 
             window = ''
@@ -113,8 +150,8 @@
             # '';
 
             session = ''
-              bind = CTRL_ALT,DEL,exit        # Exit session
-              bind = ${mod},SHIFT,DEL,restart # Restart session
+              # bind = CTRL_ALT,DELETE,exit        # Exit session
+              # bind = ${mod},SHIFT,DELETE,restart # Restart session
             '';
 
             workspace = ''
@@ -155,18 +192,19 @@
           }
 
           plugin {
-            hyprbars {
-              bar_color = rgb(2a2a2a)
-              bar_height = 28
-              col_text = rgba(ffffffdd)
-              bar_text_size = 11
-              bar_text_font = Ubuntu Nerd Font
-    
-              buttons {
-                button_size = 11
-                col.maximize = rgba(ffffff11)
-                col.close = rgba(ff111133)
-              }
+            borders-plus-plus {
+                add_borders = 1 # 0 - 9
+
+                # you can add up to 9 borders
+                col.border_1 = rgb(ffffff)
+                col.border_2 = rgb(2222ff)
+
+                # -1 means "default" as in the one defined in general:border_size
+                border_size_1 = 10
+                border_size_2 = -1
+
+                # makes outer edges match rounding of the parent. Turn on / off to better understand. Default = on.
+                natural_rounding = yes
             }
           }
         '';

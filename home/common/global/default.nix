@@ -6,6 +6,7 @@ in
   imports = [
     inputs.nur.hmModules.nur
     inputs.sops-nix.homeManagerModule
+    inputs.anyrun.homeManagerModules.default
   ] ++ [
     ./dynamic-linker.nix
     ./nix.nix

@@ -32,6 +32,11 @@
     lanzaboote = { url = "github:nix-community/lanzaboote/v0.3.0"; inputs.nixpkgs.follows = "nixpkgs"; };
     nix-ld-rs = { url = "github:nix-community/nix-ld-rs"; inputs.nixpkgs.follows = "nixpkgs"; };
 
+    # Desktop Sessions
+    hyprland.url = "github:hyprwm/Hyprland";
+    hyprland-plugins = { url = "github:hyprwm/hyprland-plugins"; inputs.hyprland.follows = "hyprland"; };
+    anyrun = { url = "github:Kirottu/anyrun"; inputs.nixpkgs.follows = "nixpkgs-unstable"; };
+
     # Other misc modules
     arion = { url = "github:hercules-ci/arion"; };
     nix-doom-emacs = { url = "github:nix-community/nix-doom-emacs"; };

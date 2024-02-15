@@ -1,6 +1,7 @@
 { pkgs, ... }: {
   imports = [
     ./features/desktop/gnome.nix
+    ./features/desktop/hyprland
 
     ./features/cli
     ../common/features/games

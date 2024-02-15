@@ -29,7 +29,8 @@ in
       enableUpdateCheck = false;
 
       # TODO -> Add [aaron-bond.better-comments, github.copilot-labs, wayou.vscode-todo-highlight]
-      extensions = let extensions = inputs.vscode-extensions.extensions.${pkgs.stdenv.system}.forVSCodeVersion package.version; in with extensions.vscode-marketplace; [
+      # forVSCodeVersion package.version
+      extensions = let extensions = inputs.vscode-extensions.extensions.${pkgs.stdenv.system}; in with extensions.vscode-marketplace; [
         # Theme & Looks
         zhuangtongfa.material-theme
         pkief.material-icon-theme

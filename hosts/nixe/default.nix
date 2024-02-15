@@ -7,14 +7,14 @@
     ../common/optional/virtualisation.nix
 
     ../common/optional/gnome.nix
+    ../common/optional/hyprland.nix
+
     ../common/optional/pipewire.nix
     ../common/optional/quietboot.nix
     ../common/optional/gaming.nix
     ../common/optional/tailscale.nix
   ];
 
-  # services.teamviewer.enable = true;
-  # services.ratbagd.enable = true;
   programs.nix-ld.enable = true;
 
   host = {

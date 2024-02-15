@@ -1,11 +1,7 @@
-{ pkgs, config, ... }: {
+{ inputs, pkgs, ... }: {
   programs.hyprland = {
     enable = true;
-    nvidiaPatches = true;
     xwayland.enable = true;
-    package = pkgs.unstable.hyprland.override {
-      enableXWayland = config.programs.hyprland.xwayland.enable;
-      enableNvidiaPatches = config.programs.hyprland.nvidiaPatches;
-    };
+    package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
   };
 }
