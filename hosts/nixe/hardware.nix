@@ -9,13 +9,13 @@
     ../common/optional/nvidia.nix
     ../common/optional/backlight.nix
     ../common/optional/openrgb.nix
-    ../common/optional/cooler_control.nix
+    ../common/optional/cooling.nix
     ../common/optional/secureboot.nix
     ../common/optional/biometrics.nix
   ];
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_6_7;
+    kernelPackages = pkgs.linuxPackages_zen;
 
     initrd = {
       # TODO :: Needed? ahci, sd_mod usbhid usb_storage

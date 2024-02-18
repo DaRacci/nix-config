@@ -21,7 +21,7 @@ rustPlatform.buildRustPackage rec {
 
   nativeBuildInputs = [ pkg-config ];
 
-  buildInputs = [];
+  buildInputs = [ ];
 
   meta = with lib; {
     description = "A Rust app to Install and Update GE-Proton for Steam, and Wine-GE for Lutris";

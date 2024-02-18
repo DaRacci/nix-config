@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 with lib;
-  let cfg = config.hardware.openrgb;
+let cfg = config.hardware.openrgb;
 in {
   options.hardware.openrgb = {
     enable = mkEnableOption "OpenRGB";

@@ -8,17 +8,16 @@
 
     nvidia = {
       # package = config.boot.kernelPackages.nvidiaPackages.stable;
-      open = false;
+      open = true;
       nvidiaSettings = true;
       nvidiaPersistenced = true;
       modesetting.enable = true;
       forceFullCompositionPipeline = true;
       powerManagement = {
         enable = true;
-        # finegrained = true;
       };
     };
   };
 
-  boot.kernelParams = [ "nvidia.NVreg_EnableResizableBar=1" ];
+  boot.kernelParams = [ "nvidia.NVreg_EnableResizableBar=1" "nvidia.NVreg_PreserveVideoMemoryAllocations=1" ];
 }

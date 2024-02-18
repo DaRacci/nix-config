@@ -1,6 +1,6 @@
-{ lib, outputs, pkgs, ... }: {
+{ lib, outputs, pkgs, host, ... }: {
   nixpkgs = {
-    overlays = builtins.attrValues outputs.overlays.${builtins.currentSystem};
+    overlays = builtins.attrValues outputs.overlays.${host.system};
     config = {
       allowUnfree = true;
       allowUnfreePredicate = (_: true);

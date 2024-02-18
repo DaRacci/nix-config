@@ -1,10 +1,10 @@
 { pkgs, ... }: {
   imports = [
     ./features/desktop/gnome.nix
+    ./features/desktop/hyprland
 
     ./features/cli
     ../common/features/games
-    ./features/desktop/development
     ../common/applications
   ];
 
@@ -24,6 +24,25 @@
     };
 
     Install.WantedBy = [ "graphical-session.target" ];
+  };
+
+  purpose = {
+    development = {
+      enable = true;
+      rust.enable = true;
+    };
+
+    gaming = {
+      enable = true;
+      osu.enable = true;
+      roblox.enable = true;
+      steam.enable = true;
+
+      modding = {
+        enable = true;
+        enableSatisfactory = true;
+      };
+    };
   };
 
   programs.autorandr = {

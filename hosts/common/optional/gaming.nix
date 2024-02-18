@@ -1,6 +1,12 @@
 { pkgs, ... }: {
-  hardware.steam-hardware.enable = true;
-  hardware.opengl.driSupport32Bit = true;
+  hardware = {
+    steam-hardware.enable = true;
+    opengl = {
+      enable = true;  
+      driSupport = true;
+      driSupport32Bit = true;
+    };
+  };
 
   programs.gamescope = {
     enable = true;
