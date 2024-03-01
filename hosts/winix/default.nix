@@ -13,7 +13,7 @@
     };
   };
 
-  environment.systemPackages = with pkgs; [ wget ];
+  environment.systemPackages = with pkgs; [ wget wslu ];
 
   services.tailscale = {
     enable = true;
