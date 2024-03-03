@@ -19,7 +19,7 @@
   ];
 
   home.packages = with pkgs; [
-    btop
+    unstable.btop
     nvtop
     ctop
 

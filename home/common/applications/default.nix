@@ -1,5 +1,6 @@
 { pkgs, ... }: {
   imports = [
+    ./browser.nix
     ./email.nix
     ./image-editor.nix
     ./media.nix
