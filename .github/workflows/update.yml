@@ -21,7 +21,7 @@ jobs:
         with:
           commit-msg: "chore(deps): update flake.lock"
           pr-title: "Update flake.lock"
-          pr-labels: | # Labels to be set on the PR
+          pr-labels: |
             dependencies
             automated
 
