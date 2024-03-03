@@ -13,4 +13,8 @@
 
   #   format = "proxmox-lxc";
   # };
+
+  # TODO :: Remove this override when the patch is either updated to removed from the builder
+  # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/by-name/vi/vinegar/package.nix
+  vinegar = pkgs.callPackage ./vinegar.nix { };
 }
