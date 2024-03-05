@@ -26,27 +26,30 @@
     # Base Modules
     home-manager = { url = "github:nix-community/home-manager/release-23.11"; inputs.nixpkgs.follows = "nixpkgs"; };
     nixos-hardware = { url = "github:nixos/nixos-hardware"; };
-    nixos-wsl = { url = "github:nix-community/NixOS-WSL"; };
     sops-nix = { url = "github:Mic92/sops-nix"; inputs.nixpkgs.follows = "nixpkgs"; };
     impermanence = { url = "github:nix-community/impermanence"; };
-    lanzaboote = { url = "github:nix-community/lanzaboote/v0.3.0"; inputs.nixpkgs.follows = "nixpkgs"; };
     nix-ld-rs = { url = "github:nix-community/nix-ld-rs"; inputs.nixpkgs.follows = "nixpkgs"; };
+    lanzaboote = { url = "github:nix-community/lanzaboote/v0.3.0"; inputs.nixpkgs.follows = "nixpkgs"; };
+
+    # Modules only used on some systems
+    nixos-wsl = { url = "github:nix-community/NixOS-WSL"; };
+    attic = { url = "github:zhaofengli/attic"; inputs = { nixpkgs.follows = "nixpkgs-unstable"; nixpkgs-stable.follows = "nixpkgs"; flake-utils.follows = "flake-utils"; flake-compat.follows = "flake-compat"; }; };
 
     # Desktop Sessions
     hyprland.url = "github:hyprwm/Hyprland";
     hyprland-plugins = { url = "github:hyprwm/hyprland-plugins"; inputs.hyprland.follows = "hyprland"; };
-    anyrun = { url = "github:Kirottu/anyrun"; inputs.nixpkgs.follows = "nixpkgs-unstable"; };
+    anyrun = { url = "github:Kirottu/anyrun"; inputs = { nixpkgs.follows = "nixpkgs-unstable"; }; };
 
     # Other misc modules
-    arion = { url = "github:hercules-ci/arion"; };
-    nix-doom-emacs = { url = "github:nix-community/nix-doom-emacs"; };
+    # arion = { url = "github:hercules-ci/arion"; };
+    # nix-doom-emacs = { url = "github:nix-community/nix-doom-emacs"; };
     vscode-extensions = { url = "github:nix-community/nix-vscode-extensions"; };
 
     # DevShell modules
-    pre-commit = { url = "github:cachix/pre-commit-hooks.nix"; inputs.nixpkgs.follows = "nixpkgs"; };
+    # pre-commit = { url = "github:cachix/pre-commit-hooks.nix"; inputs.nixpkgs.follows = "nixpkgs"; };
     cocogitto = { url = "github:DaRacci/cocogitto"; inputs.nixpkgs.follows = "nixpkgs"; };
     fenix = { url = "github:nix-community/fenix"; inputs.nixpkgs.follows = "nixpkgs"; };
-    getchoo = { url = "github:getchoo/nix-exprs"; };
+    # getchoo = { url = "github:getchoo/nix-exprs"; };
   };
 
   outputs = { self, nixpkgs, flake-utils, systems, getchoo, nixos-wsl, nixos-generators, ... }@inputs:
@@ -80,6 +83,7 @@
             racci = { };
           };
 
+          # TODO - Scan the folders for all the configurations and generate the list.
           configurations = builtins.mapAttrs (n: v: lib.system.build system n v) {
             nixe = {
               users = [ "racci" ];
@@ -103,6 +107,11 @@
             };
 
             nixcloud = {
+              isoFormat = "proxmox-lxc";
+              deviceType = "server";
+            };
+
+            nixserv = {
               isoFormat = "proxmox-lxc";
               deviceType = "server";
             };
