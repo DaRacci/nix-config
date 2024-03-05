@@ -35,7 +35,7 @@
     gaming = {
       enable = true;
       osu.enable = true;
-      roblox.enable = true;
+      # roblox.enable = true;
       steam.enable = true;
 
       modding = {
