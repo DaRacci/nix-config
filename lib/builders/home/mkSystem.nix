@@ -5,7 +5,7 @@
 
 , name
 , groups ? [ ]
-, shell ? pkgs.nushell
+, shell ? pkgs.bash
 , ...
 }: { flake, config, ... }:
 let inherit (pkgs.lib) mkDefault; in {
