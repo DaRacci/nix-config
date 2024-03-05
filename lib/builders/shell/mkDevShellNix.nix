@@ -5,7 +5,8 @@
 }:
 let
   pkgs = pkgsFor system;
-in (import ./mkDevShell.nix { inherit system name pkgsFor; }).overrideAttrs(oldAttrs: {
+in
+(import ./mkDevShell.nix { inherit system name pkgsFor; }).overrideAttrs (oldAttrs: {
   nativeBuildInputs = with pkgs; [
     nix
     home-manager

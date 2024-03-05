@@ -63,7 +63,8 @@ let
   useMold = isNative && targetPlatform.isLinux;
   useWine = targetPlatform.isWindows && system == "x86_64-linux";
   TARGET = (builtins.replaceStrings [ "-" ] [ "_" ] (pkgs.lib.toUpper rust-target));
-in (import ./mkDevShell.nix { inherit system name pkgsFor; }).overrideAttrs(oldAttrs: {
+in
+(import ./mkDevShell.nix { inherit system name pkgsFor; }).overrideAttrs (oldAttrs: {
   inherit name;
 
   # Arguments that can be reused in a flake or something.
