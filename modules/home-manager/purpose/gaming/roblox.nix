@@ -2,19 +2,27 @@
   options.purpose.gaming.roblox = {
     enable = mkEnableOption "Enable Roblox launcher";
 
-    grapejuicePackage = mkOption {
+    vinegarPackage = mkOption {
       type = types.package;
-      default = pkgs.unstable.grapejuice;
-      description = "The package to use for Grapejuice";
+      default = pkgs.vinegar;
+      description = "The package to use for Vinegar";
     };
   };
 
   config = mkIf cfg.enable {
-    home.packages = [ cfg.grapejuicePackage ];
+    home.packages = [ cfg.vinegarPackage ];
 
     user.persistence.directories = [
-      ".config/brinkervii/grapejuice"
-      ".local/share/grapejuice"
+      ".local/share/vinegar/"
     ];
+
+    home.file.".config/vinegar/config.toml".text = ''
+      # See how to configure Vinegar on the documentation website:
+      # https://vinegarhq.org/Configuration
+
+      # sanitize_env=true
+      # renderer=vulkan
+      # discord_rpc=true
+    '';
   };
 }

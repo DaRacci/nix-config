@@ -5,6 +5,7 @@ in
   imports = [
     ./development
     ./gaming
+    ./modelling
   ];
 
   options.purposes = {

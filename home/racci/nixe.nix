@@ -43,6 +43,11 @@
         enableSatisfactory = true;
       };
     };
+
+    modelling = {
+      enable = true;
+      blender.enable = true;
+    };
   };
 
   programs.autorandr = {

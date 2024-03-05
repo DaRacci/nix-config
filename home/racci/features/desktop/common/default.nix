@@ -1,7 +1,6 @@
 { ... }: {
   imports = [
     ./denaro.nix
-    ./firefox.nix
     ./nextcloud.nix
     ./podman.nix
     ./secrets.nix
