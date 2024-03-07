@@ -8,9 +8,8 @@ in
     ./modelling
   ];
 
-  options.purposes = {
+  options.purpose = {
     enable = mkEnableOption "If purpose auto-configuration should happen.";
-    default = true;
   };
 
   config = mkIf cfg.enable { };

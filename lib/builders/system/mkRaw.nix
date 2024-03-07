@@ -26,7 +26,7 @@ in
     "${hostDir}"
 
     ({ inputs, ... }: {
-      imports = [ inputs.home-manager.nixosModule ];
+      imports = [ inputs.home-manager.nixosModule inputs.nixos-generators.nixosModules.all-formats ];
 
       host = {
         inherit name system;
