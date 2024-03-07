@@ -7,7 +7,7 @@
   lock-false = mkLockedValue false;
   lock-true = mkLockedValue true;
 
-  mkExtension = shortId: guid: args: nameValuePair shortId ({
+  mkExtension = shortId: guid: args: nameValuePair guid ({
     install_url = "https://addons.mozilla.org/firefox/downloads/latest/${shortId}/latest.xpi";
     installation_mode = "force_installed";
   } // args);
@@ -89,12 +89,9 @@ in
         * Check about:debugging#/runtime/this-firefox for extension/add-on ID strings. */
         ExtensionSettings = (listToAttrs (mapAttrsToList (n: v: mkSimpleExtension n v.id) Extensions)) // {
           # "*" = {
-          #   installation_mode = "blocked"; # Blocks all addons except the ones specified above
-          #   allowed_types = [ "extension" ];
-          # };
         };
 
-        "3rdParty".Extensions =
+        "3rdparty".Extensions =
           let
             allowPrivateBrowsing = ext: nameValuePair ext.id {
               permissions = [ "internal:privateBrowsingAllowed" ];
