@@ -20,9 +20,7 @@ let
   };
 in
 {
-  environment.etc = {
-
-  };
+  environment.etc = { };
 
   services.openssh = {
     enable = true;
