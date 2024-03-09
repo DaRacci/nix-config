@@ -122,6 +122,7 @@ in
         "files.eol" = "\n";
 
         "git.autofetch" = true;
+        "git.confirmSync" = false;
 
         "nix.enableLanguageServer" = true;
         "nix.serverPath" = "${pkgs.unstable.nixd}/bin/nixd";
