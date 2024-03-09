@@ -43,6 +43,7 @@ in
 
         # Sidebar Additions
         gruntfuggly.todo-tree
+        eamodio.gitlens
 
         # Language Support
         redhat.vscode-xml
@@ -96,9 +97,9 @@ in
       ]));
 
       userSettings = {
-        workbench.iconTheme = "material-icon-theme";
-        workbench.colorTheme = "One Dark Pro Mix";
-        workbench.startupEditor = "none";
+        "workbench.iconTheme" = "material-icon-theme";
+        "workbench.colorTheme" = "One Dark Pro Mix";
+        "workbench.startupEditor" = "none";
 
         "window.zoomLevel" = 3;
 
@@ -109,13 +110,13 @@ in
         "editor.formatOnSave" = true;
         "editor.autoClosingQuotes" = "always";
         "editor.autoClosingBrackets" = "always";
-        "editor.inlineSuggestenabled" = true;
+        "editor.inlineSuggest.enabled" = true;
         "editor.mouseWheelZoom" = true;
 
         "diffEditor.ignoreTrimWhitespace" = false;
 
         "github.copilot.enable"."*" = true;
-        "github.copilot.advanced.indentationMode"."*" = true;
+        "github.copilot.advanced".indentationMode."*" = true;
 
         "files.autoSave" = "afterDelay";
         "files.eol" = "\n";
