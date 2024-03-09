@@ -10,6 +10,10 @@ in
   sops = {
     age.sshKeyPaths = map getKeyPath keys;
     defaultSopsFile = "${hostDir}/secrets.yaml";
+
+    secrets = {
+      SSH_PRIVATE_KEY = {};
+    };
   };
 
   # system.activationScripts.copy-ssh-keys = lib.stringAfter [ ] ''

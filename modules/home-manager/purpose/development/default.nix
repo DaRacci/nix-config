@@ -25,7 +25,7 @@ in
       mutableExtensionsDir = true;
 
       # Disable update checks
-      enableExtensionUpdateCheck = true;
+      enableExtensionUpdateCheck = false;
       enableUpdateCheck = false;
 
       # TODO -> Add [aaron-bond.better-comments, github.copilot-labs, wayou.vscode-todo-highlight]
@@ -36,6 +36,7 @@ in
         pkief.material-icon-theme
 
         # Workspaces & Projects
+        mkhl.direnv
         editorconfig.editorconfig
         alefragnani.project-manager
         ms-vscode-remote.remote-ssh
@@ -95,9 +96,9 @@ in
       ]));
 
       userSettings = {
-        "workbench.iconTheme" = "material-icon-theme";
-        "workbench.colorTheme" = "One Dark Pro Mix";
-        "workbench.startupEditor" = "none";
+        workbench.iconTheme = "material-icon-theme";
+        workbench.colorTheme = "One Dark Pro Mix";
+        workbench.startupEditor = "none";
 
         "window.zoomLevel" = 3;
 
@@ -108,24 +109,42 @@ in
         "editor.formatOnSave" = true;
         "editor.autoClosingQuotes" = "always";
         "editor.autoClosingBrackets" = "always";
-        "editor.inlineSuggest.enabled" = true;
+        "editor.inlineSuggestenabled" = true;
         "editor.mouseWheelZoom" = true;
 
+        "diffEditor.ignoreTrimWhitespace" = false;
+
         "github.copilot.enable"."*" = true;
-        "github.copilot.advanced"."indentationMode"."*" = true;
+        "github.copilot.advanced.indentationMode"."*" = true;
 
         "files.autoSave" = "afterDelay";
+        "files.eol" = "\n";
 
         "git.autofetch" = true;
 
         "nix.enableLanguageServer" = true;
-        "nix.serverPath" = "${pkgs.unstable.nil}/bin/nil";
-        "nix.serverSettings".nil.formatting.command = [ "${pkgs.unstable.nixpkgs-fmt}/bin/nixpkgs-fmt" ];
+        "nix.serverPath" = "${pkgs.unstable.nixd}/bin/nixd";
+        "nix.serverSettings" = {
+          nixd = {
+            formatting.command = "${pkgs.unstable.nixpkgs-fmt}/bin/nixpkgs-fmt";
+            options = {
+              enable = true;
+              targets = {
+                args = [ "-f" "default.nix" ];
+                installable = "<flakeref>#nixosConfigurations.nixe.options";
+              };
+            };
+          };
+        };
 
         "caddyfile.executable" = "${pkgs.unstable.caddy}/bin/caddy";
 
         "redhat.telemetry.enabled" = false;
       };
+
+      # keybindings = {
+      #   a = builtins.fromTOML "[}";
+      # };
     };
 
     user.persistence.directories = [

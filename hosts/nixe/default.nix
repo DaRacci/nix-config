@@ -38,6 +38,10 @@
     };
   };
 
+  services.netdata = {
+    enable = true;
+  };
+
   # programs.adb.enable = true;
   # services.udev = {
   #   enable = true;

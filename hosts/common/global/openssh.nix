@@ -1,4 +1,4 @@
-{ hostDir, outputs, config, lib, ... }:
+{ hostDir, outputs, config, pkgs, lib, ... }:
 
 let
   inherit (config.networking) hostName;
@@ -8,8 +8,22 @@ let
   # Sops needs acess to the keys before the persist dirs are even mounted; so
   # just persisting the keys won't work, we must point at /persist
   inherit (import ../../../lib/persistence.nix { inherit lib; inherit (config) host; }) persistable;
+
+  hostSSHPubKey = pkgs.writeTextFile {
+    name = "ssh_host_ed25519_key.pub";
+    text = builtins.readFile "${hostDir}/ssh_host_ed25519_key.pub";
+  };
+
+  hostSSHPrivKey = pkgs.writeTextFile {
+    name = "ssh_host_ed25519_key";
+    text = builtins.readFile config.sops.secrets.SSH_PRIVATE_KEY.path;
+  };
 in
 {
+  environment.etc = {
+
+  };
+
   services.openssh = {
     enable = true;
     settings = {
