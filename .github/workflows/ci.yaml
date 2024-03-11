@@ -11,21 +11,16 @@ on:
         required: false
         type: string
     secrets:
-      CACHIX_ACTIVATE_TOKEN:
       CACHIX_AUTH_TOKEN:
         required: true
 
 jobs:
-  nix:
+  build:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         system:
           - x86_64
-        nix-command:
-          - fmt -- --check
-
         include:
           - nix-command: develop .#default --profile profile
             system: x86_64
@@ -54,3 +49,38 @@ jobs:
         env:
           _system: ${{ matrix.system }}-linux
         run: nix ${{ matrix.nix-command }}
+
+  # TODO
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        system:
+          - x86_64
+        nix-command:
+          - fmt -- --check
+          - nix flake check
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Setup cachix
+        uses: cachix/cachix-action@v14
+        with:
+          name: racci
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Build command (x86_64)
+        if: matrix.system == 'x86_64'
+        env:
+          _system: ${{ matrix.system }}-linux
+        run: nix ${{ matrix.nix-command }}
+
+  # TODO
+  # cache:

@@ -3,7 +3,7 @@ name: Update inputs
 on:
   workflow_dispatch:
   schedule:
-    - cron: 0 * * * *
+    - cron: 0 */6 * * *
 
 jobs:
   update:
@@ -23,10 +23,12 @@ jobs:
           pr-title: "Update flake.lock"
           pr-labels: |
             dependencies
+            merge-queue
             automated
 
-  build:
-    uses: ./.github/workflows/ci.yml
+  build-and-test:
+    name: Build and test
+    uses: ./.github/workflows/ci.yaml
     needs: update
     secrets:
       CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
