@@ -1,9 +1,11 @@
-{ inputs, config, pkgs, ... }: {
+{ inputs, config, pkgs, lib, ... }: with lib; {
   imports = [
     ../../../../common/desktop/hyprland
-    ./anyrun.nix
-    ./mako.nix
-    ./waybar.nix
+    ./lock-screen.nix
+    ./notification.nix
+    ./pannel.nix
+    ./runner.nix
+    ./screenshot.nix
   ];
 
   wayland.windowManager.hyprland = {
@@ -34,11 +36,37 @@
           }
         '';
 
-        daemons = ''
+        executions = let
+          dbus-update-env = "${pkgs.dbus}/bin/dbus-update-activation-environment";
+        in ''
+          # ----------------- #
+          # Environment Fixes #
+          # ----------------- #
+          exec-once = ${dbus-update-env} --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+          exec-once = ${dbus-update-env} --systemd --all
+          exec-once = ${pkgs.systemd}/bin/systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+
+          # ----------------- #
+          # User Applications #
+          # ----------------- #
           exec-once = ${pkgs.libsForQt5.polkit-kde-agent}/lib/polkit-kde-authentication-agent-1
+
+          # ----------------- #
+          #  Bar and Applets  #
+          # ----------------- #
           exec-once = ${config.programs.waybar.package}/bin/waybar
+          exec-once = ${pkgs.blueman}/bin/blueman
+          exec-once = ${pkgs.networkmanagerapplet}/bin/nm-applet --indicator
+
+          # ----------------- #
+          #      Daemons      #
+          # ----------------- #
+          exec-once = ${config.programs.mako.package}/bin/mako
+          exec-once = ${pkgs.unstable.hypridle}/bin/hypridle
           
-          # Wallpaper
+          # ----------------- #
+          #     Wallpaper     #
+          # ----------------- #
           exec-once = ${pkgs.swww}/bin/swww init
           exec-once = ${pkgs.writeShellScriptBin "sww-random-wallpaper" ''
             export SWWW_TRANSITION=random
@@ -71,6 +99,14 @@
           monitor=,highrr,auto,1
         '';
 
+        env = ''
+          env = LIBVA_DRIVER_NAME,nvidia
+          env = XDG_SESSION_TYPE,wayland
+          env = GBM_BACKEND,nvidia-drm
+          env = __GLX_VENDOR_LIBRARY_NAME,nvidia
+          env = WLR_NO_HARDWARE_CURSORS,1
+        '';
+
         bindings = {
           submaps = {
             resize = ''
@@ -88,29 +124,18 @@
           };
 
           global = {
-            env = ''
-              env = LIBVA_DRIVER_NAME,nvidia
-              env = XDG_SESSION_TYPE,wayland
-              env = GBM_BACKEND,nvidia-drm
-              env = __GLX_VENDOR_LIBRARY_NAME,nvidia
-              env = WLR_NO_HARDWARE_CURSORS,1
-            '';
-
             shortcuts = ''
               bind=${mod},RETURN,exec,${pkgs.alacritty}/bin/alacritty
-            '';
 
-            rofi = ''
-              bind = ${mod}, A, exec, pkill rofi || ~/.config/hypr/scripts/rofilaunch.sh d    # launch desktop applications
-              bind = ${mod}, tab, exec, pkill rofi || ~/.config/hypr/scripts/rofilaunch.sh w  # switch between desktop applications
-              bind = ${mod}, R, exec, pkill rofi || ~/.config/hypr/scripts/rofilaunch.sh f    # browse system files
+              # TODO - Screenshot sound
+              bind=,Print,exec,${pkgs.grim}/bin/grim -g "$(${pkgs.slurp}/bin/slurp -o -r -c '#ff0000ff')" - | ${pkgs.unstable.satty}/bin/satty --filename - --fullscreen --output-filename ~/Pictures/Screenshots/$(date '+%Y/%m/%d/Screenshot_%Y%m%d_%H%M%S.png')
             '';
 
             audio = ''
-              bind  = , XF86AudioMute, exec, ~/.config/hypr/scripts/volumecontrol.sh -o m # toggle audio mute
-              bind  = , XF86AudioMicMute, exec, ~/.config/hypr/scripts/volumecontrol.sh -i m # toggle microphone mute
-              binde = , XF86AudioLowerVolume, exec, ~/.config/hypr/scripts/volumecontrol.sh -o d # decrease volume
-              binde = , XF86AudioRaiseVolume, exec, ~/.config/hypr/scripts/volumecontrol.sh -o i # increase volume
+              # bind  = , XF86AudioMute, exec, ~/.config/hypr/scripts/volumecontrol.sh -o m # toggle audio mute
+              # bind  = , XF86AudioMicMute, exec, ~/.config/hypr/scripts/volumecontrol.sh -i m # toggle microphone mute
+              # bind  = , XF86AudioLowerVolume, exec, ~/.config/hypr/scripts/volumecontrol.sh -o d # decrease volume
+              # bind  = , XF86AudioRaiseVolume, exec, ~/.config/hypr/scripts/volumecontrol.sh -o i # increase volume
               bind  = , XF86AudioPlay, exec, ${pkgs.playerctl}/bin/playerctl play-pause
               bind  = , XF86AudioPause, exec, ${pkgs.playerctl}/bin/playerctl play-pause
               bind  = , XF86AudioNext, exec, ${pkgs.playerctl}/bin/playerctl next
@@ -150,7 +175,7 @@
             # '';
 
             session = ''
-              # bind = CTRL_ALT,DELETE,exit        # Exit session
+              bind = CTRL_ALT,DELETE,exit        # Exit session
               # bind = ${mod},SHIFT,DELETE,restart # Restart session
             '';
 
@@ -216,10 +241,13 @@
         '';
       in
       builtins.concatStringsSep "\n" ([
-        animations
-        daemons
-        monitors
+        env
+
         theme
+        animations
+        
+        executions
+        monitors
         other
       ] ++ builtins.attrValues bindings.global ++ builtins.attrValues bindings.submaps);
   };

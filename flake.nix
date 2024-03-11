@@ -28,6 +28,7 @@
     flake-utils.url = "github:numtide/flake-utils";
     flake-parts.url = "github:hercules-ci/flake-parts";
     flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
+    flake-compat-nixd = { url = "github:inclyc/flake-compat"; flake = false; };
     nixos-generators.url = "github:nix-community/nixos-generators";
 
     # Base Modules
@@ -37,6 +38,7 @@
     impermanence.url = "github:nix-community/impermanence";
     nix-ld-rs.url = "github:nix-community/nix-ld-rs";
     lanzaboote.url = "github:nix-community/lanzaboote/v0.3.0";
+    nixd.url = "github:nix-community/nixd";
 
     # Modules only used on some systems
     nixos-wsl.url = "github:nix-community/NixOS-WSL";
@@ -117,6 +119,8 @@
     nixos-wsl.inputs.flake-utils.follows = "flake-utils";
     nixos-wsl.inputs.flake-compat.follows = "flake-compat";
 
+    nixd.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    nixd.inputs.flake-parts.follows = "flake-parts";
     #endregion
   };
 

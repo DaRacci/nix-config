@@ -8,7 +8,7 @@
         layer = "top";
         position = "top";
         height = 30;
-        output = [ "eDP-1" "HDMI-A-1" ];
+        output = [ "DP-1" "DP-2" "DP-3" ];
         modules-left = [ "hyprland/workspaces" "sway/mode" "wlr/taskbar" ];
         modules-center = [ "sway/window" ];
         modules-right = [ "mpd" "temperature" ];

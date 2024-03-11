@@ -51,6 +51,8 @@ in
       lib = prev.lib // {
         mine = (import ../lib { inherit (final) system; inherit self inputs; }).lib;
       };
+
+      nixd = inputs.nixd.packages.x86_64-linux.nixd;
     };
 
   # When applied, the unstable nixpkgs set (declared in the flake inputs) will

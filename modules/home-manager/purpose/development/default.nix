@@ -102,6 +102,9 @@ in
         "workbench.startupEditor" = "none";
 
         "window.zoomLevel" = 3;
+        "window.titleBarStyle" = "custom";
+
+        "settingsSync.ignoredExtensions" = [ "*" ];
 
         # TODO -> Use reference to package for this
         "editor.fontFamily" = "'JetBrainsMono Nerd Font', 'Symbols Nerd Font Mono', 'Material Icons Outlined'";
@@ -115,6 +118,8 @@ in
 
         "diffEditor.ignoreTrimWhitespace" = false;
 
+        "extensions.ignoreRecommendations" = true;
+
         "github.copilot.enable"."*" = true;
         "github.copilot.advanced".indentationMode."*" = true;
 
@@ -125,19 +130,30 @@ in
         "git.confirmSync" = false;
 
         "nix.enableLanguageServer" = true;
-        "nix.serverPath" = "${pkgs.unstable.nixd}/bin/nixd";
+        "nix.serverPath" = "${pkgs.nixd}/bin/nixd";
         "nix.serverSettings" = {
           nixd = {
             formatting.command = "${pkgs.unstable.nixpkgs-fmt}/bin/nixpkgs-fmt";
+            eval = {
+              enable = true;
+              targets = {
+                args = [ "-f" "default.nix" ];
+                installable = "";
+              };
+            };
             options = {
               enable = true;
               targets = {
                 args = [ "-f" "default.nix" ];
-                installable = "<flakeref>#nixosConfigurations.nixe.options";
+                installable = "";
+                # installable = "/flakeref#nixosConfigurations.nixe.options";
               };
             };
           };
         };
+
+        "direnv.restart.automatic" = true;
+        "direnv.status.showChangesCount" = true;
 
         "caddyfile.executable" = "${pkgs.unstable.caddy}/bin/caddy";
 
