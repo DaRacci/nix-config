@@ -59,7 +59,7 @@ jobs:
           - x86_64
         nix-command:
           - fmt -- --check
-          - nix flake check
+          - flake check
 
     steps:
       - name: Checkout repository
