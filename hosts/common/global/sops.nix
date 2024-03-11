@@ -12,7 +12,7 @@ in
     defaultSopsFile = "${hostDir}/secrets.yaml";
 
     secrets = {
-      SSH_PRIVATE_KEY = {};
+      SSH_PRIVATE_KEY = { };
     };
   };
 

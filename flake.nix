@@ -65,7 +65,7 @@
 
     rust-overlay.inputs.nixpkgs.follows = "nixpkgs-unstable";
     rust-overlay.inputs.flake-utils.follows = "flake-utils";
-    
+
     pre-commit-hooks-nix.inputs.nixpkgs-stable.follows = "nixpkgs";
     pre-commit-hooks-nix.inputs.nixpkgs.follows = "nixpkgs-unstable";
     pre-commit-hooks-nix.inputs.flake-compat.follows = "flake-compat";
