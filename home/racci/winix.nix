@@ -23,6 +23,7 @@
   purpose.development = {
     enable = true;
     rust.enable = true;
+    vscode.enable = false;
   };
 
   programs.git = {

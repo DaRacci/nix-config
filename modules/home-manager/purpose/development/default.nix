@@ -10,13 +10,17 @@ in
   options.purpose.development = {
     enable = mkEnableOption "development";
 
+    vscode = {
+      enable = mkEnableOption "Enable VSCode" // { default = true; };
+    };
+
     python = {
       enable = mkEnableOption "Enable Python Development";
     };
   };
 
   config = mkIf cfg.enable {
-    programs.vscode = rec {
+    programs.vscode = mkIf cfg.vscode.enable {
       enable = true;
       package = pkgs.unstable.vscode;
 
@@ -28,7 +32,7 @@ in
       enableExtensionUpdateCheck = false;
       enableUpdateCheck = false;
 
-      # TODO -> Add [aaron-bond.better-comments, github.copilot-labs, wayou.vscode-todo-highlight]
+      # TODO -> Add [aaron-bond.better-comments, wayou.vscode-todo-highlight]
       # forVSCodeVersion package.version
       extensions = let extensions = inputs.vscode-extensions.extensions.${pkgs.stdenv.system}; in with extensions.vscode-marketplace; [
         # Theme & Looks
@@ -125,7 +129,7 @@ in
         "git.confirmSync" = false;
 
         "nix.enableLanguageServer" = true;
-        "nix.serverPath" = "${pkgs.unstable.nixd}/bin/nixd";
+        # "nix.serverPath" = "${pkgs.unstable.nixd}/bin/nixd";
         "nix.serverSettings" = {
           nixd = {
             formatting.command = "${pkgs.unstable.nixpkgs-fmt}/bin/nixpkgs-fmt";
