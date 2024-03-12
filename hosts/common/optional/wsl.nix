@@ -17,6 +17,8 @@
     { src = "${pkgs.coreutils}/bin/uname"; }
   ];
 
+  environment.systemPackages = with pkgs; [ wslu ];
+
   programs.nix-ld = {
     enable = true;
     libraries = [

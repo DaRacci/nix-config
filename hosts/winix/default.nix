@@ -4,6 +4,7 @@
     flake.inputs.nixos-wsl.nixosModules.wsl
     ./hardware.nix
     ../common/optional/wsl.nix
+    ../common/optional/containers.nix
   ];
 
   host = {
@@ -13,10 +14,5 @@
     };
   };
 
-  environment.systemPackages = with pkgs; [ wget wslu ];
-
-  services.tailscale = {
-    enable = true;
-    useRoutingFeatures = "client";
-  };
+  environment.systemPackages = with pkgs; [ wget ];
 }
