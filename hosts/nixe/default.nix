@@ -28,6 +28,10 @@
     persistence = {
       enable = true;
       type = "tmpfs";
+
+      directories = [
+        "/var/lib/ollama"
+      ];
     };
   };
 
@@ -40,6 +44,11 @@
 
   services.netdata = {
     enable = true;
+  };
+
+  services.ollama = {
+    enable = true;
+    acceleration = "cuda";
   };
 
   # programs.adb.enable = true;
