@@ -34,6 +34,8 @@ in
 
       passthru.enable = false; # Why does build break without this?
 
+      host.device.role = deviceType;
+
       system.stateVersion = "23.11";
     })
   ] ++ (builtins.map (name: (import ../home/mkSystem.nix { inherit self pkgs name; })) users);
