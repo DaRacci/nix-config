@@ -213,27 +213,27 @@ in
     profiles.${config.home.username} = {
       containers = {
         Personal = {
-          id = 0;
+          id = 1;
           icon = "fingerprint";
           color = "purple";
         };
         Work = {
-          id = 1;
+          id = 2;
           icon = "briefcase";
           color = "yellow";
         };
         Entertainment = {
-          id = 2;
+          id = 3;
           icon = "chill";
           color = "blue";
         };
         Shopping = {
-          id = 3;
+          id = 4;
           icon = "cart";
           color = "green";
         };
         Banking = {
-          id = 4;
+          id = 5;
           icon = "dollar";
           color = "turquoise";
         };
@@ -269,7 +269,7 @@ in
             };
 
             "Home Manager Options" = {
-              urls = [{ template = "https://mipmip.github.io/home-manager-option-search/?query={searchTerms}"; }];
+              urls = [{ template = "https://home-manager-options.extranix.com/?query={searchTerms}"; }];
               icon = searchNixIcon;
               definedAliases = [ "@hmo" ];
             };
