@@ -1,6 +1,6 @@
-{ config, lib, ... }: with lib; let cfg = config.custom.auto-upgrade; in {
+{ flake, config, lib, ... }: with lib; let cfg = config.custom.auto-upgrade; in {
   options.custom.auto-upgrade = {
-    enable = mkEnableOption "auto-upgrade" // { default = true; };
+    enable = (mkEnableOption "auto-upgrade") // { default = true; };
 
     hostName = mkOption {
       type = types.str;
