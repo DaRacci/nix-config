@@ -17,7 +17,8 @@
           | upsert value {|e| replace_env_vars $e.value })
 
         for element in $columns {
-          $env.$element.name = $element.value
+          load-env { $"($element.name)": $element.value }
+          # $env.$element.name $element.value
         }
       }
 
