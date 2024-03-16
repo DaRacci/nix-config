@@ -71,7 +71,7 @@
           exec-once = ${pkgs.writeShellScriptBin "sww-random-wallpaper" ''
             export SWWW_TRANSITION=random
             export SWWW_TRANSITION_STEP=2
-            export SWWW_TRANSITION_DURATION=4
+            export SWWW_TRANSITION_DURATION=2
             export SWWW_TRANSITION_FPS=165
             export SWWW_TRANSITION_ANGLE=90
             export SWWW_TRANSITION_POS=left
@@ -82,14 +82,14 @@
             DIRECTORY=$HOME/Pictures/Wallpapers
 
             while true; do
-              find "$1" | while read -r img; do
+              find "$DIRECTORY" | while read -r img; do
                 echo "$((RANDOM % 1000)):$img"
               done | sort -n | cut -d':' -f2- | while read -r img; do
-                ${pkgs.swww} img "$img"
+                ${getExe pkgs.swww} img "$img"
                 sleep $INTERVAL
               done
             done
-          ''}
+          ''}/bin/sww-random-wallpaper
         '';
 
         monitors = ''
@@ -105,6 +105,34 @@
           env = GBM_BACKEND,nvidia-drm
           env = __GLX_VENDOR_LIBRARY_NAME,nvidia
           env = WLR_NO_HARDWARE_CURSORS,1
+
+          env = XDG_CURRENT_DESKTOP,Hyprland
+          env = XDG_SESSION_TYPE,wayland
+          env = XDG_SESSION_DESKTOP,Hyprland
+          env = QT_QPA_PLATFORM,wayland
+          #env = QT_STYLE_OVERRIDE,kvantum
+          env = QT_QPA_PLATFORMTHEME,qt5ct
+          env = QT_WAYLAND_DISABLE_WINDOWDECORATION,1
+          env = QT_AUTO_SCREEN_SCALE_FACTOR,1
+        '';
+
+        input = ''
+          input {
+            kb_layout = us
+            follow_mouse = 3
+
+            touchpad {
+                natural_scroll = no
+            }
+
+            sensitivity = 0 # -1.0 - 1.0, 0 means no modification.
+            accel_profile = flat
+          }
+
+          gestures {
+            workspace_swipe = true
+            workspace_swipe_fingers = 3
+          }
         '';
 
         bindings = {
@@ -125,21 +153,29 @@
 
           global = {
             shortcuts = ''
-              bind=${mod},RETURN,exec,${pkgs.alacritty}/bin/alacritty
+              bind = CONTROL,ESCAPE,exec,killall waybar || ${config.programs.waybar.package}/bin/waybar
+
+              # TODO Allow customising
+              bind = ${mod},T,exec,${pkgs.alacritty}/bin/alacritty
+              bind = ${mod},E,exec,${pkgs.gnome.nautilus}/bin/nautilus
+              bind = ${mod},F,exec,${config.programs.firefox.package}/bin/firefox
+
+              bind = CTRL_SHIFT,ESCAPE,exec,${config.programs.bottom.package}/bin/bottom
 
               # TODO - Screenshot sound
               bind=,Print,exec,${pkgs.grim}/bin/grim -g "$(${pkgs.slurp}/bin/slurp -o -r -c '#ff0000ff')" - | ${pkgs.unstable.satty}/bin/satty --filename - --fullscreen --output-filename ~/Pictures/Screenshots/$(date '+%Y/%m/%d/Screenshot_%Y%m%d_%H%M%S.png')
             '';
 
             audio = ''
-              # bind  = , XF86AudioMute, exec, ~/.config/hypr/scripts/volumecontrol.sh -o m # toggle audio mute
-              # bind  = , XF86AudioMicMute, exec, ~/.config/hypr/scripts/volumecontrol.sh -i m # toggle microphone mute
-              # bind  = , XF86AudioLowerVolume, exec, ~/.config/hypr/scripts/volumecontrol.sh -o d # decrease volume
-              # bind  = , XF86AudioRaiseVolume, exec, ~/.config/hypr/scripts/volumecontrol.sh -o i # increase volume
-              bind  = , XF86AudioPlay, exec, ${pkgs.playerctl}/bin/playerctl play-pause
-              bind  = , XF86AudioPause, exec, ${pkgs.playerctl}/bin/playerctl play-pause
-              bind  = , XF86AudioNext, exec, ${pkgs.playerctl}/bin/playerctl next
-              bind  = , XF86AudioPrev, exec, ${pkgs.playerctl}/bin/playerctl previous
+              bindel=,XF86AudioRaiseVolume,exec,${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
+              bindel=,XF86AudioLowerVolume,exec,${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
+              bindl=,XF86AudioMute,exec,${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+              bindl=,XF86AudioMicMute,exec,${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+
+              bind=,XF86AudioPlay,exec,${pkgs.playerctl}/bin/playerctl play-pause
+              bind=,XF86AudioPause,exec,${pkgs.playerctl}/bin/playerctl play-pause
+              bind=,XF86AudioNext,exec,${pkgs.playerctl}/bin/playerctl next
+              bind=,XF86AudioPrev,exec,${pkgs.playerctl}/bin/playerctl previous
             '';
 
             focus = ''
@@ -158,21 +194,12 @@
 
             window = ''
               bind = ${mod},Q,killactive                # Kill active window
-              bind = ${mod},F,fullscreen                # Toggle fullscreen for the active window
+              bind = ${mod},SPACE,fullscreen            # Toggle fullscreen for the active window
               bind = ${mod} SHIFT,space,togglefloating  # Toggle floating for the active window
 
-              bind = ${mod},mouse_left,moveactive       # Move active window
-
-              # Move/Resize window with mouse
-              bindm = ${mod},mouse:272,movewindow       # Move window
-              bindm = ${mod},mouse:273,resizeactive     # Resize window
+              bindm = ${mod},mouse:272,moveactive        # Move active window
+              bindm = ${mod},mouse:273,resizeactive      # Resize active window
             '';
-
-            # scratchpad = ''
-            #   bind = ${mod} SHIFT,minus,grave,scratchpad,show
-            #   bind = ${mod},grave,scratchpad,hide
-            #   bind = ${mod},grave,scratchpad,toggle
-            # '';
 
             session = ''
               bind = CTRL_ALT,DELETE,exit        # Exit session
@@ -180,8 +207,13 @@
             '';
 
             workspace = ''
-              bind = ${mod},mouse_up,workspace,e+1
-              bind = ${mod},mouse_down,workspace,e-1
+              # Move workspaces between monitors
+              bind = ${mod}_ALT,RIGHT,movecurrentworkspacetomonitor,+1
+              bind = ${mod}_ALT,LEFT,movecurrentworkspacetomonitor,-1
+
+              # Graveyard
+              bind=SUPER_SHIFT,S,movetoworkspace,special
+              bind=SUPER,S,togglespecialworkspace,
             '';
 
             workspaces = builtins.concatStringsSep "\n" (builtins.genList
@@ -198,12 +230,19 @@
 
         theme = ''
           decoration {
-            drop_shadow = yes
+            rounding = 12
+
+            active_opacity = 1
+            inactive_opacity = 0.8
+            #full_opacity = 1
+
+            drop_shadow = true
             shadow_range = 8
             shadow_render_power = 2
             col.shadow = rgba(00000044)
 
-            dim_inactive = false
+            dim_inactive = true
+            dim_strength = 0.1
 
             blur {
               enabled = true
@@ -214,6 +253,11 @@
               contrast = 0.9
               brightness = 0.8
             }
+          }
+
+          general {
+            col.active_border = rgba(eae0e445)
+            col.inactive_border = rgba(9a8d9533)
           }
 
           plugin {
@@ -232,11 +276,24 @@
                 natural_rounding = yes
             }
           }
+
+          windowrulev2 = bordercolor rgba(ffabf1AA) rgba(ffabf177),pinned:1
         '';
 
         other = ''
           misc {
             vrr = 1
+            disable_hyprland_logo = true
+            disable_splash_rendering = true
+            force_default_wallpaper = 0
+
+            mouse_move_enables_dpms = 1
+            key_press_enables_dpms = 1
+
+            animate_manual_resizes = 1
+            animate_mouse_windowdragging = 1
+
+            focus_on_activate = true
           }
         '';
       in

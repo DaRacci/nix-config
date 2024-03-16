@@ -26,4 +26,8 @@
       maxEntries = null;
     };
   };
+
+  wayland.windowManager.hyprland.extraConfig = ''
+    bind=CTRL_ALT,SPACE,exec,anyrun
+  '';
 }

@@ -2,55 +2,92 @@
   home.packages = with pkgs; [ unstable.hyprlock unstable.hypridle ];
 
   xdg.configFile."hypr/hyprlock.conf".text = ''
+    $text_color = rgba(ede0deFF)
+    $entry_background_color = rgba(130F0F11)
+    $entry_border_color = rgba(a08c8955)
+    $entry_color = rgba(d8c2bfFF)
+    $font_family = Gabarito
+    $font_family_clock = Gabarito
+    $font_material_symbols = Material Symbols Rounded
+
     background {
-      path = ${config.home.homeDirectory}/Pictures/Wallpapers/10.png
-      color = rgba(203, 53, 61, 1.0)
-
-      # all these options are taken from hyprland, see https://wiki.hyprland.org/Configuring/Variables/#blur for explanations
-      blur_passes = 1
-      blur_size = 7
-      noise = 0.0117
-      contrast = 0.8916
-      brightness = 0.8172
-      vibrancy = 0.1696
-      vibrancy_darkness = 0.0
+        color = rgba(130F0F77)
+        # path = {{ SWWW_WALL }}
+        path = screenshot
+        blur_size = 5
+        blur_passes = 4
     }
-
     input-field {
-      monitor = DP-2
-      size = 200, 50
-      outline_thickness = 3
-      dots_size = 0.33 # Scale of input-field height, 0.2 - 0.8
-      dots_spacing = 0.15 # Scale of dots' absolute size, 0.0 - 1.0
-      dots_center = false
-      dots_rounding = -1 # -1 default circle, -2 follow input-field rounding
-      outer_color = rgb(151515)
-      inner_color = rgb(200, 200, 200)
-      font_color = rgb(10, 10, 10)
-      fade_on_empty = true
-      fade_timeout = 1000 # Milliseconds before fade_on_empty is triggered.
-      placeholder_text = <i>Input Password...</i> # Text rendered in the input box when it's empty.
-      hide_input = false
-      rounding = -1 # -1 means complete rounding (circle/oval)
-      fail_color = rgb(204, 34, 34) # if authentication failed, changes outer_color and fail message color
-      fail_text = <i>$FAIL <b>($ATTEMPTS)</b></i> # can be set to empty
-      fail_transition = 300 # transition time in ms between normal outer_color and fail_color
+        monitor =
+        size = 250, 50
+        outline_thickness = 2
+        dots_size = 0.1
+        dots_spacing = 0.3
+        outer_color = $entry_border_color
+        inner_color = $entry_background_color
+        font_color = $entry_color
+        # fade_on_empty = true
 
-      position = 0, -20
-      halign = center
-      valign = center
+        position = 0, 20
+        halign = center
+        valign = center
     }
 
-    label {
-      monitor = DP-2
-      text = Hi there, $USER
-      color = rgba(200, 200, 200, 1.0)
-      font_size = 25
-      font_family = Noto Sans
+    label { # Clock
+        monitor =
+        text = $TIME
+        color = $text_color
+        font_size = 65
+        font_family = $font_family_clock
 
-      position = 0, 80
-      halign = center
-      valign = center
+        position = 0, 300
+        halign = center
+        valign = center
+    }
+    label { # Greeting
+        monitor =
+        text = hi $USER !!!
+        color = $text_color
+        font_size = 20
+        font_family = $font_family
+
+        position = 0, 240
+        halign = center
+        valign = center
+    }
+    label { # lock icon
+        monitor =
+        text = lock
+        color = $text_color
+        font_size = 21
+        font_family = $font_material_symbols
+
+        position = 0, 65
+        halign = center
+        valign = bottom
+    }
+    label { # "locked" text
+        monitor =
+        text = locked
+        color = $text_color
+        font_size = 14
+        font_family = $font_family
+
+        position = 0, 50
+        halign = center
+        valign = bottom
+    }
+
+    label { # Status
+        monitor =
+        text = cmd[update:5000] ~/.config/hypr/hyprlock/status.sh
+        color = $text_color
+        font_size = 14
+        font_family = $font_family
+
+        position = 30, -30
+        halign = left
+        valign = top
     }
   '';
 
