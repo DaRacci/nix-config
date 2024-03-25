@@ -1,4 +1,4 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, lib, ... }: {
   home.packages = with pkgs; [ unstable.hyprlock unstable.hypridle ];
 
   xdg.configFile."hypr/hyprlock.conf".text = ''
@@ -107,5 +107,9 @@
       on-timeout = ${notifySend} "Idle for 5 seconds..."
       on-resume = ${notifySend} "Resumed from idle..."
     }
+  '';
+
+  wayland.windowManager.hyprland.extraConfig = ''
+    exec-once = ${lib.getExe pkgs.unstable.hypridle}/bin/hypridle
   '';
 }

@@ -1,4 +1,4 @@
-{ lib, ... }: {
+{ pkgs, lib, ... }: rec {
   i18n = {
     defaultLocale = "en_AU.UTF-8";
 
@@ -9,10 +9,18 @@
   };
 
   services = {
-    localtimed.enable = true;
     geoclue2 = {
       enable = true;
-      enableWifi = false;
+      enableWifi = true;
+    };
+
+    automatic-timezoned = {
+      enable = true;
+      package = pkgs.automatic-timezoned;
     };
   };
+
+  # systemd.services.automatic-timezoned = {
+  #   serviceConfig.ExecStart = lib.mkForce "${lib.getExe services.automatic-timezoned.package}";
+  # };
 }

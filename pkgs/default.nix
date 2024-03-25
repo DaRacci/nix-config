@@ -1,10 +1,11 @@
 # Custom packages, that can be defined similarly to ones from nixpkgs
 # You can build them using 'nix build .#example' or (legacy) 'nix-build -A example'
 
-{ system, pkgs, getchoo }: {
+{ system, pkgs }: {
   protonup-rs = pkgs.callPackage ./protonup-rs { };
   ficsit-cli = pkgs.callPackage ./ficsit-cli { };
   noise-supression = pkgs.callPackage ./noise-suppression-for-voice { };
+  hyprland-smart-borders = pkgs.callPackage ./hyprland-smart-borders.nix { };
 
   # nixcloud = nixos-generators.nixosGenerate {
   #   inherit (mkRawConfiguration "nixcloud" { inherit system; }) system modules specialArgs;

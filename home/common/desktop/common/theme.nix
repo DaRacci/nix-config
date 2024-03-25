@@ -1,4 +1,4 @@
-{ pkgs, ... }: rec {
+{ config, pkgs, ... }: rec {
   gtk = {
     enable = true;
 
@@ -29,12 +29,8 @@
 
   qt = {
     enable = true;
-    platformTheme = "gtk";
-
-    style = {
-      package = pkgs.adwaita-qt;
-      name = "adwaita-dark";
-    };
+    platformTheme = "gtk3";
+    style.name = "adwaita-qt6";
   };
 
   fontProfiles = {

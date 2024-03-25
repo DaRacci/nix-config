@@ -1,8 +1,6 @@
 { flake, host, config, lib, ... }: with lib;
 let
   cfg = config.user.persistence;
-
-
 in
 {
   options.user.persistence = {

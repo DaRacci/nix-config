@@ -46,10 +46,8 @@
 
     # Desktop Sessions
     hyprland.url = "github:hyprwm/Hyprland";
-    hyprland-plugins = {
-      url = "github:hyprwm/hyprland-plugins";
-      inputs.hyprland.follows = "hyprland";
-    };
+    hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
+    hyprland-contrib.url = "github:hyprwm/contrib";
     anyrun.url = "github:Kirottu/anyrun";
 
     # Other misc modules
@@ -80,6 +78,7 @@
     flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs-unstable";
 
     hyprland.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    hyprland-plugins.inputs.hyprland.follows = "hyprland";
 
     sops-nix.inputs.nixpkgs.follows = "nixpkgs-unstable";
     sops-nix.inputs.nixpkgs-stable.follows = "nixpkgs";
@@ -124,7 +123,7 @@
     #endregion
   };
 
-  outputs = { self, nixpkgs, flake-utils, systems, getchoo, nixos-wsl, nixos-generators, ... }@inputs:
+  outputs = { self, nixpkgs, flake-utils, systems, nixos-wsl, nixos-generators, ... }@inputs:
     let
       inherit (self) outputs;
       inherit (nixpkgs.lib) listToAttrs foldl' recursiveUpdate;
@@ -143,8 +142,8 @@
           ];
 
           formatter = nixpkgs.legacyPackages.${system}.nixpkgs-fmt;
-          packages = (import ./pkgs { pkgs = nixpkgs.legacyPackages.${system}; inherit system getchoo; });
-          overlays = import ./overlays { pkgs = nixpkgs.legacyPackages.${system}; inherit self inputs system outputs getchoo; };
+          packages = (import ./pkgs { pkgs = nixpkgs.legacyPackages.${system}; inherit system; });
+          overlays = import ./overlays { pkgs = nixpkgs.legacyPackages.${system}; inherit self inputs system outputs; };
         }))
       (
         let

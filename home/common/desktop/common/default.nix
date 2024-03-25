@@ -1,6 +1,7 @@
 {
   imports = [
     ./audio.nix
-    # ./background.nix
+    ./keyring.nix
+    ./theme.nix
   ];
 }

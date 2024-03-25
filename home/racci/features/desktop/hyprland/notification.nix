@@ -1,5 +1,5 @@
-{
-  services.mako = {
+{ config, lib, ... }: {
+  programs.mako = {
     enable = true;
     actions = true;
 
@@ -13,4 +13,8 @@
     borderRadius = 0;
     borderSize = 0;
   };
+
+  wayland.windowManager.hyprland.extraConfig = lib.mkIf config.services.mako.enable ''
+    exec-once = ${lib.getExe config.programs.mako.package}
+  '';
 }

@@ -30,7 +30,7 @@
       type = "tmpfs";
 
       directories = [
-        "/var/lib/ollama"
+        "/var/lib/private/ollama"
       ];
     };
   };
@@ -38,7 +38,7 @@
   networking = {
     firewall = {
       allowedUDPPorts = [ 9944 8082 9942 9943 ];
-      allowedTCPPorts = [ 9999 22 5990 9944 8082 9942 9943 ];
+      allowedTCPPorts = [ 9999 22 5990 9944 8082 9942 9943 8080 ];
     };
   };
 

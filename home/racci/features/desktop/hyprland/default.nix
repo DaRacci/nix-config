@@ -1,3 +1,6 @@
+# TODO - Colour picker bind to SUPER + C (hyprpicker)
+# TODO - Clipboard manager bind to SUPER + V (cliphist)
+# TODO - Game mode that disables compositor and pauses swww-random-wallpaper
 { inputs, config, pkgs, lib, ... }: with lib; {
   imports = [
     ../../../../common/desktop/hyprland
@@ -6,6 +9,7 @@
     ./pannel.nix
     ./runner.nix
     ./screenshot.nix
+    ./wallpaper.nix
   ];
 
   wayland.windowManager.hyprland = {
@@ -36,60 +40,16 @@
           }
         '';
 
-        executions = let
-          dbus-update-env = "${pkgs.dbus}/bin/dbus-update-activation-environment";
-        in ''
-          # ----------------- #
-          # Environment Fixes #
-          # ----------------- #
-          exec-once = ${dbus-update-env} --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
-          exec-once = ${dbus-update-env} --systemd --all
-          exec-once = ${pkgs.systemd}/bin/systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
-
-          # ----------------- #
-          # User Applications #
-          # ----------------- #
-          exec-once = ${pkgs.libsForQt5.polkit-kde-agent}/lib/polkit-kde-authentication-agent-1
+        executions = ''
+          # exec-once = ${pkgs.systemd}/bin/systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+          exec-once = ${getExe pkgs.hyprland-smart-borders}
+          exec-once = ${getExe pkgs.hyprland-autoname-workspaces}
 
           # ----------------- #
           #  Bar and Applets  #
           # ----------------- #
-          exec-once = ${config.programs.waybar.package}/bin/waybar
           exec-once = ${pkgs.blueman}/bin/blueman
           exec-once = ${pkgs.networkmanagerapplet}/bin/nm-applet --indicator
-
-          # ----------------- #
-          #      Daemons      #
-          # ----------------- #
-          exec-once = ${config.programs.mako.package}/bin/mako
-          exec-once = ${pkgs.unstable.hypridle}/bin/hypridle
-          
-          # ----------------- #
-          #     Wallpaper     #
-          # ----------------- #
-          exec-once = ${pkgs.swww}/bin/swww init
-          exec-once = ${pkgs.writeShellScriptBin "sww-random-wallpaper" ''
-            export SWWW_TRANSITION=random
-            export SWWW_TRANSITION_STEP=2
-            export SWWW_TRANSITION_DURATION=2
-            export SWWW_TRANSITION_FPS=165
-            export SWWW_TRANSITION_ANGLE=90
-            export SWWW_TRANSITION_POS=left
-            export SWWW_TRANSITION_BEZIER=.07,.56,1,.25
-
-            # This controls (in seconds) when to switch to the next image
-            INTERVAL=10
-            DIRECTORY=$HOME/Pictures/Wallpapers
-
-            while true; do
-              find "$DIRECTORY" | while read -r img; do
-                echo "$((RANDOM % 1000)):$img"
-              done | sort -n | cut -d':' -f2- | while read -r img; do
-                ${getExe pkgs.swww} img "$img"
-                sleep $INTERVAL
-              done
-            done
-          ''}/bin/sww-random-wallpaper
         '';
 
         monitors = ''
@@ -108,12 +68,11 @@
 
           env = XDG_CURRENT_DESKTOP,Hyprland
           env = XDG_SESSION_TYPE,wayland
-          env = XDG_SESSION_DESKTOP,Hyprland
-          env = QT_QPA_PLATFORM,wayland
+          # env = QT_QPA_PLATFORM,wayland
           #env = QT_STYLE_OVERRIDE,kvantum
-          env = QT_QPA_PLATFORMTHEME,qt5ct
-          env = QT_WAYLAND_DISABLE_WINDOWDECORATION,1
-          env = QT_AUTO_SCREEN_SCALE_FACTOR,1
+          # env = QT_QPA_PLATFORMTHEME,qt5ct
+          # env = QT_WAYLAND_DISABLE_WINDOWDECORATION,1
+          # env = QT_AUTO_SCREEN_SCALE_FACTOR,1
         '';
 
         input = ''
@@ -153,17 +112,10 @@
 
           global = {
             shortcuts = ''
-              bind = CONTROL,ESCAPE,exec,killall waybar || ${config.programs.waybar.package}/bin/waybar
-
               # TODO Allow customising
               bind = ${mod},T,exec,${pkgs.alacritty}/bin/alacritty
               bind = ${mod},E,exec,${pkgs.gnome.nautilus}/bin/nautilus
               bind = ${mod},F,exec,${config.programs.firefox.package}/bin/firefox
-
-              bind = CTRL_SHIFT,ESCAPE,exec,${config.programs.bottom.package}/bin/bottom
-
-              # TODO - Screenshot sound
-              bind=,Print,exec,${pkgs.grim}/bin/grim -g "$(${pkgs.slurp}/bin/slurp -o -r -c '#ff0000ff')" - | ${pkgs.unstable.satty}/bin/satty --filename - --fullscreen --output-filename ~/Pictures/Screenshots/$(date '+%Y/%m/%d/Screenshot_%Y%m%d_%H%M%S.png')
             '';
 
             audio = ''

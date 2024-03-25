@@ -63,4 +63,6 @@ in
       config.allowUnfree = true;
     };
   };
+
+  hyprland-contrib = inputs.hyprland-contrib.overlays.default;
 }

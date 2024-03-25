@@ -49,6 +49,8 @@ in
 
     programs.rofi.font = with cfg.regular; "${family} ${size}";
 
+    # programs.mako.font = with cfg.monospace; "${family} ${size}";
+
     home.packages = builtins.map (profile: profile.package) (with cfg; [
       monospace
       regular
