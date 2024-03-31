@@ -14,10 +14,7 @@
 
   inputs = {
     # Flake Inputs
-    crane.url = "github:ipetkov/crane";
-    fenix.url = "github:nix-community/fenix";
     nixpkgs-lib.url = "github:nix-community/nixpkgs.lib";
-    rust-overlay.url = "github:oxalica/rust-overlay";
 
     # Packages
     nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
@@ -25,7 +22,6 @@
     nur.url = "github:nix-community/NUR";
 
     # Utils
-    flake-utils.url = "github:numtide/flake-utils";
     flake-parts.url = "github:hercules-ci/flake-parts";
     flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
     flake-compat-nixd = { url = "github:inclyc/flake-compat"; flake = false; };
@@ -39,6 +35,7 @@
     nix-ld-rs.url = "github:nix-community/nix-ld-rs";
     lanzaboote.url = "github:nix-community/lanzaboote/v0.3.0";
     nixd.url = "github:nix-community/nixd";
+    nix-colours.url = "github:misterio77/nix-colors";
 
     # Modules only used on some systems
     nixos-wsl.url = "github:nix-community/NixOS-WSL";
@@ -49,31 +46,18 @@
     hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
     hyprland-contrib.url = "github:hyprwm/contrib";
     anyrun.url = "github:Kirottu/anyrun";
+    haumea = { url = "github:nix-community/haumea/v0.2.2"; inputs.nixpkgs.follows = "nixpkgs"; };
 
     # Other misc modules
     # arion = { url = "github:hercules-ci/arion"; };
     # nix-doom-emacs = { url = "github:nix-community/nix-doom-emacs"; };
     vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
 
-    # DevShell modules
-    pre-commit-hooks-nix.url = "github:cachix/pre-commit-hooks.nix";
-    cocogitto.url = "github:DaRacci/cocogitto";
-
     #region Flake input following
     nixos-generators.inputs.nixlib.follows = "nixpkgs-lib";
     nixos-generators.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
-    rust-overlay.inputs.nixpkgs.follows = "nixpkgs-unstable";
-    rust-overlay.inputs.flake-utils.follows = "flake-utils";
-
-    pre-commit-hooks-nix.inputs.nixpkgs-stable.follows = "nixpkgs";
-    pre-commit-hooks-nix.inputs.nixpkgs.follows = "nixpkgs-unstable";
-    pre-commit-hooks-nix.inputs.flake-compat.follows = "flake-compat";
-    pre-commit-hooks-nix.inputs.flake-utils.follows = "flake-utils";
-
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-
-    fenix.inputs.nixpkgs.follows = "nixpkgs";
 
     flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs-unstable";
 
@@ -87,7 +71,7 @@
     attic.inputs.nixpkgs.follows = "nixpkgs-unstable";
     attic.inputs.flake-utils.follows = "flake-utils";
     attic.inputs.flake-compat.follows = "flake-compat";
-    attic.inputs.crane.follows = "crane";
+    # attic.inputs.crane.follows = "crane";
 
     anyrun.inputs.nixpkgs.follows = "nixpkgs-unstable";
     anyrun.inputs.flake-parts.follows = "flake-parts";
@@ -104,15 +88,9 @@
     lanzaboote.inputs.flake-parts.follows = "flake-parts";
     lanzaboote.inputs.flake-utils.follows = "flake-utils";
     lanzaboote.inputs.flake-compat.follows = "flake-compat";
-    lanzaboote.inputs.crane.follows = "crane";
-    lanzaboote.inputs.rust-overlay.follows = "rust-overlay";
-    lanzaboote.inputs.pre-commit-hooks-nix.follows = "pre-commit-hooks-nix";
-
-    cocogitto.inputs.flake-utils.follows = "flake-utils";
-    cocogitto.inputs.nixpkgs.follows = "nixpkgs";
-    cocogitto.inputs.crane.follows = "crane";
-    cocogitto.inputs.fenix.follows = "fenix";
-    cocogitto.inputs.systems.follows = "systems";
+    # lanzaboote.inputs.crane.follows = "crane";
+    # lanzaboote.inputs.rust-overlay.follows = "rust-overlay";
+    # lanzaboote.inputs.pre-commit-hooks-nix.follows = "pre-commit-hooks-nix";
 
     nixos-wsl.inputs.nixpkgs.follows = "nixpkgs";
     nixos-wsl.inputs.flake-utils.follows = "flake-utils";
@@ -123,86 +101,94 @@
     #endregion
   };
 
-  outputs = { self, nixpkgs, flake-utils, systems, nixos-wsl, nixos-generators, ... }@inputs:
+  outputs = inputs@{ self, nixpkgs, flake-parts, systems, nixos-wsl, nixos-generators, haumea, ... }:
     let
       inherit (self) outputs;
       inherit (nixpkgs.lib) listToAttrs foldl' recursiveUpdate;
-    in
-    foldl' recursiveUpdate { } [
-      (flake-utils.lib.eachDefaultSystem (system:
-        let
-          lib = import ./lib { inherit self inputs system; };
-          inherit (lib.shell) mkNix mkRust;
-        in
-        {
-          devShells = listToAttrs [
-            (mkNix system "default")
-            (mkRust system "rust-stable" { rustChannel = "stable"; })
-            (mkRust system "rust-nightly" { rustChannel = "nightly"; })
-          ];
 
-          formatter = nixpkgs.legacyPackages.${system}.nixpkgs-fmt;
-          packages = (import ./pkgs { pkgs = nixpkgs.legacyPackages.${system}; inherit system; });
-          overlays = import ./overlays { pkgs = nixpkgs.legacyPackages.${system}; inherit self inputs system outputs; };
-        }))
-      (
-        let
-          system = "x86_64-linux";
-          lib = import ./lib { inherit self inputs system; };
+      lib = inputs.nixpkgs.lib.extend (prev: _: import ./lib { lib = prev; });
+      haumea = haumea.lib.load { src = ./.; inputs = { inherit lib; }; };
+      builders = import ./lib/builders { inherit self inputs lib haumea; };
 
-          homeConfigurations = builtins.mapAttrs (n: v: lib.home.mkHm system n v) {
-            racci = { };
+      # TODO - Scan the folders for all the configurations and generate the list.
+      configurations = builtins.mapAttrs (n: v: builders.system.build builtins.currentSystem n v) {
+        nixe = {
+          users = [ "racci" ];
+
+          isoFormat = "iso";
+          deviceType = "desktop";
+        };
+
+        surnix = {
+          users = [ "racci" ];
+
+          isoFormat = "iso";
+          deviceType = "laptop";
+        };
+
+        winix = {
+          users = [ "racci" ];
+
+          isoFormat = "iso";
+          deviceType = "desktop";
+        };
+
+        nixcloud = {
+          isoFormat = "proxmox-lxc";
+          deviceType = "server";
+        };
+
+        nixserv = {
+          isoFormat = "proxmox-lxc";
+          deviceType = "server";
+        };
+      };
+    in flake-parts.lib.mkFlake { inherit inputs; specialArgs.lib = lib; } {
+      systems = [ "x86_64-linux" "aarch64-linux" ];      
+
+      flake = rec {
+        nixosConfigurations = builtins.mapAttrs (n: v: v.system) configurations;
+
+        nixosModules = import ./modules/nixos;
+        homeManagerModules = import ./modules/home-manager;
+
+        packages = {
+          # Image Generators
+          images = (builtins.mapAttrs (n: v: v.iso) configurations);
+
+          # NixOS Outputs
+          outputs = (builtins.mapAttrs (n: v: v.config.system.build.toplevel) nixosConfigurations);
+        };
+      };
+
+      perSystem = { config, system, lib, ... }: {
+        _module.args.pkgs = import inputs.nixpkgs {
+          inherit system;
+          config = {
+            allowUnfree = true;
+            allowUnfreePredicate = (_: true);
+            permittedInsecurePackages = [ ];
           };
 
-          # TODO - Scan the folders for all the configurations and generate the list.
-          configurations = builtins.mapAttrs (n: v: lib.system.build system n v) {
-            nixe = {
-              users = [ "racci" ];
+          overlays = [
+            inputs.hyprland-contrib.overlays.default
+          ] ++ builtins.attrValues import ./overlays;
+        };
 
-              isoFormat = "iso";
-              deviceType = "desktop";
-            };
+        packages = {
+          # Image Generators
+          # images = (builtins.mapAttrs (n: v: v.iso) configurations);
 
-            surnix = {
-              users = [ "racci" ];
+          # NixOS Outputs
+          # outputs = (builtins.mapAttrs (n: v: v.system.config.system.build.toplevel) config.nixosConfigurations);
+        } // (import ./pkgs { pkgs = nixpkgs.legacyPackages.${system}; inherit system; });
 
-              isoFormat = "iso";
-              deviceType = "laptop";
-            };
+        devShells = listToAttrs [
+          (lib.shell.mkNix system "default")
+        ];
 
-            winix = {
-              users = [ "racci" ];
-
-              isoFormat = "iso";
-              deviceType = "desktop";
-            };
-
-            nixcloud = {
-              isoFormat = "proxmox-lxc";
-              deviceType = "server";
-            };
-
-            nixserv = {
-              isoFormat = "proxmox-lxc";
-              deviceType = "server";
-            };
-          };
-        in
-        {
-          nixosConfigurations = builtins.mapAttrs (n: v: v.system) configurations;
-          homeConfigurations = builtins.mapAttrs (n: v: inputs.home-manager.lib.homeManagerConfiguration v) homeConfigurations;
-
-          packages = {
-            # Image Generators
-            images = (builtins.mapAttrs (n: v: v.iso) configurations);
-
-            # NixOS Outputs
-            outputs = (builtins.mapAttrs (n: v: v.system.config.system.build.toplevel) configurations);
-          };
-
-          nixosModules = import ./modules/nixos;
-          homeManagerModules = import ./modules/home-manager;
-        }
-      )
-    ];
+        formatter = nixpkgs.legacyPackages.${system}.nixpkgs-fmt;
+        # overlays = import ./overlays { pkgs = nixpkgs.legacyPackages.${system}; inherit self inputs system outputs; };
+      };
+    };
 }

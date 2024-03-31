@@ -1,5 +1,4 @@
 { lib }: {
-
   /*
     Check if the system is running on an Nvidia GPU.
   */

@@ -1,12 +1,9 @@
-{ system
+{ pkgs
+, lib
+
 , name
-, pkgsFor
 , ...
-}:
-let
-  pkgs = pkgsFor system;
-in
-pkgs.mkShell {
+}: pkgs.mkShell {
   inherit name;
 
   NIX_CONFIG = "extra-experimental-features = nix-command flakes repl-flake";

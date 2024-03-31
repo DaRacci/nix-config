@@ -1,7 +1,6 @@
 { self
-, pkgsFor ? null
-, system ? null
-, pkgs ? pkgsFor system
+, lib
+, system
 
 , name
 , users ? [ ]
@@ -9,6 +8,7 @@
 , ...
 }:
 let
+  # TODO - Remove this, and use the new haumea lib
   hostDir =
     let
       opt1 = "${self}/hosts/${name}";
@@ -38,12 +38,15 @@ in
 
       system.stateVersion = "23.11";
     })
-  ] ++ (builtins.map (name: (import ../home/mkSystem.nix { inherit self pkgs name; })) users);
+  ] ++ (builtins.map (name: (import ../home/mkSystem.nix { inherit self lib name; })) users);
 
   specialArgs = {
     flake = self;
     inherit (self.inputs) nix-colours;
     inherit hostDir;
     inherit (self) inputs outputs;
+
+    haumea = haumea.hosts.${deviceType}.${name};
+    haumeaCommon = haumea.hosts.common;
   };
 }

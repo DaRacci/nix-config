@@ -1,16 +1,15 @@
 { inputs
-, system
-, name
-, pkgsFor
+, pkgs
+, lib
 
+, name
 , rustChannel
 , crossSystem ? system
 , additionalLibraryPath ? (pkgs: [ ])
 , ...
 }:
 let
-  pkgs = pkgsFor system;
-  inherit (pkgs.lib) optionals;
+  inherit (lib) optionals;
   inherit (inputs) fenix;
 
   channel =

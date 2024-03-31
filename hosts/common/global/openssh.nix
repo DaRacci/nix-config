@@ -1,21 +1,17 @@
-{ hostDir, outputs, config, pkgs, lib, ... }:
+{ self, hostDir, outputs, config, pkgs, lib, ... }:
 
 let
   inherit (config.networking) hostName;
   hosts = outputs.nixosConfigurations;
-  pubKey = host: "${hostDir}/ssh_host_ed25519_key.pub";
 
-  # Sops needs acess to the keys before the persist dirs are even mounted; so
-  # just persisting the keys won't work, we must point at /persist
-  inherit (import ../../../lib/persistence.nix { inherit lib; inherit (config) host; }) persistable;
-
-  hostSSHPubKey = pkgs.writeTextFile {
-    name = "ssh_host_ed25519_key.pub";
-    text = builtins.readFile "${hostDir}/ssh_host_ed25519_key.pub";
+  mkPubKey = hostName: pkgs.writeTextFile {
+    name = "${hostName}_ed25519.pub";
+    text = builtins.readFile (lib.mine.files.findFile "${hostName}/ssh_host_ed25519_key.pub");
   };
 
+  hostSSHPubKey = mkPubKey config.host.name;
   hostSSHPrivKey = pkgs.writeTextFile {
-    name = "ssh_host_ed25519_key";
+    name = "${config.host.name}_ed25519";
     text = builtins.readFile config.sops.secrets.SSH_PRIVATE_KEY.path;
   };
 in
@@ -31,25 +27,28 @@ in
     };
 
     hostKeys = [{
-      path = persistable "/etc/ssh/ssh_host_ed25519_key";
+      path = hostSSHPubKey;
       type = "ed25519";
     }];
   };
 
   programs.ssh = {
     # Each hosts public key
-    knownHosts = builtins.mapAttrs
-      (name: _: {
-        publicKeyFile = pubKey name;
-        extraHostNames = (lib.optional (name == hostName) "localhost"); # Alias for localhost if it's the same host
-      })
-      hosts;
+    knownHosts = builtins.mapAttrs (name: _: {
+      publicKeyFile = mkPubKey name;
+      extraHostNames = (lib.optional (name == hostName) "localhost"); # Alias for localhost if it's the same host
+    }) hosts;
   };
 
   users.users.root = {
-    openssh.authorizedKeys.keys = [ (builtins.readFile "${hostDir}/ssh_host_ed25519_key.pub") ];
+    openssh.authorizedKeys.keys = [ (builtins.readFile hostSSHPubKey) ];
   };
 
   # Passwordless sudo when SSH'ing with keys
   security.pam.enableSSHAgentAuth = true;
+
+  environment.etc = {
+    "ssh/ssh_host_ed25519_key".source = hostSSHPrivKey;
+    "ssh/ssh_host_ed25519_key.pub".source = hostSSHPubKey;
+  };
 }

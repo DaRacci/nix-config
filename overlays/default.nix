@@ -1,4 +1,3 @@
-# This file defines overlays
 { self, inputs, ... }:
 let
   usePRRaw = final: prev: name: owner: branch: sha256: {
@@ -48,9 +47,9 @@ in
         in
         final.discord.override ({ withOpenASAR = true; } // nss);
 
-      lib = prev.lib // {
-        mine = (import ../lib { inherit (final) system; inherit self inputs; }).lib;
-      };
+      # lib = prev.lib // {
+      #   mine = (import ../lib { inherit (final) system; inherit self inputs; }).lib;
+      # };
 
       nixd = inputs.nixd.packages.x86_64-linux.nixd;
     };
@@ -63,6 +62,4 @@ in
       config.allowUnfree = true;
     };
   };
-
-  hyprland-contrib = inputs.hyprland-contrib.overlays.default;
 }

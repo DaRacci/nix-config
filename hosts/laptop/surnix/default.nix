@@ -2,12 +2,15 @@
   imports = [
     ./hardware.nix
 
-    ../common/optional/ephemeral-btrfs.nix
     ../common/optional/pipewire.nix
     ../common/optional/quietboot.nix
     ../common/optional/gnome.nix
     ../common/optional/gaming.nix
   ];
+
+  host.persistence = {
+    type = "snapshot";
+  };
 
   microsoft-surface.kernelVersion = "6.5.5";
 

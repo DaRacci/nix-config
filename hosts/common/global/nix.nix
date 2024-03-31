@@ -1,12 +1,4 @@
 { inputs, outputs, lib, config, ... }: {
-  nixpkgs = {
-    overlays = builtins.attrValues outputs.overlays.${config.host.system};
-    config.allowUnfree = true;
-    config.allowUnfreePredicate = _: true;
-
-    config.permittedInsecurePackages = [ ];
-  };
-
   nix = {
     settings = {
       trusted-users = [ "root" "@wheel" ];

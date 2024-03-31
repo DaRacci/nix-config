@@ -1,16 +1,12 @@
 { self
-, system ? null
-, pkgsFor ? null
-, pkgs ? pkgsFor system
+, lib
 
 , name
 , groups ? [ ]
-, shell ? pkgs.nushell
 , ...
 }: { flake, config, ... }:
-let inherit (pkgs.lib) mkDefault; in {
+let inherit (lib) mkDefault; in {
   users.users.${name} = {
-    inherit shell;
     isNormalUser = mkDefault true;
 
     # Only add groups that exist.
@@ -36,9 +32,25 @@ let inherit (pkgs.lib) mkDefault; in {
     neededForUsers = true;
   };
 
-  home-manager = let hmBase = import ./mkHm.nix { inherit self pkgs name; args = { host = config.host; }; }; in {
-    inherit (hmBase) extraSpecialArgs;
+  home-manager = {
+    extraSpecialArgs = {
+      host = null;
+      flake = self;
+      inherit (self) inputs outputs;
+    };
 
-    users.${name} = builtins.elemAt hmBase.modules 0;
+    users.${name} = { flake, host, config, lib, ... }: {
+      home = {
+        username = name;
+        homeDirectory = mkForce "/home/${name}";
+
+        stateVersion = mkForce "23.11";
+        sessionPath = [ "$HOME/.local/bin" ];
+      };
+
+      imports = [
+        "${flake}/home/common/global"
+      ] ++ (optionals (host != null && host.name != null) [ "${flake}/home/${name}/${host.name}.nix" ]);
+    };
   };
 }

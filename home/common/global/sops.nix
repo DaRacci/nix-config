@@ -1,13 +1,18 @@
-{ flake, config, lib, ... }:
+{ flake, config, pkgs, lib, ... }:
 let
   inherit (config.home) username;
   inherit (import "${flake}/lib" lib) persistablePath;
+
+  privateKey = pkgs.writeTextFile {
+    name = "${config.host.name}_ed25519";
+    text = builtins.readFile config.sops.secrets.SSH_PRIVATE_KEY.path;
+  };
 in
 {
   sops = {
     defaultSopsFile = "${flake}/home/${username}/secrets.yaml";
 
     # TODO - Get from 1Password
-    age.sshKeyPaths = [ (persistablePath "/home/${username}/.ssh/id_ed25519") ];
+    age.sshKeyPaths = [ privateKey ];
   };
 }

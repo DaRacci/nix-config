@@ -1,4 +1,4 @@
-{ inputs
+{ lib
 , raw
 , ...
-}: inputs.nixpkgs.lib.nixosSystem raw
+}: lib.nixosSystem raw
