@@ -69,7 +69,6 @@
 
     attic.inputs.nixpkgs-stable.follows = "nixpkgs";
     attic.inputs.nixpkgs.follows = "nixpkgs-unstable";
-    attic.inputs.flake-utils.follows = "flake-utils";
     attic.inputs.flake-compat.follows = "flake-compat";
     # attic.inputs.crane.follows = "crane";
 
@@ -77,23 +76,19 @@
     anyrun.inputs.flake-parts.follows = "flake-parts";
 
     nix-ld-rs.inputs.nixpkgs.follows = "nixpkgs-unstable";
-    nix-ld-rs.inputs.flake-utils.follows = "flake-utils";
     nix-ld-rs.inputs.flake-compat.follows = "flake-compat";
 
     vscode-extensions.inputs.nixpkgs.follows = "nixpkgs";
-    vscode-extensions.inputs.flake-utils.follows = "flake-utils";
     vscode-extensions.inputs.flake-compat.follows = "flake-compat";
 
     lanzaboote.inputs.nixpkgs.follows = "nixpkgs-unstable";
     lanzaboote.inputs.flake-parts.follows = "flake-parts";
-    lanzaboote.inputs.flake-utils.follows = "flake-utils";
     lanzaboote.inputs.flake-compat.follows = "flake-compat";
     # lanzaboote.inputs.crane.follows = "crane";
     # lanzaboote.inputs.rust-overlay.follows = "rust-overlay";
     # lanzaboote.inputs.pre-commit-hooks-nix.follows = "pre-commit-hooks-nix";
 
     nixos-wsl.inputs.nixpkgs.follows = "nixpkgs";
-    nixos-wsl.inputs.flake-utils.follows = "flake-utils";
     nixos-wsl.inputs.flake-compat.follows = "flake-compat";
 
     nixd.inputs.nixpkgs.follows = "nixpkgs-unstable";
