@@ -1,3 +1,4 @@
+# TODO :: Modularise
 { config, pkgs, lib, ... }: {
   home.packages = with pkgs; [
     gnome-secrets
@@ -19,5 +20,14 @@
       package = pkgs._1password-gui;
       extraArgs = [ "--silent" ];
     };
+  };
+
+  # https://developer.1password.com/docs/ssh/agent/config
+  xdg.configFile."1Password/ssh/agent.toml".source = pkgs.writers.writeTOML "agent.toml" {
+    ssh-keys = [
+      {
+        vault = "Hosts & Users"
+      }
+    ];
   };
 }
