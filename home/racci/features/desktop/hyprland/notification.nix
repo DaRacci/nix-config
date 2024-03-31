@@ -1,20 +1,28 @@
 { config, lib, ... }: {
-  programs.mako = {
+  services.mako = {
     enable = true;
     actions = true;
-
-    defaultTimeout = 5;
+    defaultTimeout = 5000;
+    padding = "15";
+    borderSize = 2;
+    borderRadius = 5;
     anchor = "top-center";
-
     font = "sans-serif";
+    icons = true;
+    # actions = true;
+    backgroundColor = "#1e1e2e";
+    borderColor = "#b4befe";
+    progressColor = "over #313244";
+    textColor = "#cdd6f4";
 
-    backgroundColor = "#000000";
-    borderColor = "#ffffff";
-    borderRadius = 0;
-    borderSize = 0;
+    extraConfig = ''
+      text-alignment=center
+      [urgency=high]
+      border-color=#fab387
+    '';
   };
 
   wayland.windowManager.hyprland.extraConfig = lib.mkIf config.services.mako.enable ''
-    exec-once = ${lib.getExe config.programs.mako.package}
+    exec-once = ${lib.getExe config.services.mako.package}
   '';
 }

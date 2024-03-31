@@ -31,8 +31,8 @@
     done
   '';
 }; in {
-  wayland.windowManager.hyprland.extraConfig = ''
-    exec-once = ${pkgs.unstable.swww}/bin/swww-daemon
-    exec-once = ${randomWallpaperScript}/bin/sww-random-wallpaper
-  '';
+  wayland.windowManager.hyprland.settings.exec-once = [
+    "sleep 1 && ${pkgs.unstable.swww}/bin/swww-daemon"
+    "sleep 1 && ${randomWallpaperScript}/bin/sww-random-wallpaper"
+  ];
 }
