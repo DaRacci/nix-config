@@ -1,5 +1,5 @@
 # This file defines overlays
-{ self, inputs, getchoo, ... }:
+{ self, inputs, ... }:
 let
   usePRRaw = final: prev: name: owner: branch: sha256: {
     ${name} = (import
@@ -14,9 +14,9 @@ in
   # This one brings our custom packages from the 'pkgs' directory
   additions = final: prev:
     let usePR = usePRRaw final prev; in prev.lib.foldl' prev.lib.recursiveUpdate { } [
-      (import ../pkgs { system = final.system; pkgs = final; inherit getchoo; })
+      (import ../pkgs { system = final.system; pkgs = final; })
       (usePR "coolercontrol" "codifryed" "coolercontrol-0.17.0" "sha256-UXznzCmBpSFELFuztM7KSS+R1a1vWBYZBISARafu+OA=")
-      (usePR "jetbrains" "sdht0" "jetbrains-update" "sha256-0CLqsQeGd41fFeQr00XpJa9uAKfBcq3Ct2k/j40ja2E=")
+      (usePR "jetbrains" "DaRacci" "master" "sha256-I0iE9APrVbU6TFpJEDrpfRhirMCyaeNCbiE5XL+KXTY=")
     ];
 
   # This one contains whatever you want to overlay

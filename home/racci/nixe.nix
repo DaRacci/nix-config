@@ -1,5 +1,6 @@
 { pkgs, ... }: {
   imports = [
+    ./global.nix
     ./features/desktop/gnome.nix
     ./features/desktop/hyprland
 

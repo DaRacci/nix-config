@@ -1,6 +1,4 @@
-{ lib, config, ... }:
-
-let
+{ lib, config, ... }: with lib; let
   mkFontOption = kind: {
     family = lib.mkOption {
       type = lib.types.str;
@@ -24,10 +22,10 @@ let
     };
 
   };
-  cfg = config.fontProfiles;
+  cfg = config.custom.fontProfiles;
 in
 {
-  options.fontProfiles = {
+  options.custom.fontProfiles = {
     enable = lib.mkEnableOption "Whether to enable font profiles";
     monospace = mkFontOption "monospace";
     regular = mkFontOption "regular";
@@ -47,7 +45,7 @@ in
       name = cfg.monospace.name;
     };
 
-    programs.rofi.font = with cfg.regular; "${family} ${size}";
+    programs.rofi.font = with cfg.regular; "${family} ${toString size}";
 
     # programs.mako.font = with cfg.monospace; "${family} ${size}";
 

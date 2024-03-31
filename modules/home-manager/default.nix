@@ -1,6 +1,6 @@
 {
   audio = import ./audio.nix;
-  fonts = import ./fonts.nix;
+  custom = import ./custom;
   user = import ./user;
   purpose = import ./purpose;
 }

@@ -42,6 +42,7 @@ in
 
   specialArgs = {
     flake = self;
+    inherit (self.inputs) nix-colours;
     inherit hostDir;
     inherit (self) inputs outputs;
   };
