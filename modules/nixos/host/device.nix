@@ -1,4 +1,4 @@
-{ flake, config, lib, ... }: with lib; let
+{ config, lib, ... }: with lib; let
   cfg = config.host.device;
 in
 {

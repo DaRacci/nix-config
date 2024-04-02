@@ -15,7 +15,6 @@
   fileSystems =
     let
       bootPart = "/dev/disk/by-partlabel/ESP";
-      primaryPart = "/dev/disk/by-partlabel/surnix";
     in
     {
       "/boot" = {

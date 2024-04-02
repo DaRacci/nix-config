@@ -1,5 +1,5 @@
 { pkgs, ... }: {
-  home.packages = with pkgs; [ (unstable.lutris) ];
+  home.packages = with pkgs; [ unstable.lutris ];
 
   user.persistence.directories = [
     ".config/lutris"

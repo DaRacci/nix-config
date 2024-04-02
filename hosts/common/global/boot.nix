@@ -1,4 +1,4 @@
-{ config ,pkgs, ... }: {
+{ pkgs, ... }: {
   boot = {
     loader = {
       systemd-boot.enable = true;
@@ -7,7 +7,7 @@
       timeout = 0;
     };
 
-    kernelParams = ["quiet" "rd.systemd.show_status=false" "rd.udev.log_level=3" "udev.log_priority=3"];
+    kernelParams = [ "quiet" "rd.systemd.show_status=false" "rd.udev.log_level=3" "udev.log_priority=3" ];
     consoleLogLevel = 0;
 
     initrd = {
@@ -22,6 +22,6 @@
   console = {
     font = "JetBrainsMono Nerd Font";
     keyMap = "us";
-    packages = [ pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ];} ];
+    packages = [ pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; } ];
   };
 }

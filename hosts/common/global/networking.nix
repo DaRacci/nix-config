@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   networking = {
     enableIPv6 = true;
 

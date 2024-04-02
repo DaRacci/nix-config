@@ -2,7 +2,7 @@ let
   persistDirectory = "/persist/srv/lollms";
 in
 {
-  services.lollms = { pkgs, lib, ... }: {
+  services.lollms = { pkgs, ... }: {
     image = {
       enableRecommendedContents = true;
       command = [ "${pkgs.lollms-webui}/bin/lollms-webui" "--host" "0.0.0.0" "--port" "9600" "--db_path" "/data/database.db" ];

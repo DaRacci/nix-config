@@ -7,7 +7,7 @@
     ./clipboard.nix
     ./lock-screen.nix
     ./notification.nix
-    ./pannel.nix
+    ./panel.nix
     ./rofi.nix
     ./runner.nix
     ./screenshot.nix
@@ -219,20 +219,22 @@
               bind = ${mod},F,exec,${getExe config.programs.firefox.finalPackage}
             '';
 
-            audio = let
-              wpctl = "${pkgs.wireplumber}/bin/wpctl";
-              playerctl = getExe config.services.playerctld.package;
-            in ''
-              bindel=,XF86AudioRaiseVolume,exec,${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+
-              bindel=,XF86AudioLowerVolume,exec,${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-
-              bindl=,XF86AudioMute,exec,${wpctl} set-mute @DEFAULT_AUDIO_SINK@ toggle
-              bindl=,XF86AudioMicMute,exec,${wpctl} set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+            audio =
+              let
+                wpctl = "${pkgs.wireplumber}/bin/wpctl";
+                playerctl = getExe config.services.playerctld.package;
+              in
+              ''
+                bindel=,XF86AudioRaiseVolume,exec,${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+
+                bindel=,XF86AudioLowerVolume,exec,${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-
+                bindl=,XF86AudioMute,exec,${wpctl} set-mute @DEFAULT_AUDIO_SINK@ toggle
+                bindl=,XF86AudioMicMute,exec,${wpctl} set-mute @DEFAULT_AUDIO_SOURCE@ toggle
 
-              bind=,XF86AudioPause,exec,${playerctl} play-pause
-              bind=,XF86AudioPlay,exec,${playerctl} play-pause
-              bind=,XF86AudioNext,exec,${playerctl} next
-              bind=,XF86AudioPrev,exec,${playerctl} previous
-            '';
+                bind=,XF86AudioPause,exec,${playerctl} play-pause
+                bind=,XF86AudioPlay,exec,${playerctl} play-pause
+                bind=,XF86AudioNext,exec,${playerctl} next
+                bind=,XF86AudioPrev,exec,${playerctl} previous
+              '';
 
             focus = ''
               bind = ${mod},left,movefocus,l
@@ -286,10 +288,11 @@
             '';
 
             workspaces = builtins.concatStringsSep "\n" (builtins.genList
-              (x: let workspace = builtins.toString (x + 1 - ((x + 1) / 10) * 10); in ''
-                bind = ${mod}, ${workspace}, workspace, ${toString (x + 1)}
-                bind = ${mod} SHIFT, ${workspace}, movetoworkspace, ${toString (x + 1)}
-              '') 10);
+              (x:
+                let workspace = builtins.toString (x + 1 - ((x + 1) / 10) * 10); in ''
+                  bind = ${mod}, ${workspace}, workspace, ${toString (x + 1)}
+                  bind = ${mod} SHIFT, ${workspace}, movetoworkspace, ${toString (x + 1)}
+                '') 10);
           };
         };
 
@@ -299,7 +302,7 @@
 
             active_opacity = 0.95
             inactive_opacity = 0.95
-            # fullscreen_opactity = 1
+            fullscreen_opacity = 1
 
             dim_inactive = false
             dim_strength = 0.1
@@ -370,11 +373,13 @@
         '';
       in
       builtins.concatStringsSep "\n" ([
+        input
+        layout
         env
 
         theme
         animations
-        
+
         executions
         monitors
         other

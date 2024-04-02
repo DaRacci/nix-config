@@ -1,6 +1,6 @@
 { flake, config, lib, ... }: with lib; with types; let
   cfg = config.host.persistence;
-  drive = config.host.drive;
+  inherit (config.host) drive;
 
   defaultPerms = {
     mode = "0755";

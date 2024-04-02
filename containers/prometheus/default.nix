@@ -1,8 +1,7 @@
 {
   containers.prometheus = {
-    inherit (import ../common);
 
-    config = { ... }: {
+    config = _: {
       services.prometheus = { };
     };
   };

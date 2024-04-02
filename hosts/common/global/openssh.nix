@@ -1,4 +1,4 @@
-{ self, hostDir, outputs, config, pkgs, lib, ... }:
+{ outputs, config, pkgs, lib, ... }:
 
 let
   inherit (config.networking) hostName;
@@ -34,10 +34,12 @@ in
 
   programs.ssh = {
     # Each hosts public key
-    knownHosts = builtins.mapAttrs (name: _: {
-      publicKeyFile = mkPubKey name;
-      extraHostNames = (lib.optional (name == hostName) "localhost"); # Alias for localhost if it's the same host
-    }) hosts;
+    knownHosts = builtins.mapAttrs
+      (name: _: {
+        publicKeyFile = mkPubKey name;
+        extraHostNames = lib.optional (name == hostName) "localhost"; # Alias for localhost if it's the same host
+      })
+      hosts;
   };
 
   users.users.root = {

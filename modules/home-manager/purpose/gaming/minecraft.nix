@@ -1,4 +1,4 @@
 # TODO
-{ pkgs, ... }: {
+_: {
   # home.packages = with pkgs; [ modrinth-app ];
 }

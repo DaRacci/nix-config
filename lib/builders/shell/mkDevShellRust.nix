@@ -5,7 +5,7 @@
 , name
 , rustChannel
 , crossSystem ? system
-, additionalLibraryPath ? (pkgs: [ ])
+, additionalLibraryPath ? (_pkgs: [ ])
 , ...
 }:
 let
@@ -61,9 +61,9 @@ let
   isNative = system == crossSystem;
   useMold = isNative && targetPlatform.isLinux;
   useWine = targetPlatform.isWindows && system == "x86_64-linux";
-  TARGET = (builtins.replaceStrings [ "-" ] [ "_" ] (pkgs.lib.toUpper rust-target));
+  TARGET = builtins.replaceStrings [ "-" ] [ "_" ] (pkgs.lib.toUpper rust-target);
 in
-(import ./mkDevShell.nix { inherit system name pkgsFor; }).overrideAttrs (oldAttrs: {
+(import ./mkDevShell.nix { inherit system name pkgsFor; }).overrideAttrs (_oldAttrs: {
   inherit name;
 
   # Arguments that can be reused in a flake or something.
@@ -94,12 +94,11 @@ in
     cargo-edit
   ];
   # ++ optionals (useWine) ([ (pkgs.wine.override { wineBuild = "wine64"; }) ]);
-  depsBuildBuild = [ ]
-    ++ optionals (!isNative) (with pkgs; [ qemu ])
-    ++ optionals (targetPlatform.isWindows) (with crossPackages; [ stdenv.cc windows.mingw_w64_pthreads windows.pthreads ]);
+  depsBuildBuild = optionals (!isNative) (with pkgs; [ qemu ])
+    ++ optionals targetPlatform.isWindows (with crossPackages; [ stdenv.cc windows.mingw_w64_pthreads windows.pthreads ]);
 
   buildInputs = with crossPackages; [ openssl ]
-    ++ optionals (useMold) (with pkgs; [ clang mold ]);
+    ++ optionals useMold (with pkgs; [ clang mold ]);
 
   LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath (with pkgs; [
     openssl

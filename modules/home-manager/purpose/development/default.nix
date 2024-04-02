@@ -81,7 +81,7 @@ in
 
         # Integrations
         github.vscode-github-actions
-      ] ++ (optionals (cfg.python.enable) (with extensions.vscode-marketplace.ms-python; [
+      ] ++ (optionals cfg.python.enable (with extensions.vscode-marketplace.ms-python; [
         python
         vscode-pylance
         debugpy
@@ -90,13 +90,13 @@ in
         pylint
         mypy-type-checker
         gather
-      ])) ++ (optionals (cfg.rust.enable) (with extensions.vscode-marketplace; [
+      ])) ++ (optionals cfg.rust.enable (with extensions.vscode-marketplace; [
         vadimcn.vscode-lldb
         serayuzgur.crates
         jscearcy.rust-doc-viewer
         dustypomerleau.rust-syntax
         rust-lang.rust-analyzer
-      ])) ++ (optionals (cfg.jvm.enable) (with extensions.open-vscx; [
+      ])) ++ (optionals cfg.jvm.enable (with extensions.open-vscx; [
 
       ]));
 
@@ -134,8 +134,17 @@ in
         "git.confirmSync" = false;
 
         "nix.enableLanguageServer" = true;
-        "nix.serverPath" = "${pkgs.nixd}/bin/nixd";
+        "nix.serverPath" = "${lib.getExe pkgs.nil}";
         "nix.serverSettings" = {
+          nil = {
+            diagnostics = {
+              ignored = [ ];
+            };
+            formatting = {
+              command = [ "${pkgs.unstable.nixpkgs-fmt}/bin/nixpkgs-fmt" ];
+            };
+          };
+
           nixd = {
             formatting.command = "${pkgs.unstable.nixpkgs-fmt}/bin/nixpkgs-fmt";
             eval = {

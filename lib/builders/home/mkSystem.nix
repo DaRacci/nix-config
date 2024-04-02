@@ -11,7 +11,7 @@ let inherit (lib) mkDefault; in {
 
     # Only add groups that exist.
     # TODO : Move this to where these programs reside.
-    extraGroups = (builtins.filter (x: builtins.elem x (builtins.attrNames config.users.groups)) [
+    extraGroups = builtins.filter (x: builtins.elem x (builtins.attrNames config.users.groups)) [
       "video"
       "audio"
       "wheel"
@@ -21,7 +21,7 @@ let inherit (lib) mkDefault; in {
       "podman"
       "git"
       "libvirtd"
-    ] ++ groups);
+    ] ++ groups;
 
     hashedPasswordFile = config.sops.secrets."${name}-passwd".path;
     openssh.authorizedKeys.keys = [ (builtins.readFile "${flake}/home/${name}/id_ed25519.pub") ];
@@ -39,7 +39,7 @@ let inherit (lib) mkDefault; in {
       inherit (self) inputs outputs;
     };
 
-    users.${name} = { flake, host, config, lib, ... }: {
+    users.${name} = { flake, host, ... }: {
       home = {
         username = name;
         homeDirectory = mkForce "/home/${name}";

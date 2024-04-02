@@ -1,4 +1,4 @@
-{ config, lib, ... }: with lib; let cfg = config.user; in {
+{ config, lib, ... }: with lib; {
   imports = [
     ./autorun.nix
     ./persistence.nix

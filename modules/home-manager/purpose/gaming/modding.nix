@@ -8,14 +8,12 @@
   };
 
   config = mkIf cfg.enable {
-    home.packages = with pkgs; [
-    ] ++ (optionals cfg.enableSatisfactory [
+    home.packages = with pkgs; (optionals cfg.enableSatisfactory [
       ficsit-cli
     ]);
 
-    user.persistence.directories = [
-    ] ++ (optionals cfg.enableSatisfactory [
+    user.persistence.directories = optionals cfg.enableSatisfactory [
       ".local/share/ficsit"
-    ]);
+    ];
   };
 }

@@ -3,7 +3,7 @@
 , POSTGRES_USER ? "root"
 , POSTGRES_PASSWORD ? "postgres"
 }: {
-  services.postgres = { pkgs, lib, ... }: {
+  services.postgres = _: {
     service = {
       image = "${image}:${version}";
 

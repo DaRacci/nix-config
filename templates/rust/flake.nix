@@ -20,7 +20,7 @@
     let
       # TODO - Darwin support (error: don't yet have a `targetPackages.darwin.LibsystemCross for x86_64-apple-darwin`)
       targets = flake-utils.lib.defaultSystems ++ [ "x86_64-windows" ];
-      onAll = localSystem: f: (builtins.foldl' (attr: target: attr // (f target)) { } targets);
+      onAll = _localSystem: f: (builtins.foldl' (attr: target: attr // (f target)) { } targets);
     in
     flake-utils.lib.eachDefaultSystem (localSystem:
       let

@@ -11,6 +11,6 @@ in
   programs._1password.enable = (builtins.length opCliUsers) > 0;
   programs._1password-gui = {
     enable = (builtins.length opGuiUsers) > 0;
-    polkitPolicyOwners = (opGuiUsers);
+    polkitPolicyOwners = opGuiUsers;
   };
 }

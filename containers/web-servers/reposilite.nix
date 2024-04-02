@@ -1,11 +1,11 @@
 { image ? "dzikoysk/reposilite"
 , version ? "latest"
-, persistanceDir
+, persistenceDir
 }: {
-  services.reposilite = { pkgs, lib, ... }: {
+  services.reposilite = _: {
     service = {
       image = "${image}:${version}";
-      volumes = [ "${persistanceDir}/reposilite:/app/data" ];
+      volumes = [ "${persistenceDir}/reposilite:/app/data" ];
 
       environment = {
         JAVA_OPTS = "-Xmx256M";

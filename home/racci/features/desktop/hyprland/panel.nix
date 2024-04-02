@@ -130,13 +130,13 @@
           on-click-middle = "${wpctl} set-mute @DEFAULT_AUDIO_SINK@ toggle";
           on-scroll-up = "${wpctl} set-volume @DEFAULT_AUDIO_SINK@ 5%+";
           on-scroll-down = "${wpctl} set-volume @DEFAULT_AUDIO_SINK@ 5%-";
-          
+
           tooltip-format = "{icon} {desc} // {volume}%";
           max-volume = 100;
           scroll-step = 5;
         };
 
-        "wireplumber#microphone" = {        
+        "wireplumber#microphone" = {
           format = "{icon} {volume}%";
           format-source = "";
           format-source-muted = "";
@@ -194,7 +194,7 @@
           tooltip = false;
         };
 
-        "custom/r_end" ={
+        "custom/r_end" = {
           format = " ";
           interval = "once";
           tooltip = false;
@@ -417,153 +417,153 @@
   };
 
   xdg.configFile."hyporland-autorename-workspaces".text = ''
-  version = "1.1.13"
+    version = "1.1.13"
 
-  [format]
-  dedup = true
-  dedup_inactive_fullscreen = false
-  delim = " "
-  client = "{icon}{delim}"
-  client_active = "<span color='red'>{icon}</span>"
-  workspace = "<b><span color='red'>{id}-{name}:</span></b>{delim}{clients}"
-  workspace_empty = "<b><span color='yellow'>{id}-{name}:</span></b>{delim}{clients}"
-  client_dup = "{icon}{counter_sup}{delim}"
-  client_dup_fullscreen = "[{icon}]{delim}{icon}{counter_unfocused_sup}"
-  client_fullscreen = "[{icon}]{delim}"
+    [format]
+    dedup = true
+    dedup_inactive_fullscreen = false
+    delim = " "
+    client = "{icon}{delim}"
+    client_active = "<span color='red'>{icon}</span>"
+    workspace = "<b><span color='red'>{id}-{name}:</span></b>{delim}{clients}"
+    workspace_empty = "<b><span color='yellow'>{id}-{name}:</span></b>{delim}{clients}"
+    client_dup = "{icon}{counter_sup}{delim}"
+    client_dup_fullscreen = "[{icon}]{delim}{icon}{counter_unfocused_sup}"
+    client_fullscreen = "[{icon}]{delim}"
 
-  [class_active]
-  DEFAULT="{icon}"
-  "(?i)firefox" = "<span color='orange'> {class}</span>"
+    [class_active]
+    DEFAULT="{icon}"
+    "(?i)firefox" = "<span color='orange'> {class}</span>"
 
-  # [initial_class]
-  # "DEFAULT" = " {class}: {title}"
-  # "(?i)Kitty" = "term"
+    # [initial_class]
+    # "DEFAULT" = " {class}: {title}"
+    # "(?i)Kitty" = "term"
 
-  # [initial_class_active]
-  # "(?i)Kitty" = "*TERM*"
+    # [initial_class_active]
+    # "(?i)Kitty" = "*TERM*"
 
-  # regex captures support is supported
-  [title_in_class."(?i)foot"]
-  "emerge: (.+?/.+?)-.*" = "{match1}"
+    # regex captures support is supported
+    [title_in_class."(?i)foot"]
+    "emerge: (.+?/.+?)-.*" = "{match1}"
 
-  [initial_title_in_class."kitty"]
-  "zsh" = "Zsh"
+    [initial_title_in_class."kitty"]
+    "zsh" = "Zsh"
 
-  [title_in_class."(firefox|chrom.*)"]
-  "(?i)youtube" = "ꟳ"
-  "(?i)twitch" = "ꟳ"
+    [title_in_class."(firefox|chrom.*)"]
+    "(?i)youtube" = "ꟳ"
+    "(?i)twitch" = "ꟳ"
 
-  [title_active."(firefox|chrom.*)"]
-  "(?i)twitch" = "<span color='purple'>{icon}</span>"
+    [title_active."(firefox|chrom.*)"]
+    "(?i)twitch" = "<span color='purple'>{icon}</span>"
 
-  # [title_in_initial_class."(?i)kitty"]
-  # "(?i)neomutt" = "neomutt"
+    # [title_in_initial_class."(?i)kitty"]
+    # "(?i)neomutt" = "neomutt"
 
-  # [initial_title_in_initial_class."(?i)kitty"]
-  # "(?i)neomutt" = "neomutt"
+    # [initial_title_in_initial_class."(?i)kitty"]
+    # "(?i)neomutt" = "neomutt"
 
-  # [initial_title."(?i)kitty"]
-  # "zsh" = "Zsh"
+    # [initial_title."(?i)kitty"]
+    # "zsh" = "Zsh"
 
-  # [initial_title_active."(?i)kitty"]
-  # "zsh" = "*Zsh*"
+    # [initial_title_active."(?i)kitty"]
+    # "zsh" = "*Zsh*"
 
-  [workspaces_name]
-  0 = "zero"
-  1 = "one"
-  2 = "two"
-  3 = "three"
-  4 = "four"
-  5 = "five"
-  6 = "six"
-  7 = "seven"
-  8 = "eight"
-  9 = "nine"
-  10 = "ten"
+    [workspaces_name]
+    0 = "zero"
+    1 = "one"
+    2 = "two"
+    3 = "three"
+    4 = "four"
+    5 = "five"
+    6 = "six"
+    7 = "seven"
+    8 = "eight"
+    9 = "nine"
+    10 = "ten"
 
-  [class]
-  DEFAULT = ""
-  "(?i)firefox" = "<span color='orange'> </span>"
-  "(?i)kitty" = ""
-  "(?i)alacritty" = ""
-  bleachbit = ""
-  burp-startburp = ""
-  calibre-gui = ""
-  "chrome-faolnafnngnfdaknnbpnkhgohbobgegn-default" = ""
-  chromium = ""
-  "Gimp-2.10" = ""
-  code-oss = ""
-  cssh = ""
-  darktable = ""
-  discord = ""
-  dmenu-clipboard = ""
-  dmenu-pass = ""
-  duolingo = ""
-  element = ""
-  fontforge = ""
-  gcr-prompter = ""
-  gsimplecalc = ""
-  "jetbrains-studio" = ""
-  "kak" = ""
-  kicad = ""
-  "(?i)waydroid.*" = "droid"
-  obsidian = ""
-  "dmenu-emoji" = ""
-  "dmenu-browser" = ""
-  "dmenu-pass generator" = ""
-  "qalculate-gtk" = ""
-  krita = ""
-  libreoffice-calc = ""
-  libreoffice-impress = ""
-  libreoffice-startcenter = ""
-  libreoffice-writer = ""
-  molotov = ""
-  mpv = ""
-  neomutt = ""
-  nm-connection-editor = ""
-  org-ksnip-ksnip = ""
-  org-pwmt-zathura = ""
-  org-qutebrowser-qutebrowser = ""
-  org-telegram-desktop = ""
-  paperwork = ""
-  pavucontrol = ""
-  personal = ""
-  plexamp = ""
-  qutepreview = ""
-  rapid-photo-downloader = ""
-  remote-viewer = ""
-  sandboxed-tor-browser = ""
-  scli = ""
-  shopping = ""
-  Signal = ""
-  slack = ""
-  snappergui = ""
-  songrec = ""
-  spotify = ""
-  steam = ""
-  streamlink-twitch-gui = ""
-  sun-awt-x11-xframepeer = ""
-  swappy = ""
-  taskwarrior-tui = ""
-  telegramdesktop = ""
-  ".*transmission.*" = ""
-  udiskie = ""
-  vimiv = ""
-  virt-manager = ""
-  vlc = ""
-  vncviewer = ""
-  wayvnc = "󰀄"
-  whatsapp-desktop = ""
-  whatsapp-nativefier-d52542 = ""
-  wire = "󰁀"
-  wireshark-gtk = ""
-  wlfreerdp = "󰀄"
-  work = ""
-  xplr = ""
-  nemo = ""
-  zoom = ""
+    [class]
+    DEFAULT = ""
+    "(?i)firefox" = "<span color='orange'> </span>"
+    "(?i)kitty" = ""
+    "(?i)alacritty" = ""
+    bleachbit = ""
+    burp-startburp = ""
+    calibre-gui = ""
+    "chrome-faolnafnngnfdaknnbpnkhgohbobgegn-default" = ""
+    chromium = ""
+    "Gimp-2.10" = ""
+    code-oss = ""
+    cssh = ""
+    darktable = ""
+    discord = ""
+    dmenu-clipboard = ""
+    dmenu-pass = ""
+    duolingo = ""
+    element = ""
+    fontforge = ""
+    gcr-prompter = ""
+    gsimplecalc = ""
+    "jetbrains-studio" = ""
+    "kak" = ""
+    kicad = ""
+    "(?i)waydroid.*" = "droid"
+    obsidian = ""
+    "dmenu-emoji" = ""
+    "dmenu-browser" = ""
+    "dmenu-pass generator" = ""
+    "qalculate-gtk" = ""
+    krita = ""
+    libreoffice-calc = ""
+    libreoffice-impress = ""
+    libreoffice-startcenter = ""
+    libreoffice-writer = ""
+    molotov = ""
+    mpv = ""
+    neomutt = ""
+    nm-connection-editor = ""
+    org-ksnip-ksnip = ""
+    org-pwmt-zathura = ""
+    org-qutebrowser-qutebrowser = ""
+    org-telegram-desktop = ""
+    paperwork = ""
+    pavucontrol = ""
+    personal = ""
+    plexamp = ""
+    qutepreview = ""
+    rapid-photo-downloader = ""
+    remote-viewer = ""
+    sandboxed-tor-browser = ""
+    scli = ""
+    shopping = ""
+    Signal = ""
+    slack = ""
+    snappergui = ""
+    songrec = ""
+    spotify = ""
+    steam = ""
+    streamlink-twitch-gui = ""
+    sun-awt-x11-xframepeer = ""
+    swappy = ""
+    taskwarrior-tui = ""
+    telegramdesktop = ""
+    ".*transmission.*" = ""
+    udiskie = ""
+    vimiv = ""
+    virt-manager = ""
+    vlc = ""
+    vncviewer = ""
+    wayvnc = "󰀄"
+    whatsapp-desktop = ""
+    whatsapp-nativefier-d52542 = ""
+    wire = "󰁀"
+    wireshark-gtk = ""
+    wlfreerdp = "󰀄"
+    work = ""
+    xplr = ""
+    nemo = ""
+    zoom = ""
 
-  [exclude]
-  "" = "^$" # prevent displaying clients with empty class
+    [exclude]
+    "" = "^$" # prevent displaying clients with empty class
   '';
 }

@@ -40,7 +40,8 @@
       };
     };
   };
-in {
+in
+{
   options.user.autorun = {
     enable = (mkEnableOption "Enable autorun services") // { default = true; };
 
@@ -58,21 +59,23 @@ in {
     #   message = "Executable path does not exist: ${service.executablePath}";
     # })) cfg.services;
 
-    systemd.user.services = (mapAttrs' (_name: service: nameValuePair "autoRun--${service.name}" {
-      Unit = {
-        Description = "Auto-Run ${service.name} at Login.";
-        After = [ "graphical-session-pre.target" ];
-        PartOf = [ "graphical-session.target" ];
-      };
+    systemd.user.services = mapAttrs'
+      (_name: service: nameValuePair "autoRun--${service.name}" {
+        Unit = {
+          Description = "Auto-Run ${service.name} at Login.";
+          After = [ "graphical-session-pre.target" ];
+          PartOf = [ "graphical-session.target" ];
+        };
 
-      Service = {
-        PassEnvironment = [ "DISPLAY" ];
-        ExecStart = "${service.executablePath} ${concatStringsSep " " service.extraArgs}";
-      };
+        Service = {
+          PassEnvironment = [ "DISPLAY" ];
+          ExecStart = "${service.executablePath} ${concatStringsSep " " service.extraArgs}";
+        };
 
-      Install = {
-        WantedBy = [ "graphical-session.target" ];
-      };
-    }) cfg.services);
+        Install = {
+          WantedBy = [ "graphical-session.target" ];
+        };
+      })
+      cfg.services;
   };
 }

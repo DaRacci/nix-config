@@ -2,33 +2,25 @@
   imports = [
     ./atuin.nix
     ./bat.nix
-    ./bottom.nix
-    ./broot.nix
     ./carapace.nix
     ./direnv.nix
+    ./files.nix
     ./info.nix
-    ./nix.nix
     ./micro.nix
+    ./monitors.nix
+    ./nix.nix
     ./nushell.nix
     ./ripgrep.nix
     ./ssh.nix
     ./starship.nix
-    ./xplr.nix
     ./zoxide.nix
   ];
 
   home.packages = with pkgs; [
-    unstable.btop
-    nvtop
-    ctop
-
     fd
     du-dust
     duf
     procs
     doggo
-
-    nil
-    nixfmt
   ];
 }

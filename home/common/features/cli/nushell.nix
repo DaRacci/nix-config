@@ -76,12 +76,56 @@
     '';
 
     extraConfig = ''
+      let carapace_completer = {|spans: list<string>|
+        ${lib.getExe config.programs.carapace.package} $spans.0 nushell $spans
+          | from json
+          | if ($in | default [] | where value == $"($spans | last)ERR" | is-empty) { $in } else { null }  
+      }
+
+      let fish_completer = {|spans|
+        ${lib.getExe config.programs.fish.package} --command $'complete "--do-complete=($spans | str join " ")"'
+          | $"value(char tab)description(char newline)" + $in
+          | from tsv --flexible --no-infer
+      }
+
+      let zoxide_completer = {|spans|
+        $spans | skip 1 | zoxide query -l ...$in | lines | where {|x| $x != $env.PWD}
+      }
+
+      let external_completer = {|spans|
+        # Workaround for https://github.com/nushell/nushell/issues/8483
+        let expanded_alias = scope aliases
+          | where name == $spans.0
+          | get -i 0.expansion
+
+        let spans = if $expanded_alias != null {
+          $spans
+            | skip 1
+            | prepend ($expanded_alias | split row " " | take 1)
+        } else {
+          $spans
+        }
+
+        match $spans.0 {
+          git | nix | nix-shell | nix-store | nix-* => $fish_completer
+          __zoxide_z | __zoxide_zi => $zoxide_completer
+          _ => $carapace_completer
+        } | do $in $spans
+      }
+
       $env.config = {
         show_banner: false
 
-        # rm: {
-        #   always_trash: true
-        # }
+        completions: {
+          case_sensitive: false
+          quick: true
+          partial: true
+          algorithm: "fuzzy"
+          external: {
+            enable: true
+            completer: $external_completer
+          }
+        }
       }
     '';
 

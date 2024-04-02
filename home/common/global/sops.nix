@@ -1,7 +1,6 @@
 { flake, config, pkgs, lib, ... }:
 let
   inherit (config.home) username;
-  inherit (import "${flake}/lib" lib) persistablePath;
 
   privateKey = pkgs.writeTextFile {
     name = "${config.host.name}_ed25519";

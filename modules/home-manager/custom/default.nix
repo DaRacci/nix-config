@@ -1,4 +1,4 @@
-{ config, lib, ... }: with lib; let cfg = config.custom; in {
+{ config, lib, ... }: with lib; {
   imports = [
     ./fonts.nix
     ./theme.nix

@@ -2,18 +2,18 @@
   imports = [ ./common "${flake}/home/common/desktop/gnome" ];
 
   dconf.settings = with lib.hm.gvariant; let
-    mkLocation = name: short: location: mkVariant [
-      (mkUint32 2)
-      (mkVariant [
-        name
-        short
-        true
-        [ (mkTuple [ location.latitude location.longitude ]) ]
-        [ (mkTuple [ location.latitude location.longitude ]) ]
-      ])
-    ];
+    # mkLocation = name: short: location: mkVariant [
+    #   (mkUint32 2)
+    #   (mkVariant [
+    #     name
+    #     short
+    #     true
+    #     [ (mkTuple [ location.latitude location.longitude ]) ]
+    #     [ (mkTuple [ location.latitude location.longitude ]) ]
+    #   ])
+    # ];
 
-    sydney = mkLocation "Sydney" "YSSY" { latitude = -0.592539281052075; longitude = 2.638646934988996; };
+    # sydney = mkLocation "Sydney" "YSSY" { latitude = -0.592539281052075; longitude = 2.638646934988996; };
   in
   {
     "org/gnome/weather" = {

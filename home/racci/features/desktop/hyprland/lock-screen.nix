@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }: {
+{ pkgs, lib, ... }: {
   home.packages = with pkgs; [ unstable.hyprlock unstable.hypridle ];
 
   xdg.configFile."hypr/hyprlock.conf".text = ''
@@ -91,23 +91,25 @@
     }
   '';
 
-  xdg.configFile."hypr/hyperidle.conf".text = let
-    notifySend = "${pkgs.libnotify}/bin/notiofy-send";
-  in ''
-    general {
-      lock_cmd = ${notifySend} "Locking screen..."
-      unlock_cmd = ${notifySend} "Unlocking screen..."
-      before_sleep_cmd = ${notifySend} "Going to sleep..."
-      after_wake_cmd = ${notifySend} "Waking up..."
-      ignore_dbus_inhibit = false
-    }
+  xdg.configFile."hypr/hyperidle.conf".text =
+    let
+      notifySend = "${pkgs.libnotify}/bin/notiofy-send";
+    in
+    ''
+      general {
+        lock_cmd = ${notifySend} "Locking screen..."
+        unlock_cmd = ${notifySend} "Unlocking screen..."
+        before_sleep_cmd = ${notifySend} "Going to sleep..."
+        after_wake_cmd = ${notifySend} "Waking up..."
+        ignore_dbus_inhibit = false
+      }
 
-    listener {
-      timeout = 500
-      on-timeout = ${notifySend} "Idle for 5 seconds..."
-      on-resume = ${notifySend} "Resumed from idle..."
-    }
-  '';
+      listener {
+        timeout = 500
+        on-timeout = ${notifySend} "Idle for 5 seconds..."
+        on-resume = ${notifySend} "Resumed from idle..."
+      }
+    '';
 
   wayland.windowManager.hyprland.extraConfig = ''
     exec-once = ${lib.getExe pkgs.unstable.hypridle}/bin/hypridle

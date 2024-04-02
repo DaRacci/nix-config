@@ -1,4 +1,4 @@
-{ config, ... }:
+_:
 let
   persistDir = "/persist/container/minio/data";
   image = "minio/minio:latest";

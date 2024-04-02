@@ -26,6 +26,7 @@
     flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
     flake-compat-nixd = { url = "github:inclyc/flake-compat"; flake = false; };
     nixos-generators.url = "github:nix-community/nixos-generators";
+    devenv.url = "github:cachix/devenv";
 
     # Base Modules
     home-manager.url = "github:nix-community/home-manager/release-23.11";
@@ -36,6 +37,8 @@
     lanzaboote.url = "github:nix-community/lanzaboote/v0.3.0";
     nixd.url = "github:nix-community/nixd";
     nix-colours.url = "github:misterio77/nix-colors";
+    haumea = { url = "github:nix-community/haumea/v0.2.2"; inputs.nixpkgs.follows = "nixpkgs"; };
+    treefmt-nix.url = "github:numtide/treefmt-nix";
 
     # Modules only used on some systems
     nixos-wsl.url = "github:nix-community/NixOS-WSL";
@@ -46,7 +49,6 @@
     hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
     hyprland-contrib.url = "github:hyprwm/contrib";
     anyrun.url = "github:Kirottu/anyrun";
-    haumea = { url = "github:nix-community/haumea/v0.2.2"; inputs.nixpkgs.follows = "nixpkgs"; };
 
     # Other misc modules
     # arion = { url = "github:hercules-ci/arion"; };
@@ -70,7 +72,6 @@
     attic.inputs.nixpkgs-stable.follows = "nixpkgs";
     attic.inputs.nixpkgs.follows = "nixpkgs-unstable";
     attic.inputs.flake-compat.follows = "flake-compat";
-    # attic.inputs.crane.follows = "crane";
 
     anyrun.inputs.nixpkgs.follows = "nixpkgs-unstable";
     anyrun.inputs.flake-parts.follows = "flake-parts";
@@ -84,9 +85,6 @@
     lanzaboote.inputs.nixpkgs.follows = "nixpkgs-unstable";
     lanzaboote.inputs.flake-parts.follows = "flake-parts";
     lanzaboote.inputs.flake-compat.follows = "flake-compat";
-    # lanzaboote.inputs.crane.follows = "crane";
-    # lanzaboote.inputs.rust-overlay.follows = "rust-overlay";
-    # lanzaboote.inputs.pre-commit-hooks-nix.follows = "pre-commit-hooks-nix";
 
     nixos-wsl.inputs.nixpkgs.follows = "nixpkgs";
     nixos-wsl.inputs.flake-compat.follows = "flake-compat";
@@ -96,10 +94,9 @@
     #endregion
   };
 
-  outputs = inputs@{ self, nixpkgs, flake-parts, systems, nixos-wsl, nixos-generators, haumea, ... }:
+  outputs = inputs@{ self, nixpkgs, flake-parts, systems, ... }:
     let
       inherit (self) outputs;
-      inherit (nixpkgs.lib) listToAttrs foldl' recursiveUpdate;
 
       lib = inputs.nixpkgs.lib.extend (prev: _: import ./lib { lib = prev; });
       haumea = haumea.lib.load { src = ./.; inputs = { inherit lib; }; };
@@ -138,36 +135,42 @@
           deviceType = "server";
         };
       };
-    in flake-parts.lib.mkFlake { inherit inputs; specialArgs.lib = lib; } {
-      systems = [ "x86_64-linux" "aarch64-linux" ];      
+    in
+    flake-parts.lib.mkFlake { inherit inputs; specialArgs.lib = lib; } {
+      imports = [
+        inputs.devenv.flakeModule
+        inputs.treefmt-nix.flakeModule
+      ];
+
+      systems = [ "x86_64-linux" "aarch64-linux" ];
 
       flake = rec {
-        nixosConfigurations = builtins.mapAttrs (n: v: v.system) configurations;
+        nixosConfigurations = builtins.mapAttrs (_n: v: v.system) configurations;
 
         nixosModules = import ./modules/nixos;
         homeManagerModules = import ./modules/home-manager;
 
         packages = {
           # Image Generators
-          images = (builtins.mapAttrs (n: v: v.iso) configurations);
+          images = builtins.mapAttrs (_n: v: v.iso) configurations;
 
           # NixOS Outputs
-          outputs = (builtins.mapAttrs (n: v: v.config.system.build.toplevel) nixosConfigurations);
+          outputs = builtins.mapAttrs (_n: v: v.config.system.build.toplevel) nixosConfigurations;
         };
       };
 
-      perSystem = { config, system, lib, ... }: {
+      perSystem = { config, system, pkgs, lib, ... }: {
         _module.args.pkgs = import inputs.nixpkgs {
           inherit system;
           config = {
             allowUnfree = true;
-            allowUnfreePredicate = (_: true);
+            allowUnfreePredicate = _: true;
             permittedInsecurePackages = [ ];
           };
 
           overlays = [
             inputs.hyprland-contrib.overlays.default
-          ] ++ builtins.attrValues import ./overlays;
+          ] ++ (builtins.attrValues (import ./overlays { inherit self inputs lib; }));
         };
 
         packages = {
@@ -176,14 +179,63 @@
 
           # NixOS Outputs
           # outputs = (builtins.mapAttrs (n: v: v.system.config.system.build.toplevel) config.nixosConfigurations);
-        } // (import ./pkgs { pkgs = nixpkgs.legacyPackages.${system}; inherit system; });
+        } // (import ./pkgs { pkgs = nixpkgs.legacyPackages.${system}; });
 
-        devShells = listToAttrs [
-          (lib.shell.mkNix system "default")
-        ];
+        devenv.shells.default = {
+          packages = with pkgs; [
+            # Cli Tools
+            act # Github Action testing
+            hyperfine # Benchmarking
+            cocogitto # Conventional Commits
+
+            # Required Tools
+            nix
+            git
+            home-manager
+
+            # Secure Boot Debugging
+            sbctl
+
+            # Sops-nix
+            age
+            sops
+            ssh-to-age
+          ];
+
+          languages = {
+            nix.enable = true;
+          };
+
+          pre-commit = {
+            settings = {
+              treefmt.package = pkgs.treefmt;
+            };
+
+            hooks = {
+              # mdsh.enable = true;
+              # typos.enable = true;
+              # editorconfig-checker.enable = true;
+              actionlint.enable = true;
+
+              # deadnix.enable = true;
+              # nixpkgs-fmt.enable = true;
+              # nil.enable = true;
+              # statix.enable = true;
+            };
+          };
+
+          env = {
+            NIX_CONFIG = "extra-experimental-features = nix-command flakes repl-flake";
+          };
+        };
 
         formatter = nixpkgs.legacyPackages.${system}.nixpkgs-fmt;
-        # overlays = import ./overlays { pkgs = nixpkgs.legacyPackages.${system}; inherit self inputs system outputs; };
+
+        treefmt = {
+          deadnix.enable = true;
+          nixpkgs-fmt.enable = true;
+          statix.enable = true;
+        };
       };
     };
 }

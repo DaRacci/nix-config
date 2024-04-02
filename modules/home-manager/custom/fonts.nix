@@ -42,7 +42,7 @@ in
 
     programs.kitty.font = {
       inherit (cfg.monospace) package size;
-      name = cfg.monospace.name;
+      inherit (cfg.monospace) name;
     };
 
     programs.rofi.font = with cfg.regular; "${family} ${toString size}";

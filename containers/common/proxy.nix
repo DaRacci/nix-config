@@ -1,4 +1,4 @@
-{ lib, ... }: {
+_: {
   service = {
     dependsOn = [ "caddy" ];
     networks = [ "proxy" ];

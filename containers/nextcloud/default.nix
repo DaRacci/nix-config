@@ -1,8 +1,7 @@
 { pkgs, ... }: {
   containers.nextcloud = {
-    inherit (import ../common);
 
-    config = { ... }: {
+    config = _: {
       services.nextcloud = {
         enable = true;
         hostName = "localhost";

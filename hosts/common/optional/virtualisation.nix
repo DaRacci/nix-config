@@ -386,14 +386,14 @@ in
 
   environment = {
     sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
-    systemPackages = (with pkgs; [
+    systemPackages = with pkgs; [
       virt-manager
       virtiofsd
       looking-glass-client
       win-virtio
       win-spice
       virtio-win
-    ]);
+    ];
   };
   host.persistence.directories = [
     { directory = "/var/lib/libvirt/qemu"; user = "qemu-libvirtd"; group = "qemu-libvirtd"; mode = "u=rwx,g=rx,o=rx"; }

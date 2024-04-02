@@ -14,7 +14,7 @@
     }];
   };
 
-  services.caddy = { pkgs, lib, ... }: {
+  services.caddy = _: {
     service = {
       image = "${image}:${version}";
       volumes = [ "${toString ./.}/Caddyfile:/etc/caddy/Caddyfile:ro" ];

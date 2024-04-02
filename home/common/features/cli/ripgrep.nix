@@ -1,10 +1,11 @@
-{ pkgs, ... }: {
-  # programs.ripgrep = {
-  #   enable = true;
-  #   package = pkgs.ripgrep;
+{ pkgs, ... }: rec {
+  programs.ripgrep = {
+    enable = true;
+    package = pkgs.ripgrep;
 
-  #   arguments = [ ];
-  # };
+    arguments = [ ];
+  };
 
-  home.packages = with pkgs.unstable; [ ripgrep ];
+  home.shellAliases.grep = "rg";
+  programs.nushell.grep = home.shellAliases.grep;
 }

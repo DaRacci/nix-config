@@ -2,7 +2,7 @@ let
   image = "adguard/adguardhome:latest";
 in
 {
-  services.adguardhome = { pkgs, lib, ... }: {
+  services.adguardhome = _: {
     service = {
       inherit image;
       volumes = [

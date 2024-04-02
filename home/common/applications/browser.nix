@@ -22,7 +22,7 @@ in
     * Check about:policies#documentation for options. */
     policies =
       let
-        Extensions = (trivial.pipe [
+        Extensions = trivial.pipe [
           # Privacy / Security
           [ "ublock-origin" "uBlock0@raymondhill.net" ]
           [ "istilldontcareaboutcookies" "idcac-pub@guus.ninja" ]
@@ -39,9 +39,9 @@ in
           [ "search_by_image" "{2e5ff8c8-32fe-46d0-9fc8-6b8986621f3c}" ]
         ] [
           (map (arr: { id = elemAt arr 1; name = elemAt arr 0; }))
-          (map (ext: nameValuePair (ext.name) { inherit (ext) id name; }))
+          (map (ext: nameValuePair ext.name { inherit (ext) id name; }))
           listToAttrs
-        ]);
+        ];
       in
       {
         # Privacy
@@ -106,7 +106,7 @@ in
               Extensions.darkreader
               Extensions."1password-x-password-manager"
             ] [
-              (map (ext: allowPrivateBrowsing ext))
+              (map allowPrivateBrowsing)
               listToAttrs
             ])
             {
@@ -308,7 +308,7 @@ in
         "sessionstore-backups" # Session restore
         "bookmarkbackups" # Bookmarks
       ] [
-        (map (v: onEachProfile v))
+        (map onEachProfile)
         flatten
       ];
 
@@ -326,7 +326,7 @@ in
         "sessionstore.jsonlz4" # Session restore
         "signedInUser.json" # Mozilla Sync
       ] [
-        (map (v: onEachProfile v))
+        (map onEachProfile)
         flatten
       ];
     };

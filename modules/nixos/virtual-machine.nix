@@ -111,159 +111,167 @@ in
     };
   };
 
-  config = mkIf (cfg.enable && cfg.guests != { })
-    (mkMerge mapAttrs'
-      (name: guest:
-        let
-          xml = pkgs.writeText "libvirt-guest-${guest.name}.xml" ''
-            <domain type="kvm">
-              <name>${guest.name}</name>
-              <uuid>UUID</uuid>
-          '' + optional (guest.os.type == "windows") ''
-            <metadata>
-              <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
-                <libosinfo:os id="http://microsoft.com/win/${guest.os.version}"/>
-              </libosinfo:libosinfo>
-            </metadata>
-            <os>
-              <type arch="x86_64" machine="pc-q35-8.0">hvm</type>
-              <loader readonly="yes" type="pflash">/usr/share/OVMF/OVMF_CODE.fd</loader>
-            </os>
-          '' + ''
-            <cpu mode="host-passthrough">
-              <topology sockets="1" dies="1" cores="${toString (guest.cpu.threads / 2)}" threads="2"/>
-              <feature policy="require" name="topoext"/>
-              <feature policy="disable" name="hypervisor"/>
-            </cpu>
-          '' + ''
-            <memory unit="MiB">${toString guest.memory.maxMemory}</memory>
-            <currentMemory unit="MiB">${toString (guest.memory.maxMemory / (guest.memory.reservedMemory / 100))}</currentMemory>
-          '' + optional guest.memory.sharedMemory ''
-            <memoryBacking>
-              <source mode="shared"/>
-            </memoryBacking>
-          '' + ''
-            <features>
-              <acpi/>
-              <apic/>
-              <kvm>
-                <hidden state="on"/>
-              </kvm>
-              <vmport state="off"/>
-              <smm state="on"/>
-            </features>
-          '' + ''
-            <devices>
-              <panic model="isa"/>
-              <memballoon model="none"/>
-              <watchdog model="i6300esb" action="reset"/>
-              <rng model="virtio">
-                <backend model="random">/dev/urandom</backend>
-              </rng>
-              <input type="mouse" bus="virtio"/>
-              <input type="keyboard" bus="virtio"/>
-              <channel type="spicevmc">
-                <target type="virtio" name="com.redhat.spice.0"/>
-              </channel>
-              <interface type="direct">
-                <source dev="${guest.network.hostNic}" mode="bridge"/>
-                <mac address="${guest.network.mac}"/>
-                <model type="virtio"/>
-              </interface>
-          '' + optional guest.tpm ''
-            <tpm model="tpm-tis">
-              <backend type="passthrough"/>
-            </tpm>
-          '' + optional guest.audio ''
-            <sound model="ich9"/>
-            <audio id="1" type="ich9"/>
-          '' + optional guest.graphics.enable
-            (if guest.graphics.method == "spice" then ''
-              <graphics type="spice" autoport="yes">
-                <listen type="address"/>
-              </graphics>
-            '' else if guest.graphics.method == "mdev" then ''
-              ?????
-            '' else ''
-              <graphics type="spice" port="-1" autoport="no">
-                <listen type="address"/>
-                <gl enable="no"/>
-              </graphics>
-              <video>
-                <model type="vga" vram="16384" heads="1" primary="yes"/>
-              </video>
-              <shmem name="looking-glass">
-                <model type="ivshmem-plain"/>
-                <size unit="M">64</size>
-              </shmem>
-            '') + ''
-              </devices>
-            </domain>
-          '';
-        in
-        { }
-          cfg.guests);
+  # config = mkIf (cfg.enable && cfg.guests != { }) {
+  #   systemd.services.populate-vms = {
+  #     description = "Populate virtual machines xml files into /var/lib/libvirt/qemu";
+  #     wantedBy = [ "multi-user.target" ];
+  #     before = [ "libvirtd.service" ];
+  #     script = ''
+  #       mkdir -p /var/lib/libvirt/qemu
+  #       for xml in
+  #     '';
+  #   }
+  #     (mkMerge mapAttrs'
+  #       (name: guest:
+  #         let
+  #           xml = pkgs.writeText "libvirt-guest-${guest.name}.xml" ''
+  #             <domain type="kvm">
+  #               <name>${guest.name}</name>
+  #               <uuid>UUID</uuid>
+  #           '' + optional (guest.os.type == "windows") ''
+  #             <metadata>
+  #               <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
+  #                 <libosinfo:os id="http://microsoft.com/win/${guest.os.version}"/>
+  #               </libosinfo:libosinfo>
+  #             </metadata>
+  #             <os>
+  #               <type arch="x86_64" machine="pc-q35-8.0">hvm</type>
+  #               <loader readonly="yes" type="pflash">/usr/share/OVMF/OVMF_CODE.fd</loader>
+  #             </os>
+  #           '' + ''
+  #             <cpu mode="host-passthrough">
+  #               <topology sockets="1" dies="1" cores="${toString (guest.cpu.threads / 2)}" threads="2"/>
+  #               <feature policy="require" name="topoext"/>
+  #               <feature policy="disable" name="hypervisor"/>
+  #             </cpu>
+  #           '' + ''
+  #             <memory unit="MiB">${toString guest.memory.maxMemory}</memory>
+  #             <currentMemory unit="MiB">${toString (guest.memory.maxMemory / (guest.memory.reservedMemory / 100))}</currentMemory>
+  #           '' + optional guest.memory.sharedMemory ''
+  #             <memoryBacking>
+  #               <source mode="shared"/>
+  #             </memoryBacking>
+  #           '' + ''
+  #             <features>
+  #               <acpi/>
+  #               <apic/>
+  #               <kvm>
+  #                 <hidden state="on"/>
+  #               </kvm>
+  #               <vmport state="off"/>
+  #               <smm state="on"/>
+  #             </features>
+  #           '' + ''
+  #             <devices>
+  #               <panic model="isa"/>
+  #               <memballoon model="none"/>
+  #               <watchdog model="i6300esb" action="reset"/>
+  #               <rng model="virtio">
+  #                 <backend model="random">/dev/urandom</backend>
+  #               </rng>
+  #               <input type="mouse" bus="virtio"/>
+  #               <input type="keyboard" bus="virtio"/>
+  #               <channel type="spicevmc">
+  #                 <target type="virtio" name="com.redhat.spice.0"/>
+  #               </channel>
+  #               <interface type="direct">
+  #                 <source dev="${guest.network.hostNic}" mode="bridge"/>
+  #                 <mac address="${guest.network.mac}"/>
+  #                 <model type="virtio"/>
+  #               </interface>
+  #           '' + optional guest.tpm ''
+  #             <tpm model="tpm-tis">
+  #               <backend type="passthrough"/>
+  #             </tpm>
+  #           '' + optional guest.audio ''
+  #             <sound model="ich9"/>
+  #             <audio id="1" type="ich9"/>
+  #           '' + optional guest.graphics.enable
+  #             (if guest.graphics.method == "spice" then ''
+  #               <graphics type="spice" autoport="yes">
+  #                 <listen type="address"/>
+  #               </graphics>
+  #             '' else if guest.graphics.method == "mdev" then ''
+  #               ?????
+  #             '' else ''
+  #               <graphics type="spice" port="-1" autoport="no">
+  #                 <listen type="address"/>
+  #                 <gl enable="no"/>
+  #               </graphics>
+  #               <video>
+  #                 <model type="vga" vram="16384" heads="1" primary="yes"/>
+  #               </video>
+  #               <shmem name="looking-glass">
+  #                 <model type="ivshmem-plain"/>
+  #                 <size unit="M">64</size>
+  #               </shmem>
+  #             '') + ''
+  #               </devices>
+  #             </domain>
+  #           '';
+  #         in
+  #         { }));
 
 
-    systemd.services = lib.mapAttrs'
-  (name: guest: lib.nameValuePair "libvirtd-guest-${name}" {
-  after = [ "libvirtd.service" ];
-  requires = [ "libvirtd.service" ];
-  wantedBy = [ "multi-user.target" ];
-  serviceConfig = {
-    Type = "oneshot";
-    RemainAfterExit = "yes";
-  };
-  script =
-    let
-      xml = pkgs.writeText "libvirt-guest-${name}.xml"
-        ''
-          <domain type="kvm">
-            <name>${name}</name>
-            <uuid>UUID</uuid>
-            <os>
-              <type>hvm</type>
-            </os>
-            <memory unit="GiB">${guest.memory}</memory>
-            <devices>
-              <disk type="volume">
-                <source volume="guest-${name}"/>
-                <target dev="vda" bus="virtio"/>
-              </disk>
-              <graphics type="spice" autoport="yes"/>
-              <input type="keyboard" bus="usb"/>
-              <interface type="direct">
-                <source dev="${hostNic}" mode="bridge"/>
-                <mac address="${guest.mac}"/>
-                <model type="virtio"/>
-              </interface>
-            </devices>
-            <features>
-              <acpi/>
-            </features>
-          </domain>
-        '';
-    in
-    ''
-      uuid="$(${pkgs.libvirt}/bin/virsh domuuid '${name}' || true)"
-      ${pkgs.libvirt}/bin/virsh define <(sed "s/UUID/$uuid/" '${xml}')
-      ${pkgs.libvirt}/bin/virsh start '${name}'
-    '';
-  preStop =
-    ''
-      ${pkgs.libvirt}/bin/virsh shutdown '${name}'
-      let "timeout = $(date +%s) + 10"
-      while [ "$(${pkgs.libvirt}/bin/virsh list --name | grep --count '^${name}$')" -gt 0 ]; do
-        if [ "$(date +%s)" -ge "$timeout" ]; then
-          # Meh, we warned it...
-          ${pkgs.libvirt}/bin/virsh destroy '${name}'
-        else
-          # The machine is still running, let's give it some time to shut down
-          sleep 0.5
-        fi
-      done
-    '';
-})
-guests;
-};
+  #   systemd.services = lib.mapAttrs'
+  #     (name: guest: lib.nameValuePair "libvirtd-guest-${name}" {
+  #       after = [ "libvirtd.service" ];
+  #       requires = [ "libvirtd.service" ];
+  #       wantedBy = [ "multi-user.target" ];
+  #       serviceConfig = {
+  #         Type = "oneshot";
+  #         RemainAfterExit = "yes";
+  #       };
+  #       script =
+  #         let
+  #           xml = pkgs.writeText "libvirt-guest-${name}.xml"
+  #             ''
+  #               <domain type="kvm">
+  #                 <name>${name}</name>
+  #                 <uuid>UUID</uuid>
+  #                 <os>
+  #                   <type>hvm</type>
+  #                 </os>
+  #                 <memory unit="GiB">${guest.memory}</memory>
+  #                 <devices>
+  #                   <disk type="volume">
+  #                     <source volume="guest-${name}"/>
+  #                     <target dev="vda" bus="virtio"/>
+  #                   </disk>
+  #                   <graphics type="spice" autoport="yes"/>
+  #                   <input type="keyboard" bus="usb"/>
+  #                   <interface type="direct">
+  #                     <source dev="${hostNic}" mode="bridge"/>
+  #                     <mac address="${guest.mac}"/>
+  #                     <model type="virtio"/>
+  #                   </interface>
+  #                 </devices>
+  #                 <features>
+  #                   <acpi/>
+  #                 </features>
+  #               </domain>
+  #             '';
+  #         in
+  #         ''
+  #           uuid="$(${pkgs.libvirt}/bin/virsh domuuid '${name}' || true)"
+  #           ${pkgs.libvirt}/bin/virsh define <(sed "s/UUID/$uuid/" '${xml}')
+  #           ${pkgs.libvirt}/bin/virsh start '${name}'
+  #         '';
+  #       preStop =
+  #         ''
+  #           ${pkgs.libvirt}/bin/virsh shutdown '${name}'
+  #           let "timeout = $(date +%s) + 10"
+  #           while [ "$(${pkgs.libvirt}/bin/virsh list --name | grep --count '^${name}$')" -gt 0 ]; do
+  #             if [ "$(date +%s)" -ge "$timeout" ]; then
+  #               # Meh, we warned it...
+  #               ${pkgs.libvirt}/bin/virsh destroy '${name}'
+  #             else
+  #               # The machine is still running, let's give it some time to shut down
+  #               sleep 0.5
+  #             fi
+  #           done
+  #         '';
+  #     })
+  #     guests;
+  # };
 }

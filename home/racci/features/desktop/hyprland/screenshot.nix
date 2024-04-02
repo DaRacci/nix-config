@@ -1,4 +1,5 @@
-{ inputs, config, pkgs, ... }: let
+{ config, pkgs, ... }:
+let
   screenshotsPath = "${config.xdg.userDirs.pictures}/Screenshots";
 
   mkScript = name: content: "${pkgs.writeShellApplication {
@@ -25,7 +26,8 @@
     grimblast --notify --freeze copysave output "$savePath";
     satty --filename "''${savePath}" --fullscreen --output-filename "''${savePathAnnotated}";
   '';
-in {
+in
+{
   # TODO - Screenshot sound
   wayland.windowManager.hyprland.extraConfig = ''
     bind=,Print,exec,${scriptArea}

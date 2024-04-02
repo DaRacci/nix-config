@@ -35,7 +35,7 @@ let
   ];
 
   craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
-  TARGET = (builtins.replaceStrings [ "-" ] [ "_" ] (pkgs.lib.toUpper target));
+  TARGET = builtins.replaceStrings [ "-" ] [ "_" ] (pkgs.lib.toUpper target);
 
   crossPackages = let inherit (flake-utils.lib) system; in
     if localSystem == crossSystem
@@ -78,15 +78,14 @@ let
 
       passthru = { inherit craneLib commonArgs; };
 
-      depsBuildBuild = [ ]
-        ++ lib.optionals (!isNative) (with pkgs; [ qemu ])
-        ++ lib.optionals (targetPlatform.isWindows) (with crossPackages; [ stdenv.cc windows.mingw_w64_pthreads windows.pthreads ]);
+      depsBuildBuild = lib.optionals (!isNative) (with pkgs; [ qemu ])
+        ++ lib.optionals targetPlatform.isWindows (with crossPackages; [ stdenv.cc windows.mingw_w64_pthreads windows.pthreads ]);
 
       buildInputs = with crossPackages; [ openssl ]
-        ++ lib.optionals (useMold) (with pkgs; [ clang mold ]);
+        ++ lib.optionals useMold (with pkgs; [ clang mold ]);
 
       nativeBuildInputs = with pkgs; [ pkg-config ]
-        ++ lib.optionals (useWine) ([ (pkgs.wine.override { wineBuild = "wine64"; }) ]);
+        ++ lib.optionals useWine [ (pkgs.wine.override { wineBuild = "wine64"; }) ];
 
       "CARGO_BUILD_TARGET" = target;
 
