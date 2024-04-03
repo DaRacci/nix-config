@@ -20,13 +20,13 @@ jobs:
     strategy:
       matrix:
         system:
+          # TODO - add more systems
           - x86_64
         include:
           - nix-command: develop .#default --profile profile
             system: x86_64
-          - nix-command: develop .#rust-stable --profile profile
-            system: x86_64
-          - nix-command: develop .#rust-nightly --profile profile
+
+          - nix-command: build --impure .#x86-64-linux.nixosConfigurations.nixe.config.system.build.toplevel
             system: x86_64
 
     steps:
