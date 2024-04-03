@@ -1,9 +1,9 @@
 # TODO - Colour picker bind to SUPER + C (hyprpicker)
 # TODO - Clipboard manager bind to SUPER + V (cliphist)
 # TODO - Game mode that disables compositor and pauses swww-random-wallpaper
-{ inputs, config, pkgs, lib, ... }: with lib; {
+{ flake, inputs, config, pkgs, lib, ... }: with lib; {
   imports = [
-    ../../../../common/desktop/hyprland
+    "${flake}/home/shared/desktop/hyprland"
     ./clipboard.nix
     ./lock-screen.nix
     ./notification.nix
@@ -94,12 +94,12 @@
 
             animation = windowsIn, 1, 3, easeOutCubic, popin 30% # window open
             animation = windowsOut, 1, 3, fluent_decel, popin 70% # window close.
-            animation = windowsMove, 1, 2, easeinoutsine, slide # everything in between, moving, dragging, resizing.
+            # animation = windowsMove, 1, 2, easeinoutsine, slide # everything in between, moving, dragging, resizing.
 
             # animation = windows, 1, 6, wind, slide
             # animation = windowsIn, 1, 6, winIn, slide
             # animation = windowsOut, 1, 5, winOut, slide
-            # animation = windowsMove, 1, 5, wind, slide
+            animation = windowsMove, 1, 5, wind, slide
 
             # Fade
             animation = fadeIn, 1, 3, easeOutCubic  # fade in (open) -> layers and windows
@@ -215,7 +215,7 @@
             applications = ''
               # TODO Allow customising
               bind = ${mod},T,exec,${getExe config.programs.alacritty.package}
-              bind = ${mod},E,exec,${getExe pkgs.gnome.nautilus}
+              bind = ${mod},E,exec,${pkgs.gnome.nautilus}/bin/nautilus
               bind = ${mod},F,exec,${getExe config.programs.firefox.finalPackage}
             '';
 

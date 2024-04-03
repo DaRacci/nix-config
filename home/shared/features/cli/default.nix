@@ -1,10 +1,11 @@
-{ pkgs, ... }: {
+{ pkgs, lib, ... }: {
   imports = [
     ./atuin.nix
     ./bat.nix
     ./carapace.nix
     ./direnv.nix
     ./files.nix
+    ./fish.nix
     ./info.nix
     ./micro.nix
     ./monitors.nix

@@ -1,12 +1,12 @@
-{ pkgs, ... }: {
+{ flake, pkgs, ... }: {
   imports = [
     ./global.nix
     ./features/desktop/gnome.nix
     ./features/desktop/hyprland
 
     ./features/cli
-    ../common/features/games
-    ../common/applications
+    "${flake}/home/shared/features/games"
+    "${flake}/home/shared/applications"
   ];
 
   home.packages = with pkgs.unstable; [ trayscale ];

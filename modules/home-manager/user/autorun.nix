@@ -47,17 +47,18 @@ in
 
     services = mkOption {
       type = with types; attrsOf (submodule packageDefinition);
+      default = { };
       description = ''
         List of services to be started automatically.
       '';
     };
   };
 
-  config = mkIf cfg.enable {
-    # assertions = (map (service: {
-    #   assertion = builtins.pathExists service.executablePath;
-    #   message = "Executable path does not exist: ${service.executablePath}";
-    # })) cfg.services;
+  config = mkIf (cfg.enable && length cfg.services > 0) {
+    assertions = (map (service: {
+      assertion = builtins.pathExists service.executablePath;
+      message = "Executable path does not exist: ${service.executablePath}";
+    })) cfg.services;
 
     systemd.user.services = mapAttrs'
       (_name: service: nameValuePair "autoRun--${service.name}" {

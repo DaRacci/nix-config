@@ -1,10 +1,10 @@
 { self
 , inputs
+, pkgs
 , lib
-, haumea
 }: let
   wrapper = builder: system: name: args: import builder (args // {
-    inherit self system name inputs lib haumea;
+    inherit self system name inputs lib pkgs;
   });
   simpleWrapper = builder: system: name: wrapper builder system name { };
 

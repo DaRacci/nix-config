@@ -7,5 +7,5 @@
   };
 
   home.shellAliases.grep = "rg";
-  programs.nushell.grep = home.shellAliases.grep;
+  programs.nushell.shellAliases.grep = home.shellAliases.grep;
 }

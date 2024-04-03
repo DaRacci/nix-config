@@ -1,6 +1,6 @@
 { self
+, pkgs
 , lib
-, system
 
 , name
 , users ? [ ]
@@ -8,45 +8,45 @@
 , ...
 }:
 let
-  # TODO - Remove this, and use the new haumea lib
-  hostDir =
-    let
-      opt1 = "${self}/hosts/${name}";
-      opt2 = "${self}/hosts/servers/${name}";
-    in
-    if (builtins.pathExists opt1) then opt1 else opt2;
+  hostDirectory = "${self}/hosts/${deviceType}/${name}";
 in
-{
-  inherit system;
+rec {
+  inherit pkgs;
+  inherit (pkgs.stdenv) system;
 
   modules = [
-    "${self}/hosts/common/global"
-    "${self}/hosts/device/common"
-    "${self}/hosts/device/${deviceType}"
-    "${hostDir}"
+    ({ inputs, ... }: {
+      imports = builtins.attrValues (import "${self}/modules/nixos");
+    })
+
+    "${self}/hosts/shared/global"
+    "${self}/hosts/${deviceType}/shared"
+    hostDirectory
 
     ({ inputs, ... }: {
-      imports = [ inputs.home-manager.nixosModule inputs.nixos-generators.nixosModules.all-formats ];
+      imports = [ 
+        inputs.home-manager.nixosModule
+        inputs.nixos-generators.nixosModules.all-formats
+      ];
 
       host = {
         inherit name system;
+        device.role = deviceType;
       };
 
       passthru.enable = false; # Why does build break without this?
 
-      host.device.role = deviceType;
-
       system.stateVersion = "23.11";
     })
-  ] ++ (builtins.map (name: (import ../home/mkSystem.nix { inherit self lib name; })) users);
+  ] ++ (builtins.map (username: (import "${self}/lib/builders/home/mkSystem.nix" {
+    inherit self lib;
+    name = username;
+    hostName = name;
+  })) users);
 
   specialArgs = {
     flake = self;
-    inherit (self.inputs) nix-colours;
-    inherit hostDir;
+    inherit hostDirectory;
     inherit (self) inputs outputs;
-
-    haumea = haumea.hosts.${deviceType}.${name};
-    haumeaCommon = haumea.hosts.common;
   };
 }

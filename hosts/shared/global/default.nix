@@ -13,7 +13,7 @@ in
     ./sops.nix
     ./security.nix
     ./zram.nix
-  ] ++ (builtins.attrValues outputs.nixosModules);
+  ];# ++ (builtins.attrValues outputs.nixosModules);
 
   # programs.nix-index.enable = true;
   # programs.nix-index-database.comma.enable = true;

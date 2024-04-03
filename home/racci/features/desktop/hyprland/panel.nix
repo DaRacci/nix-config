@@ -128,8 +128,8 @@
 
           on-click = "${lib.getExe pkgs.pavucontrol} -t 3";
           on-click-middle = "${wpctl} set-mute @DEFAULT_AUDIO_SINK@ toggle";
-          on-scroll-up = "${wpctl} set-volume @DEFAULT_AUDIO_SINK@ 5%+";
-          on-scroll-down = "${wpctl} set-volume @DEFAULT_AUDIO_SINK@ 5%-";
+          on-scroll-up = "${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+";
+          on-scroll-down = "${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-";
 
           tooltip-format = "{icon} {desc} // {volume}%";
           max-volume = 100;
@@ -143,8 +143,8 @@
 
           on-click = "${lib.getExe pkgs.pavucontrol} -t 4";
           on-click-middle = "${wpctl} set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
-          on-scroll-up = "${wpctl} set-volume @DEFAULT_AUDIO_SOURCE@ 5%+";
-          on-scroll-down = "${wpctl} set-volume @DEFAULT_AUDIO_SOURCE@ 5%-";
+          on-scroll-up = "${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SOURCE@ 5%+";
+          on-scroll-down = "${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SOURCE@ 5%-";
 
           tooltip-format = "{icon} {desc} // {volume}%";
           scroll-step = 5;

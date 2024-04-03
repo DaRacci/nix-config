@@ -1,5 +1,5 @@
 { flake, lib, ... }: {
-  imports = [ ./common "${flake}/home/common/desktop/gnome" ];
+  imports = [ ./common "${flake}/home/shared/desktop/gnome" ];
 
   dconf.settings = with lib.hm.gvariant; let
     # mkLocation = name: short: location: mkVariant [

@@ -1,9 +1,9 @@
-{
+{ flake, ... }: {
   imports = [
     ./features/desktop/gnome.nix
 
     ./features/cli
-    ../common/features/games
-    ../common/applications
+    "${flake}/home/shared/features/games"
+    "${flake}/home/shared/applications"
   ];
 }

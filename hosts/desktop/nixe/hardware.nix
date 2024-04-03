@@ -1,17 +1,17 @@
 # TODO :: Auto subvolume setup
-{ inputs, pkgs, ... }: {
+{ flake, inputs, pkgs, ... }: {
   imports = [
     inputs.nixos-hardware.nixosModules.common-cpu-amd
     inputs.nixos-hardware.nixosModules.common-cpu-amd-pstate
     inputs.nixos-hardware.nixosModules.common-pc-ssd
     inputs.nixos-hardware.nixosModules.common-hidpi
 
-    ../common/optional/nvidia.nix
-    ../common/optional/backlight.nix
-    ../common/optional/openrgb.nix
-    ../common/optional/cooling.nix
-    ../common/optional/secureboot.nix
-    ../common/optional/biometrics.nix
+    "${flake}/hosts/shared/optional/nvidia.nix"
+    "${flake}/hosts/shared/optional/backlight.nix"
+    "${flake}/hosts/shared/optional/openrgb.nix"
+    "${flake}/hosts/shared/optional/cooling.nix"
+    "${flake}/hosts/shared/optional/secureboot.nix"
+    "${flake}/hosts/shared/optional/biometrics.nix"
   ];
 
   boot = {

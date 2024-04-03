@@ -10,7 +10,6 @@ let
 in
 {
   imports = [
-    # ../../modules/nixos
     # nur-no-pkgs.repos.crtified.modules.vfio
     nur-no-pkgs.repos.crtified.modules.virtualisation.nix
   ];

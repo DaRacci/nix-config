@@ -1,11 +1,11 @@
-{ ... }: {
+{ self, ... }: {
   imports = [
     ./hardware.nix
 
-    ../common/optional/pipewire.nix
-    ../common/optional/quietboot.nix
-    ../common/optional/gnome.nix
-    ../common/optional/gaming.nix
+    "${self}/hosts/shared/optional/pipewire.nix"
+    "${self}/hosts/shared/optional/quietboot.nix"
+    "${self}/hosts/shared/optional/gnome.nix"
+    "${self}/hosts/shared/optional/gaming.nix"
   ];
 
   host.persistence = {

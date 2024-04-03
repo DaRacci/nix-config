@@ -37,7 +37,6 @@
     lanzaboote.url = "github:nix-community/lanzaboote/v0.3.0";
     nixd.url = "github:nix-community/nixd";
     nix-colours.url = "github:misterio77/nix-colors";
-    haumea = { url = "github:nix-community/haumea/v0.2.2"; inputs.nixpkgs.follows = "nixpkgs"; };
     treefmt-nix.url = "github:numtide/treefmt-nix";
 
     # Modules only used on some systems
@@ -97,13 +96,28 @@
   outputs = inputs@{ self, nixpkgs, flake-parts, systems, ... }:
     let
       inherit (self) outputs;
-
       lib = inputs.nixpkgs.lib.extend (prev: _: import ./lib { lib = prev; });
-      haumea = haumea.lib.load { src = ./.; inputs = { inherit lib; }; };
-      builders = import ./lib/builders { inherit self inputs lib haumea; };
+
+      mkPkgs = system: import inputs.nixpkgs {
+        inherit system;
+        config = {
+          allowUnfree = true;
+          allowUnfreePredicate = _: true;
+          permittedInsecurePackages = [ ];
+        };
+
+        overlays = [
+          inputs.hyprland-contrib.overlays.default
+        ] ++ (builtins.attrValues (import ./overlays { inherit self inputs lib; }));
+      };
 
       # TODO - Scan the folders for all the configurations and generate the list.
-      configurations = builtins.mapAttrs (n: v: builders.system.build builtins.currentSystem n v) {
+      mkConfigurations = system: let
+        builders = import ./lib/builders {
+          inherit self inputs lib;
+          pkgs = mkPkgs system;
+        }; 
+      in builtins.mapAttrs (n: v: builders.system.build system n v) {
         nixe = {
           users = [ "racci" ];
 
@@ -144,42 +158,20 @@
 
       systems = [ "x86_64-linux" "aarch64-linux" ];
 
-      flake = rec {
+      flake = let configurations = mkConfigurations builtins.currentSystem; in rec {
         nixosConfigurations = builtins.mapAttrs (_n: v: v.system) configurations;
-
-        nixosModules = import ./modules/nixos;
-        homeManagerModules = import ./modules/home-manager;
-
-        packages = {
-          # Image Generators
-          images = builtins.mapAttrs (_n: v: v.iso) configurations;
-
-          # NixOS Outputs
-          outputs = builtins.mapAttrs (_n: v: v.config.system.build.toplevel) nixosConfigurations;
-        };
       };
 
       perSystem = { config, system, pkgs, lib, ... }: {
-        _module.args.pkgs = import inputs.nixpkgs {
-          inherit system;
-          config = {
-            allowUnfree = true;
-            allowUnfreePredicate = _: true;
-            permittedInsecurePackages = [ ];
-          };
+        _module.args.pkgs = mkPkgs system;
 
-          overlays = [
-            inputs.hyprland-contrib.overlays.default
-          ] ++ (builtins.attrValues (import ./overlays { inherit self inputs lib; }));
-        };
-
-        packages = {
+        packages = let configurations = mkConfigurations system; in {
           # Image Generators
-          # images = (builtins.mapAttrs (n: v: v.iso) configurations);
+          images = (builtins.mapAttrs (n: v: v.iso) configurations);
 
           # NixOS Outputs
-          # outputs = (builtins.mapAttrs (n: v: v.system.config.system.build.toplevel) config.nixosConfigurations);
-        } // (import ./pkgs { pkgs = nixpkgs.legacyPackages.${system}; });
+          outputs = (builtins.mapAttrs (n: v: v.system.config.system.build.toplevel) config.nixosConfigurations);
+        } // (import ./pkgs { inherit pkgs; });
 
         devenv.shells.default = {
           packages = with pkgs; [
@@ -229,7 +221,7 @@
           };
         };
 
-        formatter = nixpkgs.legacyPackages.${system}.nixpkgs-fmt;
+        formatter = pkgs.nixpkgs-fmt;
 
         treefmt = {
           deadnix.enable = true;

@@ -1,18 +1,18 @@
-{ ... }: {
+{ flake, ... }: {
 
   imports = [
     ./hardware.nix
 
-    ../common/optional/containers.nix
-    ../common/optional/virtualisation.nix
+    "${flake}/hosts/shared/optional/containers.nix"
+    "${flake}/hosts/shared/optional/virtualisation.nix"
 
-    ../common/optional/gnome.nix
-    ../common/optional/hyprland.nix
+    "${flake}/hosts/shared/optional/gnome.nix"
+    "${flake}/hosts/shared/optional/hyprland.nix"
 
-    ../common/optional/pipewire.nix
-    ../common/optional/quietboot.nix
-    ../common/optional/gaming.nix
-    ../common/optional/tailscale.nix
+    "${flake}/hosts/shared/optional/pipewire.nix"
+    "${flake}/hosts/shared/optional/quietboot.nix"
+    "${flake}/hosts/shared/optional/gaming.nix"
+    "${flake}/hosts/shared/optional/tailscale.nix"
   ];
 
   programs.nix-ld.enable = true;

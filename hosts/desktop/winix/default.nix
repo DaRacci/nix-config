@@ -3,8 +3,8 @@
   imports = [
     flake.inputs.nixos-wsl.nixosModules.wsl
     ./hardware.nix
-    ../common/optional/wsl.nix
-    ../common/optional/containers.nix
+    "${flake}/hosts/shared/optional/wsl.nix"
+    "${flake}/hosts/shared/optional/containers.nix"
   ];
 
   host = {

@@ -3,9 +3,10 @@
 
 , name
 , groups ? [ ]
+, hostName ? null
 , ...
 }: { flake, config, ... }:
-let inherit (lib) mkDefault; in {
+let inherit (lib) mkDefault mkForce optionals; in {
   users.users.${name} = {
     isNormalUser = mkDefault true;
 
@@ -34,12 +35,11 @@ let inherit (lib) mkDefault; in {
 
   home-manager = {
     extraSpecialArgs = {
-      host = null;
       flake = self;
       inherit (self) inputs outputs;
     };
 
-    users.${name} = { flake, host, ... }: {
+    users.${name} = { flake, ... }: {
       home = {
         username = name;
         homeDirectory = mkForce "/home/${name}";
@@ -48,9 +48,9 @@ let inherit (lib) mkDefault; in {
         sessionPath = [ "$HOME/.local/bin" ];
       };
 
-      imports = [
-        "${flake}/home/common/global"
-      ] ++ (optionals (host != null && host.name != null) [ "${flake}/home/${name}/${host.name}.nix" ]);
+      imports = builtins.attrValues (import "${flake}/modules/home-manager") ++ [
+        "${flake}/home/shared/global"
+      ] ++ (lib.optional (hostName != null) "${flake}/home/${name}/${hostName}.nix");
     };
   };
 }
