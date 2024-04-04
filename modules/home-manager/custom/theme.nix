@@ -7,9 +7,9 @@
     enable = mkEnableOption "Theming" // { default = true; };
 
     colourScheme = mkOption {
-      type = types.enum (lib.attrNames inputs.nix-colours.colourSchemes);
+      type = types.enum (lib.attrNames inputs.nix-colours.colorSchemes);
       default = "onedark";
-    }
+    };
 
     cursor = {
       name = mkOption {
@@ -29,20 +29,20 @@
     };
   };
 
-  config = mkIf cfg.enable (let nix-colours-lib = nix-colours.lib.contrib { inherit pkgs; }; in rec {
+  config = mkIf cfg.enable (let nix-colours-lib = inputs.nix-colours.lib.contrib { inherit pkgs; }; in rec {
     home.packages = with pkgs; [
       twemoji-color-font
       noto-fonts-emoji
     ];
 
-    colorScheme = nix-colours.colorSchemes.${cfg.colourScheme};
+    colorScheme = inputs.nix-colours.colorSchemes.${cfg.colourScheme};
 
     gtk = {
       enable = true;
 
-      theme = {
-        name = cfg.colourScheme;
-        package = nix-colours-lib.gtkThemeFromScheme;
+      theme = rec {
+        name = colorScheme.name;
+        package = nix-colours-lib.gtkThemeFromScheme { scheme = colorScheme; };
       };
 
       iconTheme = {
@@ -54,6 +54,12 @@
         inherit (cfg.cursor) name size package;
       };
     };
+
+    dconf.settings."org/gnome/desktop/interface".color-scheme = if (config.colorScheme.variant == "dark")
+      then "prefer-dark"
+      else if (colorScheme.variant == "light")
+      then "prefer-light"
+      else throw "Unable to determine light or dark preference, got ${config.colorScheme.variant}";
 
     services.xsettingsd = {
       enable = true;
@@ -74,7 +80,7 @@
     };
 
     wayland.windowManager.hyprland.settings.exec-once = mkIf config.wayland.windowManager.hyprland.enable [
-      "hyprctl setcursor ${cfg.cusor.name} ${cfg.cursor.size}"
+      "hyprctl setcursor ${cfg.cursor.name} ${toString cfg.cursor.size}"
     ];
 
     programs.alacritty.settings = mkIf config.programs.alacritty.enable {
@@ -82,13 +88,13 @@
         draw_bold_text_with_bright_colors = true;
 
         primary = {
-          background = "${colorScheme.base00}";
-          foreground = "${colorScheme.base05}";
+          background = colorScheme.base00;
+          foreground = colorScheme.base05;
         };
 
         cursor = {
-          text = "${colorScheme.base00}";
-          cursor = "${colorScheme.base05}";
+          text = colorScheme.base00;
+          cursor = colorScheme.base05;
         };
 
         normal = {
@@ -116,7 +122,7 @@
         indexed_colors = {
           index = 16;
           color = colourScheme.base09;
-        }
+        };
       };
     };
   });

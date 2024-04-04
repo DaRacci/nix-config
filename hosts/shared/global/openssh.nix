@@ -1,4 +1,4 @@
-{ outputs, config, pkgs, lib, ... }:
+{ flake, outputs, config, pkgs, lib, ... }:
 
 let
   inherit (config.networking) hostName;
@@ -6,14 +6,10 @@ let
 
   mkPubKey = hostName: pkgs.writeTextFile {
     name = "${hostName}_ed25519.pub";
-    text = builtins.readFile (lib.mine.files.findFile "${hostName}/ssh_host_ed25519_key.pub");
+    text = builtins.readFile (lib.mine.files.findFile flake "${hostName}/ssh_host_ed25519_key.pub");
   };
 
   hostSSHPubKey = mkPubKey config.host.name;
-  hostSSHPrivKey = pkgs.writeTextFile {
-    name = "${config.host.name}_ed25519";
-    text = builtins.readFile config.sops.secrets.SSH_PRIVATE_KEY.path;
-  };
 in
 {
   environment.etc = { };
@@ -50,7 +46,7 @@ in
   security.pam.enableSSHAgentAuth = true;
 
   environment.etc = {
-    "ssh/ssh_host_ed25519_key".source = hostSSHPrivKey;
+    "ssh/ssh_host_ed25519_key".source = config.sops.secrets.SSH_PRIVATE_KEY.path;
     "ssh/ssh_host_ed25519_key.pub".source = hostSSHPubKey;
   };
 }

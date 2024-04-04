@@ -1,10 +1,10 @@
-{ pkgs, ... }: {
-  environment.systemPackages = with pkgs.coolercontrol; [
+{ pkgs, ... }: let coolercontrol = pkgs.unstable.coolercontrol; in {
+  environment.systemPackages = with coolercontrol; [
     coolercontrol-gui
   ];
 
   systemd = {
-    packages = with pkgs.coolercontrol; [
+    packages = with coolercontrol; [
       coolercontrol-liqctld
       coolercontrold
     ];

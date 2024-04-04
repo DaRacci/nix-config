@@ -9,14 +9,8 @@
       clock-show-date = true;
       clock-show-seconds = true;
       clock-show-weekday = true;
-      color-scheme = "prefer-dark";
-      cursor-size = 32;
-      cursor-theme = "Bibata-Modern-Ice";
       enable-hot-corners = false;
-      font-name = "Fira Sans 12";
       gtk-enable-primary-paste = false;
-      gtk-theme = "Adwaita-dark";
-      icon-theme = "Adwaita";
       toolkit-accessibility = false;
     };
 

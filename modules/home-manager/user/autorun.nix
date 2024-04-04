@@ -54,11 +54,11 @@ in
     };
   };
 
-  config = mkIf (cfg.enable && length cfg.services > 0) {
+  config = mkIf (cfg.enable && builtins.length (lib.attrNames cfg.services) > 0) {
     assertions = (map (service: {
       assertion = builtins.pathExists service.executablePath;
       message = "Executable path does not exist: ${service.executablePath}";
-    })) cfg.services;
+    })) (lib.attrValues cfg.services);
 
     systemd.user.services = mapAttrs'
       (_name: service: nameValuePair "autoRun--${service.name}" {

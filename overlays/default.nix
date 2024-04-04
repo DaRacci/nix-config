@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, lib, ... }:
 let
   usePRRaw = final: prev: name: owner: branch: sha256: {
     ${name} = (import
@@ -14,8 +14,7 @@ in
   additions = final: prev:
     let usePR = usePRRaw final prev; in prev.lib.foldl' prev.lib.recursiveUpdate { } [
       (import ../pkgs { pkgs = final; })
-      (usePR "coolercontrol" "codifryed" "coolercontrol-0.17.0" "sha256-UXznzCmBpSFELFuztM7KSS+R1a1vWBYZBISARafu+OA=")
-      (usePR "jetbrains" "DaRacci" "master" "sha256-I0iE9APrVbU6TFpJEDrpfRhirMCyaeNCbiE5XL+KXTY=")
+      # (usePR "jetbrains" "DaRacci" "master" "sha256-I0iE9APrVbU6TFpJEDrpfRhirMCyaeNCbiE5XL+KXTY=")
     ];
 
   # This one contains whatever you want to overlay
@@ -47,10 +46,7 @@ in
         in
         final.discord.override ({ withOpenASAR = true; } // nss);
 
-      # lib = prev.lib // {
-      #   mine = (import ../lib { inherit (final) system; inherit self inputs; }).lib;
-      # };
-
+      inherit lib;
       inherit (inputs.nixd.packages.x86_64-linux) nixd;
     };
 

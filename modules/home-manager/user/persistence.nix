@@ -1,4 +1,4 @@
-{ flake, host, config, lib, ... }: with lib;
+{ flake, osConfig, config, lib, ... }: with lib;
 let
   cfg = config.user.persistence;
 in
@@ -85,7 +85,7 @@ in
   config = mkIf cfg.enable {
     assertions = [
       {
-        assertion = host.persistence.enable;
+        assertion = osConfig.host.persistence.enable;
         message = ''
           The "persistence" option is enabled, but the host does not have
           persistence enabled. This is probably a mistake, user persistence cannot be
@@ -95,7 +95,7 @@ in
     ];
 
     home.persistence = mkIf cfg.enable {
-      "${host.persistence.root}/home/${config.home.username}" = {
+      "${osConfig.host.persistence.root}/home/${config.home.username}" = {
         inherit (cfg) files;
 
         directories = [

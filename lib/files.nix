@@ -1,6 +1,6 @@
 { lib }: rec {
   # Recursively constructs an attrset of a given folder, recursing on directories, value of attrs is the filetype
-  getDir = dir: mapAttrs
+  getDir = dir: lib.mapAttrs
     (file: type:
       if type == "directory" then getDir "${dir}/${file}" else type
     )
@@ -15,7 +15,7 @@
   */
   findFile = dir: pathPattern: lib.trivial.pipe (files dir) [
     (lib.filter (file: lib.hasSuffix pathPattern file))
-    (builtins.map (file: ./. + "/${file}"))
+    (builtins.map (file: dir + "/${file}"))
     (arr: builtins.elemAt arr 0)
   ];
 
@@ -26,7 +26,7 @@
     Usage:
       imports = (getModules ./someDir);
   */
-  getModules = dir: trivial.pipe (files dir) [
+  getModules = dir: lib.trivial.pipe (files dir) [
     (lib.filter (file: lib.hasSuffix ".nix" file))
     (lib.filter (file: ! lib.hasSuffix "default.nix" file))
     (builtins.map (file: ./. + "/${file}"))

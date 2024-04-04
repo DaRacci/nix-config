@@ -11,7 +11,6 @@ in
   sops = {
     defaultSopsFile = "${flake}/home/${username}/secrets.yaml";
 
-    # TODO - Get from 1Password
     age.sshKeyPaths = [ privateKey ];
   };
 }

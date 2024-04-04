@@ -11,7 +11,7 @@ let
   hostDirectory = "${self}/hosts/${deviceType}/${name}";
 in
 rec {
-  inherit pkgs;
+  inherit pkgs lib;
   inherit (pkgs.stdenv) system;
 
   modules = [
@@ -34,12 +34,14 @@ rec {
         device.role = deviceType;
       };
 
-      passthru.enable = false; # Why does build break without this?
+      home-manager.useUserPackages = true;
+      home-manager.useGlobalPkgs = true;
 
+      # passthru.enable = false; # Why does build break without this?
       system.stateVersion = "23.11";
     })
   ] ++ (builtins.map (username: (import "${self}/lib/builders/home/mkSystem.nix" {
-    inherit self lib;
+    inherit self lib pkgs;
     name = username;
     hostName = name;
   })) users);
