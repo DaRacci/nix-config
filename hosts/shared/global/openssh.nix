@@ -23,7 +23,7 @@ in
     };
 
     hostKeys = [{
-      path = hostSSHPubKey;
+      path = config.sops.secrets.SSH_PRIVATE_KEY.path;
       type = "ed25519";
     }];
   };
@@ -39,14 +39,13 @@ in
   };
 
   users.users.root = {
-    openssh.authorizedKeys.keys = [ (builtins.readFile hostSSHPubKey) ];
+    openssh.authorizedKeys.keyFiles = [ hostSSHPubKey ];
   };
 
   # Passwordless sudo when SSH'ing with keys
   security.pam.enableSSHAgentAuth = true;
 
   environment.etc = {
-    "ssh/ssh_host_ed25519_key".source = config.sops.secrets.SSH_PRIVATE_KEY.path;
     "ssh/ssh_host_ed25519_key.pub".source = hostSSHPubKey;
   };
 }

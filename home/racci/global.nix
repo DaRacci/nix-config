@@ -1,5 +1,7 @@
 { pkgs, ... }: {
   custom.theme = {
+    colourScheme = "tokyodark";
+
     cursor = {
       name = "Bibata-Modern-Ice";
       size = 32;

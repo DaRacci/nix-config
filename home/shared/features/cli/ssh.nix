@@ -24,5 +24,8 @@ in
     };
   };
 
-  user.persistence.directories = [ ".ssh" ];
+  user.persistence.files = [
+    # ".ssh/id_ed25519"
+    ".ssh/known_hosts"
+  ];
 }

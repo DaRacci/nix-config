@@ -1,6 +1,6 @@
-{ inputs, ... }: {
+_: {
   imports = [
     ./audio.nix
-    ./keyring.nix
+    # ./keyring.nix
   ];
 }

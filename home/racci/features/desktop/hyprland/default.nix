@@ -94,12 +94,12 @@
 
             animation = windowsIn, 1, 3, easeOutCubic, popin 30% # window open
             animation = windowsOut, 1, 3, fluent_decel, popin 70% # window close.
-            # animation = windowsMove, 1, 2, easeinoutsine, slide # everything in between, moving, dragging, resizing.
+            animation = windowsMove, 1, 2, easeinoutsine, slide # everything in between, moving, dragging, resizing.
 
             # animation = windows, 1, 6, wind, slide
             # animation = windowsIn, 1, 6, winIn, slide
             # animation = windowsOut, 1, 5, winOut, slide
-            animation = windowsMove, 1, 5, wind, slide
+            # animation = windowsMove, 1, 5, qwind, slide
 
             # Fade
             animation = fadeIn, 1, 3, easeOutCubic  # fade in (open) -> layers and windows
@@ -173,7 +173,7 @@
         input = ''
           input {
             kb_layout = us
-            follow_mouse = 3
+            follow_mouse = 1
 
             touchpad {
                 natural_scroll = no

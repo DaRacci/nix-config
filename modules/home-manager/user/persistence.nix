@@ -6,6 +6,11 @@ in
   options.user.persistence = {
     enable = mkEnableOption "persistence";
 
+    root = mkOption {
+      readOnly = true;
+      default = "${osConfig.host.persistence.root}/home/${config.home.username}";
+    };
+
     directories = mkOption {
       type = with types; listOf (either str (submodule {
         options = {
@@ -95,7 +100,7 @@ in
     ];
 
     home.persistence = mkIf cfg.enable {
-      "${osConfig.host.persistence.root}/home/${config.home.username}" = {
+      "${cfg.root}" = {
         inherit (cfg) files;
 
         directories = [

@@ -40,8 +40,8 @@
     gtk = {
       enable = true;
 
-      theme = rec {
-        name = colorScheme.name;
+      theme = {
+        name = colorScheme.slug;
         package = nix-colours-lib.gtkThemeFromScheme { scheme = colorScheme; };
       };
 

@@ -24,7 +24,7 @@ rec {
     hostDirectory
 
     ({ inputs, ... }: {
-      imports = [ 
+      imports = [
         inputs.home-manager.nixosModule
         inputs.nixos-generators.nixosModules.all-formats
       ];
@@ -34,17 +34,19 @@ rec {
         device.role = deviceType;
       };
 
-      home-manager.useUserPackages = true;
+      # home-manager.useUserPackages = true;
       home-manager.useGlobalPkgs = true;
 
       # passthru.enable = false; # Why does build break without this?
       system.stateVersion = "23.11";
     })
-  ] ++ (builtins.map (username: (import "${self}/lib/builders/home/mkSystem.nix" {
-    inherit self lib pkgs;
-    name = username;
-    hostName = name;
-  })) users);
+  ] ++ (builtins.map
+    (username: (import "${self}/lib/builders/home/mkSystem.nix" {
+      inherit self lib pkgs;
+      name = username;
+      hostName = name;
+    }))
+    users);
 
   specialArgs = {
     flake = self;

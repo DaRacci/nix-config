@@ -6,14 +6,18 @@
 , ...
 }: { flake, config, pkgs, lib, hostDirectory, ... }:
 let
-  inherit (lib) mkDefault mkForce optionals;
-  
+  inherit (lib) mkDefault mkForce;
+  user = config.users.users.${name};
   publicKey = pkgs.writeTextFile {
-    name = "${config.host.name}_ed25519.pub";
+    name = "${name}_ed25519.pub";
     text = "${flake}/home/${name}/id_ed25519.pub";
   };
-in {
+in
+{
   users.users.${name} = {
+    # FIXME Can't use multiple users with this
+    uid = 1000;
+    shell = pkgs.nushell;
     isNormalUser = mkDefault true;
 
     # Only add groups that exist.
@@ -52,6 +56,11 @@ in {
 
         stateVersion = mkForce "23.11";
         sessionPath = [ "$HOME/.local/bin" ];
+      };
+
+      sops = {
+        defaultSymlinkPath = "/run/user/${toString user.uid}/secrets";
+        defaultSecretsMountPoint = "/run/user/${toString user.uid}/secrets.d";
       };
 
       imports = builtins.attrValues (import "${flake}/modules/home-manager") ++ [
