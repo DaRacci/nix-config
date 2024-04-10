@@ -14,22 +14,22 @@ creation_rules:
     key_groups:
     - age: [ *james ]
 
-  - path_regex: hosts/nixe/secrets.yaml$
+  - path_regex: hosts/desktop/nixe/secrets.yaml$
     key_groups:
     - age: [ *nixe, *james ]
 
-  - path_regex: hosts/surnix/secrets.yaml$
+  - path_regex: hosts/laptop/surnix/secrets.yaml$
     key_groups:
     - age: [ *surnix, *james ]
 
-  - path_regex: hosts/winix/secrets.yaml$
+  - path_regex: hosts/desktop/winix/secrets.yaml$
     key_groups:
     - age: [ *winix, *james ]
 
-  - path_regex: hosts/servers/nixcloud/secrets.yaml$
+  - path_regex: hosts/server/nixcloud/secrets.yaml$
     key_groups:
     - age: [ *james, *nixcloud ]
 
-  - path_regex: hosts/servers/nixserv/secrets.yaml$
+  - path_regex: hosts/server/nixserv/secrets.yaml$
     key_groups:
     - age: [ *james, *nixserv ]

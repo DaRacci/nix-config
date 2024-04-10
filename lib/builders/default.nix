@@ -2,7 +2,8 @@
 , inputs
 , pkgs
 , lib
-}: let
+}:
+let
   wrapper = builder: system: name: args: import builder (args // {
     inherit self system name inputs lib pkgs;
   });
@@ -10,7 +11,8 @@
 
   wrapperPair = builder: system: name: args: lib.nameValuePair name (wrapper builder system name args);
   simpleWrapperPair = builder: system: name: lib.nameValuePair name (simpleWrapper builder system name);
-in {
+in
+{
   shell = {
     mkNix = simpleWrapperPair ./shell/mkDevShellNix.nix;
     mkRust = wrapperPair ./shell/mkDevShellRust.nix;
@@ -27,9 +29,10 @@ in {
     mkIso = wrapper ./system/mkIso.nix;
 
     build = system: name: args:
-      let raw = mkRaw system name args; in {
+      let raw = mkRaw system name args; in rec {
         system = mkSystem system name (args // { inherit raw; });
-        iso = mkIso system name (args // { inherit raw; });
+        image = system.config.formats.${args.isoFormat};
+        # iso = mkIso system name (args // { inherit raw; });
       };
   };
 }

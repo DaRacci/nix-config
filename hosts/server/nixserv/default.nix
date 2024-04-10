@@ -1,10 +1,9 @@
-{ inputs, config, lib, ... }: with lib; {
+{ inputs, config, ... }: {
   imports = [
     inputs.attic.nixosModules.atticd
   ];
 
   sops.secrets = {
-    HOST_SSH_KEY = { };
     ATTIC_SECRET = { };
     CLOUDFLARE_API_TOKEN = { };
   };

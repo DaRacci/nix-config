@@ -95,7 +95,6 @@
 
   outputs = inputs@{ self, nixpkgs, flake-parts, systems, ... }:
     let
-      inherit (self) outputs;
       lib = inputs.nixpkgs.lib.extend (prev: _: import ./lib { lib = prev; });
 
       mkPkgs = system: import inputs.nixpkgs {
@@ -112,43 +111,45 @@
       };
 
       # TODO - Scan the folders for all the configurations and generate the list.
-      mkConfigurations = system: let
-        builders = import ./lib/builders {
-          inherit self inputs lib;
-          pkgs = mkPkgs system;
-        }; 
-      in builtins.mapAttrs (n: v: builders.system.build system n v) {
-        nixe = {
-          users = [ "racci" ];
+      mkConfigurations = system:
+        let
+          builders = import ./lib/builders {
+            inherit self inputs lib;
+            pkgs = mkPkgs system;
+          };
+        in
+        builtins.mapAttrs (n: v: builders.system.build system n v) {
+          nixe = {
+            users = [ "racci" ];
 
-          isoFormat = "iso";
-          deviceType = "desktop";
+            isoFormat = "iso";
+            deviceType = "desktop";
+          };
+
+          surnix = {
+            users = [ "racci" ];
+
+            isoFormat = "iso";
+            deviceType = "laptop";
+          };
+
+          winix = {
+            users = [ "racci" ];
+
+            isoFormat = "iso";
+            deviceType = "desktop";
+          };
+
+          nixcloud = {
+            isoFormat = "proxmox-lxc";
+            deviceType = "server";
+          };
+
+          nixserv = {
+            isoFormat = "proxmox-lxc";
+            deviceType = "server";
+          };
         };
-
-        surnix = {
-          users = [ "racci" ];
-
-          isoFormat = "iso";
-          deviceType = "laptop";
-        };
-
-        winix = {
-          users = [ "racci" ];
-
-          isoFormat = "iso";
-          deviceType = "desktop";
-        };
-
-        nixcloud = {
-          isoFormat = "proxmox-lxc";
-          deviceType = "server";
-        };
-
-        nixserv = {
-          isoFormat = "proxmox-lxc";
-          deviceType = "server";
-        };
-      };
     in
     flake-parts.lib.mkFlake { inherit inputs; specialArgs.lib = lib; } {
       imports = [
@@ -158,20 +159,22 @@
 
       systems = [ "x86_64-linux" "aarch64-linux" ];
 
-      flake = let configurations = mkConfigurations builtins.currentSystem; in rec {
+      flake = let configurations = mkConfigurations builtins.currentSystem; in {
         nixosConfigurations = builtins.mapAttrs (_n: v: v.system) configurations;
+        packages = {
+          # Image Generators
+          images = (builtins.mapAttrs (n: v: v.image) configurations);
+          # images = (builtins.mapAttrs (n: v: v.config.formats) nixosConfigurations);
+
+          # NixOS Outputs
+          outputs = (builtins.mapAttrs (n: v: v.system.config.system.build.toplevel) configurations);
+        };
       };
 
       perSystem = { config, system, pkgs, lib, ... }: {
         _module.args.pkgs = mkPkgs system;
 
-        packages = let configurations = mkConfigurations system; in {
-          # Image Generators
-          images = (builtins.mapAttrs (n: v: v.iso) configurations);
-
-          # NixOS Outputs
-          outputs = (builtins.mapAttrs (n: v: v.system.config.system.build.toplevel) config.nixosConfigurations);
-        } // (import ./pkgs { inherit pkgs; });
+        packages = (import ./pkgs { inherit pkgs; });
 
         devenv.shells.default = {
           packages = with pkgs; [

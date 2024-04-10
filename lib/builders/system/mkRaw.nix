@@ -1,4 +1,5 @@
 { self
+, inputs
 , pkgs
 , lib
 
@@ -17,6 +18,13 @@ rec {
   modules = [
     ({ inputs, ... }: {
       imports = builtins.attrValues (import "${self}/modules/nixos");
+    })
+    ({ config, ... }: {
+      imports = [
+        inputs.nixos-generators.nixosModules.all-formats
+      ];
+
+      nixpkgs.hostPlatform = pkgs.system;
     })
 
     "${self}/hosts/shared/global"
