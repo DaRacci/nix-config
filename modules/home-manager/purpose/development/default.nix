@@ -34,71 +34,75 @@ in
 
       # TODO -> Add [aaron-bond.better-comments, wayou.vscode-todo-highlight]
       # forVSCodeVersion package.version
-      extensions = let extensions = inputs.vscode-extensions.extensions.${pkgs.stdenv.system}; in with extensions.vscode-marketplace; [
-        # Theme & Looks
-        zhuangtongfa.material-theme
-        pkief.material-icon-theme
+      extensions =
+        let
+          extensions = inputs.vscode-extensions.extensions.${pkgs.stdenv.system};
+          versionExtensions = extensions.forVSCodeVersion config.programs.vscode.package.version;
+        in
+        with extensions.vscode-marketplace; [
+          # Theme & Looks
+          zhuangtongfa.material-theme
+          pkief.material-icon-theme
 
-        # Workspaces & Projects
-        mkhl.direnv
-        editorconfig.editorconfig
-        alefragnani.project-manager
-        ms-vscode-remote.remote-ssh
+          # Workspaces & Projects
+          mkhl.direnv
+          editorconfig.editorconfig
+          alefragnani.project-manager
+          ms-vscode-remote.remote-ssh
 
-        # Sidebar Additions
-        gruntfuggly.todo-tree
-        eamodio.gitlens
+          # Sidebar Additions
+          gruntfuggly.todo-tree
+          eamodio.gitlens
 
-        # Language Support
-        redhat.vscode-xml
-        redhat.vscode-yaml
-        tamasfe.even-better-toml
-        matthewpi.caddyfile-support
-        coolbear.systemd-unit-file
+          # Language Support
+          redhat.vscode-xml
+          redhat.vscode-yaml
+          tamasfe.even-better-toml
+          matthewpi.caddyfile-support
+          coolbear.systemd-unit-file
 
-        # LSP Servers
-        jnoortheen.nix-ide
-        ms-vscode.powershell
+          # LSP Servers
+          jnoortheen.nix-ide
+          ms-vscode.powershell
 
-        # Formatters
-        esbenp.prettier-vscode
+          # Formatters
+          esbenp.prettier-vscode
 
-        # Containers
-        ms-azuretools.vscode-docker
+          # Containers
+          ms-azuretools.vscode-docker
 
-        # AI
-        github.copilot
-        github.copilot-chat
+          # AI
+          github.copilot
+          github.copilot-chat
 
-        # Other
-        formulahendry.code-runner
-        formulahendry.auto-close-tag
-        formulahendry.auto-rename-tag
+          # Other
+          formulahendry.code-runner
+          platformio.platformio-ide
 
-        # Bash Extensions
-        rogalmic.bash-debug
-        foxundermoon.shell-format
+          # Bash Extensions
+          rogalmic.bash-debug
+          foxundermoon.shell-format
 
-        # Integrations
-        github.vscode-github-actions
-      ] ++ (optionals cfg.python.enable (with extensions.vscode-marketplace.ms-python; [
-        python
-        vscode-pylance
-        debugpy
-        black-formatter
-        isort
-        pylint
-        mypy-type-checker
-        gather
-      ])) ++ (optionals cfg.rust.enable (with extensions.vscode-marketplace; [
-        vadimcn.vscode-lldb
-        serayuzgur.crates
-        jscearcy.rust-doc-viewer
-        dustypomerleau.rust-syntax
-        rust-lang.rust-analyzer
-      ])) ++ (optionals cfg.jvm.enable (with extensions.open-vscx; [
+          # Integrations
+          github.vscode-github-actions
+        ] ++ (optionals cfg.python.enable (with versionExtensions.vscode-marketplace.ms-python; [
+          python
+          vscode-pylance
+          debugpy
+          black-formatter
+          isort
+          pylint
+          mypy-type-checker
+          gather
+        ])) ++ (optionals cfg.rust.enable (with versionExtensions.vscode-marketplace; [
+          vadimcn.vscode-lldb
+          serayuzgur.crates
+          jscearcy.rust-doc-viewer
+          dustypomerleau.rust-syntax
+          rust-lang.rust-analyzer
+        ])) ++ (optionals cfg.jvm.enable (with extensions.open-vscx; [
 
-      ]));
+        ]));
 
       userSettings = {
         "workbench.iconTheme" = "material-icon-theme";
@@ -110,10 +114,6 @@ in
 
         "settingsSync.ignoredExtensions" = [ "*" ];
 
-        # TODO -> Use reference to package for this
-        "editor.fontFamily" = "'JetBrainsMono Nerd Font', 'Symbols Nerd Font Mono', 'Material Icons Outlined'";
-        "editor.fontSize" = 16;
-        "editor.fontLigatures" = true;
         "editor.formatOnSave" = true;
         "editor.autoClosingQuotes" = "always";
         "editor.autoClosingBrackets" = "always";
@@ -171,6 +171,11 @@ in
         "caddyfile.executable" = "${pkgs.unstable.caddy}/bin/caddy";
 
         "redhat.telemetry.enabled" = false;
+
+        # "platformio-ide.customPATH" = "${pkgs.platformio}/bin/platformio";
+        # "platformio-ide.useBuiltinPython" = false;
+        # "platformio-ide.useBuiltinPIOCore" = false;
+        # "platformio-ide.pioHomeServerHttpPort" = 8008;
       };
 
       # keybindings = {

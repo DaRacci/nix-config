@@ -21,7 +21,7 @@
     regular = {
       family = "Fira Sans";
       package = pkgs.fira;
-      size = 12;
+      size = 14;
     };
 
     emoji = {
