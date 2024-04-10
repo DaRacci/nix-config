@@ -72,7 +72,7 @@
         $string
       }
 
-      load-sh-env ~/.nix-profile/etc/profile.d/hm-session-vars.sh
+      load-sh-env ${config.home.homeDirectory}/.nix-profile/etc/profile.d/hm-session-vars.sh
     '';
 
     extraConfig = ''
