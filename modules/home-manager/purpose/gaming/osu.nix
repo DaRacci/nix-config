@@ -5,7 +5,7 @@
 
     lazerPackages = mkOption {
       type = types.package;
-      default = pkgs.unstable.osu-lazer;
+      default = pkgs.unstable.osu-lazer-bin;
       description = "The package to install for OSU! Lazer";
     };
   };
