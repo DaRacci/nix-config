@@ -1,15 +1,14 @@
 queue_rules:
   - name: default
     merge_conditions:
-      - check-success=ci/build
-      - check-success=ci/test
-      - check-success=gitguardian/scanning
+      - check-success=Build and test flake outputs
+      - check-success=GitGuardian scan
 
 defaults:
   actions:
     queue:
-      allow_merging_configuration_change: true
-      method: rebase
+      merge_method:  rebase
+      update_method: rebase
 
 pull_request_rules:
   - name: merge using the merge queue
