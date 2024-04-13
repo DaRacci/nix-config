@@ -7,7 +7,6 @@
     borderSize = 2;
     borderRadius = 5;
     anchor = "top-center";
-    font = "sans-serif";
     icons = true;
     # actions = true;
     backgroundColor = "#1e1e2e";

@@ -14,7 +14,7 @@
       enable = isClean;
       dates = "hourly";
       flags = [ "--refresh" ];
-      flake = "github:DaRacci/nix-config#${hostName}";
+      flake = "github:DaRacci/nix-config#${cfg.hostName}";
 
       allowReboot = false;
       rebootWindow = { lower = "02:00"; upper = "05:00"; };

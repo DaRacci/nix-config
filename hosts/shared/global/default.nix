@@ -1,8 +1,4 @@
-{ flake, ... }:
-let
-  inherit (flake) outputs;
-in
-{
+_: {
   imports = [
     ./appimage.nix
     ./locale.nix
@@ -13,10 +9,7 @@ in
     ./sops.nix
     ./security.nix
     ./zram.nix
-  ];# ++ (builtins.attrValues outputs.nixosModules);
-
-  # programs.nix-index.enable = true;
-  # programs.nix-index-database.comma.enable = true;
+  ];
 
   environment = {
     enableAllTerminfo = true;
