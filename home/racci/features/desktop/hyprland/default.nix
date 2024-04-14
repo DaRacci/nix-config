@@ -279,8 +279,8 @@
 
             workspace = ''
               # Move workspaces between monitors
-              bind = ${mod}_ALT,RIGHT,movecurrentworkspacetomonitor,+1
-              bind = ${mod}_ALT,LEFT,movecurrentworkspacetomonitor,-1
+              bind = ${mod}_ALT,RIGHT,movecurrentworkspacetomonitor,-1
+              bind = ${mod}_ALT,LEFT,movecurrentworkspacetomonitor,+1
 
               # Graveyard
               bind=SUPER_SHIFT,S,movetoworkspace,special
@@ -371,7 +371,11 @@
             focus_on_activate = true
           }
 
+          general {
+            allow_tearing = true
+          }
 
+          env = WLR_DRM_NO_ATOMIC,1
         '';
       in
       builtins.concatStringsSep "\n" ([
