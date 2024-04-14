@@ -1,6 +1,7 @@
-{ inputs, config, ... }: {
+{ inputs, config, modulesPath, ... }: {
   imports = [
     inputs.attic.nixosModules.atticd
+    "${modulesPath}/virtualisation/proxmox-lxc.nix"
   ];
 
   sops.secrets = {

@@ -18,7 +18,7 @@ in
     enable = true;
     settings = {
       PasswordAuthentication = false;
-      PermitRootLogin = "no";
+      PermitRootLogin = "prohibit-password";
       GatewayPorts = "clientspecified";
     };
 
@@ -29,6 +29,9 @@ in
   };
 
   programs.ssh = {
+    hostKeyAlgorithms = [ "ssh-ed25519" ];
+    pubkeyAcceptedKeyTypes = [ "ssh-ed25519" ];
+
     # Each hosts public key
     knownHosts = builtins.mapAttrs
       (name: _: {
