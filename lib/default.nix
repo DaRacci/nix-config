@@ -1,4 +1,5 @@
-{ lib }: let
+{ lib }:
+let
   simpleImport = path: import path { inherit lib; };
 in
 {
