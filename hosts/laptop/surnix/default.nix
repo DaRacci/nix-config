@@ -17,16 +17,18 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  nix.distributedBuilds = true;
-  nix.extraOptions = ''builders-use-substitutes = true'';
-  nix.buildMachines = [{
-    hostName = "nixe";
-    system = "x86_64-linux";
-    protocol = "ssh-ng";
-    systems = [ "x86_64-linux" ];
-    maxJobs = 1;
-    speedFactor = 2;
-    supportedFeatures = [ "nixos-test" "benchmark" "big-parallel" "kvm" ];
-    mandatoryFeatures = [ ];
-  }];
+  nix = {
+    distributedBuilds = true;
+    extraOptions = ''builders-use-substitutes = true'';
+    buildMachines = [{
+      hostName = "nixe";
+      system = "x86_64-linux";
+      protocol = "ssh-ng";
+      systems = [ "x86_64-linux" ];
+      maxJobs = 1;
+      speedFactor = 2;
+      supportedFeatures = [ "nixos-test" "benchmark" "big-parallel" "kvm" ];
+      mandatoryFeatures = [ ];
+    }];
+  };
 }

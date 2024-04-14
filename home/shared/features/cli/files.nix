@@ -1,4 +1,4 @@
-{ pkgs, fetchFromGitHub, ... }: {
+{ pkgs, ... }: {
   programs.xplr = {
     enable = true;
     package = pkgs.xplr;

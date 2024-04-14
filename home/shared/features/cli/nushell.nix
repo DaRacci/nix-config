@@ -50,7 +50,7 @@
           } else {
             $value = ($env | get -i $match.key)
 
-            # Test for using default value 
+            # Test for using default value
             if ($value == null and match.op == "-") {
               $value = $match.else
             } else {
@@ -79,7 +79,7 @@
       let carapace_completer = {|spans: list<string>|
         ${lib.getExe config.programs.carapace.package} $spans.0 nushell $spans
           | from json
-          | if ($in | default [] | where value == $"($spans | last)ERR" | is-empty) { $in } else { null }  
+          | if ($in | default [] | where value == $"($spans | last)ERR" | is-empty) { $in } else { null }
       }
 
       let fish_completer = {|spans|
@@ -143,4 +143,3 @@
     ".config/nushell/history.txt"
   ];
 }
-

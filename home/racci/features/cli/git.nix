@@ -20,7 +20,7 @@
         resign = "!re() { git rebase --exec 'git commit --amend --no-edit -n -S' $1; }; re";
         caa = "commit -a --amend -C HEAD";
         bclean = "!f() { git branch --merged \${1-master} | grep -v ' \${1-master}$' | xargs -r git branch -d; }; f";
-        retag = "!ret() { git checkout -q '\${1}' && GIT_COMMITER_DATE=$(git show --format=%aD | head -1) && git tag -a '\${2}' -m '\${3}' -s -f && git checkout -q master; }; ret";
+        retag = "!ret() { git checkout -q '\${1}' && GIT_COMMITTER_DATE=$(git show --format=%aD | head -1) && git tag -a '\${2}' -m '\${3}' -s -f && git checkout -q master; }; ret";
       };
 
       delta = {

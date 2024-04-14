@@ -15,7 +15,7 @@ rustPlatform.buildRustPackage rec {
     hash = "sha256-IE8QO9LaEllTYRRDA704SNWp4Ap2NQmoYMaKX4l9McY=";
   };
 
-  doCheck = false; # Tests include external network gets. 
+  doCheck = false; # Tests include external network gets.
 
   cargoSha256 = "sha256-04EabrIlLwKPbrNIaJXi1WEDOdX3ojZrds5izzOymIg=";
 

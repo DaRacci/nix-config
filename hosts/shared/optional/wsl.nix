@@ -1,21 +1,24 @@
 { flake, config, pkgs, lib, ... }: with builtins; with lib; {
-  wsl.enable = true;
-  wsl.defaultUser = "racci";
-  wsl.startMenuLaunchers = true;
-  wsl.nativeSystemd = true;
+  wsl = {
+    enable = true;
+    defaultUser = "racci";
+    startMenuLaunchers = true;
+    nativeSystemd = true;
+
+    interop.register = true;
+    wslConf.interop.enabled = true;
+    wslConf.interop.appendWindowsPath = true;
+
+    # Fixes VSCode not being able to run.
+    extraBin = [
+      # Required by VS Code's Remote WSL extension
+      { src = "${pkgs.coreutils}/bin/dirname"; }
+      { src = "${pkgs.coreutils}/bin/readlink"; }
+      { src = "${pkgs.coreutils}/bin/uname"; }
+    ];
+  };
+
   users.allowNoPasswordLogin = true;
-
-  wsl.interop.register = true;
-  wsl.wslConf.interop.enabled = true;
-  wsl.wslConf.interop.appendWindowsPath = true;
-
-  # Fixes VSCode not being able to run.
-  wsl.extraBin = [
-    # Required by VS Code's Remote WSL extension
-    { src = "${pkgs.coreutils}/bin/dirname"; }
-    { src = "${pkgs.coreutils}/bin/readlink"; }
-    { src = "${pkgs.coreutils}/bin/uname"; }
-  ];
 
   environment.systemPackages = with pkgs; [ wslu ];
 

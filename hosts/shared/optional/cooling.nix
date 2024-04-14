@@ -1,4 +1,5 @@
-{ pkgs, ... }: let coolercontrol = pkgs.unstable.coolercontrol; in {
+{ pkgs, ... }:
+let inherit (pkgs.unstable) coolercontrol; in {
   environment.systemPackages = with coolercontrol; [
     coolercontrol-gui
   ];

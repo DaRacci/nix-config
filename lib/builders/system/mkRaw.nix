@@ -16,10 +16,10 @@ rec {
   inherit (pkgs.stdenv) system;
 
   modules = [
-    ({ inputs, ... }: {
+    ({ ... }: {
       imports = builtins.attrValues (import "${self}/modules/nixos");
     })
-    ({ config, ... }: {
+    ({ ... }: {
       imports = [
         inputs.nixos-generators.nixosModules.all-formats
       ];

@@ -1,18 +1,8 @@
 { inputs, lib, ... }:
-let
-  usePRRaw = final: prev: name: owner: branch: sha256: {
-    ${name} = (import
-      (final.fetchzip {
-        inherit sha256;
-        url = "https://github.com/${owner}/nixpkgs/archive/${branch}.tar.gz";
-      })
-      { overlays = [ ]; inherit (prev) config; }).${name};
-  };
-in
 {
   # This one brings our custom packages from the 'pkgs' directory
   additions = final: prev:
-    let usePR = usePRRaw final prev; in prev.lib.foldl' prev.lib.recursiveUpdate { } [
+    prev.lib.foldl' prev.lib.recursiveUpdate { } [
       (import ../pkgs { pkgs = final; })
       # (usePR "jetbrains" "DaRacci" "master" "sha256-I0iE9APrVbU6TFpJEDrpfRhirMCyaeNCbiE5XL+KXTY=")
     ];

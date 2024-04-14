@@ -1,6 +1,6 @@
 { image ? "caddy"
 , version ? "latest"
-, extraConfig ? [ ]
+, ...
 }: {
   networks.proxy = {
     name = "proxy";

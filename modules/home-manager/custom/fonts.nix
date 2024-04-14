@@ -80,7 +80,7 @@ in
 
     programs = {
       alacritty.settings.font = {
-        size = cfg.monospace.size;
+        inherit (cfg.monospace) size;
         normal = { inherit (cfg.monospace) family; };
       };
 

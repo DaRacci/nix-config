@@ -115,7 +115,7 @@ in
             # Numa node formula
             # CORES=$(dmidecode -t processor | grep "Core Count" | awk '{print $3}')
             # THREADS=$(dmidecode -t processor | grep "Thread Count" | awk '{print $3}')
-            
+
             # ALLOWED="$($CORES / 2)-$($CORES - 1),$($THREADS - (($CORES / 2) - 1))-$(($THREADS - 1))"
             ALLOWED="${toString (cores / 4)}-${toString ((cores / 2) - 1)},${toString (cores - (cores / 4))}-${toString (cores - 1)}"
 
@@ -156,7 +156,7 @@ in
             function stop-save-service {
               if systemctl is-active --quiet "$1"; then
                 output="/tmp/vfio-store-''${2:-services}"
-                
+
                 # Create file if it doesn't exist
                 if test ! -e "$output"; then
                   touch "$output"
@@ -194,7 +194,7 @@ in
               if test -e "/tmp/vfio-bound-consoles"; then
                 rm -f /tmp/vfio-bound-consoles
               fi
-          
+
               for (( i = 0; i < 16; i++)); do
                 if test -x /sys/class/vtconsole/vtcon"$i"; then
                   if [ "$(grep -c "frame buffer" /sys/class/vtconsole/vtcon"$i"/name)" = 1 ]; then
@@ -217,10 +217,10 @@ in
               if lspci -nn | grep -e VGA | grep -s NVIDIA ; then
                 echo "$DATE System has an NVIDIA GPU"
                 echo "true" > /tmp/vfio-is-nvidia
-                
+
                 if ! (echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind); then
                   echo "$DATE Failed to unbind frame buffer"
-                fi 
+                fi
 
                 stop-save-service "nvidia-persistenced.service" "nvidia"
                 sleep 1
@@ -313,7 +313,7 @@ in
             function load-gpu-drivers {
               if test -e "/tmp/vfio-is-nvidia" && grep -q "true" "/tmp/vfio-is-nvidia"; then
                 echo "$DATE Loading NVIDIA GPU Drivers"
-        
+
                 modprobe drm
                 modprobe drm_kms_helper
                 modprobe i2c_nvidia_gpu
@@ -329,12 +329,12 @@ in
 
               if test -e "/tmp/vfio-is-amd" && grep -q "true" "/tmp/vfio-is-amd"; then
                 echo "$DATE Loading AMD GPU Drivers"
-      
+
                 modprobe drm
                 modprobe amdgpu
                 modprobe radeon
                 modprobe drm_kms_helper
-      
+
                 echo "$DATE AMD GPU Drivers Loaded"
               fi
             }

@@ -15,7 +15,7 @@
     system = mkOption {
       type = types.str;
       default = throw "host.system is required";
-      description = "The system archetecture.";
+      description = "The system architecture.";
     };
   };
 

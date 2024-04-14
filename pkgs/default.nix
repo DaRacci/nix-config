@@ -5,7 +5,6 @@
   protonup-rs = pkgs.callPackage ./protonup-rs { };
   ficsit-cli = pkgs.callPackage ./ficsit-cli { };
   noise-suppression = pkgs.callPackage ./noise-suppression-for-voice { };
-  hyprland-smart-borders = pkgs.callPackage ./hyprland-smart-borders.nix { };
 
   # nixcloud = nixos-generators.nixosGenerate {
   #   inherit (mkRawConfiguration "nixcloud" { inherit system; }) system modules specialArgs;

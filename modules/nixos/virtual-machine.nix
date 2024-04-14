@@ -1,8 +1,7 @@
-{ lib, pkgs, config, ... }:
+{ lib, ... }:
 with lib; let
-  cfg = config.virtual-machines.guests;
 
-  guestOpts = { name, config, ... }: {
+  guestOpts = { name, ... }: {
     options = {
       name = mkOption {
         type = types.str;
@@ -56,7 +55,7 @@ with lib; let
       };
 
       storage = {
-        # TODO  
+        # TODO
       };
 
       network = {

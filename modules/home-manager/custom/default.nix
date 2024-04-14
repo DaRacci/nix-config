@@ -1,4 +1,4 @@
-{ config, lib, ... }: with lib; {
+_: {
   imports = [
     ./fonts.nix
     ./theme.nix

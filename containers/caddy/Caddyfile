@@ -1,30 +1,30 @@
 {
-	email {$EMAIL}
-	acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+  email {$EMAIL}
+  acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
 
-	servers {
-		timeouts {
-			read_body 10s
-			read_header 10s
-			write 10s
-			idle 2m
-		}
+  servers {
+    timeouts {
+      read_body 10s
+      read_header 10s
+      write 10s
+      idle 2m
+    }
 
-		max_header_size 16384
-	}
+    max_header_size 16384
+  }
 }
 
 (base) {
-	# Caching rules
-	header {
-		Cache-Control "public, max-age=604800, must-revalidate"
-	}
+  # Caching rules
+  header {
+    Cache-Control "public, max-age=604800, must-revalidate"
+  }
 
-	# Compression rules
-	encode zstd gzip
+  # Compression rules
+  encode zstd gzip
 
-	# Logging
-	log {
-		output file /var/log/caddy/caddy.log
-	}
+  # Logging
+  log {
+    output file /var/log/caddy/caddy.log
+  }
 }

@@ -70,7 +70,7 @@
 
         #region Opacity
         "opacity 1.0 override 1.0 override, title:^(Picture-in-Picture)$"
-        #endregion 
+        #endregion
       ];
     };
 
@@ -199,7 +199,7 @@
               binde=,left,resizeactive,-10 0
               binde=,up,resizeactive,0 -10
               binde=,down,resizeactive,0 10
-              
+
               binde=,right,resizeactive,50 0
               binde=,left,resizeactive,-50 0
               binde=,up,resizeactive,0 -50
@@ -318,7 +318,7 @@
               enabled = true
               new_optimizations = on
               xray = true
-              
+
               size = 4
               passes = 2
 
@@ -370,6 +370,8 @@
 
             focus_on_activate = true
           }
+
+
         '';
       in
       builtins.concatStringsSep "\n" ([

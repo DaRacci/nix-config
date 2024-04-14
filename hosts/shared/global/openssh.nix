@@ -23,7 +23,7 @@ in
     };
 
     hostKeys = [{
-      path = config.sops.secrets.SSH_PRIVATE_KEY.path;
+      inherit (config.sops.secrets.SSH_PRIVATE_KEY) path;
       type = "ed25519";
     }];
   };

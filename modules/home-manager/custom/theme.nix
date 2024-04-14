@@ -29,101 +29,104 @@
     };
   };
 
-  config = mkIf cfg.enable (let nix-colours-lib = inputs.nix-colours.lib.contrib { inherit pkgs; }; in rec {
-    home.packages = with pkgs; [
-      twemoji-color-font
-      noto-fonts-emoji
-    ];
+  config = mkIf cfg.enable (
+    let nix-colours-lib = inputs.nix-colours.lib.contrib { inherit pkgs; }; in rec {
+      home.packages = with pkgs; [
+        twemoji-color-font
+        noto-fonts-emoji
+      ];
 
-    colorScheme = inputs.nix-colours.colorSchemes.${cfg.colourScheme};
+      colorScheme = inputs.nix-colours.colorSchemes.${cfg.colourScheme};
 
-    gtk = {
-      enable = true;
+      gtk = {
+        enable = true;
 
-      theme = {
-        name = colorScheme.slug;
-        package = nix-colours-lib.gtkThemeFromScheme { scheme = colorScheme; };
+        theme = {
+          name = colorScheme.slug;
+          package = nix-colours-lib.gtkThemeFromScheme { scheme = colorScheme; };
+        };
+
+        iconTheme = {
+          name = "Adwaita";
+          package = pkgs.gnome.adwaita-icon-theme;
+        };
+
+        cursorTheme = {
+          inherit (cfg.cursor) name size package;
+        };
       };
 
-      iconTheme = {
-        name = "Adwaita";
-        package = pkgs.gnome.adwaita-icon-theme;
+      dconf.settings."org/gnome/desktop/interface".color-scheme =
+        if (config.colorScheme.variant == "dark")
+        then "prefer-dark"
+        else if (colorScheme.variant == "light")
+        then "prefer-light"
+        else throw "Unable to determine light or dark preference, got ${config.colorScheme.variant}";
+
+      services.xsettingsd = {
+        enable = true;
+        settings = {
+          "Net/ThemeName" = "${gtk.theme.name}";
+          "Net/IconThemeName" = "${gtk.iconTheme.name}";
+        };
       };
 
-      cursorTheme = {
+      home.pointerCursor = {
         inherit (cfg.cursor) name size package;
       };
-    };
 
-    dconf.settings."org/gnome/desktop/interface".color-scheme = if (config.colorScheme.variant == "dark")
-      then "prefer-dark"
-      else if (colorScheme.variant == "light")
-      then "prefer-light"
-      else throw "Unable to determine light or dark preference, got ${config.colorScheme.variant}";
-
-    services.xsettingsd = {
-      enable = true;
-      settings = {
-        "Net/ThemeName" = "${gtk.theme.name}";
-        "Net/IconThemeName" = "${gtk.iconTheme.name}";
+      qt = {
+        enable = true;
+        platformTheme = "gtk3";
+        style.name = "adwaita-qt6";
       };
-    };
 
-    home.pointerCursor = {
-      inherit (cfg.cursor) name size package;
-    };
+      wayland.windowManager.hyprland.settings.exec-once = mkIf config.wayland.windowManager.hyprland.enable [
+        "hyprctl setcursor ${cfg.cursor.name} ${toString cfg.cursor.size}"
+      ];
 
-    qt = {
-      enable = true;
-      platformTheme = "gtk3";
-      style.name = "adwaita-qt6";
-    };
+      programs.alacritty.settings = mkIf config.programs.alacritty.enable {
+        colors = {
+          draw_bold_text_with_bright_colors = true;
 
-    wayland.windowManager.hyprland.settings.exec-once = mkIf config.wayland.windowManager.hyprland.enable [
-      "hyprctl setcursor ${cfg.cursor.name} ${toString cfg.cursor.size}"
-    ];
+          primary = {
+            background = colorScheme.base00;
+            foreground = colorScheme.base05;
+          };
 
-    programs.alacritty.settings = mkIf config.programs.alacritty.enable {
-      colors = {
-        draw_bold_text_with_bright_colors = true;
+          cursor = {
+            text = colorScheme.base00;
+            cursor = colorScheme.base05;
+          };
 
-        primary = {
-          background = colorScheme.base00;
-          foreground = colorScheme.base05;
-        };
+          normal = {
+            black = colorScheme.base00;
+            red = colorScheme.base08;
+            green = colorScheme.base0B;
+            yellow = colorScheme.base0A;
+            blue = colorScheme.base0D;
+            magenta = colorScheme.base0E;
+            cyan = colorScheme.base0C;
+            white = colorScheme.base05;
+          };
 
-        cursor = {
-          text = colorScheme.base00;
-          cursor = colorScheme.base05;
-        };
+          bright = {
+            black = colorScheme.base03;
+            red = colorScheme.base08;
+            green = colorScheme.base0B;
+            yellow = colorScheme.base0A;
+            blue = colorScheme.base0D;
+            magenta = colorScheme.base0E;
+            cyan = colorScheme.base0C;
+            white = colorScheme.base05;
+          };
 
-        normal = {
-          black = colorScheme.base00;
-          red = colorScheme.base08;
-          green = colorScheme.base0B;
-          yellow = colorScheme.base0A;
-          blue = colorScheme.base0D;
-          magenta = colorScheme.base0E;
-          cyan = colorScheme.base0C;
-          white = colorScheme.base05;
-        };
-
-        bright = {
-          black = colorScheme.base03;
-          red = colorScheme.base08;
-          green = colorScheme.base0B;
-          yellow = colorScheme.base0A;
-          blue = colorScheme.base0D;
-          magenta = colorScheme.base0E;
-          cyan = colorScheme.base0C;
-          white = colorScheme.base05;
-        };
-
-        indexed_colors = {
-          index = 16;
-          color = colourScheme.base09;
+          indexed_colors = {
+            index = 16;
+            color = colourScheme.base09;
+          };
         };
       };
-    };
-  });
+    }
+  );
 }

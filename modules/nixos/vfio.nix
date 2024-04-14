@@ -68,35 +68,36 @@ in
       "kvm.report_ignored_msrs=0"
     ]);
 
-    boot.kernelModules = [ "vfio_pci" "vfio_iommu_type1" "vfio" ];
+    boot = {
+      kernelModules = [ "vfio_pci" "vfio_iommu_type1" "vfio" ];
 
-    boot.initrd.kernelModules = [ "vfio_pci" "vfio_iommu_type1" "vfio" ];
-    boot.blacklistedKernelModules =
-      optionals cfg.blacklistNvidia [ "nvidia" "nouveau" ];
+      initrd.kernelModules = [ "vfio_pci" "vfio_iommu_type1" "vfio" ];
+      blacklistedKernelModules = optionals cfg.blacklistNvidia [ "nvidia" "nouveau" ];
 
-    boot.kernelPatches = optionals cfg.applyACSpatch [
-      {
-        name = "add-acs-overrides";
-        patch = pkgs.fetchurl {
-          name = "add-acs-overrides.patch";
-          url =
-            "https://raw.githubusercontent.com/slowbro/linux-vfio/v5.5.4-arch1/add-acs-overrides.patch";
-          #url =
-          #  "https://aur.archlinux.org/cgit/aur.git/plain/add-acs-overrides.patch?h=linux-vfio&id=${acscommit}";
-          sha256 = "0nbmc5bwv7pl84l1mfhacvyp8vnzwhar0ahqgckvmzlhgf1n1bii";
-        };
-      }
-      {
-        name = "i915-vga-arbiter";
-        patch = pkgs.fetchurl {
-          name = "i915-vga-arbiter.patch";
-          url =
-            "https://raw.githubusercontent.com/slowbro/linux-vfio/v5.5.4-arch1/i915-vga-arbiter.patch";
-          #url =
-          #  "https://aur.archlinux.org/cgit/aur.git/plain/i915-vga-arbiter.patch?h=linux-vfio&id=${acscommit}";
-          sha256 = "1m5nn9pfkf685g31y31ip70jv61sblvxgskqn8a0ca60mmr38krk";
-        };
-      }
-    ];
+      kernelPatches = optionals cfg.applyACSpatch [
+        {
+          name = "add-acs-overrides";
+          patch = pkgs.fetchurl {
+            name = "add-acs-overrides.patch";
+            url =
+              "https://raw.githubusercontent.com/slowbro/linux-vfio/v5.5.4-arch1/add-acs-overrides.patch";
+            #url =
+            #  "https://aur.archlinux.org/cgit/aur.git/plain/add-acs-overrides.patch?h=linux-vfio&id=${acscommit}";
+            sha256 = "0nbmc5bwv7pl84l1mfhacvyp8vnzwhar0ahqgckvmzlhgf1n1bii";
+          };
+        }
+        {
+          name = "i915-vga-arbiter";
+          patch = pkgs.fetchurl {
+            name = "i915-vga-arbiter.patch";
+            url =
+              "https://raw.githubusercontent.com/slowbro/linux-vfio/v5.5.4-arch1/i915-vga-arbiter.patch";
+            #url =
+            #  "https://aur.archlinux.org/cgit/aur.git/plain/i915-vga-arbiter.patch?h=linux-vfio&id=${acscommit}";
+            sha256 = "1m5nn9pfkf685g31y31ip70jv61sblvxgskqn8a0ca60mmr38krk";
+          };
+        }
+      ];
+    };
   };
 }

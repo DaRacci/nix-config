@@ -67,7 +67,7 @@ let cfg = config.services.nextcloud.config; in {
     enable = true;
 
     ensureDatabases = [ cfg.dbname ];
-    ensureUsers = [{ name = cfg.dbuser; ensurePermissions."DATABASE ${cfg.dbname}" = "ALL PRIVILEDGES"; }];
+    ensureUsers = [{ name = cfg.dbuser; ensurePermissions."DATABASE ${cfg.dbname}" = "ALL PRIVILEGES"; }];
   };
 
   systemd.services."nextcloud-setup" = {

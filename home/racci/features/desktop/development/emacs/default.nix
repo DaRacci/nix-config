@@ -8,7 +8,7 @@
     emacsPackage = pkgs.emacs-gtk;
 
     extraPackages = with pkgs; [
-      # Grammer & Spell Checking
+      # Grammar & Spell Checking
       (aspellWithDicts
         (dicts: with dicts; [ en en-computers en-science ]))
       languagetool
@@ -40,7 +40,7 @@
               doom-big-font (font-spec :family "${monospace.family}" :size ${builtins.toString (monospace.size + 6)} :style 'regular)
               doom-variable-pitch-font (font-spec :family "${regular.family}" :size ${builtins.toString regular.size} :style 'regular))
 
-        (setq emojify-emoji-set "${emoji.family}")      
+        (setq emojify-emoji-set "${emoji.family}")
       '';
   };
 
