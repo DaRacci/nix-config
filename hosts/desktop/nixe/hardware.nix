@@ -15,7 +15,7 @@
   ];
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_zen;
+    kernelPackages = pkgs.unstable.linuxPackages_zen;
 
     initrd = {
       # TODO :: Needed? ahci, sd_mod usbhid usb_storage
