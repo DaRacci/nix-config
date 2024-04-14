@@ -37,7 +37,7 @@ jobs:
           - nix-command: develop .#default --profile profile
             system: x86_64
 
-          - nix-command: build --impure .#x86-64-linux.nixosConfigurations.nixe.config.system.build.toplevel
+          - nix-command: build --impure --accept-flake-config .#nixosConfigurations.nixe.config.system.build.toplevel
             system: x86_64
 
     steps:
@@ -69,8 +69,8 @@ jobs:
         system:
           - x86_64
         nix-command:
-          - fmt -- --check
-          - flake check
+          - fmt -L -- --check .
+          - flake check --impure
 
     steps:
       - name: Checkout repository
@@ -92,6 +92,3 @@ jobs:
         env:
           _system: ${{ matrix.system }}-linux
         run: nix ${{ matrix.nix-command }}
-
-  # TODO
-  # cache:
