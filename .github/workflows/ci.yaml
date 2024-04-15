@@ -46,6 +46,14 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
 
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+        continue-on-error: true
+        if: matrix.system == 'x86_64'
+        with:
+          swap-storage: false
+          tool-cache: true
+
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
 
