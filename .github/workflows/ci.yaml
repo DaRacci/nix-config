@@ -57,6 +57,9 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
 
+      - name: Setup magic cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
       - name: Setup cachix
         uses: cachix/cachix-action@v14
         with:
@@ -96,6 +99,9 @@ jobs:
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Setup magic cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Setup cachix
         uses: cachix/cachix-action@v14
