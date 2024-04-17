@@ -11,5 +11,5 @@ proc-macro = true
 [dependencies]
 syn = "~2.0.48"
 quote = "~1.0.9"
-proc-macro2 = "~1.0.63"
+proc-macro2 = "~1.0.81"
 downcast-rs = "~1.2.0"
