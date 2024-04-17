@@ -9,7 +9,7 @@ path = "src/lib.rs"
 proc-macro = true
 
 [dependencies]
-syn = "~2.0.48"
+syn = "~2.0.60"
 quote = "~1.0.9"
 proc-macro2 = "~1.0.63"
 downcast-rs = "~1.2.0"
