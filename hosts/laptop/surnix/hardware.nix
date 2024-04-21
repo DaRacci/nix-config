@@ -12,14 +12,28 @@
     kernelModules = [ "kvm-intel" ];
   };
 
-  fileSystems =
-    let
-      bootPart = "/dev/disk/by-partlabel/ESP";
-    in
-    {
-      "/boot" = {
-        device = bootPart;
-        fsType = "vfat";
-      };
+  host = {
+    drive = {
+      enable = true;
+
+      format = "btrfs";
+      name = "Nix";
     };
+
+    persistence = {
+      enable = true;
+      type = "tmpfs";
+
+      directories = [
+        "/var/lib/private/ollama"
+      ];
+    };
+  };
+
+  fileSystems = {
+    "/boot" = {
+      device = "/dev/disk/by-partlabel/ESP";
+      fsType = "vfat";
+    };
+  };
 }

@@ -1,8 +1,4 @@
-{ flake, ... }:
-let
-  inherit (flake) inputs;
-in
-{
+{ inputs, config, pkgs, ... }: {
   imports = [
     inputs.nur.hmModules.nur
     inputs.sops-nix.homeManagerModule
@@ -16,4 +12,8 @@ in
 
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";
+
+  home.activation.report-changes = config.lib.dag.entryAnywhere ''
+    ${pkgs.nvd}/bin/nvd $oldGenPath $newGenPath
+  '';
 }

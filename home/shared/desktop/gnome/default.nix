@@ -28,9 +28,6 @@ let inherit (pkgs) lib; in {
     # Online Accounts - Calendar
     ".config/evolution"
 
-    # Misc
-    ".local/share/Trash"
-
     # Gnome Extensions and settings
     ".cache/clipboard-indicator@tudmotu.com" # Clipboard history
     ".config/gsconnect" # Gsconnect

@@ -6,7 +6,7 @@
     "${flake}/hosts/shared/optional/containers.nix"
     "${flake}/hosts/shared/optional/virtualisation.nix"
 
-    "${flake}/hosts/shared/optional/gnome.nix"
+    "${flake}/hosts/shared/optional/gdm.nix"
     "${flake}/hosts/shared/optional/hyprland.nix"
 
     "${flake}/hosts/shared/optional/pipewire.nix"
@@ -49,13 +49,8 @@
   services.ollama = {
     enable = true;
     acceleration = "cuda";
+    environmentVariables = {
+      OLLAMA_ORIGINS = "http://192.168.0.0:*,app://obsidian.md:*";
+    };
   };
-
-  # programs.adb.enable = true;
-  # services.udev = {
-  #   enable = true;
-  #   extraRules = ''
-  #     SUBSYSTEM="usb", ATTR{idVendor}=="2833", ATTR{idProduct}=="0186", MODE="0660", GROUP="plugdev", symlink+="ocuquest%n"
-  #   '';
-  # };
 }

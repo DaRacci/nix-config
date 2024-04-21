@@ -6,4 +6,7 @@
   };
 
   services.xserver.updateDbusEnvironment = true;
+  security.pam.services.hyprland = {
+    enableGnomeKeyring = true;
+  };
 }

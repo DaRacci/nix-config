@@ -1,6 +1,7 @@
 { ... }: {
   imports = [
     ./auto-upgrade.nix
+    ./core.nix
     ./display-manager.nix
   ];
 

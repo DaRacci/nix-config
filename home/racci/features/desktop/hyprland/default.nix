@@ -3,7 +3,9 @@
 # TODO - Game mode that disables compositor and pauses swww-random-wallpaper
 { flake, inputs, config, pkgs, lib, ... }: with lib; {
   imports = [
+    "${flake}/home/racci/features/desktop/common"
     "${flake}/home/shared/desktop/hyprland"
+
     ./clipboard.nix
     ./lock-screen.nix
     ./notification.nix
@@ -119,7 +121,6 @@
         '';
 
         executions = ''
-          # exec-once = ${pkgs.systemd}/bin/systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
           exec-once = ${getExe pkgs.hyprland-autoname-workspaces}
 
           # ----------------- #

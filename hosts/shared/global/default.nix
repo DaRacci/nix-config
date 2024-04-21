@@ -1,6 +1,8 @@
-_: {
+{ pkgs, lib, ... }: {
   imports = [
     ./appimage.nix
+    ./boot.nix
+    ./hm-helper.nix
     ./locale.nix
     ./networking.nix
     ./nix.nix
@@ -19,4 +21,11 @@ _: {
   hardware.enableRedistributableFirmware = true;
 
   programs.nix-ld.enable = true;
+
+  documentation.man.enable = false;
+
+  system.activationScripts.report-changes = ''
+    PATH=$PATH:${lib.makeBinPath [ pkgs.nvd pkgs.nix ]}
+    nvd diff $(ls -dv /nix/var/nix/profiles/system-*-link | tail -2)
+  '';
 }
