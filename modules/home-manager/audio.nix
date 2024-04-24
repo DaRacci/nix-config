@@ -1,10 +1,10 @@
-{ config, pkgs, lib, ... }: with lib; let
+{ osConfig, config, pkgs, lib, ... }: with lib; let
   cfg = config.custom.audio;
   disabledDevicesPath = "wireplumber/main.lua.d/51-disable-devices.lua";
 in
 {
   options.custom.audio = {
-    enable = mkEnableOption "Enable Audio Module" // { default = true; };
+    enable = mkEnableOption "Enable Audio Module" // { default = osConfig.host.device.role != "server"; };
 
     # disableHDMISources = mkEnableOption
     disabledDevices = mkOption {
@@ -14,7 +14,7 @@ in
     };
   };
 
-  config = mkIf cfg.enable rec {
+  config = mkIf cfg.enable {
     services.playerctld = {
       enable = true;
       package = pkgs.playerctl;
