@@ -1,7 +1,8 @@
-_: {
+{ lib, ... }:
+let inherit (lib) mkDefault; in {
   boot = {
     loader = {
-      systemd-boot.enable = true;
+      systemd-boot.enable = mkDefault true;
       efi.canTouchEfiVariables = true;
       systemd-boot.editor = false;
     };
@@ -11,7 +12,7 @@ _: {
 
     initrd = {
       verbose = false;
-      systemd.enable = true;
+      systemd.enable = mkDefault true;
     };
   };
 
