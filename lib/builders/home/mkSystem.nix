@@ -65,7 +65,7 @@ in
 
       imports = builtins.attrValues (import "${flake}/modules/home-manager") ++ [
         "${flake}/home/shared/global"
-      ] ++ (lib.optional (hostName != null) "${flake}/home/${name}/${hostName}.nix");
+      ] ++ (let hostPath = "${flake}/home/${name}/${hostName}.nix"; in lib.optional (hostName != null && builtins.pathExists hostPath) hostPath);
     };
   };
 }
