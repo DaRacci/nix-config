@@ -1,7 +1,6 @@
 { pkgs, lib, ... }: {
   imports = [
     ./appimage.nix
-    ./boot.nix
     ./hm-helper.nix
     ./locale.nix
     ./networking.nix
