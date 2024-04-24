@@ -39,7 +39,7 @@
   wayland.windowManager.hyprland = {
     plugins = with inputs.hyprland-plugins.packages.${pkgs.system}; [
       # borders-plus-plus
-      hyprtrails
+      # hyprtrails
     ];
 
     settings = {

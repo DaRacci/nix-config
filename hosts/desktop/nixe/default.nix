@@ -1,4 +1,4 @@
-{ flake, ... }: {
+{ flake, pkgs, ... }: {
 
   imports = [
     ./hardware.nix
@@ -37,8 +37,8 @@
 
   networking = {
     firewall = {
-      allowedUDPPorts = [ 9944 8082 9942 9943 ];
-      allowedTCPPorts = [ 9999 22 5990 9944 8082 9942 9943 8080 ];
+      allowedUDPPorts = [ 9944 8082 9942 9943 7860 ];
+      allowedTCPPorts = [ 9999 22 5990 9944 8082 9942 9943 8080 7860 ];
     };
   };
 
@@ -48,6 +48,7 @@
 
   services.ollama = {
     enable = true;
+    package = pkgs.unstable.ollama;
     acceleration = "cuda";
     environmentVariables = {
       OLLAMA_ORIGINS = "http://192.168.0.0:*,app://obsidian.md:*";

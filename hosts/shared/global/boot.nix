@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+_: {
   boot = {
     loader = {
       systemd-boot.enable = true;
@@ -17,8 +17,8 @@
 
   systemd.watchdog.rebootTime = "0";
 
-  console = {
-    font = "JetBrainsMono Nerd Font";
-    packages = [ (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; }) ];
-  };
+  # console = {
+  #   font = "JetBrainsMono Nerd Font";
+  #   packages = [ (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; }) ];
+  # };
 }

@@ -1,10 +1,8 @@
 { flake, pkgs, ... }: {
   imports = [
     ./global.nix
-    # ./features/desktop/gnome.nix
     ./features/desktop/hyprland
 
-    ./features/cli
     "${flake}/home/shared/features/games"
     "${flake}/home/shared/applications"
   ];

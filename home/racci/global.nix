@@ -1,4 +1,8 @@
 { pkgs, ... }: {
+  imports = [
+    ./features/cli
+  ];
+
   custom.theme = {
     colourScheme = "tokyodark";
 
