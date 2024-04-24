@@ -3,6 +3,8 @@
   imports = [
     ./hardware.nix
 
+    "${flake}/hosts/shared/optional/systemd-boot.nix"
+
     "${flake}/hosts/shared/optional/containers.nix"
     "${flake}/hosts/shared/optional/virtualisation.nix"
 

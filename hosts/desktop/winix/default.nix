@@ -2,7 +2,11 @@
 
   imports = [
     flake.inputs.nixos-wsl.nixosModules.wsl
+
     ./hardware.nix
+
+    "${flake}/hosts/shared/optional/systemd-boot.nix"
+
     "${flake}/hosts/shared/optional/wsl.nix"
     "${flake}/hosts/shared/optional/containers.nix"
   ];
