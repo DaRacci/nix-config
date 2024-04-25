@@ -170,11 +170,15 @@
             hooks = {
               typos = {
                 enable = true;
-                settings.ignored-words = [
-                  "lazer"
-                  "Optin"
-                  "tere"
-                ];
+                settings = {
+                  ignored-words = [
+                    "lazer"
+                    "Optin"
+                    "tere"
+                  ];
+
+                  exclude = "secrets.yaml";
+                };
               };
               editorconfig-checker.enable = true;
               actionlint.enable = true;

@@ -4,13 +4,14 @@
 , groups ? [ ]
 , hostName ? null
 , ...
-}: { flake, config, pkgs, lib, hostDirectory, ... }:
+}: { flake, config, pkgs, lib, ... }:
 let
   inherit (lib) mkDefault mkForce;
+  userDirectory = "${flake}/home/${name}";
   user = config.users.users.${name};
   publicKey = pkgs.writeTextFile {
     name = "${name}_ed25519.pub";
-    text = "${flake}/home/${name}/id_ed25519.pub";
+    text = "${userDirectory}/id_ed25519.pub";
   };
 in
 {
@@ -34,12 +35,12 @@ in
       "libvirtd"
     ] ++ groups;
 
-    hashedPasswordFile = config.sops.secrets."${name}-passwd".path;
+    hashedPasswordFile = config.sops.secrets."passwd".path;
     openssh.authorizedKeys.keyFiles = [ publicKey ];
   };
 
-  sops.secrets."${name}-passwd" = {
-    sopsFile = "${hostDirectory}/secrets.yaml";
+  sops.secrets."passwd" = {
+    sopsFile = "${userDirectory}/secrets.yaml";
     neededForUsers = true;
   };
 
