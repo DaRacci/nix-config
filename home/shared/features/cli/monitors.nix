@@ -15,6 +15,4 @@
     package = pkgs.bottom;
     settings = { };
   };
-
-
 }

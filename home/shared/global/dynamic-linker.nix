@@ -5,6 +5,9 @@
       glibc
       glib
       libelf
+      nss
+      nspr
+      dbus
     ];
 
     NIX_LD = builtins.readFile "${pkgs.stdenv.cc}/nix-support/dynamic-linker";
