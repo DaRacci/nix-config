@@ -20,10 +20,10 @@ in
       package = pkgs.playerctl;
     };
 
-    xdg.configFile.${disabledDevicesPath} = {
+    xdg.configFile.${disabledDevicesPath} = mkIf ((length cfg.disabledDevices) > 0) {
       # onChange = "systemctl restart wireplumber.service";
 
-      text = mkIf ((length cfg.disabledDevices) > 0) ''
+      text = ''
         rule = {
           matches = {
             ${

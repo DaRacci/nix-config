@@ -14,7 +14,9 @@
   systemd.user.startServices = "sd-switch";
 
   home.activation.report-changes = config.lib.dag.entryAnywhere ''
-    ${pkgs.nvd}/bin/nvd diff "$oldGenPath" "$newGenPath"
+    if [ ! -z "$oldGenPath" ]; then
+      ${pkgs.nvd}/bin/nvd diff "$oldGenPath" "$newGenPath"
+    fi
   '';
 
   dconf.enable = pkgs.lib.mkForce osConfig.programs.dconf.enable;
