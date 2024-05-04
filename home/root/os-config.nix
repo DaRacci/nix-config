@@ -1,7 +1,5 @@
-{ pkgs, lib, ... }:
-let inherit (lib) mkForce; in {
+{ pkgs, ... }: {
   users.users.root = {
     shell = pkgs.fish;
-    home.homeDirectory = mkForce "/root";
   };
 }
