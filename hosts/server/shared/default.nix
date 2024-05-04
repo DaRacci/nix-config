@@ -1,3 +1,3 @@
 _: {
-  services.getty.autoLoginUser = "root";
+  services.getty.autologinUser = "root";
 }
