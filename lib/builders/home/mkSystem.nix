@@ -9,6 +9,7 @@
 let
   inherit (lib) mkIf mkDefault mkForce optional;
   userDirectory = "${flake}/home/${name}";
+  user = config.users.users.${name};
   skipSSHKey = builtins.pathExists "${userDirectory}/id_ed25519.pub";
   publicKey = pkgs.writeTextFile {
     name = "${name}_ed25519.pub";
@@ -61,10 +62,10 @@ in
         sessionPath = [ "$HOME/.local/bin" ];
       };
 
-      # sops = {
-      #   defaultSymlinkPath = "/run/user/${toString user.uid}/secrets";
-      #   defaultSecretsMountPoint = "/run/user/${toString user.uid}/secrets.d";
-      # };
+      sops = {
+        defaultSymlinkPath = "/run/user/${toString user.uid}/secrets";
+        defaultSecretsMountPoint = "/run/user/${toString user.uid}/secrets.d";
+      };
 
       imports = builtins.attrValues (import "${flake}/modules/home-manager") ++ [
         "${flake}/home/shared/global"
