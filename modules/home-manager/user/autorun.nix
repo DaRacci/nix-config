@@ -64,7 +64,7 @@ in
       (_name: service: nameValuePair "autoRun--${service.name}" {
         Unit = {
           Description = "Auto-Run ${service.name} at Login.";
-          After = [ "graphical-session-pre.target" ];
+          After = [ "graphical-session.target" ];
           PartOf = [ "graphical-session.target" ];
         };
 
