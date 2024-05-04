@@ -10,6 +10,7 @@
     ./lock-screen.nix
     ./notification.nix
     ./panel.nix
+    ./polkit.nix
     ./rofi.nix
     ./runner.nix
     ./screenshot.nix
@@ -43,6 +44,10 @@
     ];
 
     settings = {
+      exec-once = [
+        "gnome-keyring-daemon --start --components=secrets"
+      ];
+
       windowrulev2 = [
         #region Floating Windows
         "float,title:^(Picture-in-Picture)$"
@@ -66,8 +71,9 @@
         #endregion
 
         #region Position and Size
+        # Popup below the panel
         "size 700 450,title:^(Volume Control)$"
-        "move 40 55%,title:^(Volume Control)$"
+        "move 70% 10%,title:^(Volume Control)$"
         #endregion
 
         #region Opacity
