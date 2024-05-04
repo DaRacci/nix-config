@@ -104,15 +104,11 @@
           };
 
           nixcloud = {
-            users = [ "racci" ];
-
             isoFormat = "proxmox-lxc";
             deviceType = "server";
           };
 
           nixserv = {
-            users = [ "racci" ];
-
             isoFormat = "proxmox-lxc";
             deviceType = "server";
           };
