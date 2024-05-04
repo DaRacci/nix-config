@@ -107,7 +107,6 @@ rec {
       home-manager.useUserPackages = true;
       home-manager.useGlobalPkgs = true;
 
-      # passthru.enable = false; # Why does build break without this?
       system.stateVersion = "23.11";
     })
   ] ++ (builtins.map
@@ -115,6 +114,7 @@ rec {
       inherit self lib pkgs;
       name = username;
       hostName = name;
+      skipPassword = username == "root";
     }))
     (users ++ [ "root" ]));
 

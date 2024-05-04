@@ -3,12 +3,13 @@
 , name
 , groups ? [ ]
 , hostName ? null
+, skipPassword ? false
 , ...
 }: { flake, config, pkgs, lib, hostDirectory, ... }:
 let
-  inherit (lib) mkDefault mkForce optional;
+  inherit (lib) mkIf mkDefault mkForce optional;
   userDirectory = "${flake}/home/${name}";
-  user = config.users.users.${name};
+  skipSSHKey = builtins.pathExists "${userDirectory}/id_ed25519.pub";
   publicKey = pkgs.writeTextFile {
     name = "${name}_ed25519.pub";
     text = "${userDirectory}/id_ed25519.pub";
@@ -36,11 +37,11 @@ in
       "libvirtd"
     ] ++ groups;
 
-    hashedPasswordFile = config.sops.secrets."${name}-passwd".path;
-    openssh.authorizedKeys.keyFiles = [ publicKey ];
+    hashedPasswordFile = mkIf (!skipPassword) config.sops.secrets."${name}-passwd".path;
+    openssh.authorizedKeys.keyFiles = mkIf (!skipSSHKey) [ publicKey ];
   };
 
-  sops.secrets."${name}-passwd" = {
+  sops.secrets."${name}-passwd" = mkIf (!skipPassword) {
     sopsFile = "${hostDirectory}/secrets.yaml";
     neededForUsers = true;
   };
@@ -60,10 +61,10 @@ in
         sessionPath = [ "$HOME/.local/bin" ];
       };
 
-      sops = {
-        defaultSymlinkPath = "/run/user/${toString user.uid}/secrets";
-        defaultSecretsMountPoint = "/run/user/${toString user.uid}/secrets.d";
-      };
+      # sops = {
+      #   defaultSymlinkPath = "/run/user/${toString user.uid}/secrets";
+      #   defaultSecretsMountPoint = "/run/user/${toString user.uid}/secrets.d";
+      # };
 
       imports = builtins.attrValues (import "${flake}/modules/home-manager") ++ [
         "${flake}/home/shared/global"
