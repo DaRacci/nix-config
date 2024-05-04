@@ -24,7 +24,7 @@ let
           continue
         fi
 
-        find "$DIRECTORY" | while read -r img; do
+        find "$DIRECTORY" -type f | while read -r img; do
           echo "$((RANDOM % 1000)):$img"
         done | sort -n | cut -d':' -f2- | while read -r img; do
           swww img "$img"
