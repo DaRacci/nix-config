@@ -40,7 +40,7 @@ in
     (mkIf cfg.network.enable {
       networking.networkmanager.enable = true;
     })
-    {
+    (mkIf (config.host.role != "server") {
       services = {
         dleyna-renderer.enable = true;
         dleyna-server.enable = true;
@@ -52,6 +52,6 @@ in
       };
 
       security.polkit.enable = true;
-    }
+    })
   ]);
 }
