@@ -1,5 +1,5 @@
 { pkgs, ... }: {
-  home.packages = with pkgs; [ hydroxide protonmail-bridge thunderbird ];
+  home.packages = with pkgs; [ hydroxide protonmail-bridge ];
 
   systemd.user.services.protonmail-bridge = {
     Unit = {
@@ -17,5 +17,20 @@
     };
   };
 
-  user.persistence.directories = [ ".local/share/protonmail" ];
+  # programs.thunderbird = {
+  #   enable = true;
+  #   package = pkgs.thunderbird;
+
+  #   settings = { };
+
+  #   # profiles.racci = {
+  #   #   settings = { };
+  #   # };
+  # };
+
+  user.persistence.directories = [
+    ".thunderbird"
+    ".local/share/protonmail"
+    ".config/protonmail"
+  ];
 }

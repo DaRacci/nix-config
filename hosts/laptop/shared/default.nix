@@ -1,6 +1,7 @@
 _: {
   imports = [
     ./power.nix
+    ../../desktop/shared/appimage.nix
   ];
 
   custom.core = {

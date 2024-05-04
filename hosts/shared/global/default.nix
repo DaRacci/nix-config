@@ -1,6 +1,5 @@
 { pkgs, lib, ... }: {
   imports = [
-    ./appimage.nix
     ./hm-helper.nix
     ./locale.nix
     ./networking.nix
@@ -14,7 +13,9 @@
 
   environment = {
     enableAllTerminfo = true;
-    sessionVariables.NIXOS_OZONE_WL = "1";
+    sessionVariables = {
+      NIXOS_OZONE_WL = "1";
+    };
   };
 
   hardware.enableRedistributableFirmware = true;
