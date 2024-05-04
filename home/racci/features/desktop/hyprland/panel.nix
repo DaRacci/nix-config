@@ -19,7 +19,7 @@
         passthrough = false;
         gtk-layer-shell = true;
 
-        modules-left = [ "custom/padd" "custom/l_end" "custom/cliphist" "idle_inhibitor" "custom/r_end" "custom/l_end" "wlr/taskbar" "custom/r_end" "" "custom/padd" ];
+        modules-left = [ "custom/padd" "custom/l_end" "custom/cliphist" "custom/r_end" "custom/l_end" "wlr/taskbar" "custom/r_end" "" "custom/padd" ];
         modules-center = [ "custom/padd" "custom/l_end" "mpris" "custom/r_end" "custom/l_end" "clock" "custom/r_end" "custom/padd" ];
         modules-right = [ "custom/padd" "custom/l_end" "tray" "custom/r_end" "custom/l_end" "network" "bluetooth" "wireplumber" "wireplumber#microphone" "custom/r_end" "custom/padd" ];
 
@@ -64,34 +64,26 @@
         };
 
         clock = {
-          # format = "{:%I:%M %p}";
-          # format-alt = "{:%R 󰃭 %d·%m·%y}}";
-          # tooltip-format = "<tt>{calendar}</tt>";
-          # calendar = {
-          #   mode = "month";
-          #   mode-mon-col = 3;
-          #   on-scroll = 1;
-          #   on-click-right = "mode";
-          #   format = {
-          #     months = "<span color='#ffead3'><b>{}</b></span>";
-          #     weekdays = "<span color='#ffcc66'><b>{}</b></span>";
-          #     today = "<span color='#ff6699'><b>{}</b></span>";
-          #   };
-          # };
-          # actions = {
-          #   on-click-right = "mode";
-          #   on-click-forward = "tz_up";
-          #   on-click-backward = "tz_down";
-          #   on-scroll-up = "shift_up";
-          #   on-scroll-down = "shift_down";
-          # };
-        };
-
-        idle_inhibitor = {
-          format = "{icon}";
-          format-icons = {
-            activated = "󰥔 ";
-            deactivated = " ";
+          format = "{:%I:%M %p}";
+          format-alt = "{:%R 󰃭 %d·%m·%y}}";
+          tooltip-format = "<tt>{calendar}</tt>";
+          calendar = {
+            mode = "month";
+            mode-mon-col = 3;
+            on-scroll = 1;
+            on-click-right = "mode";
+            format = {
+              months = "<span color='#ffead3'><b>{}</b></span>";
+              weekdays = "<span color='#ffcc66'><b>{}</b></span>";
+              today = "<span color='#ff6699'><b>{}</b></span>";
+            };
+          };
+          actions = {
+            on-click-right = "mode";
+            on-click-forward = "tz_up";
+            on-click-backward = "tz_down";
+            on-scroll-up = "shift_up";
+            on-scroll-down = "shift_down";
           };
         };
 
@@ -105,7 +97,7 @@
           # status-icons = {
           #   paused = "⏸";
           # };
-          # max-length = 1000;
+          max-length = 60;
           # interval = 1;
         };
 
@@ -118,7 +110,7 @@
           format-disconnected = "󰖪 ";
           tooltip-format-disconnected = "Disconnected";
           format-alt = "<span foreground='#99ffdd'> {bandwidthDownBytes}</span> <span foreground='#ffcc66'> {bandwidthUpBytes}</span>";
-          interval = 2;
+          interval = 1;
         };
 
         wireplumber = {
@@ -229,10 +221,6 @@
           interval = "once";
           tooltip = false;
         };
-
-        # "custom/wallpaper-change" = {
-        #   format = "{}";
-        # };
       };
     };
 
@@ -342,14 +330,13 @@
       #custom-cpuinfo,
       #cpu,
       #custom-gpuinfo,
-      #idle_inhibitor,
       #custom-keybindhint,
       #language,
       #memory,
       #mpris,
       #network,
       #custom-power,
-      #pipewire,
+      #wireplumber,
       #custom-spotify,
       #taskbar,
       #custom-theme,
