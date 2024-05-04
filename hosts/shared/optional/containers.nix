@@ -1,7 +1,6 @@
-{ config, pkgs, lib, ... }: with lib; {
+{ pkgs, lib, ... }: with lib; {
   environment.systemPackages = with pkgs; [
     podman-tui
-    podman-compose
   ];
 
   virtualisation = {
@@ -12,26 +11,14 @@
       enable = mkForce true;
       enableNvidia = mkForce true;
       package = pkgs.unstable.docker;
-    };
 
-    oci-containers.backend = "podman";
+      logDriver = "journald";
+      storageDriver = "btrfs";
 
-    podman = {
-      enable = true;
-      package = pkgs.unstable.podman;
-
-      defaultNetwork.settings.dns_name = true;
-
-      dockerCompat = mkForce (!config.virtualisation.docker.enable);
-      dockerSocket.enable = mkForce (!config.virtualisation.docker.enable);
-
-      # TODO: Check for nvidia gpu
-      enableNvidia = true;
-
-      networkSocket = {
-        enable = false; # TODO?
-        listenAddress = "0.0.0.0";
-      };
+      listenOptions = [
+        "unix:///var/run/docker.sock"
+        "tcp:///0.0.0.0:2375"
+      ];
 
       autoPrune = {
         enable = true;
@@ -39,6 +26,8 @@
         flags = [ ];
       };
     };
+
+    oci-containers.backend = "docker";
   };
 
   host.persistence.directories = let docker = "/var/lib/docker"; in [
@@ -47,4 +36,6 @@
     "${docker}/volumes"
     "${docker}/containers"
   ];
+
+  networking.firewall.allowedTCPPorts = [ 2375 ];
 }
