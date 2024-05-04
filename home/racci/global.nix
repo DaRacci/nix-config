@@ -33,4 +33,21 @@
       package = pkgs.openmoji-color;
     };
   };
+
+  # accounts.racci = {
+  #   calendar = {
+  #     remote = {
+  #       url = "https://nextcloud.racci.dev";
+  #       userName = "Racci";
+  #       passwordCommand = [
+  #         "cat"
+  #         "${config.sops.nextcloud.password.path}"
+  #       ];
+  #     };
+  #   };
+  # };
+
+  # sops.secrets = {
+  #   nextcloud.password = { };
+  # };
 }

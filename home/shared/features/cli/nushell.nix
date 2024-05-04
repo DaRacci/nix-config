@@ -1,5 +1,5 @@
-{ config, pkgs, lib, ... }: {
-  programs.nushell = {
+{ osConfig, config, pkgs, lib, ... }: {
+  programs.nushell = lib.mkIf (osConfig.users.users.${config.home.username}.shell.pname == "nushell") {
     enable = true;
 
     environmentVariables = {
