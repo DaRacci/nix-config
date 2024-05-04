@@ -10,6 +10,7 @@ in
       hosts = {
         host = builtins.concatStringsSep " " hostnames;
         forwardAgent = true;
+        identitiesOnly = true;
         extraOptions = {
           IdentityAgent = "~/.1password/agent.sock";
         };
@@ -25,7 +26,6 @@ in
   };
 
   user.persistence.files = [
-    # ".ssh/id_ed25519"
     ".ssh/known_hosts"
   ];
 }
