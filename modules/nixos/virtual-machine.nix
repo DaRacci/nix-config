@@ -1,26 +1,36 @@
-{ lib, ... }:
+{ config, lib, ... }:
 with lib; let
-
+  cfg = config.virtual-machines;
   guestOpts = { name, ... }: {
     options = {
+      # uuid = mkOption {
+      #   type = types.str;
+      #   default = builtins.hashString name;
+      #   description = ''
+      #     The UUID of the guest, this must be unique for each guest.
+      #     If a UUID is not provided, one will be derived from the name.
+      #   '';
+      # };
+
       name = mkOption {
         type = types.str;
         example = "win10";
+        default = name;
         description = "The name of the guest virtual machine.";
       };
 
       os = {
         type = mkOption {
-          type = types.strMatching "^(linux|windows)$";
+          type = types.enum [ "linux" "windows" ];
           default = "windows";
           description = "The type of operating system to install.";
         };
 
-        version = mkOption {
-          type = types.str;
-          default = "11";
-          description = "The version of the operating system to install.";
-        };
+        # version = mkOption {
+        #   type = types.str;
+        #   default = "11";
+        #   description = "The version of the operating system to install.";
+        # };
       };
 
       cpu = {
@@ -29,6 +39,13 @@ with lib; let
           default = 1;
           apply = v: if v < 1 then throw "threads must be positive" else v;
           description = "The number of threads to allocate to the guest.";
+        };
+
+        threadsPerCore = mkOption {
+          type = types.int;
+          default = 2;
+          apply = v: if v < 1 then throw "threadsPerCore must be positive" else v;
+          description = "The number of threads per core for your CPU.";
         };
       };
 
@@ -55,7 +72,17 @@ with lib; let
       };
 
       storage = {
-        # TODO
+        disks = mkOption {
+          type = types.list types.str;
+          default = [ ];
+          description = "The disks to attach to the guest.";
+        };
+
+        mounts = mkOption {
+          type = types;
+          default = { };
+          description = "The mounts to attach to the guest.";
+        };
       };
 
       network = {
@@ -86,9 +113,9 @@ with lib; let
         };
 
         method = mkOption {
-          type = types.strMatching "^(pci|mdev|spice)$";
+          type = types.enum [ "passthrough" "spice" ];
           default = "spice";
-          description = "The method of graphics passthrough.";
+          description = "The method of graphics passthrough";
         };
       };
 
@@ -99,6 +126,10 @@ with lib; let
       };
     };
   };
+
+  # TODO :: Get Constant UUID
+  # TODO :: Calculate size needed for shmem
+  # TODO :: Auto calculate emulatorpin and iothreadpin
 in
 {
   options.virtual-machines = {
@@ -110,16 +141,23 @@ in
     };
   };
 
-  # config = mkIf (cfg.enable && cfg.guests != { }) {
-  #   systemd.services.populate-vms = {
-  #     description = "Populate virtual machines xml files into /var/lib/libvirt/qemu";
-  #     wantedBy = [ "multi-user.target" ];
-  #     before = [ "libvirtd.service" ];
-  #     script = ''
-  #       mkdir -p /var/lib/libvirt/qemu
-  #       for xml in
-  #     '';
-  #   }
+  config = mkIf (cfg.enable && (builtins.length (builtins.attrValues cfg.guests)) > 0) {
+    # system.activationScripts.populate-vms.text = ''
+    #   mkdir -p /var/lib/libvirt/qemu;
+
+    #   ${lib.trivial.pipe virtualMachines [
+    #     (builtins.attrValues)
+    #     (builtins.map (guest: ''
+    #       ln -s "${guest.storePath}" "/var/lib/libvirt/qemu/${guest.filePath}";
+    #     ''))
+    #     (builtins.concatStringsSep "\n")
+    #   ]}
+
+    #   for xml in /var/lib/libvirt/qemu/*.xml; do
+    #     virsh define "$xml";
+    #   done
+    # '';
+  };
   #     (mkMerge mapAttrs'
   #       (name: guest:
   #         let
@@ -274,3 +312,5 @@ in
   #     guests;
   # };
 }
+
+

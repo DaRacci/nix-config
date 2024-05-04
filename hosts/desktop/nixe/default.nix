@@ -56,4 +56,34 @@
       OLLAMA_ORIGINS = "http://192.168.0.0:*,app://obsidian.md:*";
     };
   };
+
+  virtual-machines = {
+    enable = true;
+    guests = {
+      gaming = {
+        os = {
+          type = "windows";
+        };
+
+        cpu = {
+          threads = 12;
+        };
+
+        memory = {
+          sharedMemory = true;
+          reservedMemory = 60;
+          maxMemory = 16 * 1024 * 1024 * 1024;
+        };
+
+        storage = { };
+
+        graphics = {
+          enable = true;
+          method = "passthrough";
+        };
+
+        audio = true;
+      };
+    };
+  };
 }
