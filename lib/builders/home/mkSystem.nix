@@ -4,21 +4,22 @@
 , groups ? [ ]
 , hostName ? null
 , ...
-}: { flake, config, pkgs, lib, ... }:
+}: { flake, config, pkgs, lib, hostDirectory, ... }:
 let
-  inherit (lib) mkDefault mkForce;
+  inherit (lib) mkDefault mkForce optional;
   userDirectory = "${flake}/home/${name}";
   user = config.users.users.${name};
   publicKey = pkgs.writeTextFile {
     name = "${name}_ed25519.pub";
     text = "${userDirectory}/id_ed25519.pub";
   };
+
+  osConfigPath = "${userDirectory}/os-config.nix";
 in
 {
+  imports = optional (builtins.pathExists osConfigPath) osConfigPath;
+
   users.users.${name} = {
-    # FIXME Can't use multiple users with this
-    uid = 1000;
-    shell = pkgs.nushell;
     isNormalUser = mkDefault true;
 
     # Only add groups that exist.
@@ -35,12 +36,12 @@ in
       "libvirtd"
     ] ++ groups;
 
-    hashedPasswordFile = config.sops.secrets."passwd".path;
+    hashedPasswordFile = config.sops.secrets."${name}-passwd".path;
     openssh.authorizedKeys.keyFiles = [ publicKey ];
   };
 
-  sops.secrets."passwd" = {
-    sopsFile = "${userDirectory}/secrets.yaml";
+  sops.secrets."${name}-passwd" = {
+    sopsFile = "${hostDirectory}/secrets.yaml";
     neededForUsers = true;
   };
 
@@ -53,7 +54,7 @@ in
     users.${name} = { flake, ... }: {
       home = {
         username = name;
-        homeDirectory = mkForce "/home/${name}";
+        homeDirectory = mkDefault "/home/${name}";
 
         stateVersion = mkForce "23.11";
         sessionPath = [ "$HOME/.local/bin" ];
@@ -66,7 +67,7 @@ in
 
       imports = builtins.attrValues (import "${flake}/modules/home-manager") ++ [
         "${flake}/home/shared/global"
-      ] ++ (let hostPath = "${flake}/home/${name}/${hostName}.nix"; in lib.optional (hostName != null && builtins.pathExists hostPath) hostPath);
+      ] ++ (let hostPath = "${userDirectory}/${hostName}.nix"; in lib.optional (hostName != null && builtins.pathExists hostPath) hostPath);
     };
   };
 }

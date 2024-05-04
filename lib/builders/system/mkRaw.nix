@@ -104,7 +104,7 @@ rec {
         device.role = deviceType;
       };
 
-      # home-manager.useUserPackages = true;
+      home-manager.useUserPackages = true;
       home-manager.useGlobalPkgs = true;
 
       # passthru.enable = false; # Why does build break without this?
@@ -116,7 +116,7 @@ rec {
       name = username;
       hostName = name;
     }))
-    users);
+    (users ++ [ "root" ]));
 
   specialArgs = {
     flake = self;
