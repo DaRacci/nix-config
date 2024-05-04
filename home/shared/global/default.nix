@@ -1,4 +1,4 @@
-{ inputs, config, pkgs, ... }: {
+{ inputs, osConfig, config, pkgs, ... }: {
   imports = [
     inputs.nur.hmModules.nur
     inputs.sops-nix.homeManagerModule
@@ -16,4 +16,6 @@
   home.activation.report-changes = config.lib.dag.entryAnywhere ''
     ${pkgs.nvd}/bin/nvd diff $oldGenPath $newGenPath
   '';
+
+  dconf.enable = pkgs.lib.mkForce osConfig.programs.dconf.enable;
 }
