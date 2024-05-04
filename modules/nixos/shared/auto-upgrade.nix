@@ -13,7 +13,7 @@
     system.autoUpgrade = let isClean = flake ? rev; in {
       enable = isClean;
       dates = "hourly";
-      flags = [ "--refresh" ];
+      flags = [ "--refresh" "--impure" ];
       flake = "github:DaRacci/nix-config#${cfg.hostName}";
 
       allowReboot = false;
