@@ -135,7 +135,7 @@
       perSystem = { system, pkgs, ... }: {
         _module.args.pkgs = mkPkgs system;
 
-        packages = import ./pkgs { inherit pkgs; };
+        packages = import ./pkgs { inherit pkgs; } // (builtins.mapAttrs (_n: v: v.image) (mkConfigurations builtins.currentSystem));
 
         devenv.shells.default = {
           packages = with pkgs; [

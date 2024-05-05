@@ -28,8 +28,8 @@ creation_rules:
 
   - path_regex: hosts/server/nixcloud/secrets.yaml$
     key_groups:
-    - age: [ *james, *nixcloud ]
+    - age: [ *nixcloud, *james ]
 
   - path_regex: hosts/server/nixserv/secrets.yaml$
     key_groups:
-    - age: [ *james, *nixserv ]
+    - age: [ *nixserv, *james ]

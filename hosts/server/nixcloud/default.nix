@@ -10,64 +10,69 @@ let cfg = config.services.nextcloud.config; in {
     manageHostName = false;
   };
 
-  tailscale.enable = true;
-
   sops.secrets = {
     nextcloud-admin-password = { };
     nextcloud-db-password = { };
   };
 
-  services.nextcloud = {
-    enable = true;
-    configureRedis = true;
-    package = pkgs.nextcloud28;
-
-    https = true;
-    hostName = "nextcloud.racci.dev";
-
-    maxUploadSize = "10G";
-
-    autoUpdateApps = {
+  services = {
+    tailscale = {
       enable = true;
-      startAt = "05:00:00";
+      useRoutingFeatures = "client";
     };
 
-    config = {
-      adminuser = "admin";
-      adminpassFile = config.sops.secrets.nextcloud-admin-password.path;
+    nextcloud = {
+      enable = true;
+      configureRedis = true;
+      package = pkgs.unstable.nextcloud29;
 
-      dbtype = "pgsql";
-      dbuser = "nextcloud";
-      dbname = "nextcloud";
-      dbhost = "/run/postgresql";
-      dbpassFile = config.sops.secrets.nextcloud-db-pass.path;
+      https = true;
+      hostName = "nextcloud.racci.dev";
+
+      maxUploadSize = "10G";
+
+      autoUpdateApps = {
+        enable = true;
+        startAt = "05:00:00";
+      };
+
+      config = {
+        adminuser = "admin";
+        adminpassFile = config.sops.secrets.nextcloud-admin-password.path;
+
+        dbtype = "pgsql";
+        dbuser = "nextcloud";
+        dbname = "nextcloud";
+        dbhost = "/run/postgresql";
+        dbpassFile = config.sops.secrets.nextcloud-db-password.path;
+      };
+
+      extraOptions = {
+        mail_smtpmode = "sendmail";
+        mail_sendmailmode = "pipe";
+
+        enabledPreviewProviders = [
+          "OC\\Preview\\BMP"
+          "OC\\Preview\\GIF"
+          "OC\\Preview\\JPEG"
+          "OC\\Preview\\Krita"
+          "OC\\Preview\\MarkDown"
+          "OC\\Preview\\MP3"
+          "OC\\Preview\\OpenDocument"
+          "OC\\Preview\\PNG"
+          "OC\\Preview\\TXT"
+          "OC\\Preview\\XBitmap"
+          "OC\\Preview\\HEIC"
+        ];
+      };
     };
 
-    extraOptions = {
-      mail_smtpmode = "sendmail";
-      mail_sendmailmode = "pipe";
+    postgresql = {
+      enable = true;
 
-      enabledPreviewProviders = [
-        "OC\\Preview\\BMP"
-        "OC\\Preview\\GIF"
-        "OC\\Preview\\JPEG"
-        "OC\\Preview\\Krita"
-        "OC\\Preview\\MarkDown"
-        "OC\\Preview\\MP3"
-        "OC\\Preview\\OpenDocument"
-        "OC\\Preview\\PNG"
-        "OC\\Preview\\TXT"
-        "OC\\Preview\\XBitmap"
-        "OC\\Preview\\HEIC"
-      ];
+      ensureDatabases = [ cfg.dbname ];
+      ensureUsers = [{ name = cfg.dbuser; ensureDBOwnership = true; }];
     };
-  };
-
-  services.postgresql = {
-    enable = true;
-
-    ensureDatabases = [ cfg.dbname ];
-    ensureUsers = [{ name = cfg.dbuser; ensurePermissions."DATABASE ${cfg.dbname}" = "ALL PRIVILEGES"; }];
   };
 
   systemd.services."nextcloud-setup" = {
@@ -80,7 +85,7 @@ let cfg = config.services.nextcloud.config; in {
       DO $$
       DECLARE password TEXT;
       BEGIN
-        password := trim(both from replace(pg_read_file('${config.sops.secrets.nextcloud-db-pass.path}'), E'\n', '''));
+        password := trim(both from replace(pg_read_file('${config.sops.secrets.nextcloud-db-password.path}'), E'\n', '''));
         EXECUTE format('ALTER ROLE ${cfg.dbuser} WITH PASSWORD '''%s''';', password);
       END $$;
     EOF
