@@ -12,8 +12,8 @@
       enableNvidia = mkForce true;
       package = pkgs.unstable.docker;
 
-      logDriver = "journald";
-      storageDriver = "btrfs";
+      # logDriver = "journald";
+      # storageDriver = "btrfs";
 
       listenOptions = [
         "unix:///var/run/docker.sock"

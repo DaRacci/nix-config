@@ -1,5 +1,5 @@
-{ osConfig, config, pkgs, lib, ... }: {
-  programs.nushell = lib.mkIf (osConfig.users.users.${config.home.username}.shell.pname == "nushell") {
+{ osConfig, config, pkgs, lib, ... }: lib.mkIf (osConfig.users.users.${config.home.username}.shell.pname == "nushell") {
+  programs.nushell = {
     enable = true;
 
     environmentVariables = {
@@ -72,7 +72,7 @@
         $string
       }
 
-      load-sh-env ${config.home.homeDirectory}/.nix-profile/etc/profile.d/hm-session-vars.sh
+      load-sh-env /etc/profiles/per-user/${config.home.username}/etc/profile.d/hm-session-vars.sh
     '';
 
     extraConfig = ''

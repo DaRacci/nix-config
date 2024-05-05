@@ -1,6 +1,7 @@
 {
   imports = [
     ./appimage.nix
+    ./xdg.nix
   ];
 
   custom.core = {
