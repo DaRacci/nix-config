@@ -14,7 +14,7 @@
   systemd.user.startServices = "sd-switch";
 
   home.activation.report-changes = config.lib.dag.entryAnywhere ''
-    if [ ! -z "$oldGenPath" ]; then
+    if [ ! -z "''${oldGenPath:-}" ]; then
       ${pkgs.nvd}/bin/nvd diff "$oldGenPath" "$newGenPath"
     fi
   '';
