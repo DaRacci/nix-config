@@ -1,21 +1,34 @@
 # TODO - Colour picker bind to SUPER + C (hyprpicker)
 # TODO - Clipboard manager bind to SUPER + V (cliphist)
 # TODO - Game mode that disables compositor and pauses swww-random-wallpaper
-{ flake, inputs, config, pkgs, lib, ... }: with lib; {
+{ flake, inputs, config, pkgs, lib, ... }: with lib; let
+  inherit (config) colorScheme;
+in
+{
   imports = [
     "${flake}/home/racci/features/desktop/common"
     "${flake}/home/shared/desktop/hyprland"
 
+    ./ags.nix
     ./clipboard.nix
     ./lock-screen.nix
-    ./notification.nix
-    ./panel.nix
+    # ./notification.nix
+    # ./panel.nix
     ./polkit.nix
-    ./rofi.nix
+    # ./rofi.nix
     ./runner.nix
     ./screenshot.nix
-    ./wallpaper.nix
+    # ./wallpaper.nix
   ];
+
+  xdg.desktopEntries."org.gnome.Settings" = {
+    name = "Settings";
+    comment = "Gnome Control Center";
+    icon = "org.gnome.Settings";
+    exec = "env XDG_CURRENT_DESKTOP=gnome ${pkgs.gnome.gnome-control-center}/bin/gnome-control-center";
+    categories = [ "X-Preferences" ];
+    terminal = false;
+  };
 
   home.file.".local/bin/wlprop" = {
     executable = true;
@@ -39,6 +52,7 @@
 
   wayland.windowManager.hyprland = {
     plugins = with inputs.hyprland-plugins.packages.${pkgs.system}; [
+      # inputs.hy3.packages.${pkgs.system}.hy3
       # borders-plus-plus
       # hyprtrails
     ];
@@ -48,38 +62,93 @@
         "gnome-keyring-daemon --start --components=secrets"
       ];
 
-      windowrulev2 = [
-        #region Floating Windows
-        "float,title:^(Picture-in-Picture)$"
-        "float,class:^(pavucontrol)$"
-        "float,class:^(SoundWireServer)$"
-        "float,class:^(file_progress)$"
-        "float,class:^(confirm)$"
-        "float,class:^(dialog)$"
-        "float,class:^(download)$"
-        "float,class:^(notification)$"
-        "float,class:^(error)$"
-        "float,class:^(confirmreset)$"
-        "float,title:^(Open File)$"
-        "float,title:^(branchdialog)$"
-        "float,title:^(Confirm to replace files)$"
-        "float,title:^(File Operation Progress)$"
-        #endregion
-
-        #region Pinning Windows (Keep between workspace changes)
-        "pin, title:^(Picture-in-Picture)$"
-        #endregion
-
-        #region Position and Size
-        # Popup below the panel
-        "size 700 450,title:^(Volume Control)$"
-        "move 70% 10%,title:^(Volume Control)$"
-        #endregion
-
-        #region Opacity
-        "opacity 1.0 override 1.0 override, title:^(Picture-in-Picture)$"
-        #endregion
+      exec = [
+        "asztal -q; asztal"
       ];
+
+      binds = {
+        allow_workspace_cycles = true;
+      };
+
+      bind =
+        let
+          mainMod = "SUPER";
+          binding = mod: cmd: key: arg: "${mod},${key},${cmd},${arg}";
+
+          agsExec = extra: "exec, asztal ${extra}";
+          agsBinding = mod: cmd: key: (binding mod "${agsExec cmd}" key "");
+        in
+        [
+          (agsBinding "CTRL_${mainMod}" "-t launcher" "SPACE")
+          (agsBinding mainMod "-t overview" "TAB")
+          (agsBinding "" "-r 'powermenu.shutdown()'" "XF86PowerOff")
+          (agsBinding "" "-r 'powermenu.reboot()'" "XF86Restart")
+          (agsBinding "" "-r 'recorder.start()'" "XF86Launch4")
+        ];
+
+      plugin = {
+        overview = {
+          centerAligned = true;
+          hideTopLayers = true;
+          hideOverlayLayers = true;
+          showNewWorkspace = true;
+          exitOnClick = true;
+          exitOnSwitch = true;
+          drawActiveWorkspace = true;
+          reverseSwipe = true;
+        };
+
+        hyprbars = {
+          bar_color = "rgb(2a2a2a)";
+          bar_height = 28;
+          col_text = "rgba(ffffffdd)";
+          bar_text_size = 11;
+          bar_text_font = "JetBrainsMono Nerd Font";
+
+          buttons = {
+            button_size = 0;
+            "col.maximize" = "rgba(ffffff11)";
+            "col.close" = "rgba(ff111133)";
+          };
+        };
+      };
+
+      windowrulev2 =
+        let
+          fl = target: regex: "float,${target}:^(${regex})$";
+        in
+        [
+          #region Floating Windows
+          (fl "title" "Picture-in-Picture")
+          (fl "class" "pavucontrol")
+          (fl "class" "SoundWireServer")
+          (fl "class" "file_progress")
+          (fl "class" "confirm")
+          (fl "class" "dialog")
+          (fl "class" "download")
+          (fl "class" "notification")
+          (fl "class" "error")
+          (fl "class" "confirmreset")
+          (fl "title" "Open File")
+          (fl "title" "branchdialog")
+          (fl "title" "Confirm to replace files")
+          (fl "title" "File Operation Progress")
+          #endregion
+
+          #region Pinning Windows (Keep between workspace changes)
+          "pin, title:^(Picture-in-Picture)$"
+          #endregion
+
+          #region Position and Size
+          # Popup below the panel
+          "size 700 450,title:^(Volume Control)$"
+          "move 70% 10%,title:^(Volume Control)$"
+          #endregion
+
+          #region Opacity
+          "opacity 1.0 override 1.0 override, title:^(Picture-in-Picture)$"
+          #endregion
+        ];
     };
 
     extraConfig =
@@ -175,6 +244,10 @@
             special_scale_factor = 1
             no_gaps_when_only = true
           }
+
+          # general {
+          #   layout = hy3
+          # }
         '';
 
         input = ''
@@ -356,6 +429,37 @@
 
             #     # makes outer edges match rounding of the parent. Turn on / off to better understand. Default = on.
             #     natural_rounding = yes
+            # }
+
+            # hy3 {
+            #   no_gaps_when_only = 1
+            #   node_collapse_policy = 2
+            #   group_insert = 10
+            #   tab_first_window = false
+
+            #   tabs {
+            #     height = 15
+            #     padding = 5
+            #     from_top = false
+            #     rounding = 3
+            #     render_text = true
+
+            #     text_center = true
+            #     text_font = JetBrainsMono Nerd Font
+            #     text_height = 8
+            #     text_padding = 3
+
+            #     col.active = ${colorScheme.palette.base03}
+            #     col.urgent = ${colorScheme.palette.base08}
+            #     col.inactive = ${colorScheme.palette.base01}
+            #     col.text.active = ${colorScheme.palette.base00}
+            #     col.text.urgent = ${colorScheme.palette.base00}
+            #     col.text.inactive = ${colorScheme.palette.base05}
+            #   }
+            # }
+
+            # autotile {
+            #   enable = false
             # }
           }
 

@@ -32,6 +32,6 @@
   };
 
   wayland.windowManager.hyprland.settings.bind = [
-    "CTRL_SHIFT,SPACE,exec,${lib.getExe pkgs._1password} --quick-access"
+    "CTRL_SHIFT,SPACE,exec,${lib.getExe pkgs._1password-gui} --quick-access"
   ];
 }
