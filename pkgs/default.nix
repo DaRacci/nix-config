@@ -6,9 +6,6 @@
   ficsit-cli = pkgs.callPackage ./ficsit-cli { };
   noise-suppression = pkgs.callPackage ./noise-suppression-for-voice { };
 
-  # nixcloud = nixos-generators.nixosGenerate {
-  #   inherit (mkRawConfiguration "nixcloud" { inherit system; }) system modules specialArgs;
-
-  #   format = "proxmox-lxc";
-  # };
+  copy-to-proxmox = pkgs.callPackage ./copy-to-proxmox { };
+  create-proxmox = pkgs.callPackage ./create-proxmox { };
 }

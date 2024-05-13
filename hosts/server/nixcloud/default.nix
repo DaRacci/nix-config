@@ -1,7 +1,8 @@
-{ modulesPath, config, pkgs, ... }:
+{ modulesPath, flake, config, pkgs, ... }:
 let cfg = config.services.nextcloud.config; in {
   imports = [
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
+    "${flake}/hosts/shared/optional/tailscale.nix"
   ];
 
   proxmoxLXC = {
@@ -16,11 +17,6 @@ let cfg = config.services.nextcloud.config; in {
   };
 
   services = {
-    tailscale = {
-      enable = true;
-      useRoutingFeatures = "client";
-    };
-
     nextcloud = {
       enable = true;
       configureRedis = true;
@@ -29,7 +25,7 @@ let cfg = config.services.nextcloud.config; in {
       https = true;
       hostName = "nextcloud.racci.dev";
 
-      maxUploadSize = "10G";
+      maxUploadSize = "16G";
 
       autoUpdateApps = {
         enable = true;
@@ -45,6 +41,15 @@ let cfg = config.services.nextcloud.config; in {
         dbname = "nextcloud";
         dbhost = "/run/postgresql";
         dbpassFile = config.sops.secrets.nextcloud-db-password.path;
+
+        defaultPhoneRegion = "AU";
+        objectstore.s3 = { };
+      };
+
+      caching = {
+        redis = true;
+        apcu = true;
+        memcached = true;
       };
 
       extraOptions = {
