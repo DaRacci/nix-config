@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }: with lib; let
+{ inputs, config, pkgs, lib, ... }: with lib; let
   mkLockedValue = value: {
     Value = value;
     Status = "locked";
@@ -14,6 +14,15 @@
   mkSimpleExtension = shortId: guid: mkExtension shortId guid { };
 in
 {
+  home = {
+    sessionVariables.BROWSER = lib.mkForce "firefox";
+
+    file."firefox-gnome-theme" = {
+      target = ".mozilla/firefox/${config.home.username}/chrome/firefox-gnome-theme";
+      source = inputs.firefox-gnome-theme;
+    };
+  };
+
   programs.firefox = {
     enable = true;
     package = pkgs.unstable.firefox;
@@ -239,6 +248,24 @@ in
         };
       };
 
+      settings = {
+        "browser.tabs.loadInBackground" = true;
+        "widget.gtk.rounded-bottom-corners.enabled" = true;
+        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+        "svg.context-properties.content.enabled" = true;
+        "gnomeTheme.hideSingleTab" = true;
+        "gnomeTheme.bookmarksToolbarUnderTabs" = true;
+        "gnomeTheme.normalWidthTabs" = false;
+        "gnomeTheme.tabsAsHeaderbar" = true;
+      };
+
+      userChrome = ''
+        @import "firefox-gnome-theme/userChrome.css";
+      '';
+      userContent = ''
+        @import "firefox-gnome-theme/userContent.css";
+      '';
+
       search = {
         default = "Google";
         force = true;
@@ -286,8 +313,6 @@ in
       };
     };
   };
-
-  home.sessionVariables.BROWSER = lib.mkForce "firefox";
 
   xdg.mimeApps.defaultApplications = {
     "text/html" = lib.mkForce [ "firefox.desktop" ];
