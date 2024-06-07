@@ -18,5 +18,6 @@
     };
   };
 
+  boot.loader.systemd-boot.enable = false;
   environment.systemPackages = with pkgs; [ wget ];
 }

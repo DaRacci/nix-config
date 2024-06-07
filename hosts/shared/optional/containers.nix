@@ -9,7 +9,7 @@
     # Mark my works, i will rid myself of docker one day..
     docker = {
       enable = mkForce true;
-      enableNvidia = mkForce true;
+      enableNvidia = mkDefault true;
       package = pkgs.unstable.docker;
 
       # logDriver = "journald";

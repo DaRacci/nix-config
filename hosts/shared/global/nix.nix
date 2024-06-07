@@ -6,12 +6,19 @@
       experimental-features = [ "nix-command" "flakes" "repl-flake" ];
       system-features = [ "kvm" "big-parallel" "nixos-test" ];
 
-      trusted-substituters = [ "https://racci.cachix.org" ];
-      trusted-public-keys = [ "racci.cachix.org-1:Kl4opLxvTV9c77DpoKjUOMLDbCv6wy3GVHWxB384gxg=" ];
+      trusted-substituters = [
+        "https://nix-community.cachix.org"
+        "https://racci.cachix.org"
+        "https://hyprland.cachix.org"
+      ];
+      trusted-public-keys = [
+        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+        "racci.cachix.org-1:Kl4opLxvTV9c77DpoKjUOMLDbCv6wy3GVHWxB384gxg="
+        "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+      ];
     };
 
     # TODO :: Ssh Serve store
-
     gc = {
       automatic = true;
       dates = "daily";

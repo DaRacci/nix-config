@@ -50,4 +50,6 @@
       fi
     done
   '';
+
+  virtualisation.docker.enableNvidia = mkForce false;
 }
