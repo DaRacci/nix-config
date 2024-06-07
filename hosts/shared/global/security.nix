@@ -18,4 +18,8 @@ let userLimit = 32768; in {
   };
 
   systemd.user.extraConfig = "DefaultLimitNOFILE=${toString userLimit}";
+
+  boot.kernel.sysctl = {
+    "fs.file-max" = 65536;
+  };
 }
