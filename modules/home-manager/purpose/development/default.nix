@@ -60,6 +60,9 @@ in
           tamasfe.even-better-toml
           matthewpi.caddyfile-support
           coolbear.systemd-unit-file
+          hashicorp.terraform
+          bierner.markdown-preview-github-styles
+          ruschaaf.extended-embedded-languages
 
           # LSP Servers
           jnoortheen.nix-ide
@@ -77,7 +80,7 @@ in
 
           # Other
           formulahendry.code-runner
-          platformio.platformio-ide
+          # platformio.platformio-ide
 
           # Bash Extensions
           rogalmic.bash-debug
@@ -85,6 +88,7 @@ in
 
           # Integrations
           github.vscode-github-actions
+          github.vscode-pull-request-github
         ] ++ (optionals cfg.python.enable (with versionExtensions.vscode-marketplace.ms-python; [
           python
           vscode-pylance
@@ -181,6 +185,15 @@ in
       # keybindings = {
       #   a = builtins.fromTOML "[}";
       # };
+    };
+
+    home.file.".vscode/argv.json" = {
+      text = /*json*/''
+        {
+          "enable-crash-reporter": false,
+          "password-store": "gnome-libsecret"
+        }
+      '';
     };
 
     user.persistence.directories = [
