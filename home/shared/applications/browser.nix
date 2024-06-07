@@ -41,6 +41,7 @@ in
           [ "darkreader" "addon@darkreader.org" ]
           [ "sidebery" "{3c078156-979c-498b-8990-85f7987dd929}" ]
           [ "1password-x-password-manager" "{d634138d-c276-4fc8-924b-40a0ea21d284}" ]
+          [ "Firefox Multi-Account Containers" "@testpilot-containers" ]
 
           # Site Improvements
           [ "enhancer-for-youtube" "enhancerforyoutube@maximerf.addons.mozilla.org" ]
