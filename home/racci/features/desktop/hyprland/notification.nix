@@ -1,23 +1,33 @@
-{ config, lib, ... }: {
+{ config, lib, ... }:
+let inherit (config) colorScheme; in {
   services.mako = {
     enable = true;
+    icons = true;
     actions = true;
     defaultTimeout = 5000;
-    padding = "15";
-    borderSize = 2;
-    borderRadius = 5;
+
+    layer = "overlay";
     anchor = "top-center";
-    icons = true;
-    # actions = true;
-    backgroundColor = "#1e1e2e";
-    borderColor = "#b4befe";
+    width = 450;
+    height = 120;
+    margin = "5";
+    padding = "0,5,10";
+    borderSize = 0;
+    borderRadius = 10;
+
+    backgroundColor = "#${colorScheme.palette.base00}";
+    textColor = "#${colorScheme.palette.base05}";
+    borderColor = "#${colorScheme.palette.base0D}";
     progressColor = "over #313244";
-    textColor = "#cdd6f4";
 
     extraConfig = ''
       text-alignment=center
+
+      [urgency=low]
+      text-color=#${colorScheme.palette.base0A}
+
       [urgency=high]
-      border-color=#fab387
+      text-color=#${colorScheme.palette.base08}
     '';
   };
 

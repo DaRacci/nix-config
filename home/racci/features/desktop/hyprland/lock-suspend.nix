@@ -1,21 +1,32 @@
-{ pkgs, lib, ... }: {
+{ config, pkgs, lib, ... }:
+let
+  inherit (lib) getExe;
+in
+{
   home.packages = with pkgs; [ unstable.hyprlock unstable.hypridle ];
 
+  wayland.windowManager.hyprland.settings = {
+    exec = [
+      "pidof hypridle || ${getExe pkgs.unstable.hypridle}"
+    ];
+  };
+
   xdg.configFile."hypr/hyprlock.conf".text = ''
-    $text_color = rgba(ede0deFF)
-    $entry_background_color = rgba(130F0F11)
-    $entry_border_color = rgba(a08c8955)
-    $entry_color = rgba(d8c2bfFF)
-    $font_family = Gabarito
-    $font_family_clock = Gabarito
+    $text_color = rgba(FFFFFFFF)
+    $entry_background_color = rgba(33333311)
+    $entry_border_color = rgba(3B3B3B55)
+    $entry_color = rgba(FFFFFFFF)
+    $font_family = JetBrainsMono Nerd Font
+    $font_family_clock = JetBrainsMono Nerd Font
     $font_material_symbols = Material Symbols Rounded
 
     background {
-        color = rgba(130F0F77)
+        # color = rgba(170C04FF)
+        color = rgba(000000FF)
         # path = {{ SWWW_WALL }}
-        path = screenshot
-        blur_size = 5
-        blur_passes = 4
+        # path = screenshot
+        # blur_size = 5
+        # blur_passes = 4
     }
     input-field {
         monitor =
@@ -36,6 +47,8 @@
     label { # Clock
         monitor =
         text = $TIME
+        shadow_passes = 1
+        shadow_boost = 0.5
         color = $text_color
         font_size = 65
         font_family = $font_family_clock
@@ -47,6 +60,8 @@
     label { # Greeting
         monitor =
         text = hi $USER !!!
+        shadow_passes = 1
+        shadow_boost = 0.5
         color = $text_color
         font_size = 20
         font_family = $font_family
@@ -58,6 +73,8 @@
     label { # lock icon
         monitor =
         text = lock
+        shadow_passes = 1
+        shadow_boost = 0.5
         color = $text_color
         font_size = 21
         font_family = $font_material_symbols
@@ -69,11 +86,13 @@
     label { # "locked" text
         monitor =
         text = locked
+        shadow_passes = 1
+        shadow_boost = 0.5
         color = $text_color
         font_size = 14
         font_family = $font_family
 
-        position = 0, 50
+        position = 0, 45
         halign = center
         valign = bottom
     }
@@ -81,6 +100,8 @@
     label { # Status
         monitor =
         text = cmd[update:5000] ~/.config/hypr/hyprlock/status.sh
+        shadow_passes = 1
+        shadow_boost = 0.5
         color = $text_color
         font_size = 14
         font_family = $font_family
@@ -93,25 +114,38 @@
 
   xdg.configFile."hypr/hyperidle.conf".text =
     let
-      notifySend = "${pkgs.libnotify}/bin/notiofy-send";
+      hyprctl = "${config.wayland.windowManager.hyprland.package}/bin/hyprctl";
+      lockCmd = "pidof hyprlock || ${getExe pkgs.unstable.hyprlock}";
+      suspendCmd = "pidof steam || systemctl suspend || loginctl suspend";
+      brightnessctl = "${getExe pkgs.brightnessctl}";
     in
     ''
       general {
-        lock_cmd = ${notifySend} "Locking screen..."
-        unlock_cmd = ${notifySend} "Unlocking screen..."
-        before_sleep_cmd = ${notifySend} "Going to sleep..."
-        after_wake_cmd = ${notifySend} "Waking up..."
-        ignore_dbus_inhibit = false
+        lock_cmd = ${lockCmd}
+        before_sleep_cmd = ${suspendCmd}
+        after_sleep_cmd = ${hyprctl} dispatch dpms on
       }
 
       listener {
-        timeout = 500
-        on-timeout = ${notifySend} "Idle for 5 seconds..."
-        on-resume = ${notifySend} "Resumed from idle..."
+        timeout = 180 # 3 minutes
+        on-timeout = ${brightnessctl} -sd rgb:kbd_backlight set 0
+        on-resume = ${brightnessctl} -rd rgb:kbd_backlight
+      }
+
+      listener {
+        timeout = 300 # 5 minutes
+        on-timeout = loginctl lock-session
+      }
+
+      listener {
+        timeout = 420 # 7 minutes
+        on-timeout = ${hyprctl} dispatch dpms off
+        on-resume = ${hyprctl} dispatch dpms on
+      }
+
+      listener {
+        timeout = 1800 # 30 minutes
+        on-timeout = ${suspendCmd}
       }
     '';
-
-  wayland.windowManager.hyprland.extraConfig = ''
-    exec-once = ${lib.getExe pkgs.unstable.hypridle}/bin/hypridle
-  '';
 }

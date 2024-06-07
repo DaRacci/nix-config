@@ -9,16 +9,16 @@ in
     "${flake}/home/racci/features/desktop/common"
     "${flake}/home/shared/desktop/hyprland"
 
-    ./ags.nix
+    # ./ags.nix
     ./clipboard.nix
-    ./lock-screen.nix
-    # ./notification.nix
-    # ./panel.nix
+    # ./lock-screen.nix
+    ./notification.nix
+    ./panel.nix
     ./polkit.nix
-    # ./rofi.nix
+    ./rofi.nix
     ./runner.nix
     ./screenshot.nix
-    # ./wallpaper.nix
+    ./wallpaper.nix
   ];
 
   xdg.desktopEntries."org.gnome.Settings" = {
@@ -54,16 +54,12 @@ in
     plugins = with inputs.hyprland-plugins.packages.${pkgs.system}; [
       # inputs.hy3.packages.${pkgs.system}.hy3
       # borders-plus-plus
-      # hyprtrails
+      hyprtrails
     ];
 
     settings = {
       exec-once = [
         "gnome-keyring-daemon --start --components=secrets"
-      ];
-
-      exec = [
-        "asztal -q; asztal"
       ];
 
       binds = {
@@ -431,36 +427,36 @@ in
             #     natural_rounding = yes
             # }
 
-            # hy3 {
-            #   no_gaps_when_only = 1
-            #   node_collapse_policy = 2
-            #   group_insert = 10
-            #   tab_first_window = false
+            hy3 {
+              no_gaps_when_only = 1
+              node_collapse_policy = 2
+              group_insert = 10
+              tab_first_window = false
 
-            #   tabs {
-            #     height = 15
-            #     padding = 5
-            #     from_top = false
-            #     rounding = 3
-            #     render_text = true
+              tabs {
+                height = 15
+                padding = 5
+                from_top = false
+                rounding = 3
+                render_text = true
 
-            #     text_center = true
-            #     text_font = JetBrainsMono Nerd Font
-            #     text_height = 8
-            #     text_padding = 3
+                text_center = true
+                text_font = JetBrainsMono Nerd Font
+                text_height = 8
+                text_padding = 3
 
-            #     col.active = ${colorScheme.palette.base03}
-            #     col.urgent = ${colorScheme.palette.base08}
-            #     col.inactive = ${colorScheme.palette.base01}
-            #     col.text.active = ${colorScheme.palette.base00}
-            #     col.text.urgent = ${colorScheme.palette.base00}
-            #     col.text.inactive = ${colorScheme.palette.base05}
-            #   }
-            # }
+                col.active = rgb(${colorScheme.palette.base03})
+                col.urgent = rgb(${colorScheme.palette.base08})
+                col.inactive = rgb(${colorScheme.palette.base01})
+                col.text.active = rgb(${colorScheme.palette.base00})
+                col.text.urgent = rgb(${colorScheme.palette.base00})
+                col.text.inactive = rgb(${colorScheme.palette.base05})
+              }
+            }
 
-            # autotile {
-            #   enable = false
-            # }
+            autotile {
+              enable = false
+            }
           }
 
           windowrulev2 = bordercolor rgba(ffabf1AA) rgba(ffabf177),pinned:1
@@ -480,10 +476,6 @@ in
             animate_mouse_windowdragging = 1
 
             focus_on_activate = true
-          }
-
-          general {
-            allow_tearing = true
           }
 
           env = WLR_DRM_NO_ATOMIC,1
