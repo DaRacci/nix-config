@@ -2,8 +2,6 @@
 
   imports = [
     ./hardware.nix
-
-    "${flake}/hosts/shared/optional/systemd-boot.nix"
     inputs.jovian.nixosModules.default
     inputs.arion.nixosModules.arion
 
@@ -14,10 +12,34 @@
     "${flake}/hosts/shared/optional/hyprland.nix"
 
     "${flake}/hosts/shared/optional/pipewire.nix"
-    "${flake}/hosts/shared/optional/quietboot.nix"
     "${flake}/hosts/shared/optional/gaming.nix"
     "${flake}/hosts/shared/optional/tailscale.nix"
   ];
+
+  boot = {
+    quiet.enable = true;
+    secure.enable = true;
+    systemd.enable = true;
+  };
+
+  jovian = {
+    steamos = {
+      useSteamOSConfig = true;
+      enableDefaultCmdlineConfig = false;
+    };
+
+    steam = {
+      enable = true;
+
+      autoStart = false;
+      user = "racci";
+      desktopSession = "hyprland";
+    };
+
+    decky-loader = {
+      enable = true;
+    };
+  };
 
   programs.nix-ld.enable = true;
 
@@ -34,6 +56,7 @@
       type = "tmpfs";
 
       directories = [
+        "/var/lib/decky-loader"
         "/var/lib/private/ollama"
       ];
     };
@@ -41,9 +64,10 @@
 
   networking = {
     firewall = {
-      allowedUDPPorts = [ 9944 8082 9942 9943 7860 ];
-      allowedTCPPorts = [ 9999 22 5990 9944 8082 9942 9943 8080 7860 ];
+      allowedUDPPorts = [ 9944 8082 9942 9943 7860 11434 ];
+      allowedTCPPorts = [ 9999 22 5990 9944 8082 9942 9943 8080 7860 11434 ];
     };
+
     nat = {
       enable = true;
       internalInterfaces = [ "ve-+" ];

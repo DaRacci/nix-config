@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }: {
+{ inputs, pkgs, lib, ... }: {
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
@@ -11,11 +11,11 @@
       hyprland-packages = inputs.hyprland.inputs.nixpkgs.legacyPackages.${pkgs.system};
     in
     {
-      package = hyprland-packages.mesa.drivers;
+      package = lib.mkOverride 50 hyprland-packages.mesa.drivers;
 
       # if you also want 32-bit support (e.g for Steam)
       driSupport32Bit = true;
-      package32 = hyprland-packages.pkgsi686Linux.mesa.drivers;
+      package32 = lib.mkOverride 50 hyprland-packages.pkgsi686Linux.mesa.drivers;
     };
 
   services = {

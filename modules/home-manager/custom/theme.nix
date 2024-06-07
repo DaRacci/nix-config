@@ -47,8 +47,8 @@
         };
 
         iconTheme = {
-          name = "moreWaita";
-          package = pkgs.unstable.morewaita-icon-theme;
+          name = "Adwaita";
+          package = pkgs.gnome.adwaita-icon-theme;
         };
 
         cursorTheme = {

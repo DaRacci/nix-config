@@ -7,12 +7,14 @@
     inputs.nixos-hardware.nixosModules.common-hidpi
 
     "${flake}/hosts/shared/optional/nvidia.nix"
-    "${flake}/hosts/shared/optional/backlight.nix"
-    "${flake}/hosts/shared/optional/openrgb.nix"
-    "${flake}/hosts/shared/optional/cooling.nix"
-    "${flake}/hosts/shared/optional/secureboot.nix"
-    "${flake}/hosts/shared/optional/biometrics.nix"
   ];
+
+  hardware = {
+    graphics.hasNvidia = true;
+    backlight.enable = true;
+    cooling.enable = true;
+    rgb.enable = true;
+  };
 
   boot = {
     kernelPackages = pkgs.unstable.linuxPackages_zen;

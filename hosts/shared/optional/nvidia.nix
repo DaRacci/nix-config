@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ config, pkgs, ... }: {
   environment.systemPackages = with pkgs; [ nvtop ];
 
   services.xserver.videoDrivers = [ "nvidia" ];
@@ -7,7 +7,7 @@
     opengl.enable = true;
 
     nvidia = {
-      # package = config.boot.kernelPackages.nvidiaPackages.stable;
+      package = config.boot.kernelPackages.nvidiaPackages.beta;
       open = true;
       nvidiaSettings = true;
       nvidiaPersistenced = true;
