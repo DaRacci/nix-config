@@ -4,7 +4,7 @@
   ];
 
   virtualisation.arion = {
-    backend = "podman-socket";
+    backend = "docker";
     projects = {
       global.settings = {
         enableDefaultNetwork = false;
@@ -19,8 +19,6 @@
             gateway = "10.10.9.1";
           }];
         };
-
-        imports = [ ./caddy ];
       };
     };
   };

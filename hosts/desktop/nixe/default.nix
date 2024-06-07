@@ -1,9 +1,11 @@
-{ flake, pkgs, ... }: {
+{ flake, inputs, pkgs, ... }: {
 
   imports = [
     ./hardware.nix
 
     "${flake}/hosts/shared/optional/systemd-boot.nix"
+    inputs.jovian.nixosModules.default
+    inputs.arion.nixosModules.arion
 
     "${flake}/hosts/shared/optional/containers.nix"
     "${flake}/hosts/shared/optional/virtualisation.nix"
@@ -42,6 +44,12 @@
       allowedUDPPorts = [ 9944 8082 9942 9943 7860 ];
       allowedTCPPorts = [ 9999 22 5990 9944 8082 9942 9943 8080 7860 ];
     };
+    nat = {
+      enable = true;
+      internalInterfaces = [ "ve-+" ];
+      externalInterface = "eth0";
+      enableIPv6 = false;
+    };
   };
 
   services.netdata = {
@@ -54,6 +62,19 @@
     acceleration = "cuda";
     environmentVariables = {
       OLLAMA_ORIGINS = "http://192.168.0.0:*,app://obsidian.md:*";
+    };
+  };
+
+  virtualisation.arion = {
+    backend = "docker";
+    projects = {
+      ai = {
+        settings = {
+          imports = [
+            "${flake}/containers/web-servers/open-webui.nix"
+          ];
+        };
+      };
     };
   };
 
