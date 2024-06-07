@@ -48,6 +48,8 @@ in
   };
 
   home-manager = {
+    backupFileExtension = ".bak";
+
     extraSpecialArgs = {
       flake = self;
       inherit (self) inputs outputs;

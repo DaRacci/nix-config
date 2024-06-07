@@ -7,5 +7,5 @@
   noise-suppression = pkgs.callPackage ./noise-suppression-for-voice { };
 
   copy-to-proxmox = pkgs.callPackage ./copy-to-proxmox { };
-  create-proxmox = pkgs.callPackage ./create-proxmox { };
+  create-proxmox-container = pkgs.callPackage ./create-proxmox-container { };
 }
