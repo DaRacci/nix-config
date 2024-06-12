@@ -1,12 +1,10 @@
 # TODO :: Auto subvolume setup
-{ flake, inputs, pkgs, ... }: {
+{ inputs, pkgs, ... }: {
   imports = [
     inputs.nixos-hardware.nixosModules.common-cpu-amd
     inputs.nixos-hardware.nixosModules.common-cpu-amd-pstate
     inputs.nixos-hardware.nixosModules.common-pc-ssd
     inputs.nixos-hardware.nixosModules.common-hidpi
-
-    "${flake}/hosts/shared/optional/nvidia.nix"
   ];
 
   hardware = {

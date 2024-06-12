@@ -75,9 +75,9 @@
       load-sh-env /etc/profiles/per-user/${config.home.username}/etc/profile.d/hm-session-vars.sh
     '';
 
-    extraConfig = ''
+    extraConfig = /*nu*/ ''
       let carapace_completer = {|spans: list<string>|
-        ${lib.getExe config.programs.carapace.package} $spans.0 nushell $spans
+        ${lib.getExe config.programs.carapace.package} $spans.0 nushell ...$spans
           | from json
           | if ($in | default [] | where value == $"($spans | last)ERR" | is-empty) { $in } else { null }
       }
@@ -89,22 +89,16 @@
       }
 
       let zoxide_completer = {|spans|
-        $spans | skip 1 | zoxide query -l ...$in | lines | where {|x| $x != $env.PWD}
+        $spans | skip 1 | ${lib.getExe config.programs.zoxide.package} query -l ...$in | lines | where {|x| $x != $env.PWD}
       }
 
       let external_completer = {|spans|
         # Workaround for https://github.com/nushell/nushell/issues/8483
-        let expanded_alias = scope aliases
-          | where name == $spans.0
-          | get -i 0.expansion
+        let expanded_alias = (scope aliases | where name == $spans.0 | get -i 0 | get -i expansion)
 
-        let spans = if $expanded_alias != null {
-          $spans
-            | skip 1
-            | prepend ($expanded_alias | split row " " | take 1)
-        } else {
-          $spans
-        }
+        let spans = (if $expanded_alias != null {
+          $spans | skip 1 | prepend ($expanded_alias | split row " " | take 1)
+        } else { $spans })
 
         match $spans.0 {
           git | nix | nix-shell | nix-store | nix-* => $fish_completer

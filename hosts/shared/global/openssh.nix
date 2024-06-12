@@ -46,7 +46,7 @@ in
   };
 
   # Passwordless sudo when SSH'ing with keys
-  security.pam.enableSSHAgentAuth = true;
+  security.pam.sshAgentAuth.enable = true;
 
   environment.etc = {
     "ssh/ssh_host_ed25519_key.pub".source = hostSSHPubKey;

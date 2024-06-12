@@ -18,7 +18,9 @@ in
   };
 
   config = mkIf cfg.graphics.hasNvidia {
-    environment.systemPackages = with pkgs; [ nvtop ];
+    environment.systemPackages = with pkgs; [
+      nvtopPackages.full
+    ];
 
     services.xserver.videoDrivers = [ "nvidia" ];
 
@@ -26,7 +28,7 @@ in
       opengl.enable = true;
 
       nvidia = {
-        # package = config.boot.kernelPackages.nvidiaPackages.stable;
+        package = config.boot.kernelPackages.nvidiaPackages.beta;
         open = true;
         nvidiaSettings = true;
         nvidiaPersistenced = true;

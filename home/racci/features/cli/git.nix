@@ -63,7 +63,7 @@
     gh = {
       enable = true;
       extensions = with pkgs; [ gh-markdown-preview ];
-      enableGitCredentialHelper = true;
+      gitCredentialHelper.enable = true;
       settings = {
         git_protocol = "ssh";
         prompt = "enabled";

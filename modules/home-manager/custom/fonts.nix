@@ -93,7 +93,9 @@ in
       kitty.font = { inherit (cfg.monospace) package size family; };
 
       rofi.font = with cfg.regular; "${family} ${toString size}";
+    };
 
+    services = {
       mako.font = with cfg.monospace; "${family} ${toString size}";
     };
 
