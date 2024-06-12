@@ -1,8 +1,12 @@
 { inputs, pkgs, lib, ... }: {
   programs.hyprland = {
     enable = true;
+    package = inputs.hyprland.packages.${pkgs.system}.hyprland.override {
+      enableXWayland = true;
+      withSystemd = true;
+    };
+
     xwayland.enable = true;
-    package = inputs.hyprland.packages.${pkgs.system}.hyprland;
     portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
   };
 

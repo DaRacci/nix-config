@@ -1,5 +1,4 @@
-{ flake, inputs, pkgs, ... }:
-let inherit (pkgs) system; in {
+{ flake, osConfig, inputs, ... }: {
   imports = [
     inputs.hyprland.homeManagerModules.default
     "${flake}/home/shared/desktop/common"
@@ -8,11 +7,13 @@ let inherit (pkgs) system; in {
 
   wayland.windowManager.hyprland = {
     enable = true;
-    systemd.enable = true;
+    inherit (osConfig.programs.hyprland) package;
+
     xwayland.enable = true;
-
-    package = inputs.hyprland.packages.${system}.hyprland;
-
-    systemd.variables = [ "-all" ];
+    systemd = {
+      enable = true;
+      enableXdgAutostart = true;
+      variables = [ "-all" ];
+    };
   };
 }
