@@ -31,6 +31,8 @@ in
     * Check about:policies#documentation for options. */
     policies =
       let
+        /* ---- EXTENSIONS
+        * Check about:debugging#/runtime/this-firefox for extension/add-on ID strings. */
         Extensions = trivial.pipe [
           # Privacy / Security
           [ "ublock-origin" "uBlock0@raymondhill.net" ]
@@ -42,6 +44,7 @@ in
           [ "sidebery" "{3c078156-979c-498b-8990-85f7987dd929}" ]
           [ "1password-x-password-manager" "{d634138d-c276-4fc8-924b-40a0ea21d284}" ]
           [ "Firefox Multi-Account Containers" "@testpilot-containers" ]
+          [ "Omni" "5bc8d6f7-79e6-42b0-a64e-06a05dc2db5d" ]
 
           # Site Improvements
           [ "enhancer-for-youtube" "enhancerforyoutube@maximerf.addons.mozilla.org" ]
@@ -54,14 +57,13 @@ in
         ];
       in
       {
-        # Privacy
+        #region Privacy
         DisableAccounts = true;
         DisableFeedbackCommands = true;
         DisableFirefoxAccounts = true;
         DisableFirefoxStudies = true;
         DisablePocket = true;
         DisableTelemetry = true;
-        DontCheckDefaultBrowser = true;
         FirefoxHome = mkLockedAttr {
           Search = true;
           TopSites = false;
@@ -81,8 +83,12 @@ in
           Fingerprinting = true;
           EmailTracking = true;
         };
+        #endregion
 
-        # Annoyances
+        #region Annoyances
+        DisableSetDesktopBackground = true;
+        DisplayMenuBar = "default-off";
+        DontCheckDefaultBrowser = true;
         NoDefaultBookmarks = true;
         OfferToSaveLogins = false;
         OverrideFirstRunPage = "";
@@ -94,20 +100,22 @@ in
           SkipOnBoarding = true;
           MoreFromMozilla = false;
         };
+        #endregion
+
+        #region Misc
+        EncryptedMediaExtensions = mkLockedValue true;
+        #endregion
 
         /* ---- EXTENSIONS
         * Check about:debugging#/runtime/this-firefox for extension/add-on ID strings. */
-        ExtensionSettings = (listToAttrs (mapAttrsToList (n: v: mkSimpleExtension n v.id) Extensions)) // {
-          # "*" = {
-        };
-
-        "3rdparty".Extensions =
+        ExtensionSettings =
           let
             allowPrivateBrowsing = ext: nameValuePair ext.id {
               permissions = [ "internal:privateBrowsingAllowed" ];
             };
           in
           pkgs.lib.mine.attrsets.recursiveMergeAttrs [
+            (listToAttrs (mapAttrsToList (n: v: mkSimpleExtension n v.id) Extensions))
             (trivial.pipe [
               Extensions.ublock-origin
               Extensions.istilldontcareaboutcookies
@@ -119,62 +127,64 @@ in
               (map allowPrivateBrowsing)
               listToAttrs
             ])
-            {
-              "${Extensions.ublock-origin.id}" = {
-                userSettings = [ ];
-                advancedSettings = [ ];
-                toOverwrite = {
-                  filterLists = [
-                    "user-filters"
-
-                    "ublock-filters"
-                    "ublock-badware"
-                    "ublock-privacy"
-                    "ublock-unbreak"
-                    "ublock-quick-fixes"
-                    "adguard-generic"
-                    "adgaurd-mobile"
-                    "easylist"
-
-                    "adguard-spyware-url"
-                    "adguard-spyware"
-                    "block-lan"
-                    "easyprivacy"
-
-                    "urlhaus-1"
-                    "curben-phishing"
-
-                    "adguard-social"
-                    "adguard-cookies"
-                    "ublock-cookies-adguard"
-                    "adguard-popup-overlays"
-                    "adguard-mobile-app-banners"
-                    "adguard-other-annoyances"
-                    "adguard-widgets"
-                    "fanboy-thirdparty_social"
-                    "easylist-annoyances"
-                    "easylist-chat"
-                    "fanboy-cookiemonster"
-                    "ublock-cookies-easylist"
-                    "easylist-newsletters"
-                    "easylist-notifications"
-                    "fanboy-social"
-                    "ublock-annoyances"
-
-                    "dpollock-0"
-                    "plowe-0"
-                  ];
-                };
-
-                toAdd = {
-                  rules = [
-                    "* * 3p-frame block"
-                  ];
-                };
-              };
-            }
-
           ];
+
+        "3rdparty".Extensions = {
+          # Based on https://github.com/Kreyren/nixos-config/blob/bd4765eb802a0371de7291980ce999ccff59d619/nixos/users/kreyren/home/modules/web-browsers/firefox/firefox.nix#L116-L148
+          "${Extensions.ublock-origin.id}" = {
+            adminSettings = {
+              userSettings = {
+                uiTheme = "dark";
+                uiAccentCustom = true;
+                uiAccentCustom0 = "#8300ff";
+                cloudStorageEnabled = false;
+                importedLists = [ ];
+                externalLists = [ ];
+              };
+
+              selectedFilterLists = [
+                "user-filters"
+
+                "ublock-filters"
+                "ublock-badware"
+                "ublock-privacy"
+                "ublock-unbreak"
+                "ublock-quick-fixes"
+                "adguard-generic"
+                "adgaurd-mobile"
+                "easylist"
+
+                "adguard-spyware-url"
+                "adguard-spyware"
+                "block-lan"
+                "easyprivacy"
+
+                "urlhaus-1"
+                "curben-phishing"
+
+                "adguard-social"
+                "adguard-cookies"
+                "ublock-cookies-adguard"
+                "adguard-popup-overlays"
+                "adguard-mobile-app-banners"
+                "adguard-other-annoyances"
+                "adguard-widgets"
+                "fanboy-thirdparty_social"
+                "easylist-annoyances"
+                "easylist-chat"
+                "fanboy-cookiemonster"
+                "ublock-cookies-easylist"
+                "easylist-newsletters"
+                "easylist-notifications"
+                "fanboy-social"
+                "ublock-annoyances"
+
+                "dpollock-0"
+                "plowe-0"
+              ];
+            };
+          };
+        };
 
         /* ---- PREFERENCES
         * Set preferences shared by all profiles. */
