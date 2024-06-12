@@ -68,6 +68,11 @@
             deviceType = "server";
           };
 
+          nixdev = {
+            isoFormat = "proxmox-lxc";
+            deviceType = "server";
+          };
+
           nixio = {
             isoFormat = "proxmox-lxc";
             deviceType = "server";
