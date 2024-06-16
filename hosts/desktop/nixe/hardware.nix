@@ -12,6 +12,14 @@
     backlight.enable = true;
     cooling.enable = true;
     rgb.enable = true;
+
+    # Disable motherboards really shit bluetooth module.
+    bluetooth.disabledDevices = [
+      {
+        vendorId = "8087";
+        productId = "0029";
+      }
+    ];
   };
 
   boot = {

@@ -1,6 +1,4 @@
 { pkgs, ... }: {
-  home.packages = with pkgs; [ gpu-screen-recorder-gtk ];
-
   programs.obs-studio = {
     enable = true;
     package = pkgs.obs-studio;

@@ -48,7 +48,7 @@ in
   };
 
   home-manager = {
-    backupFileExtension = ".bak";
+    backupFileExtension = "bak";
 
     extraSpecialArgs = {
       flake = self;

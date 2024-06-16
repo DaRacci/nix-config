@@ -171,7 +171,6 @@ in
       default = [ ];
       example = [
         "/var/log"
-        "/var/lib/bluetooth"
         "/var/lib/nixos"
         "/var/lib/systemd/coredump"
         "/etc/NetworkManager/system-connections"
@@ -204,7 +203,6 @@ in
       hideMounts = true;
 
       directories = [
-        "/var/lib/bluetooth"
         "/var/lib/systemd"
         "/var/lib/nixos"
         "/var/log"

@@ -7,6 +7,7 @@ in
   imports = [
     ./backlight.nix
     ./biometrics.nix
+    ./bluetooth.nix
     ./cooling.nix
     ./openrgb.nix
   ];

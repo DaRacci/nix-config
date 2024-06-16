@@ -36,16 +36,33 @@
   custom = {
     audio = {
       disabledDevices = [
-        "alsa_card.usb-046d_HD_Pro_Webcam_C920_AC8BDE4F-02"
-        "alsa_card.usb-Sony_Interactive_Entertainment_Wireless_Controller-00"
-
         # Disable Instrument line and monitoring line
         "alsa_output.usb-Focusrite_Scarlett_Solo_USB-00.HiFi__hw_USB__sink"
         "alsa_input.usb-Focusrite_Scarlett_Solo_USB-00.HiFi__scarlett2i_mono_in_USB_0_1__source"
 
+        # Disable things that really shouldn't have built-in audio devices
+        "alsa_input.usb-046d_HD_Pro_Webcam_C920_AC8BDE4F-02.analog-stereo"
+        "alsa_input.usb-Sony_Interactive_Entertainment_Wireless_Controller-00.analog-stereo"
+        "alsa_output.usb-Sony_Interactive_Entertainment_Wireless_Controller-00.analog-surround-40"
+
         # Disable graphics card audio / monitors
-        # "alsa_card.pci-0000_0b_00.1"
-        # "alsa_card.pci-0000_0e_00.4"
+        "alsa_output.pci-0000_0b_00.1.hdmi-stereo.2"
+      ];
+
+      updateDevices = [
+        {
+          node = "alsa_output.pci-0000_0e_00.4.iec958-stereo";
+          props = [
+            {
+              name = "node.nick";
+              value = "Headphones";
+            }
+            {
+              name = "device.description";
+              value = "Starship DAC";
+            }
+          ];
+        }
       ];
     };
   };
