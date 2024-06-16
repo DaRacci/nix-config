@@ -23,18 +23,18 @@ _: {
         # ports = [ "3000:8080" ];
         # extra_hosts = [ "host.docker.internal:host-gateway" ];
         restart = "unless-stopped";
-        depends_on = [ "searxng" ];
+        # depends_on = [ "searxng" ];
       };
     };
 
-    searxng = {
-      service = {
-        image = "searxng/searxng:latest";
-        # ports = [ "8080" ];
-        volumes = [ "searxng:/etc/searxng" ];
-        restart = "always";
-      };
-    };
+    # searxng = {
+    #   service = {
+    #     image = "searxng/searxng:latest";
+    #     # ports = [ "8080" ];
+    #     volumes = [ "searxng:/etc/searxng" ];
+    #     restart = "always";
+    #   };
+    # };
   };
 
   docker-compose.volumes = {
