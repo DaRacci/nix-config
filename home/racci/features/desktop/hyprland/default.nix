@@ -34,7 +34,7 @@ in
     executable = true;
     source = "${pkgs.writeShellApplication {
       name = "wlprop";
-      runtimeInputs = with pkgs; [ hyprland gojq slurp ];
+      runtimeInputs = with pkgs; [ hyprland jq slurp ];
       text = ''
         TREE=$(hyprctl clients -j | jq -r '.[] | select(.hidden==false and .mapped==true)')
         SELECTION=$(echo "''${TREE}" | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"' | slurp)
@@ -45,7 +45,7 @@ in
         H=$(echo "''${SELECTION}" | awk -F'[, x]' '{print $4}')
 
         # shellcheck disable=SC2016
-        echo "''${TREE}" | gojq -r --argjson x "''${X}" --argjson y "''${Y}" --argjson w "''${W}" --argjson h "''${H}" '. | select(.at[0]==$x and .at[1]==$y and .size[0]==$w and.size[1]==$h)'
+        echo "''${TREE}" | jq -r --argjson x "''${X}" --argjson y "''${Y}" --argjson w "''${W}" --argjson h "''${H}" '. | select(.at[0]==$x and .at[1]==$y and .size[0]==$w and.size[1]==$h)'
       '';
     }}/bin/wlprop";
   };
@@ -62,6 +62,10 @@ in
         "gnome-keyring-daemon --start --components=secrets"
       ];
 
+      cursor = {
+        no_warps = true;
+      };
+
       binds = {
         allow_workspace_cycles = true;
       };
@@ -69,17 +73,10 @@ in
       bind =
         let
           mainMod = "SUPER";
-          binding = mod: cmd: key: arg: "${mod},${key},${cmd},${arg}";
-
-          agsExec = extra: "exec, asztal ${extra}";
-          agsBinding = mod: cmd: key: (binding mod "${agsExec cmd}" key "");
+          binding = mod: key: cmd: arg: "${mod},${key},${cmd},${arg}";
         in
         [
-          (agsBinding "CTRL_${mainMod}" "-t launcher" "SPACE")
-          (agsBinding mainMod "-t overview" "TAB")
-          (agsBinding "" "-r 'powermenu.shutdown()'" "XF86PowerOff")
-          (agsBinding "" "-r 'powermenu.reboot()'" "XF86Restart")
-          (agsBinding "" "-r 'recorder.start()'" "XF86Launch4")
+          (binding mainMod "b" "exec" "${lib.getExe pkgs.hdrop} -f -b ${lib.getExe pkgs.overskride}")
         ];
 
       plugin = {
@@ -116,8 +113,6 @@ in
         [
           #region Floating Windows
           (fl "title" "Picture-in-Picture")
-          (fl "class" "pavucontrol")
-          (fl "class" "SoundWireServer")
           (fl "class" "file_progress")
           (fl "class" "confirm")
           (fl "class" "dialog")
@@ -133,12 +128,6 @@ in
 
           #region Pinning Windows (Keep between workspace changes)
           "pin, title:^(Picture-in-Picture)$"
-          #endregion
-
-          #region Position and Size
-          # Popup below the panel
-          "size 700 450,title:^(Volume Control)$"
-          "move 70% 10%,title:^(Volume Control)$"
           #endregion
 
           #region Opacity

@@ -1,9 +1,34 @@
-{ config, pkgs, lib, ... }: {
-  wayland.windowManager.hyprland.extraConfig = let waybarBin = lib.getExe config.programs.waybar.package; in ''
-    exec-once = ${waybarBin}
+{ config, pkgs, lib, ... }:
+let
+  inherit (lib) getExe;
+  hdrop = getExe pkgs.hdrop;
+in
+{
+  home.packages = with pkgs; [ networkmanagerapplet ];
 
-    bind = CONTROL,ESCAPE,exec,killall waybar || ${waybarBin}
-  '';
+  wayland.windowManager.hyprland = {
+    settings = let waybarBin = lib.getExe config.programs.waybar.package; in {
+      exec-once = [
+        "${waybarBin}"
+        # "${hdrop} -b ${getExe pkgs.overskride}"
+      ];
+
+      bind = [
+        "CONTROL,ESCAPE,exec,killall waybar || ${waybarBin}"
+      ];
+
+      windowrulev2 = [
+        "float,class:^(pavucontrol)$"
+        "size 900 450,class:^(pavucontrol)$"
+        "move 1660 48,class:^(pavucontrol)$"
+        "animation slide right,class:^(pavucontrol)$"
+      ];
+    };
+  };
+
+  services = {
+    blueman-applet.enable = true;
+  };
 
   programs.waybar = {
     enable = true;
@@ -19,9 +44,9 @@
         passthrough = false;
         gtk-layer-shell = true;
 
-        modules-left = [ "custom/padd" "custom/l_end" "custom/cliphist" "custom/r_end" "custom/l_end" "wlr/taskbar" "custom/r_end" "" "custom/padd" ];
-        modules-center = [ "custom/padd" "custom/l_end" "mpris" "custom/r_end" "custom/l_end" "clock" "custom/r_end" "custom/padd" ];
-        modules-right = [ "custom/padd" "custom/l_end" "tray" "custom/r_end" "custom/l_end" "network" "bluetooth" "wireplumber" "wireplumber#microphone" "custom/r_end" "custom/padd" ];
+        modules-left = [ "custom/padd" "custom/l_end" "" "custom/r_end" "custom/l_end" "wlr/taskbar" "custom/r_end" "" "custom/padd" ];
+        modules-center = [ "custom/padd" "custom/l_end" "clock" "custom/r_end" "custom/padd" ];
+        modules-right = [ "custom/padd" "custom/l_end" "tray" "custom/r_end" "custom/l_end" "network" "bluetooth" "pulseaudio#sink" "pulseaudio#source" "custom/notification" "custom/r_end" "custom/padd" ];
 
         "hyprland/workspaces" = {
           format = "{id}:{delim}{clients}";
@@ -61,6 +86,10 @@
           tooltip-format-connected = "{controller_alias}\n{num_connections} connected\n\n{device_enumerate}";
           tooltip-format-enumerate-connected = "{device_alias}";
           tooltip-format-connected-battery = "{device_alias}\t{icon} {device_battery_percentage}%";
+
+          actions = {
+            on-click = "${hdrop} -f -b ${getExe pkgs.overskride}";
+          };
         };
 
         clock = {
@@ -90,15 +119,15 @@
         mpris = {
           # format = "{player_icon} {dynamic}";
           # format-paused = "{status_icon} <i>{dynamic}</i>";
-          # player-icons = {
-          #   default = "▶";
-          #   mpv = "🎵";
-          # };
-          # status-icons = {
-          #   paused = "⏸";
-          # };
+          player-icons = {
+            default = "▶";
+            mpv = "🎵";
+          };
+          status-icons = {
+            paused = "⏸";
+          };
           max-length = 60;
-          # interval = 1;
+          interval = 1;
         };
 
         network = {
@@ -113,44 +142,37 @@
           interval = 1;
         };
 
-        wireplumber = {
+        "pulseaudio#sink" = {
           format = "{icon} {volume}%";
-          format-muted = "";
+          format-muted = " {volume}%";
           format-icons = [ "" "" "" ];
 
-          on-click = "${lib.getExe pkgs.pavucontrol} -t 3";
-          on-click-middle = "${wpctl} set-mute @DEFAULT_AUDIO_SINK@ toggle";
+          format-bluetooth = "{icon} {volume}%";
+          format-bluetooth-muted = "";
+
+          on-click = "${wpctl} set-mute @DEFAULT_AUDIO_SINK@ toggle";
+          on-click-middle = "${lib.getExe pkgs.pavucontrol} -t 3";
           on-scroll-up = "${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+";
           on-scroll-down = "${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-";
 
-          tooltip-format = "{icon} {desc} // {volume}%";
-          max-volume = 100;
+          max-volume = 150;
           scroll-step = 5;
+          tooltip = false;
         };
 
-        "wireplumber#microphone" = {
-          format = "{icon} {volume}%";
-          format-source = "";
-          format-source-muted = "";
+        "pulseaudio#source" = {
+          format = "{format_source}";
+          format-source = "{volume}%";
+          format-source-muted = "‎{volume}%";
 
-          on-click = "${lib.getExe pkgs.pavucontrol} -t 4";
-          on-click-middle = "${wpctl} set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+          on-click = "${wpctl} set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+          on-click-middle = "${lib.getExe pkgs.pavucontrol} -t 4";
           on-scroll-up = "${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SOURCE@ 5%+";
           on-scroll-down = "${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SOURCE@ 5%-";
 
-          tooltip-format = "{icon} {desc} // {volume}%";
+          max-volume = 150;
           scroll-step = 5;
-        };
-
-        "custom/cliphist" = {
-          format = "{}";
-          exec = "echo; echo 󰅇 clipboard history";
-          tooltip = true;
-          interval = 86400;
-
-          # on-click = "sleep 0.1 && ${sSrcDir}/cliphist.sh c";
-          # on-click-right = "sleep 0.1 && ${sSrcDir}/cliphist.sh d";
-          # on-click-middle = "sleep 0.1 && ${sSrcDir}/cliphist.sh w";
+          tooltip = false;
         };
 
         "custom/weather" = {
@@ -178,6 +200,27 @@
         tray = {
           icon-size = "\${i_size}";
           spacing = 5;
+        };
+
+        "custom/notification" = let swaync = lib.getExe' pkgs.swaynotificationcenter "swaync-client"; in {
+          tooltip = false;
+          format = "{icon}";
+          format-icons = {
+            notification = " <span foreground='red'><sup></sup></span>";
+            none = " ";
+            dnd-notification = " <span foreground='red'><sup></sup></span>";
+            dnd-none = " ";
+            inhibited-notification = " <span foreground='red'><sup></sup></span>";
+            inhibited-none = " ";
+            dnd-inhibited-notification = " <span foreground='red'><sup></sup></span>";
+            dnd-inhibited-none = ";";
+          };
+          return-type = "json";
+          exec-if = "which ${swaync}";
+          exec = "${swaync} -swb";
+          on-click = "${swaync} -t -sw";
+          on-click-right = "${swaync} -d -sw";
+          escape = true;
         };
 
         "custom/l_end" = {
@@ -224,11 +267,8 @@
       };
     };
 
-    style = ''
+    style = /*css*/ ''
       @define-color bar-bg rgba(0, 0, 0, 0);
-
-      @define-color main-bg #11111b;
-      @define-color main-fg #cdd6f4;
 
       @define-color wb-act-bg #a6adc8;
       @define-color wb-act-fg #313244;
@@ -246,14 +286,24 @@
       }
 
       window#waybar {
-        background: @bar-bg;
+        background: @theme_base_color;
+        border-bottom: 1px solid @unfocused_borders;
+        color: @theme_text_color;
       }
 
       tooltip {
-        background: @main-bg;
-        color: @main-fg;
+        background: @theme_base_color;
         border-radius: 8px;
         border-width: 0px;
+      }
+
+      #pulseaudio.source.source-muted,
+      #pulseaudio.sink.muted {
+        color: #ffcc66;
+      }
+      #pulseaudio.source.muted,
+      #pulseaudio.sink.source-muted {
+        color: @theme_text_color;
       }
 
       #workspaces button {
@@ -267,7 +317,6 @@
         padding-left: 4px;
         padding-right: 4px;
         margin-right: 0px;
-        color: @main-fg;
         animation: ws_normal 20s ease-in-out 1;
       }
 
@@ -325,25 +374,15 @@
       #backlight,
       #battery,
       #bluetooth,
-      #custom-cliphist,
       #clock,
-      #custom-cpuinfo,
       #cpu,
-      #custom-gpuinfo,
-      #custom-keybindhint,
       #language,
       #memory,
       #mpris,
       #network,
-      #custom-power,
-      #wireplumber,
-      #custom-spotify,
-      #taskbar,
-      #custom-theme,
+      #pulseaudio,
+      #notification,
       #tray,
-      #custom-updates,
-      #custom-wallchange,
-      #custom-wbar,
       #window,
       #workspaces,
       #custom-l_end,
@@ -352,8 +391,6 @@
       #custom-sr_end,
       #custom-rl_end,
       #custom-rr_end {
-        color: @main-fg;
-        background: @main-bg;
         opacity: 1;
         margin: 4px 0px 4px 0px;
         padding-left: 4px;
