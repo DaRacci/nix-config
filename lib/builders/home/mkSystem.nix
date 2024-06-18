@@ -10,7 +10,7 @@ let
   inherit (lib) mkIf mkDefault mkForce optional;
   userDirectory = "${flake}/home/${name}";
   user = config.users.users.${name};
-  skipSSHKey = builtins.pathExists "${userDirectory}/id_ed25519.pub";
+  skipSSHKey = !(builtins.pathExists "${userDirectory}/id_ed25519.pub");
   publicKey = pkgs.writeTextFile {
     name = "${name}_ed25519.pub";
     text = "${userDirectory}/id_ed25519.pub";
