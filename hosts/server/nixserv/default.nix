@@ -4,7 +4,7 @@
   ];
 
   sops.secrets = {
-    CLOUDFLARE_API_TOKEN = { };
+    # CLOUDFLARE_API_TOKEN = { };
     HARMONIA_SECRET = { };
   };
 
@@ -21,23 +21,23 @@
       };
     };
 
-    caddy = {
-      enable = true;
+    # caddy = {
+    #   enable = true;
 
-      virtualHosts."cache.racci.dev".extraConfig = ''
-        encode {
-          zstd
-          match {
-            header Content-Type application/x-nix-archive
-          }
-        }
+    #   virtualHosts."cache.racci.dev".extraConfig = ''
+    #     encode {
+    #       zstd
+    #       match {
+    #         header Content-Type application/x-nix-archive
+    #       }
+    #     }
 
-        reverse_proxy {
-          to http://${harmonia.settings.bind}
-        }
-      '';
-    };
+    #     reverse_proxy {
+    #       to http://${harmonia.settings.bind}
+    #     }
+    #   '';
+    # };
   };
 
-  networking.firewall.allowedTCPPorts = [ 443 ];
+  networking.firewall.allowedTCPPorts = [ 5000 ];
 }

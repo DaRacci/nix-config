@@ -1,6 +1,6 @@
 { config, pkgs, ... }: {
   services.caddy = {
-    package = pkgs.caddy;
+    package = pkgs.unstable.caddy;
     email = "admin@racci.dev";
     acmeCA = "https://acme-v02.api.letsencrypt.org/directory";
 
@@ -9,9 +9,9 @@
       format console
     '';
 
-    globalConfig = ''
-      acme_dns cloudflare {$CLOUDFLARE_API_TOKEN}
-    '';
+    # globalConfig = ''
+    #   acme_dns cloudflare {$CLOUDFLARE_API_TOKEN}
+    # '';
   };
 
   systemd.services.caddy = {
