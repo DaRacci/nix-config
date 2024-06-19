@@ -16,29 +16,29 @@
   };
 
   networking.firewall = {
-    allowedTCPPorts = [ 80 443 ];
+    allowedTCPPorts = [ 9000 9001 ];
   };
 
-  services.caddy = {
-    enable = true;
-    email = "admin@racci.dev";
+  # services.caddy = {
+  #   enable = true;
+  #   email = "admin@racci.dev";
 
-    virtualHosts = {
-      "minio.racci.dev" = {
-        extraConfig = ''
-          redir /console /console/
+  #   virtualHosts = {
+  #     "minio.racci.dev" = {
+  #       extraConfig = ''
+  #         redir /console /console/
 
-          handle_path /console/* {
-            reverse_proxy {
-              to ${config.services.minio.consoleAddress}
-            }
-          }
+  #         handle_path /console/* {
+  #           reverse_proxy {
+  #             to ${config.services.minio.consoleAddress}
+  #           }
+  #         }
 
-          reverse_proxy {
-            to ${config.services.minio.listenAddress}
-          }
-        '';
-      };
-    };
-  };
+  #         reverse_proxy {
+  #           to ${config.services.minio.listenAddress}
+  #         }
+  #       '';
+  #     };
+  #   };
+  # };
 }
