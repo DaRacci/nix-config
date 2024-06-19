@@ -1,8 +1,6 @@
 { flake, config, pkgs, ... }: {
-  sops = {
-    TAILSCALE_AUTH_KEY = {
-      sopsFile = "${flake}/hosts/secrets.yaml";
-    };
+  sops.secrets.TAILSCALE_AUTH_KEY = {
+    sopsFile = "${flake}/hosts/secrets.yaml";
   };
 
   services.tailscale = {
