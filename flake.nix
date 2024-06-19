@@ -211,26 +211,26 @@
 
     # Modules only used on some systems
     nixos-wsl = { url = "github:nix-community/NixOS-WSL"; inputs = { nixpkgs.follows = "nixpkgs"; flake-compat.follows = "flake-compat"; }; };
-    attic = { url = "github:zhaofengli/attic"; inputs = { nixpkgs-stable.follows = "nixpkgs"; nixpkgs.follows = "nixpkgs-unstable"; flake-compat.follows = "flake-compat"; }; };
+    # attic = { url = "github:zhaofengli/attic"; inputs = { nixpkgs-stable.follows = "nixpkgs"; nixpkgs.follows = "nixpkgs-unstable"; flake-compat.follows = "flake-compat"; }; };
     jovian = { url = "github:Jovian-Experiments/Jovian-NixOS"; inputs.nixpkgs.follows = "nixpkgs-unstable"; };
 
     # Hyprland Stuff
     hyprland = { url = "git+https://github.com/hyprwm/Hyprland?submodules=1"; inputs.nixpkgs.follows = "nixpkgs-unstable"; };
     hyprland-plugins = { url = "github:hyprwm/hyprland-plugins"; inputs.hyprland.follows = "hyprland"; };
     hyprland-contrib.url = "github:hyprwm/contrib";
-    hy3 = { url = "github:outfoxxed/hy3"; inputs.hyprland.follows = "hyprland"; };
-    ags.url = "github:Aylur/ags";
-    asztal = {
-      url = "github:Aylur/dotfiles";
-      inputs = {
-        nixpkgs.follows = "nixpkgs-unstable";
-        home-manager.follows = "home-manager";
-        ags.follows = "ags";
-        hyprland.follows = "hyprland";
-        hyprland-plugins.follows = "hyprland-plugins";
-        firefox-gnome-theme.follows = "firefox-gnome-theme";
-      };
-    };
+    # hy3 = { url = "github:outfoxxed/hy3"; inputs.hyprland.follows = "hyprland"; };
+    # ags.url = "github:Aylur/ags";
+    # asztal = {
+    #   url = "github:Aylur/dotfiles";
+    #   inputs = {
+    #     nixpkgs.follows = "nixpkgs-unstable";
+    #     home-manager.follows = "home-manager";
+    #     ags.follows = "ags";
+    #     hyprland.follows = "hyprland";
+    #     hyprland-plugins.follows = "hyprland-plugins";
+    #     firefox-gnome-theme.follows = "firefox-gnome-theme";
+    #   };
+    # };
     anyrun = { url = "github:peppidesu/anyrun/hyprland-socket-move-fix"; inputs = { nixpkgs.follows = "nixpkgs-unstable"; flake-parts.follows = "flake-parts"; }; };
 
     # Other misc modules
