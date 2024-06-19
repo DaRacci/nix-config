@@ -16,14 +16,6 @@
     };
   };
 
-  systemd.services.minio = {
-    serviceConfig = {
-      environment = {
-        MINIO_BROWSER_REDIRECT_URL = "http://minio.racci.dev/console";
-      };
-    };
-  };
-
   networking.firewall = {
     allowedTCPPorts = [ 9000 9001 ];
   };
