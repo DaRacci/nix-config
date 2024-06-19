@@ -12,6 +12,11 @@
     };
   };
 
+  virtualisation.docker = {
+    enable = true;
+    autoPrune.enable = true;
+  };
+
   networking.firewall = {
     allowedTCPPorts = [ 8080 ];
   };
