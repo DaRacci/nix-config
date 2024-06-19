@@ -1,4 +1,4 @@
-{ config, pkgs, ... }: {
+{ pkgs, ... }: {
   services.caddy = {
     package = pkgs.unstable.caddy;
     email = "admin@racci.dev";
@@ -14,9 +14,9 @@
     # '';
   };
 
-  systemd.services.caddy = {
-    serviceConfig = {
-      EnvironmentFile = config.sops.secrets.CLOUDFLARE_API_TOKEN.path;
-    };
-  };
+  # systemd.services.caddy = {
+  #   serviceConfig = {
+  #     EnvironmentFile = config.sops.secrets.CLOUDFLARE_API_TOKEN.path;
+  #   };
+  # };
 }
