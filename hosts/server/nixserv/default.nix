@@ -9,6 +9,10 @@
     HARMONIA_SECRET = { };
   };
 
+  environment.systemPackages = with pkgs.unstable; [
+    attic-client
+  ];
+
   services = {
     harmonia = {
       enable = true;
@@ -24,6 +28,7 @@
 
     atticd = {
       enable = true;
+      package = pkgs.unstable.attic-server;
       credentialsFile = config.sops.secrets.ATTIC_SECRET.path;
       settings = {
         listen = "127.0.0.1:8080";
