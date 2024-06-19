@@ -1,14 +1,15 @@
-{ config, pkgs, modulesPath, ... }: {
+{ inputs, config, pkgs, modulesPath, ... }: {
   imports = [
+    inputs.attic.nixosModules.atticd
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
   ];
 
   sops.secrets = {
-    # CLOUDFLARE_API_TOKEN = { };
+    ATTIC_SECRET = { };
     HARMONIA_SECRET = { };
   };
 
-  services = rec {
+  services = {
     harmonia = {
       enable = true;
       package = pkgs.harmonia;
@@ -18,6 +19,21 @@
         workers = 4;
         max_connection_rate = 256;
         priority = 50;
+      };
+    };
+
+    atticd = {
+      enable = true;
+      credentialsFile = config.sops.secrets.ATTIC_SECRET.path;
+      settings = {
+        listen = "127.0.0.1:8080";
+
+        chunking = {
+          nar-size-threshold = 64 * 1024;
+          min-size = 16 * 1024;
+          avg-size = 64 * 1024;
+          max-size = 256 * 1024;
+        };
       };
     };
 
@@ -39,5 +55,5 @@
     # };
   };
 
-  networking.firewall.allowedTCPPorts = [ 5000 ];
+  networking.firewall.allowedTCPPorts = [ 5000 8080 ];
 }

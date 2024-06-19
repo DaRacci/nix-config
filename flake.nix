@@ -213,7 +213,7 @@
 
     # Modules only used on some systems
     nixos-wsl = { url = "github:nix-community/NixOS-WSL"; inputs = { nixpkgs.follows = "nixpkgs"; flake-compat.follows = "flake-compat"; }; };
-    # attic = { url = "github:zhaofengli/attic"; inputs = { nixpkgs-stable.follows = "nixpkgs"; nixpkgs.follows = "nixpkgs-unstable"; flake-compat.follows = "flake-compat"; }; };
+    attic = { url = "github:zhaofengli/attic"; inputs = { nixpkgs-stable.follows = "nixpkgs"; nixpkgs.follows = "nixpkgs-unstable"; flake-compat.follows = "flake-compat"; }; };
     jovian = { url = "github:Jovian-Experiments/Jovian-NixOS"; inputs.nixpkgs.follows = "nixpkgs-unstable"; };
 
     # Hyprland Stuff
