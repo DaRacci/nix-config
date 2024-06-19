@@ -12,6 +12,10 @@ keys:
     - &nixserv "age1hepu4nkwau3p0z2sf40xq0pzzss0wl263m5uey7lfj7usnr7sfeskdkeg4"
 
 creation_rules:
+  - path_regex: hosts/secrets.yaml$
+    key_groups:
+    - age: [ *james ]
+
   - path_regex: home/racci/secrets.yaml$
     key_groups:
     - age: [ *james ]
