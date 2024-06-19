@@ -12,6 +12,10 @@
     };
   };
 
+  users.extraUsers.coder = {
+    groups = [ "docker" ];
+  };
+
   virtualisation.docker = {
     enable = true;
     autoPrune.enable = true;
