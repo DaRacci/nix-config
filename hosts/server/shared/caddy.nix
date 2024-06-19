@@ -10,9 +10,7 @@
     '';
 
     globalConfig = ''
-      tls {
-        acme_dns cloudflare {$CLOUDFLARE_API_TOKEN}
-      }
+      acme_dns cloudflare {$CLOUDFLARE_API_TOKEN}
     '';
   };
 
