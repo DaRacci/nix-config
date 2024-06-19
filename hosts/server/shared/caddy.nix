@@ -11,8 +11,14 @@
 
     globalConfig = ''
       tls {
-        acme_dns cloudflare ${config.sops.secrets.CLOUDFLARE_API_TOKEN}
+        acme_dns cloudflare {$CLOUDFLARE_API_TOKEN}
       }
     '';
+  };
+
+  systemd.services.caddy = {
+    serviceConfig = {
+      EnvironmentFile = config.sops.secrets.CLOUDFLARE_API_TOKEN.path;
+    };
   };
 }
