@@ -1,6 +1,7 @@
-{ config, modulesPath, pkgs, ... }: {
+{ flake, config, modulesPath, pkgs, ... }: {
   imports = [
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
+    "${flake}/hosts/shared/optional/tailscale.nix"
   ];
 
   sops.secrets = {
