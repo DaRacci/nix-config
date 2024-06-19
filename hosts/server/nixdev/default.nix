@@ -13,7 +13,7 @@
   };
 
   users.extraUsers.coder = {
-    groups = [ "docker" ];
+    extraGroups = [ "docker" ];
   };
 
   virtualisation.docker = {
