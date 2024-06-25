@@ -8,7 +8,6 @@
     "${flake}/hosts/shared/optional/containers.nix"
     "${flake}/hosts/shared/optional/virtualisation.nix"
 
-    "${flake}/hosts/shared/optional/gdm.nix"
     "${flake}/hosts/shared/optional/hyprland.nix"
 
     "${flake}/hosts/shared/optional/pipewire.nix"
@@ -76,9 +75,9 @@
     };
   };
 
-  services.netdata = {
-    enable = true;
-  };
+  # services.netdata = {
+  #   enable = true;
+  # };
 
   services.ollama = {
     enable = true;

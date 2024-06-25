@@ -31,7 +31,6 @@
     enableGnomeKeyring = true;
   };
 
-  # TODO - Move the HM when 24.05 is released
   xdg.portal = {
     enable = true;
     extraPortals = with pkgs; [

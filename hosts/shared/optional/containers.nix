@@ -12,14 +12,6 @@
       enableNvidia = mkDefault true;
       package = pkgs.unstable.docker;
 
-      # logDriver = "journald";
-      # storageDriver = "btrfs";
-
-      listenOptions = [
-        "unix:///var/run/docker.sock"
-        "tcp:///0.0.0.0:2375"
-      ];
-
       autoPrune = {
         enable = true;
         dates = "weekly";
