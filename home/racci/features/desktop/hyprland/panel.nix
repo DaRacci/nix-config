@@ -1,7 +1,6 @@
 { config, pkgs, lib, ... }:
 let
   inherit (lib) getExe;
-  hdrop = getExe pkgs.hdrop;
 in
 {
   home.packages = with pkgs; [ networkmanagerapplet ];
@@ -10,7 +9,6 @@ in
     settings = let waybarBin = lib.getExe config.programs.waybar.package; in {
       exec-once = [
         "${waybarBin}"
-        # "${hdrop} -b ${getExe pkgs.overskride}"
       ];
 
       bind = [
@@ -88,7 +86,7 @@ in
           tooltip-format-connected-battery = "{device_alias}\t{icon} {device_battery_percentage}%";
 
           actions = {
-            on-click = "${hdrop} -f -b ${getExe pkgs.overskride}";
+            # on-click = "${hdrop} -f -b ${getExe pkgs.overskride}";
           };
         };
 

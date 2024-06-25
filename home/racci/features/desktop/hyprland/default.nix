@@ -71,12 +71,8 @@ in
       };
 
       bind =
-        let
-          mainMod = "SUPER";
-          binding = mod: key: cmd: arg: "${mod},${key},${cmd},${arg}";
-        in
         [
-          (binding mainMod "b" "exec" "${lib.getExe pkgs.hdrop} -f -b ${lib.getExe pkgs.overskride}")
+          # (binding mainMod "b" "exec" "${lib.getExe pkgs.hdrop} -f -b ${lib.getExe pkgs.overskride}")
         ];
 
       plugin = {
@@ -141,6 +137,10 @@ in
         mod = "SUPER";
 
         animations = ''
+          debug {
+            disable_logs = false
+          }
+
           animations {
             enabled = yes
 
@@ -181,8 +181,6 @@ in
         '';
 
         executions = ''
-          exec-once = ${getExe pkgs.hyprland-autoname-workspaces}
-
           # ----------------- #
           #  Bar and Applets  #
           # ----------------- #
@@ -229,10 +227,6 @@ in
             special_scale_factor = 1
             no_gaps_when_only = true
           }
-
-          # general {
-          #   layout = hy3
-          # }
         '';
 
         input = ''
