@@ -22,8 +22,10 @@
     ];
   };
 
-  boot = {
+  boot = rec {
     kernelPackages = pkgs.unstable.linuxPackages_zen;
+    kernelModules = [ "v4l2loopback" ];
+    extraModulePackages = [ kernelPackages.v4l2loopback ];
 
     initrd = {
       # TODO :: Needed? ahci, sd_mod usbhid usb_storage
