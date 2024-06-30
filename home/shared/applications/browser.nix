@@ -32,7 +32,8 @@ in
     policies =
       let
         /* ---- EXTENSIONS
-        * Check about:debugging#/runtime/this-firefox for extension/add-on ID strings. */
+        * Check about:debugging#/runtime/this-firefox for extension/add-on ID strings.
+        * You can use about:policies to debug issues with extensions. */
         Extensions = trivial.pipe [
           # Privacy / Security
           [ "ublock-origin" "uBlock0@raymondhill.net" ]
@@ -43,8 +44,9 @@ in
           [ "darkreader" "addon@darkreader.org" ]
           [ "sidebery" "{3c078156-979c-498b-8990-85f7987dd929}" ]
           [ "1password-x-password-manager" "{d634138d-c276-4fc8-924b-40a0ea21d284}" ]
-          [ "Firefox Multi-Account Containers" "@testpilot-containers" ]
-          [ "Omni" "5bc8d6f7-79e6-42b0-a64e-06a05dc2db5d" ]
+          [ "multi-account-containers" "@testpilot-containers" ]
+          [ "omnisearch" "{5bc8d6f7-79e6-42b0-a64e-06a05dc2db5d}" ]
+          [ "user-agent-string-switcher" "{a6c4a591-f1b2-4f03-b3ff-767e5bedf4e7}" ]
 
           # Site Improvements
           [ "enhancer-for-youtube" "enhancerforyoutube@maximerf.addons.mozilla.org" ]
@@ -343,6 +345,7 @@ in
       directories = trivial.pipe [
         "sessionstore-backups" # Session restore
         "bookmarkbackups" # Bookmarks
+        "storage" # Offline Storage
       ] [
         (map onEachProfile)
         flatten
@@ -361,6 +364,7 @@ in
         # Persistent Information
         "sessionstore.jsonlz4" # Session restore
         "signedInUser.json" # Mozilla Sync
+        "persdict.dat" # Personal dictionary
       ] [
         (map onEachProfile)
         flatten
