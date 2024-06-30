@@ -136,6 +136,8 @@ let cfg = config.purpose.gaming.steam; in {
         # Games
         ".barony"
         ".local/share/Colossal Order/Cities_Skylines"
+        ".config/WarThunder"
+        ".config/Gaijin"
       ];
     };
 }

@@ -26,8 +26,13 @@
   programs.steam = {
     enable = true;
     package = pkgs.unstable.steam;
+    extraPackages = with pkgs.unstable; [
+      xwayland-run
+      gamescope
+    ];
 
     remotePlay.openFirewall = true;
+    localNetworkGameTransfers.openFirewall = true;
     gamescopeSession.enable = true;
   };
 
