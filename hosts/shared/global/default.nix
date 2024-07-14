@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }: {
+{ pkgs, ... }: {
   imports = [
     ./hm-helper.nix
     ./locale.nix
@@ -22,11 +22,11 @@
 
   programs.nix-ld.enable = true;
 
-  documentation.man.enable = false;
-
-  system.activationScripts.report-changes = ''
-    PATH=$PATH:${lib.makeBinPath [ pkgs.nvd pkgs.nix ]}
-    nvd diff $(ls -dv /nix/var/nix/profiles/system-*-link | tail -2)
+  system.activationScripts.report-changes = /*sh*/ ''
+    LINKS=$(ls -dv /nix/var/nix/profiles/system-*-link)
+    if [ $(echo $LINKS | wc -w) -gt 1 ]; then
+      ${pkgs.nvd} diff $(echo $LINKS | tail -2)
+    fi
   '';
 
   time = {
