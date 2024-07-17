@@ -4,6 +4,7 @@
     ./osu.nix
     ./roblox.nix
     ./steam.nix
+    ./vr.nix
   ];
 
   options.purpose.gaming = {

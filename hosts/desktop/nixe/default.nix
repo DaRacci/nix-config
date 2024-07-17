@@ -36,11 +36,17 @@
     };
 
     decky-loader = {
-      enable = true;
+      enable = false;
     };
   };
 
-  programs.nix-ld.enable = true;
+  programs = {
+    nix-ld.enable = true;
+    alvr = {
+      enable = true;
+      openFirewall = true;
+    };
+  };
 
   host = {
     drive = {
@@ -63,8 +69,8 @@
 
   networking = {
     firewall = {
-      allowedUDPPorts = [ 9944 8082 9942 9943 7860 11434 ];
-      allowedTCPPorts = [ 9999 22 5990 9944 8082 9942 9943 8080 7860 11434 ];
+      allowedUDPPorts = [ 9944 8082 9942 9943 7860 11434 27031 27036 ];
+      allowedTCPPorts = [ 9999 22 5990 9944 8082 9942 9943 8080 7860 11434 27036 27037 10400 10401 ];
     };
 
     nat = {

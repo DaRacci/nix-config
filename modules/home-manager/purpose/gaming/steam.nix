@@ -22,6 +22,11 @@ let cfg = config.purpose.gaming.steam; in {
 
   config = mkIf cfg.enable
     {
+      xdg.mimeApps = {
+        defaultApplications."x-scheme-handler/steam" = "steam.desktop";
+        associations.added."x-scheme-handler/steam" = "steam.desktop";
+      };
+
       home = {
         #region - Fix Big Picture Mode on Nvidia
         file = {
