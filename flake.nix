@@ -190,8 +190,9 @@
     nixpkgs-lib.url = "github:nix-community/nixpkgs.lib";
 
     # Packages
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    # nixpkgs.url = "github:nixos/nixpkgs/release-24.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nur.url = "github:nix-community/NUR";
 
     # Utils
@@ -202,7 +203,7 @@
     devenv.url = "github:cachix/devenv";
 
     # Base Modules
-    home-manager = { url = "github:nix-community/home-manager/release-24.05"; inputs.nixpkgs.follows = "nixpkgs"; };
+    home-manager = { url = "github:nix-community/home-manager"; inputs.nixpkgs.follows = "nixpkgs"; };
     nixos-hardware.url = "github:nixos/nixos-hardware";
     sops-nix = { url = "github:Mic92/sops-nix"; inputs = { nixpkgs.follows = "nixpkgs-unstable"; nixpkgs-stable.follows = "nixpkgs"; }; };
     impermanence.url = "github:nix-community/impermanence";
@@ -210,6 +211,7 @@
     lanzaboote = { url = "github:nix-community/lanzaboote/v0.3.0"; inputs = { nixpkgs.follows = "nixpkgs-unstable"; flake-parts.follows = "flake-parts"; flake-compat.follows = "flake-compat"; }; };
     nixd = { url = "github:nix-community/nixd"; inputs = { nixpkgs.follows = "nixpkgs-unstable"; flake-parts.follows = "flake-parts"; }; };
     nix-colours.url = "github:misterio77/nix-colors";
+    lix-module = { url = "https://git.lix.systems/lix-project/nixos-module/archive/2.90.0.tar.gz"; inputs.nixpkgs.follows = "nixpkgs"; };
 
     # Modules only used on some systems
     nixos-wsl = { url = "github:nix-community/NixOS-WSL"; inputs = { nixpkgs.follows = "nixpkgs"; flake-compat.follows = "flake-compat"; }; };
@@ -220,24 +222,10 @@
     hyprland = { url = "git+https://github.com/hyprwm/Hyprland?submodules=1"; inputs.nixpkgs.follows = "nixpkgs-unstable"; };
     hyprland-plugins = { url = "github:hyprwm/hyprland-plugins"; inputs.hyprland.follows = "hyprland"; };
     hyprland-contrib.url = "github:hyprwm/contrib";
-    # hy3 = { url = "github:outfoxxed/hy3"; inputs.hyprland.follows = "hyprland"; };
-    # ags.url = "github:Aylur/ags";
-    # asztal = {
-    #   url = "github:Aylur/dotfiles";
-    #   inputs = {
-    #     nixpkgs.follows = "nixpkgs-unstable";
-    #     home-manager.follows = "home-manager";
-    #     ags.follows = "ags";
-    #     hyprland.follows = "hyprland";
-    #     hyprland-plugins.follows = "hyprland-plugins";
-    #     firefox-gnome-theme.follows = "firefox-gnome-theme";
-    #   };
-    # };
     anyrun = { url = "github:peppidesu/anyrun/hyprland-socket-move-fix"; inputs = { nixpkgs.follows = "nixpkgs-unstable"; flake-parts.follows = "flake-parts"; }; };
 
     # Other misc modules
     arion = { url = "github:hercules-ci/arion"; };
-    # nix-doom-emacs = { url = "github:nix-community/nix-doom-emacs"; };
     vscode-extensions = { url = "github:nix-community/nix-vscode-extensions"; inputs = { nixpkgs.follows = "nixpkgs"; flake-compat.follows = "flake-compat"; }; };
     firefox-gnome-theme = { url = "github:rafaelmardojai/firefox-gnome-theme"; flake = false; };
   };

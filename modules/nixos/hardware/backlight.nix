@@ -19,7 +19,7 @@ in
     boot.kernelModules = [ "i2c-dev" "ddcci_backlight" ];
 
     #region Nvidia Specific fix from https://discourse.nixos.org/t/ddcci-kernel-driver/22186/4
-    services.udev.extraRules = optionalString cfg.graphics.hasNvidia ''
+    services.udev.extraRules = optionalString (cfg.graphics.manufacturer == "nvidia") ''
       SUBSYSTEM=="i2c-dev", ACTION=="add",\
         ATTR{name}=="NVIDIA i2c adapter*",\
         TAG+="ddcci",\
@@ -27,7 +27,7 @@ in
         ENV{SYSTEMD_WANTS}+="ddcci@$kernel.service"
     '';
 
-    systemd.services."ddcci@" = mkIf cfg.graphics.hasNvidia {
+    systemd.services."ddcci@" = mkIf (cfg.graphics.manufacturer == "nvidia") {
       scriptArgs = "%i";
       script = ''
         echo Trying to attach ddcci to $1

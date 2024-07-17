@@ -25,7 +25,7 @@
   system.activationScripts.report-changes = /*sh*/ ''
     LINKS=$(ls -dv /nix/var/nix/profiles/system-*-link)
     if [ $(echo $LINKS | wc -w) -gt 1 ]; then
-      ${pkgs.nvd} diff $(echo $LINKS | tail -2)
+      ${pkgs.nvd}/bin/nvd diff $(echo $LINKS | tail -2)
     fi
   '';
 

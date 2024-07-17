@@ -20,6 +20,7 @@
       enable = true;
       osu.enable = true;
       steam.enable = true;
+      vr.enable = true;
 
       modding = {
         enable = true;

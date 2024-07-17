@@ -1,6 +1,6 @@
 { config, pkgs, lib, ... }:
 let
-  inherit (lib) mkIf mkEnableOption;
+  inherit (lib) mkIf optionals mkOption;
   cfg = config.hardware;
 in
 {
@@ -14,21 +14,31 @@ in
 
   options.hardware = {
     graphics = {
-      hasNvidia = mkEnableOption "Whether the device has an NVIDIA GPU";
+      manufacturer = mkOption {
+        type = lib.types.enum [ "unknown" "amd" "intel" "nvidia" ];
+        default = "unknown";
+        description = "The manufacturer of your GPU";
+      };
     };
   };
 
-  config = mkIf cfg.graphics.hasNvidia {
+  config = {
     environment.systemPackages = with pkgs; [
       nvtopPackages.full
     ];
 
-    services.xserver.videoDrivers = [ "nvidia" ];
+    services.xserver.videoDrivers =
+      if (cfg.graphics.manufacturer == "nvidia") then
+        [ "nvidia" ]
+      else if (cfg.graphics.manufacturer == "amd") then
+        [ "amdgpu" ]
+      else
+        [ "modesetting" "fbdev" ];
 
     hardware = {
       opengl.enable = true;
 
-      nvidia = {
+      nvidia = mkIf (cfg.graphics.manufacturer == "nvidia") {
         package = config.boot.kernelPackages.nvidiaPackages.beta;
         open = true;
         nvidiaSettings = true;
@@ -41,6 +51,9 @@ in
       };
     };
 
-    boot.kernelParams = [ "nvidia.NVreg_EnableResizableBar=1" "nvidia.NVreg_PreserveVideoMemoryAllocations=1" ];
+    boot.kernelParams = optionals (cfg.graphics.manufacturer == "nvidia") [
+      "nvidia.NVreg_EnableResizableBar=1"
+      "nvidia.NVreg_PreserveVideoMemoryAllocations=1"
+    ];
   };
 }
