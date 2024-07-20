@@ -3,5 +3,14 @@
 ### Nixcloud
 My Personal Cloud including Immich and Nextcloud, which is in the process of being cloned and moved to this nix host from the current Digital Ocean VM i have the Nextcloud AIO running on.
 
+### Nixdev
+Develop stuff
+
 ### Nixio
 The super cool IO of my servers meaning the Proxy / Caddy instance and also some general purpose stuff like Minio.
+
+### Nixmon
+Monitors shit
+
+### Nixserv
+Nix cache and build server
