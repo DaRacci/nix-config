@@ -100,7 +100,7 @@ in
           gather
         ])) ++ (optionals cfg.rust.enable (with versionExtensions.vscode-marketplace; [
           vadimcn.vscode-lldb
-          serayuzgur.crates
+          fill-labs.dependi
           jscearcy.rust-doc-viewer
           dustypomerleau.rust-syntax
           rust-lang.rust-analyzer
