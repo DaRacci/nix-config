@@ -25,6 +25,7 @@
       modding = {
         enable = true;
         enableSatisfactory = true;
+        enableBeatSaber = true;
       };
     };
 

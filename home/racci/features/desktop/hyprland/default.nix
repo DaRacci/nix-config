@@ -1,7 +1,7 @@
 # TODO - Colour picker bind to SUPER + C (hyprpicker)
 # TODO - Clipboard manager bind to SUPER + V (cliphist)
 # TODO - Game mode that disables compositor and pauses swww-random-wallpaper
-{ flake, inputs, config, pkgs, lib, ... }: with lib; let
+{ flake, config, pkgs, lib, ... }: with lib; let
   inherit (config) colorScheme;
 in
 {
@@ -51,12 +51,6 @@ in
   };
 
   wayland.windowManager.hyprland = {
-    plugins = with inputs.hyprland-plugins.packages.${pkgs.system}; [
-      # inputs.hy3.packages.${pkgs.system}.hy3
-      # borders-plus-plus
-      hyprtrails
-    ];
-
     settings = {
       exec-once = [
         "gnome-keyring-daemon --start --components=secrets"
@@ -223,7 +217,7 @@ in
           }
 
           master {
-            new_is_master = true
+            new_status = true
             special_scale_factor = 1
             no_gaps_when_only = true
           }
