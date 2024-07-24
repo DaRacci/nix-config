@@ -65,6 +65,11 @@
             deviceType = "desktop";
           };
 
+          nixarr = {
+            isoFormat = "proxmox-lxc";
+            deviceType = "server";
+          };
+
           nixcloud = {
             isoFormat = "proxmox-lxc";
             deviceType = "server";
@@ -156,6 +161,7 @@
               typos = {
                 enable = true;
                 settings = {
+                  diff = true;
                   ignored-words = [
                     "lazer"
                     "Optin"

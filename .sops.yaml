@@ -6,6 +6,7 @@ keys:
     - &surnix "age1hxxjcpvm9cz88xu6d5jv82uavhqg3jjk4e770a0pc2gzak5gs4zsp4798j"
     - &winix "age10f7nnwsce2zj8905m7xelejm37uckp6tn7jk0eteghprjg2uducsgs9yss"
   - &servers :
+    - &nixarr "age1qlkycz667c4dzzhywgp94ek5zs9u5xmp4dfd8fh48h58c4253seqajrk49"
     - &nixcloud "age1vn626zvqf9hhnwur37fzww0xqts5jp45uuhetk2caggx75wp4umshj235u"
     - &nixdev "age1zeu2cj6mt0nllar0myzhlsgwp0xk2px83vskplu0s2ul87g9634svuhjpw"
     - &nixio "age1azcacxqvwankaf5ma98jk7swwpn6uxmwvdz0azq5fnulrlwk747sr9x2z9"
@@ -32,6 +33,10 @@ creation_rules:
   - path_regex: hosts/desktop/winix/secrets.yaml$
     key_groups:
     - age: [ *winix, *james ]
+
+  - path_regex: hosts/server/nixarr/.*$
+    key_groups:
+    - age: [ *nixarr, *james ]
 
   - path_regex: hosts/server/nixcloud/secrets.yaml$
     key_groups:
