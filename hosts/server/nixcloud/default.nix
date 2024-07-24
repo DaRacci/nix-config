@@ -42,7 +42,6 @@ let cfg = config.services.nextcloud.config; in {
         dbhost = "/run/postgresql";
         dbpassFile = config.sops.secrets.nextcloud-db-password.path;
 
-        defaultPhoneRegion = "AU";
         objectstore.s3 = { };
       };
 
@@ -52,7 +51,8 @@ let cfg = config.services.nextcloud.config; in {
         memcached = true;
       };
 
-      extraOptions = {
+      settings = {
+        default_phone_region = "AU";
         mail_smtpmode = "sendmail";
         mail_sendmailmode = "pipe";
 
