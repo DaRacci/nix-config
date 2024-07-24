@@ -4,6 +4,7 @@
   services.easyeffects = {
     enable = true;
     package = pkgs.easyeffects;
+    preset = "male-voice-v2";
   };
 
   user.persistence.directories = [

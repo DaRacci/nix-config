@@ -1,21 +1,37 @@
-{ osConfig, pkgs, ... }: {
+{ pkgs, ... }:
+let
+  nautEnv = pkgs.buildEnv {
+    name = "nautilus-env";
+
+    paths = with pkgs; [
+      nautilus
+      nautilus-python
+      nautilus-open-any-terminal
+      turtle
+    ];
+  };
+in
+{
   home.packages = with pkgs; [
-    gnome.nautilus
-    gnome.sushi
-    baobab
+    nautEnv
+    baobab # Disk usage analyzer
+    gnome-disk-utility # Disk utility
+    file-roller # Archive manager
     unstable.morgen
     unstable.karlender
-    loupe
-    gnome.totem
-    gnome.file-roller
-    gnome.gnome-disk-utility
   ];
 
   xdg.mimeApps.defaultApplications = {
     "inode/directory" = [ "nautilus.desktop;org.gnome.Nautilus.desktop" ];
   };
 
+  dconf.settings = {
+    "com/github/stunkymonkey/nautilus-open-any-terminal" = {
+      "terminal" = "alacritty";
+    };
+  };
+
   home.sessionVariables = {
-    NAUTILUS_4_EXTENSION_DIR = "${osConfig.system.path}/lib/nautilus/extensions-4";
+    NAUTILUS_4_EXTENSION_DIR = "${nautEnv}/lib/nautilus/extensions-4";
   };
 }
