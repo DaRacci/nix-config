@@ -7,7 +7,7 @@
   ];
 
   sops.secrets.wireguard = {
-    formats = "binary";
+    format = "binary";
     sopsFile = ./wg.conf;
   };
 
