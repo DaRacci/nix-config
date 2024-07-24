@@ -11,11 +11,10 @@ let cfg = config.services.nextcloud.config; in {
     manageHostName = false;
   };
 
-  sops.secrets = {
-    nextcloud-admin-password = {
-      owner = config.users.users.nextcloud.name;
-      inherit (config.users.users.nextcloud) group;
-    };
+  sops.secrets = let ncOwned = { owner = config.users.users.nextcloud.name; inherit (config.users.users.nextcloud) group; }; in {
+    "NEXTCLOUD.S3_SECRET" = ncOwned;
+    "NEXTCLOUD.S3_SSE_CKEY" = ncOwned;
+    nextcloud-admin-password = ncOwned;
     nextcloud-db-password = {
       owner = config.users.users.postgres.name;
       group = "db-pass-access";
@@ -55,12 +54,17 @@ let cfg = config.services.nextcloud.config; in {
         dbhost = "/run/postgresql";
         dbpassFile = config.sops.secrets.nextcloud-db-password.path;
 
-        # objectstore.s3 = {
-        #   class = "S3";
-        #   bucket = "nextcloud";
-        #   autocreate = true;
-        #   key = "minio";
-        # };
+        objectstore.s3 = {
+          enable = true;
+          autocreate = true;
+          usePathStyle = true;
+
+          bucket = "nextcloud";
+          hostname = "nixio.racci.dev";
+          key = "k6Dkuj139Y65LzvILRax";
+          secretFile = config.sops.secrets."NEXTCLOUD.S3_SECRET".path;
+          sseCKeyFile = config.sops.secrets."NEXTCLOUD.S3_SSE_CKEY".path;
+        };
       };
 
       caching = {
