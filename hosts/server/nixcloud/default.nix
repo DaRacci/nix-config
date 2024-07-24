@@ -21,10 +21,12 @@ let cfg = config.services.nextcloud.config; in {
     };
   };
 
-  users.users = {
+  users = {
     groups = { db-pass-access = { }; };
-    postgres.extraGroups = [ "db-pass-access" ];
-    nextcloud.extraGroups = [ "db-pass-access" ];
+    users = {
+      postgres.extraGroups = [ "db-pass-access" ];
+      nextcloud.extraGroups = [ "db-pass-access" ];
+    };
   };
 
   services = {
