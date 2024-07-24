@@ -35,7 +35,8 @@ let cfg = config.services.nextcloud.config; in {
       package = pkgs.unstable.nextcloud29;
 
       https = true;
-      hostName = "nextcloud.racci.dev";
+      # TODO - Change back to nextcloud.racci.dev when ready.
+      hostName = "nc.racci.dev";
 
       maxUploadSize = "16G";
 
@@ -54,7 +55,12 @@ let cfg = config.services.nextcloud.config; in {
         dbhost = "/run/postgresql";
         dbpassFile = config.sops.secrets.nextcloud-db-password.path;
 
-        objectstore.s3 = { };
+        # objectstore.s3 = {
+        #   class = "S3";
+        #   bucket = "nextcloud";
+        #   autocreate = true;
+        #   key = "minio";
+        # };
       };
 
       caching = {

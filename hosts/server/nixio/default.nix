@@ -146,7 +146,7 @@
   };
 
   networking.firewall = {
-    allowedTCPPorts = [ 9000 9001 ];
+    allowedTCPPorts = [ 53 80 9000 9001 ];
   };
 
   # services.caddy = {
