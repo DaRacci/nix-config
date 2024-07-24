@@ -6,8 +6,9 @@
 
   sops.secrets = {
     MINIO_ROOT_CREDENTIALS = { };
-    ADGUARDHOME_ADMIN_PASSWORD = { };
   };
+
+  services.resolved.enable = pkgs.lib.mkForce false;
 
   services = {
     minio = {
