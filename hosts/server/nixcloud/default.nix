@@ -11,19 +11,22 @@ let cfg = config.services.nextcloud.config; in {
     manageHostName = false;
   };
 
-  sops.secrets =
-    let
+  sops.secrets = {
+    nextcloud-admin-password = {
       owner = config.users.users.nextcloud.name;
       inherit (config.users.users.nextcloud) group;
-    in
-    {
-      nextcloud-admin-password = {
-        inherit owner group;
-      };
-      nextcloud-db-password = {
-        inherit owner group;
-      };
     };
+    nextcloud-db-password = {
+      owner = config.users.users.postgres.name;
+      group = "db-pass-access";
+    };
+  };
+
+  users.users = {
+    groups = [ "db-pass-access" ];
+    postgres.extraGroups = [ "db-pass-access" ];
+    nextcloud.extraGroups = [ "db-pass-access" ];
+  };
 
   services = {
     nextcloud = {
