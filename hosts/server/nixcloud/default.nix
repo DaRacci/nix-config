@@ -11,10 +11,19 @@ let cfg = config.services.nextcloud.config; in {
     manageHostName = false;
   };
 
-  sops.secrets = {
-    nextcloud-admin-password = { };
-    nextcloud-db-password = { };
-  };
+  sops.secrets =
+    let
+      owner = config.users.users.nextcloud.name;
+      inherit (config.users.users.nextcloud) group;
+    in
+    {
+      nextcloud-admin-password = {
+        inherit owner group;
+      };
+      nextcloud-db-password = {
+        inherit owner group;
+      };
+    };
 
   services = {
     nextcloud = {
