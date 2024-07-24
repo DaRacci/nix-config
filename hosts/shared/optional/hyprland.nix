@@ -10,16 +10,15 @@
     portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
   };
 
-  hardware.opengl =
+  hardware.graphics =
     let
       hyprland-packages = inputs.hyprland.inputs.nixpkgs.legacyPackages.${pkgs.system};
     in
     {
       package = lib.mkOverride 50 hyprland-packages.mesa.drivers;
 
-      # if you also want 32-bit support (e.g for Steam)
-      driSupport32Bit = true;
-      package32 = lib.mkOverride 50 hyprland-packages.pkgsi686Linux.mesa.drivers;
+      enable32Bit = true;
+      extraPackages32 = lib.mkOverride 50 hyprland-packages.pkgsi686Linux.mesa.drivers;
     };
 
   services = {

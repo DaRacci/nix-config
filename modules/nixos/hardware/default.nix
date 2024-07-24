@@ -36,7 +36,7 @@ in
         [ "modesetting" "fbdev" ];
 
     hardware = {
-      opengl.enable = true;
+      graphics.enable = true;
 
       nvidia = mkIf (cfg.graphics.manufacturer == "nvidia") {
         package = config.boot.kernelPackages.nvidiaPackages.beta;
