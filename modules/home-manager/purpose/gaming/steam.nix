@@ -131,12 +131,13 @@ let cfg = config.purpose.gaming.steam; in {
         '';
         #endregion - Fix download speed issues
 
-        packages = with pkgs; [ protonup-rs ];
+        packages = with pkgs; [ protonup-rs adwsteamgtk ];
       };
 
       user.persistence.directories = [
         ".local/share/Steam"
         ".config/steamtinkerlaunch"
+        ".config/AdwSteamGtk"
 
         # Games
         ".barony"

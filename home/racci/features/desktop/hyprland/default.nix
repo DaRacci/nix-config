@@ -1,10 +1,7 @@
 # TODO - Colour picker bind to SUPER + C (hyprpicker)
 # TODO - Clipboard manager bind to SUPER + V (cliphist)
 # TODO - Game mode that disables compositor and pauses swww-random-wallpaper
-{ flake, config, pkgs, lib, ... }: with lib; let
-  inherit (config) colorScheme;
-in
-{
+{ flake, config, pkgs, lib, ... }: with lib; {
   imports = [
     "${flake}/home/racci/features/desktop/common"
     "${flake}/home/shared/desktop/hyprland"
@@ -268,7 +265,7 @@ in
             applications = ''
               # TODO Allow customising
               bind = ${mod},T,exec,${getExe config.programs.alacritty.package}
-              bind = ${mod},E,exec,${pkgs.gnome.nautilus}/bin/nautilus
+              bind = ${mod},E,exec,${pkgs.nautilus}/bin/nautilus
               bind = ${mod},F,exec,${getExe config.programs.firefox.finalPackage}
             '';
 
@@ -421,13 +418,6 @@ in
                 text_font = JetBrainsMono Nerd Font
                 text_height = 8
                 text_padding = 3
-
-                col.active = rgb(${colorScheme.palette.base03})
-                col.urgent = rgb(${colorScheme.palette.base08})
-                col.inactive = rgb(${colorScheme.palette.base01})
-                col.text.active = rgb(${colorScheme.palette.base00})
-                col.text.urgent = rgb(${colorScheme.palette.base00})
-                col.text.inactive = rgb(${colorScheme.palette.base05})
               }
             }
 

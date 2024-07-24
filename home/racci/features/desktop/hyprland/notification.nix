@@ -1,5 +1,4 @@
-{ config, lib, ... }:
-let inherit (config) colorScheme; in {
+{ config, lib, ... }: {
   services.mako = {
     enable = false;
     icons = true;
@@ -15,19 +14,8 @@ let inherit (config) colorScheme; in {
     borderSize = 0;
     borderRadius = 10;
 
-    backgroundColor = "#${colorScheme.palette.base00}";
-    textColor = "#${colorScheme.palette.base05}";
-    borderColor = "#${colorScheme.palette.base0D}";
-    progressColor = "over #313244";
-
     extraConfig = ''
       text-alignment=center
-
-      [urgency=low]
-      text-color=#${colorScheme.palette.base0A}
-
-      [urgency=high]
-      text-color=#${colorScheme.palette.base08}
     '';
   };
 

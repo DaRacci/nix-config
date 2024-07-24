@@ -1,6 +1,5 @@
 _: {
   imports = [
-    ./fonts.nix
     ./theme.nix
   ];
 

@@ -17,9 +17,9 @@ in
   home = {
     sessionVariables.BROWSER = lib.mkForce "firefox";
 
-    file."firefox-gnome-theme" = {
-      target = ".mozilla/firefox/${config.home.username}/chrome/firefox-gnome-theme";
-      source = inputs.firefox-gnome-theme;
+    file."firefox-ultima" = {
+      target = ".mozilla/firefox/${config.home.username}/chrome/firefox-ultima";
+      source = inputs.firefox-ultima;
     };
   };
 
@@ -266,18 +266,23 @@ in
         "widget.gtk.rounded-bottom-corners.enabled" = true;
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
         "svg.context-properties.content.enabled" = true;
-        "gnomeTheme.hideSingleTab" = true;
-        "gnomeTheme.bookmarksToolbarUnderTabs" = true;
-        "gnomeTheme.normalWidthTabs" = false;
-        "gnomeTheme.tabsAsHeaderbar" = true;
+
+        # Ultima
+        "ultima.OS.gnome" = true;
+        "ultima.OS.gnome.wdl" = true;
+        "ultima.OS.kde" = false;
+        "ultima.tabs.sidebery.autohide" = true;
+        "ultima.tabs.vertical.hide" = true;
+        "ultima.urlbar.hidebuttons" = true;
       };
 
       userChrome = ''
-        @import "firefox-gnome-theme/userChrome.css";
+        @import "firefox-ultima/userChrome.css";
       '';
       userContent = ''
-        @import "firefox-gnome-theme/userContent.css";
+        @import "firefox-ultima/userContent.css";
       '';
+      extraConfig = builtins.readFile "${inputs.firefox-ultima}/user.js";
 
       search = {
         default = "Google";
@@ -365,6 +370,8 @@ in
         "sessionstore.jsonlz4" # Session restore
         "signedInUser.json" # Mozilla Sync
         "persdict.dat" # Personal dictionary
+        "extension-settings.json" # Extension Keybinds
+        "prefs.js" # Preferences & State Storage
       ] [
         (map onEachProfile)
         flatten

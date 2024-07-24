@@ -1,53 +1,89 @@
-{ pkgs, ... }: {
+{ inputs, config, pkgs, ... }: {
   imports = [
     ./features/cli
   ];
 
-  custom.theme = {
-    colourScheme = "tokyodark";
+  stylix = {
+    enable = true;
+    base16Scheme = "${inputs.tinted-theming}/base16/tokyo-night-dark.yaml";
 
     cursor = {
+      package = pkgs.bibata-cursors;
       name = "Bibata-Modern-Ice";
       size = 32;
-      package = pkgs.bibata-cursors;
+    };
+
+    fonts = rec {
+      emoji = {
+        package = pkgs.openmoji-color;
+        family = "OpenMoji Color";
+      };
+
+      monospace = {
+        package = pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; };
+        family = "JetBrainsMono Nerd Font";
+      };
+
+      sansSerif = {
+        package = pkgs.fira;
+        family = "Fira Sans";
+      };
+      serif = sansSerif;
+
+      sizes = {
+        applications = 14;
+        desktop = 12;
+        popups = 14;
+        terminal = 18;
+      };
     };
   };
 
-  custom.fontProfiles = {
-    enable = true;
+  # custom.theme = {
+  #   colourScheme = "tokyodark";
 
-    monospace = {
-      family = "JetBrainsMono Nerd Font";
-      package = pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; };
-      size = 18;
-    };
-
-    regular = {
-      family = "Fira Sans";
-      package = pkgs.fira;
-      size = 14;
-    };
-
-    emoji = {
-      family = "OpenMoji Color";
-      package = pkgs.openmoji-color;
-    };
-  };
-
-  # accounts.racci = {
-  #   calendar = {
-  #     remote = {
-  #       url = "https://nextcloud.racci.dev";
-  #       userName = "Racci";
-  #       passwordCommand = [
-  #         "cat"
-  #         "${config.sops.nextcloud.password.path}"
-  #       ];
-  #     };
+  #   cursor = {
+  #     name = "Bibata-Modern-Ice";
+  #     size = 32;
+  #     package = pkgs.bibata-cursors;
   #   };
   # };
 
-  # sops.secrets = {
-  #   nextcloud.password = { };
-  # };
+  accounts = {
+    email = { };
+
+    calendar = {
+      basePath = ".calendar";
+      accounts.personal = {
+        primary = true;
+        primaryCollection = "Personal";
+
+        remote = {
+          type = "caldav";
+          url = "https://nextcloud.racci.dev/remote.php/dav";
+
+          userName = "Racci";
+          passwordCommand = [ "${pkgs.lib.getExe pkgs.cat} ${config.sops.secrets.NEXTLCOUD_APP_PASSWORD.path}" ];
+        };
+
+        # vdirsyncer = {
+        #   enable = true;
+        #   collections = [ "Personal" "Contact Birthdays" ];
+
+        #   timeRange = {
+        #     start = /*py*/ ''datetime.now() + timedelta(days=365 * 2)'';
+        #     end = /*py*/ ''datetime.now() - timedelta(days=365 * 2)'';
+        #   };
+
+        #   urlCommand = [ "echo https://" ];
+        # };
+      };
+    };
+  };
+
+  programs.vdirsyncer.enable = true;
+
+  sops.secrets = {
+    NEXTCLOUD_APP_PASSWORD = { };
+  };
 }

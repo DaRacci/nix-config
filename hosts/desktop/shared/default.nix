@@ -1,5 +1,7 @@
-{
+{ inputs, ... }: {
   imports = [
+    inputs.stylix.nixosModules.stylix
+
     ./appimage.nix
     ./xdg.nix
   ];
