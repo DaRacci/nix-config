@@ -16,7 +16,7 @@ let cfg = config.services.nextcloud.config; in {
     "NEXTCLOUD/S3/SSE_CKEY" = ncOwned;
     "NEXTCLOUD/admin-password" = ncOwned;
     db-password = {
-      owner = config.users.users.postgres.name;
+      owner = "db-pass-access";
       group = "db-pass-access";
     };
   };
