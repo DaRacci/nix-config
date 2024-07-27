@@ -16,16 +16,8 @@ let cfg = config.services.nextcloud.config; in {
     "NEXTCLOUD/S3/SSE_CKEY" = ncOwned;
     "NEXTCLOUD/admin-password" = ncOwned;
     db-password = {
-      owner = "db-pass-access";
-      group = "db-pass-access";
-    };
-  };
-
-  users = {
-    groups = { db-pass-access = { }; };
-    users = {
-      postgres.extraGroups = [ "db-pass-access" ];
-      nextcloud.extraGroups = [ "db-pass-access" ];
+      # Fuck it, this shit works but it aint safe!
+      neededForUsers = true;
     };
   };
 
