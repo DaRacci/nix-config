@@ -12,8 +12,8 @@ let cfg = config.services.nextcloud.config; in {
   };
 
   sops.secrets = let ncOwned = { owner = config.users.users.nextcloud.name; inherit (config.users.users.nextcloud) group; }; in {
-    "NEXTCLOUD.S3_SECRET" = ncOwned;
-    "NEXTCLOUD.S3_SSE_CKEY" = ncOwned;
+    "NEXTCLOUD/S3_SECRET" = ncOwned;
+    "NEXTCLOUD/S3_SSE_CKEY" = ncOwned;
     nextcloud-admin-password = ncOwned;
     nextcloud-db-password = {
       owner = config.users.users.postgres.name;
@@ -64,8 +64,8 @@ let cfg = config.services.nextcloud.config; in {
           bucket = "nextcloud";
           hostname = "nixio.racci.dev";
           key = "k6Dkuj139Y65LzvILRax";
-          secretFile = config.sops.secrets."NEXTCLOUD.S3_SECRET".path;
-          sseCKeyFile = config.sops.secrets."NEXTCLOUD.S3_SSE_CKEY".path;
+          secretFile = config.sops.secrets."NEXTCLOUD/S3_SECRET".path;
+          sseCKeyFile = config.sops.secrets."NEXTCLOUD/S3_SSE_CKEY".path;
         };
       };
 
