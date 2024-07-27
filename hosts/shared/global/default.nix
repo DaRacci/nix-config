@@ -23,9 +23,12 @@
   programs.nix-ld.enable = true;
 
   system.activationScripts.report-changes = /*sh*/ ''
-    LINKS=$(ls -dv /nix/var/nix/profiles/system-*-link)
+    LINKS=($(ls -dv /nix/var/nix/profiles/system-*-link))
     if [ $(echo $LINKS | wc -w) -gt 1 ]; then
-      ${pkgs.nvd}/bin/nvd diff $(echo $LINKS | tail -2)
+      NEW=$(readlink -f ''${LINKS[-1]})
+      CURRENT=$(readlink -f ''${LINKS[-2]})
+
+      ${pkgs.nvd}/bin/nvd diff $PREVIOUS $NEW
     fi
   '';
 
