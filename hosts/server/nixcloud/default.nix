@@ -63,7 +63,7 @@ let cfg = config.services.nextcloud.config; in {
           usePathStyle = true;
 
           bucket = "nextcloud";
-          hostname = "nixio.racci.dev";
+          hostname = "minio.racci.dev";
           key = "k6Dkuj139Y65LzvILRax";
           secretFile = config.sops.secrets."NEXTCLOUD/S3/SECRET".path;
           sseCKeyFile = config.sops.secrets."NEXTCLOUD/S3/SSE_CKEY".path;
