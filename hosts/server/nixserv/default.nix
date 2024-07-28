@@ -79,15 +79,6 @@
       enable = true;
       ensureDatabases = [ "attic" ];
       ensureUsers = [{ name = "attic"; ensureDBOwnership = true; }];
-
-      initialScript = pkgs.writeText "init-script" ''
-        DO $$
-        DECLARE password TEXT;
-        BEGIN
-          password := trim(both from replace(pg_read_file('${config.sops.secrets.POSTGRESQL_PASSWORD.path}'), E'\n', '''));
-          EXECUTE format('ALTER ROLE attic WITH PASSWORD '''%s''';', password);
-        END $$;
-      '';
     };
 
     caddy.virtualHosts = {
@@ -103,6 +94,17 @@
       '';
     };
   };
+
+  systemd.services.postgresql.postStart = ''
+    $PSQL -tA <<'EOF'
+      DO $$
+      DECLARE password TEXT;
+      BEGIN
+        password := trim(both from replace(pg_read_file('${config.sops.secrets.POSTGRESQL_PASSWORD.path}'), E'\n', '''));
+        EXECUTE format('ALTER ROLE attic WITH PASSWORD '''%s''';', password);
+      END $$;
+    EOF
+  '';
 
   networking.firewall.allowedTCPPorts = [ 8080 ];
 }
