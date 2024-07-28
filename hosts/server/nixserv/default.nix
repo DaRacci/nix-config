@@ -58,7 +58,7 @@
     postgresql = {
       enable = true;
       ensureDatabases = [ "attic" ];
-      ensureUsers = [{ attic = { ensureDBOwnership = true; }; }];
+      ensureUsers = [{ name = "attic"; ensureDBOwnership = true; }];
 
       initialScript = pkgs.writeText "init-script" ''
         DO $$
