@@ -18,6 +18,14 @@ let cfg = config.purpose.gaming.vr; in {
       };
     };
 
+    home.activation.link-steamvr-openxr-runtime = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      run mkdir -p $VERBOSE_ARG \
+        "$HOME/.config/openxr/1/";
+
+      run ln -s $VERBOSE_ARG \
+        "$HOME/.config/openxr/1/active_runtime.json" "$HOME/.steam/steam/steamapps/common/SteamVR/steamxr_linux64.json";
+    '';
+
     user.persistence.directories = [
       ".config/alvr"
     ];
