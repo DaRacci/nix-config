@@ -45,6 +45,7 @@
         require-proof-of-possession = true;
 
         database = {
+          url = "postgresql://attic@localhost:5432/attic";
           heartbeat = true;
         };
 
