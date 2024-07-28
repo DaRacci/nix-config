@@ -19,11 +19,16 @@
     attic-client
   ];
 
-  users.users = {
-    atticd = {
+  users = {
+    users.atticd = {
+      uid = 949;
       group = "atticd";
       home = "/var/lib/atticd";
       useDefaultShell = true;
+    };
+
+    groups.atticd = {
+      gid = 949;
     };
   };
 
