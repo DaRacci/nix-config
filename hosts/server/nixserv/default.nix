@@ -21,8 +21,9 @@
 
   users.users = {
     atticd = {
-      isSystemUser = true;
+      group = "atticd";
       home = "/var/lib/atticd";
+      useDefaultShell = true;
     };
   };
 
