@@ -31,13 +31,23 @@ jobs:
     strategy:
       matrix:
         system:
-          # TODO - add more systems
           - x86_64
         include:
           - nix-command: develop .#default --profile profile
             system: x86_64
-
           - nix-command: build --impure --accept-flake-config .#nixosConfigurations.nixe.config.system.build.toplevel
+            system: x86_64
+          - nix-command: build --impure --accept-flake-config .#nixosConfigurations.nixarr.config.system.build.toplevel
+            system: x86_64
+          - nix-command: build --impure --accept-flake-config .#nixosConfigurations.nixcloud.config.system.build.toplevel
+            system: x86_64
+          - nix-command: build --impure --accept-flake-config .#nixosConfigurations.nixdev.config.system.build.toplevel
+            system: x86_64
+          - nix-command: build --impure --accept-flake-config .#nixosConfigurations.nixio.config.system.build.toplevel
+            system: x86_64
+          - nix-command: build --impure --accept-flake-config .#nixosConfigurations.nixmon.config.system.build.toplevel
+            system: x86_64
+          - nix-command: build --impure --accept-flake-config .#nixosConfigurations.nixserv.config.system.build.toplevel
             system: x86_64
 
     steps:
