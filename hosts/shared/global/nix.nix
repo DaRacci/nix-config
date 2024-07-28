@@ -1,5 +1,7 @@
 { inputs, lib, config, ... }: {
   nix = {
+    # nix.package = pkgs.lix;
+
     settings = {
       trusted-users = [ "root" "@wheel" ];
       auto-optimise-store = lib.mkForce true;

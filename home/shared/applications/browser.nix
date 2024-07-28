@@ -282,7 +282,7 @@ in
       userContent = ''
         @import "firefox-ultima/userContent.css";
       '';
-      extraConfig = builtins.readFile "${inputs.firefox-ultima}/user.js";
+      # extraConfig = builtins.readFile "${inputs.firefox-ultima}/user.js";
 
       search = {
         default = "Google";

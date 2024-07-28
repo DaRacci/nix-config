@@ -62,12 +62,21 @@
 
     gh = {
       enable = true;
-      extensions = with pkgs; [ gh-markdown-preview ];
+      extensions = with pkgs; [
+        gh-markdown-preview
+        gh-notify
+        gh-copilot
+        gh-eco
+      ];
       gitCredentialHelper.enable = true;
       settings = {
         git_protocol = "ssh";
         prompt = "enabled";
       };
+    };
+
+    gh-dash = {
+      enable = true;
     };
 
     gitui = {

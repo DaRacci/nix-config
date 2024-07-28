@@ -20,6 +20,10 @@ in
   };
 
   config = mkIf cfg.enable {
+    home.packages = with pkgs; [
+      bruno # API Client
+    ];
+
     programs.vscode = mkIf cfg.vscode.enable {
       enable = true;
       package = pkgs.unstable.vscode;
@@ -110,7 +114,7 @@ in
 
       userSettings = {
         "workbench.iconTheme" = "material-icon-theme";
-        "workbench.colorTheme" = "One Dark Pro Mix";
+        # "workbench.colorTheme" = "One Dark Pro Mix";
         "workbench.startupEditor" = "none";
 
         "window.zoomLevel" = 3;
@@ -188,7 +192,7 @@ in
     };
 
     home.file.".vscode/argv.json" = {
-      text = /*json*/''
+      text = /*json*/ ''
         {
           "enable-crash-reporter": false,
           "password-store": "gnome-libsecret"

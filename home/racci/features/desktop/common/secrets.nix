@@ -1,7 +1,6 @@
 # TODO :: Modularise
 { config, pkgs, lib, ... }: {
   home.packages = with pkgs; [
-    gnome-secrets
     _1password-gui
     _1password
   ];

@@ -7,11 +7,11 @@ in
   };
 
   config = mkIf cfg.enable
-    {
+    rec {
       gtk = {
         iconTheme = {
           name = "Adwaita";
-          package = pkgs.gnome.adwaita-icon-theme;
+          package = pkgs.adwaita-icon-theme;
         };
       };
 
@@ -29,7 +29,7 @@ in
       # };
 
       wayland.windowManager.hyprland.settings.exec-once = mkIf config.wayland.windowManager.hyprland.enable [
-        "hyprctl setcursor ${cfg.cursor.name} ${toString cfg.cursor.size}"
+        "hyprctl setcursor ${config.stylix.cursor.name} ${toString config.stylix.cursor.size}"
       ];
     };
 }

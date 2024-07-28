@@ -16,9 +16,8 @@
     in
     {
       package = lib.mkOverride 50 hyprland-packages.mesa.drivers;
-
+      package32 = lib.mkOverride 50 hyprland-packages.pkgsi686Linux.mesa.drivers;
       enable32Bit = true;
-      extraPackages32 = lib.mkOverride 50 hyprland-packages.pkgsi686Linux.mesa.drivers;
     };
 
   services = {
