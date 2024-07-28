@@ -5,8 +5,14 @@
   ];
 
   sops.secrets = {
-    ATTIC_ENVIRONMENT = { };
-    POSTGRESQL_PASSWORD = { };
+    ATTIC_ENVIRONMENT = {
+      owner = config.services.atticd.user;
+      inherit (config.services.atticd) group;
+    };
+    POSTGRESQL_PASSWORD = {
+      owner = "postgres";
+      group = "postgres";
+    };
   };
 
   environment.systemPackages = with pkgs.unstable; [
