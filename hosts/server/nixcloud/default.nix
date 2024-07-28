@@ -1,8 +1,7 @@
-{ modulesPath, flake, config, pkgs, ... }:
+{ modulesPath, config, pkgs, ... }:
 let cfg = config.services.nextcloud.config; in {
   imports = [
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
-    "${flake}/hosts/shared/optional/tailscale.nix"
   ];
 
   proxmoxLXC = {
@@ -63,6 +62,7 @@ let cfg = config.services.nextcloud.config; in {
           usePathStyle = true;
 
           bucket = "nextcloud";
+          region = "us-east-1";
           hostname = "minio.racci.dev";
           key = "k6Dkuj139Y65LzvILRax";
           secretFile = config.sops.secrets."NEXTCLOUD/S3/SECRET".path;
