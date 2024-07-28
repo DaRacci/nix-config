@@ -16,17 +16,17 @@
     fonts = rec {
       emoji = {
         package = pkgs.openmoji-color;
-        family = "OpenMoji Color";
+        name = "OpenMoji Color";
       };
 
       monospace = {
         package = pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; };
-        family = "JetBrainsMono Nerd Font";
+        name = "JetBrainsMono Nerd Font";
       };
 
       sansSerif = {
         package = pkgs.fira;
-        family = "Fira Sans";
+        name = "Fira Sans";
       };
       serif = sansSerif;
 
@@ -63,20 +63,20 @@
           url = "https://nextcloud.racci.dev/remote.php/dav";
 
           userName = "Racci";
-          passwordCommand = [ "${pkgs.lib.getExe pkgs.cat} ${config.sops.secrets.NEXTLCOUD_APP_PASSWORD.path}" ];
+          passwordCommand = [ "${pkgs.lib.getExe' pkgs.uutils-coreutils-noprefix "cat"} ${config.sops.secrets.NEXTCLOUD_APP_PASSWORD.path}" ];
         };
 
-        # vdirsyncer = {
-        #   enable = true;
-        #   collections = [ "Personal" "Contact Birthdays" ];
+        vdirsyncer = {
+          enable = true;
+          collections = [ "Personal" "Contact Birthdays" ];
 
-        #   timeRange = {
-        #     start = /*py*/ ''datetime.now() + timedelta(days=365 * 2)'';
-        #     end = /*py*/ ''datetime.now() - timedelta(days=365 * 2)'';
-        #   };
+          timeRange = {
+            start = /*py*/ ''datetime.now() + timedelta(days=365 * 2)'';
+            end = /*py*/ ''datetime.now() - timedelta(days=365 * 2)'';
+          };
 
-        #   urlCommand = [ "echo https://" ];
-        # };
+          #   urlCommand = [ "echo https://" ];
+        };
       };
     };
   };

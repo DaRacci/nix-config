@@ -1,6 +1,6 @@
-{ inputs, ... }: {
+{ flake, ... }: {
   imports = [
-    inputs.stylix.nixosModules.stylix
+    "${flake}/hosts/shared/optional/stylix.nix"
 
     ./power.nix
     ../../desktop/shared/appimage.nix
