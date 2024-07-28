@@ -7,7 +7,7 @@
     "${flake}/home/shared/applications"
   ];
 
-  home.packages = with pkgs.unstable; [ trayscale ];
+  home.packages = with pkgs; [ trayscale boxflat ];
   user.persistence.enable = true;
 
   purpose = {

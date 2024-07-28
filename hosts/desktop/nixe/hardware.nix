@@ -1,5 +1,5 @@
 # TODO :: Auto subvolume setup
-{ inputs, pkgs, ... }: {
+{ flake, inputs, pkgs, ... }: {
   imports = [
     inputs.nixos-hardware.nixosModules.common-cpu-amd
     inputs.nixos-hardware.nixosModules.common-cpu-amd-pstate
@@ -25,7 +25,10 @@
   boot = rec {
     kernelPackages = pkgs.unstable.linuxPackages_zen;
     kernelModules = [ "v4l2loopback" ];
-    extraModulePackages = [ kernelPackages.v4l2loopback ];
+    extraModulePackages = [
+      kernelPackages.v4l2loopback
+      (kernelPackages.callPackage "${flake}/pkgs/universal-pidff" { })
+    ];
 
     initrd = {
       # TODO :: Needed? ahci, sd_mod usbhid usb_storage
