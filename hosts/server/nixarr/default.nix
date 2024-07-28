@@ -1,7 +1,6 @@
-{ modulesPath, flake, inputs, config, ... }: {
+{ modulesPath, inputs, config, ... }: {
   imports = [
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
-    "${flake}/hosts/shared/optional/tailscale.nix"
 
     inputs.nixarr.nixosModules.default
   ];

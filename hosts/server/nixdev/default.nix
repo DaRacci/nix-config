@@ -1,7 +1,6 @@
-{ flake, modulesPath, ... }: {
+{ modulesPath, ... }: {
   imports = [
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
-    "${flake}/hosts/shared/optional/tailscale.nix"
   ];
 
   services = {

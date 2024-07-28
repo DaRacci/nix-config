@@ -1,8 +1,7 @@
-{ flake, inputs, modulesPath, ... }: {
+{ inputs, modulesPath, ... }: {
   imports = [
     inputs.attic.nixosModules.atticd
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
-    "${flake}/hosts/shared/optional/tailscale.nix"
   ];
 
   sops.secrets = { };
