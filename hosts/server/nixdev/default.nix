@@ -3,12 +3,16 @@
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
   ];
 
-  services = {
+  services = rec {
     coder = {
       enable = true;
       accessUrl = "https://coder.racci.dev";
       listenAddress = "0.0.0.0:8080";
     };
+
+    caddy.virtualHosts.coder.extraConfig = /*caddyfile*/ ''
+      reverse_proxy http://${coder.listenAddress}
+    '';
   };
 
   users.extraUsers.coder = {

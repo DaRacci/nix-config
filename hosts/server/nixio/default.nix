@@ -1,4 +1,4 @@
-{ flake, config, modulesPath, pkgs, ... }: {
+{ flake, config, modulesPath, pkgs, lib, ... }: {
   imports = [
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
     "${flake}/hosts/shared/optional/tailscale.nix"
@@ -6,6 +6,9 @@
 
   sops.secrets = {
     MINIO_ROOT_CREDENTIALS = { };
+    "CLOUDFLARE/EMAIL" = { };
+    "CLOUDFLARE/DNS_API_TOKEN" = { };
+    "CLOUDFLARE/ZONE_API_TOKEN" = { };
   };
 
   services.resolved.enable = pkgs.lib.mkForce false;
@@ -139,36 +142,100 @@
           ];
       };
     };
+
+    caddy = {
+      enable = true;
+
+      # Create a map of virtual hosts using the configurations from other servers.
+      # This will need to iterate the hosts of the flake and pull the virtualHosts configuration from each server.
+      virtualHosts = lib.trivial.pipe flake.nixosConfigurations [
+        # Exclude the current host
+        (lib.filterAttrs (name: _: name != config.system.name))
+        # Extract the config from each host
+        builtins.attrValues
+        (builtins.map (host: host.config))
+        # Filter to only servers
+        (builtins.filter (config: config.host.device.role == "server"))
+        # Filter to only servers with at least one caddy virtualHost
+        (builtins.filter (config: config.services.caddy ? virtualHosts && config.services.caddy.virtualHosts != { }))
+        # Update references in extraConfig to 127.0.0.1 or localhost to the hosts name,
+        # Append the domain to the name, and enable the use of ACME provided certs.
+        (builtins.map (config: lib.mapAttrs'
+          (name: value: lib.nameValuePair "${name}.racci.dev"
+            rec {
+              hostName = "${name}.racci.dev";
+              useACMEHost = hostName;
+              extraConfig = builtins.replaceStrings [ "0.0.0.0" "127.0.0.1" "localhost" ] [ config.system.name config.system.name config.system.name ] value.extraConfig;
+            } // value)
+          config.services.caddy.virtualHosts
+        ))
+        # Merge all the virtualHosts into a single map
+        lib.mergeAttrsList
+      ] // (
+        let
+          mkVirtualHost = name: config: lib.nameValuePair "${name}.racci.dev"
+            {
+              hostName = "${name}.racci.dev";
+              useACMEHost = name;
+            } // config;
+        in
+        lib.listToAttrs [
+          (mkVirtualHost "minio" {
+            extraConfig = /*caddyfile*/ ''
+              redir /console /console/
+
+              handle_path /console/* {
+                reverse_proxy http://localhost${config.services.minio.consoleAddress}
+              }
+
+              reverse_proxy http://localhost${config.services.minio.listenAddress}
+            '';
+          })
+          (mkVirtualHost "adguard" {
+            extraConfig = /*caddyfile*/ ''
+              reverse_proxy http://${config.services.adguardhome.host}:${config.services.adguardhome.port}
+            '';
+          })
+          (mkVirtualHost "pve" {
+            extraConfig = /*caddyfile*/ ''
+              reverse_proxy {
+                to https://192.168.2.210:8006
+                transport http {
+                  tls_insecure_skip_verify
+                }
+              }
+            '';
+          })
+        ]
+      );
+    };
   };
 
   systemd.services.minio.environment = {
     MINIO_BROWSER_REDIRECT_URL = "https://minio.racci.dev/console";
   };
 
-  networking.firewall = {
-    allowedTCPPorts = [ 53 80 9000 9001 ];
+  security.acme = {
+    defaults = {
+      email = "admin@racci.dev";
+      dnsResolver = "1.1.1.1:53";
+      dnsProvider = "cloudflare";
+      crentialFiles = {
+        CLOUDFLARE_EMAIL_FILE = config.sops.secrets."CLOUDFLARE/EMAIL".path;
+        CLOUDFLARE_DNS_API_TOKEN_FILE = config.sops.secrets."CLOUDFLARE/DNS_API_TOKEN".path;
+        CLOUDFLARE_ZONE_API_TOKEN_FILE = config.sops.secrets."CLOUDFLARE/ZONE_API_TOKEN".path;
+      };
+    };
+
+    certs = lib.trivial.pipe config.services.caddy.virtualHosts [
+      builtins.attrNames
+      (builtins.filter (name: lib.strings.hasSuffix ".racci.dev" name))
+      (map (name: lib.nameValuePair name { }))
+      builtins.listToAttrs
+    ];
   };
 
-  # services.caddy = {
-  #   enable = true;
-  #   email = "admin@racci.dev";
-
-  #   virtualHosts = {
-  #     "minio.racci.dev" = {
-  #       extraConfig = ''
-  #         redir /console /console/
-
-  #         handle_path /console/* {
-  #           reverse_proxy {
-  #             to ${config.services.minio.consoleAddress}
-  #           }
-  #         }
-
-  #         reverse_proxy {
-  #           to ${config.services.minio.listenAddress}
-  #         }
-  #       '';
-  #     };
-  #   };
-  # };
+  networking.firewall = {
+    allowedTCPPorts = [ 53 80 443 9000 9001 ];
+  };
 }

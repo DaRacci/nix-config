@@ -103,6 +103,12 @@ let cfg = config.services.nextcloud.config; in {
       ensureDatabases = [ cfg.dbname ];
       ensureUsers = [{ name = cfg.dbuser; ensureDBOwnership = true; }];
     };
+
+    caddy = {
+      "nc.racci.dev".extraConfig = /*caddyfile*/ ''
+        reverse_proxy http://localhost:80
+      '';
+    };
   };
 
   systemd.services."nextcloud-setup" = {

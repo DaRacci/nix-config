@@ -5,33 +5,36 @@
   ];
 
   sops.secrets = {
-    ATTIC_SECRET = { };
-    HARMONIA_SECRET = { };
+    ATTIC_ENVIRONMENT = { };
+    POSTGRESQL_PASSWORD = { };
   };
 
   environment.systemPackages = with pkgs.unstable; [
     attic-client
   ];
 
-  services = {
-    harmonia = {
-      enable = true;
-      package = pkgs.harmonia;
-      signKeyPath = config.sops.secrets.HARMONIA_SECRET.path;
-      settings = {
-        bind = "127.0.0.1:5000";
-        workers = 4;
-        max_connection_rate = 256;
-        priority = 50;
-      };
-    };
-
+  services = rec {
     atticd = {
       enable = true;
       package = pkgs.unstable.attic-server;
-      credentialsFile = config.sops.secrets.ATTIC_SECRET.path;
+      credentialsFile = config.sops.secrets.ATTIC_ENVIRONMENT.path;
       settings = {
         listen = "127.0.0.1:8080";
+        allowed-hosts = [ ];
+        api-endpoint = "https://cache.racci.dev/";
+        soft-delete-caches = false;
+        require-proof-of-possession = true;
+
+        database = {
+          heartbeat = true;
+        };
+
+        storage = {
+          type = "s3";
+          region = "us-east-1";
+          bucket = "attic";
+          endpoint = "https://minio.racci.dev";
+        };
 
         chunking = {
           nar-size-threshold = 64 * 1024;
@@ -39,26 +42,47 @@
           avg-size = 64 * 1024;
           max-size = 256 * 1024;
         };
+
+        compression = {
+          type = "zstd"; # TODO Maybe use brotli instead?
+          level = 8;
+        };
+
+        garbage-collection = {
+          interval = "12 hours";
+          default-retention-period = "14 days";
+        };
       };
     };
 
-    # caddy = {
-    #   enable = true;
+    postgresql = {
+      enable = true;
+      ensureDatabases = [ "attic" ];
+      ensureUsers = [{ attic = { ensureDBOwnership = true; }; }];
 
-    #   virtualHosts."cache.racci.dev".extraConfig = ''
-    #     encode {
-    #       zstd
-    #       match {
-    #         header Content-Type application/x-nix-archive
-    #       }
-    #     }
+      initialScript = pkgs.writeText "init-script" ''
+        DO $$
+        DECLARE password TEXT;
+        BEGIN
+          password := trim(both from replace(pg_read_file('${config.sops.secrets.POSTGRESQL_PASSWORD.path}'), E'\n', '''));
+          EXECUTE format('ALTER ROLE attic WITH PASSWORD '''%s''';', password);
+        END $$;
+      '';
+    };
 
-    #     reverse_proxy {
-    #       to http://${harmonia.settings.bind}
-    #     }
-    #   '';
-    # };
+    caddy.virtualHosts = {
+      cache.extraConfig = /*caddyfile*/ ''
+        encode {
+          zstd
+          match {
+            header Content-Type application/x-nix-archive
+          }
+        }
+
+        reverse_proxy ${atticd.settings.listen}
+      '';
+    };
   };
 
-  networking.firewall.allowedTCPPorts = [ 5000 8080 ];
+  networking.firewall.allowedTCPPorts = [ 8080 ];
 }
