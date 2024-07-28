@@ -19,6 +19,13 @@
     attic-client
   ];
 
+  users.users = {
+    atticd = {
+      isSystemUser = true;
+      home = "/var/lib/atticd";
+    };
+  };
+
   services = rec {
     atticd = {
       enable = true;
