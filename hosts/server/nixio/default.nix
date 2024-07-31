@@ -221,6 +221,7 @@
   };
 
   security.acme = {
+    acceptTerms = true;
     defaults = {
       email = "admin@racci.dev";
       dnsResolver = "1.1.1.1:53";
