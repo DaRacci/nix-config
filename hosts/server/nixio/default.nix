@@ -212,7 +212,12 @@
   };
 
   systemd.services.minio.environment = {
+    MINIO_DOMAIN = "minio.racci.dev";
+    MINIO_SERVER_URL = "https://minio.racci.dev";
     MINIO_BROWSER_REDIRECT_URL = "https://minio.racci.dev/console";
+
+    # MINIO_USE_SSL = true;
+    # MINIO_OPTS = "--certs-dir ";
   };
 
   security.acme = {
@@ -220,7 +225,7 @@
       email = "admin@racci.dev";
       dnsResolver = "1.1.1.1:53";
       dnsProvider = "cloudflare";
-      crentialFiles = {
+      credentialFiles = {
         CLOUDFLARE_EMAIL_FILE = config.sops.secrets."CLOUDFLARE/EMAIL".path;
         CLOUDFLARE_DNS_API_TOKEN_FILE = config.sops.secrets."CLOUDFLARE/DNS_API_TOKEN".path;
         CLOUDFLARE_ZONE_API_TOKEN_FILE = config.sops.secrets."CLOUDFLARE/ZONE_API_TOKEN".path;
