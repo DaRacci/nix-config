@@ -227,7 +227,7 @@
     MINIO_SERVER_URL = "https://minio.racci.dev";
     MINIO_BROWSER_REDIRECT_URL = "https://minio.racci.dev/console";
 
-    MINIO_USE_SSL = true;
+    MINIO_USE_SSL = "true";
     MINIO_OPTS = "--certs-dir /var/lib/acme/minio.racci.dev/";
   };
 
