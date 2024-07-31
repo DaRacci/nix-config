@@ -176,7 +176,7 @@
           mkVirtualHost = name: config: lib.nameValuePair "${name}.racci.dev"
             {
               hostName = "${name}.racci.dev";
-              useACMEHost = name;
+              useACMEHost = "${name}.racci.dev";
             } // config;
         in
         lib.listToAttrs [
