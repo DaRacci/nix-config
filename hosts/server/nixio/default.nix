@@ -13,6 +13,10 @@
 
   services.resolved.enable = pkgs.lib.mkForce false;
 
+  users.users.minio = {
+    extraGroups = [ "caddy" ]; # Caddy group has access to certs, and minio needs access to its own certs.
+  };
+
   services = {
     minio = {
       enable = true;
@@ -188,7 +192,14 @@
                 reverse_proxy http://localhost${config.services.minio.consoleAddress}
               }
 
-              reverse_proxy http://localhost${config.services.minio.listenAddress}
+              reverse_proxy {
+                to https://localhost${config.services.minio.listenAddress}
+                # IDK if this is necessary
+                transport http {
+                  tls
+                  tls_server_name minio.racci.dev
+                }
+              }
             '';
           })
           (mkVirtualHost "adguard" {
@@ -216,8 +227,8 @@
     MINIO_SERVER_URL = "https://minio.racci.dev";
     MINIO_BROWSER_REDIRECT_URL = "https://minio.racci.dev/console";
 
-    # MINIO_USE_SSL = true;
-    # MINIO_OPTS = "--certs-dir ";
+    MINIO_USE_SSL = true;
+    MINIO_OPTS = "--certs-dir /var/lib/acme/minio.racci.dev/";
   };
 
   security.acme = {
