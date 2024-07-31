@@ -104,11 +104,9 @@ let cfg = config.services.nextcloud.config; in {
       ensureUsers = [{ name = cfg.dbuser; ensureDBOwnership = true; }];
     };
 
-    caddy = {
-      "nc.racci.dev".extraConfig = /*caddyfile*/ ''
-        reverse_proxy http://localhost:80
-      '';
-    };
+    caddy.virtualHosts."nc.racci.dev".extraConfig = /*caddyfile*/ ''
+      reverse_proxy http://localhost:80
+    '';
   };
 
   systemd.services."nextcloud-setup" = {
