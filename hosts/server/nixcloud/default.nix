@@ -106,8 +106,7 @@ let cfg = config.services.nextcloud.config; in {
       phpOptions = {
         maintenance_window_start = "100";
 
-        preview_imaginary_url = "http://127.0.0.1:${imaginary.port}";
-        preview_imaginary_key = "";
+        preview_imaginary_url = "http://127.0.0.1:${toString imaginary.port}";
 
         opcache.jit = "1255";
         opcache.jit_buffer_size = "128M";
