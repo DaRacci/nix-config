@@ -261,7 +261,7 @@ in
         };
         Admin = {
           id = 6;
-          icon = "shield";
+          icon = "tree";
           color = "red";
         };
       };
