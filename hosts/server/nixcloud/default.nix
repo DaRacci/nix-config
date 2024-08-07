@@ -109,7 +109,7 @@ let cfg = config.services.nextcloud.config; in {
         preview_imaginary_url = "http://127.0.0.1:${imaginary.port}";
         preview_imaginary_key = "";
 
-        opcache.jit = 1255;
+        opcache.jit = "1255";
         opcache.jit_buffer_size = "128M";
       };
 
