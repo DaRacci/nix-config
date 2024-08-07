@@ -108,8 +108,8 @@ let cfg = config.services.nextcloud.config; in {
 
         preview_imaginary_url = "http://127.0.0.1:${toString imaginary.port}";
 
-        opcache.jit = "1255";
-        opcache.jit_buffer_size = "128M";
+        "opcache.jit" = "1255";
+        "opcache.jit_buffer_size" = "128M";
       };
 
       notify_push = {
