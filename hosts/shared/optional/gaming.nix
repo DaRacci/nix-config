@@ -37,6 +37,7 @@
 
   services.udev.extraRules = ''
     SUBSYSTEM=="sound", ACTION=="change", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ce6", ENV{SOUND_DESCRIPTION}="Wireless Controller"
+    SUBSYSTEM=="usb", ATTR{idVendor}=="2833", ATTR{idProduct}=="0186", MODE="0660", group="users", symlink+="ocuquest%n"
   '';
 
   networking.firewall.allowedTCPPorts = [ 24070 ];
