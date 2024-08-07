@@ -1,21 +1,29 @@
 { inputs, lib, ... }:
 # let
-# usePRRaw = final: prev: name: owner: branch: sha256: {
-#   ${name} = (import
-#     (final.fetchzip {
-#       inherit sha256;
-#       url = "https://github.com/${owner}/nixpkgs/archive/${branch}.tar.gz";
-#     })
-#     { overlays = [ ]; inherit (prev) config; }).${name};
-# };
+#   usePRRaw = final: prev: names: owner: branch: sha256:
+#     let
+#       overlay = import
+#         (final.fetchzip {
+#           inherit sha256;
+#           url = "https://github.com/${owner}/nixpkgs/archive/${branch}.tar.gz";
+#         })
+#         { overlays = [ ]; inherit (prev) config; };
+#     in
+#     lib.foldl'
+#       (name: acc: acc // {
+#         ${name} = overlay.${name};
+#       })
+#       { }
+#       names;
 # in
 {
-  # This one brings our custom packages from the 'pkgs' directory
   additions = final: prev:
     # let usePR = usePRRaw final prev; in
     prev.lib.foldl' prev.lib.recursiveUpdate { } [
+      # This one brings our custom packages from the 'pkgs' directory
       (import ../pkgs { pkgs = final; })
       # (usePR "jetbrains" "DaRacci" "master" "sha256-I0iE9APrVbU6TFpJEDrpfRhirMCyaeNCbiE5XL+KXTY=")
+      # (usePR [ "elasticsearch8" "elasticSearch8Plugins" ] "messemar" "elasticsearch" "0000000000000000000000000000000000000000000000000000")
     ];
 
   # This one contains whatever you want to overlay

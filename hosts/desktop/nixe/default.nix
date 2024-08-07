@@ -112,7 +112,7 @@
       enable = true;
       internalInterfaces = [ "ve-+" ];
       externalInterface = "eth0";
-      enableIPv6 = false;
+      enableIPv6 = true;
     };
   };
 
@@ -120,12 +120,21 @@
   #   enable = true;
   # };
 
-  services.ollama = {
-    enable = true;
-    package = pkgs.unstable.ollama;
-    acceleration = "cuda";
-    environmentVariables = {
-      OLLAMA_ORIGINS = "http://192.168.0.0:*,app://obsidian.md:*";
+  services = {
+    ollama = {
+      enable = true;
+      package = pkgs.unstable.ollama;
+      acceleration = "cuda";
+      environmentVariables = {
+        OLLAMA_ORIGINS = "http://192.168.0.0:*,app://obsidian.md:*";
+      };
+    };
+
+    tailscale = {
+      extraUpFlags = [
+        "--accept-dns=true"
+        "--accept-routes"
+      ];
     };
   };
 

@@ -259,6 +259,11 @@ in
           icon = "dollar";
           color = "turquoise";
         };
+        Admin = {
+          id = 6;
+          icon = "shield";
+          color = "red";
+        };
       };
 
       settings = {
@@ -324,6 +329,13 @@ in
               iconUpdateURL = "https://www.protondb.com/favicon.ico";
               updateInterval = 24 * 60 * 60 * 1000; # every day
               definedAliases = [ "@pdb" ];
+            };
+
+            "Github" = {
+              urls = [{ template = "https://github.com/search?ref=opensearch&type=repositories&q={searchTerms}"; }];
+              iconUpdateURL = "https://github.githubassets.com/favicons/favicon.png";
+              updateInterval = 24 * 60 * 60 * 1000; # every day
+              definedAliases = [ "@gh" ];
             };
 
             "Google".metaData.alias = "@g"; # builtin engines only support specifying one additional alias

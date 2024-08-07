@@ -1,5 +1,5 @@
 { pkgs, ... }: {
-  home.packages = with pkgs; [ hydroxide protonmail-bridge ];
+  home.packages = with pkgs; [ protonmail-bridge ];
 
   systemd.user.services.protonmail-bridge = {
     Unit = {
