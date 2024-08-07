@@ -14,22 +14,23 @@ let cfg = config.services.nextcloud.config; in {
     "NEXTCLOUD/S3/SECRET" = ncOwned;
     "NEXTCLOUD/S3/SSE_CKEY" = ncOwned;
     "NEXTCLOUD/admin-password" = ncOwned;
-    db-password = {
+
+    "POSTGRES/NEXTCLOUD_PASS" = {
       owner = config.users.users.postgres.name;
-      group = "db-pass-access";
+      group = "nextcloud-db-pass-access";
       mode = "0440";
     };
   };
 
   users = {
-    groups = { db-pass-access = { }; };
+    groups = { nextcloud-db-pass-access = { }; };
     users = {
-      postgres.extraGroups = [ "db-pass-access" ];
-      nextcloud.extraGroups = [ "db-pass-access" ];
+      postgres.extraGroups = [ "nextcloud-db-pass-access" ];
+      nextcloud.extraGroups = [ "nextcloud-db-pass-access" ];
     };
   };
 
-  services = {
+  services = rec {
     nextcloud = {
       enable = true;
       configureRedis = true;
@@ -54,7 +55,7 @@ let cfg = config.services.nextcloud.config; in {
         dbuser = "nextcloud";
         dbname = "nextcloud";
         dbhost = "/run/postgresql";
-        dbpassFile = config.sops.secrets."db-password".path;
+        dbpassFile = config.sops.secrets."POSTGRES/NEXTCLOUD_PASS".path;
 
         objectstore.s3 = {
           enable = true;
@@ -82,26 +83,84 @@ let cfg = config.services.nextcloud.config; in {
         mail_sendmailmode = "pipe";
 
         enabledPreviewProviders = [
-          "OC\\Preview\\BMP"
-          "OC\\Preview\\GIF"
-          "OC\\Preview\\JPEG"
+          "OC\\Preview\\Imaginary"
+          # "OC\\Preview\\BMP"
+          # "OC\\Preview\\GIF"
+          # "OC\\Preview\\JPEG"
           "OC\\Preview\\Krita"
           "OC\\Preview\\MarkDown"
           "OC\\Preview\\MP3"
           "OC\\Preview\\OpenDocument"
-          "OC\\Preview\\PNG"
+          # "OC\\Preview\\PNG"
           "OC\\Preview\\TXT"
-          "OC\\Preview\\XBitmap"
-          "OC\\Preview\\HEIC"
+          # "OC\\Preview\\XBitmap"
+          # "OC\\Preview\\HEIC"
+        ];
+
+        trusted_proxies = [
+          "192.168.1.0/24"
+          "192.168.2.0/24"
         ];
       };
+
+      phpOptions = {
+        maintenance_window_start = "100";
+
+        preview_imaginary_url = "http://127.0.0.1:${imaginary.port}";
+        preview_imaginary_key = "";
+
+        opcache.jit = 1255;
+        opcache.jit_buffer_size = "128M";
+      };
+
+      notify_push = {
+        enable = true;
+        package = pkgs.nextcloud-notify_push;
+      };
+    };
+
+    imaginary = {
+      enable = true;
+      port = 9000;
+      settings = {
+        concurrency = 50;
+        enable-url-source = true;
+        return-size = true;
+        max-allowed-resize = "222.2";
+        allowed-origins = [ "https://${nextcloud.hostName}" ];
+      };
+    };
+
+    clamav = {
+      daemon = {
+        enable = true;
+        settings = {
+          MaxDirectoryRecursion = 30;
+          MaxFileSize = "10G";
+          PCREMaxFileSize = "10G";
+          StreamMaxLength = "10G";
+        };
+      };
+
+      updater.enable = true;
+    };
+
+    elasticsearch = {
+      enable = true;
+      package = pkgs.elasticsearch;
+      port = 9200;
+      plugins = [ pkgs.elasticsearchPlugins.ingest-attachment ];
     };
 
     postgresql = {
       enable = true;
 
-      ensureDatabases = [ cfg.dbname ];
-      ensureUsers = [{ name = cfg.dbuser; ensureDBOwnership = true; }];
+      ensureDatabases = [
+        nextcloud.config.dbname
+      ];
+      ensureUsers = [
+        { name = nextcloud.config.dbuser; ensureDBOwnership = true; }
+      ];
     };
 
     caddy.virtualHosts."nc.racci.dev".extraConfig = /*caddyfile*/ ''
@@ -109,28 +168,42 @@ let cfg = config.services.nextcloud.config; in {
     '';
   };
 
-  systemd.services."nextcloud-setup" = {
-    requires = [ "postgresql.service" ];
-    after = [ "postgresql.service" ];
+  virtualisation.docker = {
+    enable = true;
   };
 
-  systemd.services.postgresql.postStart = ''
-    $PSQL -tA <<'EOF'
-      DO $$
-      DECLARE password TEXT;
-      BEGIN
-        password := trim(both from replace(pg_read_file('${config.sops.secrets."db-password".path}'), E'\n', '''));
-        EXECUTE format('ALTER ROLE ${cfg.dbuser} WITH PASSWORD '''%s''';', password);
-      END $$;
-    EOF
-  '';
+  systemd.services = {
+    nextcloud-setup = {
+      requires = [ "postgresql.service" ];
+      after = [ "postgresql.service" ];
+    };
+
+    postgresql.postStart = ''
+      $PSQL -tA <<'EOF'
+        DO $$
+        DECLARE password TEXT;
+        BEGIN
+          password := trim(both from replace(pg_read_file('${config.sops.secrets."POSTGRES/NEXTCLOUD_PASS".path}'), E'\n', '''));
+          EXECUTE format('ALTER ROLE ${cfg.dbuser} WITH PASSWORD '''%s''';', password);
+        END $$;
+      EOF
+    '';
+
+    protonmail-bridge = {
+      after = [ "network.target" ];
+      wantedBy = [ "default.target" ];
+      script = "${pkgs.protonmail-bridge}/bin/protonmail-bridge --no-window --noninteractive --log-level info";
+
+      serviceConfig = {
+        Restart = "always";
+      };
+    };
+  };
 
   networking = {
     firewall = {
-      allowedUDPPorts = [ ];
-      allowedTCPPorts = [ 80 443 ];
-      allowedUDPPortRanges = [{ from = 0; to = 0; }];
-      allowedTCPPortRanges = [{ from = 0; to = 0; }];
+      allowedUDPPorts = [ 3478 ];
+      allowedTCPPorts = [ 80 443 3478 ];
     };
   };
 }
