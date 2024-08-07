@@ -115,6 +115,7 @@ let cfg = config.services.nextcloud.config; in {
       notify_push = {
         enable = true;
         package = pkgs.nextcloud-notify_push;
+        bendDomainToLocalhost = true;
       };
     };
 
