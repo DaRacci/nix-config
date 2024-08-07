@@ -126,7 +126,7 @@ let cfg = config.services.nextcloud.config; in {
         concurrency = 50;
         enable-url-source = true;
         return-size = true;
-        max-allowed-resolution = "222.2";
+        # max-allowed-resolution = "222.2";
         allowed-origins = [ "https://${nextcloud.hostName}" ];
       };
     };
