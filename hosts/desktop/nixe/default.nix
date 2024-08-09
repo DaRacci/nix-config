@@ -46,6 +46,7 @@
       enable = true;
       openFirewall = true;
     };
+    adb.enable = true;
   };
 
   host = {

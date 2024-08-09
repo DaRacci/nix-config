@@ -22,8 +22,13 @@ let cfg = config.purpose.gaming.vr; in {
       run mkdir -p $VERBOSE_ARG \
         "$HOME/.config/openxr/1/";
 
+      if [ -f "$HOME/.config/openxr/1/active_runtime.json" ]; then
+        run rm $VERBOSE_ARG \
+          "$HOME/.config/openxr/1/active_runtime.json";
+      fi
+
       run ln -s $VERBOSE_ARG \
-        "$HOME/.config/openxr/1/active_runtime.json" "$HOME/.steam/steam/steamapps/common/SteamVR/steamxr_linux64.json";
+        "$HOME/.steam/steam/steamapps/common/SteamVR/steamxr_linux64.json" "$HOME/.config/openxr/1/active_runtime.json";
     '';
 
     user.persistence.directories = [

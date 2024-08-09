@@ -36,6 +36,7 @@ in
       "podman"
       "git"
       "libvirtd"
+      "adbusers"
     ] ++ groups;
 
     hashedPasswordFile = mkIf (!skipPassword) config.sops.secrets."${name}-passwd".path;
