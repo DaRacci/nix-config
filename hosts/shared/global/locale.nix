@@ -15,12 +15,8 @@
     };
 
     automatic-timezoned = {
-      enable = true;
+      enable = false;
       package = pkgs.automatic-timezoned;
     };
   };
-
-  # systemd.services.automatic-timezoned = {
-  #   serviceConfig.ExecStart = lib.mkForce "${lib.getExe services.automatic-timezoned.package}";
-  # };
 }

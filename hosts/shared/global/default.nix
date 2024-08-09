@@ -8,6 +8,7 @@
     ./passwords.nix
     ./sops.nix
     ./security.nix
+    ./time.nix
     ./zram.nix
   ];
 
@@ -31,8 +32,4 @@
       ${pkgs.nvd}/bin/nvd diff $PREVIOUS $NEW
     fi
   '';
-
-  time = {
-    hardwareClockInLocalTime = true;
-  };
 }
