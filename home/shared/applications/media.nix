@@ -4,6 +4,7 @@
     unstable.spotify
     delfin # Jellyfin client
     clapper # Video player
+    switcheroo # Converter Utility
   ];
 
   xdg.mimeApps =
