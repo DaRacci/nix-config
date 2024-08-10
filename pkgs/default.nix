@@ -1,5 +1,4 @@
 { pkgs }: {
-  protonup-rs = pkgs.callPackage ./protonup-rs { };
   ficsit-cli = pkgs.callPackage ./ficsit-cli { };
   noise-suppression = pkgs.callPackage ./noise-suppression-for-voice { };
   oscavmgr = pkgs.callPackage ./oscavmgr { };

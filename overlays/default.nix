@@ -1,29 +1,28 @@
 { inputs, lib, ... }:
-# let
-#   usePRRaw = final: prev: names: owner: branch: sha256:
-#     let
-#       overlay = import
-#         (final.fetchzip {
-#           inherit sha256;
-#           url = "https://github.com/${owner}/nixpkgs/archive/${branch}.tar.gz";
-#         })
-#         { overlays = [ ]; inherit (prev) config; };
-#     in
-#     lib.foldl'
-#       (name: acc: acc // {
-#         ${name} = overlay.${name};
-#       })
-#       { }
-#       names;
-# in
+let
+  usePRRaw = final: prev: names: owner: branch: sha256:
+    let
+      overlay = import
+        (final.fetchzip {
+          inherit sha256;
+          url = "https://github.com/${owner}/nixpkgs/archive/${branch}.tar.gz";
+        })
+        { overlays = [ ]; inherit (prev) config; };
+    in
+    lib.foldl'
+      (acc: name: acc // {
+        ${name} = overlay.${name};
+      })
+      { }
+      names;
+in
 {
   additions = final: prev:
-    # let usePR = usePRRaw final prev; in
+    let usePR = usePRRaw final prev; in
     prev.lib.foldl' prev.lib.recursiveUpdate { } [
       # This one brings our custom packages from the 'pkgs' directory
       (import ../pkgs { pkgs = final; })
-      # (usePR "jetbrains" "DaRacci" "master" "sha256-I0iE9APrVbU6TFpJEDrpfRhirMCyaeNCbiE5XL+KXTY=")
-      # (usePR [ "elasticsearch8" "elasticSearch8Plugins" ] "messemar" "elasticsearch" "0000000000000000000000000000000000000000000000000000")
+      (usePR [ "protonup-rs" ] "liperium" "protonuprs-init" "sha256-z5Zh+ih0gE+Uwl8b7//apBRbrsHTvpV0PAhQwM8mOZ4=")
     ];
 
   # This one contains whatever you want to overlay
@@ -57,6 +56,7 @@
 
       inherit lib;
       inherit (inputs.nixd.packages.x86_64-linux) nixd;
+      inherit (inputs.moza-racing.packages) boxflat;
     };
 
   # When applied, the unstable nixpkgs set (declared in the flake inputs) will
