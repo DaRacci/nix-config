@@ -9,7 +9,7 @@
 
   hardware = {
     graphics.manufacturer = "nvidia";
-    backlight.enable = true;
+    backlight.enable = false;
     cooling.enable = true;
     rgb.enable = true;
 
