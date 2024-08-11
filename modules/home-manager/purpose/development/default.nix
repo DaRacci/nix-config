@@ -4,6 +4,7 @@ in
 {
   imports = [
     ./rust.nix
+    ./nix.nix
     ./jvm.nix
   ];
 
