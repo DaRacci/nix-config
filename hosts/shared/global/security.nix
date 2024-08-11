@@ -13,7 +13,7 @@ let userLimit = 32768; in {
       # { domain = "@wheel"; item = "nofile"; type = "soft"; value = "524288"; }
       # { domain = "@wheel"; item = "nofile"; type = "hard"; value = "1048576"; }
       { domain = "*"; item = "nofile"; type = "-"; value = "${toString userLimit}"; }
-      { domain = "*"; item = "memlock"; type = "-"; value = "${toString userLimit}"; }
+      # { domain = "*"; item = "memlock"; type = "-"; value = "${toString userLimit}"; }
     ];
   };
 
