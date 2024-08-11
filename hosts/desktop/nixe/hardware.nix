@@ -1,5 +1,5 @@
 # TODO :: Auto subvolume setup
-{ flake, inputs, pkgs, ... }: {
+{ inputs, pkgs, ... }: {
   imports = [
     inputs.nixos-hardware.nixosModules.common-cpu-amd
     inputs.nixos-hardware.nixosModules.common-cpu-amd-pstate
@@ -23,11 +23,11 @@
   };
 
   boot = rec {
-    kernelPackages = pkgs.unstable.linuxPackages_zen;
+    kernelPackages = pkgs.linuxPackages_zen;
     kernelModules = [ "v4l2loopback" ];
     extraModulePackages = [
       kernelPackages.v4l2loopback
-      (kernelPackages.callPackage "${flake}/pkgs/universal-pidff" { })
+      kernelPackages.universal-pidff
     ];
 
     initrd = {

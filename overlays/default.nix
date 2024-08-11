@@ -54,6 +54,16 @@ in
         in
         final.discord.override ({ withOpenASAR = true; } // nss);
 
+      linuxKernel = prev.linuxKernel // {
+        packagesFor = kernel: prev.linuxKernel.packagesFor kernel // {
+          universal-pidff = prev.callPackage "${(final.fetchzip {
+              sha256 = "sha256-BbKrKAdFNTZU5tx7HeP3tWb/aDg00MJNC9w/3nvpJD4=";
+              url = "https://github.com/danerieber/nixpkgs/archive/universal-pidff.tar.gz";
+            })}/pkgs/os-specific/linux/universal-pidff"
+            { inherit kernel; };
+        };
+      };
+
       inherit lib;
       inherit (inputs.nixd.packages.x86_64-linux) nixd;
       inherit (inputs.moza-racing.packages) boxflat;
