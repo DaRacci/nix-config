@@ -238,6 +238,7 @@
     # Other misc modules
     arion = { url = "github:hercules-ci/arion"; };
     vscode-extensions = { url = "github:nix-community/nix-vscode-extensions"; inputs = { nixpkgs.follows = "nixpkgs"; flake-compat.follows = "flake-compat"; }; };
+    moza-racing = { url = "github:danerieber/moza-racing-wheel-nix"; };
 
     # Resources
     firefox-ultima = { url = "github:soulhotel/FF-ULTIMA"; flake = false; };

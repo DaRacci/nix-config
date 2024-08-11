@@ -8,11 +8,11 @@
 
 stdenv.mkDerivation rec {
   pname = "oscavmgr";
-  version = "0.3.0-2";
+  version = "0.3.3";
 
   src = fetchurl {
     url = "https://github.com/galister/oscavmgr/releases/download/v${version}/oscavmgr-alvr";
-    hash = "sha256-EJfp9ZGQH4+NhNXAln8DQC7QY2Lo5l4bjd7Ddes8rmI=";
+    hash = "sha256-fc8WuZAjZZHZG2/XmL07gUk2LaEX8B1LuwsHADjOJ5I=";
     executable = true;
   };
 
