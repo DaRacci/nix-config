@@ -358,45 +358,7 @@ in
     "x-scheme-handler/https" = lib.mkForce [ "firefox.desktop" ];
   };
 
-  # For information about what the folders are for, see:
-  # https://support.mozilla.org/en-US/kb/profiles-where-firefox-stores-user-data
-  user.persistence =
-    let
-      profiles = attrNames config.programs.firefox.profiles;
-      onEachProfile = value: map (profile: ".mozilla/firefox/${profile}/${value}") profiles;
-    in
-    {
-      directories = trivial.pipe [
-        "sessionstore-backups" # Session restore
-        "bookmarkbackups" # Bookmarks
-        "storage" # Offline Storage
-      ] [
-        (map onEachProfile)
-        flatten
-      ];
-
-      files = trivial.pipe [
-        # Bookmarks
-        "places.sqlite" # Bookmarks // TODO -> Mozilla Sync
-        "favicons.sqlite" # Favicons for bookmarks // TODO -> Needed?
-        # Site Specific
-        "permissions.sqlite" # Permissions
-        "content-prefs.sqlite" # Permissions
-        "cookies.sqlite" # Offline Storage
-        "webappsstore.sqlite" # Offline Storage
-        "chromeappstore.sqlite" # Offline Storage
-        "cert9.db" # SSL Certificates
-        # Persistent Information
-        "sessionstore.jsonlz4" # Session restore
-        "signedInUser.json" # Mozilla Sync
-        "persdict.dat" # Personal dictionary
-        "extensions.json" # Extension permissions
-        "extension-settings.json" # Extension Keybinds
-        "extension-preferences.json" # Extension Preferences
-        "prefs.js" # Preferences & State Storage
-      ] [
-        (map onEachProfile)
-        flatten
-      ];
-    };
+  user.persistence = {
+    directories = map (profile: ".mozilla/firefox/${profile}") (attrNames config.programs.firefox.profiles);
+  };
 }
