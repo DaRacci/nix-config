@@ -345,6 +345,12 @@ in
               definedAliases = [ "@noog" ];
             };
 
+            "NixPkgsIssues" = {
+              urls = [{ template = "https://github.com/NixOS/nixpkgs/issues?q={searchTerms}"; }];
+              icon = "https://nixos.org/logo/nixos-logo-only-hires.png";
+              definedAliases = [ "@npi" ];
+            };
+
             "Google".metaData.alias = "@g"; # builtin engines only support specifying one additional alias
           };
       };
