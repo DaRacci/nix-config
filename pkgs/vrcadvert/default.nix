@@ -40,5 +40,6 @@ stdenv.mkDerivation rec {
     homepage = "https://github.com/galister/VrcAdvert";
     description = "Advertise your OSC app through OSCQuery.";
     platforms = platforms.linux;
+    mainProgram = "VrcAdvert";
   };
 }

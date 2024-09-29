@@ -11,3 +11,6 @@ insert_final_newline = true
 
 [*.pub]
 insert_final_newline = false
+
+[Cargo.lock]
+indent_size = 1

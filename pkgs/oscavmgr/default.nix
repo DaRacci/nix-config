@@ -1,29 +1,46 @@
-{ writeShellApplication
-, callPackage
-, libz
-, openssl
+{ stdenv
 , lib
+, fetchurl
+, openssl
+, openxr-loader
+, libgcc
+, autoPatchelfHook
 }:
-let
-  OSCAvMgr = callPackage ./oscavmgr.nix { };
-  VrcAdvert = callPackage ./VrcAdvert.nix { };
-in
-writeShellApplication {
-  name = "oscavmgr";
 
-  runtimeInputs = [ libz openssl ];
+stdenv.mkDerivation rec {
+  pname = "oscavmgr";
+  version = "0.4.1";
 
-  text = /*bash*/ ''
-    trap 'jobs -p | xargs kill' EXIT
+  src = fetchurl {
+    url = "https://github.com/galister/oscavmgr/releases/download/v${version}/oscavmgr";
+    hash = "sha256-m8A1Mo4MRrxYUMTn+w2YFH366n2HwOinqtDp3q9K6wQ=";
+    executable = true;
+  };
 
-    ${VrcAdvert}/bin/VrcAdvert 9402 9002 &
-    ${OSCAvMgr}/bin/oscavmgr
+  nativeBuildInputs = [
+    autoPatchelfHook
+  ];
+
+  buildInputs = [
+    openssl
+    libgcc
+    openxr-loader
+  ];
+
+  dontUnpack = true;
+
+  sourceRoot = ".";
+
+  installPhase = ''
+    runHook preInstall
+    install -m755 -D $src $out/bin/oscavmgr
+    runHook postInstall
   '';
 
-  meta = {
-    description = "";
-    license = lib.licenses.mit;
-    platforms = lib.platforms.linux;
-    maintainers = [ "DaRacci" ];
+  meta = with lib; {
+    homepage = "https://github.com/galister/oscavmgr";
+    description = " [Linux] Face tracking & utilities for Resonite and VRC";
+    platforms = platforms.linux;
+    mainProgram = "oscavmgr";
   };
 }

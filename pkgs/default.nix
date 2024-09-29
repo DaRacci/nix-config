@@ -1,10 +1,12 @@
 { pkgs }: {
+  # Modding
   ficsit-cli = pkgs.callPackage ./ficsit-cli { };
-  noise-suppression = pkgs.callPackage ./noise-suppression-for-voice { };
-  oscavmgr = pkgs.callPackage ./oscavmgr { };
-  alvr = pkgs.callPackage ./alvr { };
-  boxflat = pkgs.callPackage ./boxflat { };
 
-  copy-to-proxmox = pkgs.callPackage ./copy-to-proxmox { };
-  create-proxmox-container = pkgs.callPackage ./create-proxmox-container { };
+  # VR Stuff
+  alvr = pkgs.callPackage ./alvr { };
+  oscavmgr = pkgs.callPackage ./oscavmgr { };
+  vrcadvert = pkgs.callPackage ./vrcadvert { };
+
+  # Racing Games
+  monocoque = pkgs.callPackage ./monocoque { };
 }

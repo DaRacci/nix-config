@@ -201,39 +201,39 @@
     nixpkgs-lib.url = "github:nix-community/nixpkgs.lib";
 
     # Packages
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nur.url = "github:nix-community/NUR";
 
     # Utils
-    flake-parts = { url = "github:hercules-ci/flake-parts"; inputs.nixpkgs-lib.follows = "nixpkgs-unstable"; };
+    flake-parts = { url = "github:hercules-ci/flake-parts"; inputs.nixpkgs-lib.follows = "nixpkgs"; };
     flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
     flake-compat-nixd = { url = "github:inclyc/flake-compat"; flake = false; };
-    nixos-generators = { url = "github:nix-community/nixos-generators"; inputs = { nixlib.follows = "nixpkgs-lib"; nixpkgs.follows = "nixpkgs-unstable"; }; };
+    nixos-generators = { url = "github:nix-community/nixos-generators"; inputs = { nixlib.follows = "nixpkgs-lib"; nixpkgs.follows = "nixpkgs"; }; };
     devenv.url = "github:cachix/devenv";
 
     # Base Modules
     home-manager = { url = "github:nix-community/home-manager"; inputs.nixpkgs.follows = "nixpkgs"; };
     nixos-hardware.url = "github:nixos/nixos-hardware";
-    sops-nix = { url = "github:Mic92/sops-nix"; inputs = { nixpkgs.follows = "nixpkgs-unstable"; nixpkgs-stable.follows = "nixpkgs"; }; };
+    sops-nix = { url = "github:Mic92/sops-nix"; inputs = { nixpkgs.follows = "nixpkgs"; nixpkgs-stable.follows = "nixpkgs"; }; };
     impermanence.url = "github:nix-community/impermanence";
-    nix-ld-rs = { url = "github:nix-community/nix-ld-rs"; inputs = { nixpkgs.follows = "nixpkgs-unstable"; flake-compat.follows = "flake-compat"; }; };
-    lanzaboote = { url = "github:nix-community/lanzaboote/v0.3.0"; inputs = { nixpkgs.follows = "nixpkgs-unstable"; flake-parts.follows = "flake-parts"; flake-compat.follows = "flake-compat"; }; };
-    nixd = { url = "github:nix-community/nixd"; inputs = { nixpkgs.follows = "nixpkgs-unstable"; flake-parts.follows = "flake-parts"; }; };
+    nix-ld-rs = { url = "github:nix-community/nix-ld-rs"; inputs = { nixpkgs.follows = "nixpkgs"; flake-compat.follows = "flake-compat"; }; };
+    lanzaboote = { url = "github:nix-community/lanzaboote/v0.3.0"; inputs = { nixpkgs.follows = "nixpkgs"; flake-parts.follows = "flake-parts"; flake-compat.follows = "flake-compat"; }; };
+    nixd = { url = "github:nix-community/nixd"; inputs = { nixpkgs.follows = "nixpkgs"; flake-parts.follows = "flake-parts"; }; };
     lix-module = { url = "https://git.lix.systems/lix-project/nixos-module/archive/2.90.0.tar.gz"; inputs.nixpkgs.follows = "nixpkgs"; };
     stylix = { url = "github:danth/stylix"; };
+    nix-alien = { url = "github:thiagokokada/nix-alien"; };
 
     # Modules only used on some systems
     nixos-wsl = { url = "github:nix-community/NixOS-WSL"; inputs = { nixpkgs.follows = "nixpkgs"; flake-compat.follows = "flake-compat"; }; };
-    attic = { url = "github:zhaofengli/attic"; inputs = { nixpkgs-stable.follows = "nixpkgs"; nixpkgs.follows = "nixpkgs-unstable"; flake-compat.follows = "flake-compat"; }; };
-    jovian = { url = "github:Jovian-Experiments/Jovian-NixOS"; inputs.nixpkgs.follows = "nixpkgs-unstable"; };
-    nixarr = { url = "github:rasmus-kirk/nixarr"; inputs.nixpkgs.follows = "nixpkgs-unstable"; };
+    attic = { url = "github:zhaofengli/attic"; inputs = { nixpkgs-stable.follows = "nixpkgs"; nixpkgs.follows = "nixpkgs"; flake-compat.follows = "flake-compat"; }; };
+    jovian = { url = "github:Jovian-Experiments/Jovian-NixOS"; inputs.nixpkgs.follows = "nixpkgs"; };
+    nixarr = { url = "github:rasmus-kirk/nixarr"; inputs.nixpkgs.follows = "nixpkgs"; };
 
     # Hyprland Stuff
-    hyprland = { url = "git+https://github.com/hyprwm/Hyprland?submodules=1"; inputs.nixpkgs.follows = "nixpkgs-unstable"; };
+    hyprland = { url = "git+https://github.com/hyprwm/Hyprland?submodules=1"; inputs.nixpkgs.follows = "nixpkgs"; };
     hyprland-plugins = { url = "github:hyprwm/hyprland-plugins"; inputs.hyprland.follows = "hyprland"; };
     hyprland-contrib.url = "github:hyprwm/contrib";
-    anyrun = { url = "github:peppidesu/anyrun/hyprland-socket-move-fix"; inputs = { nixpkgs.follows = "nixpkgs-unstable"; flake-parts.follows = "flake-parts"; }; };
+    anyrun = { url = "github:peppidesu/anyrun/hyprland-socket-move-fix"; inputs = { nixpkgs.follows = "nixpkgs"; flake-parts.follows = "flake-parts"; }; };
 
     # Other misc modules
     arion = { url = "github:hercules-ci/arion"; };

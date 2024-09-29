@@ -1,4 +1,3 @@
-# Credit to PassiveLemon for his work on making this derivation!
 { lib
 , stdenv
 , fetchzip
@@ -21,22 +20,22 @@
 , wayland
 , x264
 , xorg
-,
+, SDL2
 }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "alvr";
-  version = "20.8.1";
+  version = "20.11.1";
 
   src = fetchzip {
     url = "https://github.com/alvr-org/ALVR/releases/download/v${finalAttrs.version}/alvr_streamer_linux.tar.gz";
-    hash = "sha256-8bQpEnzK4ZGE5P49Gh/fmxgyCBFTzD511q6aZxe0B/Y=";
+    hash = "sha256-/m5uyqI1qrWc82FSoU+baSzpvIGXOwjjJhObMeWPjfg=";
   };
 
   alvrSrc = fetchFromGitHub {
     owner = "alvr-org";
     repo = "ALVR";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-HRXBagh6NClm0269ip0SlhOWCoI8CQXEtr7veSRgvwE=";
+    hash = "sha256-boSS7eEfcKRJf5gt1LKk/DuyZEWMTun093P7mkIjUgs=";
   };
 
   nativeBuildInputs = [
@@ -49,6 +48,8 @@ stdenv.mkDerivation (finalAttrs: {
     libva
     libvdpau
     vulkan-loader
+    pipewire
+    SDL2
   ];
 
   runtimeDependencies = [

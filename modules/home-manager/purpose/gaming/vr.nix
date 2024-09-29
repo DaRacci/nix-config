@@ -5,7 +5,48 @@ let cfg = config.purpose.gaming.vr; in {
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = with pkgs; [ sidequest oscavmgr ];
+    home = {
+      packages = with pkgs; [
+        sidequest
+        oscavmgr
+        vrcadvert
+        android-tools
+      ];
+
+      file.".config/alvr/alvr-startup.sh" = {
+        executable = true;
+        text = ''
+          trap 'jobs -p | xargs kill' EXIT
+
+          ${lib.getExe pkgs.vrcadvert} 9402 9002 &
+          ${lib.getExe pkgs.oscavmgr} alvr
+        '';
+      };
+
+      file.".config/alvr/alvr-stop.sh" = {
+        executable = true;
+        text = ''
+          killall VrcAdvert
+          killall oscavmgr
+        '';
+      };
+
+      # FIXME - breaks on rebuild
+      activation.link-steamvr-openxr-runtime = lib.hm.dag.entryAfter [ "writeBoundary" ] /*bash*/ ''
+        RUNTIME_PATH="$HOME/.config/openxr/1/active_runtime.json"
+
+        run mkdir -p $VERBOSE_ARG \
+          "$HOME/.config/openxr/1/";
+
+        if [ -f "$RUNTIME_PATH" ]; then
+          run rm $VERBOSE_ARG \
+            "$RUNTIME_PATH";
+        fi
+
+        run ln -s $VERBOSE_ARG \
+          "$HOME/.steam/steam/steamapps/common/SteamVR/steamxr_linux64.json" "$RUNTIME_PATH";
+      '';
+    };
 
     xdg.mimeApps = {
       defaultApplications = {
@@ -18,21 +59,10 @@ let cfg = config.purpose.gaming.vr; in {
       };
     };
 
-    home.activation.link-steamvr-openxr-runtime = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      run mkdir -p $VERBOSE_ARG \
-        "$HOME/.config/openxr/1/";
-
-      if [ -f "$HOME/.config/openxr/1/active_runtime.json" ]; then
-        run rm $VERBOSE_ARG \
-          "$HOME/.config/openxr/1/active_runtime.json";
-      fi
-
-      run ln -s $VERBOSE_ARG \
-        "$HOME/.steam/steam/steamapps/common/SteamVR/steamxr_linux64.json" "$HOME/.config/openxr/1/active_runtime.json";
-    '';
-
     user.persistence.directories = [
       ".config/alvr"
+      ".android"
+      ".SideQuest"
     ];
   };
 }
