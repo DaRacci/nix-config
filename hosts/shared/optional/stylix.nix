@@ -5,6 +5,7 @@
 
   stylix = {
     enable = true;
+    polarity = "dark";
     # Image is needed for now, until https://github.com/danth/stylix/issues/200 is fixed.
     image = pkgs.fetchurl {
       url = "https://nextcloud.racci.dev/s/Hy8qkAWYwqSTjKp/download/17.jpeg";
