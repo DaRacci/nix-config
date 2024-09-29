@@ -277,24 +277,24 @@ in
     services.btrfs.autoScrub = mkIf (drive.format == "btrfs") {
       enable = mkDefault true;
       fileSystems = [ "/persist" ];
-      interval = "weekly";
+      interval = "monthly";
     };
 
-    services.snapper.configs = mkIf (drive.format == "btrfs") (builtins.foldl' recursiveUpdate { }
-      ([{
-        persist = {
-          SUBVOLUME = "/persist";
-          TIMELINE_CREATE = true;
-          TIMELINE_CLEANUP = true;
-        };
-      }] ++ builtins.map
-        (user: {
-          "${user.name}Home" = {
-            SUBVOLUME = "${cfg.root}/home/${user.name}";
-            TIMELINE_CREATE = true;
-            TIMELINE_CLEANUP = true;
-          };
-        })
-        (builtins.filter (user: user.createHome) (builtins.attrValues config.users.users))));
+    # services.snapper.configs = mkIf (drive.format == "btrfs") (builtins.foldl' recursiveUpdate { }
+    #   ([{
+    #     persist = {
+    #       SUBVOLUME = "/persist";
+    #       TIMELINE_CREATE = true;
+    #       TIMELINE_CLEANUP = true;
+    #     };
+    #   }] ++ builtins.map
+    #     (user: {
+    #       "${user.name}Home" = {
+    #         SUBVOLUME = "${cfg.root}/home/${user.name}";
+    #         TIMELINE_CREATE = true;
+    #         TIMELINE_CLEANUP = true;
+    #       };
+    #     })
+    #     (builtins.filter (user: user.createHome) (builtins.attrValues config.users.users))));
   };
 }
