@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 let
   nur-no-pkgs = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") { };
@@ -39,6 +39,7 @@ in
       qemu = {
         runAsRoot = true;
         ovmf.enable = true;
+        swtpm.enable = true;
       };
 
       # deviceACL = [
@@ -46,6 +47,16 @@ in
       #   "/dev/kvm"
       #   "/dev/shm/looking-glass"
       # ];
+    };
+  };
+
+  environment.etc = {
+    "ovmf/edk2-x86_64-secure-code.fd" = {
+      source = config.virtualisation.libvirtd.qemu.package + "/share/qemu/edk2-x86_64-secure-code.fd";
+    };
+
+    "ovmf/edk2-i386-vars.fd" = {
+      source = config.virtualisation.libvirtd.qemu.package + "/share/qemu/edk2-i386-vars.fd";
     };
   };
 
