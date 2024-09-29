@@ -9,7 +9,6 @@
       obs-backgroundremoval
       looking-glass-obs
       input-overlay
-      advanced-scene-switcher
     ];
   };
 

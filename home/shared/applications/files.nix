@@ -7,7 +7,6 @@ let
       nautilus
       nautilus-python
       nautilus-open-any-terminal
-      turtle
     ];
   };
 in
@@ -17,8 +16,6 @@ in
     baobab # Disk usage analyzer
     gnome-disk-utility # Disk utility
     file-roller # Archive manager
-    unstable.morgen
-    unstable.karlender
   ];
 
   xdg.mimeApps.defaultApplications = {

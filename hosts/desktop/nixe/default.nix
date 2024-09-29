@@ -71,14 +71,16 @@
   networking = {
     firewall = {
       allowedUDPPorts = [
-        9944
-        8082
-        9942
-        9943
+        # ALVR
+        9942 # OSC
+        9944 # Stream
+        8082 # Web
+
         7860
         11434
         27031
         27036
+
         # Immersed-VR
         21000
         21010
@@ -90,9 +92,6 @@
         9999
         22
         5990
-        9944
-        8082
-        9942
         9943
         8080
         7860
@@ -101,6 +100,12 @@
         27037
         10400
         10401
+
+        # ALVR
+        9942
+        9944
+        8082
+
         # Immersed-VR
         21000
         48847
@@ -124,7 +129,7 @@
   services = {
     ollama = {
       enable = true;
-      package = pkgs.unstable.ollama;
+      package = pkgs.ollama-cuda;
       acceleration = "cuda";
       environmentVariables = {
         OLLAMA_ORIGINS = "http://192.168.0.0:*,app://obsidian.md:*";

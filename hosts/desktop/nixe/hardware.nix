@@ -31,7 +31,6 @@
     ];
 
     initrd = {
-      # TODO :: Needed? ahci, sd_mod usbhid usb_storage
       availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usb_storage" "usbhid" "sd_mod" ];
     };
 

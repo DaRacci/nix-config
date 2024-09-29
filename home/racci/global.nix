@@ -39,15 +39,11 @@
     };
   };
 
-  # custom.theme = {
-  #   colourScheme = "tokyodark";
-
-  #   cursor = {
-  #     name = "Bibata-Modern-Ice";
-  #     size = 32;
-  #     package = pkgs.bibata-cursors;
-  #   };
-  # };
+  programs.vdirsyncer.enable = true;
+  services.vdirsyncer = {
+    enable = true;
+    frequency = "minutely";
+  };
 
   accounts = {
     email = { };
@@ -63,7 +59,13 @@
           url = "https://nextcloud.racci.dev/remote.php/dav";
 
           userName = "Racci";
-          passwordCommand = [ "${pkgs.lib.getExe' pkgs.uutils-coreutils-noprefix "cat"} ${config.sops.secrets.NEXTCLOUD_APP_PASSWORD.path}" ];
+          passwordCommand =
+            let
+              getPassScript = pkgs.writeScriptBin "get-pass" ''
+                ${pkgs.lib.getExe' pkgs.uutils-coreutils-noprefix "cat"} ${config.sops.secrets.NEXTCLOUD_APP_PASSWORD.path}
+              '';
+            in
+            [ "${getPassScript.outPath}/bin/get-pass" ];
         };
 
         vdirsyncer = {
@@ -74,14 +76,10 @@
             start = /*py*/ ''datetime.now() + timedelta(days=365 * 2)'';
             end = /*py*/ ''datetime.now() - timedelta(days=365 * 2)'';
           };
-
-          #   urlCommand = [ "echo https://" ];
         };
       };
     };
   };
-
-  programs.vdirsyncer.enable = true;
 
   sops.secrets = {
     NEXTCLOUD_APP_PASSWORD = { };
