@@ -3,6 +3,7 @@
     ./modding.nix
     ./osu.nix
     ./roblox.nix
+    ./simulator.nix
     ./steam.nix
     ./vr.nix
   ];

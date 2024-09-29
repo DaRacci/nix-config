@@ -1,4 +1,4 @@
-{ flake, pkgs, ... }: {
+{ flake, ... }: {
   imports = [
     ./global.nix
     ./features/desktop/hyprland
@@ -7,7 +7,7 @@
     "${flake}/home/shared/applications"
   ];
 
-  home.packages = with pkgs; [ trayscale boxflat ];
+  # home.packages = with pkgs; [ ];
   user.persistence.enable = true;
 
   purpose = {
@@ -26,6 +26,11 @@
         enable = true;
         enableSatisfactory = true;
         enableBeatSaber = true;
+      };
+
+      simulator = {
+        enable = true;
+        enableRacing = true;
       };
     };
 

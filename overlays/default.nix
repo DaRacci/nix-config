@@ -23,6 +23,7 @@ in
       # This one brings our custom packages from the 'pkgs' directory
       (import ../pkgs { pkgs = final; })
       (usePR [ "protonup-rs" ] "liperium" "protonuprs-init" "sha256-z5Zh+ih0gE+Uwl8b7//apBRbrsHTvpV0PAhQwM8mOZ4=")
+      # (usePR [ "alvr" ] "jopejoe1" "alvr-src" "sha256-OWnvv900LI20DypGLMAsceRTFdkahMns6BHO2OKzmM0=")
     ];
 
   # This one contains whatever you want to overlay
@@ -54,25 +55,25 @@ in
         in
         final.discord.override ({ withOpenASAR = true; } // nss);
 
-      linuxKernel = prev.linuxKernel // {
-        packagesFor = kernel: prev.linuxKernel.packagesFor kernel // {
-          universal-pidff = prev.callPackage "${(final.fetchzip {
-              sha256 = "sha256-BbKrKAdFNTZU5tx7HeP3tWb/aDg00MJNC9w/3nvpJD4=";
-              url = "https://github.com/danerieber/nixpkgs/archive/universal-pidff.tar.gz";
-            })}/pkgs/os-specific/linux/universal-pidff"
-            { inherit kernel; };
-        };
-      };
+      # linuxKernel = prev.linuxKernel // {
+      #   packagesFor = kernel: prev.linuxKernel.packagesFor kernel // {
+      #     universal-pidff = prev.callPackage "${(final.fetchzip {
+      #         sha256 = "sha256-okjpIXPWT1IcUcljPTuTiMhrAUbMEkw0eVgnOm09wlU=";
+      #         url = "https://github.com/danerieber/nixpkgs/archive/universal-pidff.tar.gz";
+      #       })}/pkgs/os-specific/linux/universal-pidff"
+      #       { inherit kernel; };
+      #   };
+      # };
 
       inherit lib;
       inherit (inputs.nixd.packages.x86_64-linux) nixd;
-      inherit (inputs.moza-racing.packages) boxflat;
+      inherit (inputs.moza-racing.packages.x86_64-linux) boxflat;
     };
 
   # When applied, the unstable nixpkgs set (declared in the flake inputs) will
   # be accessible through 'pkgs.unstable'
   unstable-packages = final: _prev: {
-    unstable = import inputs.nixpkgs-unstable {
+    unstable = import inputs.nixpkgs {
       inherit (final) system;
       config.allowUnfree = true;
     };
