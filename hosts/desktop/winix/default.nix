@@ -9,15 +9,19 @@
     "${flake}/hosts/shared/optional/containers.nix"
   ];
 
-  boot.systemd.enable = true;
+  environment.systemPackages = with pkgs; [ wget ];
 
   host = {
     drive = {
       format = "btrfs";
       name = "Nix";
     };
+
+    device.isHeadless = true;
   };
 
-  boot.loader.systemd-boot.enable = false;
-  environment.systemPackages = with pkgs; [ wget ];
+  boot = {
+    systemd.enable = true;
+    loader.systemd-boot.enable = false;
+  };
 }

@@ -6,7 +6,9 @@
 in
 {
   options.custom.display-manager = {
-    enable = (mkEnableOption "Enable custom display manager configuration") // { default = config.host.device.role != "server"; };
+    enable = (mkEnableOption "Enable custom display manager configuration") // {
+      default = config.host.device.isHeadless;
+    };
   };
 
   config = mkIf cfg.enable {

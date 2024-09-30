@@ -2,11 +2,12 @@
 let
   inherit (lib) mkIf mkEnableOption;
   cfg = config.hardware.cooling;
+  inherit (config.host) device;
 in
 {
   options.hardware.cooling = {
     enable = mkEnableOption "enable cooling support" // {
-      default = config.host.device.role == "desktop";
+      default = device.role == "desktop" && !device.isVirtual;
     };
   };
 

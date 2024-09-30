@@ -6,14 +6,20 @@ let
 in
 {
   options.custom.core = {
-    enable = (mkEnableOption "Enable core features") // { default = true; };
+    enable = (mkEnableOption "Enable core features") // {
+      default = true;
+    };
 
     audio = {
-      enable = mkEnableOption "Enable audio support";
+      enable = mkEnableOption "Enable audio support" // {
+        default = !config.host.device.isHeadless;
+      };
     };
 
     bluetooth = {
-      enable = mkEnableOption "Enable Bluetooth support";
+      enable = mkEnableOption "Enable Bluetooth support" // {
+        default = !config.host.device.isHeadless;
+      };
     };
 
     network = {

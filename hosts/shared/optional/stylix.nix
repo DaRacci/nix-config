@@ -1,10 +1,10 @@
-{ inputs, pkgs, ... }: {
+{ inputs, config, pkgs, ... }: {
   imports = [
     inputs.stylix.nixosModules.stylix
   ];
 
   stylix = {
-    enable = true;
+    enable = !config.host.device.isHeadless;
     polarity = "dark";
     # Image is needed for now, until https://github.com/danth/stylix/issues/200 is fixed.
     image = pkgs.fetchurl {
