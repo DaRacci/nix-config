@@ -4,7 +4,6 @@
   ];
 
   stylix = {
-    enable = true;
     base16Scheme = "${inputs.tinted-theming}/base16/tokyo-night-dark.yaml";
 
     cursor = {

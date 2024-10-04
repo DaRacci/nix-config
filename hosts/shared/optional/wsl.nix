@@ -1,9 +1,10 @@
-{ flake, config, pkgs, lib, ... }: with builtins; with lib; {
+{ flake, config, pkgs, lib, ... }: with builtins; with lib; let user = "racci"; in {
   wsl = {
     enable = true;
-    defaultUser = "racci";
+    defaultUser = user;
     startMenuLaunchers = true;
     nativeSystemd = true;
+    useWindowsDriver = true;
 
     interop.register = true;
     wslConf.interop.enabled = true;

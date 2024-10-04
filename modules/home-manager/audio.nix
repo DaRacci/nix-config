@@ -5,7 +5,9 @@
 in
 {
   options.custom.audio = {
-    enable = mkEnableOption "Enable Audio Module" // { default = osConfig.host.device.role != "server"; };
+    enable = mkEnableOption "Enable Audio Module" // {
+      default = !osConfig.host.device.isHeadless;
+    };
 
     disabledDevices = mkOption {
       type = with types; listOf str;

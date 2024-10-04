@@ -23,7 +23,9 @@ in
     };
 
     network = {
-      enable = (mkEnableOption "Enable network support") // { default = true; };
+      enable = (mkEnableOption "Enable network support") // {
+        default = !builtins.hasAttr "wsl" config; # Disable network support on WSL, its already handled by Windows.
+      };
     };
   };
 
