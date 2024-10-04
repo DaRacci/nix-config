@@ -7,7 +7,7 @@ in
 {
   options.custom.display-manager = {
     enable = (mkEnableOption "Enable custom display manager configuration") // {
-      default = config.host.device.isHeadless;
+      default = !config.host.device.isHeadless;
     };
   };
 
