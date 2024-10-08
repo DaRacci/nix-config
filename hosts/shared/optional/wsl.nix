@@ -39,8 +39,8 @@
     for x in applications icons; do
       echo "setting up /usr/share/''${x}..."
       targets=()
-      if [[ -d "/home/${config.wsl.defaultUser}/.nix-profile/share/$x" ]]; then
-        targets+=("/home/${config.wsl.defaultUser}/.nix-profile/share/$x/.")
+      if [[ -d "/etc/profiles/per-user/${config.wsl.defaultUser}/share/$x" ]]; then
+        targets+=("/etc/profiles/per-user/${config.wsl.defaultUser}/share/$x/.")
       fi
 
       if (( ''${#targets[@]} != 0 )); then
