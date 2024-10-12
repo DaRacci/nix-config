@@ -38,5 +38,17 @@ in
     };
   };
 
-  config = mkIf cfg.enable { };
+  config = mkIf cfg.enable {
+    programs = {
+      light = mkIf (!cfg.isHeadless) {
+        enable = true;
+      };
+    };
+
+    boot = {
+      extraModulePackages = lib.optionals (!cfg.isHeadless) [ config.boot.kernelPackages.ddcci-driver ];
+
+      kernelModules = lib.optionals (!cfg.isHeadless) [ "i2c-dev" "ddcci_backlight" ];
+    };
+  };
 }

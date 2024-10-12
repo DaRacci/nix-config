@@ -81,7 +81,7 @@ in
 
           runtimeInputs = with pkgs; [ systemd findutils ];
 
-          text = ''
+          text = /*bash*/ ''
             GUEST_NAME="$1"
             HOOK_NAME="$2"
             STATE_NAME="$3"
@@ -101,6 +101,7 @@ in
 
             set -e # If a script exits with an error, we should as well.
 
+            echo "Attempting to run $HOOKPATH" 2>&1 | tee -a /var/log/libvirt/hooks.log
             # check if it's a non-empty executable file
             if [ -f "$HOOKPATH" ] && [ -s "$HOOKPATH" ] && [ -x "$HOOKPATH" ]; then
               echo "Running $HOOKPATH" 2>&1 | tee -a /var/log/libvirt/hooks.log
@@ -122,12 +123,11 @@ in
 
           runtimeInputs = with pkgs; [ systemd ];
 
-          text = ''
+          text = /*bash*/ ''
             # Numa node formula
             # CORES=$(dmidecode -t processor | grep "Core Count" | awk '{print $3}')
             # THREADS=$(dmidecode -t processor | grep "Thread Count" | awk '{print $3}')
 
-            # ALLOWED="$($CORES / 2)-$($CORES - 1),$($THREADS - (($CORES / 2) - 1))-$(($THREADS - 1))"
             ALLOWED="${toString (cores / 4)}-${toString ((cores / 2) - 1)},${toString (cores - (cores / 4))}-${toString (cores - 1)}"
 
             systemctl set-property --runtime -- user.slice AllowedCPUs=$ALLOWED
@@ -141,7 +141,7 @@ in
 
           runtimeInputs = with pkgs; [ systemd ];
 
-          text = ''
+          text = /*bash*/ ''
             ALLOWED="0-${toString (cores - 1)}"
 
             systemctl set-property --runtime -- user.slice AllowedCPUs=$ALLOWED
