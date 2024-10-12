@@ -22,15 +22,15 @@
     let
       lib = inputs.nixpkgs.lib.extend (prev: _: import ./lib { lib = prev; });
 
-      mkPkgs = system: import inputs.nixpkgs {
+      mkPkgs = system: cuda: rocm: import inputs.nixpkgs {
         inherit system;
         config = {
           allowUnfree = true;
           allowUnfreePredicate = _: true;
           permittedInsecurePackages = [ ];
 
-          cudaSupport = true;
-          rocmSupport = true;
+          cudaSupport = cuda;
+          rocmSupport = rocm;
         };
 
         overlays = [
@@ -41,63 +41,83 @@
       # TODO - Scan the folders for all the configurations and generate the list.
       mkConfigurations = system:
         let
-          builders = import ./lib/builders {
+          mkBuilders = cuda: rocm: import ./lib/builders {
             inherit self inputs lib;
-            pkgs = mkPkgs system;
+            pkgs = mkPkgs system cuda rocm;
           };
+
+          builders = mkBuilders false false;
+          buildersWithCuda = mkBuilders true false;
+          buildersWithRocm = mkBuilders false true;
         in
-        builtins.mapAttrs (n: v: builders.system.build system n v) {
-          nixe = {
-            users = [ "racci" ];
+        builtins.mapAttrs
+          (n: v:
+            if (builtins.hasAttr "acceleration" v) then
+              if (v.acceleration == "cuda") then buildersWithCuda.system.build system n v
+              else if (v.acceleration == "rocm") then buildersWithRocm.system.build system n v
+              else builders.system.build system n v
+            else builders.system.build system n v
+          )
+          {
+            nixe = {
+              users = [ "racci" ];
 
-            isoFormat = "iso";
-            deviceType = "desktop";
+              isoFormat = "iso";
+              deviceType = "desktop";
+              acceleration = "cuda";
+            };
+
+            surnix = {
+              users = [ "racci" ];
+
+              isoFormat = "iso";
+              deviceType = "laptop";
+            };
+
+            winix = {
+              users = [ "racci" ];
+
+              isoFormat = "iso";
+              deviceType = "desktop";
+              acceleration = "cuda";
+            };
+
+            nixarr = {
+              isoFormat = "proxmox-lxc";
+              deviceType = "server";
+              acceleration = "rocm";
+            };
+
+            nixcloud = {
+              isoFormat = "proxmox-lxc";
+              deviceType = "server";
+              acceleration = "rocm";
+            };
+
+            nixdev = {
+              isoFormat = "proxmox-lxc";
+              deviceType = "server";
+              acceleration = "rocm";
+            };
+
+            nixio = {
+              isoFormat = "proxmox-lxc";
+              deviceType = "server";
+              acceleration = "rocm";
+            };
+
+            nixmon = {
+              isoFormat = "proxmox-lxc";
+              deviceType = "server";
+              acceleration = "rocm";
+            };
+
+            nixserv = {
+              isoFormat = "proxmox-lxc";
+              deviceType = "server";
+              acceleration = "rocm";
+            };
           };
-
-          surnix = {
-            users = [ "racci" ];
-
-            isoFormat = "iso";
-            deviceType = "laptop";
-          };
-
-          winix = {
-            users = [ "racci" ];
-
-            isoFormat = "iso";
-            deviceType = "desktop";
-          };
-
-          nixarr = {
-            isoFormat = "proxmox-lxc";
-            deviceType = "server";
-          };
-
-          nixcloud = {
-            isoFormat = "proxmox-lxc";
-            deviceType = "server";
-          };
-
-          nixdev = {
-            isoFormat = "proxmox-lxc";
-            deviceType = "server";
-          };
-
-          nixio = {
-            isoFormat = "proxmox-lxc";
-            deviceType = "server";
-          };
-
-          nixmon = {
-            isoFormat = "proxmox-lxc";
-            deviceType = "server";
-          };
-
-          nixserv = {
-            isoFormat = "proxmox-lxc";
-            deviceType = "server";
-          };
-        };
     in
     flake-parts.lib.mkFlake { inherit inputs; specialArgs.lib = lib; } {
       imports = [
@@ -118,7 +138,7 @@
       };
 
       perSystem = { system, pkgs, ... }: {
-        _module.args.pkgs = mkPkgs system;
+        _module.args.pkgs = mkPkgs system false false;
 
         packages = import ./pkgs { inherit pkgs; } // (builtins.mapAttrs (_n: v: v.image) (mkConfigurations builtins.currentSystem)) // {
           proxmox-template = pkgs.writeShellApplication {

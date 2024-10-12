@@ -129,8 +129,7 @@
   services = {
     ollama = {
       enable = true;
-      package = pkgs.ollama-cuda;
-      acceleration = "cuda";
+      package = pkgs.ollama;
       environmentVariables = {
         OLLAMA_ORIGINS = "http://192.168.0.0:*,app://obsidian.md:*";
       };
