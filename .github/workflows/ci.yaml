@@ -33,8 +33,6 @@ jobs:
       cancel-in-progress: true
     strategy:
       matrix:
-        system:
-          - x86_64
         include:
           - host: nixe
             system: x86_64
