@@ -35,7 +35,7 @@ in
     hardware = {
       graphics.enable = true;
 
-      nvidia-container-toolkit.enable = true;
+      nvidia-container-toolkit.enable = cfg.graphics.manufacturer == "nvidia";
       nvidia = mkIf (cfg.graphics.manufacturer == "nvidia") {
         package = config.boot.kernelPackages.nvidiaPackages.beta;
         open = true;

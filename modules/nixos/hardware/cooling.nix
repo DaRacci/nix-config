@@ -14,7 +14,7 @@ in
   config = mkIf cfg.enable {
     programs.coolercontrol = {
       enable = true;
-      nvidiaSupport = true;
+      nvidiaSupport = config.hardware.graphics == "nvidia";
     };
 
     host.persistence.directories = [
