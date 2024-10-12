@@ -28,6 +28,9 @@
           allowUnfree = true;
           allowUnfreePredicate = _: true;
           permittedInsecurePackages = [ ];
+
+          cudaSupport = true;
+          rocmSupport = true;
         };
 
         overlays = [
@@ -233,7 +236,7 @@
     hyprland = { url = "git+https://github.com/hyprwm/Hyprland?submodules=1"; inputs.nixpkgs.follows = "nixpkgs"; };
     hyprland-plugins = { url = "github:hyprwm/hyprland-plugins"; inputs.hyprland.follows = "hyprland"; };
     hyprland-contrib.url = "github:hyprwm/contrib";
-    anyrun = { url = "github:peppidesu/anyrun/hyprland-socket-move-fix"; inputs = { nixpkgs.follows = "nixpkgs"; flake-parts.follows = "flake-parts"; }; };
+    anyrun = { url = "github:anyrun-org/anyrun"; inputs = { nixpkgs.follows = "nixpkgs"; flake-parts.follows = "flake-parts"; }; };
 
     # Other misc modules
     arion = { url = "github:hercules-ci/arion"; };
