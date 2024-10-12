@@ -277,7 +277,7 @@ in
     services.btrfs.autoScrub = mkIf (drive.format == "btrfs") {
       enable = mkDefault true;
       fileSystems = [ "/persist" ];
-      interval = "monthly";
+      interval = "Wed *-*-* 02:00:00";
     };
 
     # services.snapper.configs = mkIf (drive.format == "btrfs") (builtins.foldl' recursiveUpdate { }
