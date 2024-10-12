@@ -109,14 +109,14 @@ rec {
 
       system.stateVersion = "24.05";
     })
-  ] ++ (builtins.map
-    (username: (import "${self}/lib/builders/home/mkSystem.nix" {
+  ] ++ (lib.trivial.pipe (users ++ [ "root" ]) [
+    (map (username: (import "${self}/lib/builders/home/mkSystem.nix" {
       inherit self lib pkgs;
       name = username;
       hostName = name;
       skipPassword = username == "root";
-    }))
-    (users ++ [ "root" ]));
+    })))
+  ]);
 
   specialArgs = {
     flake = self;

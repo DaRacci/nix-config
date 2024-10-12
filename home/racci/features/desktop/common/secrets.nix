@@ -24,9 +24,7 @@
   # https://developer.1password.com/docs/ssh/agent/config
   xdg.configFile."1Password/ssh/agent.toml".source = pkgs.writers.writeTOML "agent.toml" {
     ssh-keys = [
-      {
-        vault = "Hosts & Users";
-      }
+      { vault = "Hosts & Users"; }
     ];
   };
 

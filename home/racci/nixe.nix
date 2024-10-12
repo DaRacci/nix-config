@@ -1,13 +1,11 @@
 { flake, ... }: {
   imports = [
-    ./global.nix
     ./features/desktop/hyprland
 
     "${flake}/home/shared/features/games"
     "${flake}/home/shared/applications"
   ];
 
-  # home.packages = with pkgs; [ ];
   user.persistence.enable = true;
 
   purpose = {

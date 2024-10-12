@@ -61,7 +61,7 @@ in
         username = name;
         homeDirectory = mkDefault "/home/${name}";
 
-        stateVersion = mkForce "23.11";
+        stateVersion = mkForce "24.05";
         sessionPath = [ "$HOME/.local/bin" ];
       };
 
@@ -72,6 +72,7 @@ in
 
       imports = builtins.attrValues (import "${flake}/modules/home-manager") ++ [
         "${flake}/home/shared/global"
+        "${userDirectory}/global.nix"
       ] ++ (let hostPath = "${userDirectory}/${hostName}.nix"; in lib.optional (hostName != null && builtins.pathExists hostPath) hostPath);
     };
   };
