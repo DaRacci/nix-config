@@ -4,15 +4,13 @@ in
 {
   options.custom.theme = {
     enable = mkEnableOption "Theming" // {
-      default = builtins.hasAttr "stylix" osConfig && osConfig.stylix.enable;
+      default = hasAttr "stylix" osConfig
+        && osConfig.stylix.enable
+        && hasAttr "stylix" config;
     };
   };
 
   config = mkIf cfg.enable rec {
-    stylix = {
-      enable = true;
-    };
-
     gtk = {
       iconTheme = {
         name = "Adwaita";
