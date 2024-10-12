@@ -28,27 +28,30 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.host }}-${{ matrix.system }}
+      cancel-in-progress: true
     strategy:
       matrix:
         system:
           - x86_64
         include:
-          - nix-command: develop .#default --profile profile
+          - host: nixe
             system: x86_64
-          - nix-command: build --impure --accept-flake-config .#nixosConfigurations.nixe.config.system.build.toplevel
+          - host: nixarr
             system: x86_64
-          - nix-command: build --impure --accept-flake-config .#nixosConfigurations.nixarr.config.system.build.toplevel
+          - host: nixcloud
             system: x86_64
-          - nix-command: build --impure --accept-flake-config .#nixosConfigurations.nixcloud.config.system.build.toplevel
+          - host: nixdev
             system: x86_64
-          - nix-command: build --impure --accept-flake-config .#nixosConfigurations.nixdev.config.system.build.toplevel
+          - host: nixio
             system: x86_64
-          - nix-command: build --impure --accept-flake-config .#nixosConfigurations.nixio.config.system.build.toplevel
+          - host: nixmon
             system: x86_64
-          - nix-command: build --impure --accept-flake-config .#nixosConfigurations.nixmon.config.system.build.toplevel
+          - host: nixserv
             system: x86_64
-          - nix-command: build --impure --accept-flake-config .#nixosConfigurations.nixserv.config.system.build.toplevel
-            system: x86_64
+
+    name: Build ${{ matrix.host }} on ${{ matrix.system }}
 
     steps:
       - name: Checkout repository
@@ -80,7 +83,7 @@ jobs:
         if: matrix.system == 'x86_64'
         env:
           _system: ${{ matrix.system }}-linux
-        run: nix ${{ matrix.nix-command }}
+        run: nix build --impure --accept-flake-config .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
 
   # TODO
   test:
