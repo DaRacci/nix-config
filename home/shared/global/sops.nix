@@ -27,4 +27,29 @@ in
   home.file = mkIf hasPubKeyFile {
     ".ssh/id_ed25519.pub".source = "${flake}/home/${username}/id_ed25519.pub";
   };
+
+  home.activation.ssh-to-age = let dir = "${config.xdg.configHome}/age"; in config.lib.dag.entryAfter [ "writeBoundry" "sops-nix" ] /*bash*/ ''
+    if [ ! -d "${dir}" ]; then
+      mkdir -p "${dir}";
+    fi
+
+    # If the file exists, remove it.
+    if [ -f "${dir}/keys.txt" ]; then
+      rm "${dir}/keys.txt";
+    fi
+
+    # Create an array of possible SSH key paths, then filter out the non-existent ones and deduplicate.
+    sshKeyPaths=(
+      "${config.sops.secrets.SSH_PRIVATE_KEY.path}"
+      "${config.user.persistence.root}/.ssh/id_ed25519"
+    )
+    sshKeyPaths=($(printf "%s\n" "''${sshKeyPaths[@]}" | sort -u))
+
+    # Convert the SSH keys to age keys, then append them to the age key file with newlines as separators.
+    for sshKeyPath in "''${sshKeyPaths[@]}"; do
+      if [ -f "''${sshKeyPath}" ]; then
+        age --private-key -i "''${sshKeyPath}" >> "${dir}/keys.txt";
+      fi
+    done
+  '';
 }
