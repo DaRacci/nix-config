@@ -28,16 +28,14 @@ in
     ];
 
     services.xserver.videoDrivers =
-      if (cfg.graphics.manufacturer == "nvidia") then
-        [ "nvidia" ]
-      else if (cfg.graphics.manufacturer == "amd") then
-        [ "amdgpu" ]
-      else
-        [ "modesetting" "fbdev" ];
+      if (cfg.graphics.manufacturer == "nvidia") then [ "nvidia" ]
+      else if (cfg.graphics.manufacturer == "amd") then [ "amdgpu" ]
+      else [ "modesetting" "fbdev" ];
 
     hardware = {
       graphics.enable = true;
 
+      nvidia-container-toolkit.enable = true;
       nvidia = mkIf (cfg.graphics.manufacturer == "nvidia") {
         package = config.boot.kernelPackages.nvidiaPackages.beta;
         open = true;

@@ -107,7 +107,7 @@ rec {
       home-manager.useUserPackages = true;
       home-manager.useGlobalPkgs = true;
 
-      system.stateVersion = "23.11";
+      system.stateVersion = "24.05";
     })
   ] ++ (builtins.map
     (username: (import "${self}/lib/builders/home/mkSystem.nix" {

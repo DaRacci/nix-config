@@ -7,8 +7,8 @@ let
   usersWithPackage = pkg: builtins.filter (username: hasPackage pkg username) hmUsers;
   anyoneHasPackage = pkg: builtins.length (usersWithPackage pkg) > 0;
 
-  enableSushi = anyoneHasPackage pkgs.gnome.sushi;
-  enableNautilus = anyoneHasPackage pkgs.gnome.nautilus;
+  enableSushi = anyoneHasPackage pkgs.sushi;
+  enableNautilus = anyoneHasPackage pkgs.nautilus;
 in
 {
   services.gnome.sushi.enable = enableSushi;

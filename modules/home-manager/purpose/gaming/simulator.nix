@@ -5,7 +5,7 @@ let cfg = config.purpose.gaming.simulator; in {
     enableRacing = lib.mkEnableOption "Enable Moza Racing";
   };
 
-  config = lib.mkIf (cfg.enable && cfg.racing) {
+  config = lib.mkIf (cfg.enable && cfg.enableRacing) {
     home.packages = with pkgs; [
       boxflat
     ];
