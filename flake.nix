@@ -22,7 +22,7 @@
     let
       lib = inputs.nixpkgs.lib.extend (prev: _: import ./lib { lib = prev; });
 
-      mkPkgs = system: cuda: rocm: import inputs.nixpkgs {
+      mkPkgs = system: cuda: _rocm: import inputs.nixpkgs {
         inherit system;
         config = {
           allowUnfree = true;
@@ -30,7 +30,7 @@
           permittedInsecurePackages = [ ];
 
           cudaSupport = cuda;
-          rocmSupport = rocm;
+          rocmSupport = false; # FIXME for some reason this is breaking shit when it shouldn't???
         };
 
         overlays = [
