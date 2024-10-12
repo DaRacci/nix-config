@@ -13,7 +13,7 @@
   ];
 
   environment = {
-    enableAllTerminfo = true;
+    enableAllTerminfo = false;
     sessionVariables = {
       NIXOS_OZONE_WL = "1";
     };
