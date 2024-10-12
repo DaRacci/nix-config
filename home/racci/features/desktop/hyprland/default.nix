@@ -1,14 +1,13 @@
 # TODO - Colour picker bind to SUPER + C (hyprpicker)
-# TODO - Clipboard manager bind to SUPER + V (cliphist)
 # TODO - Game mode that disables compositor and pauses swww-random-wallpaper
 { flake, config, pkgs, lib, ... }: with lib; {
   imports = [
     "${flake}/home/racci/features/desktop/common"
     "${flake}/home/shared/desktop/hyprland"
 
-    # ./ags.nix
+    ./actions.nix
     ./clipboard.nix
-    # ./lock-screen.nix
+    ./menus.nix
     ./notification.nix
     ./panel.nix
     ./polkit.nix
@@ -21,8 +20,8 @@
   xdg.desktopEntries."org.gnome.Settings" = {
     name = "Settings";
     comment = "Gnome Control Center";
-    icon = "org.gnome.Settings";
-    exec = "env XDG_CURRENT_DESKTOP=gnome ${pkgs.gnome.gnome-control-center}/bin/gnome-control-center";
+    icon = "${pkgs.gnome-control-center}/share/icons/gnome-logo-text-dark.svg";
+    exec = "env XDG_CURRENT_DESKTOP=gnome ${lib.getExe pkgs.gnome-control-center}";
     categories = [ "X-Preferences" ];
     terminal = false;
   };
@@ -49,22 +48,284 @@
 
   wayland.windowManager.hyprland = {
     settings = {
+      monitor = [
+        "DP-2,  2560x1440@165,  0x0,        1, vrr, 1" # Center Monitor
+        "DP-1,  2560x1440@144,  auto-left,  1, vrr, 1" # Left Monitor
+        "DP-3,  2560x1440@144,  auto-right, 1, vrr, 1" # Right Monitor
+        ",      preferred,      auto,       1" # Fallback Rule
+      ];
+
+      #region Ricing
+      animations = {
+        enabled = "yes";
+
+        bezier = [
+          "fluent_decel, 0, 0.2, 0.4, 1"
+          "easeOutCirc, 0, 0.55, 0.45, 1"
+          "easeOutCubic, 0.33, 1, 0.68, 1"
+          "easeinoutsine, 0.37, 0, 0.63, 1"
+        ];
+
+        animation = [
+          "windowsIn, 1, 3, easeOutCubic, popin 30" # window open
+          "windowsOut, 1, 3, fluent_decel, popin 70" # window close.
+          "windowsMove, 1, 2, easeinoutsine, slide" #everything in between, moving, dragging, resizing.
+
+          # Fade
+          "fadeIn, 1, 3, easeOutCubic" # fade in (open) -> layers and windows
+          "fadeOut, 1, 2, easeOutCubic" # fade out (close) -> layers and windows
+          "fadeSwitch, 0, 1, easeOutCirc" # fade on changing activewindow and its opacity
+          "fadeShadow, 1, 10, easeOutCirc" # fade on changing activewindow for shadows
+          "fadeDim, 1, 4, fluent_decel" # the easing of the dimming of inactive windows
+          "border, 1, 2.7, easeOutCirc" # for animating the border's color switch speed
+          "borderangle, 1, 30, fluent_decel, once" # for animating the border's gradient angle - styles: once (default), loop
+          "workspaces, 1, 4, easeOutCubic, fade" # styles: slide, slidevert, fade, slidefade, slidefadevert
+        ];
+      };
+
+      decoration = {
+        rounding = 20;
+
+        blur = {
+          enabled = true;
+          xray = true;
+          special = false;
+          new_optimizations = true;
+          size = 14;
+          passes = 4;
+          brightness = 1;
+          noise = 0.01;
+          contrast = 1;
+          popups = true;
+          popups_ignorealpha = 0.6;
+        };
+
+        #region Shadows
+        drop_shadow = true;
+        shadow_ignore_window = true;
+        shadow_range = 20;
+        shadow_offset = "0 2";
+        shadow_render_power = 4;
+        #endregion
+
+        #region Dim
+        dim_inactive = false;
+        dim_strength = 0.1;
+        dim_special = 0;
+        #endregion
+      };
+      #endregion
+
+      general = {
+        gaps_in = 4;
+        gaps_out = 5;
+        gaps_workspaces = 50;
+        border_size = 1;
+
+        resize_on_border = true;
+        no_focus_fallback = true;
+        layout = "dwindle";
+        allow_tearing = true;
+      };
+
+      dwindle = {
+        preserve_split = true;
+        no_gaps_when_only = true;
+        smart_split = false;
+        smart_resizing = false;
+
+        # force_split = 0;
+        # special_scale_factor = 1.0;
+        # split_width_multiplier = 1.0;
+        # use_active_for_splits = true;
+        # pseudotile = yes;
+      };
+
       exec-once = [
         "gnome-keyring-daemon --start --components=secrets"
+
+        # ----------------- #
+        #  Bar and Applets  #
+        # ----------------- #
+        "${lib.getExe pkgs.blueman}"
+        "${lib.getExe pkgs.networkmanagerapplet} --indicator"
       ];
 
       cursor = {
         no_warps = true;
+        no_hardware_cursors = true;
       };
 
       binds = {
         allow_workspace_cycles = true;
       };
 
-      bind =
+      bind = [
+        # (binding mainMod "b" "exec" "${lib.getExe pkgs.hdrop} -f -b ${lib.getExe pkgs.overskride}")
+      ];
+
+      env = [
+        #region NVIDIA
+        "GBM_BACKEND,nvidia-drm"
+        "__GLX_VENDOR_LIBRARY_NAME,nvidia"
+        "LIBVA_DRIVER_NAME,nvidia"
+        "__GL_GSYNC_ALLOWED,1"
+        "__GL_VRR_ALLOWED,1"
+        #endregion
+
+        #region XDG
+        "XDG_CURRENT_DESKTOP,Hyprland"
+        "XDG_SESSION_TYPE,wayland"
+        "XDG_SESSION_DESKTOP,Hyprland"
+        #endregion
+
+        #region Toolkit Backends
+        "GTK_BACKEND,wayland,x11"
+        "QT_QPA_PLATFORM,wayland;xcb"
+        "SDL_VIDEODRIVER,wayland"
+        "CLUTTER_BACKEND,wayland"
+        #endregion
+      ];
+
+      windowrulev2 =
+        let
+          fl = target: regex: mkRule "float" "${target}:^(${regex})$";
+          mkRule = action: matcher: "${action},${matcher}";
+          mkRules = matchers: functions: lib.trivial.pipe matchers (functions ++ [
+            flatten
+          ]);
+
+          mkExactTitleMatcher = title: "title:^(${title})$";
+          mkStartingTitleMatcher = title: "title:^(${title})(.*)$";
+
+          dialogs = [
+            "Steam Settings"
+            "Open File"
+            "Select a File"
+            "Choose wallpaper"
+            "Open Folder"
+            "Save As"
+            "Library"
+            "File Upload"
+          ];
+
+          tripleMonitorGames = [
+            "Assetto Corsa"
+            "AC2"
+          ];
+        in
         [
-          # (binding mainMod "b" "exec" "${lib.getExe pkgs.hdrop} -f -b ${lib.getExe pkgs.overskride}")
-        ];
+          #region Floating Windows
+          (fl "class" "file_progress")
+          (fl "class" "confirm")
+          (fl "class" "dialog")
+          (fl "class" "download")
+          (fl "class" "notification")
+          (fl "class" "error")
+          (fl "class" "confirmreset")
+          (fl "title" "branchdialog")
+          (fl "title" "Confirm to replace files")
+          (fl "title" "File Operation Progress")
+          (fl "class" "org.pulseaudio.pavucontrol")
+          #endregion
+
+          #region Picture In Picture
+          "keepaspectratio, title:^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$"
+          "move 73% 72%,title:^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$"
+          "size 25%, title:^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$"
+          "float, title:^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$"
+          "pin, title:^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$"
+          #endregion
+
+          #region Opacity
+          "opacity 1.0 override 1.0 override, title:^(Picture-in-Picture)$"
+          #endregion
+
+          #region Tearing
+          "immediate, class:(steam_app)" # Enable Tearing for all Steam Games
+          #endregion
+
+          #region Dialogs
+        ] ++ (mkRules dialogs [
+          (map mkStartingTitleMatcher)
+          (map (matcher: [
+            (mkRule "center" matcher)
+            (mkRule "float" matcher)
+          ]))
+          #endregion
+          #region Triple Monitor Windows
+        ]) ++ (mkRules tripleMonitorGames [
+          (map mkExactTitleMatcher)
+          (map (matcher: [
+            (mkRule "float" matcher)
+            (mkRule "center" matcher)
+            (mkRule "opacity 1.0 override 1.0 override 1.0 override" matcher)
+            (mkRule "rounding 0" matcher)
+            (mkRule "size 7680x1440" matcher)
+          ]))
+          #endregion
+        ]);
+
+      layerrule = [
+        "xray 1, .*"
+        #region No Animations
+      ] ++ (trivial.pipe [
+        "walker"
+        "selection"
+        "overview"
+        "anyrun"
+        "indicator.*"
+        "osk"
+        "hyprpicker"
+        "noanim"
+      ] [
+        (map (layer: "noanim, ${layer}"))
+        #endregion
+        #region Ags
+      ]) ++ [
+        "animation slide top, sideleft.*"
+        "animation slide top, sideright.*"
+        "blur, session"
+      ] ++ (trivial.pipe [
+        "bar"
+        "corner.*"
+        "dock"
+        "indicator.*"
+        "indicator*"
+        "overview"
+        "cheatsheet"
+        "sideright"
+        "sideleft"
+        "osk"
+      ] [
+        (map (layer: [
+          "blur, ${layer}"
+          "ignorealpha 0.6, ${layer}"
+        ]))
+        flatten
+        #endregion
+      ]);
+
+      misc = {
+        vfr = true;
+        vrr = true;
+
+        mouse_move_enables_dpms = 1;
+        key_press_enables_dpms = 1;
+
+        animate_manual_resizes = false;
+        animate_mouse_windowdragging = false;
+        enable_swallow = false;
+        swallow_regex = "(foot|kitty|allacritty|Allacritty)";
+
+        focus_on_activate = true;
+        disable_hyprland_logo = true;
+        force_default_wallpaper = 0;
+        new_window_takes_over_fullscreen = 2;
+        allow_session_lock_restore = true;
+
+        initial_workspace_tracking = false;
+      };
 
       plugin = {
         overview = {
@@ -82,7 +343,7 @@
           bar_color = "rgb(2a2a2a)";
           bar_height = 28;
           col_text = "rgba(ffffffdd)";
-          bar_text_size = 11;
+          bar_text_size = 12;
           bar_text_font = "JetBrainsMono Nerd Font";
 
           buttons = {
@@ -91,128 +352,25 @@
             "col.close" = "rgba(ff111133)";
           };
         };
+
+        hyprexpo = {
+          columns = 3;
+          gap_size = 5;
+          bg_col = "rgb(000000)";
+          workspace_method = "first 1"; # [center/first] [workspace] e.g. first 1 or center m+1
+
+          enable_gesture = true; # laptop touchpad, 4 fingers
+          gesture_distance = 300; # how far is the "max"
+          gesture_positive = false;
+        };
       };
-
-      windowrulev2 =
-        let
-          fl = target: regex: "float,${target}:^(${regex})$";
-        in
-        [
-          #region Floating Windows
-          (fl "title" "Picture-in-Picture")
-          (fl "class" "file_progress")
-          (fl "class" "confirm")
-          (fl "class" "dialog")
-          (fl "class" "download")
-          (fl "class" "notification")
-          (fl "class" "error")
-          (fl "class" "confirmreset")
-          (fl "title" "Open File")
-          (fl "title" "branchdialog")
-          (fl "title" "Confirm to replace files")
-          (fl "title" "File Operation Progress")
-          #endregion
-
-          #region Pinning Windows (Keep between workspace changes)
-          "pin, title:^(Picture-in-Picture)$"
-          #endregion
-
-          #region Opacity
-          "opacity 1.0 override 1.0 override, title:^(Picture-in-Picture)$"
-          #endregion
-        ];
     };
 
     extraConfig =
       let
         mod = "SUPER";
 
-        animations = ''
-          debug {
-            disable_logs = false
-          }
-
-          animations {
-            enabled = yes
-
-            # bezier = wind, 0.05, 0.9, 0.1, 1.05
-            # bezier = winIn, 0.1, 1.1, 0.1, 1.1
-            # bezier = winOut, 0.3, -0.3, 0, 1
-            # bezier = liner, 1, 1, 1, 1
-
-            bezier = fluent_decel, 0, 0.2, 0.4, 1
-            bezier = easeOutCirc, 0, 0.55, 0.45, 1
-            bezier = easeOutCubic, 0.33, 1, 0.68, 1
-            bezier = easeinoutsine, 0.37, 0, 0.63, 1
-
-            animation = windowsIn, 1, 3, easeOutCubic, popin 30% # window open
-            animation = windowsOut, 1, 3, fluent_decel, popin 70% # window close.
-            animation = windowsMove, 1, 2, easeinoutsine, slide # everything in between, moving, dragging, resizing.
-
-            # animation = windows, 1, 6, wind, slide
-            # animation = windowsIn, 1, 6, winIn, slide
-            # animation = windowsOut, 1, 5, winOut, slide
-            # animation = windowsMove, 1, 5, qwind, slide
-
-            # Fade
-            animation = fadeIn, 1, 3, easeOutCubic  # fade in (open) -> layers and windows
-            animation = fadeOut, 1, 2, easeOutCubic # fade out (close) -> layers and windows
-            animation = fadeSwitch, 0, 1, easeOutCirc # fade on changing activewindow and its opacity
-            animation = fadeShadow, 1, 10, easeOutCirc # fade on changing activewindow for shadows
-            animation = fadeDim, 1, 4, fluent_decel # the easing of the dimming of inactive windows
-            animation = border, 1, 2.7, easeOutCirc # for animating the border's color switch speed
-            animation = borderangle, 1, 30, fluent_decel, once # for animating the border's gradient angle - styles: once (default), loop
-            animation = workspaces, 1, 4, easeOutCubic, fade # styles: slide, slidevert, fade, slidefade, slidefadevert
-
-            # animation = border, 1, 1, liner
-            # animation = borderangle, 1, 30, liner, loop
-            # animation = fade, 1, 10, default
-            # animation = workspaces, 1, 5, wind
-          }
-        '';
-
-        executions = ''
-          # ----------------- #
-          #  Bar and Applets  #
-          # ----------------- #
-          exec-once = ${pkgs.blueman}/bin/blueman
-          exec-once = ${pkgs.networkmanagerapplet}/bin/nm-applet --indicator
-        '';
-
-        monitors = ''
-          monitor=DP-1,2560x1440@144,-2560x0,1
-          monitor=DP-2,2560x1440@165,0x0,1
-          monitor=DP-3,2560x1440@144,2560x0,1
-          monitor=,highrr,auto,1
-        '';
-
-        env = ''
-          env = LIBVA_DRIVER_NAME,nvidia
-          env = XDG_SESSION_TYPE,wayland
-          env = GBM_BACKEND,nvidia-drm
-          env = __GLX_VENDOR_LIBRARY_NAME,nvidia
-          env = WLR_NO_HARDWARE_CURSORS,1
-
-          env = XDG_CURRENT_DESKTOP,Hyprland
-          env = XDG_SESSION_TYPE,wayland
-          # env = QT_QPA_PLATFORM,wayland
-          #env = QT_STYLE_OVERRIDE,kvantum
-          # env = QT_QPA_PLATFORMTHEME,qt5ct
-          # env = QT_WAYLAND_DISABLE_WINDOWDECORATION,1
-          # env = QT_AUTO_SCREEN_SCALE_FACTOR,1
-        '';
-
         layout = ''
-          dwindle {
-            no_gaps_when_only = true
-            force_split = 0
-            special_scale_factor = 1.0
-            split_width_multiplier = 1.0
-            use_active_for_splits = true
-            pseudotile = yes
-            preserve_split = yes
-          }
-
           master {
             new_status = true
             special_scale_factor = 1
@@ -305,14 +463,6 @@
               bind = ${mod} SHIFT, right, movewindow, r
               bind = ${mod} SHIFT, up, movewindow, u
               bind = ${mod} SHIFT, down, movewindow, d
-              # bind = ${mod} CTRL, left, resizeactive, -80 0
-              # bind = ${mod} CTRL, right, resizeactive, 80 0
-              # bind = ${mod} CTRL, up, resizeactive, 0 -80
-              # bind = ${mod} CTRL, down, resizeactive, 0 80
-              # bind = ${mod} ALT, left, moveactive,  -80 0
-              # bind = ${mod} ALT, right, moveactive, 80 0
-              # bind = ${mod} ALT, up, moveactive, 0 -80
-              # bind = ${mod} ALT, down, moveactive, 0 80
 
               bind = ${mod},Q,killactive                # Kill active window
               bind = ${mod},SPACE,fullscreen            # Toggle fullscreen for the active window
@@ -323,14 +473,13 @@
             '';
 
             session = ''
-              bind = CTRL_ALT,DELETE,exit        # Exit session
-              # bind = ${mod},SHIFT,DELETE,restart # Restart session
+              bind = CTRL_ALT,DELETE,exit           # Exit session
             '';
 
             workspace = ''
               # Move workspaces between monitors
-              bind = ${mod}_ALT,RIGHT,movecurrentworkspacetomonitor,-1
-              bind = ${mod}_ALT,LEFT,movecurrentworkspacetomonitor,+1
+              bind = ${mod}_ALT,RIGHT,movecurrentworkspacetomonitor,+1
+              bind = ${mod}_ALT,LEFT,movecurrentworkspacetomonitor,-1
 
               # Graveyard
               bind=SUPER_SHIFT,S,movetoworkspace,special
@@ -348,36 +497,11 @@
 
         theme = ''
           decoration {
-            rounding = 5
-
             active_opacity = 0.95
             inactive_opacity = 0.95
             fullscreen_opacity = 1
 
-            dim_inactive = false
-            dim_strength = 0.1
-
-            drop_shadow = true
-            shadow_ignore_window = true
             # shadow_offset = 0.2
-            shadow_range = 20
-            shadow_render_power = 3
-            col.shadow = rgba(00000055)
-
-            blur {
-              enabled = true
-              new_optimizations = on
-              xray = true
-
-              size = 4
-              passes = 2
-
-              brightness = 1
-              contrast = 1.3
-              ignore_opacity = true
-              noise = 0.011700
-
-            }
           }
 
           general {
@@ -428,37 +552,11 @@
 
           windowrulev2 = bordercolor rgba(ffabf1AA) rgba(ffabf177),pinned:1
         '';
-
-        other = ''
-          misc {
-            vrr = 1
-            disable_hyprland_logo = true
-            disable_splash_rendering = true
-            force_default_wallpaper = 0
-
-            mouse_move_enables_dpms = 1
-            key_press_enables_dpms = 1
-
-            animate_manual_resizes = 1
-            animate_mouse_windowdragging = 1
-
-            focus_on_activate = true
-          }
-
-          env = WLR_DRM_NO_ATOMIC,1
-        '';
       in
       builtins.concatStringsSep "\n" ([
         input
         layout
-        env
-
         theme
-        animations
-
-        executions
-        monitors
-        other
       ] ++ builtins.attrValues bindings.global ++ builtins.attrValues bindings.submaps);
   };
 }
