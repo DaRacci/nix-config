@@ -40,8 +40,12 @@ in
 
     # Create an array of possible SSH key paths, then filter out the non-existent ones and deduplicate.
     sshKeyPaths=(
-      "${config.sops.secrets.SSH_PRIVATE_KEY.path}"
-      "${config.user.persistence.root}/.ssh/id_ed25519"
+      ${lib.trivial.pipe ([
+        "${config.user.persistence.root}/.ssh/id_ed25519"
+      ] ++ (lib.optionals hasSopsFile [ config.sops.secrets.SSH_PRIVATE_KEY.path ])) [
+        (map (path: "\"${path}\""))
+        (builtins.concatStringsSep "\n")
+      ]}
     )
     sshKeyPaths=($(printf "%s\n" "''${sshKeyPaths[@]}" | sort -u))
 
