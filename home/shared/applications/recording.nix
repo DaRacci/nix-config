@@ -6,7 +6,7 @@
       wlrobs
       obs-vkcapture
       obs-pipewire-audio-capture
-      obs-backgroundremoval
+      # obs-backgroundremoval
       looking-glass-obs
       input-overlay
     ];
