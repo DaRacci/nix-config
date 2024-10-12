@@ -20,17 +20,49 @@ let cfg = config.services.nextcloud.config; in {
       group = "nextcloud-db-pass-access";
       mode = "0440";
     };
+
+    "POSTGRES/IMMICH_PASS" = {
+      owner = config.users.users.postgres.name;
+      group = "immich-db-pass-access";
+      mode = "0440";
+    };
   };
 
   users = {
     groups = { nextcloud-db-pass-access = { }; };
     users = {
-      postgres.extraGroups = [ "nextcloud-db-pass-access" ];
+      postgres.extraGroups = [ "nextcloud-db-pass-access" "immich-db-pass-access" ];
       nextcloud.extraGroups = [ "nextcloud-db-pass-access" ];
+      immich.extraGroups = [ "immich-db-pass-access" ];
     };
   };
 
   services = rec {
+    immich = {
+      enable = true;
+      secretsFile = config.sops.secrets."IMMICH/ENV".path;
+      environment = {
+        IMMICH_TRUSTED_PROXIES = [
+          "192.168.1.0/24"
+          "192.168.2.0/24"
+        ];
+      };
+
+      machine-learning = {
+        enable = true;
+        environment = { };
+      };
+
+      database = {
+        enable = true;
+        createDB = true;
+      };
+
+      redis = {
+        enable = true;
+      };
+    };
+
     nextcloud = {
       enable = true;
       configureRedis = true;
@@ -67,7 +99,7 @@ let cfg = config.services.nextcloud.config; in {
           hostname = "minio.racci.dev";
           key = "k6Dkuj139Y65LzvILRax";
           secretFile = config.sops.secrets."NEXTCLOUD/S3/SECRET".path;
-          # sseCKeyFile = config.sops.secrets."NEXTCLOUD/S3/SSE_CKEY".path;
+          # sseCKeyFile = config.sops.secrets."NEXTCLOUD/S3/SSE_CKEY".path; // TODO - Uncomment when ready.
         };
       };
 
@@ -155,17 +187,19 @@ let cfg = config.services.nextcloud.config; in {
     postgresql = {
       enable = true;
 
-      ensureDatabases = [
-        nextcloud.config.dbname
-      ];
-      ensureUsers = [
-        { name = nextcloud.config.dbuser; ensureDBOwnership = true; }
-      ];
+      ensureDatabases = [ nextcloud.config.dbname ];
+      ensureUsers = [{ name = nextcloud.config.dbuser; ensureDBOwnership = true; }];
     };
 
-    caddy.virtualHosts."nc.racci.dev".extraConfig = /*caddyfile*/ ''
-      reverse_proxy http://localhost:80
-    '';
+    caddy.virtualHosts = {
+      "nc.racci.dev".extraConfig = /*caddyfile*/ ''
+        reverse_proxy http://localhost:80
+      '';
+
+      "photos.racci.dev".extraConfig = let cfg = immich; in /*caddyfile*/ ''
+        reverse_proxy http://${cfg.host}:${toString cfg.port}
+      '';
+    };
   };
 
   virtualisation.docker = {
