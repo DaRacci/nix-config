@@ -22,7 +22,7 @@
 
     persistence = {
       enable = true;
-      type = "tmpfs";
+      type = "snapshot";
 
       directories = [
         "/var/lib/private/ollama"

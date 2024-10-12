@@ -13,10 +13,6 @@
     systemd.enable = true;
   };
 
-  host.persistence = {
-    type = "snapshot";
-  };
-
   microsoft-surface.kernelVersion = "6.5.5";
 
   boot.loader.systemd-boot.enable = true;
