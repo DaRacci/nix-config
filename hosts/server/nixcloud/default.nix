@@ -26,6 +26,11 @@ let cfg = config.services.nextcloud.config; in {
       group = "immich-db-pass-access";
       mode = "0440";
     };
+
+    "IMMICH/ENV" = {
+      owner = config.users.users.immich.name;
+      inherit (config.users.users.immich) group;
+    };
   };
 
   users = {
@@ -42,10 +47,7 @@ let cfg = config.services.nextcloud.config; in {
       enable = true;
       secretsFile = config.sops.secrets."IMMICH/ENV".path;
       environment = {
-        IMMICH_TRUSTED_PROXIES = [
-          "192.168.1.0/24"
-          "192.168.2.0/24"
-        ];
+        IMMICH_TRUSTED_PROXIES = "192.168.1.0/24,192.168.2.0/24";
       };
 
       machine-learning = {
@@ -66,7 +68,7 @@ let cfg = config.services.nextcloud.config; in {
     nextcloud = {
       enable = true;
       configureRedis = true;
-      package = pkgs.unstable.nextcloud29;
+      package = pkgs.unstable.nextcloud30;
 
       https = true;
       # TODO - Change back to nextcloud.racci.dev when ready.
