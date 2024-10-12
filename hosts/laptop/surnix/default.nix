@@ -13,7 +13,7 @@
     systemd.enable = true;
   };
 
-  microsoft-surface.kernelVersion = "6.5.5";
+  microsoft-surface.kernelVersion = "6.10.5";
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
