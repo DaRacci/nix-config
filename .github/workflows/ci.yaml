@@ -61,7 +61,6 @@ jobs:
       - name: Free Disk Space
         uses: jlumbroso/free-disk-space@main
         continue-on-error: true
-        if: matrix.system == 'x86_64'
         with:
           swap-storage: false
           tool-cache: true
@@ -84,31 +83,25 @@ jobs:
           _system: ${{ matrix.system }}-linux
         run: nix build --impure --accept-flake-config .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
 
-  # TODO
   test:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.command }}-${{ matrix.system }}
+      cancel-in-progress: true
     strategy:
       fail-fast: false
       matrix:
-        system:
-          - x86_64
-        nix-command:
-          - fmt -L -- --check .
-          - flake check --impure
+        include:
+          - command: fmt -L -- --check .
+            system: x86_64
+          - command: flake check --impure
+            system: x86_64
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
-
-      - name: Free Disk Space
-        uses: jlumbroso/free-disk-space@main
-        continue-on-error: true
-        if: matrix.system == 'x86_64'
-        with:
-          swap-storage: false
-          tool-cache: true
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
@@ -122,8 +115,7 @@ jobs:
           name: racci
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
-      - name: Build command (x86_64)
-        if: matrix.system == 'x86_64'
+      - name: Run ${{ matrix.command }} on ${{ matrix.system }}
         env:
           _system: ${{ matrix.system }}-linux
-        run: nix ${{ matrix.nix-command }}
+        run: nix ${{ matrix.command }}
