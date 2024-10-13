@@ -10,7 +10,6 @@
 
     "${flake}/hosts/shared/optional/hyprland.nix"
 
-    "${flake}/hosts/shared/optional/pipewire.nix"
     "${flake}/hosts/shared/optional/gaming.nix"
     "${flake}/hosts/shared/optional/tailscale.nix"
   ];

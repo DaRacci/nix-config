@@ -2,7 +2,6 @@
   imports = [
     ./hardware.nix
 
-    "${flake}/hosts/shared/optional/pipewire.nix"
     "${flake}/hosts/shared/optional/gnome.nix"
     "${flake}/hosts/shared/optional/gaming.nix"
   ];
