@@ -194,11 +194,11 @@ let cfg = config.services.nextcloud.config; in {
     };
 
     caddy.virtualHosts = {
-      "nc.racci.dev".extraConfig = /*caddyfile*/ ''
+      "nc".extraConfig = /*caddyfile*/ ''
         reverse_proxy http://localhost:80
       '';
 
-      "photos.racci.dev".extraConfig = let cfg = immich; in /*caddyfile*/ ''
+      "photos".extraConfig = let cfg = config.services.immich; in /*caddyfile*/ ''
         reverse_proxy http://${cfg.host}:${toString cfg.port}
       '';
     };
