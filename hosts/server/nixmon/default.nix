@@ -12,12 +12,12 @@
       settings = { };
     };
 
-    netdata = {
-      enable = true;
-      config = {
-        bind = "";
-      };
-    };
+    # netdata = {
+    #   enable = true;
+    #   config = {
+    #     bind = "";
+    #   };
+    # };
 
     caddy.enable = true;
     caddy.virtualHosts = {
