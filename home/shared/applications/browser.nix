@@ -287,6 +287,7 @@ in
       userContent = ''
         @import "firefox-ultima/userContent.css";
       '';
+      # TODO - Somehow keep track of the last version this was updated for, and apply it when necessary
       # extraConfig = builtins.readFile "${inputs.firefox-ultima}/user.js";
 
       search = {
