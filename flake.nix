@@ -224,7 +224,7 @@
     nixpkgs-lib.url = "github:nix-community/nixpkgs.lib";
 
     # Packages
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nur.url = "github:nix-community/NUR";
 
     # Utils
