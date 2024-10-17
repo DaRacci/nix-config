@@ -23,10 +23,6 @@
     persistence = {
       enable = true;
       type = "snapshot";
-
-      directories = [
-        "/var/lib/private/ollama"
-      ];
     };
   };
 

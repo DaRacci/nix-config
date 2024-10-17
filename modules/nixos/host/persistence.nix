@@ -223,10 +223,11 @@ in
         neededForBoot = true;
       };
 
-      "/" = mkIf (cfg.type == "tmpfs") {
-        device = "none";
-        fsType = "tmpfs";
-        options = [ "defaults" "size=16G" "mode=755" ];
+      "/" = {
+        device = if cfg.type == "tmpfs" then "none" else "/dev/disk/by-partlabel/${drive.name}";
+        fsType = if cfg.type == "tmpfs" then "tmpfs" else drive.format;
+        options = if cfg.type == "tmpfs" then [ "defaults" "size=16G" "mode=755" ] else [ "subvol=@root" "compress=zstd" ];
+        neededForBoot = if cfg.type == "tmpfs" then false else true;
       };
     };
 
