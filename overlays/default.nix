@@ -23,12 +23,8 @@ in
       # This one brings our custom packages from the 'pkgs' directory
       (import ../pkgs { pkgs = final; })
       (usePR [ "protonup-rs" ] "liperium" "protonuprs-init" "sha256-z5Zh+ih0gE+Uwl8b7//apBRbrsHTvpV0PAhQwM8mOZ4=")
-      # (usePR [ "alvr" ] "jopejoe1" "alvr-src" "sha256-OWnvv900LI20DypGLMAsceRTFdkahMns6BHO2OKzmM0=")
     ];
 
-  # This one contains whatever you want to overlay
-  # You can change versions, add patches, set compilation flags, anything really.
-  # https://nixos.wiki/wiki/Overlays
   modifications = final: prev:
     {
       steamPackages = prev.steamPackages.overrideScope (_steamFinal: steamPrev: {
@@ -55,15 +51,15 @@ in
         in
         final.discord.override ({ withOpenASAR = true; } // nss);
 
-      # linuxKernel = prev.linuxKernel // {
-      #   packagesFor = kernel: prev.linuxKernel.packagesFor kernel // {
-      #     universal-pidff = prev.callPackage "${(final.fetchzip {
-      #         sha256 = "sha256-okjpIXPWT1IcUcljPTuTiMhrAUbMEkw0eVgnOm09wlU=";
-      #         url = "https://github.com/danerieber/nixpkgs/archive/universal-pidff.tar.gz";
-      #       })}/pkgs/os-specific/linux/universal-pidff"
-      #       { inherit kernel; };
-      #   };
-      # };
+      cliphist = prev.cliphist.overrideAttrs (_old: {
+        src = final.fetchFromGitHub {
+          owner = "sentriz";
+          repo = "cliphist";
+          rev = "c49dcd26168f704324d90d23b9381f39c30572bd";
+          sha256 = "sha256-2mn55DeF8Yxq5jwQAjAcvZAwAg+pZ4BkEitP6S2N0HY=";
+        };
+        vendorHash = "sha256-M5n7/QWQ5POWE4hSCMa0+GOVhEDCOILYqkSYIGoy/l0=";
+      });
 
       inherit lib;
       inherit (inputs.nixd.packages.x86_64-linux) nixd;
