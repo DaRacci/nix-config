@@ -1,6 +1,5 @@
-{ inputs, modulesPath, ... }: {
+{ modulesPath, ... }: {
   imports = [
-    inputs.attic.nixosModules.atticd
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
   ];
 

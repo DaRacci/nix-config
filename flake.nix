@@ -247,7 +247,6 @@
 
     # Modules only used on some systems
     nixos-wsl = { url = "github:nix-community/NixOS-WSL"; inputs = { nixpkgs.follows = "nixpkgs"; flake-compat.follows = "flake-compat"; }; };
-    attic = { url = "github:zhaofengli/attic"; inputs = { nixpkgs.follows = "nixpkgs"; flake-compat.follows = "flake-compat"; }; };
     jovian = { url = "github:Jovian-Experiments/Jovian-NixOS"; inputs.nixpkgs.follows = "nixpkgs"; };
     nixarr = { url = "github:rasmus-kirk/nixarr"; };
 

@@ -1,6 +1,5 @@
-{ inputs, config, pkgs, modulesPath, ... }: {
+{ config, pkgs, modulesPath, ... }: {
   imports = [
-    inputs.attic.nixosModules.atticd
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
   ];
 
@@ -36,7 +35,7 @@
     atticd = {
       enable = true;
       package = pkgs.attic-server;
-      credentialsFile = config.sops.secrets.ATTIC_ENVIRONMENT.path;
+      environmentFile = config.sops.secrets.ATTIC_ENVIRONMENT.path;
       settings = {
         listen = "127.0.0.1:8080";
         allowed-hosts = [ ];
