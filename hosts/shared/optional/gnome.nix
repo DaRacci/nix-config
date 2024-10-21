@@ -19,17 +19,12 @@
     };
   };
 
-  services.gnome = {
-    gnome-browser-connector.enable = true;
-    sushi.enable = true;
-  };
-
   environment.gnome.excludePackages = with pkgs; [
     gnome-tour
     gnome-text-editor
-    gnome.gnome-calculator
+    gnome-calculator
     gnome-connections
-    gnome.simple-scan
-    gnome.yelp
+    simple-scan
+    yelp
   ];
 }

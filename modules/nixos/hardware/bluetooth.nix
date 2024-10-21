@@ -6,6 +6,7 @@ in
 {
   options.hardware.bluetooth = {
     disabledDevices = mkOption {
+      default = [ ];
       type = with lib.types; listOf (submodule {
         options = {
           vendorId = mkOption {
