@@ -1007,11 +1007,11 @@
         "xdph": "xdph"
       },
       "locked": {
-        "lastModified": 1729378105,
-        "narHash": "sha256-pcrrLHaHXct4I985PZhNZVYLghwZvQnnjGNToL56DFY=",
+        "lastModified": 1729523354,
+        "narHash": "sha256-iRLBeVWU6rbMruacoMOJ6y+mgTVMWng4T8JYnIPgsSE=",
         "ref": "refs/heads/main",
-        "rev": "08cc063e175e48cea44d26b7e3762f4b8611f0c5",
-        "revCount": 5362,
+        "rev": "9df0f0b66c66706c9ce8cf9f80e834d5abfc1e96",
+        "revCount": 5364,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/hyprwm/Hyprland"
@@ -1602,11 +1602,11 @@
     },
     "nixos-hardware": {
       "locked": {
-        "lastModified": 1729501257,
-        "narHash": "sha256-q6ofDeqzv1/mLe+ru7lJbgerOMDOT83PXy84vsi+Jhg=",
+        "lastModified": 1729509737,
+        "narHash": "sha256-8OHgqz+tFo21h3hg4/GHizFPws+MMzpEru/+62Z0E8c=",
         "owner": "nixos",
         "repo": "nixos-hardware",
-        "rev": "7495e877539919988c9ebe4ae0f47343982da0e5",
+        "rev": "cc2d3c0e060f981905d52337340ee6ec8b8eb037",
         "type": "github"
       },
       "original": {
@@ -1940,11 +1940,11 @@
     },
     "nur": {
       "locked": {
-        "lastModified": 1729491640,
-        "narHash": "sha256-k2mR4w+yvko/JsWaH+1fIqjWRFixEs+jv/lNw8qnfkQ=",
+        "lastModified": 1729525671,
+        "narHash": "sha256-/pZSi3LBtztMfOJti72FOj3OBJvsCb1N/d9Jl5L04fI=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "41ca6cfe238fdfab2831386c5a65f5c0a01e1cfd",
+        "rev": "305d127d2f03fb412de348455a3175df9e66cd04",
         "type": "github"
       },
       "original": {
@@ -2288,9 +2288,10 @@
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "path": "/nix/store/yj1wxm9hh8610iyzqnz75kvs6xl8j3my-source",
+        "owner": "nix-systems",
+        "repo": "default",
         "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "path"
+        "type": "github"
       },
       "original": {
         "id": "systems",
