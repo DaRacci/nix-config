@@ -1,6 +1,6 @@
 { pkgs, ... }: {
   services.caddy = {
-    package = pkgs.unstable.caddy;
+    package = pkgs.caddy;
     email = "admin@racci.dev";
     acmeCA = "https://acme-v02.api.letsencrypt.org/directory";
 

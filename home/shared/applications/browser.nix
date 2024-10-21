@@ -25,7 +25,7 @@ in
 
   programs.firefox = {
     enable = true;
-    package = pkgs.unstable.firefox;
+    package = pkgs.firefox;
 
     /* ---- POLICIES
     * Check about:policies#documentation for options. */

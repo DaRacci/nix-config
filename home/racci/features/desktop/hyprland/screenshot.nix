@@ -4,7 +4,7 @@ let
 
   mkScript = name: content: "${pkgs.writeShellApplication {
     name = "screenshot-select-${name}";
-    runtimeInputs = [ pkgs.grimblast pkgs.unstable.satty ];
+    runtimeInputs = [ pkgs.grimblast pkgs.satty ];
     text = ''
       datedFolder="${screenshotsPath}/$(date '+%Y/%m')";
       savePath="''${datedFolder}/Screenshot_$(date '+%Y%m%d_%H%M%S')";

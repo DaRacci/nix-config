@@ -5,7 +5,7 @@
 
   services.tailscale = {
     enable = true;
-    package = pkgs.unstable.tailscale;
+    package = pkgs.tailscale;
     useRoutingFeatures = "client";
     authKeyFile = config.sops.secrets.TAILSCALE_AUTH_KEY.path;
   };

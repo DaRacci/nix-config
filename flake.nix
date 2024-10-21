@@ -230,9 +230,8 @@
     # Utils
     flake-parts = { url = "github:hercules-ci/flake-parts"; inputs.nixpkgs-lib.follows = "nixpkgs"; };
     flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
-    flake-compat-nixd = { url = "github:inclyc/flake-compat"; flake = false; };
     nixos-generators = { url = "github:nix-community/nixos-generators"; inputs = { nixlib.follows = "nixpkgs-lib"; nixpkgs.follows = "nixpkgs"; }; };
-    devenv.url = "github:cachix/devenv";
+    devenv = { url = "github:cachix/devenv"; inputs = { flake-compat.follows = "flake-compat"; }; };
 
     # Base Modules
     home-manager = { url = "github:nix-community/home-manager"; inputs.nixpkgs.follows = "nixpkgs"; };

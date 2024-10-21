@@ -9,7 +9,7 @@
     # Mark my works, i will rid myself of docker one day..
     docker = {
       enable = mkForce true;
-      package = pkgs.unstable.docker;
+      package = pkgs.docker;
 
       autoPrune = {
         enable = true;

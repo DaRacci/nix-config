@@ -27,7 +27,7 @@ in
 
     programs.vscode = mkIf cfg.vscode.enable {
       enable = true;
-      package = pkgs.unstable.vscode;
+      package = pkgs.vscode;
 
       # Allows Settings Sync to work;
       # TODO -> Maybe replace with sync from nextcloud?
@@ -150,12 +150,12 @@ in
               ignored = [ ];
             };
             formatting = {
-              command = [ "${pkgs.unstable.nixpkgs-fmt}/bin/nixpkgs-fmt" ];
+              command = [ "${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt" ];
             };
           };
 
           nixd = {
-            formatting.command = "${pkgs.unstable.nixpkgs-fmt}/bin/nixpkgs-fmt";
+            formatting.command = "${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt";
             eval = {
               enable = true;
               targets = {
@@ -177,7 +177,7 @@ in
         "direnv.restart.automatic" = true;
         "direnv.status.showChangesCount" = true;
 
-        "caddyfile.executable" = "${pkgs.unstable.caddy}/bin/caddy";
+        "caddyfile.executable" = "${pkgs.caddy}/bin/caddy";
 
         "redhat.telemetry.enabled" = false;
 

@@ -18,11 +18,11 @@
     xdg.userDirs.extraConfig.XDG_GAME_DIR = "${config.home.homeDirectory}/Games";
     user.persistence.directories = [ "Games" ];
 
-    home.packages = optionals cfg.controllerSupport (with pkgs.unstable; [ dualsensectl trigger-control ]);
+    home.packages = optionals cfg.controllerSupport (with pkgs; [ dualsensectl trigger-control ]);
 
     programs.mangohud = {
       enable = true;
-      package = pkgs.unstable.mangohud;
+      package = pkgs.mangohud;
 
       settings = {
         #region PERFORMANCE

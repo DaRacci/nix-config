@@ -1,5 +1,5 @@
 { pkgs, ... }: {
-  home.packages = with pkgs.unstable; [ vintagestory ];
+  home.packages = with pkgs; [ vintagestory ];
 
   user.persistence.directories = [
     ".config/VintagestoryData/"

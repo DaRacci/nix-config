@@ -2,7 +2,7 @@ _:
 # let
 # randomWallpaperScript = pkgs.writeShellApplication {
 #   name = "sww-random-wallpaper";
-#   runtimeInputs = [ pkgs.unstable.swww ];
+#   runtimeInputs = [ pkgs.swww ];
 #   text = ''
 #     export SWWW_TRANSITION=random
 #     export SWWW_TRANSITION_STEP=2
@@ -36,7 +36,7 @@ _:
 # in
 {
   wayland.windowManager.hyprland.settings.exec-once = [
-    # "sleep 1 && ${pkgs.unstable.swww}/bin/swww-daemon"
+    # "sleep 1 && ${pkgs.swww}/bin/swww-daemon"
     # "sleep 1 && ${randomWallpaperScript}/bin/sww-random-wallpaper"
   ];
 }

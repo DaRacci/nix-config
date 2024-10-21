@@ -7,7 +7,7 @@ in
 
   wayland.windowManager.hyprland.settings = {
     exec = [
-      "pidof hypridle || ${getExe pkgs.unstable.hypridle}"
+      "pidof hypridle || ${getExe pkgs.hypridle}"
     ];
   };
 
@@ -115,7 +115,7 @@ in
   xdg.configFile."hypr/hyperidle.conf".text =
     let
       hyprctl = "${config.wayland.windowManager.hyprland.package}/bin/hyprctl";
-      lockCmd = "pidof hyprlock || ${getExe pkgs.unstable.hyprlock}";
+      lockCmd = "pidof hyprlock || ${getExe pkgs.hyprlock}";
       suspendCmd = "pidof steam || systemctl suspend || loginctl suspend";
       brightnessctl = "${getExe pkgs.brightnessctl}";
     in

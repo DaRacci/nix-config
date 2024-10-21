@@ -9,7 +9,7 @@
 
   programs.gamescope = {
     enable = true;
-    package = pkgs.unstable.gamescope;
+    package = pkgs.gamescope;
     args = [
       "-w 2560" # Upscaled from Resolution
       "-h 1440" # Upscaled from Resolution
@@ -24,8 +24,8 @@
 
   programs.steam = {
     enable = true;
-    package = pkgs.unstable.steam;
-    extraPackages = with pkgs.unstable; [
+    package = pkgs.steam;
+    extraPackages = with pkgs; [
       xwayland-run
       gamescope
     ];

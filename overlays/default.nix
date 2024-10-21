@@ -65,13 +65,4 @@ in
       inherit (inputs.nixd.packages.x86_64-linux) nixd;
       inherit (inputs.moza-racing.packages.x86_64-linux) boxflat;
     };
-
-  # When applied, the unstable nixpkgs set (declared in the flake inputs) will
-  # be accessible through 'pkgs.unstable'
-  unstable-packages = final: _prev: {
-    unstable = import inputs.nixpkgs {
-      inherit (final) system;
-      config.allowUnfree = true;
-    };
-  };
 }

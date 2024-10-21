@@ -68,7 +68,7 @@ let cfg = config.services.nextcloud.config; in {
     nextcloud = {
       enable = true;
       configureRedis = true;
-      package = pkgs.unstable.nextcloud30;
+      package = pkgs.nextcloud30;
 
       https = true;
       # TODO - Change back to nextcloud.racci.dev when ready.

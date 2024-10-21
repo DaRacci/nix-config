@@ -15,7 +15,7 @@
     };
   };
 
-  environment.systemPackages = with pkgs.unstable; [
+  environment.systemPackages = with pkgs; [
     attic-client
   ];
 
@@ -35,7 +35,7 @@
   services = rec {
     atticd = {
       enable = true;
-      package = pkgs.unstable.attic-server;
+      package = pkgs.attic-server;
       credentialsFile = config.sops.secrets.ATTIC_ENVIRONMENT.path;
       settings = {
         listen = "127.0.0.1:8080";
