@@ -38,7 +38,7 @@
     };
   };
 
-  looking-glass-client = {
+  programs.looking-glass-client = {
     enable = true;
     settings = {
       input = {
