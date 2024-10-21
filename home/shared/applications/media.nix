@@ -1,7 +1,7 @@
 { pkgs, lib, ... }: {
   home.packages = with pkgs; [
     loupe # Image viewer
-    unstable.spotify
+    spotify
     delfin # Jellyfin client
     clapper # Video player
     switcheroo # Converter Utility

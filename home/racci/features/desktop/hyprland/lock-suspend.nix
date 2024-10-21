@@ -3,7 +3,7 @@ let
   inherit (lib) getExe;
 in
 {
-  home.packages = with pkgs; [ unstable.hyprlock unstable.hypridle ];
+  home.packages = with pkgs; [ hyprlock hypridle ];
 
   wayland.windowManager.hyprland.settings = {
     exec = [
