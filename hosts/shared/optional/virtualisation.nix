@@ -399,7 +399,6 @@ in
     systemPackages = with pkgs; [
       virt-manager
       virtiofsd
-      looking-glass-client
       win-virtio
       win-spice
       virtio-win

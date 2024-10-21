@@ -38,6 +38,21 @@
     };
   };
 
+  looking-glass-client = {
+    enable = true;
+    settings = {
+      input = {
+        captureOnFocus = false;
+        autoCapture = false;
+        escapeKey = "KEY_END";
+      };
+
+      win = {
+        fullScreen = true;
+      };
+    };
+  };
+
   custom = {
     audio = {
       disabledDevices = [
