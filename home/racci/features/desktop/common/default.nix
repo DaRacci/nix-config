@@ -1,6 +1,5 @@
 { config, pkgs, ... }: {
   imports = [
-    ./denaro.nix
     ./nextcloud.nix
     ./podman.nix
     ./secrets.nix
