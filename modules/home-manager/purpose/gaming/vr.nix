@@ -31,20 +31,19 @@ let cfg = config.purpose.gaming.vr; in {
         '';
       };
 
-      # FIXME - breaks on rebuild
       activation.link-steamvr-openxr-runtime = lib.hm.dag.entryAfter [ "writeBoundary" ] /*bash*/ ''
         RUNTIME_PATH="$HOME/.config/openxr/1/active_runtime.json"
 
         run mkdir -p $VERBOSE_ARG \
           "$HOME/.config/openxr/1/";
 
-        if [ -f "$RUNTIME_PATH" ]; then
+        if [ -L "$RUNTIME_PATH" ]; then
           run rm $VERBOSE_ARG \
             "$RUNTIME_PATH";
         fi
 
         run ln -s $VERBOSE_ARG \
-          "$HOME/.steam/steam/steamapps/common/SteamVR/steamxr_linux64.json" "$RUNTIME_PATH";
+          "$HOME/.local/share/Steam/steamapps/common/SteamVR/steamxr_linux64.json" "$RUNTIME_PATH";
       '';
     };
 
