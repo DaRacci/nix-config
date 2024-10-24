@@ -1,4 +1,4 @@
-{ flake, config, lib, ... }:
+{ flake, config, pkgs, lib, ... }:
 let
   inherit (lib) mkIf;
   inherit (config.home) username;
@@ -52,7 +52,7 @@ in
     # Convert the SSH keys to age keys, then append them to the age key file with newlines as separators.
     for sshKeyPath in "''${sshKeyPaths[@]}"; do
       if [ -f "''${sshKeyPath}" ]; then
-        age --private-key -i "''${sshKeyPath}" >> "${dir}/keys.txt";
+        ${lib.getExe pkgs.ssh-to-age} --private-key -i "''${sshKeyPath}" >> "${dir}/keys.txt";
       fi
     done
   '';
