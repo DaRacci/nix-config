@@ -160,6 +160,9 @@
         };
 
         devenv.shells.default = {
+          # Fixes https://github.com/cachix/devenv/issues/528
+          containers = lib.mkForce { };
+
           packages = with pkgs; [
             # Cli Tools
             act # Github Action testing
