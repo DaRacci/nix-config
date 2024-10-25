@@ -1,4 +1,4 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, lib, ... }: {
   users.users.racci = {
     uid = 1000;
     shell = pkgs.nushell;
@@ -8,7 +8,7 @@
 
   hardware.keyboard.qmk.enable = true;
 
-  services.kanata = {
+  services.kanata = lib.mkIf (!config.host.device.isHeadless) {
     enable = true;
     keyboards = {
       "megu-board" = {
