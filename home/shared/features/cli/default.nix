@@ -12,7 +12,6 @@
     ./nix.nix
     ./nushell.nix
     ./ripgrep.nix
-    ./ssh.nix
     ./starship.nix
     ./zoxide.nix
   ];
