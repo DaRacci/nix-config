@@ -1,4 +1,4 @@
-{ flake, config, pkgs, lib, ... }: with builtins; with lib; let user = "racci"; in {
+{ config, pkgs, lib, ... }: with builtins; with lib; let user = "racci"; in {
   wsl = {
     enable = true;
     defaultUser = user;
@@ -29,9 +29,6 @@
       # Required by NodeJS installed by VS Code's Remote WSL extension
       pkgs.stdenv.cc.cc
     ];
-
-    # Use `nix-ld-rs` instead of `nix-ld`, because VS Code's Remote WSL extension launches a non-login non-interactive shell, which is not supported by `nix-ld`, while `nix-ld-rs` works in non-login non-interactive shells.
-    package = flake.inputs.nix-ld-rs.packages.${pkgs.system}.nix-ld-rs;
   };
 
   # Fixes Home-Manager applications not appearing in Start Menu

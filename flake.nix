@@ -238,7 +238,6 @@
     nixos-hardware.url = "github:nixos/nixos-hardware";
     sops-nix = { url = "github:Mic92/sops-nix"; inputs = { nixpkgs.follows = "nixpkgs"; nixpkgs-stable.follows = "nixpkgs"; }; };
     impermanence.url = "github:nix-community/impermanence";
-    nix-ld-rs = { url = "github:nix-community/nix-ld-rs"; inputs = { nixpkgs.follows = "nixpkgs"; flake-compat.follows = "flake-compat"; }; };
     lanzaboote = { url = "github:nix-community/lanzaboote/v0.3.0"; inputs = { nixpkgs.follows = "nixpkgs"; flake-parts.follows = "flake-parts"; flake-compat.follows = "flake-compat"; }; };
     nixd = { url = "github:nix-community/nixd"; inputs = { nixpkgs.follows = "nixpkgs"; flake-parts.follows = "flake-parts"; }; };
     lix-module = { url = "https://git.lix.systems/lix-project/nixos-module/archive/2.90.0.tar.gz"; inputs.nixpkgs.follows = "nixpkgs"; };
