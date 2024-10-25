@@ -131,9 +131,6 @@
         packages = {
           # Image Generators
           images = builtins.mapAttrs (_n: v: v.image) configurations;
-
-          # NixOS Outputs
-          outputs = builtins.mapAttrs (_n: v: v.system.config.system.build.toplevel) configurations;
         };
       };
 
