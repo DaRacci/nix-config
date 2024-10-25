@@ -94,7 +94,7 @@ jobs:
         include:
           - command: fmt -L -- --check .
             system: x86_64
-          - command: flake check --impure
+          - command: flake check --impure --allow-import-from-derivation
             system: x86_64
 
     steps:
