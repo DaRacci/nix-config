@@ -29,7 +29,7 @@ in
 
     isHeadless = mkOption {
       type = types.bool;
-      default = role == "server";
+      default = cfg.role == "server";
       description = ''
         Whether the device is headless, i.e. does not have a display is only accessible via SSH.
 
