@@ -24,7 +24,7 @@ in
           })
         ];
       };
-      loader.timeout = 5;
+      loader.timeout = lib.mkDefault 5; # Allow for overriding in the ISO image builders.
       kernelParams = [
         "quiet"
         "loglevel=3"
