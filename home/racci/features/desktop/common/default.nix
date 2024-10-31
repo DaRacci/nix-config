@@ -1,4 +1,4 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, lib, ... }: rec {
   imports = [
     ./nextcloud.nix
     ./podman.nix
@@ -18,39 +18,60 @@
 
   programs.vdirsyncer.enable = true;
 
-  accounts = {
-    email = { };
+  accounts =
+    let
+      passwordCommand = lib.getExe (pkgs.writeShellScriptBin "get-pass" ''
+        ${pkgs.lib.getExe' pkgs.uutils-coreutils-noprefix "cat"} ${config.sops.secrets.NEXTCLOUD_APP_PASSWORD.path}
+      '');
+      mkRemote = type: {
+        inherit type;
+        url = "https://nextcloud.racci.dev/";
 
-    calendar = {
-      basePath = ".calendar";
-      accounts.personal = {
-        primary = true;
-        primaryCollection = "Personal";
+        userName = "Racci";
+        passwordCommand = [ passwordCommand ];
+      };
+    in
+    {
+      email = { };
 
-        remote = {
-          type = "caldav";
-          url = "https://nextcloud.racci.dev/remote.php/dav";
+      contact = {
+        basePath = ".contacts";
+        accounts.personal = {
+          remote = mkRemote "carddav";
 
-          userName = "Racci";
-          passwordCommand =
-            let
-              getPassScript = pkgs.writeScriptBin "get-pass" ''
-                ${pkgs.lib.getExe' pkgs.uutils-coreutils-noprefix "cat"} ${config.sops.secrets.NEXTCLOUD_APP_PASSWORD.path}
-              '';
-            in
-            [ "${getPassScript.outPath}/bin/get-pass" ];
+          vdirsyncer = {
+            enable = true;
+            collections = [ "contacts" "work" ];
+          };
+
+          local = {
+            type = "singlefile";
+          };
         };
+      };
 
-        vdirsyncer = {
-          enable = true;
-          collections = [ "Personal" "Contact Birthdays" ];
+      calendar = {
+        basePath = ".calendar";
+        accounts.personal = {
+          primary = true;
+          primaryCollection = "Personal";
+          remote = mkRemote "caldav";
 
-          timeRange = {
-            start = /*py*/ ''datetime.now() + timedelta(days=365 * 2)'';
-            end = /*py*/ ''datetime.now() - timedelta(days=365 * 2)'';
+          vdirsyncer = {
+            enable = true;
+            collections = [ "personal" "contact_birthdays" ];
+
+            # timeRange = {
+            #   start = /*py*/ ''datetime.now() + timedelta(days=365 * 2)'';
+            #   end = /*py*/ ''datetime.now() - timedelta(days=365 * 2)'';
+            # };
           };
         };
       };
     };
-  };
+
+  user.persistence.directories = [
+    accounts.contact.basePath
+    accounts.calendar.basePath
+  ];
 }
