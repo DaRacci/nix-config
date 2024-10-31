@@ -38,7 +38,7 @@ in
       rm "${dir}/keys.txt";
     fi
 
-    # Create an array of possible SSH key paths, then filter out the non-existent ones and deduplicate.
+    # Create an array of possible SSH key paths, and deduplicate based on the content.
     sshKeyPaths=(
       ${lib.trivial.pipe ([
         "${config.user.persistence.root}/.ssh/id_ed25519"

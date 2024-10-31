@@ -11,7 +11,7 @@ let
       savePathAnnotated="''${savePath}_annotated.png";
       savePath="''${savePath}.png";
 
-      mkdir -p "${screenshotsPath}";
+      mkdir -p "''${datedFolder}";
 
       ${content}
     '';
