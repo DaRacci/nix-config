@@ -23,7 +23,7 @@
   };
 
   boot = rec {
-    kernelPackages = pkgs.linuxPackages_latest;
+    kernelPackages = pkgs.linuxPackages_xanmod_latest;
     kernelModules = [ "v4l2loopback" ];
     extraModulePackages = [
       kernelPackages.v4l2loopback
