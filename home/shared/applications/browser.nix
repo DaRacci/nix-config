@@ -52,6 +52,7 @@ in
           [ "enhancer-for-youtube" "enhancerforyoutube@maximerf.addons.mozilla.org" ]
           [ "augmented-steam" "{1be309c5-3e4f-4b99-927d-bb500eb4fa88}" ]
           [ "search_by_image" "{2e5ff8c8-32fe-46d0-9fc8-6b8986621f3c}" ]
+          [ "return-youtube-dislikes" "{762f9885-5a13-4abd-9c77-433dcd38b8fd}" ]
         ] [
           (map (arr: { id = elemAt arr 1; name = elemAt arr 0; }))
           (map (ext: nameValuePair ext.name { inherit (ext) id name; }))
