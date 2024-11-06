@@ -128,10 +128,6 @@
 
       flake = let configurations = mkConfigurations builtins.currentSystem; in {
         nixosConfigurations = builtins.mapAttrs (_n: v: v.system) configurations;
-        packages = {
-          # Image Generators
-          images = builtins.mapAttrs (_n: v: v.image) configurations;
-        };
       };
 
       perSystem = { system, pkgs, ... }: {
@@ -249,11 +245,13 @@
     jovian = { url = "github:Jovian-Experiments/Jovian-NixOS"; inputs.nixpkgs.follows = "nixpkgs"; };
     nixarr = { url = "github:rasmus-kirk/nixarr"; };
 
-    # Hyprland Stuff
+    # Desktop Stuff
     hyprland = { url = "git+https://github.com/hyprwm/Hyprland?submodules=1"; };
     hyprland-plugins = { url = "github:hyprwm/hyprland-plugins"; inputs.hyprland.follows = "hyprland"; };
     hyprland-contrib.url = "github:hyprwm/contrib";
     anyrun = { url = "github:anyrun-org/anyrun"; inputs = { nixpkgs.follows = "nixpkgs"; flake-parts.follows = "flake-parts"; }; };
+    astal = { url = "github:aylur/astal"; inputs.nixpkgs.follows = "nixpkgs"; };
+    ags = { url = "github:aylur/ags/v2"; inputs = { nixpkgs.follows = "nixpkgs"; astal.follows = "astal"; }; };
 
     # Other misc modules
     arion = { url = "github:hercules-ci/arion"; };
