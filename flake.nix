@@ -69,13 +69,6 @@
               acceleration = "cuda";
             };
 
-            surnix = {
-              users = [ "racci" ];
-
-              isoFormat = "iso";
-              deviceType = "laptop";
-            };
-
             winix = {
               users = [ "racci" ];
 
@@ -119,6 +112,16 @@
               deviceType = "server";
               acceleration = "rocm";
             };
+
+            #|----------------------|
+            #|  Deprecated Systems  |
+            #|----------------------|
+            # surnix = {
+            #   users = [ "racci" ];
+
+            #   isoFormat = "iso";
+            #   deviceType = "laptop";
+            # };
           };
     in
     flake-parts.lib.mkFlake { inherit inputs; specialArgs.lib = lib; } {
