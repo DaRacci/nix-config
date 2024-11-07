@@ -1,4 +1,3 @@
-# TODO - Colour picker bind to SUPER + C (hyprpicker)
 # TODO - Game mode that disables compositor and pauses swww-random-wallpaper
 { flake, config, pkgs, lib, ... }: with lib; {
   imports = [
@@ -116,6 +115,11 @@
         dim_special = 0;
         #endregion
       };
+
+      workspace = [
+        "workspace = w[t1], gapsout:0, gapsin:0, border: 0, rounding:0"
+        "workspace = w[tg1], gapsout:0, gapsin:0, border: 0, rounding:0"
+      ];
       #endregion
 
       general = {
@@ -132,15 +136,9 @@
 
       dwindle = {
         preserve_split = true;
-        no_gaps_when_only = true;
-        smart_split = false;
-        smart_resizing = false;
-
-        # force_split = 0;
-        # special_scale_factor = 1.0;
-        # split_width_multiplier = 1.0;
-        # use_active_for_splits = true;
-        # pseudotile = yes;
+        smart_split = true;
+        smart_resizing = true;
+        pseudotile = true;
       };
 
       exec-once = [
@@ -154,7 +152,8 @@
       ];
 
       cursor = {
-        no_warps = true;
+        no_warps = false;
+        persistent_warps = true;
         no_hardware_cursors = true;
       };
 
@@ -372,14 +371,6 @@
       let
         mod = "SUPER";
 
-        layout = ''
-          master {
-            new_status = true
-            special_scale_factor = 1
-            no_gaps_when_only = true
-          }
-        '';
-
         input = ''
           input {
             kb_layout = us
@@ -527,26 +518,6 @@
             #     natural_rounding = yes
             # }
 
-            hy3 {
-              no_gaps_when_only = 1
-              node_collapse_policy = 2
-              group_insert = 10
-              tab_first_window = false
-
-              tabs {
-                height = 15
-                padding = 5
-                from_top = false
-                rounding = 3
-                render_text = true
-
-                text_center = true
-                text_font = JetBrainsMono Nerd Font
-                text_height = 8
-                text_padding = 3
-              }
-            }
-
             autotile {
               enable = false
             }
@@ -557,7 +528,6 @@
       in
       builtins.concatStringsSep "\n" ([
         input
-        layout
         theme
       ] ++ builtins.attrValues bindings.global ++ builtins.attrValues bindings.submaps);
   };
