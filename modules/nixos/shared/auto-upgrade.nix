@@ -13,7 +13,7 @@
     system.autoUpgrade = let isClean = flake ? rev; in {
       enable = isClean;
       dates = "daily";
-      flags = [ "--refresh" "--impure" "--accept-flake-config" ];
+      flags = [ "--refresh" "--impure" "--accept-flake-config" "--no-update-lock-file" ];
       flake = "github:DaRacci/nix-config#${cfg.hostName}";
 
       allowReboot = false;
