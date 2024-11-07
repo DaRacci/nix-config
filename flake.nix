@@ -3,6 +3,7 @@
 
   nixConfig = {
     extra-substituters = [
+      "https://cache.nixos.org"
       "https://cache.racci.dev"
       "https://nix-community.cachix.org"
       "https://racci.cachix.org"
@@ -10,6 +11,7 @@
       "https://anyrun.cachix.org"
     ];
     extra-trusted-public-keys = [
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "cache.racci.dev-1:/i2mJWsMm9rDxIPH3bqNXJXd/wPEDRsJFYiTKh8JPF0="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "racci.cachix.org-1:Kl4opLxvTV9c77DpoKjUOMLDbCv6wy3GVHWxB384gxg="
