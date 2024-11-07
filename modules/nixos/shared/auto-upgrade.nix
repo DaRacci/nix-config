@@ -19,5 +19,11 @@
       allowReboot = false;
       rebootWindow = { lower = "02:00"; upper = "05:00"; };
     };
+
+    systemd.services.nixos-upgrade.serviceConfig = {
+      CPUWeight = [ "20" ];
+      CPUQuota = [ "65%" ];
+      IOWeight = [ "20" ];
+    };
   };
 }
