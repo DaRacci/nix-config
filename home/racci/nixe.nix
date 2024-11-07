@@ -34,7 +34,7 @@
 
     modelling = {
       enable = true;
-      blender.enable = true;
+      blender.enable = false;
     };
   };
 
