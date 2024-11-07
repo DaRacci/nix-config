@@ -31,13 +31,13 @@
     };
   };
 
-  services = rec {
+  services = {
     atticd = {
       enable = true;
       package = pkgs.attic-server;
       environmentFile = config.sops.secrets.ATTIC_ENVIRONMENT.path;
       settings = {
-        listen = "127.0.0.1:8080";
+        listen = "[::]:8080";
         allowed-hosts = [ ];
         api-endpoint = "https://cache.racci.dev/";
         soft-delete-caches = false;
@@ -89,7 +89,7 @@
           }
         }
 
-        reverse_proxy ${atticd.settings.listen}
+        reverse_proxy 127.0.0.1:8080
       '';
     };
   };
