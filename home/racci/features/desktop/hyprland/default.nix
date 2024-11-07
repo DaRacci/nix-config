@@ -4,6 +4,7 @@
     "${flake}/home/racci/features/desktop/common"
     "${flake}/home/shared/desktop/hyprland"
 
+    ./ags.nix
     ./actions.nix
     ./clipboard.nix
     ./menus.nix
