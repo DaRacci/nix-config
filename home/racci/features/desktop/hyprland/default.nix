@@ -101,11 +101,13 @@
         };
 
         #region Shadows
-        drop_shadow = true;
-        shadow_ignore_window = true;
-        shadow_range = 20;
-        shadow_offset = "0 2";
-        shadow_render_power = 4;
+        shadow = {
+          enabled = true;
+          range = 20;
+          render_power = 4;
+          ignore_window = true;
+          offset = "0 2";
+        };
         #endregion
 
         #region Dim
