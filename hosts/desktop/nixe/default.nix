@@ -28,6 +28,7 @@
 
     steam = {
       enable = true;
+      updater.splash = "vendor";
 
       autoStart = false;
       user = "racci";
@@ -35,7 +36,7 @@
     };
 
     decky-loader = {
-      enable = false;
+      enable = true;
     };
   };
 
