@@ -139,7 +139,7 @@
       perSystem = { system, pkgs, ... }: {
         _module.args.pkgs = mkPkgs system false false;
 
-        packages = import ./pkgs { inherit pkgs; } // (builtins.mapAttrs (_n: v: v.image) (mkConfigurations builtins.currentSystem)) // {
+        packages = import ./pkgs { inherit pkgs; } // {
           proxmox-template = pkgs.writeShellApplication {
             name = "copy-template-to-proxmox";
             runtimeInputs = [ pkgs.openssh ];

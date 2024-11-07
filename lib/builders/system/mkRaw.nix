@@ -107,7 +107,7 @@ rec {
       home-manager.useUserPackages = true;
       home-manager.useGlobalPkgs = true;
 
-      system.stateVersion = "24.05";
+      system.stateVersion = "24.11";
     })
   ] ++ (lib.trivial.pipe (users ++ [ "root" ]) [
     (map (username: (import "${self}/lib/builders/home/mkSystem.nix" {
