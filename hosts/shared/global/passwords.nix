@@ -5,7 +5,7 @@ let
   usersWithPackage = pkg: builtins.filter (username: hasPackage pkg username) hmUsers;
 
   opGuiUsers = usersWithPackage pkgs._1password-gui;
-  opCliUsers = usersWithPackage pkgs._1password;
+  opCliUsers = usersWithPackage pkgs._1password-cli;
 in
 {
   programs._1password.enable = (builtins.length opCliUsers) > 0;
