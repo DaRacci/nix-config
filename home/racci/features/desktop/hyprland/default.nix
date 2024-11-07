@@ -148,7 +148,7 @@
         # ----------------- #
         #  Bar and Applets  #
         # ----------------- #
-        "${lib.getExe pkgs.blueman}"
+        "${lib.getExe' pkgs.blueman "blueman-tray"}"
         "${lib.getExe pkgs.networkmanagerapplet} --indicator"
       ];
 
