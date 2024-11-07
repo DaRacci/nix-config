@@ -96,7 +96,6 @@ rec {
     ({ inputs, ... }: {
       imports = [
         inputs.home-manager.nixosModule
-        inputs.lix-module.nixosModules.default
         inputs.nixos-generators.nixosModules.all-formats
       ];
 
