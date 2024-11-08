@@ -7,6 +7,10 @@
 
   xdg.mimeApps.enable = true;
 
+  home.packages = [
+    pkgs.miru
+  ];
+
   sops.secrets = {
     NEXTCLOUD_APP_PASSWORD = { };
   };
@@ -73,5 +77,6 @@
   user.persistence.directories = [
     accounts.contact.basePath
     accounts.calendar.basePath
+    ".config/Miru"
   ];
 }
