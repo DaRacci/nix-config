@@ -8,6 +8,39 @@ let
 
   pubKeyFile = "${flake}/home/${username}/id_ed25519.pub";
   hasPubKeyFile = builtins.pathExists pubKeyFile;
+
+  ssh-to-age-script = let dir = "${config.xdg.configHome}/sops/age"; in pkgs.writeShellApplication {
+    name = "ssh-to-age";
+    runtimeInputs = [ pkgs.ssh-to-age ];
+    text = ''
+      if [ ! -d "${dir}" ]; then
+          mkdir -p "${dir}";
+      fi
+
+      # If the file exists, remove it.
+      if [ -f "${dir}/keys.txt" ]; then
+        rm "${dir}/keys.txt";
+      fi
+
+      # Create an array of possible SSH key paths, and deduplicate based on the content.
+      sshKeyPaths=(
+        ${lib.trivial.pipe ([
+          "${config.user.persistence.root}/.ssh/id_ed25519"
+        ] ++ (lib.optionals hasSopsFile [ config.sops.secrets.SSH_PRIVATE_KEY.path ])) [
+          (map (path: "\"${path}\""))
+          (builtins.concatStringsSep "\n")
+        ]}
+      )
+      mapfile -t sshKeyPaths < <(printf "%s\n" "''${sshKeyPaths[@]}" | sort -u)
+
+      # Convert the SSH keys to age keys, then append them to the age key file with newlines as separators.
+      for sshKeyPath in "''${sshKeyPaths[@]}"; do
+        if [ -f "''${sshKeyPath}" ]; then
+          ssh-to-age --private-key -i "''${sshKeyPath}" >> "${dir}/keys.txt";
+        fi
+      done
+    '';
+  };
 in
 {
   sops = mkIf hasSopsFile {
@@ -28,32 +61,18 @@ in
     ".ssh/id_ed25519.pub".source = "${flake}/home/${username}/id_ed25519.pub";
   };
 
-  home.activation.ssh-to-age = let dir = "${config.xdg.configHome}/age"; in config.lib.dag.entryAfter [ "writeBoundry" "sops-nix" ] /*bash*/ ''
-    if [ ! -d "${dir}" ]; then
-      mkdir -p "${dir}";
-    fi
+  systemd.user.services.ssh-to-age = {
+    Unit = {
+      Description = "Convert SSH keys to age keys";
+    };
 
-    # If the file exists, remove it.
-    if [ -f "${dir}/keys.txt" ]; then
-      rm "${dir}/keys.txt";
-    fi
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${lib.getExe ssh-to-age-script}";
+    };
 
-    # Create an array of possible SSH key paths, and deduplicate based on the content.
-    sshKeyPaths=(
-      ${lib.trivial.pipe ([
-        "${config.user.persistence.root}/.ssh/id_ed25519"
-      ] ++ (lib.optionals hasSopsFile [ config.sops.secrets.SSH_PRIVATE_KEY.path ])) [
-        (map (path: "\"${path}\""))
-        (builtins.concatStringsSep "\n")
-      ]}
-    )
-    sshKeyPaths=($(printf "%s\n" "''${sshKeyPaths[@]}" | sort -u))
-
-    # Convert the SSH keys to age keys, then append them to the age key file with newlines as separators.
-    for sshKeyPath in "''${sshKeyPaths[@]}"; do
-      if [ -f "''${sshKeyPath}" ]; then
-        ${lib.getExe pkgs.ssh-to-age} --private-key -i "''${sshKeyPath}" >> "${dir}/keys.txt";
-      fi
-    done
-  '';
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+  };
 }
