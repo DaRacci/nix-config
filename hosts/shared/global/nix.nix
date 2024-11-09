@@ -11,19 +11,9 @@ let
       key = "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=";
     };
 
-    raccicachixorg = {
-      url = "https://racci.cachix.org";
-      key = "racci.cachix.org-1:Kl4opLxvTV9c77DpoKjUOMLDbCv6wy3GVHWxB384gxg=";
-    };
-
-    hyprlandcachixorg = {
-      url = "https://hyprland.cachix.org";
-      key = "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc=";
-    };
-
-    anyruncachixorg = {
-      url = "https://anyrun.cachix.org";
-      key = "anyrun.cachix.org-1:pqBobmOjI7nKlsUMV25u9QHa9btJK65/C8vnO3p346s=";
+    cacheraccidev = {
+      url = "https://cache.racci.dev/racci";
+      key = "cache.racci.dev-1:/i2mJWsMm9rDxIPH3bqNXJXd/wPEDRsJFYiTKh8JPF0=";
     };
   };
 in
