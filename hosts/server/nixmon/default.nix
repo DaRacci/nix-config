@@ -18,7 +18,6 @@
     #   };
     # };
 
-    caddy.enable = true;
     caddy.virtualHosts = {
       uptime.extraConfig = ''
         reverse_proxy http://localhost:3001
