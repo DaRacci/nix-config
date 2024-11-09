@@ -188,17 +188,12 @@
             extraConfig = /*caddyfile*/ ''
               redir /console /console/
 
-              handle_path /console/* {
+              handle_path /console* {
                 reverse_proxy http://localhost${config.services.minio.consoleAddress}
               }
 
               reverse_proxy {
                 to https://localhost${config.services.minio.listenAddress}
-                # IDK if this is necessary
-                transport http {
-                  tls
-                  tls_server_name minio.racci.dev
-                }
               }
             '';
           })
