@@ -25,5 +25,7 @@
     };
   };
 
-  networking.firewall.allowedTCPPorts = [ ];
+  networking.firewall.allowedTCPPorts = [
+    3001
+  ];
 }
