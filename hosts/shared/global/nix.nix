@@ -1,4 +1,4 @@
-{ inputs, lib, config, ... }:
+{ flake, inputs, pkgs, lib, config, ... }:
 let
   caches = {
     cachenixosorg = {
@@ -16,11 +16,23 @@ let
       key = "cache.racci.dev-1:/i2mJWsMm9rDxIPH3bqNXJXd/wPEDRsJFYiTKh8JPF0=";
     };
   };
+
+  postBuildHook = pkgs.writeShellApplication {
+    name = "post-build-hook";
+    runtimeInputs = [ pkgs.attic-client ];
+    text = ''
+      JWT=$(cat ${config.sops.secrets.CACHE_PUSH_KEY.path})
+      attic login build-auto-push ${caches.cacheraccidev.url} "$JWT" || exit 1
+      attic push build-auto-push:racci "$OUT_PATHS"
+    '';
+  };
 in
 {
-  nix = {
-    # nix.package = pkgs.lix;
+  sops.secrets.CACHE_PUSH_KEY = {
+    sopsFile = "${flake}/hosts/secrets.yaml";
+  };
 
+  nix = {
     settings = rec {
       trusted-users = [ "root" "@wheel" ];
       auto-optimise-store = lib.mkForce true;
@@ -29,6 +41,8 @@ in
       substituters = map (sub: sub.url) (lib.attrValues caches);
       trusted-substituters = substituters;
       trusted-public-keys = map (sub: sub.key) (lib.attrValues caches);
+
+      post-build-hook = lib.getExe postBuildHook;
     };
 
     # TODO :: Ssh Serve store
