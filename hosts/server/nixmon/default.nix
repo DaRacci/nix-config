@@ -8,7 +8,9 @@
   services = {
     uptime-kuma = {
       enable = true;
-      settings = { };
+      settings = {
+        HOST = "::";
+      };
     };
 
     # netdata = {
