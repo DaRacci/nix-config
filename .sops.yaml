@@ -19,7 +19,7 @@ keys:
 creation_rules:
   - path_regex: hosts/secrets.yaml$
     key_groups:
-    - age: [ *james, *nixe, *surnix, *winix, *nixcloud, *nixdev, *nixio, *nixserv ]
+    - age: [ *james, *nixe, *surnix, *winix, *nixcloud, *nixdev, *nixio, *nixserv, *nixmon, *nixarr ]
 
   - path_regex: home/racci/secrets.yaml$
     key_groups:
