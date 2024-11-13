@@ -1,4 +1,4 @@
-{ config, pkgs, modulesPath, ... }: {
+{ flake, config, pkgs, modulesPath, ... }: {
   imports = [
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
   ];
@@ -19,11 +19,20 @@
   ];
 
   users = {
-    users.atticd = {
-      uid = 949;
-      group = "atticd";
-      home = "/var/lib/atticd";
-      useDefaultShell = true;
+    users = {
+      builder = {
+        isNormalUser = true;
+        extraGroups = [ "trusted" ];
+        home = "/var/lib/builder";
+        openssh.authorizedKeys.keyFiles = [ "${flake}/home/root/id_ed25519.pub" ];
+      };
+
+      atticd = {
+        uid = 949;
+        group = "atticd";
+        home = "/var/lib/atticd";
+        useDefaultShell = true;
+      };
     };
 
     groups.atticd = {
