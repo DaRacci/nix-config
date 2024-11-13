@@ -1,4 +1,27 @@
-{ flake, config, modulesPath, pkgs, lib, ... }: {
+{ flake, config, modulesPath, pkgs, lib, ... }:
+let
+  subnets = [
+    {
+      dns = "100.100.100.100:53";
+      ipv4_cidr = "10.64.0.0/10";
+      ipv6_cidr = "fd7a:115c:a1e0::/48";
+      domain = "degu-beta.ts.net";
+    }
+    {
+      dns = "192.168.1.1:53";
+      ipv4_cidr = "192.168.1.0/24";
+      ipv6_cidr = null;
+      domain = "home";
+    }
+    {
+      dns = "192.168.2.1:53";
+      ipv4_cidr = "192.168.2.0/24";
+      ipv6_cidr = null;
+      domain = "localdomain";
+    }
+  ];
+in
+{
   imports = [
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
     "${flake}/hosts/shared/optional/tailscale.nix"
@@ -56,16 +79,7 @@
           #region Upstream Settings
           anonymize_client_ip = false;
           upstream_mode = "parallel";
-          upstream_dns = [
-            #region local resolvers
-            # Allow Unifi to finish .localdomain CNAME's (USA)
-            # "[//localdomain/]192.168.1.1"
-            # Allow Unifi to finish .localdomain CNAME's (AUS)
-            "[/localdomain/]192.168.2.1"
-            # Allow Tailscale to finish .degu-beta.ts.net CNAME's
-            "[/degu-beta.ts.net/]100.100.100.100"
-            #endregion
-
+          upstream_dns = (builtins.map (subnet: "[/${subnet.domain}/]${subnet.dns}") subnets) ++ [
             #region public resolvers
             "tls://dns10.quad9.net"
             "tls://1dot1dot1dot1.cloudflare-dns.com"
@@ -85,29 +99,32 @@
           ];
 
           trusted_proxies = [
-            "100.101.160.87/32"
-            "192.168.2.207/32"
             "127.0.0.0/8"
             "::1/128"
           ];
 
-          private_networks = [
-            "100.0.0.0/8"
-            "192.168.1.0/24"
-            "192.168.2.0/24"
+          private_networks = lib.trivial.pipe subnets [
+            (builtins.map (subnet: [ subnet.ipv4_cidr subnet.ipv6_cidr ]))
+            lib.flatten
+            (builtins.filter (subnet: subnet != null))
           ];
 
           use_private_ptr_resolvers = true;
-          local_ptr_upstreams = [
-            # Unifi (USA)
-            # "192.168.1.1:53"
-            # Unifi (AUS)
-            "192.168.2.1:53"
-            # Tailscale
-            "100.100.100.100:53"
-          ];
+          local_ptr_upstreams = builtins.map (subnet: subnet.dns) subnets;
           #endregion
         };
+
+        user_rules = lib.trivial.pipe subnets [
+          (builtins.map (subnet: [
+            "*.racci.dev^$client=${subnet.ipv4_cidr},dnsrewrite=${config.system.name}.${subnet.domain}"
+          ] ++ lib.optionals (subnet.ipv6_cidr != null) [
+            "*.racci.dev^$client=${subnet.ipv6_cidr},dnsrewrite=${config.system.name}.${subnet.domain}"
+          ]))
+          lib.flatten
+        ] ++ [
+          "@@||nextcloud.racci.dev^$dnsrewrite" # Nextcloud isn't hosted internally yet.
+          "@@||s.youtube.com^$important" # Fix YouTube history for IOS App
+        ];
 
         tls = {
           enabled = true;
@@ -119,8 +136,8 @@
 
           strict_sni_check = false;
           allow_unencrypted_doh = true;
-          certificate_path = "/data/certificates/adguard.racci.dev/adguard.racci.dev.crt";
-          private_key_path = "/data/certificates/adguard.racci.dev/adguard.racci.dev.key";
+          certificate_path = "${config.security.acme.certs."adguard.racci.dev".directory}/adguard.racci.dev.crt";
+          private_key_path = "${config.security.acme.certs."adguard.racci.dev".directory}/adguard.racci.dev.key";
         };
 
         filters =
@@ -142,7 +159,12 @@
             (mkFilter "1Hosts (Lite)" 24)
             (mkFilter "AWAvenue Ads Rule" 53)
             (mkFilter "Dan Pollock's List" 4)
-
+            (mkFilter "Dandelion Sprout's Anti-Malware List" 12)
+            (mkFilter "HaGeZi's Ultimate Blocklist" 49)
+            (mkFilter "Dandelion Sprout's Anti pUsh Notifications" 39)
+            (mkFilter "HaGeZi's Badware Hoster Blocklist" 55)
+            (mkFilter "HaGeZi's Threat Intelligence Feeds" 44)
+            (mkFilter "NoCoin Filter List" 8)
           ];
       };
     };
@@ -246,6 +268,17 @@
   };
 
   networking.firewall = {
-    allowedTCPPorts = [ 53 80 443 9000 9001 ];
+    allowedTCPPorts = [
+      # AdGuardHome
+      53
+
+      # Caddy
+      80
+      443
+
+      # Minio
+      9000
+      9001
+    ];
   };
 }
