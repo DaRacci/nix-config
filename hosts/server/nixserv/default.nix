@@ -1,4 +1,4 @@
-{ flake, config, pkgs, modulesPath, ... }: {
+{ flake, config, pkgs, lib, modulesPath, ... }: {
   imports = [
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
   ];
@@ -24,7 +24,7 @@
         isNormalUser = true;
         extraGroups = [ "trusted" ];
         home = "/var/lib/builder";
-        openssh.authorizedKeys.keyFiles = [ "${flake}/home/root/id_ed25519.pub" ];
+        openssh.authorizedKeys.keyFiles = builtins.map (system: builtins.elemAt system.config.users.users.root.openssh.authorizedKeys.keyFiles 0) (lib.attrValues flake.nixosConfigurations);
       };
 
       atticd = {
