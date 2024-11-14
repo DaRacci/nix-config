@@ -137,24 +137,7 @@
       perSystem = { system, pkgs, ... }: {
         _module.args.pkgs = mkPkgs system false false;
 
-        packages = import ./pkgs { inherit pkgs; } // {
-          proxmox-template = pkgs.writeShellApplication {
-            name = "copy-template-to-proxmox";
-            runtimeInputs = [ pkgs.openssh ];
-            text = ''
-              TARGET="''${1}"
-              if [ -z "$TARGET" ]; then
-                echo "No target specified"
-                exit 1
-              fi
-
-              nix build .#"''${TARGET}" --impure
-
-              echo "Adding result to proxmox templates"
-              scp -oIdentitiesOnly=yes result root@192.168.2.210:/var/lib/vz/template/cache/"''${TARGET}"-${pkgs.stdenv.system}.tar.gz
-            '';
-          };
-        };
+        packages = import ./pkgs { inherit pkgs; };
 
         devenv.shells.default = {
           # Fixes https://github.com/cachix/devenv/issues/528
