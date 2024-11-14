@@ -40,6 +40,8 @@
     };
   };
 
+  nix.settings.trusted-users = [ "builder" ];
+
   services = {
     atticd = {
       enable = true;
