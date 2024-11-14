@@ -10,16 +10,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1730900198,
-        "narHash": "sha256-4CzKmObApm7nzI/8R33/oD8EZXKX//Q5EM5KtMZTvgU=",
+        "lastModified": 1731549533,
+        "narHash": "sha256-ZA2H6b3VvGOK4FlK+Zxb8FxY65/1pUi8xmm7szYk9Bk=",
         "owner": "aylur",
         "repo": "ags",
-        "rev": "e04f22997221f56a59558343fc46a26ee1b55aec",
+        "rev": "fb47b50834333359eaf9717896065e7f54f2f4fb",
         "type": "github"
       },
       "original": {
         "owner": "aylur",
-        "ref": "v2",
         "repo": "ags",
         "type": "github"
       }

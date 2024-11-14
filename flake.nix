@@ -256,7 +256,7 @@
     hyprland-contrib.url = "github:hyprwm/contrib";
     anyrun = { url = "github:anyrun-org/anyrun"; inputs = { nixpkgs.follows = "nixpkgs"; flake-parts.follows = "flake-parts"; }; };
     astal = { url = "github:aylur/astal"; inputs.nixpkgs.follows = "nixpkgs"; };
-    ags = { url = "github:aylur/ags/v2"; inputs = { nixpkgs.follows = "nixpkgs"; astal.follows = "astal"; }; };
+    ags = { url = "github:aylur/ags"; inputs = { nixpkgs.follows = "nixpkgs"; astal.follows = "astal"; }; };
 
     # Other misc modules
     arion = { url = "github:hercules-ci/arion"; };
