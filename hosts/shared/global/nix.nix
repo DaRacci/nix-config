@@ -45,7 +45,6 @@ in
       post-build-hook = lib.getExe postBuildHook;
     };
 
-    # TODO :: Ssh Serve store
     gc = {
       automatic = true;
       dates = "daily";
@@ -61,5 +60,14 @@ in
     # This will additionally add your inputs to the system's legacy channels
     # Making legacy nix commands consistent as well, awesome!
     nixPath = lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
+
+    distributedBuilds = true;
+    buildMachines = lib.mkIf (config.system.name != "nixserv") [{
+      inherit (flake.nixosConfigurations.nixserv.config.networking) hostName;
+      system = "x86_64-linux";
+      protocl = "ssh-ng";
+      sshUser = "builder";
+      sshKey = config.sops.secrets.SSH_PRIVATE_KEY.path;
+    }];
   };
 }
