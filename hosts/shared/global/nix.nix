@@ -23,7 +23,7 @@ let
     text = ''
       JWT=$(cat ${config.sops.secrets.CACHE_PUSH_KEY.path})
       attic login build-auto-push ${caches.cacheraccidev.url} "$JWT" || exit 1
-      attic push build-auto-push:racci "$OUT_PATHS"
+      attic push build-auto-push:racci "$OUT_PATHS" &
     '';
   };
 in
