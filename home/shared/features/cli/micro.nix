@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+_: {
   programs.micro = {
     enable = true;
     settings = {
@@ -12,9 +12,9 @@
     };
   };
 
-  home.sessionVariables = {
-    EDITOR = "${pkgs.micro}/bin/micro";
-  };
+  # home.sessionVariables = {
+  #   EDITOR = "${pkgs.micro}/bin/micro";
+  # };
 
   user.persistence.directories = [
     ".config/micro/buffers"

@@ -4,7 +4,7 @@
     ./cava.nix
     ./fastfetch.nix
     ./git.nix
-    ./multiplexer.nix
+    ./terminal.nix
   ];
 
   user.persistence.directories = [
