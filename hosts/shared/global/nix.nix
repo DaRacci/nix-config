@@ -65,7 +65,7 @@ in
     buildMachines = lib.mkIf (config.system.name != "nixserv") [{
       inherit (flake.nixosConfigurations.nixserv.config.networking) hostName;
       system = "x86_64-linux";
-      protocl = "ssh-ng";
+      protocol = "ssh-ng";
       sshUser = "builder";
       sshKey = config.sops.secrets.SSH_PRIVATE_KEY.path;
       supportedFeatures = [ "kvm" "nixos-test" "big-parallel" "benchmark" ];
