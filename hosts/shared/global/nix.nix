@@ -62,8 +62,20 @@ in
   };
 
   systemd.services.attic-watch-store = {
-    enable = true;
     description = "Watch nix store for attic";
+    wants = [ "network-online.target" ];
+    after = [ "network-online.target" ];
+    wantedBy = [ "multi-user.target" ];
+
+    unitConfig = {
+      StartLimitInterval = 0;
+    };
+
+    serviceConfig = {
+      RestartSec = 1;
+      Restart = "on-failure";
+    };
+
     script = lib.getExe (pkgs.writeShellApplication {
       name = "attic-watch-store";
       runtimeInputs = [ pkgs.attic-client ];
