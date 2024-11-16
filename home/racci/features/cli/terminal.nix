@@ -117,9 +117,8 @@ in
       settings = {
         editor = {
           line-number = "relative";
-          cursorline = true;
-          cursorcolumn = true;
-          bufferline = true;
+          cursorline = false;
+          cursorcolumn = false;
         };
       };
 
