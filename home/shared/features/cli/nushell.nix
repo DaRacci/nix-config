@@ -121,6 +121,11 @@
           }
         }
       }
+
+      # Zellij integration
+      if 'ZELLIJ' not-in ($env | columns) {
+        zellij attach -c
+      }
     '';
 
     shellAliases = {
