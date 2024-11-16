@@ -12,26 +12,12 @@ let
     };
 
     cacheraccidev = {
-      url = "https://cache.racci.dev/racci";
-      key = "cache.racci.dev-1:/i2mJWsMm9rDxIPH3bqNXJXd/wPEDRsJFYiTKh8JPF0=";
+      url = "https://cache.racci.dev/global";
+      key = "global:OKNSxDYKp8Q8Tr5/5Bc7CYVSfvdFQV0dMhpG0fOAG0k=";
     };
-  };
-
-  postBuildHook = pkgs.writeShellApplication {
-    name = "post-build-hook";
-    runtimeInputs = [ pkgs.attic-client ];
-    text = ''
-      JWT=$(cat ${config.sops.secrets.CACHE_PUSH_KEY.path})
-      attic login build-auto-push ${caches.cacheraccidev.url} "$JWT" || exit 1
-      attic push build-auto-push:racci "$OUT_PATHS" &
-    '';
   };
 in
 {
-  sops.secrets.CACHE_PUSH_KEY = {
-    sopsFile = "${flake}/hosts/secrets.yaml";
-  };
-
   nix = {
     settings = rec {
       trusted-users = [ "root" "@wheel" ];
@@ -41,8 +27,6 @@ in
       substituters = map (sub: sub.url) (lib.attrValues caches);
       trusted-substituters = substituters;
       trusted-public-keys = map (sub: sub.key) (lib.attrValues caches);
-
-      post-build-hook = lib.getExe postBuildHook;
     };
 
     gc = {
@@ -70,5 +54,24 @@ in
       sshKey = config.sops.secrets.SSH_PRIVATE_KEY.path;
       supportedFeatures = [ "kvm" "nixos-test" "big-parallel" "benchmark" ];
     }];
+  };
+
+  sops.secrets.CACHE_PUSH_KEY = {
+    sopsFile = "${flake}/hosts/secrets.yaml";
+    restartUnits = [ "attic-watch-store.service" ];
+  };
+
+  systemd.services.attic-watch-store = {
+    enable = true;
+    description = "Watch nix store for attic";
+    script = lib.getExe (pkgs.writeShellApplication {
+      name = "attic-watch-store";
+      runtimeInputs = [ pkgs.attic-client ];
+      text = ''
+        JWT=$(cat ${config.sops.secrets.CACHE_PUSH_KEY.path})
+        attic login build-auto-push ${caches.cacheraccidev.url} "$JWT" || exit 1
+        attic watch-store build-auto-push:global
+      '';
+    });
   };
 }
