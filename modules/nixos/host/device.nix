@@ -2,7 +2,7 @@
   cfg = config.host.device;
 in
 {
-  options.host.device = rec {
+  options.host.device = {
     enable = mkEnableOption "device specification";
 
     role = mkOption {

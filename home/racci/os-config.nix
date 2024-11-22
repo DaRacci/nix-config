@@ -1,7 +1,11 @@
 { config, pkgs, lib, ... }: {
   users.users.racci = {
     uid = 1000;
-    shell = pkgs.nushell;
+    # WSL is fucky with nu so we use fish instead.
+    shell =
+      if builtins.hasAttr "wsl" config
+      then pkgs.fish
+      else pkgs.nushell;
   };
 
   environment.shells = [ config.users.users.racci.shell ];
