@@ -184,7 +184,7 @@
         #region Toolkit Backends
         "GTK_BACKEND,wayland,x11"
         "QT_QPA_PLATFORM,wayland;xcb"
-        "SDL_VIDEODRIVER,wayland"
+        # "SDL_VIDEODRIVER,wayland" # Breaks osu! hardware acceleration
         "CLUTTER_BACKEND,wayland"
         #endregion
       ];
