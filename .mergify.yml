@@ -1,18 +1,27 @@
 # yaml-language-server: $schema=https://docs.mergify.com/mergify-configuration-schema.json
 
 queue_rules:
+  - name: duplicated default from merge on approval
+    queue_conditions:
+      - base=master
+      - label~=merge-queue|dependencies
+      - "#approved-reviews-by>=1"
+      - base=master
+      - label~=merge-queue|dependencies
+    merge_conditions: []
+    merge_method: rebase
+    update_method: rebase
   - name: default
+    queue_conditions:
+      - base=master
+      - label~=merge-queue|dependencies
     merge_conditions:
       - "#commits-behind==0"
       - "#approved-reviews-by>=1"
       - "#check-failure==0"
       - check-success=GitGuardian Security Checks
-
-defaults:
-  actions:
-    queue:
-      merge_method:  rebase
-      update_method: rebase
+    merge_method: rebase
+    update_method: rebase
 
 pull_request_rules:
   - name: merge using the merge queue
@@ -21,13 +30,8 @@ pull_request_rules:
       - label~=merge-queue|dependencies
     actions:
       request_reviews:
-        users: [ DaRacci ]
-      queue:
-
-  - name: merge on approval
-    conditions:
-       - "#approved-reviews-by>=1"
-       - base=master
-       - label~=merge-queue|dependencies
+        users: [DaRacci]
+  - name: merge on approval + merge using the merge queue
+    conditions: []
     actions:
       queue:
