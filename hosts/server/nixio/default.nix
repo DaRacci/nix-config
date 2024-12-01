@@ -181,7 +181,7 @@ in
     caddy = {
       enable = true;
 
-      settings = {
+      globalConfig = {
         automatic_https = "disable_certs";
       };
 
