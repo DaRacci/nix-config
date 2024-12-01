@@ -29,7 +29,22 @@
     ];
   };
 
-  wayland.windowManager.hyprland.settings.bind = [
-    "CTRL_SHIFT,SPACE,exec,${lib.getExe pkgs._1password-gui} --quick-access"
-  ];
+  wayland.windowManager.hyprland = {
+    custom-settings = {
+      windowrule = [
+        {
+          matcher.title = "Quick Access — 1Password";
+          rule = {
+            pin = true;
+            center = true;
+            stayfocused = true;
+          };
+        }
+      ];
+    };
+
+    settings.bind = [
+      "CTRL_SHIFT,SPACE,exec,${lib.getExe pkgs._1password-gui} --quick-access"
+    ];
+  };
 }
