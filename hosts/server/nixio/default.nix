@@ -3,7 +3,7 @@ let
   subnets = [
     {
       dns = "100.100.100.100:53";
-      ipv4_cidr = "10.64.0.0/10";
+      ipv4_cidr = "100.64.0.0/10";
       ipv6_cidr = "fd7a:115c:a1e0::/48";
       domain = "degu-beta.ts.net";
     }
