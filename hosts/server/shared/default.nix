@@ -1,9 +1,8 @@
 { flake, config, lib, ... }: {
-  imports = [
-    ./caddy.nix
-  ];
-
-  services.getty.autologinUser = "root";
+  services = {
+    getty.autologinUser = "root";
+    resolved.enable = lib.mkForce false;
+  };
 
   nix = {
     distributedBuilds = true;

@@ -34,8 +34,6 @@ in
     "CLOUDFLARE/ZONE_API_TOKEN" = { };
   };
 
-  services.resolved.enable = pkgs.lib.mkForce false;
-
   users.users.minio = {
     extraGroups = [ "caddy" ]; # Caddy group has access to certs, and minio needs access to its own certs.
   };
@@ -185,9 +183,16 @@ in
 
     caddy = {
       enable = true;
+      package = pkgs.caddy;
+      email = "admin@racci.dev";
 
       globalConfig = ''
         auto_https "disable_certs"
+      '';
+
+      logFormat = ''
+        level DEBUG
+        format console
       '';
 
       # Create a map of virtual hosts using the configurations from other servers.
@@ -289,6 +294,7 @@ in
     allowedTCPPorts = [
       # AdGuardHome
       53
+      853
 
       # Caddy
       80
