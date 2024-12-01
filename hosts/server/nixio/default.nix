@@ -182,7 +182,7 @@ in
       enable = true;
 
       globalConfig = ''
-        automatic_https "disable_certs"
+        auto_https "disable_certs"
       '';
 
       # Create a map of virtual hosts using the configurations from other servers.
