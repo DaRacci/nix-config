@@ -108,7 +108,10 @@ in
             lib.flatten
             (builtins.filter (subnet: subnet != null))
           ];
-          allowed_clients = private_networks;
+          allowed_clients = private_networks ++ [
+            "127.0.0.0/8"
+            "::1/128"
+          ];
 
           use_private_ptr_resolvers = true;
           local_ptr_upstreams = builtins.map (subnet: subnet.dns) subnets;
