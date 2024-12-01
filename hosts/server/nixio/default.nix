@@ -235,11 +235,10 @@ in
         lib.mergeAttrsList
       ] // (
         let
-          mkVirtualHost = name: config: lib.nameValuePair "${name}.racci.dev"
-            {
-              hostName = "${name}.racci.dev";
-              useACMEHost = "${name}.racci.dev";
-            } // config;
+          mkVirtualHost = name: config: lib.nameValuePair "${name}.racci.dev" ({
+            hostName = "${name}.racci.dev";
+            useACMEHost = "${name}.racci.dev";
+          } // config);
         in
         lib.listToAttrs [
           (mkVirtualHost "minio" {
@@ -260,9 +259,9 @@ in
             extraConfig = /*caddyfile*/ ''
               redir /dns-query /dns-query/
               handle /dns-query/* {
-                reverse_proxy https://${config.services.adguardhome.host}:${config.services.adguardhome.port}
+                reverse_proxy https://${config.services.adguardhome.host}:${toString config.services.adguardhome.port}
               }
-              reverse_proxy http://${config.services.adguardhome.host}:${config.services.adguardhome.port}
+              reverse_proxy http://${config.services.adguardhome.host}:${toString config.services.adguardhome.port}
             '';
           })
           (mkVirtualHost "pve" {
