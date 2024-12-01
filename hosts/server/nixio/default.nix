@@ -172,6 +172,10 @@ in
     caddy = {
       enable = true;
 
+      settings = {
+        automatic_https = "disable_certs";
+      };
+
       # Create a map of virtual hosts using the configurations from other servers.
       # This will need to iterate the hosts of the flake and pull the virtualHosts configuration from each server.
       virtualHosts = lib.trivial.pipe flake.nixosConfigurations [
