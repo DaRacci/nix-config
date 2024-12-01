@@ -146,7 +146,7 @@ in
 
         statistics = {
           enabled = true;
-          interval = "168"; # 1 week
+          interval = "168h"; # 1 week
         };
 
         filters =
