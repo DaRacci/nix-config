@@ -60,7 +60,7 @@ in
           }
         ];
 
-        dns = {
+        dns = rec {
           bind_hosts = [ "0.0.0.0" ];
           port = 53;
 
@@ -108,9 +108,13 @@ in
             lib.flatten
             (builtins.filter (subnet: subnet != null))
           ];
+          allowed_clients = private_networks;
 
           use_private_ptr_resolvers = true;
           local_ptr_upstreams = builtins.map (subnet: subnet.dns) subnets;
+
+          edns_client_subnet = true;
+          enable_dnssec = true;
           #endregion
         };
 
@@ -136,8 +140,13 @@ in
 
           strict_sni_check = false;
           allow_unencrypted_doh = true;
-          certificate_path = "${config.security.acme.certs."adguard.racci.dev".directory}/adguard.racci.dev.crt";
-          private_key_path = "${config.security.acme.certs."adguard.racci.dev".directory}/adguard.racci.dev.key";
+          certificate_path = "${config.security.acme.certs."adguard.racci.dev".directory}/cert.pem";
+          private_key_path = "${config.security.acme.certs."adguard.racci.dev".directory}/key.pem";
+        };
+
+        statistics = {
+          enabled = true;
+          interval = "168"; # 1 week
         };
 
         filters =
