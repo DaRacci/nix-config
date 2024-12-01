@@ -4,19 +4,25 @@ let
     {
       dns = "100.100.100.100:53";
       ipv4_cidr = "100.64.0.0/10";
+      ipv4_arpa = "64.100.in-addr.arpa";
       ipv6_cidr = "fd7a:115c:a1e0::/48";
+      ipv6_arpa = "0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.1.0.0.0.0.0.f.7.2.0.0.2.ip6.arpa";
       domain = "degu-beta.ts.net";
     }
     {
       dns = "192.168.1.1:53";
       ipv4_cidr = "192.168.1.0/24";
+      ipv4_arpa = "1.168.192.in-addr.arpa";
       ipv6_cidr = null;
+      ipv6_arpa = null;
       domain = "home";
     }
     {
       dns = "192.168.2.1:53";
       ipv4_cidr = "192.168.2.0/24";
+      ipv4_arpa = "2.168.192.in-addr.arpa";
       ipv6_cidr = null;
+      ipv6_arpa = null;
       domain = "localdomain";
     }
   ];
@@ -77,7 +83,15 @@ in
           #region Upstream Settings
           anonymize_client_ip = false;
           upstream_mode = "parallel";
-          upstream_dns = (builtins.map (subnet: "[/${subnet.domain}/]${subnet.dns}") subnets) ++ [
+          upstream_dns = (lib.pipe subnets [
+            (builtins.map (subnet: [
+              "[/${subnet.domain}/]${subnet.dns}"
+              "[/${subnet.ipv4_arpa}/]${subnet.dns}"
+            ] ++ lib.optionals (subnet.ipv6_arpa != null) [
+              "[/${subnet.ipv6_arpa}/]${subnet.dns}"
+            ]))
+            lib.flatten
+          ]) ++ [
             #region public resolvers
             "tls://dns10.quad9.net"
             "tls://1dot1dot1dot1.cloudflare-dns.com"
