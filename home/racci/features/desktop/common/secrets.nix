@@ -1,13 +1,14 @@
-# TODO :: Modularise
 { config, pkgs, lib, ... }: {
   home.packages = with pkgs; [
     _1password-gui
     _1password-cli
+    bitwarden-desktop
+    bitwarden-cli
   ];
 
   user.persistence = {
     files = [ ".config/1Password/1password.sqlite" ];
-    directories = [ ".config/1Password/settings" ];
+    directories = [ ".config/1Password/settings" ".config/Bitwarden" ];
   };
 
   home.sessionVariables = {
