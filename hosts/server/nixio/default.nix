@@ -40,8 +40,9 @@ in
     "CLOUDFLARE/ZONE_API_TOKEN" = { };
   };
 
-  users.users.minio = {
-    extraGroups = [ "caddy" ]; # Caddy group has access to certs, and minio needs access to its own certs.
+  users.users = {
+    minio.extraGroups = [ "caddy" ]; # Caddy group has access to certs, and minio needs access to its own certs.
+    adguardhome.extraGroups = [ "caddy" ]; # Caddy group has access to certs, and adguardhome needs access to its own certs.
   };
 
   services = {
@@ -210,7 +211,7 @@ in
       '';
 
       # Create a map of virtual hosts using the configurations from other servers.
-      # This will need to iterate the hosts of the flake and pull the virtualHosts configuration from each server.
+      # This will iterate the hosts of the flake and pull the virtualHosts configuration from each server.
       virtualHosts = lib.trivial.pipe flake.nixosConfigurations [
         # Exclude the current host
         (lib.filterAttrs (name: _: name != config.system.name))
@@ -257,7 +258,12 @@ in
             '';
           })
           (mkVirtualHost "adguard" {
+            # TODO - DNS over HTTPS
             extraConfig = /*caddyfile*/ ''
+              redir /dns-query /dns-query/
+              handle /dns-query/* {
+                reverse_proxy https://${config.services.adguardhome.host}:${config.services.adguardhome.port}
+              }
               reverse_proxy http://${config.services.adguardhome.host}:${config.services.adguardhome.port}
             '';
           })
@@ -269,6 +275,24 @@ in
                   tls_insecure_skip_verify
                 }
               }
+            '';
+          })
+          # TODO - move out of dockge
+          (mkVirtualHost "finance" {
+            extraConfig = /*caddyfile*/ ''
+              reverse_proxy http://dockge:3000
+            '';
+          })
+          # TODO - move out of the vm
+          (mkVirtualHost "hassio" {
+            extraConfig = /*caddyfile*/ ''
+              reverse_proxy http://homeassistant:8123
+            '';
+          })
+          # TODO - will this be needed in the future?
+          (mkVirtualHost "dockge" {
+            extraConfig = /*caddyfile*/ ''
+              reverse_proxy http://dockge:5001
             '';
           })
         ]
