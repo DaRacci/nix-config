@@ -113,8 +113,10 @@ in
           use_private_ptr_resolvers = true;
           local_ptr_upstreams = builtins.map (subnet: subnet.dns) subnets;
 
-          # edns_client_subnet = true;
           enable_dnssec = true;
+          edns_client_subnet = {
+            enabled = true;
+          };
           #endregion
         };
 
