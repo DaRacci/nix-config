@@ -47,6 +47,74 @@
   };
 
   wayland.windowManager.hyprland = {
+    custom-settings = {
+      windowrule = [
+        {
+          matcher.title = "^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$";
+          rule = {
+            keepaspectratio = true;
+            float = true;
+            pin = true;
+            opacity = 1.0;
+            size = "25%";
+            move = {
+              x = "73%";
+              y = "72%";
+            };
+          };
+        }
+        {
+          matcher = [
+            { title = "^(Assetto Corsa)$"; }
+            { title = "^(AC2)$"; }
+          ];
+          rule = {
+            float = true;
+            center = true;
+            norounding = true;
+            opacity = 1.0;
+            size = "7680x1440";
+          };
+        }
+        {
+          matcher = [
+            { class = "^(file_progress)$"; }
+            { class = "^(confirm)$"; }
+            { class = "^(dialog)$"; }
+            { class = "^(download)$"; }
+            { class = "^(notification)$"; }
+            { class = "^(error)$"; }
+            { class = "^(confirmreset)$"; }
+            { title = "^(branchdialog)$"; }
+            { title = "^(Confirm to replace files)$"; }
+            { title = "^(File Operation Progress)$"; }
+            { class = "^(org.pulseaudio.pavucontrol)$"; }
+          ];
+          rule.float = true;
+        }
+        {
+          matcher = [
+            { title = "^(Steam Settings)(.*)$"; }
+            { title = "^(Open File)(.*)$"; }
+            { title = "^(Select a File)(.*)$"; }
+            { title = "^(Choose wallpaper)(.*)$"; }
+            { title = "^(Open Folder)(.*)$"; }
+            { title = "^(Save As)(.*)$"; }
+            { title = "^(Library)(.*)$"; }
+            { title = "^(File Upload)(.*)$"; }
+          ];
+          rule = {
+            center = true;
+            float = true;
+          };
+        }
+        {
+          matcher.class = "(steam_app)";
+          rule.immediate = true;
+        }
+      ];
+    };
+
     settings = {
       monitor = [
         "DP-2,  2560x1440@165,  0x0,        1, vrr, 1" # Center Monitor
@@ -117,10 +185,10 @@
         #endregion
       };
 
-      workspace = [
-        "workspace = w[t1], gapsout:0, gapsin:0, border: 0, rounding:0"
-        "workspace = w[tg1], gapsout:0, gapsin:0, border: 0, rounding:0"
-      ];
+      # workspace = [
+      #   "workspace = w[t1], gapsout:0, gapsin:0, border: 0, rounding:0"
+      #   "workspace = w[tg1], gapsout:0, gapsin:0, border: 0, rounding:0"
+      # ];
       #endregion
 
       general = {
@@ -188,85 +256,6 @@
         "CLUTTER_BACKEND,wayland"
         #endregion
       ];
-
-      windowrulev2 =
-        let
-          fl = target: regex: mkRule "float" "${target}:^(${regex})$";
-          mkRule = action: matcher: "${action},${matcher}";
-          mkRules = matchers: functions: lib.trivial.pipe matchers (functions ++ [
-            flatten
-          ]);
-
-          mkExactTitleMatcher = title: "title:^(${title})$";
-          mkStartingTitleMatcher = title: "title:^(${title})(.*)$";
-
-          dialogs = [
-            "Steam Settings"
-            "Open File"
-            "Select a File"
-            "Choose wallpaper"
-            "Open Folder"
-            "Save As"
-            "Library"
-            "File Upload"
-          ];
-
-          tripleMonitorGames = [
-            "Assetto Corsa"
-            "AC2"
-          ];
-        in
-        [
-          #region Floating Windows
-          (fl "class" "file_progress")
-          (fl "class" "confirm")
-          (fl "class" "dialog")
-          (fl "class" "download")
-          (fl "class" "notification")
-          (fl "class" "error")
-          (fl "class" "confirmreset")
-          (fl "title" "branchdialog")
-          (fl "title" "Confirm to replace files")
-          (fl "title" "File Operation Progress")
-          (fl "class" "org.pulseaudio.pavucontrol")
-          #endregion
-
-          #region Picture In Picture
-          "keepaspectratio, title:^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$"
-          "move 73% 72%,title:^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$"
-          "size 25%, title:^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$"
-          "float, title:^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$"
-          "pin, title:^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$"
-          #endregion
-
-          #region Opacity
-          "opacity 1.0 override 1.0 override, title:^(Picture-in-Picture)$"
-          #endregion
-
-          #region Tearing
-          "immediate, class:(steam_app)" # Enable Tearing for all Steam Games
-          #endregion
-
-          #region Dialogs
-        ] ++ (mkRules dialogs [
-          (map mkStartingTitleMatcher)
-          (map (matcher: [
-            (mkRule "center" matcher)
-            (mkRule "float" matcher)
-          ]))
-          #endregion
-          #region Triple Monitor Windows
-        ]) ++ (mkRules tripleMonitorGames [
-          (map mkExactTitleMatcher)
-          (map (matcher: [
-            (mkRule "float" matcher)
-            (mkRule "center" matcher)
-            (mkRule "opacity 1.0 override 1.0 override 1.0 override" matcher)
-            (mkRule "rounding 0" matcher)
-            (mkRule "size 7680x1440" matcher)
-          ]))
-          #endregion
-        ]);
 
       layerrule = [
         "xray 1, .*"
@@ -527,9 +516,11 @@
           windowrulev2 = bordercolor rgba(ffabf1AA) rgba(ffabf177),pinned:1
         '';
       in
-      builtins.concatStringsSep "\n" ([
-        input
-        theme
-      ] ++ builtins.attrValues bindings.global ++ builtins.attrValues bindings.submaps);
+      builtins.concatStringsSep
+        "\n"
+        ([
+          input
+          theme
+        ] ++ builtins.attrValues bindings.global ++ builtins.attrValues bindings.submaps);
   };
 }
