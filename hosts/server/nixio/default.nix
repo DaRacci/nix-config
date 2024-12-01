@@ -42,7 +42,6 @@ in
 
   users.users = {
     minio.extraGroups = [ "caddy" ]; # Caddy group has access to certs, and minio needs access to its own certs.
-    adguardhome.extraGroups = [ "caddy" ]; # Caddy group has access to certs, and adguardhome needs access to its own certs.
   };
 
   services = {
@@ -320,11 +319,30 @@ in
       };
     };
 
-    certs = lib.trivial.pipe config.services.caddy.virtualHosts [
-      builtins.attrNames
-      (builtins.filter (name: lib.strings.hasSuffix ".racci.dev" name))
-      (map (name: lib.nameValuePair name { }))
-      builtins.listToAttrs
+    certs = lib.mkMerge [
+      (lib.trivial.pipe config.services.caddy.virtualHosts [
+        builtins.attrNames
+        (builtins.filter (name: lib.strings.hasSuffix ".racci.dev" name))
+        (map (name: lib.nameValuePair name { }))
+        builtins.listToAttrs
+      ])
+      (lib.trivial.pipe flake.nixosConfigurations [
+        (lib.filterAttrs (name: _: name != config.system.name))
+        builtins.attrValues
+        (builtins.map (host: host.config))
+
+        (builtins.filter (config: config.host.device.role == "server"))
+        (builtins.filter (config: config.security.acme ? certs && config.security.acme.certs != { }))
+        (builtins.map (config: config.security.acme.certs))
+
+        lib.mergeAttrsList
+        (lib.mapAttrs' (name: value: lib.nameValuePair "${name}.racci.dev" value))
+      ])
+      {
+        "adguard.racci.dev" = {
+          group = "adguardhome";
+        };
+      }
     ];
   };
 
