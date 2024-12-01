@@ -1,4 +1,8 @@
 { flake, config, lib, ... }: {
+  imports = [
+    "${flake}/hosts/shared/optional/tailscale.nix"
+  ];
+
   services = {
     getty.autologinUser = "root";
     resolved.enable = lib.mkForce false;
