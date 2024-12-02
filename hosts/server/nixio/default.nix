@@ -33,7 +33,12 @@ in
   ];
 
   sops.secrets = {
-    MINIO_ROOT_CREDENTIALS = { };
+    MINIO_ROOT_CREDENTIALS = {
+      inherit (config.users.users.minio) group;
+      owner = config.users.users.minio.name;
+      restartUnits = [ "minio.service" ];
+    };
+
     "CLOUDFLARE/EMAIL" = { };
     "CLOUDFLARE/DNS_API_TOKEN" = { };
     "CLOUDFLARE/ZONE_API_TOKEN" = { };
