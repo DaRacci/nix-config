@@ -303,7 +303,6 @@ in
 
   systemd.services.minio.environment = {
     MINIO_DOMAIN = "minio.racci.dev";
-    MINIO_SERVER_URL = "https://minio.racci.dev";
     MINIO_BROWSER_REDIRECT_URL = "https://minio.racci.dev/console";
     MINIO_OPTS = "--certs-dir /var/lib/acme/";
   };
