@@ -204,7 +204,6 @@ in
       '';
 
       logFormat = ''
-        level DEBUG
         format console
       '';
 
