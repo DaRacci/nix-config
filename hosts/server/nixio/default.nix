@@ -254,7 +254,7 @@ in
               }
 
               reverse_proxy {
-                to https://localhost${config.services.minio.listenAddress}
+                to http://localhost${config.services.minio.listenAddress}
               }
             '';
           })
