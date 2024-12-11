@@ -1,6 +1,6 @@
 { ... }: {
   imports = [
-    ./vintagestory.nix
+    # ./vintagestory.nix
     ./wine.nix
   ];
 }

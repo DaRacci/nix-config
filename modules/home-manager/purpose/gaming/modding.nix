@@ -7,8 +7,8 @@
 
   config = mkIf cfg.enable {
     home.packages = with pkgs;
-      (optional cfg.enableSatisfactory ficsit-cli)
-      ++ (optional cfg.enableBeatSaber beatsabermodmanager);
+      (optional cfg.enableSatisfactory ficsit-cli);
+    # ++ (optional cfg.enableBeatSaber beatsabermodmanager);
 
     xdg.mimeApps.defaultApplications = mkIf cfg.enableBeatSaber {
       "x-scheme-handler/beatsaver" = "BeatSaberModManager-url-beatsaver.desktop";
