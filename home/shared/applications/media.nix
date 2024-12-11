@@ -12,7 +12,8 @@
       forAll = desktop: mimes: lib.mine.attrsets.recursiveMergeAttrs (builtins.map (mime: { ${mime} = desktop; }) mimes);
     in
     {
-      defaultApplications = forAll "org.gnome.Loupe.Desktop" [
+      # Krita and Switcheroo try to highjack all image files.
+      defaultApplications = forAll "org.gnome.Loupe.desktop" [
         "image/avif"
         "image/bmp"
         "image/gif"
