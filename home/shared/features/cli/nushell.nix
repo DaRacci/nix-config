@@ -101,7 +101,7 @@
         } else { $spans })
 
         match $spans.0 {
-          git | nix | nix-shell | nix-store | nix-* => $fish_completer
+          # git | nix | nix-shell | nix-store | nix-* => $fish_completer
           __zoxide_z | __zoxide_zi => $zoxide_completer
           _ => $carapace_completer
         } | do $in $spans
