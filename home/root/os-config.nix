@@ -1,7 +1,15 @@
-{ flake, pkgs, lib, ... }:
-let inherit (lib) mkForce; in {
+{ flake, config, pkgs, lib, ... }:
+let
+  inherit (lib) mkForce;
+  # WSL is fucky with nu so we use fish instead.
+  useFish = builtins.hasAttr "wsl" config;
+in
+{
   users.users.root = {
-    shell = pkgs.fish;
+    shell =
+      if useFish
+      then pkgs.fish
+      else pkgs.nushell;
     isNormalUser = mkForce false;
 
     openssh.authorizedKeys.keyFiles = [
@@ -9,5 +17,5 @@ let inherit (lib) mkForce; in {
     ];
   };
 
-  programs.fish.enable = true;
+  programs.fish.enable = useFish;
 }
