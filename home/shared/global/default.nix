@@ -1,6 +1,6 @@
 { inputs, osConfig, config, pkgs, ... }: {
   imports = [
-    inputs.nur.hmModules.nur
+    inputs.nur.modules.homeManager.default
     inputs.sops-nix.homeManagerModule
     inputs.anyrun.homeManagerModules.default
   ] ++ [
