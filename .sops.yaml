@@ -1,62 +1,79 @@
-keys:
-  - &users :
-    - &james "age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a"
-  - &hosts :
-    - &nixe "age1rm3j9r0fulw4c2l9cfa9tvrznzw2aehgy2xc700lxrxqq00efghsy9wgv7"
-    - &surnix "age1hxxjcpvm9cz88xu6d5jv82uavhqg3jjk4e770a0pc2gzak5gs4zsp4798j"
-    - &winix "age10f7nnwsce2zj8905m7xelejm37uckp6tn7jk0eteghprjg2uducsgs9yss"
-  - &servers :
-    - &nixarr "age1qlkycz667c4dzzhywgp94ek5zs9u5xmp4dfd8fh48h58c4253seqajrk49"
-    - &nixcloud "age1vn626zvqf9hhnwur37fzww0xqts5jp45uuhetk2caggx75wp4umshj235u"
-    - &nixdev "age1zeu2cj6mt0nllar0myzhlsgwp0xk2px83vskplu0s2ul87g9634svuhjpw"
-    - &nixio "age1azcacxqvwankaf5ma98jk7swwpn6uxmwvdz0azq5fnulrlwk747sr9x2z9"
-    - &nixmon "age1xct06gxt774vj3ug8j7z7j3vtnvwe29z92nh5al2xqa4uy2kxqjs67j5ay"
-    - &nixserv "age1hepu4nkwau3p0z2sf40xq0pzzss0wl263m5uey7lfj7usnr7sfeskdkeg4"
-  # Github Workflow for Infra Repo
-  - &workflow "age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8"
-
-
 creation_rules:
   - path_regex: hosts/secrets.yaml$
     key_groups:
-    - age: [ *james, *nixe, *surnix, *winix, *nixcloud, *nixdev, *nixio, *nixserv, *nixmon, *nixarr ]
-
+      - age:
+          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
+          - age1rm3j9r0fulw4c2l9cfa9tvrznzw2aehgy2xc700lxrxqq00efghsy9wgv7
+          - age1hxxjcpvm9cz88xu6d5jv82uavhqg3jjk4e770a0pc2gzak5gs4zsp4798j
+          - age10f7nnwsce2zj8905m7xelejm37uckp6tn7jk0eteghprjg2uducsgs9yss
+          - age1vn626zvqf9hhnwur37fzww0xqts5jp45uuhetk2caggx75wp4umshj235u
+          - age1zeu2cj6mt0nllar0myzhlsgwp0xk2px83vskplu0s2ul87g9634svuhjpw
+          - age1azcacxqvwankaf5ma98jk7swwpn6uxmwvdz0azq5fnulrlwk747sr9x2z9
+          - age1hepu4nkwau3p0z2sf40xq0pzzss0wl263m5uey7lfj7usnr7sfeskdkeg4
+          - age1xct06gxt774vj3ug8j7z7j3vtnvwe29z92nh5al2xqa4uy2kxqjs67j5ay
+          - age1qlkycz667c4dzzhywgp94ek5zs9u5xmp4dfd8fh48h58c4253seqajrk49
+          - age10emng003r0p06xudhz8w3846vr9dl6sw4pl8hflpd7p3sejv75ds8rnf2a
   - path_regex: home/racci/secrets.yaml$
     key_groups:
-    - age: [ *james ]
-
+      - age:
+          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
   - path_regex: hosts/desktop/nixe/secrets.yaml$
     key_groups:
-    - age: [ *nixe, *james, *workflow ]
-
+      - age:
+          - age1rm3j9r0fulw4c2l9cfa9tvrznzw2aehgy2xc700lxrxqq00efghsy9wgv7
+          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
+          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
   - path_regex: hosts/laptop/surnix/secrets.yaml$
     key_groups:
-    - age: [ *surnix, *james, *workflow ]
-
+      - age:
+          - age1hxxjcpvm9cz88xu6d5jv82uavhqg3jjk4e770a0pc2gzak5gs4zsp4798j
+          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
+          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
   - path_regex: hosts/desktop/winix/secrets.yaml$
     key_groups:
-    - age: [ *winix, *james, *workflow ]
-
+      - age:
+          - age10f7nnwsce2zj8905m7xelejm37uckp6tn7jk0eteghprjg2uducsgs9yss
+          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
+          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
   - path_regex: hosts/server/nixarr/.*$
     key_groups:
-    - age: [ *nixarr, *james, *workflow ]
-
+      - age:
+          - age1qlkycz667c4dzzhywgp94ek5zs9u5xmp4dfd8fh48h58c4253seqajrk49
+          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
+          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
   - path_regex: hosts/server/nixcloud/secrets.yaml$
     key_groups:
-    - age: [ *nixcloud, *james, *workflow ]
-
+      - age:
+          - age1vn626zvqf9hhnwur37fzww0xqts5jp45uuhetk2caggx75wp4umshj235u
+          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
+          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
   - path_regex: hosts/server/nixdev/secrets.yaml$
     key_groups:
-    - age: [ *nixdev, *james, *workflow ]
-
+      - age:
+          - age1zeu2cj6mt0nllar0myzhlsgwp0xk2px83vskplu0s2ul87g9634svuhjpw
+          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
+          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
   - path_regex: hosts/server/nixio/secrets.yaml$
     key_groups:
-    - age: [ *nixio, *james, *workflow ]
-
+      - age:
+          - age1azcacxqvwankaf5ma98jk7swwpn6uxmwvdz0azq5fnulrlwk747sr9x2z9
+          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
+          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
   - path_regex: hosts/server/nixmon/secrets.yaml$
     key_groups:
-    - age: [ *nixmon, *james, *workflow ]
-
+      - age:
+          - age1xct06gxt774vj3ug8j7z7j3vtnvwe29z92nh5al2xqa4uy2kxqjs67j5ay
+          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
+          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
   - path_regex: hosts/server/nixserv/secrets.yaml$
     key_groups:
-    - age: [ *nixserv, *james, *workflow ]
+      - age:
+          - age1hepu4nkwau3p0z2sf40xq0pzzss0wl263m5uey7lfj7usnr7sfeskdkeg4
+          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
+          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
+  - path_regex: hosts/server/nixai/secrets.yaml$
+    key_groups:
+      - age:
+          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
+          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
+          - age10emng003r0p06xudhz8w3846vr9dl6sw4pl8hflpd7p3sejv75ds8rnf2a

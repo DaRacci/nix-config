@@ -110,6 +110,12 @@
               acceleration = "rocm";
             };
 
+            nixai = {
+              isoFormat = "proxmox-lxc";
+              deviceType = "server";
+              acceleration = "rocm";
+            };
+
             #|----------------------|
             #|  Deprecated Systems  |
             #|----------------------|
