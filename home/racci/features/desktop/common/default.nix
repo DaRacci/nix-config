@@ -3,6 +3,7 @@
     ./nextcloud.nix
     ./podman.nix
     ./secrets.nix
+    ./zed.nix
   ];
 
   xdg.mimeApps.enable = true;
