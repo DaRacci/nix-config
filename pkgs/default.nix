@@ -9,4 +9,6 @@
 
   # Racing Games
   monocoque = pkgs.callPackage ./monocoque { };
+
+  new-host = pkgs.callPackage ./helpers/new-host.nix { };
 }
