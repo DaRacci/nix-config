@@ -5,16 +5,13 @@
 , hostName ? null
 , skipPassword ? false
 , ...
-}: { flake, config, pkgs, lib, hostDirectory, ... }:
+}: { flake, config, lib, hostDirectory, ... }:
 let
   inherit (lib) mkIf mkDefault mkForce optional;
   userDirectory = "${flake}/home/${name}";
   user = config.users.users.${name};
-  skipSSHKey = !(builtins.pathExists "${userDirectory}/id_ed25519.pub");
-  publicKey = pkgs.writeTextFile {
-    name = "${name}_ed25519.pub";
-    text = "${userDirectory}/id_ed25519.pub";
-  };
+  sourceSSHKey = "${userDirectory}/id_ed25519.pub";
+  skipSSHKey = !(builtins.pathExists sourceSSHKey);
 
   osConfigPath = "${userDirectory}/os-config.nix";
 in
@@ -40,7 +37,7 @@ in
     ] ++ groups;
 
     hashedPasswordFile = mkIf (!skipPassword) config.sops.secrets."${name}-passwd".path;
-    openssh.authorizedKeys.keyFiles = mkIf (!skipSSHKey) [ publicKey ];
+    openssh.authorizedKeys.keyFiles = mkIf (!skipSSHKey) [ sourceSSHKey ];
   };
 
   sops.secrets."${name}-passwd" = mkIf (!skipPassword) {
