@@ -10,9 +10,6 @@ on:
         default: ""
         required: false
         type: string
-    secrets:
-      CACHIX_AUTH_TOKEN:
-        required: true
 
 jobs:
   checks:
@@ -36,19 +33,19 @@ jobs:
       matrix:
         include:
           - host: nixe
-            system: x86_64
+            system: x86_64-linux
           - host: nixarr
-            system: x86_64
+            system: x86_64-linux
           - host: nixcloud
-            system: x86_64
+            system: x86_64-linux
           - host: nixdev
-            system: x86_64
+            system: x86_64-linux
           - host: nixio
-            system: x86_64
+            system: x86_64-linux
           - host: nixmon
-            system: x86_64
+            system: x86_64-linux
           - host: nixserv
-            system: x86_64
+            system: x86_64-linux
 
     name: Build ${{ matrix.host }} on ${{ matrix.system }}
 
@@ -65,11 +62,9 @@ jobs:
           swap-storage: false
           tool-cache: true
 
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
-
-      - name: Setup magic cache
-        uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: ./.github/setup-nix
+        with:
+          arch: ${{ matrix.system }}
 
       - name: Setup cachix
         uses: cachix/cachix-action@v14
@@ -78,13 +73,12 @@ jobs:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
       - name: Build ${{ matrix.host }} (x86_64)
-        if: matrix.system == 'x86_64'
+        if: startsWith(matrix.system, 'x86_64')
         env:
-          _system: ${{ matrix.system }}-linux
+          _system: ${{ matrix.system }}
         run: nix build --impure --accept-flake-config .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
 
   test:
-    runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.command }}-${{ matrix.system }}
       cancel-in-progress: true
@@ -93,23 +87,21 @@ jobs:
       matrix:
         include:
           - command: fmt -L -- --check .
-            system: x86_64
+            system: x86_64-linux
           - command: flake check --impure --allow-import-from-derivation
-            system: x86_64
-
+            system: x86_64-linux
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
 
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
-
-      - name: Setup magic cache
-        uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: ./.github/setup-nix
+        with:
+          arch: ${{ matrix.system }}
 
       - name: Run ${{ matrix.command }} on ${{ matrix.system }}
         env:
-          _system: ${{ matrix.system }}-linux
+          _system: ${{ matrix.system }}
         run: nix ${{ matrix.command }}

@@ -1,0 +1,15 @@
+name: "Setup Nix with Lix & Caches"
+description: "Setup Nix with Lix & Caches"
+
+inputs:
+  arch:
+    description: "What architecture to install for"
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: DeterminateSystems/nix-installer-action@main
+      with:
+        source-url: "${{ format('https://install.lix.systems/lix/lix-installer-{0}', inputs.arch) }}"
+
+    - uses: DeterminateSystems/magic-nix-cache-action@main
