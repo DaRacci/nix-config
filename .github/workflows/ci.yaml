@@ -62,7 +62,7 @@ jobs:
           swap-storage: false
           tool-cache: true
 
-      - uses: ./.github/actions/setup-nix.yaml
+      - uses: ./.github/actions/setup-nix
         with:
           arch: ${{ matrix.system }}
 
@@ -97,7 +97,7 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
 
-      - uses: ./.github/actions/setup-nix.yaml
+      - uses: ./.github/actions/setup-nix
         with:
           arch: ${{ matrix.system }}
 

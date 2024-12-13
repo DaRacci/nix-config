@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - uses: ./.github/actions/setup-nix.yaml
+      - uses: ./.github/actions/setup-nix
         with:
           arch: x86_64-linux
 
