@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 let
   open_file = /*nu*/ pkgs.writeTextFile {
     name = "open_file.nu";
@@ -151,5 +151,12 @@ in
         end
       '';
     };
+
+    nushell.extraConfig = lib.mkAfter ''
+      # Zellij integration
+      if 'ZELLIJ' not-in ($env | columns) {
+        zellij attach -c
+      }
+    '';
   };
 }
