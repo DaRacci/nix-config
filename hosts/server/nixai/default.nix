@@ -38,7 +38,7 @@
     };
 
     caddy.virtualHosts."ai".extraConfig = ''
-      reverse_proxy ${config.services.open-webui.host}:${config.services.open-webui.port}
+      reverse_proxy ${config.services.open-webui.host}:${toString config.services.open-webui.port}
     '';
   };
 }
