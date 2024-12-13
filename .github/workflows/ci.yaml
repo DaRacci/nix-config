@@ -104,4 +104,4 @@ jobs:
       - name: Run ${{ matrix.command }} on ${{ matrix.system }}
         env:
           _system: ${{ matrix.system }}
-        run: nix ${{ matrix.command }}
+        run: nix --accept-flake-config ${{ matrix.command }}
