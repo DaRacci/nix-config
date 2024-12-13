@@ -33,7 +33,7 @@
 
         overlays = [
           inputs.hyprland-contrib.overlays.default
-          inputs.lix-module.overlays.default
+          inputs.lix-module.overlays.lixFromNixpkgs
         ] ++ (builtins.attrValues (import ./overlays { inherit self inputs lib; }));
       };
 
@@ -228,8 +228,7 @@
     crane.url = "github:ipetkov/crane/f2926e34a1599837f3256c701739529d772e36e7";
     lanzaboote = { url = "github:nix-community/lanzaboote/v0.4.1"; inputs = { nixpkgs.follows = "nixpkgs"; flake-parts.follows = "flake-parts"; flake-compat.follows = "flake-compat"; crane.follows = "crane"; }; };
     nixd = { url = "github:nix-community/nixd"; inputs = { nixpkgs.follows = "nixpkgs"; flake-parts.follows = "flake-parts"; }; };
-    lix = { url = "https://git.lix.systems/lix-project/lix/archive/main.tar.gz"; flake = false; };
-    lix-module = { url = "https://git.lix.systems/lix-project/nixos-module/archive/main.tar.gz"; inputs = { nixpkgs.follows = "nixpkgs"; lix.follows = "lix"; }; };
+    lix-module = { url = "https://git.lix.systems/lix-project/nixos-module/archive/stable.tar.gz"; inputs = { nixpkgs.follows = "nixpkgs"; lix.follows = ""; }; };
     stylix = { url = "github:danth/stylix"; };
     nix-alien = { url = "github:thiagokokada/nix-alien"; };
 
