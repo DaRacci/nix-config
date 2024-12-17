@@ -14,6 +14,7 @@
     # TODO - Add fallback ollama for when nixe is down
     open-webui = {
       enable = true;
+      host = "0.0.0.0";
       openFirewall = true;
       environment = {
         OLLAMA_BASE_URLS = "http://nixe:11434";
