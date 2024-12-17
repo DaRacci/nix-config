@@ -4,7 +4,10 @@
   ];
 
   sops.secrets = {
-    SEARXNG_SETTINGS = { };
+    SEARXNG_SETTINGS = {
+      owner = config.users.users."searx".name;
+      group = config.users.groups."searx".name;
+    };
   };
 
   services = {
