@@ -1,8 +1,8 @@
 { flake, config, pkgs, lib, ... }:
 let
   inherit (lib) mkForce;
-  # WSL is fucky with nu so we use fish instead.
-  useFish = builtins.hasAttr "wsl" config;
+  # WSL is fucky with nu so we use fish instead, same with proxmox LXC.
+  useFish = builtins.hasAttr "wsl" config || config.host.device.role == "server";
 in
 {
   users.users.root = {
