@@ -3,8 +3,6 @@
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
   ];
 
-  sops.secrets.POSTGRES_PASSWORD = { };
-
   services = {
     # TODO - Add fallback ollama for when nixe is down
     open-webui = {
