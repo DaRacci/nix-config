@@ -3,6 +3,10 @@
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
   ];
 
+  sops.secrets = {
+    SEARXNG_SETTINGS = { };
+  };
+
   services = {
     # TODO - Add fallback ollama for when nixe is down
     open-webui = {
@@ -33,6 +37,7 @@
       settings = {
         server.port = 9000;
       };
+      settingsFile = config.sops.secrets.SEARXNG_SETTINGS.path;
     };
 
     caddy.virtualHosts."ai".extraConfig = ''
