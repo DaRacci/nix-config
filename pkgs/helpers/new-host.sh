@@ -89,6 +89,9 @@ $(echo "SSH_PRIVATE_KEY" | sed 's/^/  /')
 EOF
 #endsection
 
+# Make sure the secrets now include the new host
+sops updatekeys hosts/secrets.yaml
+
 echo "---------- Private Key ----------"
 echo ""
 echo "$SSH_PRIVATE_KEY"
