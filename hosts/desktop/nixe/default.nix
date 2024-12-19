@@ -129,6 +129,8 @@
   services = {
     ollama = {
       enable = true;
+      openFirewall = true;
+      host = "0.0.0.0";
       package = pkgs.ollama;
       environmentVariables = {
         OLLAMA_ORIGINS = "http://192.168.0.0:*,app://obsidian.md:*";
