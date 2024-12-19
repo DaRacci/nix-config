@@ -25,7 +25,10 @@
         config = {
           allowUnfree = true;
           allowUnfreePredicate = _: true;
-          permittedInsecurePackages = [ ];
+          permittedInsecurePackages = [
+            "aspnetcore-runtime-6.0.36"
+            "dotnet-sdk-6.0.428"
+          ];
 
           cudaSupport = cuda;
           rocmSupport = false; # FIXME for some reason this is breaking shit when it shouldn't???
