@@ -228,15 +228,15 @@ let cfg = config.services.nextcloud.config; in {
       EOF
     '';
 
-    protonmail-bridge = {
-      after = [ "network.target" ];
-      wantedBy = [ "default.target" ];
-      script = "${pkgs.protonmail-bridge}/bin/protonmail-bridge --no-window --noninteractive --log-level info";
+    # protonmail-bridge = {
+    #   after = [ "network.target" ];
+    #   wantedBy = [ "default.target" ];
+    #   script = "${pkgs.protonmail-bridge}/bin/protonmail-bridge --no-window --noninteractive --log-level info";
 
-      serviceConfig = {
-        Restart = "always";
-      };
-    };
+    #   serviceConfig = {
+    #     Restart = "always";
+    #   };
+    # };
   };
 
   networking = {
