@@ -36,7 +36,7 @@ let cfg = config.services.nextcloud.config; in {
   users = {
     groups = {
       nextcloud-db-pass-access = { };
-      immich-dp-pass-access = { };
+      immich-db-pass-access = { };
     };
     users = {
       postgres.extraGroups = [ "nextcloud-db-pass-access" "immich-db-pass-access" ];
