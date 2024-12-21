@@ -337,11 +337,6 @@ in
       # Caddy
       80
       443
-
-      # TODO - Remove once migrated to this caddy instance.
-      # Minio
-      9000
-      9001
     ];
 
     allowedUDPPorts = [
