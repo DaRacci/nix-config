@@ -48,6 +48,7 @@ let cfg = config.services.nextcloud.config; in {
   services = rec {
     immich = {
       enable = true;
+      host = "127.0.0.1";
       secretsFile = config.sops.secrets."IMMICH/ENV".path;
       environment = {
         IMMICH_TRUSTED_PROXIES = "192.168.1.0/24,192.168.2.0/24";
