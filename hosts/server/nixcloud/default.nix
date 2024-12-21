@@ -242,7 +242,15 @@ let cfg = config.services.nextcloud.config; in {
   networking = {
     firewall = {
       allowedUDPPorts = [ 3478 ];
-      allowedTCPPorts = [ 80 443 3478 ];
+      allowedTCPPorts = [
+        # Nextcloud
+        80
+        443
+        3478
+
+        # Immich
+        config.services.immich.port
+      ];
     };
   };
 }
