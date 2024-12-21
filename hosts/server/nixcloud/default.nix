@@ -17,13 +17,13 @@ let cfg = config.services.nextcloud.config; in {
 
     "POSTGRES/NEXTCLOUD_PASS" = {
       owner = config.users.users.postgres.name;
-      group = "nextcloud-db-pass-access";
+      group = config.users.groups.nextcloud-db-pass-access.name;
       mode = "0440";
     };
 
     "POSTGRES/IMMICH_PASS" = {
       owner = config.users.users.postgres.name;
-      group = "immich-db-pass-access";
+      group = config.users.groups.immich-db-pass-access.name;
       mode = "0440";
     };
 
@@ -34,7 +34,10 @@ let cfg = config.services.nextcloud.config; in {
   };
 
   users = {
-    groups = { nextcloud-db-pass-access = { }; };
+    groups = {
+      nextcloud-db-pass-access = { };
+      immich-dp-pass-access = { };
+    };
     users = {
       postgres.extraGroups = [ "nextcloud-db-pass-access" "immich-db-pass-access" ];
       nextcloud.extraGroups = [ "nextcloud-db-pass-access" ];
