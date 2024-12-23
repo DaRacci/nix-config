@@ -90,6 +90,13 @@ in
       enableJIT = true;
       enableTCPIP = true;
 
+      authentication = pkgs.lib.mkOverride 10 ''
+        #type database  DBuser    auth-method [auth-options]
+        local sameuser  all       peer        map=superuser_map
+        local all       pgmanager trust
+        host  all       all       samenet     password
+      '';
+
       extensions = ps: fromAllServers [
         (builtins.filter (config: config.services.postgresql.enable))
         (builtins.map (config: config.services.postgresql.extensions ps))
@@ -109,7 +116,9 @@ in
         (builtins.map (config: config.services.postgresql.ensureUsers))
         builtins.concatLists
         lib.unique
-      ];
+      ] ++ [{
+        name = "pgmanager";
+      }];
 
       initialScript = fromAllServers [
         (builtins.filter (config: config.services.postgresql.enable && config.services.postgresql.initialScript != null))
@@ -139,6 +148,13 @@ in
       startAt = "*-*-* 03:00:00";
       location = "/var/lib/minio/data/psql-backup";
       databases = config.services.postgresql.ensureDatabases;
+    };
+
+    pgmanage = {
+      enable = true;
+      connections = {
+        postgres = "host=/run/postgresql user=postgres";
+      };
     };
 
     pgadmin = {
