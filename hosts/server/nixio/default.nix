@@ -26,6 +26,16 @@ let
       domain = "localdomain";
     }
   ];
+
+  fromAllServers = pipe: lib.trivial.pipe flake.nixosConfigurations ([
+    # Exclude the current host
+    (lib.filterAttrs (name: _: name != config.system.name))
+    # Extract the config from each host
+    builtins.attrValues
+    (builtins.map (host: host.config))
+    # Filter to only servers
+    (builtins.filter (config: config.host.device.role == "server"))
+  ] ++ pipe);
 in
 {
   imports = [
@@ -42,10 +52,28 @@ in
     "CLOUDFLARE/EMAIL" = { };
     "CLOUDFLARE/DNS_API_TOKEN" = { };
     "CLOUDFLARE/ZONE_API_TOKEN" = { };
-  };
+
+    PGADMIN_PASSWORD = {
+      owner = config.users.users.pgadmin.name;
+      group = config.users.groups.pgadmin.name;
+      restartUnits = [ "pgadmin.service" ];
+    };
+  } // fromAllServers [
+    (builtins.map (config: config.sops.secrets))
+    lib.mergeAttrsList
+    (lib.filterAttrs (name: secret: lib.strings.hasPrefix "POSTGRES/" secret.name && lib.hasSuffix "_PASSWORD" secret.name))
+    (builtins.mapAttrs (_: value: (builtins.removeAttrs value [ "sopsFileHash" ]) // {
+      sopsFile = config.sops.defaultSopsFile;
+      # Update owner and groups because it will always be only postgres on this server.
+      owner = config.users.users.postgres.name;
+      group = config.users.groups.postgres.name;
+      # TODO - do i need to clean up the reload services?
+    }))
+  ];
 
   users.users = {
     minio.extraGroups = [ "caddy" ]; # Caddy group has access to certs, and minio needs access to its own certs.
+    postgres.extraGroups = [ "minio" ]; # For backups to be placed in the minio data directory.
   };
 
   services = {
@@ -54,6 +82,71 @@ in
       package = pkgs.minio;
       rootCredentialsFile = config.sops.secrets.MINIO_ROOT_CREDENTIALS.path;
     };
+
+    #region Database Services
+    postgresql = {
+      enable = true;
+      package = pkgs.postgresql_16;
+      enableJIT = true;
+      enableTCPIP = true;
+
+      extensions = ps: fromAllServers [
+        (builtins.filter (config: config.services.postgresql.enable))
+        (builtins.map (config: config.services.postgresql.extensions ps))
+        builtins.concatLists
+        lib.unique
+      ];
+
+      ensureDatabases = fromAllServers [
+        (builtins.filter (config: config.services.postgresql.enable && (builtins.length config.services.postgresql.ensureDatabases) >= 1))
+        (builtins.map (config: config.services.postgresql.ensureDatabases))
+        builtins.concatLists
+        lib.unique
+      ];
+
+      ensureUsers = fromAllServers [
+        (builtins.filter (config: config.services.postgresql.enable && (builtins.length config.services.postgresql.ensureUsers) >= 1))
+        (builtins.map (config: config.services.postgresql.ensureUsers))
+        builtins.concatLists
+        lib.unique
+      ];
+
+      initialScript = fromAllServers [
+        (builtins.filter (config: config.services.postgresql.enable && config.services.postgresql.initialScript != null))
+        (builtins.map (config: config.services.postgresql.initialScript))
+        (builtins.filter (path: path != null))
+        (builtins.map (path: builtins.readFile path))
+        (builtins.concatStringsSep "\n")
+        (pkgs.writeText "init-sql-script")
+      ];
+
+      settings.shared_preload_libraries = fromAllServers [
+        (builtins.filter (config: config.services.postgresql.enable && config.services.postgresql.settings.shared_preload_libraries != null))
+        (builtins.map (config: config.services.postgresql.settings.shared_preload_libraries))
+        (builtins.map (preload:
+          if lib.isString preload then [ preload ]
+          else preload
+        ))
+        builtins.concatLists
+        lib.unique
+      ];
+    };
+
+    postgresqlBackup = {
+      enable = true;
+      compression = "zstd";
+      compressionLevel = 12;
+      startAt = "*-*-* 03:00:00";
+      location = "/var/lib/minio/data/psql-backup";
+      databases = config.services.postgresql.ensureDatabases;
+    };
+
+    pgadmin = {
+      enable = true;
+      initialEmail = "admin@racci.dev";
+      initialPasswordFile = config.sops.secrets."PGADMIN_PASSWORD".path;
+    };
+    #endregion
 
     adguardhome = {
       enable = true;
@@ -301,10 +394,20 @@ in
     };
   };
 
-  systemd.services.minio.environment = {
-    MINIO_DOMAIN = "minio.racci.dev";
-    MINIO_BROWSER_REDIRECT_URL = "https://minio.racci.dev/console";
-    MINIO_OPTS = "--certs-dir /var/lib/acme/";
+  systemd.services = {
+    minio.environment = {
+      MINIO_DOMAIN = "minio.racci.dev";
+      MINIO_BROWSER_REDIRECT_URL = "https://minio.racci.dev/console";
+      MINIO_OPTS = "--certs-dir /var/lib/acme/";
+    };
+
+    postgresql.postStart = fromAllServers [
+      (builtins.filter (config: (builtins.hasAttr "postgresql" config.systemd.services) && config.systemd.services.postgresql.enable && config.systemd.services.postgresql.postStart != [ ]))
+      (builtins.map (config: config.systemd.services.postgresql.postStart))
+      builtins.concatLists
+      # We don't want to run the pre-start scripts from each server.
+      (builtins.filter (script: !lib.hasSuffix "postgresql-post-start" script))
+    ];
   };
 
   security.acme = {

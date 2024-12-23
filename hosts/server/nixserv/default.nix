@@ -8,7 +8,7 @@
       owner = config.services.atticd.user;
       inherit (config.services.atticd) group;
     };
-    POSTGRESQL_PASSWORD = {
+    "POSTGRES/ATTIC_PASSWORD" = {
       owner = "postgres";
       group = "postgres";
     };
@@ -105,16 +105,7 @@
     };
   };
 
-  systemd.services.postgresql.postStart = ''
-    $PSQL -tA <<'EOF'
-      DO $$
-      DECLARE password TEXT;
-      BEGIN
-        password := trim(both from replace(pg_read_file('${config.sops.secrets.POSTGRESQL_PASSWORD.path}'), E'\n', '''));
-        EXECUTE format('ALTER ROLE attic WITH PASSWORD '''%s''';', password);
-      END $$;
-    EOF
-  '';
+  systemd.services.postgresql.postStart = lib.mine.mkPostgresRolePass "attic" config.sops.secrets."POSTGRES/ATTIC_PASSWORD".path;
 
   networking.firewall.allowedTCPPorts = [ 8080 ];
 }

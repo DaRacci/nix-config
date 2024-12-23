@@ -1,5 +1,4 @@
-{ modulesPath, config, pkgs, ... }:
-let cfg = config.services.nextcloud.config; in {
+{ modulesPath, config, pkgs, lib, ... }: {
   imports = [
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
   ];
@@ -15,13 +14,13 @@ let cfg = config.services.nextcloud.config; in {
     "NEXTCLOUD/S3/SSE_CKEY" = ncOwned;
     "NEXTCLOUD/admin-password" = ncOwned;
 
-    "POSTGRES/NEXTCLOUD_PASS" = {
+    "POSTGRES/NEXTCLOUD_PASSWORD" = {
       owner = config.users.users.postgres.name;
       group = config.users.groups.nextcloud-db-pass-access.name;
       mode = "0440";
     };
 
-    "POSTGRES/IMMICH_PASS" = {
+    "POSTGRES/IMMICH_PASSWORD" = {
       owner = config.users.users.postgres.name;
       group = config.users.groups.immich-db-pass-access.name;
       mode = "0440";
@@ -51,7 +50,7 @@ let cfg = config.services.nextcloud.config; in {
       host = "127.0.0.1";
       secretsFile = config.sops.secrets."IMMICH/ENV".path;
       environment = {
-        IMMICH_TRUSTED_PROXIES = "192.168.1.0/24,192.168.2.0/24";
+        IMMICH_TRUSTED_PROXIES = "100.64.0.0/10,192.168.1.0/24,192.168.2.0/24";
       };
 
       machine-learning = {
@@ -93,7 +92,7 @@ let cfg = config.services.nextcloud.config; in {
         dbuser = "nextcloud";
         dbname = "nextcloud";
         dbhost = "/run/postgresql";
-        dbpassFile = config.sops.secrets."POSTGRES/NEXTCLOUD_PASS".path;
+        dbpassFile = config.sops.secrets."POSTGRES/NEXTCLOUD_PASSWORD".path;
 
         objectstore.s3 = {
           enable = true;
@@ -219,14 +218,8 @@ let cfg = config.services.nextcloud.config; in {
     };
 
     postgresql.postStart = ''
-      $PSQL -tA <<'EOF'
-        DO $$
-        DECLARE password TEXT;
-        BEGIN
-          password := trim(both from replace(pg_read_file('${config.sops.secrets."POSTGRES/NEXTCLOUD_PASS".path}'), E'\n', '''));
-          EXECUTE format('ALTER ROLE ${cfg.dbuser} WITH PASSWORD '''%s''';', password);
-        END $$;
-      EOF
+      ${lib.mime.mkPostgresRolePass config.services.nextcloud.config.dbname config.sops.secrets."POSTGRES/NEXTCLOUD_PASSWORD".path}
+      ${lib.mime.mkPostgresRolePass config.services.immich.database.name config.sops.secrets."POSTGRES/IMMICH_PASSWORD".path}
     '';
 
     # protonmail-bridge = {

@@ -7,5 +7,16 @@ in
     attrsets = simpleImport ./attrsets.nix;
     files = simpleImport ./files.nix;
     hardware = simpleImport ./hardware.nix;
+
+    mkPostgresRolePass = role: passPath: ''
+      $PSQL -tA <<'EOF'
+        DO $$
+        DECLARE password TEXT;
+        BEGIN
+          password := trim(both from replace(pg_read_file('${passPath}'), E'\n', '''));
+          EXECUTE format('ALTER ROLE ${role} WITH PASSWORD '''%s''';', password);
+        END $$;
+      EOF
+    '';
   };
 }
