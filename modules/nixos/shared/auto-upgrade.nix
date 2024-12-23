@@ -12,7 +12,8 @@
   config = mkIf cfg.enable {
     system.autoUpgrade = let isClean = flake ? rev; in {
       enable = isClean;
-      dates = "daily";
+      dates = "04:00";
+      randomizedDelaySec = "45min";
       flags = [ "--refresh" "--impure" "--accept-flake-config" "--no-update-lock-file" ];
       flake = "github:DaRacci/nix-config#${cfg.hostName}";
 
