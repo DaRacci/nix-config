@@ -92,7 +92,6 @@ in
 
       authentication = pkgs.lib.mkOverride 10 ''
         #type database  DBuser    auth-method [auth-options]
-        local sameuser  all       peer        map=superuser_map
         local all       pgmanager trust
         host  all       all       samenet     password
       '';
