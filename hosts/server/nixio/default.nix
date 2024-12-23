@@ -391,7 +391,7 @@ in
           })
           (mkVirtualHost "pgadmin" {
             extraConfig = /*caddyfile*/ ''
-              reverse_proxy http://localhost:${config.services.pgadmin.port}
+              reverse_proxy http://localhost:${toString config.services.pgadmin.port}
             '';
           })
         ]
