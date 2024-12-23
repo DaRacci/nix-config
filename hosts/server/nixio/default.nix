@@ -389,6 +389,11 @@ in
               reverse_proxy http://dockge:5001
             '';
           })
+          (mkVirtualHost "pgadmin" {
+            extraConfig = /*caddyfile*/ ''
+              reverse_proxy http://localhost:${config.services.pgadmin.port}
+            '';
+          })
         ]
       );
     };
