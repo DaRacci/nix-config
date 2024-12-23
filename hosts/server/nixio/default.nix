@@ -404,9 +404,9 @@ in
     postgresql.postStart = fromAllServers [
       (builtins.filter (config: (builtins.hasAttr "postgresql" config.systemd.services) && config.systemd.services.postgresql.enable && config.systemd.services.postgresql.postStart != [ ]))
       (builtins.map (config: config.systemd.services.postgresql.postStart))
-      builtins.concatLists
       # We don't want to run the pre-start scripts from each server.
       (builtins.filter (script: !lib.hasSuffix "postgresql-post-start" script))
+      (builtins.concatStringsSep "\n")
     ];
   };
 
