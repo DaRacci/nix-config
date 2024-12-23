@@ -410,6 +410,11 @@ in
               reverse_proxy http://localhost:${toString config.services.pgadmin.port}
             '';
           })
+          (mkVirtualHost "pgmanager" {
+            extraConfig = /*caddyfile*/ ''
+              reverse_proxy http://localhost:${toString config.services.pgmanage.port}
+            '';
+          })
         ]
       );
     };
