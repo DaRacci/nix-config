@@ -58,6 +58,13 @@ in
       group = config.users.groups.pgadmin.name;
       restartUnits = [ "pgadmin.service" ];
     };
+
+    "POSTGRES/POSTGRES_PASSWORD" = {
+      owner = config.users.users.postgres.name;
+      group = config.users.groups.postgres.name;
+      restartUnits = [ "postgresql.service" "pgadmin.service" ];
+      mode = "0440";
+    };
   } // fromAllServers [
     (builtins.map (config: config.sops.secrets))
     lib.mergeAttrsList
@@ -90,11 +97,19 @@ in
       enableJIT = true;
       enableTCPIP = true;
 
-      authentication = pkgs.lib.mkOverride 10 ''
-        #type database  DBuser    auth-method [auth-options]
-        local all       pgmanager trust
-        host  all       all       samenet     password
-      '';
+      authentication = lib.mkOverride 10 (''
+        # TYPE  DATABASE  USER  ADDRESS   AUTH-METHOD   [AUTH-OPTIONS]
+        local   all       all             peer
+        local   all       all             scram-sha-256
+      '' + (lib.pipe subnets [
+        (builtins.map (subnet: [
+          "host  all  all  ${subnet.ipv4_cidr}  scram-sha-256"
+        ] ++ lib.optionals (subnet.ipv6_cidr != null) [
+          "host  all  all  ${subnet.ipv6_cidr}  scram-sha-256"
+        ]))
+        lib.flatten
+        (builtins.concatStringsSep "\n")
+      ]));
 
       extensions = ps: fromAllServers [
         (builtins.filter (config: config.services.postgresql.enable))
@@ -115,9 +130,7 @@ in
         (builtins.map (config: config.services.postgresql.ensureUsers))
         builtins.concatLists
         lib.unique
-      ] ++ [{
-        name = "pgmanager";
-      }];
+      ];
 
       initialScript = fromAllServers [
         (builtins.filter (config: config.services.postgresql.enable && config.services.postgresql.initialScript != null))
@@ -128,16 +141,20 @@ in
         (pkgs.writeText "init-sql-script")
       ];
 
-      settings.shared_preload_libraries = fromAllServers [
-        (builtins.filter (config: config.services.postgresql.enable && config.services.postgresql.settings.shared_preload_libraries != null))
-        (builtins.map (config: config.services.postgresql.settings.shared_preload_libraries))
-        (builtins.map (preload:
-          if lib.isString preload then [ preload ]
-          else preload
-        ))
-        builtins.concatLists
-        lib.unique
-      ];
+      settings = {
+        password_encryption = "scram-sha-256";
+
+        shared_preload_libraries = fromAllServers [
+          (builtins.filter (config: config.services.postgresql.enable && config.services.postgresql.settings.shared_preload_libraries != null))
+          (builtins.map (config: config.services.postgresql.settings.shared_preload_libraries))
+          (builtins.map (preload:
+            if lib.isString preload then [ preload ]
+            else preload
+          ))
+          builtins.concatLists
+          lib.unique
+        ];
+      };
     };
 
     postgresqlBackup = {
@@ -147,13 +164,6 @@ in
       startAt = "*-*-* 03:00:00";
       location = "/var/lib/minio/data/psql-backup";
       databases = config.services.postgresql.ensureDatabases;
-    };
-
-    pgmanage = {
-      enable = true;
-      connections = {
-        postgres = "host=/run/postgresql user=postgres";
-      };
     };
 
     pgadmin = {
@@ -409,11 +419,6 @@ in
               reverse_proxy http://localhost:${toString config.services.pgadmin.port}
             '';
           })
-          (mkVirtualHost "pgmanager" {
-            extraConfig = /*caddyfile*/ ''
-              reverse_proxy http://localhost:${toString config.services.pgmanage.port}
-            '';
-          })
         ]
       );
     };
@@ -432,7 +437,7 @@ in
       # We don't want to run the pre-start scripts from each server.
       (builtins.filter (script: !lib.hasSuffix "postgresql-post-start" script))
       (builtins.concatStringsSep "\n")
-    ];
+    ] + "\n" + (lib.mine.mkPostgresRolePass "postgres" config.sops.secrets."POSTGRES/POSTGRES_PASSWORD".path);
   };
 
   security.acme = {
