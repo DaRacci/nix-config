@@ -20,8 +20,9 @@
   xdg.desktopEntries."org.gnome.Settings" = {
     name = "Settings";
     comment = "Gnome Control Center";
-    icon = "${pkgs.gnome-control-center}/share/icons/gnome-logo-text-dark.svg";
-    exec = "env XDG_CURRENT_DESKTOP=gnome ${lib.getExe pkgs.gnome-control-center}";
+    icon = "${pkgs.gnome-control-center}/share/icons/hicolor/scalable/apps/org.gnome.Settings-system-symbolic.svg";
+    # Force to the WiFi page as some pages crash and reopens to the last page visited on startup.
+    exec = "env XDG_CURRENT_DESKTOP=gnome ${lib.getExe pkgs.gnome-control-center} -v wifi";
     categories = [ "X-Preferences" ];
     terminal = false;
   };
