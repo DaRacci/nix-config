@@ -21,10 +21,6 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.packages = with pkgs; [
-      bruno # API Client
-    ];
-
     programs.vscode = mkIf cfg.vscode.enable {
       enable = true;
       package = pkgs.vscode;

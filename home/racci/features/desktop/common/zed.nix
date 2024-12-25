@@ -6,7 +6,10 @@
       nil
       shellcheck
       shfmt
+      nerd-fonts.jetbrains-mono
     ];
+
+    # TODO - Define config here, until then doing it inside zed so i can quickly revise it.
   };
 
   user.persistence.directories = [

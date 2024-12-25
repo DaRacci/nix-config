@@ -166,6 +166,8 @@ in
       databases = config.services.postgresql.ensureDatabases;
     };
 
+    # TODO - can i predefine 2fa?
+    # TODO - can i integrate this with the backup service?
     pgadmin = {
       enable = true;
       initialEmail = "admin@racci.dev";
@@ -460,6 +462,15 @@ in
       builtins.listToAttrs
     ];
   };
+
+  #region Site2Site VPN
+  boot.kernel.sysctl = {
+    "net.ipv4.ip_forward" = 1;
+    "net.ipv6.conf.all.forwarding" = 1;
+  };
+
+  services.tailscale = { };
+  #endregion
 
   networking.firewall = {
     allowedTCPPorts = [
