@@ -145,19 +145,6 @@
     };
   };
 
-  virtualisation.arion = {
-    backend = "docker";
-    projects = {
-      ai = {
-        settings = {
-          imports = [
-            "${flake}/containers/web-servers/open-webui.nix"
-          ];
-        };
-      };
-    };
-  };
-
   virtual-machines = {
     enable = true;
     guests = {
