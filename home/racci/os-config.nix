@@ -18,19 +18,26 @@ in
 
   hardware.keyboard.qmk.enable = true;
 
-  services.kanata = lib.mkIf (!config.host.device.isHeadless) {
-    enable = true;
-    keyboards = {
-      "megu-board" = {
-        devices = [ "/dev/input/by-id/usb-mt_ymd75v3_0-event-kbd" ];
-        config = ''
-          (defsrc
-            caps)
+  services = {
+    gnome = lib.mkIf (!config.host.device.isHeadless) {
+      gnome-online-accounts.enable = true;
+      evolution-data-server.enable = true;
+    };
 
-          (deflayermap (default-layer)
-            ;; tap caps lock as escape, hold caps lock as left control
-            caps (tap-hold 100 100 esc lctl))
-        '';
+    kanata = lib.mkIf (!config.host.device.isHeadless) {
+      enable = true;
+      keyboards = {
+        "megu-board" = {
+          devices = [ "/dev/input/by-id/usb-mt_ymd75v3_0-event-kbd" ];
+          config = ''
+            (defsrc
+              caps)
+
+            (deflayermap (default-layer)
+              ;; tap caps lock as escape, hold caps lock as left control
+              caps (tap-hold 100 100 esc lctl))
+          '';
+        };
       };
     };
   };

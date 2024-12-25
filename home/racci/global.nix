@@ -48,4 +48,8 @@
       autoconnect = [ "qemu:///system" ];
     };
   };
+
+  user.persistence.directories = [
+    ".config/goa-1.0"
+  ];
 }
