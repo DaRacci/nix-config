@@ -172,6 +172,11 @@ in
       enable = true;
       initialEmail = "admin@racci.dev";
       initialPasswordFile = config.sops.secrets."PGADMIN_PASSWORD".path;
+      settings = {
+        DEFAULT_BINARY_PATHS = {
+          pg-16 = "${pkgs.postgresql_16}/bin";
+        };
+      };
     };
     #endregion
 
