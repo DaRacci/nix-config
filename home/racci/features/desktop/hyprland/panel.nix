@@ -1,8 +1,4 @@
-{ config, pkgs, lib, ... }:
-let
-  inherit (lib) getExe;
-in
-{
+{ config, pkgs, lib, ... }: {
   home.packages = with pkgs; [ networkmanagerapplet ];
 
   wayland.windowManager.hyprland = {

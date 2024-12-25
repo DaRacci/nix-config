@@ -13,8 +13,6 @@
     ./polkit.nix
     ./rofi.nix
     ./runner.nix
-    ./screenshot.nix
-    ./wallpaper.nix
   ];
 
   xdg.desktopEntries."org.gnome.Settings" = {
