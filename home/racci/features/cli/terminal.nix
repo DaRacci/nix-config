@@ -93,10 +93,6 @@ let
 in
 {
   programs = {
-    wezterm = {
-      enable = true;
-    };
-
     zellij = {
       enable = true;
       settings = {
