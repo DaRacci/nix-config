@@ -34,6 +34,7 @@ jobs:
         include:
           - host: nixe
             system: x86_64-linux
+            noBuild: true # Only until i can work out how to get this building with the limited space github runners have.
           - host: nixai
             system: x86_64-linux
           - host: nixarr
@@ -68,8 +69,13 @@ jobs:
         with:
           arch: ${{ matrix.system }}
 
-      - name: Build ${{ matrix.host }} (x86_64)
-        if: startsWith(matrix.system, 'x86_64')
+      - name: Evaluate ${{ matrix.host }}
+        env:
+          _system: ${{ matrix.system }}
+        run: nix eval --impure --accept-flake-config .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
+
+      - name: Build ${{ matrix.host }}
+        if: matrix.noBuild != 'true'
         env:
           _system: ${{ matrix.system }}
         run: nix build --impure --accept-flake-config .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
