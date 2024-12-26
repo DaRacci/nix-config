@@ -37,11 +37,15 @@
     groups = {
       nextcloud-db-pass-access = { };
       immich-db-pass-access = { };
+      immich.gid = 998;
     };
     users = {
       postgres.extraGroups = [ "nextcloud-db-pass-access" "immich-db-pass-access" ];
       nextcloud.extraGroups = [ "nextcloud-db-pass-access" ];
-      immich.extraGroups = [ "immich-db-pass-access" ];
+      immich = {
+        uid = 998;
+        extraGroups = [ "immich-db-pass-access" ];
+      };
     };
   };
 
