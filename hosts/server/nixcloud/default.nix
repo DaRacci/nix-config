@@ -30,6 +30,7 @@
       owner = config.users.users.immich.name;
       inherit (config.users.users.immich) group;
     };
+    "IMMICH/S3FS_AUTH" = { };
   };
 
   users = {
@@ -246,5 +247,13 @@
         config.services.immich.port
       ];
     };
+  };
+
+  fileSystems."immich" = {
+    device = "immich";
+    mountPoint = "/mnt/immich";
+    fsType = "fuse./run/current-system/sw/bin/s3fs";
+    noCheck = true;
+    options = [ "_netdev" "allow_other" "use_path_request_style" "url=https://minio.racci.dev" "passwd_file=${config.sops.secrets."IMMICH/S3FS_AUTH".path}" "umask=0007" "mp_umask=0007" "nonempty" "uid=${config.users.users.immich.uid}" "gid=${config.users.groups.immich.gid}" ];
   };
 }
