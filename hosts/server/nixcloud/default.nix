@@ -249,10 +249,12 @@
     };
   };
 
+  environment.systemPackages = [ pkgs.s3fs ];
+
   fileSystems."nextcloud" = {
     device = "nextcloud";
     mountPoint = "/var/lib/immich/ext/nextcloud";
-    fsType = "fuse#${lib.getExe pkgs.s3fs}";
+    fsType = "fuse#/run/current-system/sw/bin/s3fs";
     noCheck = true;
     options = [ "_netdev" "allow_other" "use_path_request_style" "url=https://minio.racci.dev" "passwd_file=${config.sops.secrets."IMMICH/S3FS_AUTH".path}" "umask=0007" "mp_umask=0007" "nonempty" "uid=${config.users.users.immich.uid}" "gid=${config.users.groups.immich.gid}" ];
   };
