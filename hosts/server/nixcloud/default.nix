@@ -215,7 +215,11 @@
       '';
     };
 
-    protonmail-bridge.enable = true;
+    passSecretService.enable = true;
+    protonmail-bridge = {
+      enable = true;
+      path = [ pkgs.pass ];
+    };
   };
 
   virtualisation.docker = {
