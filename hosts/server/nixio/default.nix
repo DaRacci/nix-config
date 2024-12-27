@@ -112,28 +112,28 @@ in
       ]));
 
       extensions = ps: fromAllServers [
-        (builtins.filter (config: config.services.postgresql.enable))
+        (builtins.filter (config: !config.services.postgresql.enable))
         (builtins.map (config: config.services.postgresql.extensions ps))
         builtins.concatLists
         lib.unique
       ];
 
       ensureDatabases = fromAllServers [
-        (builtins.filter (config: config.services.postgresql.enable && (builtins.length config.services.postgresql.ensureDatabases) >= 1))
+        (builtins.filter (config: !config.services.postgresql.enable && (builtins.length config.services.postgresql.ensureDatabases) >= 1))
         (builtins.map (config: config.services.postgresql.ensureDatabases))
         builtins.concatLists
         lib.unique
       ];
 
       ensureUsers = fromAllServers [
-        (builtins.filter (config: config.services.postgresql.enable && (builtins.length config.services.postgresql.ensureUsers) >= 1))
+        (builtins.filter (config: !config.services.postgresql.enable && (builtins.length config.services.postgresql.ensureUsers) >= 1))
         (builtins.map (config: config.services.postgresql.ensureUsers))
         builtins.concatLists
         lib.unique
       ];
 
       initialScript = fromAllServers [
-        (builtins.filter (config: config.services.postgresql.enable && config.services.postgresql.initialScript != null))
+        (builtins.filter (config: !config.services.postgresql.enable && config.services.postgresql.initialScript != null))
         (builtins.map (config: config.services.postgresql.initialScript))
         (builtins.filter (path: path != null))
         (builtins.map (path: builtins.readFile path))
@@ -145,7 +145,7 @@ in
         password_encryption = "scram-sha-256";
 
         shared_preload_libraries = fromAllServers [
-          (builtins.filter (config: config.services.postgresql.enable && config.services.postgresql.settings.shared_preload_libraries != null))
+          (builtins.filter (config: !config.services.postgresql.enable && config.services.postgresql.settings.shared_preload_libraries != null))
           (builtins.map (config: config.services.postgresql.settings.shared_preload_libraries))
           (builtins.map (preload:
             if lib.isString preload then [ preload ]

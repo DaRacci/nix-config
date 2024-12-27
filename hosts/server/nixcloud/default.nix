@@ -65,7 +65,8 @@
 
       database = {
         enable = true;
-        createDB = true;
+        createDB = false;
+        host = "nixio";
       };
 
       redis = {
@@ -87,6 +88,12 @@
       autoUpdateApps = {
         enable = true;
         startAt = "05:00:00";
+      };
+
+      caching = {
+        redis = true;
+        apcu = true;
+        memcached = true;
       };
 
       config = {
@@ -113,46 +120,62 @@
         };
       };
 
-      caching = {
-        redis = true;
-        apcu = true;
-        memcached = true;
-      };
-
       settings = {
         default_phone_region = "AU";
+        maintenance_window_start = 15; # 2 AM Sydney time
+
+        mail_from_address = "no-reply";
+        mail_domain = "racci.dev";
         mail_smtpmode = "sendmail";
         mail_sendmailmode = "pipe";
 
+        preview_imaginary_url = "http://127.0.0.1:${toString imaginary.port}";
         enabledPreviewProviders = [
           "OC\\Preview\\Imaginary"
-          # "OC\\Preview\\BMP"
-          # "OC\\Preview\\GIF"
-          # "OC\\Preview\\JPEG"
           "OC\\Preview\\Krita"
           "OC\\Preview\\MarkDown"
           "OC\\Preview\\MP3"
           "OC\\Preview\\OpenDocument"
-          # "OC\\Preview\\PNG"
           "OC\\Preview\\TXT"
-          # "OC\\Preview\\XBitmap"
-          # "OC\\Preview\\HEIC"
         ];
 
         trusted_proxies = [
           "192.168.1.0/24"
           "192.168.2.0/24"
+          "100.64.0.0/10"
         ];
+
+        twofactor_enforced = true;
+        twofactor_enforced_groups = [ ];
       };
 
       phpOptions = {
-        maintenance_window_start = "100";
-
-        preview_imaginary_url = "http://127.0.0.1:${toString imaginary.port}";
-
         "opcache.jit" = "1255";
-        "opcache.jit_buffer_size" = "128M";
+        "opcache.jit_buffer_size" = "8M";
+        "opcache.memory_consumption" = 256;
+        "opcache.interned_strings_buffer" = 64;
+        "opcache.save_comments" = 1;
+        "opcache.revalidate_freq" = 60;
       };
+
+      # Just copied what AIO provides.
+      phpExtraExtensions = all: with all; [
+        pdlib
+        bcmath
+        exif
+        ftp
+        gd
+        gmp
+        igbinary
+        imap
+        ldap
+        pcntl
+        pdo_pgsql
+        pgsql
+        smbclient
+        sysvsem
+        zip
+      ];
 
       notify_push = {
         enable = true;
@@ -195,7 +218,7 @@
     };
 
     postgresql = {
-      enable = true;
+      enable = false;
 
       ensureDatabases = [ nextcloud.config.dbname ];
       ensureUsers = [{ name = nextcloud.config.dbuser; ensureDBOwnership = true; }];
@@ -210,6 +233,8 @@
         reverse_proxy http://${cfg.host}:${toString cfg.port}
       '';
     };
+
+    protonmail-bridge.enable = true;
   };
 
   virtualisation.docker = {
@@ -227,15 +252,10 @@
       ${lib.mine.mkPostgresRolePass config.services.immich.database.name config.sops.secrets."POSTGRES/IMMICH_PASSWORD".path}
     '';
 
-    # protonmail-bridge = {
-    #   after = [ "network.target" ];
-    #   wantedBy = [ "default.target" ];
-    #   script = "${pkgs.protonmail-bridge}/bin/protonmail-bridge --no-window --noninteractive --log-level info";
-
-    #   serviceConfig = {
-    #     Restart = "always";
-    #   };
-    # };
+    protonmail-bridge = {
+      after = lib.mkForce [ "network.target" ];
+      wantedBy = lib.mkForce [ "default.target" ];
+    };
   };
 
   networking = {
