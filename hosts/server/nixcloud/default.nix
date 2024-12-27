@@ -29,6 +29,12 @@
   users = {
     groups.immich.gid = 998;
     users.immich.uid = 998;
+
+    users.protonmail-bridge = {
+      isSystemUser = true;
+      home = "/var/lib/protonmail-bridge";
+    };
+    groups.protonmail-bridge.members = [ "protonmail-bridge" ];
   };
 
   services = rec {
@@ -216,10 +222,6 @@
     };
 
     passSecretService.enable = true;
-    protonmail-bridge = {
-      enable = true;
-      path = [ pkgs.pass ];
-    };
   };
 
   virtualisation.docker = {
@@ -243,6 +245,14 @@
     protonmail-bridge = {
       after = lib.mkForce [ "network.target" ];
       wantedBy = lib.mkForce [ "default.target" ];
+      script = "${pkgs.protonmail-bridge}/bin/protonmail-bridge --no-window --noninteractive --log-level info";
+      path = [ pkgs.pass ];
+
+      serviceConfig = {
+        Restart = "always";
+        RestartSec = "5";
+        User = config.users.users.protonmail-bridge.name;
+      };
     };
   };
 
