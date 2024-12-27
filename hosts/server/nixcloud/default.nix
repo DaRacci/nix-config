@@ -33,6 +33,7 @@
     users.protonmail-bridge = {
       isSystemUser = true;
       home = "/var/lib/protonmail-bridge";
+      group = "protonmail-bridge";
     };
     groups.protonmail-bridge.members = [ "protonmail-bridge" ];
   };
