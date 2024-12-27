@@ -123,6 +123,7 @@
       settings = {
         default_phone_region = "AU";
         maintenance_window_start = 15; # 2 AM Sydney time
+        log_type = "file";
 
         mail_from_address = "no-reply";
         mail_domain = "racci.dev";
