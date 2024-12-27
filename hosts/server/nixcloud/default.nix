@@ -9,44 +9,26 @@
     manageHostName = false;
   };
 
-  sops.secrets = let ncOwned = { owner = config.users.users.nextcloud.name; inherit (config.users.users.nextcloud) group; }; in {
-    "NEXTCLOUD/S3/SECRET" = ncOwned;
-    "NEXTCLOUD/S3/SSE_CKEY" = ncOwned;
-    "NEXTCLOUD/admin-password" = ncOwned;
+  sops.secrets =
+    let
+      ncOwned = { owner = config.users.users.nextcloud.name; inherit (config.users.users.nextcloud) group; };
+      immichOwned = { owner = config.users.users.immich.name; inherit (config.users.users.immich) group; };
+    in
+    {
+      "NEXTCLOUD/S3/SECRET" = ncOwned;
+      "NEXTCLOUD/S3/SSE_CKEY" = ncOwned;
+      "NEXTCLOUD/admin-password" = ncOwned;
 
-    "POSTGRES/NEXTCLOUD_PASSWORD" = {
-      owner = config.users.users.postgres.name;
-      group = config.users.groups.nextcloud-db-pass-access.name;
-      mode = "0440";
-    };
+      "POSTGRES/NEXTCLOUD_PASSWORD" = ncOwned;
+      "POSTGRES/IMMICH_PASSWORD" = immichOwned;
 
-    "POSTGRES/IMMICH_PASSWORD" = {
-      owner = config.users.users.postgres.name;
-      group = config.users.groups.immich-db-pass-access.name;
-      mode = "0440";
+      "IMMICH/ENV" = immichOwned;
+      "IMMICH/S3FS_AUTH" = { };
     };
-
-    "IMMICH/ENV" = {
-      owner = config.users.users.immich.name;
-      inherit (config.users.users.immich) group;
-    };
-    "IMMICH/S3FS_AUTH" = { };
-  };
 
   users = {
-    groups = {
-      nextcloud-db-pass-access = { };
-      immich-db-pass-access = { };
-      immich.gid = 998;
-    };
-    users = {
-      postgres.extraGroups = [ "nextcloud-db-pass-access" "immich-db-pass-access" ];
-      nextcloud.extraGroups = [ "nextcloud-db-pass-access" ];
-      immich = {
-        uid = 998;
-        extraGroups = [ "immich-db-pass-access" ];
-      };
-    };
+    groups.immich.gid = 998;
+    users.immich.uid = 998;
   };
 
   services = rec {
@@ -219,8 +201,6 @@
     };
 
     postgresql = {
-      enable = lib.mkForce false;
-
       ensureDatabases = [ nextcloud.config.dbname ];
       ensureUsers = [{ name = nextcloud.config.dbuser; ensureDBOwnership = true; }];
     };
@@ -248,10 +228,13 @@
       after = [ "postgresql.service" ];
     };
 
-    postgresql.postStart = ''
-      ${lib.mine.mkPostgresRolePass config.services.nextcloud.config.dbname config.sops.secrets."POSTGRES/NEXTCLOUD_PASSWORD".path}
-      ${lib.mine.mkPostgresRolePass config.services.immich.database.name config.sops.secrets."POSTGRES/IMMICH_PASSWORD".path}
-    '';
+    postgresql = {
+      enable = lib.mkForce false;
+      postStart = ''
+        ${lib.mine.mkPostgresRolePass config.services.nextcloud.config.dbname config.sops.secrets."POSTGRES/NEXTCLOUD_PASSWORD".path}
+        ${lib.mine.mkPostgresRolePass config.services.immich.database.name config.sops.secrets."POSTGRES/IMMICH_PASSWORD".path}
+      '';
+    };
 
     protonmail-bridge = {
       after = lib.mkForce [ "network.target" ];
