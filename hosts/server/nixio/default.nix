@@ -440,13 +440,23 @@ in
       MINIO_OPTS = "--certs-dir /var/lib/acme/";
     };
 
-    postgresql.postStart = fromAllServers [
-      (builtins.filter (config: (shouldCopyPostgres config) && config.systemd.services.postgresql.postStart != [ ]))
-      (builtins.map (config: config.systemd.services.postgresql.postStart))
-      # We don't want to run the pre-start scripts from each server.
-      (builtins.filter (script: !lib.hasSuffix "postgresql-post-start" script))
-      (builtins.concatStringsSep "\n")
-    ] + "\n" + (lib.mine.mkPostgresRolePass "postgres" config.sops.secrets."POSTGRES/POSTGRES_PASSWORD".path);
+    postgresql = {
+      postStart = fromAllServers [
+        (builtins.filter (config: (shouldCopyPostgres config) && config.systemd.services.postgresql.postStart != [ ]))
+        (builtins.map (config: config.systemd.services.postgresql.postStart))
+        (builtins.concatStringsSep "\n")
+      ] + (builtins.concatStringsSep "\n" [
+        (lib.mine.mkPostgresRolePass "postgres" config.sops.secrets."POSTGRES/POSTGRES_PASSWORD".path)
+      ]);
+
+      serviceConfig.ExecStartPost = fromAllServers [
+        (builtins.filter (config: (shouldCopyPostgres config) && config.systemd.services.postgresql.serviceConfig.ExecStartPost != [ ]))
+        (builtins.map (config: config.systemd.services.postgresql.serviceConfig.ExecStartPost))
+        lib.flatten
+        # We don't want to run the pre-start scripts from each server.
+        (builtins.filter (script: !lib.hasSuffix "postgresql-post-start" script))
+      ];
+    };
   };
 
   security.acme = {

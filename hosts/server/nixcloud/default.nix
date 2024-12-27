@@ -34,6 +34,7 @@
       isSystemUser = true;
       home = "/var/lib/protonmail-bridge";
       group = "protonmail-bridge";
+      createHome = true;
     };
     groups.protonmail-bridge.members = [ "protonmail-bridge" ];
   };
