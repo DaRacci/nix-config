@@ -65,7 +65,7 @@
 
       database = {
         enable = true;
-        createDB = false;
+        createDB = true;
         host = "nixio";
       };
 
@@ -219,7 +219,7 @@
     };
 
     postgresql = {
-      enable = false;
+      enable = lib.mkForce false;
 
       ensureDatabases = [ nextcloud.config.dbname ];
       ensureUsers = [{ name = nextcloud.config.dbuser; ensureDBOwnership = true; }];
