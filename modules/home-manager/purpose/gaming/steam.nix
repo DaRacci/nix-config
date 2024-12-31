@@ -122,15 +122,6 @@ let cfg = config.purpose.gaming.steam; in {
           '');
         #endregion - Fix Big Picture Mode on Nvidia
 
-        #region - Fix download speed issues
-        # Line 1: Disables HTTP/2
-        # Line 2: Allows concurrent server connections
-        file.".local/share/Steam/steam-dev.cfg".text = ''
-          @nClientDownloadEnableHTTP2PlatformLinux 0
-          @fDownloadRateImprovementToAddAnotherConnection 1.0
-        '';
-        #endregion - Fix download speed issues
-
         packages = with pkgs; [ protonup-rs adwsteamgtk ];
       };
 
