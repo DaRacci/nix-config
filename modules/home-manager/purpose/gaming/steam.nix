@@ -135,7 +135,10 @@ let cfg = config.purpose.gaming.steam; in {
       };
 
       user.persistence.directories = [
-        ".local/share/Steam"
+        {
+          directory = ".local/share/Steam";
+          method = "symlink";
+        }
         ".config/steamtinkerlaunch"
         ".config/AdwSteamGtk"
 
