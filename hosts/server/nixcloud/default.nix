@@ -231,11 +231,6 @@
   };
 
   systemd.services = {
-    nextcloud-setup = {
-      requires = [ "postgresql.service" ];
-      after = [ "postgresql.service" ];
-    };
-
     postgresql = {
       enable = lib.mkForce false;
       postStart = ''
