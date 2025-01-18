@@ -95,19 +95,6 @@
         dbname = "nextcloud";
         dbhost = "nixio";
         dbpassFile = config.sops.secrets."POSTGRES/NEXTCLOUD_PASSWORD".path;
-
-        objectstore.s3 = {
-          enable = true;
-          autocreate = true;
-          usePathStyle = true;
-
-          bucket = "nextcloud";
-          region = "us-east-1";
-          hostname = "minio.racci.dev";
-          key = "k6Dkuj139Y65LzvILRax";
-          secretFile = config.sops.secrets."NEXTCLOUD/S3/SECRET".path;
-          # sseCKeyFile = config.sops.secrets."NEXTCLOUD/S3/SSE_CKEY".path; // TODO - Uncomment when ready.
-        };
       };
 
       settings = {
@@ -272,9 +259,20 @@
 
   fileSystems."nextcloud" = {
     device = "${lib.getExe' pkgs.s3fs "s3fs"}#nextcloud";
-    mountPoint = "/var/lib/immich/ext/nextcloud";
+    mountPoint = "/var/lib/nextcloud/data";
     fsType = "fuse";
     noCheck = true;
-    options = [ "_netdev" "allow_other" "use_path_request_style" "url=https://minio.racci.dev" "passwd_file=${config.sops.secrets."IMMICH/S3FS_AUTH".path}" "umask=0007" "mp_umask=0007" "nonempty" "uid=${toString config.users.users.immich.uid}" "gid=${toString config.users.groups.immich.gid}" ];
+    options = [
+      "_netdev"
+      "allow_other"
+      "use_path_request_style"
+      "url=https://minio.racci.dev"
+      "passwd_file=${config.sops.secrets."NEXTCLOUD/S3FS_AUTH".path}"
+      "umask=0007"
+      "mp_umask=0007"
+      "nonempty"
+      "uid=${toString config.users.users.nextcloud.uid}"
+      "gid=${toString config.users.groups.nextcloud.gid}"
+    ];
   };
 }
