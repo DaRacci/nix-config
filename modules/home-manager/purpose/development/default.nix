@@ -39,57 +39,59 @@ in
         let
           extensions = inputs.vscode-extensions.extensions.${pkgs.stdenv.system};
           versionExtensions = extensions.forVSCodeVersion config.programs.vscode.package.version;
+
+          plugins = (import ./vscode/extensions.nix) { inherit pkgs lib; };
         in
         with extensions.vscode-marketplace; [
           # Theme & Looks
-          zhuangtongfa.material-theme
-          pkief.material-icon-theme
+          plugins.zhuangtongfa.material-theme
+          plugins.pkief.material-icon-theme
 
           # Workspaces & Projects
-          mkhl.direnv
-          editorconfig.editorconfig
-          alefragnani.project-manager
-          ms-vscode-remote.remote-ssh
+          plugins.mkhl.direnv
+          plugins.editorconfig.editorconfig
+          plugins.alefragnani.project-manager
+          plugins.ms-vscode-remote.remote-ssh
 
           # Sidebar Additions
-          gruntfuggly.todo-tree
-          eamodio.gitlens
+          plugins.gruntfuggly.todo-tree
+          plugins.eamodio.gitlens
 
           # Language Support
           redhat.vscode-xml
           redhat.vscode-yaml
-          tamasfe.even-better-toml
-          matthewpi.caddyfile-support
-          coolbear.systemd-unit-file
-          hashicorp.terraform
-          bierner.markdown-preview-github-styles
-          ruschaaf.extended-embedded-languages
+          plugins.tamasfe.even-better-toml
+          plugins.matthewpi.caddyfile-support
+          plugins.coolbear.systemd-unit-file
+          plugins.hashicorp.terraform
+          plugins.bierner.markdown-preview-github-styles
+          plugins.ruschaaf.extended-embedded-languages
 
           # LSP Servers
-          jnoortheen.nix-ide
-          ms-vscode.powershell
+          plugins.jnoortheen.nix-ide
+          plugins.ms-vscode.powershell
 
           # Formatters
-          esbenp.prettier-vscode
+          plugins.esbenp.prettier-vscode
 
           # Containers
-          ms-azuretools.vscode-docker
+          plugins.ms-azuretools.vscode-docker
 
           # AI
-          github.copilot
-          github.copilot-chat
+          plugins.github.copilot
+          plugins.github.copilot-chat
 
           # Other
-          formulahendry.code-runner
+          plugins.formulahendry.code-runner
           # platformio.platformio-ide
 
           # Bash Extensions
-          rogalmic.bash-debug
-          foxundermoon.shell-format
+          plugins.rogalmic.bash-debug
+          plugins.foxundermoon.shell-format
 
           # Integrations
-          github.vscode-github-actions
-          github.vscode-pull-request-github
+          plugins.github.vscode-github-actions
+          plugins.github.vscode-pull-request-github
         ] ++ (optionals cfg.python.enable (with versionExtensions.vscode-marketplace.ms-python; [
           python
           vscode-pylance

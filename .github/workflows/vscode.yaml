@@ -1,0 +1,30 @@
+name: Update VSCode Extensions
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * */3"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-nix
+        with:
+          arch: x86_64-linux
+
+      - run: |
+          DIR="modules/purpose/development/vscode"
+          CONFIG="$DIR/config.toml"
+          NIX_FILE="$DIR/extensions.nix"
+          VSCODE_VERSION=$(nix eval --raw nixpkgs#vscode.version)
+
+          sed -i "s/vscode_version = \".*\"/vscode_version = \"$VSCODE_VERSION\"/" modules/purpose/development/vscode/config.toml
+          nix run github:nix-community/nix4vscode -- "$CONFIG" -o "$NIX_FILE"
+
+      - uses: EndBug/add-and-commit@v9
+        with:
+          message: "chore(deps): Update VSCode extensions"

@@ -1,0 +1,133 @@
+vscode_version = "1.95.3"
+
+[[extensions]]
+publisher_name = "alefragnani"
+extension_name = "project-manager"
+
+[[extensions]]
+publisher_name = "bierner"
+extension_name = "markdown-preview-github-styles"
+
+[[extensions]]
+publisher_name = "coolbear"
+extension_name = "systemd-unit-file"
+
+[[extensions]]
+publisher_name = "dustypomerleau"
+extension_name = "rust-syntax"
+
+[[extensions]]
+publisher_name = "eamodio"
+extension_name = "gitlens"
+
+[[extensions]]
+publisher_name = "editorconfig"
+extension_name = "editorconfig"
+
+[[extensions]]
+publisher_name = "esbenp"
+extension_name = "prettier-vscode"
+
+[[extensions]]
+publisher_name = "fill-labs"
+extension_name = "dependi"
+
+[[extensions]]
+publisher_name = "formulahendry"
+extension_name = "code-runner"
+
+[[extensions]]
+publisher_name = "foxundermoon"
+extension_name = "shell-format"
+
+[[extensions]]
+publisher_name = "github"
+extension_name = "copilot"
+
+[[extensions]]
+publisher_name = "github"
+extension_name = "copilot-chat"
+
+[[extensions]]
+publisher_name = "github"
+extension_name = "vscode-github-actions"
+
+[[extensions]]
+publisher_name = "github"
+extension_name = "vscode-pull-request-github"
+
+[[extensions]]
+publisher_name = "gruntfuggly"
+extension_name = "todo-tree"
+
+[[extensions]]
+publisher_name = "hashicorp"
+extension_name = "terraform"
+
+[[extensions]]
+publisher_name = "jnoortheen"
+extension_name = "nix-ide"
+
+[[extensions]]
+publisher_name = "jscearcy"
+extension_name = "rust-doc-viewer"
+
+[[extensions]]
+publisher_name = "matthewpi"
+extension_name = "caddyfile-support"
+
+[[extensions]]
+publisher_name = "mkhl"
+extension_name = "direnv"
+
+[[extensions]]
+publisher_name = "ms-azuretools"
+extension_name = "vscode-docker"
+
+[[extensions]]
+publisher_name = "ms-vscode-remote"
+extension_name = "remote-ssh"
+
+[[extensions]]
+publisher_name = "ms-vscode"
+extension_name = "powershell"
+
+[[extensions]]
+publisher_name = "pkief"
+extension_name = "material-icon-theme"
+
+[[extensions]]
+publisher_name = "redhat"
+extension_name = "vscode-xml"
+
+[[extensions]]
+publisher_name = "redhat"
+extension_name = "vscode-yaml"
+
+[[extensions]]
+publisher_name = "rogalmic"
+extension_name = "bash-debug"
+
+[[extensions]]
+publisher_name = "ruschaaf"
+extension_name = "extended-embedded-languages"
+
+[[extensions]]
+publisher_name = "rust-lang"
+extension_name = "rust-analyzer"
+
+[[extensions]]
+publisher_name = "stylix"
+extension_name = "stylix"
+
+[[extensions]]
+publisher_name = "tamasfe"
+extension_name = "even-better-toml"
+
+[[extensions]]
+publisher_name = "vadimcn"
+extension_name = "vscode-lldb"
+
+[[extensions]]
+extension_name = "material-theme"
+publisher_name = "zhuangtongfa"

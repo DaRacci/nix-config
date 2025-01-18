@@ -175,6 +175,11 @@
           };
 
           pre-commit = {
+            excludes = [
+              "secrets.yaml"
+              "extensions.nix"
+            ];
+
             hooks = {
               typos = {
                 enable = true;
@@ -185,9 +190,8 @@
                     "Optin"
                     "tere"
                     "ags"
+                    "hassio"
                   ];
-
-                  exclude = "secrets.yaml";
                 };
               };
               editorconfig-checker.enable = true;
@@ -196,7 +200,10 @@
               nil.enable = true;
               deadnix.enable = true;
               nixpkgs-fmt.enable = true;
-              statix.enable = true;
+              statix = {
+                enable = true;
+                settings.ignore = [ "extensions.nix" ];
+              };
             };
           };
 
