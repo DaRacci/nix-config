@@ -50,7 +50,7 @@ jobs:
           - host: nixserv
             system: x86_64-linux
 
-    name: Build ${{ matrix.host }} on ${{ matrix.system }}
+    name: ${{ matrix.host }} on ${{ matrix.system }}
 
     steps:
       - name: Checkout repository
@@ -75,7 +75,7 @@ jobs:
         run: nix eval --impure --accept-flake-config .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
 
       - name: Build ${{ matrix.host }}
-        if: matrix.noBuild != 'true'
+        if: matrix.noBuild != true
         env:
           _system: ${{ matrix.system }}
         run: nix build --impure --accept-flake-config .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
