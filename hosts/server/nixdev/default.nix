@@ -29,7 +29,7 @@
       listenAddress = "0.0.0.0:8080";
     };
 
-    github-runner = {
+    github-runners = {
       runner = {
         enable = true;
         user = null;
