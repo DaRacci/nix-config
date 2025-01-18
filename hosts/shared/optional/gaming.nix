@@ -27,7 +27,7 @@
     package = pkgs.steam;
     extraPackages = with pkgs; [
       xwayland-run
-      gamescope
+      proton-ge-bin
     ];
 
     remotePlay.openFirewall = true;

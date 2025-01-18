@@ -10,14 +10,6 @@ let cfg = config.purpose.gaming.steam; in {
           Enabled a script which applies a patch to the steam runtime shel file to allow gpu acceleration on nvidia cards.
         '';
       };
-      # TODO
-      enableProtonUpdates = (mkEnableOption "Automatically update Proton") // {
-        description = ''
-          If enabled, Proton will be automatically updated and have the latest version symlinked to steam store.
-
-          This is done using the tool `protonup-rs`.
-        '';
-      };
     };
 
   config = mkIf cfg.enable
