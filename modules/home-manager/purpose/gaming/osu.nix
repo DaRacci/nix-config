@@ -14,7 +14,10 @@
     home.packages = [ cfg.lazerPackages ];
 
     user.persistence.directories = [
-      ".local/share/osu"
+      {
+        directory = ".local/share/osu";
+        method = "symlink";
+      }
     ];
   };
 }
