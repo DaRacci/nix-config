@@ -15,15 +15,13 @@
       immichOwned = { owner = config.users.users.immich.name; inherit (config.users.users.immich) group; };
     in
     {
-      "NEXTCLOUD/S3/SECRET" = ncOwned;
-      "NEXTCLOUD/S3/SSE_CKEY" = ncOwned;
       "NEXTCLOUD/admin-password" = ncOwned;
+      "NEXTCLOUD/S3FS_AUTH" = ncOwned;
 
       "POSTGRES/NEXTCLOUD_PASSWORD" = ncOwned;
       "POSTGRES/IMMICH_PASSWORD" = immichOwned;
 
       "IMMICH/ENV" = immichOwned;
-      "IMMICH/S3FS_AUTH" = { };
     };
 
   users = {
