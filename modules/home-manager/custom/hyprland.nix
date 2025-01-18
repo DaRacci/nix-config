@@ -300,7 +300,7 @@ let
       nearestneighbor = mkOption {
         type = nullOr bool;
         default = null;
-        description = "forces the window to use the nearest neigbor filtering.";
+        description = "forces the window to use the nearest neighbor filtering.";
       };
       noanimation = mkOption {
         type = nullOr bool;

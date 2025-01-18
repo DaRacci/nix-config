@@ -306,7 +306,7 @@
         animate_manual_resizes = false;
         animate_mouse_windowdragging = false;
         enable_swallow = false;
-        swallow_regex = "(foot|kitty|allacritty|Allacritty)";
+        swallow_regex = "(foot|kitty|alacritty|Alacritty)";
 
         focus_on_activate = true;
         disable_hyprland_logo = true;
