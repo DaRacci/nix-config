@@ -72,6 +72,20 @@
       enable = true;
       configureRedis = true;
       package = pkgs.nextcloud30;
+      extraAppsEnable = true;
+      extraApps = {
+        inherit (config.services.nextcloud.package.packages.apps)
+          contacts
+          calendar
+          groupfolders
+          impersonate
+          maps
+          notes
+          notify_push
+          spreed
+          tasks
+          twofactor_webauthn;
+      };
 
       https = true;
       # TODO - Change back to nextcloud.racci.dev when ready.
