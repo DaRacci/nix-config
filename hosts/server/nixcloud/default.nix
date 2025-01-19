@@ -72,6 +72,7 @@
       enable = true;
       configureRedis = true;
       package = pkgs.nextcloud30;
+      appstoreEnable = true;
       extraAppsEnable = true;
       extraApps = {
         inherit (config.services.nextcloud.package.packages.apps)
