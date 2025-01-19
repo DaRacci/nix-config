@@ -31,7 +31,10 @@
     };
     users = {
       immich.uid = 998;
-      nextcloud.uid = 997;
+      nextcloud = {
+        uid = 997;
+        extraGroups = [ "docker" ];
+      };
     };
 
     users.protonmail-bridge = {
@@ -232,9 +235,7 @@
     passSecretService.enable = true;
   };
 
-  virtualisation.docker = {
-    enable = true;
-  };
+  virtualisation.docker.enable = true;
 
   systemd.services = {
     postgresql = {
