@@ -25,8 +25,14 @@
     };
 
   users = {
-    groups.immich.gid = 998;
-    users.immich.uid = 998;
+    groups = {
+      immich.gid = 998;
+      nextcloud.gid = 997;
+    };
+    users = {
+      immich.uid = 998;
+      nextcloud.uid = 997;
+    };
 
     users.protonmail-bridge = {
       isSystemUser = true;
