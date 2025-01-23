@@ -24,6 +24,7 @@
         enable = true;
         enableSatisfactory = true;
         enableBeatSaber = true;
+        enableThunderstore = true;
       };
 
       simulator = {
