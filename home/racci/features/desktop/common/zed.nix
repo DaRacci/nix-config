@@ -7,6 +7,7 @@
       shellcheck
       shfmt
       nerd-fonts.jetbrains-mono
+      nixfmt-rfc-style
     ];
 
     # TODO - Define config here, until then doing it inside zed so i can quickly revise it.
