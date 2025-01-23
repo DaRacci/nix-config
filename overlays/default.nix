@@ -23,6 +23,7 @@ in
       # This one brings our custom packages from the 'pkgs' directory
       (import ../pkgs { pkgs = final; })
       (usePR [ "protonup-rs" ] "liperium" "protonuprs-init" "sha256-z5Zh+ih0gE+Uwl8b7//apBRbrsHTvpV0PAhQwM8mOZ4=")
+      (usePR [ "boxflat" ] "DaRacci" "boxflat" "sha256-+Rz1Cb0ALFhh4v+yf3og5v0F0Tt1Qc7mznUyZIebSBw=")
     ];
 
   modifications = final: prev: {
@@ -54,6 +55,5 @@ in
 
     inherit lib;
     inherit (inputs.nixd.packages.x86_64-linux) nixd;
-    inherit (inputs.moza-racing.packages.x86_64-linux) boxflat;
   };
 }
