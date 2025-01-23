@@ -27,7 +27,7 @@
     kernelModules = [ "v4l2loopback" ];
     extraModulePackages = [
       kernelPackages.v4l2loopback
-      kernelPackages.universal-pidff
+      # kernelPackages.universal-pidff
     ];
 
     initrd = {

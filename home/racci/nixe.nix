@@ -17,7 +17,10 @@
     gaming = {
       enable = true;
       osu.enable = true;
-      steam.enable = true;
+      steam = {
+        enable = true;
+        enableNvidiaPatches = false;
+      };
       vr.enable = true;
 
       modding = {

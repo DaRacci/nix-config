@@ -8,7 +8,7 @@
       rofi-mpd
       rofi-systemd
       rofi-bluetooth
-      rofi-file-browser
+      # rofi-file-browser
     ];
 
     cycle = true;

@@ -32,20 +32,22 @@ in
   config = mkIf cfg.enable (mkMerge [
     (mkIf cfg.audio.enable {
       security.rtkit.enable = mkForce true;
-      hardware.pulseaudio.enable = mkForce false;
 
-      services.pipewire = {
-        enable = true;
-        alsa.enable = true;
-        alsa.support32Bit = true;
-        pulse.enable = true;
-        jack.enable = false;
+      services = {
+        pulseaudio.enable = mkForce false;
+        pipewire = {
+          enable = true;
+          alsa.enable = true;
+          alsa.support32Bit = true;
+          pulse.enable = true;
+          jack.enable = false;
+        };
+
+        udev.extraRules = ''
+          KERNEL=="rtc0", GROUP="audio"
+          KERNEL=="hpet", GROUP="audio"
+        '';
       };
-
-      services.udev.extraRules = ''
-        KERNEL=="rtc0", GROUP="audio"
-        KERNEL=="hpet", GROUP="audio"
-      '';
 
       security.pam.loginLimits = [
         {
