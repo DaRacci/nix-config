@@ -6,9 +6,9 @@ _: {
       # Wireguard Fix
       checkReversePath = "loose";
 
-      logRefusedConnections = true;
-      logRefusedPackets = true;
-      logReversePathDrops = true;
+      logRefusedConnections = false;
+      logRefusedPackets = false;
+      logReversePathDrops = false;
     };
   };
 }
