@@ -1,4 +1,10 @@
-{ osConfig, config, pkgs, lib, ... }: lib.mkIf (osConfig.users.users.${config.home.username}.shell.pname == "nushell") {
+{ osConfig
+, config
+, pkgs
+, lib
+, ...
+}:
+lib.mkIf (osConfig.users.users.${config.home.username}.shell.pname == "nushell") {
   programs.nushell = {
     enable = true;
 
@@ -18,7 +24,6 @@
 
         for element in $columns {
           load-env { $"($element.name)": $element.value }
-          # $env.$element.name $element.value
         }
       }
 
@@ -27,7 +32,7 @@
         let open_index = ($type | str index-of '<')
 
         if $open_index != -1 {
-          $type = ($type | str substring ..$open_index)
+          $type = ($type | str substring ..($open_index - 1))
         }
 
         $type
