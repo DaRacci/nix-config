@@ -434,7 +434,7 @@
     '';
   };
 
-  xdg.configFile."hyporland-autorename-workspaces".text = ''
+  xdg.configFile."hyprland-autorename-workspaces".text = ''
     version = "1.1.13"
 
     [format]
