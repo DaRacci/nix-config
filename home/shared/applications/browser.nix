@@ -267,20 +267,20 @@ in
         };
       };
 
-      settings = {
-        "browser.tabs.loadInBackground" = true;
-        "widget.gtk.rounded-bottom-corners.enabled" = true;
-        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
-        "svg.context-properties.content.enabled" = true;
+      # settings = {
+      #   "browser.tabs.loadInBackground" = true;
+      #   "widget.gtk.rounded-bottom-corners.enabled" = true;
+      #   "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+      #   "svg.context-properties.content.enabled" = true;
 
-        # Ultima
-        "ultima.OS.gnome" = true;
-        "ultima.OS.gnome.wdl" = true;
-        "ultima.OS.kde" = false;
-        "ultima.tabs.sidebery.autohide" = true;
-        "ultima.tabs.vertical.hide" = true;
-        "ultima.urlbar.hidebuttons" = true;
-      };
+      #   # Ultima
+      #   "ultima.OS.gnome" = true;
+      #   "ultima.OS.gnome.wdl" = true;
+      #   "ultima.OS.kde" = false;
+      #   "ultima.tabs.sidebery.autohide" = true;
+      #   "ultima.tabs.vertical.hide" = true;
+      #   "ultima.urlbar.hidebuttons" = true;
+      # };
 
       userChrome = ''
         @import "firefox-ultima/userChrome.css";
@@ -290,6 +290,46 @@ in
       '';
       # TODO - Somehow keep track of the last version this was updated for, and apply it when necessary
       # extraConfig = builtins.readFile "${inputs.firefox-ultima}/user.js";
+
+      extraConfig = /*j*/ ''
+        ${builtins.readFile "${inputs.firefox-ultima}/user.js"}
+
+        // This must be done manually so they are placed after the above user.js defaults.
+        // Using the settings option will place them before the defaults.
+        ${
+          let
+            # Copied from https://github.com/nix-community/home-manager/blob/2f23fa308a7c067e52dfcc30a0758f47043ec176/modules/programs/firefox.nix#L57-L61
+            userPrefValue = pref:
+              builtins.toJSON (if isBool pref || isInt pref || isString pref then
+                pref
+              else
+                builtins.toJSON pref);
+
+            settings = {
+              "browser.tabs.loadInBackground" = true;
+              "widget.gtk.rounded-bottom-corners.enabled" = true;
+              "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+              "svg.context-properties.content.enabled" = true;
+
+              # Ultima
+              "ultima.OS.gnome" = true;
+              "ultima.OS.gnome.wdl" = true;
+              "ultima.OS.kde" = false;
+              "ultima.disable.alltabs.button" = true;
+              "ultima.disable.windowcontrols.button" = true;
+              "ultima.disable.verticaltab.bar" = true;
+              "ultima.tabs.sidebery.autohide" = true;
+              "ultima.tabs.vertical.hide" = true;
+              "ultima.urlbar.hidebuttons" = true;
+              "ultima.urlbar.centered" = true;
+              "ultima.theme.extensions" = true;
+              "ultima.theme.menubar" = true;
+            };
+          in concatStrings (mapAttrsToList (name: value ''
+            user_pref("${name}", ${userPrefValue value});
+          '') settings)
+        }
+      '';
 
       search = {
         default = "Google";
@@ -334,7 +374,9 @@ in
             };
 
             "Github" = {
-              urls = [{ template = "https://github.com/search?ref=opensearch&type=repositories&q={searchTerms}"; }];
+              urls = [
+                { template = "https://github.com/search?ref=opensearch&type=repositories&q={searchTerms}"; }
+              ];
               iconUpdateURL = "https://github.githubassets.com/favicons/favicon.png";
               updateInterval = 24 * 60 * 60 * 1000;
               definedAliases = [ "@gh" ];
@@ -367,6 +409,8 @@ in
   };
 
   user.persistence = {
-    directories = map (profile: ".mozilla/firefox/${profile}") (attrNames config.programs.firefox.profiles);
+    directories = map (profile: ".mozilla/firefox/${profile}") (
+      attrNames config.programs.firefox.profiles
+    );
   };
 }
