@@ -28,6 +28,8 @@
           permittedInsecurePackages = [
             "aspnetcore-runtime-6.0.36"
             "dotnet-sdk-6.0.428"
+            "dotnet-sdk-7.0.410"
+            "dotnet-runtime-7.0.20"
           ];
 
           cudaSupport = cuda;
@@ -236,7 +238,7 @@
     sops-nix = { url = "github:Mic92/sops-nix"; inputs.nixpkgs.follows = "nixpkgs"; };
     impermanence.url = "github:nix-community/impermanence";
     crane.url = "github:ipetkov/crane/f2926e34a1599837f3256c701739529d772e36e7";
-    lanzaboote = { url = "github:nix-community/lanzaboote/v0.4.1"; inputs = { nixpkgs.follows = "nixpkgs"; flake-parts.follows = "flake-parts"; flake-compat.follows = "flake-compat"; crane.follows = "crane"; }; };
+    lanzaboote = { url = "github:nix-community/lanzaboote/v0.4.2"; inputs = { nixpkgs.follows = "nixpkgs"; flake-parts.follows = "flake-parts"; flake-compat.follows = "flake-compat"; crane.follows = "crane"; }; };
     nixd = { url = "github:nix-community/nixd"; inputs = { nixpkgs.follows = "nixpkgs"; flake-parts.follows = "flake-parts"; }; };
     lix-module = { url = "https://git.lix.systems/lix-project/nixos-module/archive/stable.tar.gz"; inputs = { nixpkgs.follows = "nixpkgs"; lix.follows = ""; }; };
     stylix = { url = "github:danth/stylix"; };
