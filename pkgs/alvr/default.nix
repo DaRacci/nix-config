@@ -23,20 +23,20 @@
   xorg,
   SDL2,
 }:
-stdenv.mkDerivation (finalAttrs: {
+stdenv.mkDerivation (finalAttrs: rec {
   pname = "alvr";
-  version = "20.11.1";
+  version = "20.12.1";
 
   src = fetchzip {
     url = "https://github.com/alvr-org/ALVR/releases/download/v${finalAttrs.version}/alvr_streamer_linux.tar.gz";
-    hash = "sha256-/m5uyqI1qrWc82FSoU+baSzpvIGXOwjjJhObMeWPjfg=";
+    hash = "sha256-u8LjXRWq+EnSSQvGPriTDvhN4agLbz2Pw2JIFPRStts=";
   };
 
   alvrSrc = fetchFromGitHub {
     owner = "alvr-org";
     repo = "ALVR";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-boSS7eEfcKRJf5gt1LKk/DuyZEWMTun093P7mkIjUgs=";
+    hash = "sha256-mvwwTME8GZYL+LkAVGX1d3DPSEDtaTEkuWo+vPNw4uw=";
   };
 
   nativeBuildInputs = [ autoPatchelfHook ];
@@ -73,8 +73,8 @@ stdenv.mkDerivation (finalAttrs: {
 
     mkdir -p $out/share/applications
     cp -r $src/* $out
-    install -Dm444 $alvrSrc/alvr/xtask/resources/alvr.desktop -t $out/share/applications
-    install -Dm444 $alvrSrc/resources/alvr.png -t $out/share/icons/hicolor/256x256/apps
+    install -Dm755 ${alvrSrc}/alvr/xtask/resources/alvr.desktop $out/share/applications/alvr.desktop
+    install -Dm644 ${alvrSrc}/resources/ALVR-Icon.svg $out/share/icons/hicolor/256x256/apps/alvr.svg
 
     runHook postInstall
   '';
@@ -86,7 +86,7 @@ stdenv.mkDerivation (finalAttrs: {
     homepage = "https://github.com/alvr-org/ALVR/";
     changelog = "https://github.com/alvr-org/ALVR/releases/tag/v${finalAttrs.version}";
     license = licenses.mit;
-    maintainers = with maintainers; [ ];
+    maintainers = with maintainers; [ Racci ];
     platforms = platforms.linux;
     mainProgram = "alvr_dashboard";
   };
