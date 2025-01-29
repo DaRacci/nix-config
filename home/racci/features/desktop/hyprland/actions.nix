@@ -1,11 +1,26 @@
-{ config, pkgs, lib, ... }:
-let inherit (lib) getExe; in {
+{ config
+, pkgs
+, lib
+, ...
+}:
+let
+  inherit (lib) getExe;
+in
+{
   wayland.windowManager.hyprland.settings = {
     bind =
       let
         ocrRegion = pkgs.writeShellApplication {
           name = "ocrRegion";
-          runtimeInputs = [ pkgs.grimblast pkgs.tesseract pkgs.wl-clipboard pkgs.pulseaudio pkgs.sound-theme-freedesktop pkgs.libnotify ];
+          runtimeInputs = [
+            pkgs.uutils-coreutils-noprefix
+            pkgs.grimblast
+            pkgs.tesseract
+            pkgs.wl-clipboard
+            pkgs.pulseaudio
+            pkgs.sound-theme-freedesktop
+            pkgs.libnotify
+          ];
           text = ''
             TEMP_FILE="$(mktemp --suffix=.png)";
 
@@ -25,7 +40,13 @@ let inherit (lib) getExe; in {
 
         screenshot = pkgs.writeShellApplication {
           name = "screenshot";
-          runtimeInputs = [ pkgs.grimblast pkgs.satty pkgs.pulseaudio pkgs.sound-theme-freedesktop pkgs.libnotify ];
+          runtimeInputs = [
+            pkgs.grimblast
+            pkgs.satty
+            pkgs.pulseaudio
+            pkgs.sound-theme-freedesktop
+            pkgs.libnotify
+          ];
           text = ''
             # Require an input of either "area" or "output"
             if [ $# -ne 1 ] || [ "$1" != "area" ] && [ "$1" != "output" ]; then
