@@ -1,12 +1,15 @@
-{ config, lib, ... }: with lib.types;
+{ config, lib, ... }:
+with lib.types;
 let
   inherit (lib) mkOption;
   cfg = config.wayland.windowManager.hyprland.custom-settings;
 
-  percentString = types.addCheck (strMatching "^[0-9]{1,3}+%$") (str:
-    if builtins.stringLength str == 4
-    then builtins.tryEval (builtins.substring 0 3 str) <= 100
-    else true
+  percentString = types.addCheck (strMatching "^[0-9]{1,3}+%$") (
+    str:
+    if builtins.stringLength str == 4 then
+      builtins.tryEval (builtins.substring 0 3 str) <= 100
+    else
+      true
   );
 
   monitorSelector = _: {
@@ -107,38 +110,42 @@ let
         description = "Move the window.";
       };
       size = mkOption {
-        type = nullOr (either str (submodule {
-          options = {
-            width = mkOption {
-              type = nullOr int;
-              default = null;
-              description = "Set the window width.";
+        type = nullOr (
+          either str (submodule {
+            options = {
+              width = mkOption {
+                type = nullOr int;
+                default = null;
+                description = "Set the window width.";
+              };
+              height = mkOption {
+                type = nullOr int;
+                default = null;
+                description = "Set the window height.";
+              };
             };
-            height = mkOption {
-              type = nullOr int;
-              default = null;
-              description = "Set the window height.";
-            };
-          };
-        }));
+          })
+        );
         default = null;
         description = "Set the window size.";
       };
       center = mkOption {
-        type = nullOr (either bool (submodule {
-          options = {
-            center = mkOption {
-              type = nullOr bool;
-              default = null;
-              description = "Center the window.";
+        type = nullOr (
+          either bool (submodule {
+            options = {
+              center = mkOption {
+                type = nullOr bool;
+                default = null;
+                description = "Center the window.";
+              };
+              respectReservedArea = mkOption {
+                type = nullOr bool;
+                default = null;
+                description = "Respect monitor reserved area.";
+              };
             };
-            respectReservedArea = mkOption {
-              type = nullOr bool;
-              default = null;
-              description = "Respect monitor reserved area.";
-            };
-          };
-        }));
+          })
+        );
         default = null;
         description = "Center the window.";
       };
@@ -192,32 +199,39 @@ let
       #region Dynamic Rules
       # TODO - Animation, border colour,
       idleinhibit = mkOption {
-        type = nullOr (enum [ "none" "always" "focus" "fullscreen" ]);
+        type = nullOr (enum [
+          "none"
+          "always"
+          "focus"
+          "fullscreen"
+        ]);
         default = null;
         description = "sets an idle inhibit rule for the window. If active, apps like hypridle will not fire. Modes: none, always, focus, fullscreen";
       };
       opacity = mkOption {
-        type = nullOr (either float (submodule {
-          options = {
-            activeopacity = mkOption {
-              type = nullOr float;
-              default = null;
-              description = "Active opacity.";
-            };
+        type = nullOr (
+          either float (submodule {
+            options = {
+              activeopacity = mkOption {
+                type = nullOr float;
+                default = null;
+                description = "Active opacity.";
+              };
 
-            inactiveopacity = mkOption {
-              type = nullOr float;
-              default = null;
-              description = "Inactive opacity.";
-            };
+              inactiveopacity = mkOption {
+                type = nullOr float;
+                default = null;
+                description = "Inactive opacity.";
+              };
 
-            additionalopacity = mkOption {
-              type = nullOr float;
-              default = null;
-              description = "Additional opacity multiplier.";
+              additionalopacity = mkOption {
+                type = nullOr float;
+                default = null;
+                description = "Additional opacity multiplier.";
+              };
             };
-          };
-        }));
+          })
+        );
         default = null;
         description = "Additional opacity multiplier.";
       };
@@ -454,69 +468,66 @@ let
     };
   };
 
-  mkWindowRuleV2 = obj:
+  mkWindowRuleV2 =
+    obj:
     let
       inherit (obj) rule;
       nonNullRules = lib.filterAttrs (_: v: v != null) rule;
 
-      matchers =
-        if builtins.typeOf obj.matcher == "list"
-        then obj.matcher
-        else [ obj.matcher ];
+      matchers = if builtins.typeOf obj.matcher == "list" then obj.matcher else [ obj.matcher ];
 
-      getMatcherValue = _name: value:
-        if (builtins.typeOf value == "bool")
-        then
-          if value
-          then "1"
-          else "0"
-        else value;
+      getMatcherValue =
+        _name: value: if (builtins.typeOf value == "bool") then if value then "1" else "0" else value;
 
-      mkRuleString = name: value:
-        if builtins.typeOf value == "bool"
-        then name
-        else if builtins.typeOf value == "set"
-        then "${name} ${lib.concatStringsSep " " (lib.mapAttrsToList (_name: toString) value)}"
-        else "${name} ${toString value}";
+      mkRuleString =
+        name: value:
+        if builtins.typeOf value == "bool" then
+          name
+        else if builtins.typeOf value == "set" then
+          "${name} ${lib.concatStringsSep " " (lib.mapAttrsToList (_name: toString) value)}"
+        else
+          "${name} ${toString value}";
 
-      mkMatcherString = matcher:
+      mkMatcherString =
+        matcher:
         let
           nonNullMatchers = lib.filterAttrs (_: v: v != null) matcher;
         in
-        if builtins.length (builtins.attrValues nonNullMatchers) == 0
-        then throw "At least one matcher must be set."
-        else lib.concatStringsSep "," (lib.mapAttrsToList (name: value: "${name}:${getMatcherValue name value}") nonNullMatchers);
+        if builtins.length (builtins.attrValues nonNullMatchers) == 0 then
+          throw "At least one matcher must be set."
+        else
+          lib.concatStringsSep "," (
+            lib.mapAttrsToList (name: value: "${name}:${getMatcherValue name value}") nonNullMatchers
+          );
 
       matcherStrings = builtins.map mkMatcherString matchers;
       ruleStrings = lib.mapAttrsToList mkRuleString nonNullRules;
     in
     lib.pipe matcherStrings [
       # Create a list of rule strings for each matcher.
-      (lib.map (matcher: lib.pipe ruleStrings [
-        (lib.map (ruleString: "${ruleString}, ${matcher}"))
-      ]))
+      (lib.map (matcher: lib.pipe ruleStrings [ (lib.map (ruleString: "${ruleString}, ${matcher}")) ]))
     ];
 
-  # lib.trivial.pipe nonNullRules [
-  #   (lib.mapAttrsToList (name: value: lib.concatStringsSep "," [
-  #     "${mkRuleString name value}"
-  #     matcherString
-  #   ]))
-  # ];
 in
+# lib.trivial.pipe nonNullRules [
+#   (lib.mapAttrsToList (name: value: lib.concatStringsSep "," [
+#     "${mkRuleString name value}"
+#     matcherString
+#   ]))
+# ];
 {
   options.wayland.windowManager.hyprland.custom-settings = {
     windowrule = mkOption {
-      type = with types; listOf (submodule {
-        options = {
-          matcher = mkOption {
-            type = either (submodule windowMatch) (listOf (submodule windowMatch));
+      type =
+        with types;
+        listOf (submodule {
+          options = {
+            matcher = mkOption {
+              type = either (submodule windowMatch) (listOf (submodule windowMatch));
+            };
+            rule = mkOption { type = submodule rule; };
           };
-          rule = mkOption {
-            type = submodule rule;
-          };
-        };
-      });
+        });
       default = [ ];
       description = "Match rules for windows.";
     };

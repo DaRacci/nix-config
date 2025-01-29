@@ -1,7 +1,6 @@
-{ modulesPath, ... }: {
-  imports = [
-    "${modulesPath}/virtualisation/proxmox-lxc.nix"
-  ];
+{ modulesPath, ... }:
+{
+  imports = [ "${modulesPath}/virtualisation/proxmox-lxc.nix" ];
 
   sops.secrets = { };
 
@@ -27,7 +26,5 @@
     };
   };
 
-  networking.firewall.allowedTCPPorts = [
-    3001
-  ];
+  networking.firewall.allowedTCPPorts = [ 3001 ];
 }

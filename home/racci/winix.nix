@@ -59,9 +59,7 @@ let
   '';
 in
 {
-  imports = [
-    ./features/cli
-  ];
+  imports = [ ./features/cli ];
 
   user.sshSocket = SSH_AUTH_SOCK;
 

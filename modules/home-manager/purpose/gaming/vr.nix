@@ -1,5 +1,13 @@
-{ config, pkgs, lib, ... }:
-let cfg = config.purpose.gaming.vr; in {
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+let
+  cfg = config.purpose.gaming.vr;
+in
+{
   options.purpose.gaming.vr = {
     enable = lib.mkEnableOption "Enable VR support";
   };
@@ -31,7 +39,7 @@ let cfg = config.purpose.gaming.vr; in {
         '';
       };
 
-      activation.link-steamvr-openxr-runtime = lib.hm.dag.entryAfter [ "writeBoundary" ] /*bash*/ ''
+      activation.link-steamvr-openxr-runtime = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         RUNTIME_PATH="$HOME/.config/openxr/1/active_runtime.json"
 
         run mkdir -p $VERBOSE_ARG \

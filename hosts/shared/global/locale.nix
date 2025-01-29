@@ -1,4 +1,5 @@
-{ pkgs, lib, ... }: {
+{ pkgs, lib, ... }:
+{
   i18n = {
     defaultLocale = "en_AU.UTF-8";
 

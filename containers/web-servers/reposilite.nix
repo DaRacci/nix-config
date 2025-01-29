@@ -1,7 +1,9 @@
-{ image ? "dzikoysk/reposilite"
-, version ? "latest"
-, persistenceDir
-}: {
+{
+  image ? "dzikoysk/reposilite",
+  version ? "latest",
+  persistenceDir,
+}:
+{
   services.reposilite = _: {
     service = {
       image = "${image}:${version}";

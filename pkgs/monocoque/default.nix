@@ -1,19 +1,20 @@
-{ lib
-, stdenv
-, fetchFromGitHub
-, cmake
-, pkg-config
-, libusb1
-, hidapi
-, libserialport
-, libxml2
-, argtable
-, libconfig
-, libpulseaudio
-, portaudio
-, jansson
-, libuv
-, libxdg_basedir
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  cmake,
+  pkg-config,
+  libusb1,
+  hidapi,
+  libserialport,
+  libxml2,
+  argtable,
+  libconfig,
+  libpulseaudio,
+  portaudio,
+  jansson,
+  libuv,
+  libxdg_basedir,
 }:
 
 stdenv.mkDerivation rec {
@@ -28,7 +29,7 @@ stdenv.mkDerivation rec {
     fetchSubmodules = true;
   };
 
-  postPatch = /*bash*/ ''
+  postPatch = ''
     substituteInPlace src/monocoque/helper/parameters.c \
       --replace-warn 'argtable2.h' 'argtable3.h'
 
@@ -38,7 +39,7 @@ stdenv.mkDerivation rec {
       --replace-warn 'LIBXML_INCLUDE_DIR /usr/include' 'LIBXML_INCLUDE_DIR ${lib.getDev libxml2}/include'
   '';
 
-  installPhase = /*bash*/ ''
+  installPhase = ''
     mkdir -p $out/{bin,lib/udev}
     install -m755 -D monocoque $out/bin/monocoque
 

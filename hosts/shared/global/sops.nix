@@ -1,4 +1,9 @@
-{ inputs, config, hostDirectory, ... }:
+{
+  inputs,
+  config,
+  hostDirectory,
+  ...
+}:
 let
   isEd25519 = k: k.type == "ed25519";
   getKeyPath = k: k.path;
@@ -12,7 +17,6 @@ in
     age.sshKeyPaths = [
       "${config.host.persistence.root}/etc/ssh/ssh_host_ed25519_key"
     ] ++ (map getKeyPath keys);
-
 
     secrets = {
       SSH_PRIVATE_KEY = {

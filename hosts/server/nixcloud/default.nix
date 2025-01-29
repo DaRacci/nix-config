@@ -1,7 +1,12 @@
-{ modulesPath, config, pkgs, lib, ... }: {
-  imports = [
-    "${modulesPath}/virtualisation/proxmox-lxc.nix"
-  ];
+{
+  modulesPath,
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+{
+  imports = [ "${modulesPath}/virtualisation/proxmox-lxc.nix" ];
 
   proxmoxLXC = {
     privileged = false;
@@ -11,8 +16,14 @@
 
   sops.secrets =
     let
-      ncOwned = { owner = config.users.users.nextcloud.name; inherit (config.users.users.nextcloud) group; };
-      immichOwned = { owner = config.users.users.immich.name; inherit (config.users.users.immich) group; };
+      ncOwned = {
+        owner = config.users.users.nextcloud.name;
+        inherit (config.users.users.nextcloud) group;
+      };
+      immichOwned = {
+        owner = config.users.users.immich.name;
+        inherit (config.users.users.immich) group;
+      };
     in
     {
       "NEXTCLOUD/admin-password" = ncOwned;
@@ -72,9 +83,13 @@
     };
 
     caddy.virtualHosts = {
-      "photos".extraConfig = let cfg = config.services.immich; in /*caddyfile*/ ''
-        reverse_proxy http://${cfg.host}:${toString cfg.port}
-      '';
+      "photos".extraConfig =
+        let
+          cfg = config.services.immich;
+        in
+        ''
+          reverse_proxy http://${cfg.host}:${toString cfg.port}
+        '';
     };
 
     passSecretService.enable = true;
@@ -86,8 +101,12 @@
     postgresql = {
       enable = lib.mkForce false;
       postStart = ''
-        ${lib.mine.mkPostgresRolePass config.services.nextcloud.config.dbname config.sops.secrets."POSTGRES/NEXTCLOUD_PASSWORD".path}
-        ${lib.mine.mkPostgresRolePass config.services.immich.database.name config.sops.secrets."POSTGRES/IMMICH_PASSWORD".path}
+        ${lib.mine.mkPostgresRolePass config.services.nextcloud.config.dbname
+          config.sops.secrets."POSTGRES/NEXTCLOUD_PASSWORD".path
+        }
+        ${lib.mine.mkPostgresRolePass config.services.immich.database.name
+          config.sops.secrets."POSTGRES/IMMICH_PASSWORD".path
+        }
       '';
     };
 
@@ -107,9 +126,7 @@
 
   networking = {
     firewall = {
-      allowedTCPPorts = [
-        config.services.immich.port
-      ];
+      allowedTCPPorts = [ config.services.immich.port ];
     };
   };
 }

@@ -1,4 +1,12 @@
-{ flake, config, lib, ... }: with lib; with types; let
+{
+  flake,
+  config,
+  lib,
+  ...
+}:
+with lib;
+with types;
+let
   cfg = config.host.persistence;
   inherit (config.host) drive;
 
@@ -68,14 +76,10 @@
         '';
       };
       parentDirectory =
-        commonOpts.options //
-        mapAttrs
-          (_: x:
-            if x._type or null == "option" then
-              x // { internal = true; }
-            else
-              x)
-          dirOpts.options;
+        commonOpts.options
+        // mapAttrs (
+          _: x: if x._type or null == "option" then x // { internal = true; } else x
+        ) dirOpts.options;
       filePath = mkOption {
         type = path;
         internal = true;
@@ -117,25 +121,37 @@
   rootFile = submodule [
     commonOpts
     fileOpts
-    ({ config, ... }: {
-      parentDirectory = mkDefault (defaultPerms // rec {
-        directory = dirOf config.file;
-        dirPath = directory;
-        inherit (config) persistentStoragePath;
-        inherit defaultPerms;
-      });
-      filePath = mkDefault config.file;
-    })
+    (
+      { config, ... }:
+      {
+        parentDirectory = mkDefault (
+          defaultPerms
+          // rec {
+            directory = dirOf config.file;
+            dirPath = directory;
+            inherit (config) persistentStoragePath;
+            inherit defaultPerms;
+          }
+        );
+        filePath = mkDefault config.file;
+      }
+    )
   ];
 
-  rootDir = submodule ([
-    commonOpts
-    dirOpts
-    ({ config, ... }: {
-      defaultPerms = mkDefault defaultPerms;
-      dirPath = mkDefault config.directory;
-    })
-  ] ++ (mapAttrsToList (n: v: { ${n} = mkDefault v; }) defaultPerms));
+  rootDir = submodule (
+    [
+      commonOpts
+      dirOpts
+      (
+        { config, ... }:
+        {
+          defaultPerms = mkDefault defaultPerms;
+          dirPath = mkDefault config.directory;
+        }
+      )
+    ]
+    ++ (mapAttrsToList (n: v: { ${n} = mkDefault v; }) defaultPerms)
+  );
 in
 {
   options.host.persistence = {
@@ -150,7 +166,10 @@ in
     };
 
     type = mkOption {
-      type = enum [ "tmpfs" "snapshot" ];
+      type = enum [
+        "tmpfs"
+        "snapshot"
+      ];
       default = "tmpfs";
     };
 
@@ -181,20 +200,20 @@ in
     };
   };
 
-  imports = [
-    flake.inputs.impermanence.nixosModules.impermanence
-  ];
+  imports = [ flake.inputs.impermanence.nixosModules.impermanence ];
 
   config = mkIf cfg.enable {
     programs.fuse.userAllowOther = true;
 
     system.activationScripts.persistent-dirs.text =
       let
-        mkHomePersist = user: optionalString user.createHome ''
-          mkdir -p /persist/${user.home}
-          chown ${user.name}:${user.group} /persist/${user.home}
-          chmod ${user.homeMode} /persist/${user.home}
-        '';
+        mkHomePersist =
+          user:
+          optionalString user.createHome ''
+            mkdir -p /persist/${user.home}
+            chown ${user.name}:${user.group} /persist/${user.home}
+            chmod ${user.homeMode} /persist/${user.home}
+          '';
         users = builtins.attrValues config.users.users;
       in
       concatLines (map mkHomePersist users);
@@ -211,7 +230,12 @@ in
 
       files = [
         "/etc/machine-id"
-        { file = "/etc/nix/id_rsa"; parentDirectory = { mode = "u=rwx,g=rx,o=rx"; }; }
+        {
+          file = "/etc/nix/id_rsa";
+          parentDirectory = {
+            mode = "u=rwx,g=rx,o=rx";
+          };
+        }
       ] ++ cfg.files;
     };
 
@@ -219,14 +243,28 @@ in
       "/persist" = {
         device = "/dev/disk/by-partlabel/${drive.name}";
         fsType = drive.format;
-        options = [ "subvol=@persist" "compress=zstd" ];
+        options = [
+          "subvol=@persist"
+          "compress=zstd"
+        ];
         neededForBoot = true;
       };
 
       "/" = {
         device = if cfg.type == "tmpfs" then "none" else "/dev/disk/by-partlabel/${drive.name}";
         fsType = if cfg.type == "tmpfs" then "tmpfs" else drive.format;
-        options = if cfg.type == "tmpfs" then [ "defaults" "size=16G" "mode=755" ] else [ "subvol=@root" "compress=zstd" ];
+        options =
+          if cfg.type == "tmpfs" then
+            [
+              "defaults"
+              "size=16G"
+              "mode=755"
+            ]
+          else
+            [
+              "subvol=@root"
+              "compress=zstd"
+            ];
         neededForBoot = if cfg.type == "tmpfs" then false else true;
       };
     };
@@ -261,9 +299,7 @@ in
         systemd.services.restore-root = mkIf phase1Systemd {
           description = "Rollback btrfs rootfs";
           wantedBy = [ "initrd.target" ];
-          requires = [
-            "dev-disk-by\\x2dpartlabel-${drive.name}.device"
-          ];
+          requires = [ "dev-disk-by\\x2dpartlabel-${drive.name}.device" ];
           after = [
             "dev-disk-by\\x2dpartlabel-${drive.name}.device"
             "systemd-cryptsetup@${drive.name}.service"

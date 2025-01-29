@@ -1,4 +1,5 @@
-{ pkgs, lib, ... }: {
+{ pkgs, lib, ... }:
+{
   wayland.windowManager.hyprland.settings =
     let
       wlogout = lib.getExe pkgs.wlogout;
@@ -12,7 +13,7 @@
   programs.wlogout = {
     enable = true;
 
-    style = /*css*/ ''
+    style = ''
       * {
         all: unset;
         background-image: none;

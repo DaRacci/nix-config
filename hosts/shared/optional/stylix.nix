@@ -1,7 +1,11 @@
-{ inputs, config, pkgs, ... }: {
-  imports = [
-    inputs.stylix.nixosModules.stylix
-  ];
+{
+  inputs,
+  config,
+  pkgs,
+  ...
+}:
+{
+  imports = [ inputs.stylix.nixosModules.stylix ];
 
   stylix = {
     enable = !config.host.device.isHeadless;

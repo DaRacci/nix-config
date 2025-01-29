@@ -1,4 +1,5 @@
-{ pkgs, ... }: rec {
+{ pkgs, ... }:
+rec {
   programs.ripgrep = {
     enable = true;
     package = pkgs.ripgrep;

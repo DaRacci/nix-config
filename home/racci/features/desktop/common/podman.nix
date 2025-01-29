@@ -1,7 +1,6 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   home.packages = with pkgs; [ pods ];
 
-  user.persistence.directories = [
-    ".config/pods"
-  ];
+  user.persistence.directories = [ ".config/pods" ];
 }

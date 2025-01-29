@@ -1,6 +1,11 @@
 { config, lib, ... }:
 let
-  inherit (lib) mkEnableOption mkIf mkMerge mkForce;
+  inherit (lib)
+    mkEnableOption
+    mkIf
+    mkMerge
+    mkForce
+    ;
 
   cfg = config.custom.core;
 in
@@ -76,12 +81,8 @@ in
         }
       ];
     })
-    (mkIf cfg.bluetooth.enable {
-      hardware.bluetooth.enable = true;
-    })
-    (mkIf cfg.network.enable {
-      networking.networkmanager.enable = true;
-    })
+    (mkIf cfg.bluetooth.enable { hardware.bluetooth.enable = true; })
+    (mkIf cfg.network.enable { networking.networkmanager.enable = true; })
     (mkIf (config.host.device.role != "server") {
       services = {
         dleyna-renderer.enable = true;

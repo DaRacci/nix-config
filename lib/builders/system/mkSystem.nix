@@ -1,4 +1,1 @@
-{ lib
-, raw
-, ...
-}: lib.nixosSystem raw
+{ lib, raw, ... }: lib.nixosSystem raw

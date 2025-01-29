@@ -1,7 +1,9 @@
 { config, pkgs, ... }:
 
 let
-  nur-no-pkgs = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") { };
+  nur-no-pkgs =
+    import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz")
+      { };
   bridgeInterface = "br0";
   ethInterface = "eth0";
   cores = 24;
@@ -18,7 +20,10 @@ in
     vfio = {
       enable = true;
       IOMMUType = "amd";
-      devices = [ "10de:1b06" "10de:10ef" ];
+      devices = [
+        "10de:1b06"
+        "10de:10ef"
+      ];
     };
 
     sharedMemoryFiles = {
@@ -67,10 +72,10 @@ in
 
   systemd = {
     services."libvirt-nosleep@" = {
-      description = "Preventing sleep while libvirt domain \"%i\" is running";
+      description = ''Preventing sleep while libvirt domain "%i" is running'';
       serviceConfig = {
         Type = "simple";
-        ExecStart = "${pkgs.systemd}/bin/systemd-inhibit --what=sleep --why=\"Libvirt domain \"%i\" is running\" --who=%U --mode=block sleep infinity";
+        ExecStart = ''${pkgs.systemd}/bin/systemd-inhibit --what=sleep --why="Libvirt domain "%i" is running" --who=%U --mode=block sleep infinity'';
       };
     };
 
@@ -79,9 +84,12 @@ in
         per-machine = pkgs.writeShellApplication {
           name = "per-machine";
 
-          runtimeInputs = with pkgs; [ systemd findutils ];
+          runtimeInputs = with pkgs; [
+            systemd
+            findutils
+          ];
 
-          text = /*bash*/ ''
+          text = ''
             GUEST_NAME="$1"
             HOOK_NAME="$2"
             STATE_NAME="$3"
@@ -123,7 +131,7 @@ in
 
           runtimeInputs = with pkgs; [ systemd ];
 
-          text = /*bash*/ ''
+          text = ''
             # Numa node formula
             # CORES=$(dmidecode -t processor | grep "Core Count" | awk '{print $3}')
             # THREADS=$(dmidecode -t processor | grep "Thread Count" | awk '{print $3}')
@@ -141,7 +149,7 @@ in
 
           runtimeInputs = with pkgs; [ systemd ];
 
-          text = /*bash*/ ''
+          text = ''
             ALLOWED="0-${toString (cores - 1)}"
 
             systemctl set-property --runtime -- user.slice AllowedCPUs=$ALLOWED
@@ -154,7 +162,13 @@ in
         # TODO - Save open applications and restore them on release
         detach-gpu = pkgs.writeShellApplication {
           name = "detach-gpu";
-          runtimeInputs = with pkgs; [ systemd pciutils gnugrep findutils kmod ];
+          runtimeInputs = with pkgs; [
+            systemd
+            pciutils
+            gnugrep
+            findutils
+            kmod
+          ];
           text = ''
             ################################# Variables #################################
 
@@ -286,7 +300,12 @@ in
 
         attach-gpu = pkgs.writeShellApplication {
           name = "attach-gpu";
-          runtimeInputs = with pkgs; [ systemd gnugrep findutils kmod ];
+          runtimeInputs = with pkgs; [
+            systemd
+            gnugrep
+            findutils
+            kmod
+          ];
           text = ''
             ################################# Variables #################################
 
@@ -380,18 +399,27 @@ in
           let
             prefix = "L+ /var/lib/libvirt/hooks/guests/";
           in
-          builtins.foldl' (existing: new: existing ++ new) [ ] (builtins.map
-            (guest: [
-              "${prefix}${guest}/prepare/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
-              "${prefix}${guest}/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"
+          builtins.foldl' (existing: new: existing ++ new) [ ] (
+            builtins.map
+              (guest: [
+                "${prefix}${guest}/prepare/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
+                "${prefix}${guest}/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"
 
-              "${prefix}${guest}-single/prepare/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
-              "${prefix}${guest}-single/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"
-              "${prefix}${guest}-single/prepare/begin/detach-gpu - - - - ${pkgs.lib.getExe detach-gpu}" # TODO - Only if one gpu is present on machine
-              "${prefix}${guest}-single/release/end/attach-gpu - - - - ${pkgs.lib.getExe attach-gpu}" # TODO - Only if one gpu is present on machine
-            ]) [ "win11" "win11-gaming" ]);
+                "${prefix}${guest}-single/prepare/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
+                "${prefix}${guest}-single/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"
+                "${prefix}${guest}-single/prepare/begin/detach-gpu - - - - ${pkgs.lib.getExe detach-gpu}" # TODO - Only if one gpu is present on machine
+                "${prefix}${guest}-single/release/end/attach-gpu - - - - ${pkgs.lib.getExe attach-gpu}" # TODO - Only if one gpu is present on machine
+              ])
+              [
+                "win11"
+                "win11-gaming"
+              ]
+          );
       in
-      [ "L+ /var/lib/libvirt/hooks/qemu - - - - ${pkgs.lib.getExe per-machine}" ] ++ machines;
+      [
+        "L+ /var/lib/libvirt/hooks/qemu - - - - ${pkgs.lib.getExe per-machine}"
+      ]
+      ++ machines;
   };
 
   environment = {
@@ -405,6 +433,11 @@ in
     ];
   };
   host.persistence.directories = [
-    { directory = "/var/lib/libvirt/qemu"; user = "qemu-libvirtd"; group = "qemu-libvirtd"; mode = "u=rwx,g=rx,o=rx"; }
+    {
+      directory = "/var/lib/libvirt/qemu";
+      user = "qemu-libvirtd";
+      group = "qemu-libvirtd";
+      mode = "u=rwx,g=rx,o=rx";
+    }
   ];
 }

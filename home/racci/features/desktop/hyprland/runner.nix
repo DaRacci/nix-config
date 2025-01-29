@@ -1,5 +1,13 @@
-{ inputs, config, pkgs, ... }:
-let colours = config.lib.stylix.colors.withHashtag; in {
+{
+  inputs,
+  config,
+  pkgs,
+  ...
+}:
+let
+  colours = config.lib.stylix.colors.withHashtag;
+in
+{
   programs.anyrun = {
     enable = true;
     config = {
@@ -15,11 +23,19 @@ let colours = config.lib.stylix.colors.withHashtag; in {
         websearch
       ];
 
-      x = { fraction = 0.5; };
-      y = { absolute = 15; };
+      x = {
+        fraction = 0.5;
+      };
+      y = {
+        absolute = 15;
+      };
 
-      width = { fraction = 0.3; };
-      height = { absolute = 0; };
+      width = {
+        fraction = 0.3;
+      };
+      height = {
+        absolute = 0;
+      };
 
       hideIcons = false;
       ignoreExclusiveZones = false;
@@ -30,7 +46,7 @@ let colours = config.lib.stylix.colors.withHashtag; in {
       maxEntries = null;
     };
 
-    extraCss = /*css*/ ''
+    extraCss = ''
       * {
         all: unset;
         font-size: 1.3rem;
@@ -99,7 +115,6 @@ let colours = config.lib.stylix.colors.withHashtag; in {
       }
     '';
   };
-
 
   wayland.windowManager.hyprland.extraConfig = ''
     bind=CTRL_ALT,SPACE,exec,anyrun

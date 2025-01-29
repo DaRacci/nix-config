@@ -1,7 +1,6 @@
-{ modulesPath, config, ... }: {
-  imports = [
-    "${modulesPath}/virtualisation/proxmox-lxc.nix"
-  ];
+{ modulesPath, config, ... }:
+{
+  imports = [ "${modulesPath}/virtualisation/proxmox-lxc.nix" ];
 
   sops.secrets = {
     GITHUB_TOKEN = {
@@ -39,7 +38,7 @@
       };
     };
 
-    caddy.virtualHosts.coder.extraConfig = /*caddyfile*/ ''
+    caddy.virtualHosts.coder.extraConfig = ''
       reverse_proxy http://${coder.listenAddress}
     '';
   };

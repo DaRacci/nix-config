@@ -1,49 +1,60 @@
-{ config, pkgs, lib, ... }: with lib; let
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+with lib;
+let
   cfg = config.user.autorun;
 
-  packageDefinition = { name, config, ... }: {
-    options = {
-      name = mkOption {
-        type = types.str;
-        default = name;
-        example = "1password";
-        description = ''
-          Name of the service.
-        '';
-      };
+  packageDefinition =
+    { name, config, ... }:
+    {
+      options = {
+        name = mkOption {
+          type = types.str;
+          default = name;
+          example = "1password";
+          description = ''
+            Name of the service.
+          '';
+        };
 
-      package = mkOption {
-        type = types.package;
-        default = null;
-        example = pkgs._1password-gui;
-        description = ''
-          Package to be started automatically.
-        '';
-      };
+        package = mkOption {
+          type = types.package;
+          default = null;
+          example = pkgs._1password-gui;
+          description = ''
+            Package to be started automatically.
+          '';
+        };
 
-      extraArgs = mkOption {
-        type = with types; listOf str;
-        default = "";
-        example = "--silent";
-        description = ''
-          Extra arguments to pass to the service.
-        '';
-      };
+        extraArgs = mkOption {
+          type = with types; listOf str;
+          default = "";
+          example = "--silent";
+          description = ''
+            Extra arguments to pass to the service.
+          '';
+        };
 
-      executablePath = mkOption {
-        type = types.str;
-        default = "${config.package}/bin/${config.name}";
-        example = "${pkgs._1password-gui}/bin/1password";
-        description = ''
-          Path to the executable.
-        '';
+        executablePath = mkOption {
+          type = types.str;
+          default = "${config.package}/bin/${config.name}";
+          example = "${pkgs._1password-gui}/bin/1password";
+          description = ''
+            Path to the executable.
+          '';
+        };
       };
     };
-  };
 in
 {
   options.user.autorun = {
-    enable = (mkEnableOption "Enable autorun services") // { default = true; };
+    enable = (mkEnableOption "Enable autorun services") // {
+      default = true;
+    };
 
     services = mkOption {
       type = with types; attrsOf (submodule packageDefinition);
@@ -55,13 +66,16 @@ in
   };
 
   config = mkIf (cfg.enable && builtins.length (lib.attrNames cfg.services) > 0) {
-    assertions = (map (service: {
-      assertion = builtins.pathExists service.executablePath;
-      message = "Executable path does not exist: ${service.executablePath}";
-    })) (lib.attrValues cfg.services);
+    assertions =
+      (map (service: {
+        assertion = builtins.pathExists service.executablePath;
+        message = "Executable path does not exist: ${service.executablePath}";
+      }))
+        (lib.attrValues cfg.services);
 
-    systemd.user.services = mapAttrs'
-      (_name: service: nameValuePair "autoRun--${service.name}" {
+    systemd.user.services = mapAttrs' (
+      _name: service:
+      nameValuePair "autoRun--${service.name}" {
         Unit = {
           Description = "Auto-Run ${service.name} at Login.";
           After = [ "graphical-session.target" ];
@@ -76,7 +90,7 @@ in
         Install = {
           WantedBy = [ "graphical-session.target" ];
         };
-      })
-      cfg.services;
+      }
+    ) cfg.services;
   };
 }

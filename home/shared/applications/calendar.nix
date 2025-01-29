@@ -1,5 +1,4 @@
-{ pkgs, ... }: {
-  home.packages = [
-    pkgs.gnome-calendar
-  ];
+{ pkgs, ... }:
+{
+  home.packages = [ pkgs.gnome-calendar ];
 }

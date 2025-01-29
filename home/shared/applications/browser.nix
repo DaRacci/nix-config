@@ -1,4 +1,12 @@
-{ inputs, config, pkgs, lib, ... }: with lib; let
+{
+  inputs,
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+with lib;
+let
   mkLockedValue = value: {
     Value = value;
     Status = "locked";
@@ -7,10 +15,15 @@
   lock-false = mkLockedValue false;
   lock-true = mkLockedValue true;
 
-  mkExtension = shortId: guid: args: nameValuePair guid ({
-    install_url = "https://addons.mozilla.org/firefox/downloads/latest/${shortId}/latest.xpi";
-    installation_mode = "force_installed";
-  } // args);
+  mkExtension =
+    shortId: guid: args:
+    nameValuePair guid (
+      {
+        install_url = "https://addons.mozilla.org/firefox/downloads/latest/${shortId}/latest.xpi";
+        installation_mode = "force_installed";
+      }
+      // args
+    );
   mkSimpleExtension = shortId: guid: mkExtension shortId guid { };
 in
 {
@@ -27,37 +40,86 @@ in
     enable = true;
     package = pkgs.firefox;
 
-    /* ---- POLICIES
-    * Check about:policies#documentation for options. */
+    /**
+      ---- POLICIES
+      Check about:policies#documentation for options.
+    */
     policies =
       let
-        /* ---- EXTENSIONS
-        * Check about:debugging#/runtime/this-firefox for extension/add-on ID strings.
-        * You can use about:policies to debug issues with extensions. */
-        Extensions = trivial.pipe [
-          # Privacy / Security
-          [ "ublock-origin" "uBlock0@raymondhill.net" ]
-          [ "istilldontcareaboutcookies" "idcac-pub@guus.ninja" ]
-          [ "clearurls" "{74145f27-f039-47ce-a470-a662b129930a}" ]
+        /**
+          ---- EXTENSIONS
+          Check about:debugging#/runtime/this-firefox for extension/add-on ID strings.
+          You can use about:policies to debug issues with extensions.
+        */
+        Extensions =
+          trivial.pipe
+            [
+              # Privacy / Security
+              [
+                "ublock-origin"
+                "uBlock0@raymondhill.net"
+              ]
+              [
+                "istilldontcareaboutcookies"
+                "idcac-pub@guus.ninja"
+              ]
+              [
+                "clearurls"
+                "{74145f27-f039-47ce-a470-a662b129930a}"
+              ]
 
-          # Essentials
-          [ "darkreader" "addon@darkreader.org" ]
-          [ "sidebery" "{3c078156-979c-498b-8990-85f7987dd929}" ]
-          [ "1password-x-password-manager" "{d634138d-c276-4fc8-924b-40a0ea21d284}" ]
-          [ "multi-account-containers" "@testpilot-containers" ]
-          [ "user-agent-string-switcher" "{a6c4a591-f1b2-4f03-b3ff-767e5bedf4e7}" ]
-          [ "violentmonkey" "{aecec67f-0d10-4fa7-b7c7-609a2db280cf}" ]
+              # Essentials
+              [
+                "darkreader"
+                "addon@darkreader.org"
+              ]
+              [
+                "sidebery"
+                "{3c078156-979c-498b-8990-85f7987dd929}"
+              ]
+              [
+                "1password-x-password-manager"
+                "{d634138d-c276-4fc8-924b-40a0ea21d284}"
+              ]
+              [
+                "multi-account-containers"
+                "@testpilot-containers"
+              ]
+              [
+                "user-agent-string-switcher"
+                "{a6c4a591-f1b2-4f03-b3ff-767e5bedf4e7}"
+              ]
+              [
+                "violentmonkey"
+                "{aecec67f-0d10-4fa7-b7c7-609a2db280cf}"
+              ]
 
-          # Site Improvements
-          [ "enhancer-for-youtube" "enhancerforyoutube@maximerf.addons.mozilla.org" ]
-          [ "augmented-steam" "{1be309c5-3e4f-4b99-927d-bb500eb4fa88}" ]
-          [ "search_by_image" "{2e5ff8c8-32fe-46d0-9fc8-6b8986621f3c}" ]
-          [ "return-youtube-dislikes" "{762f9885-5a13-4abd-9c77-433dcd38b8fd}" ]
-        ] [
-          (map (arr: { id = elemAt arr 1; name = elemAt arr 0; }))
-          (map (ext: nameValuePair ext.name { inherit (ext) id name; }))
-          listToAttrs
-        ];
+              # Site Improvements
+              [
+                "enhancer-for-youtube"
+                "enhancerforyoutube@maximerf.addons.mozilla.org"
+              ]
+              [
+                "augmented-steam"
+                "{1be309c5-3e4f-4b99-927d-bb500eb4fa88}"
+              ]
+              [
+                "search_by_image"
+                "{2e5ff8c8-32fe-46d0-9fc8-6b8986621f3c}"
+              ]
+              [
+                "return-youtube-dislikes"
+                "{762f9885-5a13-4abd-9c77-433dcd38b8fd}"
+              ]
+            ]
+            [
+              (map (arr: {
+                id = elemAt arr 1;
+                name = elemAt arr 0;
+              }))
+              (map (ext: nameValuePair ext.name { inherit (ext) id name; }))
+              listToAttrs
+            ];
       in
       {
         #region Privacy
@@ -109,27 +171,31 @@ in
         EncryptedMediaExtensions = mkLockedValue true;
         #endregion
 
-        /* ---- EXTENSIONS
-        * Check about:debugging#/runtime/this-firefox for extension/add-on ID strings. */
+        /**
+          ---- EXTENSIONS
+          Check about:debugging#/runtime/this-firefox for extension/add-on ID strings.
+        */
         ExtensionSettings =
           let
-            allowPrivateBrowsing = ext: nameValuePair ext.id {
-              permissions = [ "internal:privateBrowsingAllowed" ];
-            };
+            allowPrivateBrowsing =
+              ext:
+              nameValuePair ext.id {
+                permissions = [ "internal:privateBrowsingAllowed" ];
+              };
           in
           pkgs.lib.mine.attrsets.recursiveMergeAttrs [
             (listToAttrs (mapAttrsToList (n: v: mkSimpleExtension n v.id) Extensions))
-            (trivial.pipe [
-              Extensions.ublock-origin
-              Extensions.istilldontcareaboutcookies
-              Extensions.clearurls
+            (trivial.pipe
+              [
+                Extensions.ublock-origin
+                Extensions.istilldontcareaboutcookies
+                Extensions.clearurls
 
-              Extensions.darkreader
-              Extensions."1password-x-password-manager"
-            ] [
-              (map allowPrivateBrowsing)
-              listToAttrs
-            ])
+                Extensions.darkreader
+                Extensions."1password-x-password-manager"
+              ]
+              [ (map allowPrivateBrowsing) listToAttrs ]
+            )
           ];
 
         "3rdparty".Extensions = {
@@ -189,8 +255,10 @@ in
           };
         };
 
-        /* ---- PREFERENCES
-        * Set preferences shared by all profiles. */
+        /**
+          ---- PREFERENCES
+          Set preferences shared by all profiles.
+        */
         Preferences = {
           # Privacy
           "browser.topsites.contile.enabled" = lock-false;
@@ -209,18 +277,23 @@ in
           "browser.newtabpage.activity-stream.system.showSponsored" = lock-false;
           "browser.newtabpage.activity-stream.showSponsoredTopSites" = lock-false;
 
-          /* ---- GEOLOCATION
-          * Use Mozilla's geolocation service instead of Google's.
-          * Disable using the OS's geolocation service. */
-          "geo.provider.network.url" = mkLockedValue "https://location.services.mozilla.com/v1/geolocate?key=%MOZILLA_API_KEY%";
+          /**
+            ---- GEOLOCATION
+            Use Mozilla's geolocation service instead of Google's.
+            Disable using the OS's geolocation service.
+          */
+          "geo.provider.network.url" =
+            mkLockedValue "https://location.services.mozilla.com/v1/geolocate?key=%MOZILLA_API_KEY%";
           "geo.provider.network.logging.enabled" = lock-true;
           "geo.provider.ms-windows-location" = lock-false;
           "geo.provider.use_corelocation" = lock-false;
           "geo.provider.use_gpsd" = lock-false;
           "geo.provider.use_geoclue" = lock-false;
 
-          /* ---- TELEMETRY
-          * Disable telemetry and data collection. */
+          /**
+            ---- TELEMETRY
+            Disable telemetry and data collection.
+          */
           "toolkit.telemetry.unified" = lock-false;
           "toolkit.telemetry.enabled" = lock-false;
           "toolkit.telemetry.server" = lock-false;
@@ -267,31 +340,14 @@ in
         };
       };
 
-      # settings = {
-      #   "browser.tabs.loadInBackground" = true;
-      #   "widget.gtk.rounded-bottom-corners.enabled" = true;
-      #   "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
-      #   "svg.context-properties.content.enabled" = true;
-
-      #   # Ultima
-      #   "ultima.OS.gnome" = true;
-      #   "ultima.OS.gnome.wdl" = true;
-      #   "ultima.OS.kde" = false;
-      #   "ultima.tabs.sidebery.autohide" = true;
-      #   "ultima.tabs.vertical.hide" = true;
-      #   "ultima.urlbar.hidebuttons" = true;
-      # };
-
       userChrome = ''
         @import "firefox-ultima/userChrome.css";
       '';
       userContent = ''
         @import "firefox-ultima/userContent.css";
       '';
-      # TODO - Somehow keep track of the last version this was updated for, and apply it when necessary
-      # extraConfig = builtins.readFile "${inputs.firefox-ultima}/user.js";
 
-      extraConfig = /*j*/ ''
+      extraConfig = ''
         ${builtins.readFile "${inputs.firefox-ultima}/user.js"}
 
         // This must be done manually so they are placed after the above user.js defaults.
@@ -299,11 +355,9 @@ in
         ${
           let
             # Copied from https://github.com/nix-community/home-manager/blob/2f23fa308a7c067e52dfcc30a0758f47043ec176/modules/programs/firefox.nix#L57-L61
-            userPrefValue = pref:
-              builtins.toJSON (if isBool pref || isInt pref || isString pref then
-                pref
-              else
-                builtins.toJSON pref);
+            userPrefValue =
+              pref:
+              builtins.toJSON (if isBool pref || isInt pref || isString pref then pref else builtins.toJSON pref);
 
             settings = {
               "browser.tabs.loadInBackground" = true;
@@ -325,16 +379,26 @@ in
               "ultima.theme.extensions" = true;
               "ultima.theme.menubar" = true;
             };
-          in concatStrings (mapAttrsToList (name: value ''
-            user_pref("${name}", ${userPrefValue value});
-          '') settings)
+          in
+          concatStrings (
+            mapAttrsToList (name: value: ''
+              user_pref("${name}", ${userPrefValue value});
+            '') settings
+          )
         }
       '';
 
       search = {
         default = "Google";
         force = true;
-        order = [ "Google" "Nix Packages" "Nix Options" "NixOS Wiki" "Home Manager Options" "Proton DB" ];
+        order = [
+          "Google"
+          "Nix Packages"
+          "Nix Options"
+          "NixOS Wiki"
+          "Home Manager Options"
+          "Proton DB"
+        ];
         engines =
           let
             searchNixURL = "https://search.nixos.org/";
@@ -342,32 +406,48 @@ in
           in
           {
             "Nix Packages" = {
-              urls = [{ template = "${searchNixURL}packages?type=packages&query={searchTerms}"; }];
+              urls = [
+                {
+                  template = "${searchNixURL}packages?type=packages&query={searchTerms}";
+                }
+              ];
               icon = searchNixIcon;
               definedAliases = [ "@np" ];
             };
 
             "Nix Options" = {
-              urls = [{ template = "${searchNixURL}options?query={searchTerms}"; }];
+              urls = [ { template = "${searchNixURL}options?query={searchTerms}"; } ];
               icon = searchNixIcon;
               definedAliases = [ "@no" ];
             };
 
             "NixOS Wiki" = {
-              urls = [{ template = "https://nixos.wiki/index.php?search={searchTerms}"; }];
+              urls = [
+                {
+                  template = "https://nixos.wiki/index.php?search={searchTerms}";
+                }
+              ];
               iconUpdateURL = "https://nixos.wiki/favicon.png";
               updateInterval = 24 * 60 * 60 * 1000; # every day
               definedAliases = [ "@nw" ];
             };
 
             "Home Manager Options" = {
-              urls = [{ template = "https://home-manager-options.extranix.com/?query={searchTerms}"; }];
+              urls = [
+                {
+                  template = "https://home-manager-options.extranix.com/?query={searchTerms}";
+                }
+              ];
               icon = searchNixIcon;
               definedAliases = [ "@hmo" ];
             };
 
             "Proton DB" = {
-              urls = [{ template = "https://www.protondb.com/search?q={searchTerms}"; }];
+              urls = [
+                {
+                  template = "https://www.protondb.com/search?q={searchTerms}";
+                }
+              ];
               iconUpdateURL = "https://www.protondb.com/favicon.ico";
               updateInterval = 24 * 60 * 60 * 1000; # every day
               definedAliases = [ "@pdb" ];
@@ -375,7 +455,9 @@ in
 
             "Github" = {
               urls = [
-                { template = "https://github.com/search?ref=opensearch&type=repositories&q={searchTerms}"; }
+                {
+                  template = "https://github.com/search?ref=opensearch&type=repositories&q={searchTerms}";
+                }
               ];
               iconUpdateURL = "https://github.githubassets.com/favicons/favicon.png";
               updateInterval = 24 * 60 * 60 * 1000;
@@ -383,14 +465,18 @@ in
             };
 
             "Noogle" = {
-              urls = [{ template = "https://noogle.dev/q?term={searchTerms}"; }];
+              urls = [ { template = "https://noogle.dev/q?term={searchTerms}"; } ];
               icon = "https://noogle.dev/favicon.ico";
               updateInterval = 24 * 60 * 60 * 1000;
               definedAliases = [ "@noog" ];
             };
 
             "NixPkgsIssues" = {
-              urls = [{ template = "https://github.com/NixOS/nixpkgs/issues?q={searchTerms}"; }];
+              urls = [
+                {
+                  template = "https://github.com/NixOS/nixpkgs/issues?q={searchTerms}";
+                }
+              ];
               icon = "https://nixos.org/logo/nixos-logo-only-hires.png";
               definedAliases = [ "@npi" ];
             };

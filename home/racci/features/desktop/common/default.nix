@@ -1,4 +1,5 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   imports = [
     ./nextcloud.nix
     ./secrets.nix
@@ -7,11 +8,7 @@
 
   xdg.mimeApps.enable = true;
 
-  home.packages = [
-    pkgs.miru
-  ];
+  home.packages = [ pkgs.miru ];
 
-  user.persistence.directories = [
-    ".config/Miru"
-  ];
+  user.persistence.directories = [ ".config/Miru" ];
 }

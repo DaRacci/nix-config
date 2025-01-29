@@ -1,5 +1,13 @@
 # TODO - Game mode that disables compositor and pauses swww-random-wallpaper
-{ flake, config, pkgs, lib, ... }: with lib; {
+{
+  flake,
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+with lib;
+{
   imports = [
     "${flake}/home/racci/features/desktop/common"
     "${flake}/home/shared/desktop/hyprland"
@@ -27,22 +35,28 @@
 
   home.file.".local/bin/wlprop" = {
     executable = true;
-    source = "${pkgs.writeShellApplication {
-      name = "wlprop";
-      runtimeInputs = with pkgs; [ hyprland jq slurp ];
-      text = ''
-        TREE=$(hyprctl clients -j | jq -r '.[] | select(.hidden==false and .mapped==true)')
-        SELECTION=$(echo "''${TREE}" | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"' | slurp)
+    source = "${
+      pkgs.writeShellApplication {
+        name = "wlprop";
+        runtimeInputs = with pkgs; [
+          hyprland
+          jq
+          slurp
+        ];
+        text = ''
+          TREE=$(hyprctl clients -j | jq -r '.[] | select(.hidden==false and .mapped==true)')
+          SELECTION=$(echo "''${TREE}" | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"' | slurp)
 
-        X=$(echo "''${SELECTION}" | awk -F'[, x]' '{print $1}')
-        Y=$(echo "''${SELECTION}" | awk -F'[, x]' '{print $2}')
-        W=$(echo "''${SELECTION}" | awk -F'[, x]' '{print $3}')
-        H=$(echo "''${SELECTION}" | awk -F'[, x]' '{print $4}')
+          X=$(echo "''${SELECTION}" | awk -F'[, x]' '{print $1}')
+          Y=$(echo "''${SELECTION}" | awk -F'[, x]' '{print $2}')
+          W=$(echo "''${SELECTION}" | awk -F'[, x]' '{print $3}')
+          H=$(echo "''${SELECTION}" | awk -F'[, x]' '{print $4}')
 
-        # shellcheck disable=SC2016
-        echo "''${TREE}" | jq -r --argjson x "''${X}" --argjson y "''${Y}" --argjson w "''${W}" --argjson h "''${H}" '. | select(.at[0]==$x and .at[1]==$y and .size[0]==$w and.size[1]==$h)'
-      '';
-    }}/bin/wlprop";
+          # shellcheck disable=SC2016
+          echo "''${TREE}" | jq -r --argjson x "''${X}" --argjson y "''${Y}" --argjson w "''${W}" --argjson h "''${H}" '. | select(.at[0]==$x and .at[1]==$y and .size[0]==$w and.size[1]==$h)'
+        '';
+      }
+    }/bin/wlprop";
   };
 
   wayland.windowManager.hyprland = {
@@ -136,7 +150,7 @@
         animation = [
           "windowsIn, 1, 3, easeOutCubic, popin 30" # window open
           "windowsOut, 1, 3, fluent_decel, popin 70" # window close.
-          "windowsMove, 1, 2, easeinoutsine, slide" #everything in between, moving, dragging, resizing.
+          "windowsMove, 1, 2, easeinoutsine, slide" # everything in between, moving, dragging, resizing.
 
           # Fade
           "fadeIn, 1, 3, easeOutCubic" # fade in (open) -> layers and windows
@@ -256,45 +270,55 @@
         #endregion
       ];
 
-      layerrule = [
-        "xray 1, .*"
-        #region No Animations
-      ] ++ (trivial.pipe [
-        "walker"
-        "selection"
-        "overview"
-        "anyrun"
-        "indicator.*"
-        "osk"
-        "hyprpicker"
-        "noanim"
-      ] [
-        (map (layer: "noanim, ${layer}"))
-        #endregion
-        #region Ags
-      ]) ++ [
-        "animation slide top, sideleft.*"
-        "animation slide top, sideright.*"
-        "blur, session"
-      ] ++ (trivial.pipe [
-        "bar"
-        "corner.*"
-        "dock"
-        "indicator.*"
-        "indicator*"
-        "overview"
-        "cheatsheet"
-        "sideright"
-        "sideleft"
-        "osk"
-      ] [
-        (map (layer: [
-          "blur, ${layer}"
-          "ignorealpha 0.6, ${layer}"
-        ]))
-        flatten
-        #endregion
-      ]);
+      layerrule =
+        [
+          "xray 1, .*"
+          #region No Animations
+        ]
+        ++ (trivial.pipe
+          [
+            "walker"
+            "selection"
+            "overview"
+            "anyrun"
+            "indicator.*"
+            "osk"
+            "hyprpicker"
+            "noanim"
+          ]
+          [
+            (map (layer: "noanim, ${layer}"))
+            #endregion
+            #region Ags
+          ]
+        )
+        ++ [
+          "animation slide top, sideleft.*"
+          "animation slide top, sideright.*"
+          "blur, session"
+        ]
+        ++ (trivial.pipe
+          [
+            "bar"
+            "corner.*"
+            "dock"
+            "indicator.*"
+            "indicator*"
+            "overview"
+            "cheatsheet"
+            "sideright"
+            "sideleft"
+            "osk"
+          ]
+          [
+            (map (layer: [
+              "blur, ${layer}"
+              "ignorealpha 0.6, ${layer}"
+            ]))
+            flatten
+            #endregion
+          ]
+        );
 
       misc = {
         vfr = true;
@@ -468,12 +492,18 @@
               bind=SUPER,S,togglespecialworkspace,
             '';
 
-            workspaces = builtins.concatStringsSep "\n" (builtins.genList
-              (x:
-                let workspace = builtins.toString (x + 1 - ((x + 1) / 10) * 10); in ''
+            workspaces = builtins.concatStringsSep "\n" (
+              builtins.genList (
+                x:
+                let
+                  workspace = builtins.toString (x + 1 - ((x + 1) / 10) * 10);
+                in
+                ''
                   bind = ${mod}, ${workspace}, workspace, ${toString (x + 1)}
                   bind = ${mod} SHIFT, ${workspace}, movetoworkspace, ${toString (x + 1)}
-                '') 10);
+                ''
+              ) 10
+            );
           };
         };
 
@@ -515,11 +545,13 @@
           windowrulev2 = bordercolor rgba(ffabf1AA) rgba(ffabf177),pinned:1
         '';
       in
-      builtins.concatStringsSep
-        "\n"
-        ([
+      builtins.concatStringsSep "\n" (
+        [
           input
           theme
-        ] ++ builtins.attrValues bindings.global ++ builtins.attrValues bindings.submaps);
+        ]
+        ++ builtins.attrValues bindings.global
+        ++ builtins.attrValues bindings.submaps
+      );
   };
 }

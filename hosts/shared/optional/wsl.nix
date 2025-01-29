@@ -1,4 +1,15 @@
-{ config, pkgs, lib, ... }: with builtins; with lib; let user = "racci"; in {
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+with builtins;
+with lib;
+let
+  user = "racci";
+in
+{
   wsl = {
     enable = true;
     defaultUser = user;

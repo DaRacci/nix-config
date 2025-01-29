@@ -1,11 +1,12 @@
-{ inputs
-, pkgs
-, lib
-
-, raw
-, isoFormat
-, ...
-}: inputs.nixos-generators.nixosGenerate {
+{
+  inputs,
+  pkgs,
+  lib,
+  raw,
+  isoFormat,
+  ...
+}:
+inputs.nixos-generators.nixosGenerate {
   inherit pkgs lib;
   inherit (raw) system specialArgs;
 

@@ -1,4 +1,6 @@
-{ config, lib, ... }: with lib; let
+{ config, lib, ... }:
+with lib;
+let
   cfg = config.host.device;
 in
 {
@@ -6,13 +8,26 @@ in
     enable = mkEnableOption "device specification";
 
     role = mkOption {
-      type = types.enum [ "desktop" "laptop" "server" ];
+      type = types.enum [
+        "desktop"
+        "laptop"
+        "server"
+      ];
       default = throw "A role must be specified";
       description = "The role of the device";
     };
 
     purpose = mkOption {
-      type = with types; listOf (enum [ "development" "gaming" "media" "office" "server" "virtualization" ]);
+      type =
+        with types;
+        listOf (enum [
+          "development"
+          "gaming"
+          "media"
+          "office"
+          "server"
+          "virtualization"
+        ]);
       default = [ ];
       description = "The purpose(s) of the device.";
     };
@@ -40,15 +55,16 @@ in
 
   config = mkIf cfg.enable {
     programs = {
-      light = mkIf (!cfg.isHeadless) {
-        enable = true;
-      };
+      light = mkIf (!cfg.isHeadless) { enable = true; };
     };
 
     boot = {
       extraModulePackages = lib.optionals (!cfg.isHeadless) [ config.boot.kernelPackages.ddcci-driver ];
 
-      kernelModules = lib.optionals (!cfg.isHeadless) [ "i2c-dev" "ddcci_backlight" ];
+      kernelModules = lib.optionals (!cfg.isHeadless) [
+        "i2c-dev"
+        "ddcci_backlight"
+      ];
     };
   };
 }

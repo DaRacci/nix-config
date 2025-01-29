@@ -1,26 +1,27 @@
-{ lib
-, stdenv
-, fetchzip
-, fetchFromGitHub
-, alsa-lib
-, autoPatchelfHook
-, brotli
-, ffmpeg
-, libdrm
-, libGL
-, libunwind
-, libva
-, libvdpau
-, libxkbcommon
-, nix-update-script
-, openssl
-, pipewire
-, pulseaudio
-, vulkan-loader
-, wayland
-, x264
-, xorg
-, SDL2
+{
+  lib,
+  stdenv,
+  fetchzip,
+  fetchFromGitHub,
+  alsa-lib,
+  autoPatchelfHook,
+  brotli,
+  ffmpeg,
+  libdrm,
+  libGL,
+  libunwind,
+  libva,
+  libvdpau,
+  libxkbcommon,
+  nix-update-script,
+  openssl,
+  pipewire,
+  pulseaudio,
+  vulkan-loader,
+  wayland,
+  x264,
+  xorg,
+  SDL2,
 }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "alvr";
@@ -38,9 +39,7 @@ stdenv.mkDerivation (finalAttrs: {
     hash = "sha256-boSS7eEfcKRJf5gt1LKk/DuyZEWMTun093P7mkIjUgs=";
   };
 
-  nativeBuildInputs = [
-    autoPatchelfHook
-  ];
+  nativeBuildInputs = [ autoPatchelfHook ];
 
   buildInputs = [
     alsa-lib

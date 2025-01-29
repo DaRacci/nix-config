@@ -1,4 +1,5 @@
-{ flake, ... }: {
+{ flake, ... }:
+{
   imports = [
     "${flake}/hosts/shared/optional/stylix.nix"
 

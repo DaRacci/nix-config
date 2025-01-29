@@ -1,8 +1,9 @@
-{ osConfig
-, config
-, pkgs
-, lib
-, ...
+{
+  osConfig,
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 lib.mkIf (osConfig.users.users.${config.home.username}.shell.pname == "nushell") {
   programs.nushell = {
@@ -80,7 +81,7 @@ lib.mkIf (osConfig.users.users.${config.home.username}.shell.pname == "nushell")
       load-sh-env /etc/profiles/per-user/${config.home.username}/etc/profile.d/hm-session-vars.sh
     '';
 
-    extraConfig = /*nu*/ ''
+    extraConfig = ''
       let carapace_completer = {|spans: list<string>|
         ${lib.getExe config.programs.carapace.package} $spans.0 nushell ...$spans
           | from json
@@ -134,11 +135,7 @@ lib.mkIf (osConfig.users.users.${config.home.username}.shell.pname == "nushell")
     };
   };
 
-  programs.zoxide = lib.mkIf config.programs.zoxide.enable {
-    enableNushellIntegration = true;
-  };
+  programs.zoxide = lib.mkIf config.programs.zoxide.enable { enableNushellIntegration = true; };
 
-  user.persistence.files = [
-    ".config/nushell/history.txt"
-  ];
+  user.persistence.files = [ ".config/nushell/history.txt" ];
 }

@@ -1,4 +1,5 @@
-{ lib, ... }: {
+{ lib, ... }:
+{
   dconf.settings = with lib.hm.gvariant; {
     "org/gnome/Console" = {
       font-scale = 1.6;
@@ -186,7 +187,10 @@
       sort-order = "ascending";
       type-format = "category";
       view-type = "list";
-      window-size = mkTuple [ 1400 1000 ];
+      window-size = mkTuple [
+        1400
+        1000
+      ];
     };
 
     "org/gtk/settings/file-chooser" = {
@@ -200,7 +204,10 @@
       sort-directories-first = true;
       sort-order = "ascending";
       type-format = "category";
-      window-size = mkTuple [ 1400 1000 ];
+      window-size = mkTuple [
+        1400
+        1000
+      ];
     };
   };
 }

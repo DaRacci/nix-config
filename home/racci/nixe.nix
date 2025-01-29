@@ -1,4 +1,5 @@
-{ flake, ... }: {
+{ flake, ... }:
+{
   imports = [
     ./features/desktop/hyprland
 

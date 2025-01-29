@@ -1,4 +1,5 @@
-{ config, lib, ... }: {
+{ config, lib, ... }:
+{
   services.mako = {
     enable = false;
     icons = true;
@@ -49,7 +50,12 @@
       transition-time = 200;
       hide-on-clear = true;
       hide-on-action = true;
-      widgets = [ "title" "dnd" "notifications" "mpris" ];
+      widgets = [
+        "title"
+        "dnd"
+        "notifications"
+        "mpris"
+      ];
       widget-config = {
         title = {
           text = "Notifications";
@@ -108,6 +114,3 @@
     };
   };
 }
-
-
-

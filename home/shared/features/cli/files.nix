@@ -1,4 +1,5 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   programs.xplr = {
     enable = true;
     package = pkgs.xplr;

@@ -21,4 +21,3 @@ _: {
     ".config/micro/backup"
   ];
 }
-

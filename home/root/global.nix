@@ -1,5 +1,4 @@
-{ flake, ... }: {
-  imports = [
-    "${flake}/home/shared/features/cli"
-  ];
+{ flake, ... }:
+{
+  imports = [ "${flake}/home/shared/features/cli" ];
 }

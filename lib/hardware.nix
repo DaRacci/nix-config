@@ -1,8 +1,7 @@
 _: {
-  /*
-    Check if the system is running on an Nvidia GPU.
-  */
-  isNvidia = super:
+  # Check if the system is running on an Nvidia GPU.
+  isNvidia =
+    super:
     let
       videoDrivers = super.services.xserver.videoDrivers or [ ];
     in

@@ -1,4 +1,14 @@
-{ config, lib, pkgs, ... }: with lib; let cfg = config.purpose.gaming.roblox; in {
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib;
+let
+  cfg = config.purpose.gaming.roblox;
+in
+{
   options.purpose.gaming.roblox = {
     enable = mkEnableOption "Enable Roblox launcher";
 
@@ -12,9 +22,7 @@
   config = mkIf cfg.enable {
     home.packages = [ cfg.vinegarPackage ];
 
-    user.persistence.directories = [
-      ".local/share/vinegar/"
-    ];
+    user.persistence.directories = [ ".local/share/vinegar/" ];
 
     home.file.".config/vinegar/config.toml".text = ''
       # See how to configure Vinegar on the documentation website:

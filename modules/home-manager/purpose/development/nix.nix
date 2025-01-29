@@ -1,4 +1,11 @@
-{ config, pkgs, lib, ... }: with lib; let
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+with lib;
+let
   cfg = config.purpose.development.nix;
 in
 {
@@ -15,7 +22,7 @@ in
 
     xdg.configFile."nix-init/config.toml".text = pkgs.writers.writeTOML {
       maintainers = [ config.programs.git.userName ];
-      nixpkgs = "builtins.getFlake \"nixpkgs\"";
+      nixpkgs = ''builtins.getFlake "nixpkgs"'';
     };
   };
 }

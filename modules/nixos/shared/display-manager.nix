@@ -1,7 +1,16 @@
-{ config, pkgs, lib, ... }: with lib; let
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+with lib;
+let
   cfg = config.custom.display-manager;
   sessions = config.services.displayManager.sessionPackages;
-  waylandSessionPaths = builtins.concatStringsSep ":" (map (pkg: "${pkg}/share/wayland-sessions") sessions);
+  waylandSessionPaths = builtins.concatStringsSep ":" (
+    map (pkg: "${pkg}/share/wayland-sessions") sessions
+  );
   xSessionPaths = builtins.concatStringsSep ":" (map (pkg: "${pkg}/share/xsessions") sessions);
 in
 {

@@ -1,6 +1,8 @@
 { config, pkgs, ... }:
 let
-  hmUsers = builtins.filter (user: (builtins.hasAttr user config.home-manager.users)) (builtins.attrNames config.users.users);
+  hmUsers = builtins.filter (user: (builtins.hasAttr user config.home-manager.users)) (
+    builtins.attrNames config.users.users
+  );
   hasPackage = pkg: username: builtins.elem pkg config.home-manager.users.${username}.home.packages;
   usersWithPackage = pkg: builtins.filter (username: hasPackage pkg username) hmUsers;
 

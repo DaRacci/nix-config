@@ -1,4 +1,12 @@
-{ mkVirtualHost, ... }: { flake, config, pkgs, lib, ... }: {
+{ mkVirtualHost, ... }:
+{
+  flake,
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+{
   # Caddy group has access to certs, and minio needs access to its own certs.
   users.users.minio.extraGroups = [ "caddy" ];
 
@@ -23,33 +31,47 @@
 
     # Create a map of virtual hosts using the configurations from other servers.
     # This will iterate the hosts of the flake and pull the virtualHosts configuration from each server.
-    virtualHosts = lib.trivial.pipe flake.nixosConfigurations [
-      # Exclude the current host
-      (lib.filterAttrs (name: _: name != config.system.name))
-      # Extract the config from each host
-      builtins.attrValues
-      (builtins.map (host: host.config))
-      # Filter to only servers
-      (builtins.filter (config: config.host.device.role == "server"))
-      # Filter to only servers with at least one caddy virtualHost
-      (builtins.filter (config: config.services.caddy ? virtualHosts && config.services.caddy.virtualHosts != { }))
-      # Update references in extraConfig to 127.0.0.1 or localhost to the hosts name,
-      # Append the domain to the name, and enable the use of ACME provided certs.
-      (builtins.map (config: lib.mapAttrs'
-        (name: value: lib.nameValuePair "${name}.racci.dev"
-          rec {
-            hostName = "${name}.racci.dev";
-            useACMEHost = hostName;
-            extraConfig = builtins.replaceStrings [ "0.0.0.0" "127.0.0.1" "localhost" ] [ config.system.name config.system.name config.system.name ] value.extraConfig;
-          } // value)
-        config.services.caddy.virtualHosts
-      ))
-      # Merge all the virtualHosts into a single map
-      lib.mergeAttrsList
-    ] // (
-      lib.listToAttrs [
+    virtualHosts =
+      lib.trivial.pipe flake.nixosConfigurations [
+        # Exclude the current host
+        (lib.filterAttrs (name: _: name != config.system.name))
+        # Extract the config from each host
+        builtins.attrValues
+        (builtins.map (host: host.config))
+        # Filter to only servers
+        (builtins.filter (config: config.host.device.role == "server"))
+        # Filter to only servers with at least one caddy virtualHost
+        (builtins.filter (
+          config: config.services.caddy ? virtualHosts && config.services.caddy.virtualHosts != { }
+        ))
+        # Update references in extraConfig to 127.0.0.1 or localhost to the hosts name,
+        # Append the domain to the name, and enable the use of ACME provided certs.
+        (builtins.map (
+          config:
+          lib.mapAttrs' (
+            name: value:
+            lib.nameValuePair "${name}.racci.dev" rec {
+              hostName = "${name}.racci.dev";
+              useACMEHost = hostName;
+              extraConfig =
+                builtins.replaceStrings
+                  [ "0.0.0.0" "127.0.0.1" "localhost" ]
+                  [
+                    config.system.name
+                    config.system.name
+                    config.system.name
+                  ]
+                  value.extraConfig;
+            }
+            // value
+          ) config.services.caddy.virtualHosts
+        ))
+        # Merge all the virtualHosts into a single map
+        lib.mergeAttrsList
+      ]
+      // (lib.listToAttrs [
         (mkVirtualHost "minio" {
-          extraConfig = /*caddyfile*/ ''
+          extraConfig = ''
             redir /console /console/
 
             handle_path /console* {
@@ -62,7 +84,7 @@
           '';
         })
         (mkVirtualHost "pve" {
-          extraConfig = /*caddyfile*/ ''
+          extraConfig = ''
             reverse_proxy {
               to https://192.168.2.210:8006
               transport http {
@@ -73,23 +95,22 @@
         })
         # TODO - move out of dockge
         (mkVirtualHost "finance" {
-          extraConfig = /*caddyfile*/ ''
+          extraConfig = ''
             reverse_proxy http://dockge:3000
           '';
         })
         # TODO - will this be needed in the future?
         (mkVirtualHost "dockge" {
-          extraConfig = /*caddyfile*/ ''
+          extraConfig = ''
             reverse_proxy http://dockge:5001
           '';
         })
         (mkVirtualHost "pgadmin" {
-          extraConfig = /*caddyfile*/ ''
+          extraConfig = ''
             reverse_proxy http://localhost:${toString config.services.pgadmin.port}
           '';
         })
-      ]
-    );
+      ]);
   };
 
   security.acme = {

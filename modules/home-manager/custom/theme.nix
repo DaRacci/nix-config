@@ -1,12 +1,18 @@
-{ osConfig, config, pkgs, lib, ... }: with lib; let
+{
+  osConfig,
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+with lib;
+let
   cfg = config.custom.theme;
 in
 {
   options.custom.theme = {
     enable = mkEnableOption "Theming" // {
-      default = hasAttr "stylix" osConfig
-        && osConfig.stylix.enable
-        && hasAttr "stylix" config;
+      default = hasAttr "stylix" osConfig && osConfig.stylix.enable && hasAttr "stylix" config;
     };
   };
 
@@ -31,8 +37,10 @@ in
     #   style.name = "adwaita-qt6";
     # };
 
-    wayland.windowManager.hyprland.settings.exec-once = mkIf config.wayland.windowManager.hyprland.enable [
-      "hyprctl setcursor ${config.stylix.cursor.name} ${toString config.stylix.cursor.size}"
-    ];
+    wayland.windowManager.hyprland.settings.exec-once =
+      mkIf config.wayland.windowManager.hyprland.enable
+        [
+          "hyprctl setcursor ${config.stylix.cursor.name} ${toString config.stylix.cursor.size}"
+        ];
   };
 }

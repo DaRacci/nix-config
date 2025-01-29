@@ -1,4 +1,10 @@
-{ config, pkgs, lib, ... }: {
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+{
   home.packages = with pkgs; [
     _1password-gui
     _1password-cli
@@ -8,7 +14,10 @@
 
   user.persistence = {
     files = [ ".config/1Password/1password.sqlite" ];
-    directories = [ ".config/1Password/settings" ".config/Bitwarden" ];
+    directories = [
+      ".config/1Password/settings"
+      ".config/Bitwarden"
+    ];
   };
 
   home.sessionVariables = {
@@ -24,9 +33,7 @@
 
   # https://developer.1password.com/docs/ssh/agent/config
   xdg.configFile."1Password/ssh/agent.toml".source = pkgs.writers.writeTOML "agent.toml" {
-    ssh-keys = [
-      { vault = "Hosts & Users"; }
-    ];
+    ssh-keys = [ { vault = "Hosts & Users"; } ];
   };
 
   wayland.windowManager.hyprland = {

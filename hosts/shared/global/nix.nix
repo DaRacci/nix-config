@@ -1,4 +1,11 @@
-{ flake, inputs, pkgs, lib, config, ... }:
+{
+  flake,
+  inputs,
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 let
   caches = {
     cachenixosorg = {
@@ -20,9 +27,15 @@ in
 {
   nix = {
     settings = rec {
-      trusted-users = [ "root" "@wheel" ];
+      trusted-users = [
+        "root"
+        "@wheel"
+      ];
       auto-optimise-store = lib.mkForce true;
-      experimental-features = [ "nix-command" "flakes" ];
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
 
       substituters = map (sub: sub.url) (lib.attrValues caches);
       trusted-substituters = substituters;
@@ -66,14 +79,16 @@ in
       Restart = "on-failure";
     };
 
-    script = lib.getExe (pkgs.writeShellApplication {
-      name = "attic-watch-store";
-      runtimeInputs = [ pkgs.attic-client ];
-      text = ''
-        JWT=$(cat ${config.sops.secrets.CACHE_PUSH_KEY.path})
-        attic login build-auto-push ${caches.cacheraccidev.url} "$JWT" || exit 1
-        attic watch-store build-auto-push:global
-      '';
-    });
+    script = lib.getExe (
+      pkgs.writeShellApplication {
+        name = "attic-watch-store";
+        runtimeInputs = [ pkgs.attic-client ];
+        text = ''
+          JWT=$(cat ${config.sops.secrets.CACHE_PUSH_KEY.path})
+          attic login build-auto-push ${caches.cacheraccidev.url} "$JWT" || exit 1
+          attic watch-store build-auto-push:global
+        '';
+      }
+    );
   };
 }

@@ -1,7 +1,6 @@
-{ inputs, ... }: {
-  imports = [
-    inputs.arion.nixosModules.arion
-  ];
+{ inputs, ... }:
+{
+  imports = [ inputs.arion.nixosModules.arion ];
 
   virtualisation.arion = {
     backend = "docker";
@@ -13,11 +12,13 @@
           internal = false;
           attachable = false;
           enable_ipv6 = false; # TODO :: Learn IPv6
-          ipam.config = [{
-            subnet = "10.10.9.0/24";
-            ip_range = "10.10.9.0/24";
-            gateway = "10.10.9.1";
-          }];
+          ipam.config = [
+            {
+              subnet = "10.10.9.0/24";
+              ip_range = "10.10.9.0/24";
+              gateway = "10.10.9.1";
+            }
+          ];
         };
       };
     };

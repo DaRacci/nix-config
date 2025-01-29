@@ -1,4 +1,14 @@
-{ config, pkgs, lib, ... }: with lib; let cfg = config.purpose.gaming; in {
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+with lib;
+let
+  cfg = config.purpose.gaming;
+in
+{
   imports = [
     ./modding.nix
     ./osu.nix
@@ -16,9 +26,20 @@
 
   config = mkIf cfg.enable {
     xdg.userDirs.extraConfig.XDG_GAME_DIR = "${config.home.homeDirectory}/Games";
-    user.persistence.directories = [{ directory = "Games"; method = "symlink"; }];
+    user.persistence.directories = [
+      {
+        directory = "Games";
+        method = "symlink";
+      }
+    ];
 
-    home.packages = optionals cfg.controllerSupport (with pkgs; [ dualsensectl trigger-control ]);
+    home.packages = optionals cfg.controllerSupport (
+      with pkgs;
+      [
+        dualsensectl
+        trigger-control
+      ]
+    );
 
     programs.mangohud = {
       enable = true;
@@ -26,7 +47,15 @@
 
       settings = {
         #region PERFORMANCE
-        fps_limit = [ 0 24 30 60 144 165 240 ];
+        fps_limit = [
+          0
+          24
+          30
+          60
+          144
+          165
+          240
+        ];
         # fps_limit_method = "early";
 
         vsync = 1;

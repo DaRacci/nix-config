@@ -1,4 +1,10 @@
-{ config, pkgs, lib, ... }: {
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+{
   home.packages = with pkgs.gnomeExtensions; [
     # Quick Access and Panel
     quick-settings-audio-devices-hider
@@ -63,7 +69,11 @@
 
     "org/gnome/shell/extensions/gnome-ui-tune" = {
       increase-thumbnails-size = "200%";
-      slideshow-slide-duration = mkTuple [ 1 0 0 ];
+      slideshow-slide-duration = mkTuple [
+        1
+        0
+        0
+      ];
     };
 
     "org/gnome/shell/extensions/just-perfection" = {
@@ -81,7 +91,11 @@
       bgalpha = 0.0;
       bgalpha2 = 0.7;
       bgpalette = false;
-      bcolor = [ "0.7960784435272217" "0.2078431248664856" "0.23921562731266022" ];
+      bcolor = [
+        "0.7960784435272217"
+        "0.2078431248664856"
+        "0.23921562731266022"
+      ];
       bradius = 30.0;
       bwidth = 3.0;
       default-font = "Sans 12";
@@ -99,8 +113,18 @@
     };
 
     "org/gnome/shell/extensions/quicksettings-audio-devices-hider" = {
-      excluded-input-names = [ "Digital Input (S/PDIF) – HD Pro Webcam C920" "Microphone – HD Pro Webcam C920" "Analog Input – Scarlett Solo USB" ];
-      excluded-output-names = [ "HDMI / DisplayPort 3 – GA102 High Definition Audio Controller" "HDMI / DisplayPort 2 – GA102 High Definition Audio Controller" "HDMI / DisplayPort – GA102 High Definition Audio Controller" "Digital Output (S/PDIF) – Scarlett Solo USB" "Analog Output – Scarlett Solo USB" ];
+      excluded-input-names = [
+        "Digital Input (S/PDIF) – HD Pro Webcam C920"
+        "Microphone – HD Pro Webcam C920"
+        "Analog Input – Scarlett Solo USB"
+      ];
+      excluded-output-names = [
+        "HDMI / DisplayPort 3 – GA102 High Definition Audio Controller"
+        "HDMI / DisplayPort 2 – GA102 High Definition Audio Controller"
+        "HDMI / DisplayPort – GA102 High Definition Audio Controller"
+        "Digital Output (S/PDIF) – Scarlett Solo USB"
+        "Analog Output – Scarlett Solo USB"
+      ];
     };
 
     "org/gnome/shell/extensions/quicktext" = {
@@ -120,7 +144,15 @@
       show-system = false;
       show-storage = false;
       show-voltage = false;
-      hot-sensors = [ "_temperature_asusec_t_sensor_" "_temperature_asusec_cpu_" "_processor_usage_" "_processor_frequency_" "_memory_usage_" "__network-rx_max__" "__network-tx_max__" ];
+      hot-sensors = [
+        "_temperature_asusec_t_sensor_"
+        "_temperature_asusec_cpu_"
+        "_processor_usage_"
+        "_processor_frequency_"
+        "_memory_usage_"
+        "__network-rx_max__"
+        "__network-tx_max__"
+      ];
     };
 
     "org/gnome/shell/extensions/hass-data" = {

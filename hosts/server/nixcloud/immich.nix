@@ -1,4 +1,5 @@
-{ config, ... }: {
+{ config, ... }:
+{
   services = {
     immich = {
       enable = true;
@@ -24,8 +25,12 @@
       };
     };
 
-    caddy.virtualHosts."photos".extraConfig = let cfg = config.services.immich; in /*caddyfile*/ ''
-      reverse_proxy http://${cfg.host}:${toString cfg.port}
-    '';
+    caddy.virtualHosts."photos".extraConfig =
+      let
+        cfg = config.services.immich;
+      in
+      ''
+        reverse_proxy http://${cfg.host}:${toString cfg.port}
+      '';
   };
 }

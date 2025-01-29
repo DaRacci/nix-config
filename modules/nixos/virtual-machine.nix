@@ -1,136 +1,150 @@
 { config, lib, ... }:
-with lib; let
+with lib;
+let
   cfg = config.virtual-machines;
-  guestOpts = { name, ... }: {
-    options = {
-      # uuid = mkOption {
-      #   type = types.str;
-      #   default = builtins.hashString name;
-      #   description = ''
-      #     The UUID of the guest, this must be unique for each guest.
-      #     If a UUID is not provided, one will be derived from the name.
-      #   '';
-      # };
-
-      name = mkOption {
-        type = types.str;
-        example = "win10";
-        default = name;
-        description = "The name of the guest virtual machine.";
-      };
-
-      os = {
-        type = mkOption {
-          type = types.enum [ "linux" "windows" ];
-          default = "windows";
-          description = "The type of operating system to install.";
-        };
-
-        # version = mkOption {
+  guestOpts =
+    { name, ... }:
+    {
+      options = {
+        # uuid = mkOption {
         #   type = types.str;
-        #   default = "11";
-        #   description = "The version of the operating system to install.";
+        #   default = builtins.hashString name;
+        #   description = ''
+        #     The UUID of the guest, this must be unique for each guest.
+        #     If a UUID is not provided, one will be derived from the name.
+        #   '';
         # };
-      };
 
-      cpu = {
-        threads = mkOption {
-          type = types.int;
-          default = 1;
-          apply = v: if v < 1 then throw "threads must be positive" else v;
-          description = "The number of threads to allocate to the guest.";
+        name = mkOption {
+          type = types.str;
+          example = "win10";
+          default = name;
+          description = "The name of the guest virtual machine.";
         };
 
-        threadsPerCore = mkOption {
-          type = types.int;
-          default = 2;
-          apply = v: if v < 1 then throw "threadsPerCore must be positive" else v;
-          description = "The number of threads per core for your CPU.";
-        };
-      };
+        os = {
+          type = mkOption {
+            type = types.enum [
+              "linux"
+              "windows"
+            ];
+            default = "windows";
+            description = "The type of operating system to install.";
+          };
 
-      memory = {
-        sharedMemory = mkOption {
+          # version = mkOption {
+          #   type = types.str;
+          #   default = "11";
+          #   description = "The version of the operating system to install.";
+          # };
+        };
+
+        cpu = {
+          threads = mkOption {
+            type = types.int;
+            default = 1;
+            apply = v: if v < 1 then throw "threads must be positive" else v;
+            description = "The number of threads to allocate to the guest.";
+          };
+
+          threadsPerCore = mkOption {
+            type = types.int;
+            default = 2;
+            apply = v: if v < 1 then throw "threadsPerCore must be positive" else v;
+            description = "The number of threads per core for your CPU.";
+          };
+        };
+
+        memory = {
+          sharedMemory = mkOption {
+            type = types.bool;
+            default = false;
+            description = "Whether to use shared memory.";
+          };
+
+          reservedMemory = mkOption {
+            type = types.int;
+            default = 0;
+            apply =
+              v:
+              if v < 0 || v > 100 then
+                throw "reservedMemory must be the percent of memory which is reserved, between 0 and 100"
+              else
+                v;
+            description = mkDoc "The percentage of maxMemory to reserve for the host.";
+          };
+
+          maxMemory = mkOption {
+            type = types.int;
+            default = 2048;
+            apply = v: if v < 0 then throw "maxMemory must be positive" else v;
+            description = "The maximum amount of memory that can be allocated to the guest.";
+          };
+        };
+
+        storage = {
+          disks = mkOption {
+            type = types.list types.str;
+            default = [ ];
+            description = "The disks to attach to the guest.";
+          };
+
+          mounts = mkOption {
+            type = types;
+            default = { };
+            description = "The mounts to attach to the guest.";
+          };
+        };
+
+        network = {
+          mac = mkOption {
+            type = types.str;
+            default = "52:54:00:12:34:56";
+            description = "The MAC address of the guest.";
+          };
+
+          hostNic = mkOption {
+            type = types.str;
+            default = "br0";
+            description = "The name of the host network interface to bridge to.";
+          };
+        };
+
+        tpm = mkOption {
           type = types.bool;
           default = false;
-          description = "Whether to use shared memory.";
+          description = "Whether to enable the TPM passthrough.";
         };
 
-        reservedMemory = mkOption {
-          type = types.int;
-          default = 0;
-          apply = v: if v < 0 || v > 100 then throw "reservedMemory must be the percent of memory which is reserved, between 0 and 100" else v;
-          description = mkDoc "The percentage of maxMemory to reserve for the host.";
+        graphics = {
+          enable = mkOption {
+            type = types.bool;
+            default = true;
+            description = "Whether to enable the graphics passthrough.";
+          };
+
+          method = mkOption {
+            type = types.enum [
+              "passthrough"
+              "spice"
+            ];
+            default = "spice";
+            description = "The method of graphics passthrough";
+          };
         };
 
-        maxMemory = mkOption {
-          type = types.int;
-          default = 2048;
-          apply = v: if v < 0 then throw "maxMemory must be positive" else v;
-          description = "The maximum amount of memory that can be allocated to the guest.";
-        };
-      };
-
-      storage = {
-        disks = mkOption {
-          type = types.list types.str;
-          default = [ ];
-          description = "The disks to attach to the guest.";
-        };
-
-        mounts = mkOption {
-          type = types;
-          default = { };
-          description = "The mounts to attach to the guest.";
-        };
-      };
-
-      network = {
-        mac = mkOption {
-          type = types.str;
-          default = "52:54:00:12:34:56";
-          description = "The MAC address of the guest.";
-        };
-
-        hostNic = mkOption {
-          type = types.str;
-          default = "br0";
-          description = "The name of the host network interface to bridge to.";
-        };
-      };
-
-      tpm = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Whether to enable the TPM passthrough.";
-      };
-
-      graphics = {
-        enable = mkOption {
+        audio = mkOption {
           type = types.bool;
           default = true;
-          description = "Whether to enable the graphics passthrough.";
+          description = "Whether to enable the audio passthrough.";
         };
-
-        method = mkOption {
-          type = types.enum [ "passthrough" "spice" ];
-          default = "spice";
-          description = "The method of graphics passthrough";
-        };
-      };
-
-      audio = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Whether to enable the audio passthrough.";
       };
     };
-  };
 
-  # TODO :: Get Constant UUID
-  # TODO :: Calculate size needed for shmem
-  # TODO :: Auto calculate emulatorpin and iothreadpin
 in
+# TODO :: Get Constant UUID
+# TODO :: Calculate size needed for shmem
+# TODO :: Auto calculate emulatorpin and iothreadpin
 {
   options.virtual-machines = {
     enable = mkEnableOption "Virtual machines";
@@ -249,7 +263,6 @@ in
   #         in
   #         { }));
 
-
   #   systemd.services = lib.mapAttrs'
   #     (name: guest: lib.nameValuePair "libvirtd-guest-${name}" {
   #       after = [ "libvirtd.service" ];
@@ -312,5 +325,3 @@ in
   #     guests;
   # };
 }
-
-

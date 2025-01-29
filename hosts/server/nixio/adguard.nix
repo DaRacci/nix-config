@@ -1,4 +1,6 @@
-{ subnets, mkVirtualHost, ... }: { config, lib, ... }: {
+{ subnets, mkVirtualHost, ... }:
+{ config, lib, ... }:
+{
   services = {
     adguardhome = {
       enable = true;
@@ -32,20 +34,24 @@
           #region Upstream Settings
           anonymize_client_ip = false;
           upstream_mode = "parallel";
-          upstream_dns = (lib.pipe subnets [
-            (builtins.map (subnet: [
-              "[/${subnet.domain}/]${subnet.dns}"
-              "[/${subnet.ipv4_arpa}/]${subnet.dns}"
-            ] ++ lib.optionals (subnet.ipv6_arpa != null) [
-              "[/${subnet.ipv6_arpa}/]${subnet.dns}"
-            ]))
-            lib.flatten
-          ]) ++ [
-            #region public resolvers
-            "tls://dns10.quad9.net"
-            "tls://1dot1dot1dot1.cloudflare-dns.com"
-            #endregion
-          ];
+          upstream_dns =
+            (lib.pipe subnets [
+              (builtins.map (
+                subnet:
+                [
+                  "[/${subnet.domain}/]${subnet.dns}"
+                  "[/${subnet.ipv4_arpa}/]${subnet.dns}"
+                ]
+                ++ lib.optionals (subnet.ipv6_arpa != null) [ "[/${subnet.ipv6_arpa}/]${subnet.dns}" ]
+              ))
+              lib.flatten
+            ])
+            ++ [
+              #region public resolvers
+              "tls://dns10.quad9.net"
+              "tls://1dot1dot1dot1.cloudflare-dns.com"
+              #endregion
+            ];
 
           bootstrap_dns = [
             "9.9.9.10"
@@ -65,7 +71,10 @@
           ];
 
           private_networks = lib.trivial.pipe subnets [
-            (builtins.map (subnet: [ subnet.ipv4_cidr subnet.ipv6_cidr ]))
+            (builtins.map (subnet: [
+              subnet.ipv4_cidr
+              subnet.ipv6_cidr
+            ]))
             lib.flatten
             (builtins.filter (subnet: subnet != null))
           ];
@@ -84,17 +93,23 @@
           #endregion
         };
 
-        user_rules = lib.trivial.pipe subnets [
-          (builtins.map (subnet: [
-            "*.racci.dev^$client=${subnet.ipv4_cidr},dnsrewrite=${config.system.name}.${subnet.domain}"
-          ] ++ lib.optionals (subnet.ipv6_cidr != null) [
-            "*.racci.dev^$client=${subnet.ipv6_cidr},dnsrewrite=${config.system.name}.${subnet.domain}"
-          ]))
-          lib.flatten
-        ] ++ [
-          "@@||nextcloud.racci.dev^$dnsrewrite" # Nextcloud isn't hosted internally yet.
-          "@@||s.youtube.com^$important" # Fix YouTube history for IOS App
-        ];
+        user_rules =
+          lib.trivial.pipe subnets [
+            (builtins.map (
+              subnet:
+              [
+                "*.racci.dev^$client=${subnet.ipv4_cidr},dnsrewrite=${config.system.name}.${subnet.domain}"
+              ]
+              ++ lib.optionals (subnet.ipv6_cidr != null) [
+                "*.racci.dev^$client=${subnet.ipv6_cidr},dnsrewrite=${config.system.name}.${subnet.domain}"
+              ]
+            ))
+            lib.flatten
+          ]
+          ++ [
+            "@@||nextcloud.racci.dev^$dnsrewrite" # Nextcloud isn't hosted internally yet.
+            "@@||s.youtube.com^$important" # Fix YouTube history for IOS App
+          ];
 
         tls = {
           enabled = true;
@@ -147,7 +162,7 @@
     caddy.virtualHosts = lib.listToAttrs [
       (mkVirtualHost "adguard" {
         # TODO - DNS over HTTPS
-        extraConfig = /*caddyfile*/ ''
+        extraConfig = ''
           redir /dns-query /dns-query/
           handle /dns-query/* {
             reverse_proxy https://${config.services.adguardhome.host}:${toString config.services.adguardhome.port}
@@ -164,8 +179,6 @@
       853
     ];
 
-    allowedUDPPorts = [
-      53
-    ];
+    allowedUDPPorts = [ 53 ];
   };
 }

@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   inherit (lib) mkIf mkEnableOption optionalString;
   cfg = config.hardware;
@@ -11,12 +16,13 @@ in
   config = mkIf cfg.backlight.enable {
     programs.light.enable = true;
 
-    environment.systemPackages = with pkgs; [
-      ddcutil
-    ];
+    environment.systemPackages = with pkgs; [ ddcutil ];
 
     boot.extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
-    boot.kernelModules = [ "i2c-dev" "ddcci_backlight" ];
+    boot.kernelModules = [
+      "i2c-dev"
+      "ddcci_backlight"
+    ];
 
     #region Nvidia Specific fix from https://discourse.nixos.org/t/ddcci-kernel-driver/22186/4
     services.udev.extraRules = optionalString (cfg.graphics.manufacturer == "nvidia") ''

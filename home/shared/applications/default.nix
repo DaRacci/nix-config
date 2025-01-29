@@ -1,4 +1,5 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   imports = [
     ./browser.nix
     ./calendar.nix
@@ -13,7 +14,5 @@
     ./terminal.nix
   ];
 
-  home.packages = with pkgs; [
-    toybox
-  ];
+  home.packages = with pkgs; [ toybox ];
 }

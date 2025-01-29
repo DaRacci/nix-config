@@ -1,14 +1,20 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   inherit (lib) getExe;
 in
 {
-  home.packages = with pkgs; [ hyprlock hypridle ];
+  home.packages = with pkgs; [
+    hyprlock
+    hypridle
+  ];
 
   wayland.windowManager.hyprland.settings = {
-    exec = [
-      "pidof hypridle || ${getExe pkgs.hypridle}"
-    ];
+    exec = [ "pidof hypridle || ${getExe pkgs.hypridle}" ];
   };
 
   xdg.configFile."hypr/hyprlock.conf".text = ''

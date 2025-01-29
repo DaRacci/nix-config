@@ -1,7 +1,8 @@
-{ config
-, pkgs
-, lib
-, ...
+{
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 with lib;
 let
@@ -25,11 +26,7 @@ in
         gale
         r2modman
       ])
-      ++ (optional cfg.enableNexus (
-        nexusmods-app.override {
-          _7zz = _7zz-rar;
-        }
-      ));
+      ++ (optional cfg.enableNexus (nexusmods-app.override { _7zz = _7zz-rar; }));
 
     xdg.mimeApps.defaultApplications = mkIf cfg.enableBeatSaber {
       "x-scheme-handler/beatsaver" = "BeatSaberModManager-url-beatsaver.desktop";

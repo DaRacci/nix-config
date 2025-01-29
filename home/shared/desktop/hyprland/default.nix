@@ -1,4 +1,10 @@
-{ flake, osConfig, inputs, ... }: {
+{
+  flake,
+  osConfig,
+  inputs,
+  ...
+}:
+{
   imports = [
     inputs.hyprland.homeManagerModules.default
     "${flake}/home/shared/desktop/common"

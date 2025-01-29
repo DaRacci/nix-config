@@ -1,4 +1,12 @@
-{ osConfig, config, pkgs, lib, ... }: with lib; let
+{
+  osConfig,
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+with lib;
+let
   cfg = config.custom.audio;
   updatedDevicesPath = "wireplumber/wireplumber.conf.d/50-update-devices.conf";
   disabledDevicesPath = "wireplumber/wireplumber.conf.d/51-disable-devices.conf";
@@ -19,42 +27,46 @@ in
     };
 
     updateDevices = mkOption {
-      type = with types; listOf (submodule {
-        options = {
-          node = mkOption {
-            type = str;
-            description = ''
-              The node name to update.
-              To find the name use the guide at https://wiki.archlinux.org/title/WirePlumber#Obtain_interface_name_for_rules_matching
-            '';
-          };
+      type =
+        with types;
+        listOf (submodule {
+          options = {
+            node = mkOption {
+              type = str;
+              description = ''
+                The node name to update.
+                To find the name use the guide at https://wiki.archlinux.org/title/WirePlumber#Obtain_interface_name_for_rules_matching
+              '';
+            };
 
-          props = mkOption {
-            type = with types; listOf (submodule {
-              options = {
-                name = mkOption {
-                  type = str;
-                  description = ''
-                    The property name to update.
-                    To find the name use the guide at https://wiki.archlinux.org/title/WirePlumber#Obtain_interface_name_for_rules_matching
-                  '';
-                };
+            props = mkOption {
+              type =
+                with types;
+                listOf (submodule {
+                  options = {
+                    name = mkOption {
+                      type = str;
+                      description = ''
+                        The property name to update.
+                        To find the name use the guide at https://wiki.archlinux.org/title/WirePlumber#Obtain_interface_name_for_rules_matching
+                      '';
+                    };
 
-                value = mkOption {
-                  type = str;
-                  description = ''
-                    The property value to set.
-                  '';
-                };
-              };
-            });
-            default = [ ];
-            description = ''
-              A list of properties to update.
-            '';
+                    value = mkOption {
+                      type = str;
+                      description = ''
+                        The property value to set.
+                      '';
+                    };
+                  };
+                });
+              default = [ ];
+              description = ''
+                A list of properties to update.
+              '';
+            };
           };
-        };
-      });
+        });
       default = [ ];
       description = ''
         A list of ALSA device names or node names to update.
@@ -73,17 +85,14 @@ in
       text = ''
         monitor.alsa.rules = [{
           matches = [
-            ${
-              trivial.pipe cfg.disabledDevices [
-                (map (device: ''
-                  {
-                    device.name = "${device}"
-                  },
-                ''
-                ))
-                (concatStringsSep "\n")
-              ]
-            }
+            ${trivial.pipe cfg.disabledDevices [
+              (map (device: ''
+                {
+                  device.name = "${device}"
+                },
+              ''))
+              (concatStringsSep "\n")
+            ]}
           ]
 
           actions = {
@@ -98,35 +107,29 @@ in
     xdg.configFile.${updatedDevicesPath} = mkIf ((length cfg.updateDevices) > 0) {
       text = ''
         monitor.alsa.rules = [
-          ${
-            trivial.pipe cfg.updateDevices [
-              (map (device: ''
-                {
-                  matches = [
-                    {
-                      device.name = "${device.node}"
-                    }
-                  ]
+          ${trivial.pipe cfg.updateDevices [
+            (map (device: ''
+              {
+                matches = [
+                  {
+                    device.name = "${device.node}"
+                  }
+                ]
 
-                  actions = {
-                    update-props = {
-                      ${
-                        trivial.pipe device.props [
-                          (map (prop: ''
-                            "${prop.name}" = "${prop.value}"
-                          ''
-                          ))
-                          (concatStringsSep "\n")
-                        ]
-                      }
-                    }
+                actions = {
+                  update-props = {
+                    ${trivial.pipe device.props [
+                      (map (prop: ''
+                        "${prop.name}" = "${prop.value}"
+                      ''))
+                      (concatStringsSep "\n")
+                    ]}
                   }
                 }
-              ''
-              ))
-              (concatStringsSep "\n")
-            ]
-          }
+              }
+            ''))
+            (concatStringsSep "\n")
+          ]}
         ]
       '';
     };

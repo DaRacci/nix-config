@@ -1,4 +1,6 @@
-{ lib, config, ... }: with lib; let
+{ lib, config, ... }:
+with lib;
+let
   cfg = config.purposes;
 in
 {

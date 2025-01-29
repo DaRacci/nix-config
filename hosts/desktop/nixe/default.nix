@@ -1,4 +1,10 @@
-{ flake, inputs, pkgs, ... }: {
+{
+  flake,
+  inputs,
+  pkgs,
+  ...
+}:
+{
 
   imports = [
     ./hardware.nix

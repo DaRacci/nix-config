@@ -1,4 +1,12 @@
-{ inputs, config, pkgs, lib, ... }: with lib; let
+{
+  inputs,
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+with lib;
+let
   cfg = config.purpose.development;
 in
 {
@@ -12,7 +20,9 @@ in
     enable = mkEnableOption "development";
 
     vscode = {
-      enable = mkEnableOption "Enable VSCode" // { default = true; };
+      enable = mkEnableOption "Enable VSCode" // {
+        default = true;
+      };
     };
 
     python = {
@@ -42,7 +52,8 @@ in
 
           plugins = (import ./vscode/extensions.nix) { inherit pkgs lib; };
         in
-        with extensions.vscode-marketplace; [
+        with extensions.vscode-marketplace;
+        [
           # Theme & Looks
           plugins.zhuangtongfa.material-theme
           plugins.pkief.material-icon-theme
@@ -92,24 +103,36 @@ in
           # Integrations
           plugins.github.vscode-github-actions
           plugins.github.vscode-pull-request-github
-        ] ++ (optionals cfg.python.enable (with versionExtensions.vscode-marketplace.ms-python; [
-          python
-          vscode-pylance
-          debugpy
-          black-formatter
-          isort
-          pylint
-          mypy-type-checker
-          gather
-        ])) ++ (optionals cfg.rust.enable (with versionExtensions.vscode-marketplace; [
-          vadimcn.vscode-lldb
-          fill-labs.dependi
-          jscearcy.rust-doc-viewer
-          dustypomerleau.rust-syntax
-          rust-lang.rust-analyzer
-        ])) ++ (optionals cfg.jvm.enable (with extensions.open-vscx; [
+        ]
+        ++ (optionals cfg.python.enable (
+          with versionExtensions.vscode-marketplace.ms-python;
+          [
+            python
+            vscode-pylance
+            debugpy
+            black-formatter
+            isort
+            pylint
+            mypy-type-checker
+            gather
+          ]
+        ))
+        ++ (optionals cfg.rust.enable (
+          with versionExtensions.vscode-marketplace;
+          [
+            vadimcn.vscode-lldb
+            fill-labs.dependi
+            jscearcy.rust-doc-viewer
+            dustypomerleau.rust-syntax
+            rust-lang.rust-analyzer
+          ]
+        ))
+        ++ (optionals cfg.jvm.enable (
+          with extensions.open-vscx;
+          [
 
-        ]));
+          ]
+        ));
 
       userSettings = {
         "workbench.iconTheme" = "material-icon-theme";
@@ -157,14 +180,20 @@ in
             eval = {
               enable = true;
               targets = {
-                args = [ "-f" "default.nix" ];
+                args = [
+                  "-f"
+                  "default.nix"
+                ];
                 installable = "";
               };
             };
             options = {
               enable = true;
               targets = {
-                args = [ "-f" "default.nix" ];
+                args = [
+                  "-f"
+                  "default.nix"
+                ];
                 installable = "";
                 # installable = "/flakeref#nixosConfigurations.nixe.options";
               };
@@ -191,7 +220,7 @@ in
     };
 
     home.file.".vscode/argv.json" = {
-      text = /*json*/ ''
+      text = ''
         {
           "enable-crash-reporter": false,
           "password-store": "gnome-libsecret"

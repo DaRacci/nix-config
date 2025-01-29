@@ -1,4 +1,5 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, ... }:
+{
   programs.atuin = {
     enable = false;
     package = pkgs.atuin;

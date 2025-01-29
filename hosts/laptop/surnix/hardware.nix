@@ -1,4 +1,5 @@
-{ inputs, ... }: {
+{ inputs, ... }:
+{
   imports = [
     inputs.nixos-hardware.nixosModules.microsoft-surface-pro-intel
     inputs.nixos-hardware.nixosModules.common-hidpi
@@ -6,7 +7,12 @@
 
   boot = {
     initrd = {
-      availableKernelModules = [ "xhci_pci" "nvme" "usb_storage" "sd_mod" ];
+      availableKernelModules = [
+        "xhci_pci"
+        "nvme"
+        "usb_storage"
+        "sd_mod"
+      ];
     };
 
     kernelModules = [ "kvm-intel" ];

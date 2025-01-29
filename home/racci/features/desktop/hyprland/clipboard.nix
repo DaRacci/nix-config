@@ -1,10 +1,17 @@
-{ config, pkgs, lib, ... }:
-let inherit (lib) getExe getExe'; in {
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+let
+  inherit (lib) getExe getExe';
+in
+{
   wayland.windowManager.hyprland.settings = {
     exec-once =
       let
         wl-paste = getExe' pkgs.wl-clipboard "wl-paste";
-        # wl-copy = getExe' pkgs.wl-clipboard "wl-copy";
       in
       [
         "${wl-paste} --type text --watch cliphist store"
@@ -23,22 +30,26 @@ let inherit (lib) getExe getExe'; in {
 
   home.file.".local/bin/cliphist-rofi-img" = {
     executable = true;
-    source = "${pkgs.writeShellApplication {
-      name = "cliphist-rofi-img";
-      runtimeInputs = with pkgs; [
-        config.services.cliphist.package
-        config.programs.rofi.package
-        gawk
-        wl-clipboard
-        imagemagick
-      ];
-      bashOptions = [];
-      excludeShellChecks = [ "SC2086" ];
-      text = lib.trivial.pipe "https://raw.githubusercontent.com/sentriz/cliphist/master/contrib/cliphist-rofi-img" [
-        builtins.fetchurl
-        builtins.readFile
-      ];
-    }}/bin/cliphist-rofi-img";
+    source = "${
+      pkgs.writeShellApplication {
+        name = "cliphist-rofi-img";
+        runtimeInputs = with pkgs; [
+          config.services.cliphist.package
+          config.programs.rofi.package
+          gawk
+          wl-clipboard
+          imagemagick
+        ];
+        bashOptions = [ ];
+        excludeShellChecks = [ "SC2086" ];
+        text =
+          lib.trivial.pipe
+            "https://raw.githubusercontent.com/sentriz/cliphist/master/contrib/cliphist-rofi-img"
+            [
+              builtins.fetchurl
+              builtins.readFile
+            ];
+      }
+    }/bin/cliphist-rofi-img";
   };
 }
-

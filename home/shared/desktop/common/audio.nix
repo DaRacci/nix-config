@@ -1,4 +1,5 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, ... }:
+{
   home.packages = [ config.services.easyeffects.package ];
 
   services.easyeffects = {
@@ -7,7 +8,5 @@
     preset = "male-voice-v2";
   };
 
-  user.persistence.directories = [
-    ".config/easyeffects"
-  ];
+  user.persistence.directories = [ ".config/easyeffects" ];
 }

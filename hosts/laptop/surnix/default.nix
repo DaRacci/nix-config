@@ -1,4 +1,5 @@
-{ flake, ... }: {
+{ flake, ... }:
+{
   imports = [
     ./hardware.nix
 
@@ -19,16 +20,23 @@
 
   nix = {
     distributedBuilds = true;
-    extraOptions = ''builders-use-substitutes = true'';
-    buildMachines = [{
-      hostName = "nixe";
-      system = "x86_64-linux";
-      protocol = "ssh-ng";
-      systems = [ "x86_64-linux" ];
-      maxJobs = 1;
-      speedFactor = 2;
-      supportedFeatures = [ "nixos-test" "benchmark" "big-parallel" "kvm" ];
-      mandatoryFeatures = [ ];
-    }];
+    extraOptions = "builders-use-substitutes = true";
+    buildMachines = [
+      {
+        hostName = "nixe";
+        system = "x86_64-linux";
+        protocol = "ssh-ng";
+        systems = [ "x86_64-linux" ];
+        maxJobs = 1;
+        speedFactor = 2;
+        supportedFeatures = [
+          "nixos-test"
+          "benchmark"
+          "big-parallel"
+          "kvm"
+        ];
+        mandatoryFeatures = [ ];
+      }
+    ];
   };
 }

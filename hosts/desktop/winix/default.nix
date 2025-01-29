@@ -1,4 +1,5 @@
-{ flake, pkgs, ... }: {
+{ flake, pkgs, ... }:
+{
 
   imports = [
     flake.inputs.nixos-wsl.nixosModules.wsl

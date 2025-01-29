@@ -1,8 +1,15 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
-let cfg = config.hardware.openrgb;
-in {
+let
+  cfg = config.hardware.openrgb;
+in
+{
   options.hardware.openrgb = {
     enable = mkEnableOption "OpenRGB";
     package = mkOption {
@@ -16,7 +23,11 @@ in {
   };
 
   config = mkIf cfg.enable {
-    boot.kernelModules = [ "v4l2loopback" "i2c-dev" "i2c-piix4" ];
+    boot.kernelModules = [
+      "v4l2loopback"
+      "i2c-dev"
+      "i2c-piix4"
+    ];
     environment.systemPackages = [ cfg.package ];
     services.udev.packages = [ cfg.package ];
 

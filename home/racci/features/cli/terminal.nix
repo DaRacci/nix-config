@@ -1,6 +1,11 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
-  open_file = /*nu*/ pkgs.writeTextFile {
+  open_file = pkgs.writeTextFile {
     name = "open_file.nu";
     executable = true;
     text = ''
@@ -136,7 +141,7 @@ in
           ];
         };
       };
-      initLua = /*lua*/ ''
+      initLua = ''
         function Status:render(area)
           self.area = area
 

@@ -1,4 +1,9 @@
-{ config, lib, ... }: with lib; let cfg = config.host; in {
+{ config, lib, ... }:
+with lib;
+let
+  cfg = config.host;
+in
+{
   imports = [
     ./device.nix
     ./drive.nix

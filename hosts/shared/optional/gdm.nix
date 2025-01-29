@@ -1,4 +1,5 @@
-{ lib, ... }: {
+{ lib, ... }:
+{
   programs.xwayland.enable = true;
 
   xdg.portal = {

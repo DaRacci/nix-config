@@ -1,4 +1,6 @@
-_: { config, pkgs, ... }: {
+_:
+{ config, pkgs, ... }:
+{
   sops.secrets = {
     MINIO_ROOT_CREDENTIALS = {
       inherit (config.users.users.minio) group;

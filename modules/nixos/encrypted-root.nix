@@ -1,6 +1,7 @@
 { config, lib }:
 
-with lib; let
+with lib;
+let
   hostname = config.networking.hostName;
 in
 {

@@ -1,7 +1,6 @@
-{ pkgs, ... }: {
-  home.packages = with pkgs; [
-    ctop
-  ];
+{ pkgs, ... }:
+{
+  home.packages = with pkgs; [ ctop ];
 
   programs.btop = {
     enable = true;

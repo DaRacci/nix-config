@@ -1,7 +1,13 @@
-{ flake, config, pkgs, lib, modulesPath, ... }: {
-  imports = [
-    "${modulesPath}/virtualisation/proxmox-lxc.nix"
-  ];
+{
+  flake,
+  config,
+  pkgs,
+  lib,
+  modulesPath,
+  ...
+}:
+{
+  imports = [ "${modulesPath}/virtualisation/proxmox-lxc.nix" ];
 
   sops.secrets = {
     ATTIC_ENVIRONMENT = {
@@ -14,9 +20,7 @@
     };
   };
 
-  environment.systemPackages = with pkgs; [
-    attic-client
-  ];
+  environment.systemPackages = with pkgs; [ attic-client ];
 
   users = {
     users = {
@@ -24,7 +28,9 @@
         isNormalUser = true;
         extraGroups = [ "trusted" ];
         home = "/var/lib/builder";
-        openssh.authorizedKeys.keyFiles = builtins.map (system: builtins.elemAt system.config.users.users.root.openssh.authorizedKeys.keyFiles 0) (lib.attrValues flake.nixosConfigurations);
+        openssh.authorizedKeys.keyFiles = builtins.map (
+          system: builtins.elemAt system.config.users.users.root.openssh.authorizedKeys.keyFiles 0
+        ) (lib.attrValues flake.nixosConfigurations);
       };
 
       atticd = {
@@ -88,11 +94,16 @@
     postgresql = {
       enable = true;
       ensureDatabases = [ "attic" ];
-      ensureUsers = [{ name = "attic"; ensureDBOwnership = true; }];
+      ensureUsers = [
+        {
+          name = "attic";
+          ensureDBOwnership = true;
+        }
+      ];
     };
 
     caddy.virtualHosts = {
-      cache.extraConfig = /*caddyfile*/ ''
+      cache.extraConfig = ''
         encode {
           zstd
           match {
@@ -105,7 +116,9 @@
     };
   };
 
-  systemd.services.postgresql.postStart = lib.mine.mkPostgresRolePass "attic" config.sops.secrets."POSTGRES/ATTIC_PASSWORD".path;
+  systemd.services.postgresql.postStart =
+    lib.mine.mkPostgresRolePass "attic"
+      config.sops.secrets."POSTGRES/ATTIC_PASSWORD".path;
 
   networking.firewall.allowedTCPPorts = [ 8080 ];
 }

@@ -1,7 +1,5 @@
 {
   programs.zoxide.enable = true;
 
-  user.persistence.directories = [
-    ".local/share/zoxide/"
-  ];
+  user.persistence.directories = [ ".local/share/zoxide/" ];
 }

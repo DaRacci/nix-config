@@ -1,4 +1,11 @@
-{ flake, osConfig, config, lib, ... }: with lib;
+{
+  flake,
+  osConfig,
+  config,
+  lib,
+  ...
+}:
+with lib;
 let
   cfg = config.user.persistence;
 in
@@ -12,25 +19,32 @@ in
     };
 
     directories = mkOption {
-      type = with types; listOf (either str (submodule {
-        options = {
-          directory = mkOption {
-            type = str;
-            default = null;
-            description = "The directory path to be linked.";
-          };
-          method = mkOption {
-            type = types.enum [ "bindfs" "symlink" ];
-            default = "bindfs";
-            description = ''
-              The linking method that should be used for this
-              directory. bindfs is the default and works for most use
-              cases, however some programs may behave better with
-              symlinks.
-            '';
-          };
-        };
-      }));
+      type =
+        with types;
+        listOf (
+          either str (submodule {
+            options = {
+              directory = mkOption {
+                type = str;
+                default = null;
+                description = "The directory path to be linked.";
+              };
+              method = mkOption {
+                type = types.enum [
+                  "bindfs"
+                  "symlink"
+                ];
+                default = "bindfs";
+                description = ''
+                  The linking method that should be used for this
+                  directory. bindfs is the default and works for most use
+                  cases, however some programs may behave better with
+                  symlinks.
+                '';
+              };
+            };
+          })
+        );
       default = [ ];
       example = [
         "Downloads"
@@ -58,9 +72,7 @@ in
     files = mkOption {
       type = with types; listOf str;
       default = [ ];
-      example = [
-        ".screenrc"
-      ];
+      example = [ ".screenrc" ];
       description = ''
         A list of files in your home directory you want to
         link to persistent storage.

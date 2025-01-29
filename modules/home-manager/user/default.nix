@@ -1,4 +1,9 @@
-{ outputs, config, lib, ... }:
+{
+  outputs,
+  config,
+  lib,
+  ...
+}:
 let
   cfg = config.user;
   hostnames = builtins.attrNames outputs.nixosConfigurations;
@@ -43,8 +48,6 @@ in
       };
     };
 
-    user.persistence.files = [
-      ".ssh/known_hosts"
-    ];
+    user.persistence.files = [ ".ssh/known_hosts" ];
   };
 }

@@ -1,4 +1,10 @@
-{ flake, config, modulesPath, lib, ... }:
+{
+  flake,
+  config,
+  modulesPath,
+  lib,
+  ...
+}:
 let
   subnets = [
     {
@@ -27,20 +33,30 @@ let
     }
   ];
 
-  fromAllServers = pipe: lib.trivial.pipe flake.nixosConfigurations ([
-    # Exclude the current host
-    (lib.filterAttrs (name: _: name != config.system.name))
-    # Extract the config from each host
-    builtins.attrValues
-    (builtins.map (host: host.config))
-    # Filter to only servers
-    (builtins.filter (config: config.host.device.role == "server"))
-  ] ++ pipe);
+  fromAllServers =
+    pipe:
+    lib.trivial.pipe flake.nixosConfigurations (
+      [
+        # Exclude the current host
+        (lib.filterAttrs (name: _: name != config.system.name))
+        # Extract the config from each host
+        builtins.attrValues
+        (builtins.map (host: host.config))
+        # Filter to only servers
+        (builtins.filter (config: config.host.device.role == "server"))
+      ]
+      ++ pipe
+    );
 
-  mkVirtualHost = name: config: lib.nameValuePair "${name}.racci.dev" ({
-    hostName = "${name}.racci.dev";
-    useACMEHost = "${name}.racci.dev";
-  } // config);
+  mkVirtualHost =
+    name: config:
+    lib.nameValuePair "${name}.racci.dev" (
+      {
+        hostName = "${name}.racci.dev";
+        useACMEHost = "${name}.racci.dev";
+      }
+      // config
+    );
 
   importFile = path: import path { inherit subnets fromAllServers mkVirtualHost; };
 in

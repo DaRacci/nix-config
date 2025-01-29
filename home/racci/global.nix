@@ -1,11 +1,8 @@
-{ inputs, pkgs, ... }: {
-  imports = [
-    ./features/cli
-  ];
+{ inputs, pkgs, ... }:
+{
+  imports = [ ./features/cli ];
 
-  home.packages = [
-    inputs.nix-alien.packages.${builtins.currentSystem}.nix-alien
-  ];
+  home.packages = [ inputs.nix-alien.packages.${builtins.currentSystem}.nix-alien ];
 
   stylix = {
     base16Scheme = "${inputs.tinted-theming}/base16/tokyo-night-dark.yaml";
@@ -49,7 +46,5 @@
     };
   };
 
-  user.persistence.directories = [
-    ".config/goa-1.0"
-  ];
+  user.persistence.directories = [ ".config/goa-1.0" ];
 }

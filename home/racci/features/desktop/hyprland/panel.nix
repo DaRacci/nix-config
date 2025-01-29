@@ -1,23 +1,29 @@
-{ config, pkgs, lib, ... }: {
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+{
   home.packages = with pkgs; [ networkmanagerapplet ];
 
   wayland.windowManager.hyprland = {
-    settings = let waybarBin = lib.getExe config.programs.waybar.package; in {
-      exec-once = [
-        "${waybarBin}"
-      ];
+    settings =
+      let
+        waybarBin = lib.getExe config.programs.waybar.package;
+      in
+      {
+        exec-once = [ "${waybarBin}" ];
 
-      bind = [
-        "CONTROL,ESCAPE,exec,killall waybar || ${waybarBin}"
-      ];
+        bind = [ "CONTROL,ESCAPE,exec,killall waybar || ${waybarBin}" ];
 
-      windowrulev2 = [
-        "float,class:^(pavucontrol)$"
-        "size 900 450,class:^(pavucontrol)$"
-        "move 1660 48,class:^(pavucontrol)$"
-        "animation slide right,class:^(pavucontrol)$"
-      ];
-    };
+        windowrulev2 = [
+          "float,class:^(pavucontrol)$"
+          "size 900 450,class:^(pavucontrol)$"
+          "move 1660 48,class:^(pavucontrol)$"
+          "animation slide right,class:^(pavucontrol)$"
+        ];
+      };
   };
 
   services = {
@@ -28,240 +34,306 @@
     enable = true;
     package = pkgs.waybar;
 
-    settings = let wpctl = "${pkgs.wireplumber}/bin/wpctl"; in {
-      mainBar = {
-        layer = "top";
-        position = "top";
-        mod = "dock";
-        height = 48;
-        exclusive = true;
-        passthrough = false;
-        gtk-layer-shell = true;
+    settings =
+      let
+        wpctl = "${pkgs.wireplumber}/bin/wpctl";
+      in
+      {
+        mainBar = {
+          layer = "top";
+          position = "top";
+          mod = "dock";
+          height = 48;
+          exclusive = true;
+          passthrough = false;
+          gtk-layer-shell = true;
 
-        modules-left = [ "custom/padd" "custom/l_end" "" "custom/r_end" "custom/l_end" "wlr/taskbar" "custom/r_end" "" "custom/padd" ];
-        modules-center = [ "custom/padd" "custom/l_end" "clock" "custom/r_end" "custom/padd" ];
-        modules-right = [ "custom/padd" "custom/l_end" "tray" "custom/r_end" "custom/l_end" "network" "bluetooth" "pulseaudio#sink" "pulseaudio#source" "custom/notification" "custom/r_end" "custom/padd" ];
+          modules-left = [
+            "custom/padd"
+            "custom/l_end"
+            ""
+            "custom/r_end"
+            "custom/l_end"
+            "wlr/taskbar"
+            "custom/r_end"
+            ""
+            "custom/padd"
+          ];
+          modules-center = [
+            "custom/padd"
+            "custom/l_end"
+            "clock"
+            "custom/r_end"
+            "custom/padd"
+          ];
+          modules-right = [
+            "custom/padd"
+            "custom/l_end"
+            "tray"
+            "custom/r_end"
+            "custom/l_end"
+            "network"
+            "bluetooth"
+            "pulseaudio#sink"
+            "pulseaudio#source"
+            "custom/notification"
+            "custom/r_end"
+            "custom/padd"
+          ];
 
-        "hyprland/workspaces" = {
-          format = "{id}:{delim}{clients}";
-          all-outputs = true;
-          active-only = false;
-          on-click = "activate";
-          persistent-workspaces = { };
+          "hyprland/workspaces" = {
+            format = "{id}:{delim}{clients}";
+            all-outputs = true;
+            active-only = false;
+            on-click = "activate";
+            persistent-workspaces = { };
 
-          on-scroll-up = "hyprctl dispatch workspace e+1";
-          on-scroll-down = "hyprctl dispatch workspace e-1";
-        };
-
-        "hyprland/window" = {
-          format = "{}";
-          separate-outputs = true;
-          rewrite = {
-            "\${USER}@\${set_sysname}:(.*)" = "$1 ";
-            "(.*) — Mozilla Firefox" = "$1 󰈹";
-            "(.*)Mozilla Firefox" = "Firefox 󰈹";
-            "(.*) - Visual Studio Code" = "$1 󰨞";
-            "(.*)Visual Studio Code" = "Code 󰨞";
-            "(.*) — Dolphin" = "$1 󰉋";
-            "(.*)Spotify" = "Spotify 󰓇";
-            "(.*)Steam" = "Steam 󰓓";
+            on-scroll-up = "hyprctl dispatch workspace e+1";
+            on-scroll-down = "hyprctl dispatch workspace e-1";
           };
-          max-length = 1000;
-        };
 
-        bluetooth = {
-          format = " {}";
-          format-disabled = " {}";
-          format-connected = " {num_connections}";
-          format-connected-battery = "{icon} {device_alias} {num_connections}";
-          format-icons = [ "󰥇" "󰤾" "󰤿" "󰥀" "󰥁" "󰥂" "󰥃" "󰥄" "󰥅" "󰥆" "󰥈" ];
-
-          tooltip-format = "{controller_alias}\n{num_connections} connected";
-          tooltip-format-connected = "{controller_alias}\n{num_connections} connected\n\n{device_enumerate}";
-          tooltip-format-enumerate-connected = "{device_alias}";
-          tooltip-format-connected-battery = "{device_alias}\t{icon} {device_battery_percentage}%";
-
-          actions = {
-            # on-click = "${hdrop} -f -b ${getExe pkgs.overskride}";
+          "hyprland/window" = {
+            format = "{}";
+            separate-outputs = true;
+            rewrite = {
+              "\${USER}@\${set_sysname}:(.*)" = "$1 ";
+              "(.*) — Mozilla Firefox" = "$1 󰈹";
+              "(.*)Mozilla Firefox" = "Firefox 󰈹";
+              "(.*) - Visual Studio Code" = "$1 󰨞";
+              "(.*)Visual Studio Code" = "Code 󰨞";
+              "(.*) — Dolphin" = "$1 󰉋";
+              "(.*)Spotify" = "Spotify 󰓇";
+              "(.*)Steam" = "Steam 󰓓";
+            };
+            max-length = 1000;
           };
-        };
 
-        clock = {
-          format = "{:%I:%M %p}";
-          format-alt = "{:%R 󰃭 %d·%m·%y}}";
-          tooltip-format = "<tt>{calendar}</tt>";
-          calendar = {
-            mode = "month";
-            mode-mon-col = 3;
-            on-scroll = 1;
-            on-click-right = "mode";
-            format = {
-              months = "<span color='#ffead3'><b>{}</b></span>";
-              weekdays = "<span color='#ffcc66'><b>{}</b></span>";
-              today = "<span color='#ff6699'><b>{}</b></span>";
+          bluetooth = {
+            format = " {}";
+            format-disabled = " {}";
+            format-connected = " {num_connections}";
+            format-connected-battery = "{icon} {device_alias} {num_connections}";
+            format-icons = [
+              "󰥇"
+              "󰤾"
+              "󰤿"
+              "󰥀"
+              "󰥁"
+              "󰥂"
+              "󰥃"
+              "󰥄"
+              "󰥅"
+              "󰥆"
+              "󰥈"
+            ];
+
+            tooltip-format = ''
+              {controller_alias}
+              {num_connections} connected'';
+            tooltip-format-connected = ''
+              {controller_alias}
+              {num_connections} connected
+
+              {device_enumerate}'';
+            tooltip-format-enumerate-connected = "{device_alias}";
+            tooltip-format-connected-battery = "{device_alias}	{icon} {device_battery_percentage}%";
+
+            actions = {
+              # on-click = "${hdrop} -f -b ${getExe pkgs.overskride}";
             };
           };
-          actions = {
-            on-click-right = "mode";
-            on-click-forward = "tz_up";
-            on-click-backward = "tz_down";
-            on-scroll-up = "shift_up";
-            on-scroll-down = "shift_down";
+
+          clock = {
+            format = "{:%I:%M %p}";
+            format-alt = "{:%R 󰃭 %d·%m·%y}}";
+            tooltip-format = "<tt>{calendar}</tt>";
+            calendar = {
+              mode = "month";
+              mode-mon-col = 3;
+              on-scroll = 1;
+              on-click-right = "mode";
+              format = {
+                months = "<span color='#ffead3'><b>{}</b></span>";
+                weekdays = "<span color='#ffcc66'><b>{}</b></span>";
+                today = "<span color='#ff6699'><b>{}</b></span>";
+              };
+            };
+            actions = {
+              on-click-right = "mode";
+              on-click-forward = "tz_up";
+              on-click-backward = "tz_down";
+              on-scroll-up = "shift_up";
+              on-scroll-down = "shift_down";
+            };
           };
-        };
 
-        mpris = {
-          # format = "{player_icon} {dynamic}";
-          # format-paused = "{status_icon} <i>{dynamic}</i>";
-          player-icons = {
-            default = "▶";
-            mpv = "🎵";
+          mpris = {
+            # format = "{player_icon} {dynamic}";
+            # format-paused = "{status_icon} <i>{dynamic}</i>";
+            player-icons = {
+              default = "▶";
+              mpv = "🎵";
+            };
+            status-icons = {
+              paused = "⏸";
+            };
+            max-length = 60;
+            interval = 1;
           };
-          status-icons = {
-            paused = "⏸";
+
+          network = {
+            tooltip = true;
+            format-wifi = " ";
+            format-ethernet = "󰈀 ";
+            tooltip-format = ''
+              Network: <big><b>{essid}</b></big>
+              Signal strength: <b>{signaldBm}dBm ({signalStrength}%)</b>
+              Frequency: <b>{frequency}MHz</b>
+              Interface: <b>{ifname}</b>
+              IP: <b>{ipaddr}/{cidr}</b>
+              Gateway: <b>{gwaddr}</b>
+              Netmask: <b>{netmask}</b>'';
+            format-linked = "󰈀 {ifname} (No IP)";
+            format-disconnected = "󰖪 ";
+            tooltip-format-disconnected = "Disconnected";
+            format-alt = "<span foreground='#99ffdd'> {bandwidthDownBytes}</span> <span foreground='#ffcc66'> {bandwidthUpBytes}</span>";
+            interval = 1;
           };
-          max-length = 60;
-          interval = 1;
-        };
 
-        network = {
-          tooltip = true;
-          format-wifi = " ";
-          format-ethernet = "󰈀 ";
-          tooltip-format = "Network: <big><b>{essid}</b></big>\nSignal strength: <b>{signaldBm}dBm ({signalStrength}%)</b>\nFrequency: <b>{frequency}MHz</b>\nInterface: <b>{ifname}</b>\nIP: <b>{ipaddr}/{cidr}</b>\nGateway: <b>{gwaddr}</b>\nNetmask: <b>{netmask}</b>";
-          format-linked = "󰈀 {ifname} (No IP)";
-          format-disconnected = "󰖪 ";
-          tooltip-format-disconnected = "Disconnected";
-          format-alt = "<span foreground='#99ffdd'> {bandwidthDownBytes}</span> <span foreground='#ffcc66'> {bandwidthUpBytes}</span>";
-          interval = 1;
-        };
+          "pulseaudio#sink" = {
+            format = "{icon} {volume}%";
+            format-muted = " {volume}%";
+            format-icons = [
+              ""
+              ""
+              ""
+            ];
 
-        "pulseaudio#sink" = {
-          format = "{icon} {volume}%";
-          format-muted = " {volume}%";
-          format-icons = [ "" "" "" ];
+            format-bluetooth = "{icon} {volume}%";
+            format-bluetooth-muted = "";
 
-          format-bluetooth = "{icon} {volume}%";
-          format-bluetooth-muted = "";
+            on-click = "${wpctl} set-mute @DEFAULT_AUDIO_SINK@ toggle";
+            on-click-middle = "${lib.getExe pkgs.pavucontrol} -t 3";
+            on-scroll-up = "${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+";
+            on-scroll-down = "${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-";
 
-          on-click = "${wpctl} set-mute @DEFAULT_AUDIO_SINK@ toggle";
-          on-click-middle = "${lib.getExe pkgs.pavucontrol} -t 3";
-          on-scroll-up = "${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+";
-          on-scroll-down = "${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-";
-
-          max-volume = 150;
-          scroll-step = 5;
-          tooltip = false;
-        };
-
-        "pulseaudio#source" = {
-          format = "{format_source}";
-          format-source = "{volume}%";
-          format-source-muted = "‎{volume}%";
-
-          on-click = "${wpctl} set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
-          on-click-middle = "${lib.getExe pkgs.pavucontrol} -t 4";
-          on-scroll-up = "${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SOURCE@ 5%+";
-          on-scroll-down = "${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SOURCE@ 5%-";
-
-          max-volume = 150;
-          scroll-step = 5;
-          tooltip = false;
-        };
-
-        "custom/weather" = {
-          format = "{} °";
-          tooltip = true;
-          interval = 3600;
-          exec = "${lib.getExe pkgs.wttrbar}";
-          return-type = "json";
-        };
-
-        "wlr/taskbar" = {
-          format = "{icon}";
-          icon-size = "\${i_task}";
-          icon-theme = "\${i_theme}";
-          spacing = 0;
-          tooltip-format = "{title}";
-          on-click = "activate";
-          on-click-middle = "close";
-          ignore-list = [ "Alacritty" ];
-          app_ids-mapping = {
-            firefoxdeveloperedition = "firefox-developer-edition";
+            max-volume = 150;
+            scroll-step = 5;
+            tooltip = false;
           };
-        };
 
-        tray = {
-          icon-size = "\${i_size}";
-          spacing = 5;
-        };
+          "pulseaudio#source" = {
+            format = "{format_source}";
+            format-source = "{volume}%";
+            format-source-muted = "‎{volume}%";
 
-        "custom/notification" = let swaync = lib.getExe' pkgs.swaynotificationcenter "swaync-client"; in {
-          tooltip = false;
-          format = "{icon}";
-          format-icons = {
-            notification = " <span foreground='red'><sup></sup></span>";
-            none = " ";
-            dnd-notification = " <span foreground='red'><sup></sup></span>";
-            dnd-none = " ";
-            inhibited-notification = " <span foreground='red'><sup></sup></span>";
-            inhibited-none = " ";
-            dnd-inhibited-notification = " <span foreground='red'><sup></sup></span>";
-            dnd-inhibited-none = ";";
+            on-click = "${wpctl} set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+            on-click-middle = "${lib.getExe pkgs.pavucontrol} -t 4";
+            on-scroll-up = "${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SOURCE@ 5%+";
+            on-scroll-down = "${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SOURCE@ 5%-";
+
+            max-volume = 150;
+            scroll-step = 5;
+            tooltip = false;
           };
-          return-type = "json";
-          exec-if = "which ${swaync}";
-          exec = "${swaync} -swb";
-          on-click = "${swaync} -t -sw";
-          on-click-right = "${swaync} -d -sw";
-          escape = true;
-        };
 
-        "custom/l_end" = {
-          format = " ";
-          interval = "once";
-          tooltip = false;
-        };
+          "custom/weather" = {
+            format = "{} °";
+            tooltip = true;
+            interval = 3600;
+            exec = "${lib.getExe pkgs.wttrbar}";
+            return-type = "json";
+          };
 
-        "custom/r_end" = {
-          format = " ";
-          interval = "once";
-          tooltip = false;
-        };
+          "wlr/taskbar" = {
+            format = "{icon}";
+            icon-size = "\${i_task}";
+            icon-theme = "\${i_theme}";
+            spacing = 0;
+            tooltip-format = "{title}";
+            on-click = "activate";
+            on-click-middle = "close";
+            ignore-list = [ "Alacritty" ];
+            app_ids-mapping = {
+              firefoxdeveloperedition = "firefox-developer-edition";
+            };
+          };
 
-        "custom/sl_end" = {
-          format = " ";
-          interval = "once";
-          tooltip = false;
-        };
+          tray = {
+            icon-size = "\${i_size}";
+            spacing = 5;
+          };
 
-        "custom/sr_end" = {
-          format = " ";
-          interval = "once";
-          tooltip = false;
-        };
+          "custom/notification" =
+            let
+              swaync = lib.getExe' pkgs.swaynotificationcenter "swaync-client";
+            in
+            {
+              tooltip = false;
+              format = "{icon}";
+              format-icons = {
+                notification = " <span foreground='red'><sup></sup></span>";
+                none = " ";
+                dnd-notification = " <span foreground='red'><sup></sup></span>";
+                dnd-none = " ";
+                inhibited-notification = " <span foreground='red'><sup></sup></span>";
+                inhibited-none = " ";
+                dnd-inhibited-notification = " <span foreground='red'><sup></sup></span>";
+                dnd-inhibited-none = ";";
+              };
+              return-type = "json";
+              exec-if = "which ${swaync}";
+              exec = "${swaync} -swb";
+              on-click = "${swaync} -t -sw";
+              on-click-right = "${swaync} -d -sw";
+              escape = true;
+            };
 
-        "custom/rl_end" = {
-          format = " ";
-          interval = "once";
-          tooltip = false;
-        };
+          "custom/l_end" = {
+            format = " ";
+            interval = "once";
+            tooltip = false;
+          };
 
-        "custom/rr_end" = {
-          format = " ";
-          interval = "once";
-          tooltip = false;
-        };
+          "custom/r_end" = {
+            format = " ";
+            interval = "once";
+            tooltip = false;
+          };
 
-        "custom/padd" = {
-          format = "  ";
-          interval = "once";
-          tooltip = false;
+          "custom/sl_end" = {
+            format = " ";
+            interval = "once";
+            tooltip = false;
+          };
+
+          "custom/sr_end" = {
+            format = " ";
+            interval = "once";
+            tooltip = false;
+          };
+
+          "custom/rl_end" = {
+            format = " ";
+            interval = "once";
+            tooltip = false;
+          };
+
+          "custom/rr_end" = {
+            format = " ";
+            interval = "once";
+            tooltip = false;
+          };
+
+          "custom/padd" = {
+            format = "  ";
+            interval = "once";
+            tooltip = false;
+          };
         };
       };
-    };
 
-    style = /*css*/ ''
+    style = ''
       @define-color bar-bg rgba(0, 0, 0, 0);
 
       @define-color wb-act-bg #a6adc8;

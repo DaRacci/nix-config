@@ -1,28 +1,33 @@
 { inputs, lib, ... }:
 let
-  usePRRaw = final: prev: names: owner: branch: sha256:
+  usePRRaw =
+    final: prev: names: owner: branch: sha256:
     let
-      overlay = import
-        (final.fetchzip {
-          inherit sha256;
-          url = "https://github.com/${owner}/nixpkgs/archive/${branch}.tar.gz";
-        })
-        { overlays = [ ]; inherit (prev) config; };
+      overlay =
+        import
+          (final.fetchzip {
+            inherit sha256;
+            url = "https://github.com/${owner}/nixpkgs/archive/${branch}.tar.gz";
+          })
+          {
+            overlays = [ ];
+            inherit (prev) config;
+          };
     in
-    lib.foldl'
-      (acc: name: acc // {
-        ${name} = overlay.${name};
-      })
-      { }
-      names;
+    lib.foldl' (acc: name: acc // { ${name} = overlay.${name}; }) { } names;
 in
 {
-  additions = final: prev:
-    let usePR = usePRRaw final prev; in
+  additions =
+    final: prev:
+    let
+      usePR = usePRRaw final prev;
+    in
     prev.lib.foldl' prev.lib.recursiveUpdate { } [
       # This one brings our custom packages from the 'pkgs' directory
       (import ../pkgs { pkgs = final; })
-      (usePR [ "protonup-rs" ] "liperium" "protonuprs-init" "sha256-z5Zh+ih0gE+Uwl8b7//apBRbrsHTvpV0PAhQwM8mOZ4=")
+      (usePR [
+        "protonup-rs"
+      ] "liperium" "protonuprs-init" "sha256-z5Zh+ih0gE+Uwl8b7//apBRbrsHTvpV0PAhQwM8mOZ4=")
       (usePR [ "boxflat" ] "DaRacci" "boxflat" "sha256-+Rz1Cb0ALFhh4v+yf3og5v0F0Tt1Qc7mznUyZIebSBw=")
     ];
 
@@ -37,9 +42,12 @@ in
     discord =
       let
         nss =
-          if final.stdenv.buildPlatform.isLinux
-          then { nss = final.nss_latest; }
-          else { };
+          if final.stdenv.buildPlatform.isLinux then
+            {
+              nss = final.nss_latest;
+            }
+          else
+            { };
       in
       final.discord.override ({ withOpenASAR = true; } // nss);
 

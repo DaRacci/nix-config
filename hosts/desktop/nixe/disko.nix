@@ -27,7 +27,10 @@
                 type = "btrfs";
                 subvolumes = {
                   "@nix" = {
-                    mountOptions = [ "compress=zstd" "noatime" ];
+                    mountOptions = [
+                      "compress=zstd"
+                      "noatime"
+                    ];
                     mountpoint = "/nix";
                   };
 

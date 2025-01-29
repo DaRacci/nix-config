@@ -17,8 +17,6 @@ in
       nvidiaSupport = config.hardware.graphics == "nvidia";
     };
 
-    host.persistence.directories = [
-      "/etc/coolercontrol"
-    ];
+    host.persistence.directories = [ "/etc/coolercontrol" ];
   };
 }

@@ -1,4 +1,5 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   hardware = {
     steam-hardware.enable = true;
     graphics = {

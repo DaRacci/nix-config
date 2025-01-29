@@ -1,6 +1,8 @@
 # This file contains an ephemeral btrfs root configuration
 # TODO: perhaps partition using disko in the future
-{ config, lib, ... }: with lib; let
+{ config, lib, ... }:
+with lib;
+let
   cfg = config.host.drive;
 in
 {
@@ -12,16 +14,18 @@ in
       default = config.networking.hostName;
     };
 
-    format = mkOption {
-      type = types.enum [ "btrfs" ];
-    };
+    format = mkOption { type = types.enum [ "btrfs" ]; };
   };
 
   config = mkIf cfg.enable {
     fileSystems."/nix" = mkIf (cfg.format == "btrfs") {
       device = "/dev/disk/by-partlabel/${cfg.name}";
       fsType = cfg.format;
-      options = [ "subvol=@store" "noatime" "compress=zstd" ];
+      options = [
+        "subvol=@store"
+        "noatime"
+        "compress=zstd"
+      ];
       neededForBoot = true;
     };
   };

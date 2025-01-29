@@ -1,4 +1,5 @@
-{ flake, ... }: {
+{ flake, ... }:
+{
   imports = [
     "${flake}/home/shared/features/cli"
     ./cava.nix
@@ -7,7 +8,5 @@
     ./terminal.nix
   ];
 
-  user.persistence.directories = [
-    ".terraform.d"
-  ];
+  user.persistence.directories = [ ".terraform.d" ];
 }

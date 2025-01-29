@@ -1,4 +1,5 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, ... }:
+{
   programs.carapace = {
     enable = true;
     package = pkgs.carapace;

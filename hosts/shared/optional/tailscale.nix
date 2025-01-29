@@ -1,4 +1,10 @@
-{ flake, config, pkgs, ... }: {
+{
+  flake,
+  config,
+  pkgs,
+  ...
+}:
+{
   sops.secrets.TAILSCALE_AUTH_KEY = {
     sopsFile = "${flake}/hosts/secrets.yaml";
   };
@@ -10,7 +16,5 @@
     authKeyFile = config.sops.secrets.TAILSCALE_AUTH_KEY.path;
   };
 
-  host.persistence.directories = [
-    "/var/lib/tailscale"
-  ];
+  host.persistence.directories = [ "/var/lib/tailscale" ];
 }

@@ -1,5 +1,8 @@
 { flake, pkgs, ... }:
-let inherit (pkgs) lib; in {
+let
+  inherit (pkgs) lib;
+in
+{
   imports = [
     "${flake}/home/shared/desktop/common"
     "${flake}/home/shared/desktop/wayland"
@@ -35,7 +38,9 @@ let inherit (pkgs) lib; in {
 
   xdg.mimeApps =
     let
-      forAll = desktop: mimes: lib.mine.attrsets.recursiveMergeAttrs (builtins.map (mime: { ${mime} = desktop; }) mimes);
+      forAll =
+        desktop: mimes:
+        lib.mine.attrsets.recursiveMergeAttrs (builtins.map (mime: { ${mime} = desktop; }) mimes);
     in
     {
       enable = true;

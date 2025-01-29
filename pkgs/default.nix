@@ -1,4 +1,5 @@
-{ pkgs }: {
+{ pkgs }:
+{
   # Modding
   ficsit-cli = pkgs.callPackage ./ficsit-cli { };
 

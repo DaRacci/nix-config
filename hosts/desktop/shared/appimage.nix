@@ -2,7 +2,11 @@
 { pkgs, lib, ... }:
 let
   package = pkgs.appimage-run.override {
-    extraPkgs = pkgs: with pkgs; [ libthai libxkbcommon ];
+    extraPkgs =
+      pkgs: with pkgs; [
+        libthai
+        libxkbcommon
+      ];
   };
 in
 {
@@ -11,8 +15,8 @@ in
     interpreter = lib.getExe package;
     recognitionType = "magic";
     offset = 0;
-    mask = ''\xff\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff'';
-    magicOrExtension = ''\x7fELF....AI\x02'';
+    mask = "\\xff\\xff\\xff\\xff\\x00\\x00\\x00\\x00\\xff\\xff\\xff";
+    magicOrExtension = "\\x7fELF....AI\\x02";
   };
 
   environment.systemPackages = [ package ];

@@ -1,7 +1,6 @@
-{ modulesPath, config, ... }: {
-  imports = [
-    "${modulesPath}/virtualisation/proxmox-lxc.nix"
-  ];
+{ modulesPath, config, ... }:
+{
+  imports = [ "${modulesPath}/virtualisation/proxmox-lxc.nix" ];
 
   sops.secrets = {
     SEARXNG_SETTINGS = {

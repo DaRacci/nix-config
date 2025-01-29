@@ -1,4 +1,5 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   programs.obs-studio = {
     enable = true;
     package = pkgs.obs-studio;
@@ -12,8 +13,12 @@
     ];
   };
 
-  user.persistence = let dir = ".config/obs-studio"; in {
-    directories = [ "${dir}/basic" ];
-    files = [ "${dir}/global.ini" ];
-  };
+  user.persistence =
+    let
+      dir = ".config/obs-studio";
+    in
+    {
+      directories = [ "${dir}/basic" ];
+      files = [ "${dir}/global.ini" ];
+    };
 }

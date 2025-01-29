@@ -1,4 +1,10 @@
-{ config, pkgs, lib, ... }: {
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+{
   services = rec {
     nextcloud = {
       enable = true;
@@ -17,7 +23,8 @@
           notify_push
           spreed
           tasks
-          twofactor_webauthn;
+          twofactor_webauthn
+          ;
       };
 
       https = true;
@@ -88,23 +95,24 @@
       };
 
       # Just copied what AIO provides.
-      phpExtraExtensions = all: with all; [
-        pdlib
-        bcmath
-        exif
-        ftp
-        gd
-        gmp
-        igbinary
-        imap
-        ldap
-        pcntl
-        pdo_pgsql
-        pgsql
-        smbclient
-        sysvsem
-        zip
-      ];
+      phpExtraExtensions =
+        all: with all; [
+          pdlib
+          bcmath
+          exif
+          ftp
+          gd
+          gmp
+          igbinary
+          imap
+          ldap
+          pcntl
+          pdo_pgsql
+          pgsql
+          smbclient
+          sysvsem
+          zip
+        ];
 
       notify_push = {
         enable = true;
@@ -147,10 +155,15 @@
 
     postgresql = {
       ensureDatabases = [ nextcloud.config.dbname ];
-      ensureUsers = [{ name = nextcloud.config.dbuser; ensureDBOwnership = true; }];
+      ensureUsers = [
+        {
+          name = nextcloud.config.dbuser;
+          ensureDBOwnership = true;
+        }
+      ];
     };
 
-    caddy.virtualHosts."nc".extraConfig = /*caddyfile*/ ''
+    caddy.virtualHosts."nc".extraConfig = ''
       reverse_proxy http://localhost:80
     '';
   };
