@@ -9,7 +9,10 @@ with lib;
 let
   cfg = config.custom.audio;
   updatedDevicesPath = "wireplumber/wireplumber.conf.d/50-update-devices.conf";
-  disabledDevicesPath = "wireplumber/wireplumber.conf.d/51-disable-devices.conf";
+  disabledDevicesPath = "wireplumber/wireplumber.conf.d/51-disabled-devices.conf";
+  disabledNodesPath = "wireplumber/wireplumber.conf.d/52-disabled-nodes.conf";
+
+  getType = target: if (lib.hasPrefix "alsa_card" target) then "device" else "node";
 in
 {
   options.custom.audio = {
@@ -31,38 +34,21 @@ in
         with types;
         listOf (submodule {
           options = {
-            node = mkOption {
+            name = mkOption {
               type = str;
               description = ''
-                The node name to update.
+                The node or device name.
                 To find the name use the guide at https://wiki.archlinux.org/title/WirePlumber#Obtain_interface_name_for_rules_matching
               '';
             };
 
             props = mkOption {
-              type =
-                with types;
-                listOf (submodule {
-                  options = {
-                    name = mkOption {
-                      type = str;
-                      description = ''
-                        The property name to update.
-                        To find the name use the guide at https://wiki.archlinux.org/title/WirePlumber#Obtain_interface_name_for_rules_matching
-                      '';
-                    };
-
-                    value = mkOption {
-                      type = str;
-                      description = ''
-                        The property value to set.
-                      '';
-                    };
-                  };
-                });
-              default = [ ];
+              type = with types; attrsOf str;
+              default = { };
               description = ''
-                A list of properties to update.
+                Properties to update.
+
+                To find the name use the guide at https://wiki.archlinux.org/title/WirePlumber#Obtain_interface_name_for_rules_matching
               '';
             };
           };
@@ -81,57 +67,85 @@ in
       package = pkgs.playerctl;
     };
 
-    xdg.configFile.${disabledDevicesPath} = mkIf ((length cfg.disabledDevices) > 0) {
-      text = ''
-        monitor.alsa.rules = [{
-          matches = [
-            ${trivial.pipe cfg.disabledDevices [
-              (map (device: ''
-                {
-                  device.name = "${device}"
-                },
-              ''))
-              (concatStringsSep "\n")
-            ]}
-          ]
-
-          actions = {
-            update-props = {
-              device.disabled = true;
-            }
-          }
-        }]
-      '';
-    };
-
-    xdg.configFile.${updatedDevicesPath} = mkIf ((length cfg.updateDevices) > 0) {
-      text = ''
-        monitor.alsa.rules = [
-          ${trivial.pipe cfg.updateDevices [
-            (map (device: ''
-              {
-                matches = [
+    xdg.configFile =
+      let
+        disabledNodes = filter (name: getType name == "node") cfg.disabledDevices;
+        disabledDevices = filter (name: getType name == "device") cfg.disabledDevices;
+      in
+      {
+        "${updatedDevicesPath}" = mkIf ((length cfg.updateDevices) > 0) {
+          text = ''
+            monitor.alsa.rules = [
+              ${lib.pipe cfg.updateDevices [
+                (map (target: ''
                   {
-                    device.name = "${device.node}"
-                  }
-                ]
+                    matches = [
+                      {
+                        ${getType target.name}.name = "${target.name}"
+                      }
+                    ]
 
-                actions = {
-                  update-props = {
-                    ${trivial.pipe device.props [
-                      (map (prop: ''
-                        "${prop.name}" = "${prop.value}"
-                      ''))
-                      (concatStringsSep "\n")
-                    ]}
+                    actions = {
+                      update-props = {
+                        ${lib.pipe target.props [
+                          (mapAttrsToList (name: value: "${name} = ${builtins.toJSON value}"))
+                          (concatStringsSep "\n")
+                        ]}
+                      }
+                    }
                   }
+                ''))
+                (concatStringsSep "\n")
+              ]}
+            ]
+          '';
+        };
+
+        "${disabledNodesPath}" = mkIf ((length disabledNodes) > 0) {
+          text = ''
+            monitor.alsa.rules = [{
+              matches = [
+                ${lib.pipe disabledNodes [
+                  (map (name: ''
+                    {
+                      node.name = "${name}"
+                    }
+                  ''))
+                  (concatStringsSep "\n")
+                ]}
+              ]
+
+              actions = {
+                update-props = {
+                  node.disabled = true
                 }
               }
-            ''))
-            (concatStringsSep "\n")
-          ]}
-        ]
-      '';
-    };
+            }]
+          '';
+        };
+
+        "${disabledDevicesPath}" = mkIf ((length disabledDevices) > 0) {
+          text = ''
+            monitor.alsa.rules = [{
+              matches = [
+                ${lib.pipe disabledDevices [
+                  (map (name: ''
+                    {
+                      device.name = "${name}"
+                    }
+                  ''))
+                  (concatStringsSep "\n")
+                ]}
+              ]
+
+              actions = {
+                update-props = {
+                  device.disabled = true
+                }
+              }
+            }]
+          '';
+        };
+      };
   };
 }
