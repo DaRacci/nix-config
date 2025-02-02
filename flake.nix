@@ -250,9 +250,6 @@
       };
 
   inputs = {
-    # Flake Inputs
-    nixpkgs-lib.url = "github:nix-community/nixpkgs.lib";
-
     # Packages
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nur.url = "github:nix-community/NUR";
@@ -269,7 +266,7 @@
     nixos-generators = {
       url = "github:nix-community/nixos-generators";
       inputs = {
-        nixlib.follows = "nixpkgs-lib";
+        nixlib.follows = "nixpkgs";
         nixpkgs.follows = "nixpkgs";
       };
     };
