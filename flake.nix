@@ -245,7 +245,7 @@
               };
             };
 
-            formatter = pkgs.nixfmt-nixfmt-rfc-style;
+            formatter = pkgs.nixfmt-rfc-style;
           };
       };
 
