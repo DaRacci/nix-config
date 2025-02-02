@@ -22,7 +22,7 @@ jobs:
           NIX_FILE="$DIR/extensions.nix"
           VSCODE_VERSION=$(nix eval --raw nixpkgs#vscode.version)
 
-          sed -i "s/vscode_version = \".*\"/vscode_version = \"$VSCODE_VERSION\"/" modules/purpose/development/vscode/config.toml
+          sed -i "s/vscode_version = \".*\"/vscode_version = \"$VSCODE_VERSION\"/" "$CONFIG"
           nix run github:nix-community/nix4vscode -- "$CONFIG" -o "$NIX_FILE"
 
       - uses: EndBug/add-and-commit@v9
