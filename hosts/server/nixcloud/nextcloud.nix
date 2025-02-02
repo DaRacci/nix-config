@@ -6,7 +6,7 @@
 }:
 {
   users.users.nextcloud.group = "nextcloud";
-  users.groups.nextloud = { };
+  users.groups.nextcloud = { };
 
   services = rec {
     nextcloud = {
