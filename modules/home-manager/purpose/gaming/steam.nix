@@ -27,15 +27,26 @@ in
     };
 
     home = {
-      activation.decky-loader-enabler = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        FILE="$HOME/.local/share/Steam/.cef-enable-remote-debugging"
+      activation.steam-setup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        STEAM="$HOME/.local/share/Steam"
 
-        if [ -f $FILE ]; then
-          echo "CEF Remote Debugging already enabled"
-        else
-          echo "Enabling CEF Remote Debugging"
-          touch $FILE
+        CEF_FILE="$STEAM/.cef-enable-remote-debugging"
+        if [ ! -f $CEF_FILE ]; then
+          touch $CEF_FILE
         fi
+
+        DEV_CONFIG="$STEAM/steam_dev.cfg"
+        CONTENTS=(
+          "unShaderBackgroundProcessingThreads 8"
+          "@nClientDownloadEnableHTTP2PlatformLinux 0"
+          "@fDownloadRateImprovementToAddAnotherConnection 1.1"
+          "@cMaxInitialDownloadSources 15"
+        )
+        for LINE in "''${CONTENTS[@]}"; do
+          if ! grep -q "$LINE" $DEV_CONFIG; then
+            echo "$LINE" >> $DEV_CONFIG
+          fi
+        done
       '';
 
       packages = with pkgs; [

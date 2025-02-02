@@ -1091,15 +1091,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1737307080,
-        "narHash": "sha256-YKQbvo0758a1P3pjWh75qZDPIC/18ttDtPk9PD4S4lQ=",
-        "owner": "Jovian-Experiments",
+        "lastModified": 1738167453,
+        "narHash": "sha256-jtcWFimXOllGNhOyk7qdvQ7z5KQDeXFSVS7jysevL+A=",
+        "owner": "Faupi",
         "repo": "Jovian-NixOS",
-        "rev": "e26d456e9d9a33f66e1985ab4c06e1940352ef40",
+        "rev": "fe8c70b66bf69211b5938cc503d12cec3afaef46",
         "type": "github"
       },
       "original": {
-        "owner": "Jovian-Experiments",
+        "owner": "Faupi",
+        "ref": "wrap-steam-override-args",
         "repo": "Jovian-NixOS",
         "type": "github"
       }

@@ -19,16 +19,24 @@
       "-r 0" # Uncap framerate
       "--rt"
       "--adaptive-sync"
-      "--xwayland-count 1"
+      "--fullscreen"
+      "--mangoapp"
     ];
   };
 
   programs.steam = {
     enable = true;
-    package = pkgs.steam;
+    package = pkgs.steam.override {
+      extraArgs = "-steamos3 -steamdeck -steampal -gamepadui";
+    };
+    extest.enable = true;
     extraPackages = with pkgs; [
       xwayland-run
       proton-ge-bin
+
+      # Steam logs errors about missing these, not sure for what though.
+      xorg.xwininfo
+      usbutils
     ];
 
     remotePlay.openFirewall = true;
