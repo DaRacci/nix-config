@@ -68,6 +68,11 @@ jobs:
       - uses: ./.github/actions/setup-nix
         with:
           arch: ${{ matrix.system }}
+          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
+          ATTIC_ENDPOINT: ${{ secrets.ATTIC_ENDPOINT }}
+          ATTIC_CACHE: ${{ secrets.ATTIC_CACHE }}
+          ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
 
       - name: Evaluate ${{ matrix.host }}
         env:
@@ -102,6 +107,11 @@ jobs:
       - uses: ./.github/actions/setup-nix
         with:
           arch: ${{ matrix.system }}
+          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
+          ATTIC_ENDPOINT: ${{ secrets.ATTIC_ENDPOINT }}
+          ATTIC_CACHE: ${{ secrets.ATTIC_CACHE }}
+          ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
 
       - name: Run ${{ matrix.command }} on ${{ matrix.system }}
         env:

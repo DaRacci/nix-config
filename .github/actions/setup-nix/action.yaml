@@ -5,6 +5,22 @@ inputs:
   arch:
     description: "What architecture to install for"
     required: true
+  TS_OAUTH_CLIENT_ID:
+    description: "Tailscale OAuth Client ID"
+    required: true
+  TS_OAUTH_SECRET:
+    description: "Tailscale OAuth Secret"
+    required: true
+  ATTIC_ENDPOINT:
+    description: "Attic endpoint"
+    required: true
+  ATTIC_CACHE:
+    description: "Attic cache"
+    required: true
+  ATTIC_TOKEN:
+    description: "Attic token"
+    required: true
+
 runs:
   using: composite
   steps:
@@ -16,13 +32,13 @@ runs:
     - name: Tailscale
       uses: tailscale/github-action@v3
       with:
-        oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-        oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+        oauth-client-id: ${{ inputs.TS_OAUTH_CLIENT_ID }}
+        oauth-secret: ${{ inputs.TS_OAUTH_SECRET }}
         tags: tag:ci
 
     - name: Setup Attic cache
       uses: ryanccn/attic-action@v0
       with:
-        endpoint: ${{ secrets.ATTIC_ENDPOINT }}
-        cache: ${{ secrets.ATTIC_CACHE }}
-        token: ${{ secrets.ATTIC_TOKEN }}
+        endpoint: ${{ inputs.ATTIC_ENDPOINT }}
+        cache: ${{ inputs.ATTIC_CACHE }}
+        token: ${{ inputs.ATTIC_TOKEN }}
