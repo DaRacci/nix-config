@@ -17,7 +17,7 @@ jobs:
           arch: x86_64-linux
 
       - run: |
-          DIR="modules/purpose/development/vscode"
+          DIR="modules/home-manager/purpose/development/vscode"
           CONFIG="$DIR/config.toml"
           NIX_FILE="$DIR/extensions.nix"
           VSCODE_VERSION=$(nix eval --raw nixpkgs#vscode.version)
