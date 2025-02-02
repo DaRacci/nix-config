@@ -328,8 +328,7 @@
       };
     };
     jovian = {
-      # TODO: Change this to the official repo once the PR is merged
-      url = "github:Faupi/Jovian-NixOS/wrap-steam-override-args";
+      url = "github:Jovian-Experiments/Jovian-NixOS";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixarr = {
