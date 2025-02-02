@@ -173,12 +173,12 @@ in
               ignored = [ ];
             };
             formatting = {
-              command = [ "${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt" ];
+              command = [ "${lib.getExe pkgs.nixfmt-nixfmt-rfc-style}" ];
             };
           };
 
           nixd = {
-            formatting.command = "${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt";
+            formatting.command = "${lib.getExe pkgs.nixfmt-nixfmt-rfc-style}";
             eval = {
               enable = true;
               targets = {
@@ -206,7 +206,7 @@ in
         "direnv.restart.automatic" = true;
         "direnv.status.showChangesCount" = true;
 
-        "caddyfile.executable" = "${pkgs.caddy}/bin/caddy";
+        "caddyfile.executable" = "${lib.getExe pkgs.caddy}";
 
         "redhat.telemetry.enabled" = false;
 
