@@ -5,8 +5,36 @@
   ...
 }:
 {
-  users.users.nextcloud.group = "nextcloud";
-  users.groups.nextcloud = { };
+  users = {
+    users.nextcloud = {
+      group = "nextcloud";
+      uid = 997;
+      extraGroups = [ "docker" ];
+    };
+
+    groups.nextcloud.gid = 997;
+
+    users.protonmail-bridge = {
+      isSystemUser = true;
+      home = "/var/lib/protonmail-bridge";
+      group = "protonmail-bridge";
+      createHome = true;
+    };
+    groups.protonmail-bridge.members = [ "protonmail-bridge" ];
+  };
+
+  sops.secrets =
+    let
+      ncOwned = {
+        owner = config.users.users.nextcloud.name;
+        inherit (config.users.users.nextcloud) group;
+      };
+    in
+    {
+      "NEXTCLOUD/admin-password" = ncOwned;
+      "NEXTCLOUD/S3FS_AUTH" = ncOwned;
+      "POSTGRES/NEXTCLOUD_PASSWORD" = ncOwned;
+    };
 
   services = rec {
     nextcloud = {
@@ -169,6 +197,34 @@
     caddy.virtualHosts."nc".extraConfig = ''
       reverse_proxy http://localhost:80
     '';
+
+    passSecretService.enable = true;
+  };
+
+  virtualisation.docker.enable = true;
+
+  systemd.services = {
+    postgresql = {
+      enable = lib.mkForce false;
+      postStart = ''
+        ${lib.mine.mkPostgresRolePass config.services.nextcloud.config.dbname
+          config.sops.secrets."POSTGRES/NEXTCLOUD_PASSWORD".path
+        }
+      '';
+    };
+
+    protonmail-bridge = {
+      after = lib.mkForce [ "network.target" ];
+      wantedBy = lib.mkForce [ "default.target" ];
+      script = "${pkgs.protonmail-bridge}/bin/protonmail-bridge --no-window --noninteractive --log-level info";
+      path = [ pkgs.pass ];
+
+      serviceConfig = {
+        Restart = "always";
+        RestartSec = "5";
+        User = config.users.users.protonmail-bridge.name;
+      };
+    };
   };
 
   networking = {

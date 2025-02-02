@@ -1,5 +1,22 @@
-{ config, ... }:
+{ config, lib, ... }:
 {
+  users = {
+    users.immich.uid = 998;
+    groups.immich.gid = 998;
+  };
+
+  sops.secrets =
+    let
+      immichOwned = {
+        owner = config.users.users.immich.name;
+        inherit (config.users.users.immich) group;
+      };
+    in
+    {
+      "POSTGRES/IMMICH_PASSWORD" = immichOwned;
+      "IMMICH/ENV" = immichOwned;
+    };
+
   services = {
     immich = {
       enable = true;
@@ -32,5 +49,22 @@
       ''
         reverse_proxy http://${cfg.host}:${toString cfg.port}
       '';
+  };
+
+  systemd.services = {
+    postgresql = {
+      enable = lib.mkForce false;
+      postStart = ''
+        ${lib.mine.mkPostgresRolePass config.services.immich.database.name
+          config.sops.secrets."POSTGRES/IMMICH_PASSWORD".path
+        }
+      '';
+    };
+  };
+
+  networking = {
+    firewall = {
+      allowedTCPPorts = [ config.services.immich.port ];
+    };
   };
 }
