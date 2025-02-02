@@ -33,7 +33,9 @@ in
   config = mkIf cfg.enable {
     programs.vscode = mkIf cfg.vscode.enable {
       enable = true;
-      package = pkgs.vscode;
+      package = pkgs.vscode.override {
+        commandLineArgs = "--disable-gpu-compositing";
+      };
 
       # Allows Settings Sync to work;
       # TODO -> Maybe replace with sync from nextcloud?
