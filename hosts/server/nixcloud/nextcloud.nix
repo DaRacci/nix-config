@@ -5,6 +5,9 @@
   ...
 }:
 {
+  users.users.nextcloud.group = "nextcloud";
+  users.groups.nextloud = { };
+
   services = rec {
     nextcloud = {
       enable = true;
