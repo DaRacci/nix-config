@@ -36,3 +36,4 @@ jobs:
     name: Build and test
     uses: ./.github/workflows/ci.yaml
     needs: update
+    secrets: inherit
