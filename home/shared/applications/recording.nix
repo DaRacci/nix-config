@@ -5,9 +5,8 @@
     package = pkgs.obs-studio;
     plugins = with pkgs.obs-studio-plugins; [
       wlrobs
-      # obs-vkcapture
+      obs-vkcapture
       obs-pipewire-audio-capture
-      # obs-backgroundremoval
       looking-glass-obs
       input-overlay
     ];
