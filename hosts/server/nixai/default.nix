@@ -321,7 +321,7 @@
           {
             name = "duckduckgo definitions";
             engine = "duckduckgo_definitions";
-            shortcut = "ddd";
+            # shortcut = "ddd";
             weight = 2.0;
             categories = [ "utilities" ];
           }
