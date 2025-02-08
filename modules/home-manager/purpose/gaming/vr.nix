@@ -23,12 +23,19 @@ in
 
       file.".config/alvr/alvr-startup.sh" = {
         executable = true;
-        text = ''
-          trap 'jobs -p | xargs kill' EXIT
+        source = pkgs.writeShellApplication {
+          name = "alvr-startup.sh";
+          runtimeInputs = [
+            pkgs.vrcadvert
+            pkgs.oscavmgr
+          ];
+          text = ''
+            trap 'jobs -p | xargs kill' EXIT
 
-          ${lib.getExe pkgs.vrcadvert} 9402 9002 &
-          ${lib.getExe pkgs.oscavmgr} alvr
-        '';
+            runtimeInputs 9402 9002 &
+            oscavmgr alvr
+          '';
+        };
       };
 
       file.".config/alvr/alvr-stop.sh" = {
@@ -70,6 +77,9 @@ in
       ".config/alvr"
       ".android"
       ".SideQuest"
+      ".config/envision"
+      ".local/share/envision"
+      ".config/wivrn"
     ];
   };
 }
