@@ -10,10 +10,17 @@ This is my interpretation of the perfect nix flake, this powers my desktops, vms
 
 ## Supported Configurations
 
-- [NixOS][nixos]-managed
-  - `nixe` (Personal Desktop)
-  - `surnix` (Personal Surface Laptop)
-  - `winix` (WSL 2 instance on Windows)
+- [NixOS]-managed
+  - Desktops
+    - [nixe] (Personal Desktop)
+    - [winix] (WSL 2 instance on Windows for Work)
+  - Servers
+    - [nixai] (Locally hosted AI)
+    - [nixcloud] (Replacing usage of external cloud services)
+    - [nixdev] (Development)
+    - [nixio] (Interface between the web & internal services)
+    - [nixmon] (Monitoring)
+    - [nixserv] (Nix Cache & Build System)
 
 ## Repository Structure
 
@@ -42,9 +49,17 @@ This is my interpretation of the perfect nix flake, this powers my desktops, vms
 - Cosmic Desktop once stabalised
 - SteamDeck like desktop mode
 
+[home-manager]: https://github.com/nix-community/home-manager
+[impermanence]: https://github.com/nix-community/impermanence
+[nixai]: ./hosts/server/nixai/
+[nixcloud]: ./hosts/server/nixcloud/
+[nixdev]: ./hosts/server/nixdev/
+[nixe]: ./hosts/desktop/nixe/
+[nixio]: ./hosts/server/nixio/
+[nixmon]: ./hosts/server/nixmon/
+[nixos]: https://nixos.org/
+[nixserv]: ./hosts/server/nixserv/
 [sops]: https://github.com/mozilla/sops
 [sops-nix]: https://github.com/Mic92/sops-nix
-[home-manager]: https://github.com/nix-community/home-manager
-[impermanence]: https://github.com/nix-community/impermancence
-[nixos]: https://nixos.org/
 [update-flake-lock]: https://github.com/DeterminateSystems/update-flake-lock
+[winix]: ./hosts/desktop/winix/
