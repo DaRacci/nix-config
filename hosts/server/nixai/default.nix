@@ -174,7 +174,7 @@
           }
           {
             name = "duckduckgo images";
-            engine = "duckduckgo_images";
+            engine = "duckduckgo_extra";
             shortcut = "ddgi";
             categories = [
               "images"
