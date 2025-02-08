@@ -13,7 +13,7 @@
       size = 32;
     };
 
-    fonts = rec {
+    fonts = {
       emoji = {
         package = pkgs.openmoji-color;
         name = "OpenMoji Color";
@@ -24,11 +24,15 @@
         name = "JetBrainsMono Nerd Font";
       };
 
-      sansSerif = {
-        package = pkgs.fira;
-        name = "Fira Sans";
+      serif = {
+        package = pkgs.dejavu_fonts;
+        name = "DejaVu Serif";
       };
-      serif = sansSerif;
+
+      sansSerif = {
+        package = pkgs.dejavu_fonts;
+        name = "DejaVu Sans";
+      };
 
       sizes = {
         applications = 14;
