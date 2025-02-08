@@ -1,6 +1,7 @@
+# shellcheck disable=SC2148
+
 # Usage: new-host.sh host-type host-name
 # Example: new-host.sh server nixai
-
 
 set -e
 set -o pipefail

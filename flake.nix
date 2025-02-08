@@ -157,6 +157,7 @@
       {
         imports = [
           inputs.devenv.flakeModule
+          inputs.treefmt.flakeModule
         ];
 
         systems = [
@@ -178,6 +179,36 @@
             _module.args.pkgs = mkPkgs system false false;
 
             packages = import ./pkgs { inherit pkgs; };
+
+            treefmt = {
+              projectRootFile = ".git/config";
+
+              programs.actionlint.enable = true;
+              programs.deadnix.enable = true;
+              programs.nixfmt.enable = true;
+              programs.shellcheck.enable = true;
+              programs.statix.enable = true;
+              programs.typos = {
+                enable = true;
+                locale = "en-au";
+                configFile = "${pkgs.writers.writeTOML "typos.toml" {
+                  default.extend-words = {
+                    lazer = "lazer";
+                    Optin = "Optin";
+                    tere = "tere";
+                    ags = "ags";
+                    hassio = "hassio";
+                  };
+                }}";
+              };
+
+              settings.formatter.shellcheck.excludes = [ ".envrc" ];
+              settings.global.excludes = [
+                "**/secrets.yaml"
+                "**/ssh_host_ed25519_key.pub"
+                "modules/home-manager/purpose/development/vscode/extensions.nix"
+              ];
+            };
 
             devenv.shells.default = {
               # Fixes https://github.com/cachix/devenv/issues/528
@@ -207,45 +238,10 @@
                 nix.enable = true;
               };
 
-              pre-commit = {
-                excludes = [
-                  "secrets.yaml"
-                  "extensions.nix"
-                ];
-
-                hooks = {
-                  typos = {
-                    enable = true;
-                    settings = {
-                      diff = true;
-                      ignored-words = [
-                        "lazer"
-                        "Optin"
-                        "tere"
-                        "ags"
-                        "hassio"
-                      ];
-                    };
-                  };
-                  editorconfig-checker.enable = true;
-                  actionlint.enable = true;
-
-                  nil.enable = true;
-                  deadnix.enable = true;
-                  nixfmt-rfc-style.enable = true;
-                  statix = {
-                    enable = true;
-                    settings.ignore = [ "extensions.nix" ];
-                  };
-                };
-              };
-
               env = {
                 NIX_CONFIG = "extra-experimental-features = nix-command flakes";
               };
             };
-
-            formatter = pkgs.nixfmt-rfc-style;
           };
       };
 
@@ -316,6 +312,7 @@
     nix-alien = {
       url = "github:thiagokokada/nix-alien";
     };
+    treefmt.url = "github:numtide/treefmt-nix";
 
     # Modules only used on some systems
     nixos-wsl = {
