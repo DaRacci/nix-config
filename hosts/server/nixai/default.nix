@@ -352,6 +352,7 @@
             name = "ebay";
             engine = "ebay";
             shortcut = "eb";
+            base_url = "https://www.ebay.com";
             categories = [ "shopping" ];
             timeout = 5;
           }
@@ -379,7 +380,7 @@
           {
             name = "spotify";
             engine = "spotify";
-            shortcut = "sp";
+            shortcut = "sft";
             categories = [ "music" ];
             api_client_id = "@SPOTIFY_CLIENT_ID";
             api_client_secret = "@SPOTIFY_CLIENT_SECRET";
@@ -407,23 +408,14 @@
             ];
           }
           {
-            name = "google play store";
+            name = "google play apps";
             engine = "google_play";
             categories = [
               "it"
               "apps"
             ];
             shortcut = "gpa";
-            playCategory = "apps";
-          }
-          {
-            name = "f-droid";
-            engine = "fdroid";
-            shortcut = "fd";
-            categories = [
-              "it"
-              "apps"
-            ];
+            play_categ = "apps";
           }
           #endregion
 
