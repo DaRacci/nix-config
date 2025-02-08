@@ -39,27 +39,6 @@ in
       '';
     });
 
-    # TODO: Find a way to do this without having to recompile the package
-    vesktop = prev.vesktop.overrideAttrs (oldAttrs: {
-      postFixup =
-        oldAttrs.postFixup
-        + ''
-          substituteInPlace $out/bin/vesktop --replace '--enable-features=WaylandWindowDecorations' '--enable-features=WaylandWindowDecorations --disable-gpu-compositing'
-        '';
-    });
-
-    discord =
-      let
-        nss =
-          if final.stdenv.buildPlatform.isLinux then
-            {
-              nss = final.nss_latest;
-            }
-          else
-            { };
-      in
-      final.discord.override ({ withOpenASAR = true; } // nss);
-
     oscavmgr = prev.oscavmgr.overrideAttrs (_oldAttrs: {
       patches = [ ./oscavmgr_header.patch ];
     });
