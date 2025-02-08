@@ -317,11 +317,6 @@ in
       interval = "Wed *-*-* 02:00:00";
     };
 
-    # This is handled by impermanence already.
-    systemd.services.systemd-machine-id-commit = {
-      enable = false;
-    };
-
     # services.snapper.configs = mkIf (drive.format == "btrfs") (builtins.foldl' recursiveUpdate { }
     #   ([{
     #     persist = {
