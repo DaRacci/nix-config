@@ -227,7 +227,7 @@
           }
           {
             name = "DuckDuckGo Videos";
-            engine = "duckduckgo_videos";
+            engine = "duckduckgo_extra";
             shortcut = "ddv";
             categories = [
               "videos"
@@ -287,7 +287,7 @@
             categories = [ "news" ];
           }
           {
-            name = "hn";
+            name = "hackernews";
             engine = "hackernews";
             shortcut = "hn";
             categories = [
