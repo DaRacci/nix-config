@@ -5,14 +5,12 @@
   ...
 }:
 {
+  programs.uwsm.enable = true;
+
   programs.hyprland = {
     enable = true;
-    package = inputs.hyprland.packages.${pkgs.system}.hyprland.override {
-      enableXWayland = true;
-      withSystemd = true;
-    };
-
-    xwayland.enable = true;
+    withUWSM = true;
+    package = inputs.hyprland.packages.${pkgs.system}.hyprland;
     portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
   };
 
@@ -31,8 +29,9 @@
     gnome.gnome-keyring.enable = true;
   };
 
-  security.pam.services.hyprland = {
-    enableGnomeKeyring = true;
+  security.pam.services = {
+    hyprland.enableGnomeKeyring = true;
+    hyprlock = { };
   };
 
   xdg.portal = {
@@ -48,11 +47,6 @@
 
         "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
       };
-    };
-
-    wlr = {
-      enable = false;
-      settings = { };
     };
   };
 

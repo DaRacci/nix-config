@@ -1,6 +1,7 @@
 # TODO - Game mode that disables compositor and pauses swww-random-wallpaper
 {
   flake,
+  inputs,
   config,
   pkgs,
   lib,
@@ -15,6 +16,7 @@ with lib;
     ./ags.nix
     ./actions.nix
     ./clipboard.nix
+    ./lock-suspend.nix
     ./menus.nix
     ./notification.nix
     ./panel.nix
@@ -60,6 +62,17 @@ with lib;
   };
 
   wayland.windowManager.hyprland = {
+    systemd.enable = false;
+
+    plugins =
+      with pkgs.hyprlandPlugins;
+      with inputs.hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system};
+      [
+        hyprfocus
+        borders-plus-plus
+        inputs.hyprland-dynamic-cursors.packages.${pkgs.stdenv.hostPlatform.system}.hypr-dynamic-cursors
+      ];
+
     custom-settings = {
       windowrule = [
         {
@@ -136,7 +149,6 @@ with lib;
         ",      preferred,      auto,       1" # Fallback Rule
       ];
 
-      #region Ricing
       animations = {
         enabled = "yes";
 
@@ -364,6 +376,52 @@ with lib;
             button_size = 0;
             "col.maximize" = "rgba(ffffff11)";
             "col.close" = "rgba(ff111133)";
+          };
+        };
+
+        hyprfocus = {
+          enabled = true;
+          animate_floating = true;
+          animate_workspacechange = true;
+          focus_animation = "shrink";
+          shrink = {
+            shrink_percentage = 0.9;
+            in_bezier = "realsmooth";
+            in_speed = 1;
+            out_bezier = "realsmooth";
+            out_speed = 2;
+          };
+        };
+
+        dynamic-cursors = {
+          enabled = true;
+          mode = "rotate";
+          threshold = 2;
+
+          rotate = {
+            length = config.stylix.cursor.size;
+            offset = 0.0;
+          };
+
+          shake = {
+            enabled = true;
+            nearest = false;
+            threshold = 6.0;
+            base = 4.0;
+            speed = 4.0;
+            influence = 0.0;
+            limit = 0.0;
+            timeout = 2000;
+            effects = true;
+            ipc = false;
+          };
+
+          hyprcursor = {
+            enabled = true;
+            nearest = true;
+
+            resolution = -1;
+            fallback = "clientside";
           };
         };
 

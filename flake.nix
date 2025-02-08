@@ -312,9 +312,7 @@
         lix.follows = "";
       };
     };
-    stylix = {
-      url = "github:danth/stylix";
-    };
+    stylix.url = "github:danth/stylix";
     nix-alien = {
       url = "github:thiagokokada/nix-alien";
     };
@@ -336,14 +334,16 @@
     };
 
     # Desktop Stuff
-    hyprland = {
-      url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
-    };
+    hyprland.url = "github:hyprwm/Hyprland";
     hyprland-plugins = {
       url = "github:hyprwm/hyprland-plugins";
       inputs.hyprland.follows = "hyprland";
     };
     hyprland-contrib.url = "github:hyprwm/contrib";
+    hyprland-dynamic-cursors = {
+      url = "github:VirtCode/hypr-dynamic-cursors";
+      inputs.hyprland.follows = "hyprland";
+    };
     anyrun = {
       url = "github:anyrun-org/anyrun";
       inputs = {
