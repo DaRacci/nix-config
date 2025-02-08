@@ -3,7 +3,7 @@
   imports = [ "${modulesPath}/virtualisation/proxmox-lxc.nix" ];
 
   sops.secrets = {
-    SEARXNG_SETTINGS = {
+    SEARXNG_ENVIRONMENT = {
       owner = config.users.users."searx".name;
       group = config.users.groups."searx".name;
     };
@@ -651,7 +651,7 @@
 
         defaultDoiResolver = "oadoi.org";
       };
-      environmentFile = config.sops.secrets.SEARXNG_SETTINGS.path;
+      environmentFile = config.sops.secrets.SEARXNG_ENVIRONMENT.path;
     };
 
     caddy.virtualHosts = {
