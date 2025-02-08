@@ -226,7 +226,7 @@
             ];
           }
           {
-            name = "DuckDuckGo Videos";
+            name = "duckduckgo videos";
             engine = "duckduckgo_extra";
             shortcut = "ddv";
             categories = [
@@ -568,7 +568,7 @@
           #region Q&A
           {
             name = "stackoverflow";
-            engine = "stackoverflow";
+            engine = "stackexchange";
             shortcut = "so";
             api_site = "stackoverflow";
             categories = [
