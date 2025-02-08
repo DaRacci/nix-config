@@ -197,7 +197,7 @@
             categories = [ "images" ];
           }
           {
-            name = "Material Icons";
+            name = "material icons";
             engine = "material_icons";
             categories = [ "images" ];
             shortcut = "mi";
@@ -319,7 +319,7 @@
             categories = [ "utilities" ];
           }
           {
-            name = "DuckDuckGo Definitions";
+            name = "duckduckgo definitions";
             engine = "duckduckgo_definitions";
             shortcut = "ddd";
             weight = 2.0;
@@ -336,7 +336,7 @@
             categories = [ "utilities" ];
           }
           {
-            name = "LibreTranslate";
+            name = "libretranslate";
             engine = "libretranslate";
             base_url = "https://libretranslate.com/translate";
             shortcut = "lt";
@@ -377,7 +377,7 @@
 
           #region Music
           {
-            name = "Spotify";
+            name = "spotify";
             engine = "spotify";
             shortcut = "sp";
             categories = [ "music" ];
@@ -388,7 +388,7 @@
 
           #region App Search Engines
           {
-            name = "APK Mirror";
+            name = "apk mirror";
             engine = "apkmirror";
             timeout = 4.0;
             shortcut = "apkm";
@@ -398,7 +398,7 @@
             ];
           }
           {
-            name = "Apple App Store";
+            name = "apple app store";
             engine = "apple_app_store";
             shortcut = "aps";
             categories = [
@@ -407,7 +407,7 @@
             ];
           }
           {
-            name = "Google Play Store";
+            name = "google play store";
             engine = "google_play";
             categories = [
               "it"
@@ -417,7 +417,7 @@
             playCategory = "apps";
           }
           {
-            name = "F-Droid";
+            name = "f-droid";
             engine = "fdroid";
             shortcut = "fd";
             categories = [
@@ -429,7 +429,7 @@
 
           #region Package Search Engines
           {
-            name = "Alpine Linux Packages";
+            name = "alpine linux packages";
             engine = "alpinelinux";
             shortcut = "alp";
             categories = [
@@ -438,7 +438,7 @@
             ];
           }
           {
-            name = "Docker Hub";
+            name = "docker hub";
             engine = "docker_hub";
             shortcut = "dh";
             categories = [
@@ -447,12 +447,12 @@
             ];
           }
           {
-            name = "Crates.io";
+            name = "crates.io";
             engine = "crates";
             shortcut = "crates";
           }
           {
-            name = "Lib.rs";
+            name = "lib.rs";
             engine = "lib_rs";
             shortcut = "lrs";
           }
@@ -460,7 +460,7 @@
 
           #region Wikis
           {
-            name = "Arch Linux Wiki";
+            name = "arch linux wiki";
             engine = "archlinux";
             shortcut = "alw";
             categories = [
@@ -469,7 +469,7 @@
             ];
           }
           {
-            name = "NixOS Wiki";
+            name = "nixos wiki";
             engine = "mediawiki";
             base_url = "https://wiki.nixos.org/";
             search_type = "text";
@@ -480,7 +480,7 @@
             ];
           }
           {
-            name = "Wikipedia";
+            name = "wikipedia";
             engine = "wikipedia";
             shortcut = "wp";
             base_url = "https://{language}.wikipedia.org/";
@@ -488,7 +488,7 @@
             display_type = [ "infobox" ];
           }
           {
-            name = "Free Software Directory";
+            name = "free software directory";
             engine = "mediawiki";
             shortcut = "fsd";
             categories = [
@@ -516,7 +516,7 @@
 
           #region Software Repositories
           {
-            name = "BitBucket";
+            name = "bitbucket";
             engine = "xpath";
             paging = true;
             searchUrl = "https://bitbucket.org/repo/all/{pageno}?name={query}";
