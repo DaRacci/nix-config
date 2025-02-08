@@ -188,19 +188,7 @@
               programs.nixfmt.enable = true;
               programs.shellcheck.enable = true;
               programs.statix.enable = true;
-              programs.typos = {
-                enable = true;
-                locale = "en-au";
-                configFile = "${pkgs.writers.writeTOML "typos.toml" {
-                  default.extend-words = {
-                    lazer = "lazer";
-                    Optin = "Optin";
-                    tere = "tere";
-                    ags = "ags";
-                    hassio = "hassio";
-                  };
-                }}";
-              };
+              programs.nufmt.enable = true;
 
               settings.formatter.shellcheck.excludes = [ ".envrc" ];
               settings.global.excludes = [
