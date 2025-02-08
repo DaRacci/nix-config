@@ -56,7 +56,6 @@ in
         nvidiaSettings = true;
         nvidiaPersistenced = true;
         modesetting.enable = true;
-        forceFullCompositionPipeline = true;
         powerManagement = {
           enable = true;
         };
@@ -65,7 +64,6 @@ in
 
     boot.kernelParams = optionals (cfg.graphics.manufacturer == "nvidia") [
       "nvidia.NVreg_EnableResizableBar=1"
-      "nvidia.NVreg_PreserveVideoMemoryAllocations=1"
     ];
   };
 }

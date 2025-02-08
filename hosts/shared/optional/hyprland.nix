@@ -61,6 +61,13 @@
           };
           profile = "Limit Free Buffer Pool On Wayland Compositors";
         }
+        {
+          pattern = {
+            feature = "cmdline";
+            matches = "Hyprland";
+          };
+          profile = "Limit Free Buffer Pool On Wayland Compositors";
+        }
       ];
       profiles = [
         {
