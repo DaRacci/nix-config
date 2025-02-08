@@ -4,9 +4,9 @@ This is my interpretation of the perfect nix flake, this powers my desktops, vms
 
 ## Features
 
-- Automated Persistence through TempFS, or snapshotting with BTRFS, with persistable components using [Impermanence][impermanence]
-- Secret management in [NixOS][nixos] ([sops-nix][sops-nix]) and [home-manager][home-manager] ([sops-nix][sops-nix] with [sops][sops])
-- Automated Flake dependency updates through Github Actions using [Update-flake-lock][update-flake-lock]
+- Automated Persistence through TempFS, or snapshotting with BTRFS, with persistable components using [Impermanence]
+- Secret management in [NixOS] ([sops-nix]) and [home-manager] ([sops-nix] with [sops])
+- Automated Flake dependency updates through Github Actions using [Update-flake-lock]
 
 ## Supported Configurations
 
@@ -16,21 +16,24 @@ This is my interpretation of the perfect nix flake, this powers my desktops, vms
   - `winix` (WSL 2 instance on Windows)
 
 ## Repository Structure
-    .
-    ├─ home          # Root for all user homes
-    ├─── shared      #
-    ├─ hosts         # Root for all hosts
-    ├─── shared      # Auto-Imported modules for all hosts
-    ├─── desktop     # Desktop NixOS systems
-    ├───── shared    # Auto-Imported modules for desktops
-    ├─── laptop      # Laptop NixOS Systems
-    ├───── shared    # Auto-Imported modules for laptops
-    ├─── server      # Server NixOS Systems
-    ├───── shared    # Auto-Imported modules for servers
-    ├─ lib           # Extension to the nixpkgs lib
-    ├─ modules       # Custom NixOS and home-manager modules
-    ├─ overlays      # NixPkgs overlays
-    └─ pkgs          # Custom Packages
+
+```
+.
+├─ home          # Root for all user homes
+├─── shared      #
+├─ hosts         # Root for all hosts
+├─── shared      # Auto-Imported modules for all hosts
+├─── desktop     # Desktop NixOS systems
+├───── shared    # Auto-Imported modules for desktops
+├─── laptop      # Laptop NixOS Systems
+├───── shared    # Auto-Imported modules for laptops
+├─── server      # Server NixOS Systems
+├───── shared    # Auto-Imported modules for servers
+├─ lib           # Extension to the nixpkgs lib
+├─ modules       # Custom NixOS and home-manager modules
+├─ overlays      # NixPkgs overlays
+└─ pkgs          # Custom Packages
+```
 
 ## Things on the TODO
 

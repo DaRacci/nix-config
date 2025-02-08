@@ -189,6 +189,8 @@
               programs.shellcheck.enable = true;
               programs.statix.enable = true;
               programs.nufmt.enable = true;
+              programs.mdformat.enable = true;
+              programs.mdsh.enable = true;
 
               settings.formatter.shellcheck.excludes = [ ".envrc" ];
               settings.global.excludes = [

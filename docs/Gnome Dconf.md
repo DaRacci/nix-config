@@ -2,17 +2,17 @@
 
 When changing GNOME or GNOME extension settings, it is recommended to use dconf2nix and cherry pick its output. This allows for easy configuration using the GUI, but requires copying the settings back into the respective dconf settings in home-manager to save them.
 
----
+______________________________________________________________________
 
 ## DConf Locations
 
 The locations for where to save DConf settings to is:
 
--   [Base.nix](../home/shared/desktop/gnome/base.nix) for standard GNOME DConf Settings.
--   [Extensions.nix](../home/shared/desktop/gnome/extensions.nix) for Extensions DConf Settings
--   Per User Settings should be saved in the format of `home/${username}/desktop/gnome.nix`
+- [Base.nix](../home/shared/desktop/gnome/base.nix) for standard GNOME DConf Settings.
+- [Extensions.nix](../home/shared/desktop/gnome/extensions.nix) for Extensions DConf Settings
+- Per User Settings should be saved in the format of `home/${username}/desktop/gnome.nix`
 
----
+______________________________________________________________________
 
 ## Getting the Output
 
