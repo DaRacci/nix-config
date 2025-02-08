@@ -93,7 +93,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - command: fmt -L -- --check .
+          - command: fmt -L -- --ci
             system: x86_64-linux
           - command: flake check --impure --allow-import-from-derivation
             system: x86_64-linux
