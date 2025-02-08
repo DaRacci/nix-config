@@ -655,4 +655,6 @@
       '';
     };
   };
+
+  networking.firewall.allowedTCPPorts = [ config.services.searx.settings.server.port ];
 }
