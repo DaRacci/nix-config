@@ -138,7 +138,6 @@ in
 
       userSettings = {
         "workbench.iconTheme" = "material-icon-theme";
-        # "workbench.colorTheme" = "One Dark Pro Mix";
         "workbench.startupEditor" = "none";
 
         "window.zoomLevel" = 3;
@@ -164,6 +163,10 @@ in
 
         "git.autofetch" = true;
         "git.confirmSync" = false;
+        "git.allowForcePush" = true;
+        "git.allowNoVerifyCommit" = true;
+        "git.autoStash" = true;
+        "git.blame.statusBarItem.enabled" = true;
 
         "nix.enableLanguageServer" = true;
         "nix.serverPath" = "${lib.getExe pkgs.nil}";
@@ -209,6 +212,15 @@ in
         "caddyfile.executable" = "${lib.getExe pkgs.caddy}";
 
         "redhat.telemetry.enabled" = false;
+
+        "gitlens.showWhatsNewAfterUpgrades" = false;
+        "gitlens.plusFeatures.enabled" = false;
+        "gitlens.graph.layout" = "editor";
+        "gitlens.launchpad.indicator.enabled" = false;
+        "gitlens.cloudPatches.enabled" = false;
+        "gitlens.views.commits.showStashes" = true;
+        "gitlens.telemetry.enabled" = false;
+        "gitlens.views.repositories.showStashes" = true;
 
         # "platformio-ide.customPATH" = "${pkgs.platformio}/bin/platformio";
         # "platformio-ide.useBuiltinPython" = false;

@@ -1,4 +1,8 @@
-{ inputs, pkgs, ... }:
+{
+  inputs,
+  pkgs,
+  ...
+}:
 {
   imports = [ ./features/cli ];
 
@@ -40,6 +44,16 @@
         popups = 14;
         terminal = 18;
       };
+    };
+  };
+
+  custom.input = {
+    enable = true;
+    keybinds = {
+      NewLine = "Enter";
+      NewLineAbove = "Ctrl+Shift+Enter";
+      NewLineBelow = "Ctrl+Enter";
+      SelectLine = "Ctrl+L";
     };
   };
 
