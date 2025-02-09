@@ -225,7 +225,7 @@
               ];
 
               languages = {
-                nix.enable = true;
+                nix.enable = false;
               };
 
               env = {
