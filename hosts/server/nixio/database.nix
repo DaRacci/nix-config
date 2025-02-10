@@ -17,6 +17,12 @@ in
 
   sops.secrets =
     {
+      COUCHDB_SETTINGS = {
+        owner = config.users.users.couchdb.name;
+        group = config.users.groups.couchdb.name;
+        restartUnits = [ "couchdb.service" ];
+      };
+
       PGADMIN_PASSWORD = {
         owner = config.users.users.pgadmin.name;
         group = config.users.groups.pgadmin.name;
@@ -53,6 +59,15 @@ in
     ];
 
   services = {
+    couchdb = {
+      enable = true;
+      package = pkgs.couchdb_3;
+      bindAddress = "0.0.0.0";
+      extraConfigFiles = [
+        config.sops.secrets."COUCHDB_SETTINGS".path
+      ];
+    };
+
     postgresql = {
       enable = true;
       package = pkgs.postgresql_16;
@@ -178,4 +193,6 @@ in
       (builtins.filter (script: !lib.hasSuffix "postgresql-post-start" script))
     ];
   };
+
+  networking.firewall.allowedTCPPorts = [ config.services.couchdb.port ];
 }
