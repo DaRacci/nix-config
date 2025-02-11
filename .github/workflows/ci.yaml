@@ -30,11 +30,14 @@ jobs:
       cancel-in-progress: true
     strategy:
       fail-fast: false
+      # TODO - Use a step to determine the hosts dynamically from the flake
       matrix:
         include:
           - host: nixe
             system: x86_64-linux
             noBuild: true # Only until i can work out how to get this building with the limited space github runners have.
+          - host: winix
+            system: x86_64-linux
           - host: nixai
             system: x86_64-linux
           - host: nixarr
