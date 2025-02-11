@@ -61,7 +61,7 @@ in
   services = {
     couchdb = {
       enable = true;
-      package = pkgs.couchdb_3;
+      package = pkgs.couchdb3;
       bindAddress = "0.0.0.0";
       extraConfigFiles = [
         config.sops.secrets."COUCHDB_SETTINGS".path
