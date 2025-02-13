@@ -8,7 +8,8 @@ let
   cfg = config.custom.input;
 
   # Use the nix built-in ascii-table and then extend for special keys
-  keys = (lib.attrNames (import "${inputs.nixpkgs}/lib/ascii-table.nix"))
+  keys =
+    (lib.attrNames (import "${inputs.nixpkgs}/lib/ascii-table.nix"))
     ++ [
       "SHIFT"
       "CTRL"
