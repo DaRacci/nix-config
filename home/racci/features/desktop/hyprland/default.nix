@@ -68,7 +68,7 @@ with lib;
       with pkgs.hyprlandPlugins;
       with inputs.hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system};
       [
-        hyprfocus
+        # hyprfocus
         borders-plus-plus
         inputs.hyprland-dynamic-cursors.packages.${pkgs.stdenv.hostPlatform.system}.hypr-dynamic-cursors
       ];
