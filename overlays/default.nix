@@ -39,10 +39,6 @@ in
       '';
     });
 
-    oscavmgr = prev.oscavmgr.overrideAttrs (_oldAttrs: {
-      patches = [ ./oscavmgr_header.patch ];
-    });
-
     inherit lib;
     inherit (inputs.nixd.packages.x86_64-linux) nixd;
   };

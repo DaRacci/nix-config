@@ -63,7 +63,7 @@ lib.mkIf (osConfig.users.users.${config.home.username}.shell.pname == "nushell")
               let type = (generic_type $value)
 
               $value = (match $type {
-                closure | record => null
+                nothing | closure | record => null
                 list => ($value | str join ":")
                 _ => ($value | into string)
               })
@@ -72,7 +72,9 @@ lib.mkIf (osConfig.users.users.${config.home.username}.shell.pname == "nushell")
 
           $last_key = $match.key
           $last_matched = ($value != null)
-          $string = ($string | str replace -n $match.original $value)
+          if ($value != null) {
+            $string = ($string | str replace -n $match.original $value)
+          }
         }
 
         $string
