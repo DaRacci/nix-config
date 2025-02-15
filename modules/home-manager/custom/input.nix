@@ -197,19 +197,19 @@ let
   actions = {
     NewLine = {
       editorContext = editorContexts.editorFull;
-      zed-editor = "editor::NewLine";
+      zed-editor = "editor::Newline";
       vscode = null;
-      micro = "InsertNewLine";
+      micro = "InsertNewline";
     };
     NewLineAbove = {
       editorContext = editorContexts.editorFull;
-      zed-editor = "editor::NewLineAbove";
+      zed-editor = "editor::NewlineAbove";
       vscode = "editor.action.insertLineBefore";
       micro = null;
     };
     NewLineBelow = {
       editorContext = editorContexts.editorFull;
-      zed-editor = "editor::NewLineBelow";
+      zed-editor = "editor::NewlineBelow";
       vscode = "editor.action.insertLineAfter";
       micro = null;
     };
@@ -297,7 +297,7 @@ in
       lib.pipe editorContexts [
         builtins.attrValues
         (builtins.map (context: {
-          inherit (context) zed-editor;
+          context = context.zed-editor;
           bindings = lib.pipe (bindingsForEditor "zed-editor") [
             builtins.attrValues
             (builtins.filter (keybind: keybind.editorContext == context.zed-editor))
