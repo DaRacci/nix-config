@@ -31,6 +31,13 @@ jobs:
             dependencies
             merge-queue
             automated
+          pr-assignees: DaRacci
+          pr-reviewers: DaRacci
+          token: ${{ secrets.GH_TOKEN_FOR_UPDATES }}
+          sign-commits: true
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-fingerprint: ${{ secrets.GPG_FINGERPRINT }}
+          gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
 
   build-and-test:
     name: Build and test
