@@ -17,6 +17,7 @@
     directories = [
       ".config/1Password/settings"
       ".config/Bitwarden"
+      ".gnupg"
     ];
   };
 
@@ -53,5 +54,11 @@
     settings.bind = [
       "CTRL_SHIFT,SPACE,exec,${lib.getExe pkgs._1password-gui} --quick-access"
     ];
+  };
+
+  programs.gpg.enable = true;
+  services.gpg-agent = {
+    enable = true;
+    pinentryPackage = pkgs.pinentry-rofi;
   };
 }
