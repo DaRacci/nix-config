@@ -64,6 +64,11 @@ in
     restartUnits = [ "attic-watch-store.service" ];
   };
 
+  services.angrr = {
+    enable = true;
+    period = "7days";
+  };
+
   systemd.services.attic-watch-store = {
     description = "Watch nix store for attic";
     wants = [ "network-online.target" ];
