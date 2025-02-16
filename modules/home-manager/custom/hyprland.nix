@@ -99,13 +99,13 @@ let
               type = nullOr (either percentString int);
               default = null;
               description = "Move the window to the x coordinate.";
-              apply = x: toString x;
+              apply = toString;
             };
             y = mkOption {
               type = nullOr (either percentString int);
               default = null;
               description = "Move the window to the y coordinate.";
-              apply = x: toString x;
+              apply = toString;
             };
           };
         });

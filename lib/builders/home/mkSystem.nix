@@ -66,8 +66,7 @@ in
       inherit (flake) inputs outputs;
     };
 
-    users.${name} = (
-      import ./userConf.nix {
+    users.${name} = import ./userConf.nix {
         inherit
           flake
           lib
@@ -76,7 +75,6 @@ in
           hostName
           userDirectory
           ;
-      }
-    );
+      };
   };
 }
