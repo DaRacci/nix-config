@@ -67,14 +67,14 @@ in
     };
 
     users.${name} = import ./userConf.nix {
-        inherit
-          flake
-          lib
-          name
-          user
-          hostName
-          userDirectory
-          ;
-      };
+      inherit
+        flake
+        lib
+        name
+        user
+        hostName
+        userDirectory
+        ;
+    };
   };
 }
