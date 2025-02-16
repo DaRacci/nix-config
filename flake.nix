@@ -48,6 +48,7 @@
           overlays = [
             inputs.hyprland-contrib.overlays.default
             inputs.lix-module.overlays.lixFromNixpkgs
+            inputs.angrr.overlays.default
           ] ++ (builtins.attrValues (import ./overlays { inherit self inputs lib; }));
         };
     in
@@ -301,10 +302,9 @@
       };
     };
     stylix.url = "github:danth/stylix";
-    nix-alien = {
-      url = "github:thiagokokada/nix-alien";
-    };
+    nix-alien.url = "github:thiagokokada/nix-alien";
     treefmt.url = "github:numtide/treefmt-nix";
+    angrr.url = "github:linyinfeng/angrr";
 
     # Modules only used on some systems
     nixos-wsl = {
@@ -318,9 +318,7 @@
       url = "github:Jovian-Experiments/Jovian-NixOS";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixarr = {
-      url = "github:rasmus-kirk/nixarr";
-    };
+    nixarr.url = "github:rasmus-kirk/nixarr";
 
     # Desktop Stuff
     hyprland.url = "github:hyprwm/Hyprland";
@@ -353,9 +351,7 @@
     };
 
     # Other misc modules
-    arion = {
-      url = "github:hercules-ci/arion";
-    };
+    arion.url = "github:hercules-ci/arion";
     vscode-extensions = {
       url = "github:nix-community/nix-vscode-extensions";
       inputs = {

@@ -104,6 +104,7 @@ rec {
           imports = [
             inputs.home-manager.nixosModule
             inputs.nixos-generators.nixosModules.all-formats
+            inputs.angrr.nixosModules.angrr
           ];
 
           host = {
@@ -114,7 +115,7 @@ rec {
           home-manager.useUserPackages = true;
           home-manager.useGlobalPkgs = true;
 
-          system.stateVersion = "24.11";
+          system.stateVersion = "25.05";
         }
       )
     ]
