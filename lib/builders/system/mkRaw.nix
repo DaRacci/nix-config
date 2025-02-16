@@ -1,5 +1,5 @@
 {
-  self,
+  flake,
   inputs,
   pkgs,
   lib,
@@ -9,7 +9,7 @@
   ...
 }:
 let
-  hostDirectory = "${self}/hosts/${deviceType}/${name}";
+  hostDirectory = "${flake}/hosts/${deviceType}/${name}";
 in
 rec {
   inherit pkgs lib;
@@ -20,7 +20,7 @@ rec {
       (
         { ... }:
         {
-          imports = builtins.attrValues (import "${self}/modules/nixos");
+          imports = builtins.attrValues (import "${flake}/modules/nixos");
         }
       )
       (
@@ -94,8 +94,8 @@ rec {
         }
       )
 
-      "${self}/hosts/shared/global"
-      "${self}/hosts/${deviceType}/shared"
+      "${flake}/hosts/shared/global"
+      "${flake}/hosts/${deviceType}/shared"
       hostDirectory
 
       (
@@ -121,8 +121,8 @@ rec {
     ++ (lib.trivial.pipe (users ++ [ "root" ]) [
       (map (
         username:
-        (import "${self}/lib/builders/home/mkSystem.nix" {
-          inherit self lib pkgs;
+        (import "${flake}/lib/builders/home/mkSystem.nix" {
+          inherit flake lib pkgs;
           name = username;
           hostName = name;
           skipPassword = username == "root";
@@ -131,8 +131,7 @@ rec {
     ]);
 
   specialArgs = {
-    flake = self;
-    inherit hostDirectory;
-    inherit (self) inputs outputs;
+    inherit flake hostDirectory;
+    inherit (flake) inputs outputs;
   };
 }

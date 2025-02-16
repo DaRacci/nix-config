@@ -1,5 +1,5 @@
 {
-  self,
+  flake,
   name,
   groups ? [ ],
   hostName ? null,
@@ -7,7 +7,6 @@
   ...
 }:
 {
-  flake,
   config,
   lib,
   hostDirectory,
@@ -17,9 +16,9 @@ let
   inherit (lib)
     mkIf
     mkDefault
-    mkForce
     optional
     ;
+
   userDirectory = "${flake}/home/${name}";
   user = config.users.users.${name};
   sourceSSHKey = "${userDirectory}/id_ed25519.pub";
@@ -63,38 +62,21 @@ in
     backupFileExtension = "bak";
 
     extraSpecialArgs = {
-      flake = self;
-      inherit (self) inputs outputs;
+      inherit flake;
+      inherit (flake) inputs outputs;
     };
 
-    users.${name} =
-      { flake, ... }:
-      {
-        home = {
-          username = name;
-          homeDirectory = mkDefault "/home/${name}";
-
-          stateVersion = mkForce "24.05";
-          sessionPath = [ "$HOME/.local/bin" ];
-        };
-
-        sops = {
-          defaultSymlinkPath = "/run/user/${toString user.uid}/secrets";
-          defaultSecretsMountPoint = "/run/user/${toString user.uid}/secrets.d";
-        };
-
-        imports =
-          builtins.attrValues (import "${flake}/modules/home-manager")
-          ++ [
-            "${flake}/home/shared/global"
-            "${userDirectory}/global.nix"
-          ]
-          ++ (
-            let
-              hostPath = "${userDirectory}/${hostName}.nix";
-            in
-            lib.optional (hostName != null && builtins.pathExists hostPath) hostPath
-          );
-      };
+    users.${name} = (
+      import ./userConf.nix {
+        inherit
+          flake
+          lib
+          name
+          user
+          hostName
+          userDirectory
+          ;
+      }
+    );
   };
 }

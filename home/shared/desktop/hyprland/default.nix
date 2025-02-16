@@ -1,7 +1,8 @@
 {
   flake,
-  osConfig,
+  osConfig ? null,
   inputs,
+  pkgs,
   ...
 }:
 {
@@ -13,7 +14,7 @@
 
   wayland.windowManager.hyprland = {
     enable = true;
-    inherit (osConfig.programs.hyprland) package;
+    package = if (osConfig != null) then osConfig.programs.hyprland.package else pkgs.hyprland;
 
     xwayland.enable = true;
     systemd = {

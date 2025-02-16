@@ -1,5 +1,5 @@
 {
-  osConfig,
+  osConfig ? null,
   config,
   pkgs,
   lib,
@@ -17,7 +17,7 @@ in
 {
   options.custom.audio = {
     enable = mkEnableOption "Enable Audio Module" // {
-      default = !osConfig.host.device.isHeadless;
+      default = osConfig != null && !osConfig.host.device.isHeadless;
     };
 
     disabledDevices = mkOption {

@@ -1,5 +1,5 @@
 {
-  self,
+  flake,
   inputs,
   pkgs,
   lib,
@@ -11,7 +11,7 @@ let
       args
       // {
         inherit
-          self
+          flake
           system
           name
           inputs
@@ -23,7 +23,7 @@ let
 in
 {
   home = {
-    mkHm = wrapper ./home/mkHm.nix;
+    mkHomeManager = wrapper ./home/mkHomeManager.nix;
     mkSystem = wrapper ./home/mkSystem.nix;
   };
 

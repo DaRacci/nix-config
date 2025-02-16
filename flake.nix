@@ -50,104 +50,6 @@
             inputs.lix-module.overlays.lixFromNixpkgs
           ] ++ (builtins.attrValues (import ./overlays { inherit self inputs lib; }));
         };
-
-      # TODO - Scan the folders for all the configurations and generate the list.
-      mkConfigurations =
-        system:
-        let
-          mkBuilders =
-            cuda: rocm:
-            import ./lib/builders {
-              inherit self inputs lib;
-              pkgs = mkPkgs system cuda rocm;
-            };
-
-          builders = mkBuilders false false;
-          buildersWithCuda = mkBuilders true false;
-          buildersWithRocm = mkBuilders false true;
-        in
-        builtins.mapAttrs
-          (
-            n: v:
-            if (builtins.hasAttr "acceleration" v) then
-              if (v.acceleration == "cuda") then
-                buildersWithCuda.system.build system n v
-              else if (v.acceleration == "rocm") then
-                buildersWithRocm.system.build system n v
-              else
-                builders.system.build system n v
-            else
-              builders.system.build system n v
-          )
-          {
-            nixe = {
-              users = [ "racci" ];
-
-              isoFormat = "iso";
-              deviceType = "desktop";
-              acceleration = "cuda";
-            };
-
-            winix = {
-              users = [ "racci" ];
-
-              isoFormat = "iso";
-              deviceType = "desktop";
-              acceleration = "cuda";
-            };
-
-            nixarr = {
-              isoFormat = "proxmox-lxc";
-              deviceType = "server";
-              acceleration = "rocm";
-            };
-
-            nixcloud = {
-              isoFormat = "proxmox-lxc";
-              deviceType = "server";
-              acceleration = "rocm";
-            };
-
-            nixdev = {
-              isoFormat = "proxmox-lxc";
-              deviceType = "server";
-              acceleration = "rocm";
-            };
-
-            nixio = {
-              isoFormat = "proxmox-lxc";
-              deviceType = "server";
-              acceleration = "rocm";
-            };
-
-            nixmon = {
-              isoFormat = "proxmox-lxc";
-              deviceType = "server";
-              acceleration = "rocm";
-            };
-
-            nixserv = {
-              isoFormat = "proxmox-lxc";
-              deviceType = "server";
-              acceleration = "rocm";
-            };
-
-            nixai = {
-              isoFormat = "proxmox-lxc";
-              deviceType = "server";
-              acceleration = "rocm";
-            };
-
-            #|----------------------|
-            #|  Deprecated Systems  |
-            #|----------------------|
-            # surnix = {
-            #   users = [ "racci" ];
-
-            #   isoFormat = "iso";
-            #   deviceType = "laptop";
-            # };
-          };
     in
     flake-parts.lib.mkFlake
       {
@@ -155,6 +57,7 @@
         specialArgs.lib = lib;
       }
       {
+        debug = true;
         imports = [
           inputs.devenv.flakeModule
           inputs.treefmt.flakeModule
@@ -167,10 +70,109 @@
 
         flake =
           let
-            configurations = mkConfigurations builtins.currentSystem;
+            system = builtins.currentSystem;
+            mkBuilders =
+              cuda: rocm:
+              import ./lib/builders {
+                inherit inputs lib;
+                flake = self;
+                pkgs = mkPkgs system cuda rocm;
+              };
+
+            builders = mkBuilders false false;
+            buildersWithCuda = mkBuilders true false;
+            buildersWithRocm = mkBuilders false true;
+            # TODO - Scan the folders for all the configurations and generate the list.
+            configurations =
+              builtins.mapAttrs
+                (
+                  n: v:
+                  if (builtins.hasAttr "acceleration" v) then
+                    if (v.acceleration == "cuda") then
+                      buildersWithCuda.system.build system n v
+                    else if (v.acceleration == "rocm") then
+                      buildersWithRocm.system.build system n v
+                    else
+                      builders.system.build system n v
+                  else
+                    builders.system.build system n v
+                )
+                {
+                  nixe = {
+                    users = [ "racci" ];
+
+                    isoFormat = "iso";
+                    deviceType = "desktop";
+                    acceleration = "cuda";
+                  };
+
+                  winix = {
+                    users = [ "racci" ];
+
+                    isoFormat = "iso";
+                    deviceType = "desktop";
+                    acceleration = "cuda";
+                  };
+
+                  nixarr = {
+                    isoFormat = "proxmox-lxc";
+                    deviceType = "server";
+                    acceleration = "rocm";
+                  };
+
+                  nixcloud = {
+                    isoFormat = "proxmox-lxc";
+                    deviceType = "server";
+                    acceleration = "rocm";
+                  };
+
+                  nixdev = {
+                    isoFormat = "proxmox-lxc";
+                    deviceType = "server";
+                    acceleration = "rocm";
+                  };
+
+                  nixio = {
+                    isoFormat = "proxmox-lxc";
+                    deviceType = "server";
+                    acceleration = "rocm";
+                  };
+
+                  nixmon = {
+                    isoFormat = "proxmox-lxc";
+                    deviceType = "server";
+                    acceleration = "rocm";
+                  };
+
+                  nixserv = {
+                    isoFormat = "proxmox-lxc";
+                    deviceType = "server";
+                    acceleration = "rocm";
+                  };
+
+                  nixai = {
+                    isoFormat = "proxmox-lxc";
+                    deviceType = "server";
+                    acceleration = "rocm";
+                  };
+
+                  #|----------------------|
+                  #|  Deprecated Systems  |
+                  #|----------------------|
+                  # surnix = {
+                  #   users = [ "racci" ];
+
+                  #   isoFormat = "iso";
+                  #   deviceType = "laptop";
+                  # };
+                };
+
+            users = lib.genAttrs [ "racci" ] (name: builders.home.mkHomeManager system name { });
           in
           {
             nixosConfigurations = builtins.mapAttrs (_n: v: v.system) configurations;
+
+            homeConfigurations = users;
           };
 
         perSystem =

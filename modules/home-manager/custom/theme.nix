@@ -1,5 +1,5 @@
 {
-  osConfig,
+  osConfig ? null,
   config,
   pkgs,
   lib,
@@ -12,7 +12,8 @@ in
 {
   options.custom.theme = {
     enable = mkEnableOption "Theming" // {
-      default = hasAttr "stylix" osConfig && osConfig.stylix.enable && hasAttr "stylix" config;
+      default =
+        osConfig != null && hasAttr "stylix" osConfig && osConfig.stylix.enable && hasAttr "stylix" config;
     };
   };
 

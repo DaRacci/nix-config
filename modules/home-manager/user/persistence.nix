@@ -1,6 +1,6 @@
 {
   flake,
-  osConfig,
+  osConfig ? null,
   config,
   lib,
   ...
@@ -14,8 +14,13 @@ in
     enable = mkEnableOption "persistence";
 
     root = mkOption {
-      readOnly = true;
-      default = "${osConfig.host.persistence.root}/home/${config.home.username}";
+      readOnly = osConfig != null;
+      default =
+        if (osConfig != null) then
+          "${osConfig.host.persistence.root}/home/${config.home.username}"
+        else
+          "/persist/home/${config.home.username}";
+
     };
 
     directories = mkOption {
@@ -102,7 +107,7 @@ in
   config = mkIf cfg.enable {
     assertions = [
       {
-        assertion = osConfig.host.persistence.enable;
+        assertion = osConfig == null || osConfig.host.persistence.enable;
         message = ''
           The "persistence" option is enabled, but the host does not have
           persistence enabled. This is probably a mistake, user persistence cannot be

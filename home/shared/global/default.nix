@@ -1,8 +1,9 @@
 {
   inputs,
-  osConfig,
+  osConfig ? null,
   config,
   pkgs,
+  lib,
   ...
 }:
 {
@@ -12,6 +13,7 @@
       inputs.sops-nix.homeManagerModule
       inputs.anyrun.homeManagerModules.default
     ]
+    ++ (lib.optional (osConfig == null) inputs.stylix.homeManagerModules.stylix)
     ++ [
       ./dynamic-linker.nix
       ./nix.nix
@@ -28,5 +30,6 @@
     fi
   '';
 
-  dconf.enable = pkgs.lib.mkForce osConfig.programs.dconf.enable;
+  dconf.enable =
+    if (osConfig != null) then pkgs.lib.mkForce osConfig.programs.dconf.enable else false;
 }
