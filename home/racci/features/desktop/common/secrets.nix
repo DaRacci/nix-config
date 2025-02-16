@@ -41,7 +41,7 @@
     custom-settings = {
       windowrule = [
         {
-          matcher.title = "Quick Access — 1Password";
+          matcher.title = "^(Quick Access — 1Password)";
           rule = {
             pin = true;
             center = true;

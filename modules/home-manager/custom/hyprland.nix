@@ -4,12 +4,13 @@ let
   inherit (lib) mkOption;
   cfg = config.wayland.windowManager.hyprland.custom-settings;
 
-  percentString = types.addCheck (strMatching "^[0-9]{1,3}+%$") (
+  percentString = types.addCheck (strMatching "^(-)?[0-9]{1,3}+(%)?$") (
     str:
-    if builtins.stringLength str == 4 then
-      builtins.tryEval (builtins.substring 0 3 str) <= 100
-    else
-      true
+    let
+      isPercent = lib.strings.hasSuffix "%" str;
+      num = lib.toInt (if isPercent then lib.strings.removeSuffix "%" str else str);
+    in
+    if isPercent then num >= -100 && num <= 100 else true
   );
 
   monitorSelector = _: {
@@ -95,14 +96,16 @@ let
         type = nullOr (submodule {
           options = {
             x = mkOption {
-              type = nullOr percentString;
+              type = nullOr (either percentString int);
               default = null;
               description = "Move the window to the x coordinate.";
+              apply = x: toString x;
             };
             y = mkOption {
-              type = nullOr percentString;
+              type = nullOr (either percentString int);
               default = null;
               description = "Move the window to the y coordinate.";
+              apply = x: toString x;
             };
           };
         });

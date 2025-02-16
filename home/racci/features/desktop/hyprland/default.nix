@@ -1,4 +1,5 @@
-# TODO - Game mode that disables compositor and pauses swww-random-wallpaper
+# TODO - Game mode that disables fancy animations and pauses swww-random-wallpaper
+# TODO Show me the key integration for placement size & quick launching
 {
   flake,
   inputs,
@@ -17,6 +18,7 @@ with lib;
     ./actions.nix
     ./clipboard.nix
     ./lock-suspend.nix
+    ./looks.nix
     ./menus.nix
     ./notification.nix
     ./panel.nix
@@ -138,6 +140,17 @@ with lib;
           matcher.class = "(steam_app)";
           rule.immediate = true;
         }
+        {
+          matcher.class = "^(org.pulseaudio.pavucontrol)$";
+          rule = {
+            float = true;
+            size = "33%";
+            move = {
+              x = "-33%";
+              y = 50;
+            };
+          };
+        }
       ];
     };
 
@@ -149,79 +162,7 @@ with lib;
         ",      preferred,      auto,       1" # Fallback Rule
       ];
 
-      animations = {
-        enabled = "yes";
-
-        bezier = [
-          "fluent_decel, 0, 0.2, 0.4, 1"
-          "easeOutCirc, 0, 0.55, 0.45, 1"
-          "easeOutCubic, 0.33, 1, 0.68, 1"
-          "easeinoutsine, 0.37, 0, 0.63, 1"
-        ];
-
-        animation = [
-          "windowsIn, 1, 3, easeOutCubic, popin 30" # window open
-          "windowsOut, 1, 3, fluent_decel, popin 70" # window close.
-          "windowsMove, 1, 2, easeinoutsine, slide" # everything in between, moving, dragging, resizing.
-
-          # Fade
-          "fadeIn, 1, 3, easeOutCubic" # fade in (open) -> layers and windows
-          "fadeOut, 1, 2, easeOutCubic" # fade out (close) -> layers and windows
-          "fadeSwitch, 0, 1, easeOutCirc" # fade on changing activewindow and its opacity
-          "fadeShadow, 1, 10, easeOutCirc" # fade on changing activewindow for shadows
-          "fadeDim, 1, 4, fluent_decel" # the easing of the dimming of inactive windows
-          "border, 1, 2.7, easeOutCirc" # for animating the border's color switch speed
-          "borderangle, 1, 30, fluent_decel, once" # for animating the border's gradient angle - styles: once (default), loop
-          "workspaces, 1, 4, easeOutCubic, fade" # styles: slide, slidevert, fade, slidefade, slidefadevert
-        ];
-      };
-
-      decoration = {
-        rounding = 20;
-
-        blur = {
-          enabled = true;
-          xray = true;
-          special = false;
-          new_optimizations = true;
-          size = 14;
-          passes = 4;
-          brightness = 1;
-          noise = 0.01;
-          contrast = 1;
-          popups = true;
-          popups_ignorealpha = 0.6;
-        };
-
-        #region Shadows
-        shadow = {
-          enabled = true;
-          range = 20;
-          render_power = 4;
-          ignore_window = true;
-          offset = "0 2";
-        };
-        #endregion
-
-        #region Dim
-        dim_inactive = false;
-        dim_strength = 0.1;
-        dim_special = 0;
-        #endregion
-      };
-
-      # workspace = [
-      #   "workspace = w[t1], gapsout:0, gapsin:0, border: 0, rounding:0"
-      #   "workspace = w[tg1], gapsout:0, gapsin:0, border: 0, rounding:0"
-      # ];
-      #endregion
-
       general = {
-        gaps_in = 4;
-        gaps_out = 5;
-        gaps_workspaces = 50;
-        border_size = 1;
-
         resize_on_border = true;
         no_focus_fallback = true;
         layout = "dwindle";
@@ -365,66 +306,6 @@ with lib;
           reverseSwipe = true;
         };
 
-        hyprbars = {
-          bar_color = "rgb(2a2a2a)";
-          bar_height = 28;
-          col_text = "rgba(ffffffdd)";
-          bar_text_size = 12;
-          bar_text_font = "JetBrainsMono Nerd Font";
-
-          buttons = {
-            button_size = 0;
-            "col.maximize" = "rgba(ffffff11)";
-            "col.close" = "rgba(ff111133)";
-          };
-        };
-
-        hyprfocus = {
-          enabled = true;
-          animate_floating = true;
-          animate_workspacechange = true;
-          focus_animation = "shrink";
-          shrink = {
-            shrink_percentage = 0.9;
-            in_bezier = "realsmooth";
-            in_speed = 1;
-            out_bezier = "realsmooth";
-            out_speed = 2;
-          };
-        };
-
-        dynamic-cursors = {
-          enabled = true;
-          mode = "rotate";
-          threshold = 2;
-
-          rotate = {
-            length = config.stylix.cursor.size;
-            offset = 0.0;
-          };
-
-          shake = {
-            enabled = true;
-            nearest = false;
-            threshold = 6.0;
-            base = 4.0;
-            speed = 4.0;
-            influence = 0.0;
-            limit = 0.0;
-            timeout = 2000;
-            effects = true;
-            ipc = false;
-          };
-
-          hyprcursor = {
-            enabled = true;
-            nearest = true;
-
-            resolution = -1;
-            fallback = "clientside";
-          };
-        };
-
         hyprexpo = {
           columns = 3;
           gap_size = 5;
@@ -564,49 +445,10 @@ with lib;
             );
           };
         };
-
-        theme = ''
-          decoration {
-            active_opacity = 0.95
-            inactive_opacity = 0.95
-            fullscreen_opacity = 1
-
-            # shadow_offset = 0.2
-          }
-
-          general {
-            col.active_border = rgba(eae0e445)
-            col.inactive_border = rgba(9a8d9533)
-          }
-
-          plugin {
-            # borders-plus-plus {
-            #     add_borders = 1 # 0 - 9
-
-            #     # you can add up to 9 borders
-            #     col.border_1 = rgb(ffffff)
-            #     col.border_2 = rgb(2222ff)
-
-            #     # -1 means "default" as in the one defined in general:border_size
-            #     border_size_1 = 10
-            #     border_size_2 = -1
-
-            #     # makes outer edges match rounding of the parent. Turn on / off to better understand. Default = on.
-            #     natural_rounding = yes
-            # }
-
-            autotile {
-              enable = false
-            }
-          }
-
-          windowrulev2 = bordercolor rgba(ffabf1AA) rgba(ffabf177),pinned:1
-        '';
       in
       builtins.concatStringsSep "\n" (
         [
           input
-          theme
         ]
         ++ builtins.attrValues bindings.global
         ++ builtins.attrValues bindings.submaps
