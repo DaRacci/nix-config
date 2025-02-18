@@ -3,12 +3,14 @@
 {
   systemd.services.adguardhome = {
     requires = [ "acme-finished-adguard.racci.dev.target" ];
-    serviceConfig.LoadCredential = let
-      certDir = config.security.acme.certs."adguard.racci.dev".directory;
-    in [
-      "cert.pem:${certDir}/cert.pem"
-      "key.pem:${certDir}/key.pem"
-    ];
+    serviceConfig.LoadCredential =
+      let
+        certDir = config.security.acme.certs."adguard.racci.dev".directory;
+      in
+      [
+        "cert.pem:${certDir}/cert.pem"
+        "key.pem:${certDir}/key.pem"
+      ];
   };
 
   services = {
@@ -182,12 +184,12 @@
 
   networking.firewall = let cfg = config.services.adguardhome.settings; in {
     allowedTCPPorts = [
-      settings.dns.port
-      settings.tls.port_https
-      settings.tls.port_dns_over_tls
-      settings.tls.port_dns_over_quic
+      cfg.dns.port
+      cfg.tls.port_https
+      cfg.tls.port_dns_over_tls
+      cfg.tls.port_dns_over_quic
     ];
 
-    allowedUDPPorts = [ settings.dns.port ];
+    allowedUDPPorts = [ cfg.dns.port ];
   };
 }
