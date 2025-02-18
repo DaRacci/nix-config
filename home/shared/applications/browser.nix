@@ -364,6 +364,7 @@ in
               "widget.gtk.rounded-bottom-corners.enabled" = true;
               "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
               "svg.context-properties.content.enabled" = true;
+              "dom.event.clipboardevents.enabled" = true;
 
               # Ultima
               "ultima.OS.gnome" = true;
@@ -372,12 +373,14 @@ in
               "ultima.disable.alltabs.button" = true;
               "ultima.disable.windowcontrols.button" = true;
               "ultima.disable.verticaltab.bar" = true;
+              "ultima.disable.verticaltab.bar.withindicator" = false;
               "ultima.tabs.sidebery.autohide" = true;
               "ultima.tabs.vertical.hide" = true;
               "ultima.urlbar.hidebuttons" = true;
               "ultima.urlbar.centered" = true;
               "ultima.theme.extensions" = true;
               "ultima.theme.menubar" = true;
+              "ultima.enable.js.config" = true;
             };
           in
           concatStrings (
