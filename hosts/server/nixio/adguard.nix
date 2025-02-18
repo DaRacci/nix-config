@@ -126,7 +126,7 @@
           enabled = true;
           server_name = "adguard.racci.dev";
 
-          port_https = 0;
+          port_https = 8443;
           port_dns_over_tls = 853;
           port_dns_over_quic = 853;
 
@@ -180,12 +180,14 @@
     ];
   };
 
-  networking.firewall = {
+  networking.firewall = let cfg = config.services.adguardhome.settings; in {
     allowedTCPPorts = [
-      53
-      853
+      settings.dns.port
+      settings.tls.port_https
+      settings.tls.port_dns_over_tls
+      settings.tls.port_dns_over_quic
     ];
 
-    allowedUDPPorts = [ 53 ];
+    allowedUDPPorts = [ settings.dns.port ];
   };
 }
