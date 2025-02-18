@@ -1,6 +1,16 @@
 { subnets, mkVirtualHost, ... }:
 { config, lib, ... }:
 {
+  systemd.services.adguardhome = {
+    requires = [ "acme-finished-adguard.racci.dev.target" ];
+    serviceConfig.LoadCredential = let
+      certDir = config.security.acme.certs."adguard.racci.dev".directory;
+    in [
+      "cert.pem:${certDir}/cert.pem"
+      "key.pem:${certDir}/key.pem"
+    ];
+  };
+
   services = {
     adguardhome = {
       enable = true;
@@ -108,6 +118,7 @@
           ]
           ++ [
             "@@||nextcloud.racci.dev^$dnsrewrite" # Nextcloud isn't hosted internally yet.
+            "@@||cloud.racci.dev^$dnsrewrite" # Digital Ocean DNS
             "@@||s.youtube.com^$important" # Fix YouTube history for IOS App
           ];
 
@@ -121,8 +132,8 @@
 
           strict_sni_check = false;
           allow_unencrypted_doh = true;
-          certificate_path = "${config.security.acme.certs."adguard.racci.dev".directory}/cert.pem";
-          private_key_path = "${config.security.acme.certs."adguard.racci.dev".directory}/key.pem";
+          certificate_path = "/run/credentials/adguardhome.service/cert.pem";
+          private_key_path = "/run/credentials/adguardhome.service/key.pem";
         };
 
         statistics = {
@@ -163,10 +174,6 @@
       (mkVirtualHost "adguard" {
         # TODO - DNS over HTTPS
         extraConfig = ''
-          redir /dns-query /dns-query/
-          handle /dns-query/* {
-            reverse_proxy https://${config.services.adguardhome.host}:${toString config.services.adguardhome.port}
-          }
           reverse_proxy http://${config.services.adguardhome.host}:${toString config.services.adguardhome.port}
         '';
       })
