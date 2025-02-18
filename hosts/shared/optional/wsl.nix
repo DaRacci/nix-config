@@ -14,7 +14,6 @@ in
     enable = true;
     defaultUser = user;
     startMenuLaunchers = true;
-    nativeSystemd = true;
     useWindowsDriver = true;
 
     interop.register = true;
