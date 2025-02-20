@@ -133,6 +133,7 @@
             nixos.expr = "(builtins.getFlake \"/persist/nix-config\").nixosConfigurations.nixe.options";
             home-manager.expr = "(builtins.getFlake \"/persist/nix-config\").homeConfigurations.racci.options";
             flake-parts.expr = "(builtins.getFlake \"/persist/nix-config\").debug.options";
+            flake-parts2.expr = "(builtins.getFlake \"/persist/nix-config\").currentSystem.options";
           };
         };
       };

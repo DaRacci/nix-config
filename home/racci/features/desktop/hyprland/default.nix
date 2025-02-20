@@ -66,14 +66,10 @@ with lib;
   wayland.windowManager.hyprland = {
     systemd.enable = false;
 
-    plugins =
-      with pkgs.hyprlandPlugins;
-      with inputs.hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system};
-      [
-        # hyprfocus
-        borders-plus-plus
-        inputs.hyprland-dynamic-cursors.packages.${pkgs.stdenv.hostPlatform.system}.hypr-dynamic-cursors
-      ];
+    plugins = [
+      # hyprfocus
+      inputs.hyprland-dynamic-cursors.packages.${pkgs.stdenv.hostPlatform.system}.hypr-dynamic-cursors
+    ];
 
     custom-settings = {
       windowrule = [
@@ -146,7 +142,7 @@ with lib;
             float = true;
             size = "33%";
             move = {
-              x = "-33%";
+              x = "33%";
               y = 50;
             };
           };

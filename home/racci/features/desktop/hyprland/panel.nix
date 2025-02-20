@@ -17,12 +17,12 @@
 
         bind = [ "CONTROL,ESCAPE,exec,killall waybar || ${waybarBin}" ];
 
-        windowrulev2 = [
-          "float,class:^(pavucontrol)$"
-          "size 900 450,class:^(pavucontrol)$"
-          "move 1660 48,class:^(pavucontrol)$"
-          "animation slide right,class:^(pavucontrol)$"
-        ];
+        # windowrulev2 = [
+        #   "float,class:^(pavucontrol)$"
+        #   "size 900 450,class:^(pavucontrol)$"
+        #   "move 1660 48,class:^(pavucontrol)$"
+        #   "animation slide right,class:^(pavucontrol)$"
+        # ];
       };
   };
 
@@ -31,7 +31,7 @@
   };
 
   programs.waybar = {
-    enable = true;
+    enable = false;
     package = pkgs.waybar;
 
     settings =
