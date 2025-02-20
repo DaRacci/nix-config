@@ -102,7 +102,7 @@ rec {
         { inputs, ... }:
         {
           imports = [
-            inputs.home-manager.nixosModule
+            inputs.home-manager.nixosModules.default
             inputs.nixos-generators.nixosModules.all-formats
             inputs.angrr.nixosModules.angrr
           ];

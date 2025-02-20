@@ -49,6 +49,7 @@
             inputs.hyprland-contrib.overlays.default
             inputs.lix-module.overlays.lixFromNixpkgs
             inputs.angrr.overlays.default
+            inputs.hyprpanel.overlay
           ] ++ (builtins.attrValues (import ./overlays { inherit self inputs lib; }));
         };
     in
@@ -338,17 +339,7 @@
         flake-parts.follows = "flake-parts";
       };
     };
-    astal = {
-      url = "github:aylur/astal";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    ags = {
-      url = "github:aylur/ags";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        astal.follows = "astal";
-      };
-    };
+    hyprpanel.url = "github:Jas-SinghFSU/HyprPanel";
 
     # Other misc modules
     arion.url = "github:hercules-ci/arion";

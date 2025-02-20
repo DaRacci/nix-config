@@ -28,7 +28,7 @@ in
       (usePR [
         "protonup-rs"
       ] "liperium" "protonuprs-init" "sha256-z5Zh+ih0gE+Uwl8b7//apBRbrsHTvpV0PAhQwM8mOZ4=")
-      (usePR [ "boxflat" ] "DaRacci" "boxflat" "sha256-9RVZuUC8VLNB9zyu3lpWTETO+oNnJznJ0DLVRKKqSQM=")
+      (usePR [ "boxflat" ] "DaRacci" "boxflat" "sha256-38PXVNBXg0KcSccl9QNq7q/dYCXFD601+sdIaljzwIw=")
     ];
 
   modifications = final: prev: {
