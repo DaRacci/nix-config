@@ -3,7 +3,6 @@
   osConfig ? null,
   config,
   pkgs,
-  lib,
   ...
 }:
 {
@@ -12,9 +11,7 @@
       inputs.nur.modules.homeManager.default
       inputs.sops-nix.homeManagerModule
       inputs.anyrun.homeManagerModules.default
-    ]
-    ++ (lib.optional (osConfig == null) inputs.stylix.homeManagerModules.stylix)
-    ++ [
+    ] ++ [
       ./dynamic-linker.nix
       ./nix.nix
       ./sops.nix
