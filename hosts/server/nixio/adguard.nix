@@ -182,14 +182,18 @@
     ];
   };
 
-  networking.firewall = let cfg = config.services.adguardhome.settings; in {
-    allowedTCPPorts = [
-      cfg.dns.port
-      cfg.tls.port_https
-      cfg.tls.port_dns_over_tls
-      cfg.tls.port_dns_over_quic
-    ];
+  networking.firewall =
+    let
+      cfg = config.services.adguardhome.settings;
+    in
+    {
+      allowedTCPPorts = [
+        cfg.dns.port
+        cfg.tls.port_https
+        cfg.tls.port_dns_over_tls
+        cfg.tls.port_dns_over_quic
+      ];
 
-    allowedUDPPorts = [ cfg.dns.port ];
-  };
+      allowedUDPPorts = [ cfg.dns.port ];
+    };
 }

@@ -16,11 +16,11 @@ flake.inputs.home-manager.lib.homeManagerConfiguration {
   };
 
   modules = [
-    ({
+    {
       imports = [
         flake.inputs.stylix.homeManagerModules.stylix
       ];
-    })
+    }
     (
       { lib, ... }:
       import ./userConf.nix {

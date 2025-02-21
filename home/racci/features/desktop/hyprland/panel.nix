@@ -1,5 +1,4 @@
 {
-  config,
   pkgs,
   lib,
   ...
@@ -7,24 +6,17 @@
 {
   home.packages = with pkgs; [ networkmanagerapplet ];
 
-  wayland.windowManager.hyprland = {
-    settings =
-      let
-        waybarBin = lib.getExe config.programs.waybar.package;
-      in
-      {
-        exec-once = [ "${waybarBin}" ];
+  # wayland.windowManager.hyprland = {
+  #   settings =
+  #     let
+  #       waybarBin = lib.getExe config.programs.waybar.package;
+  #     in
+  #     {
+  #       exec-once = [ "${waybarBin}" ];
 
-        bind = [ "CONTROL,ESCAPE,exec,killall waybar || ${waybarBin}" ];
-
-        # windowrulev2 = [
-        #   "float,class:^(pavucontrol)$"
-        #   "size 900 450,class:^(pavucontrol)$"
-        #   "move 1660 48,class:^(pavucontrol)$"
-        #   "animation slide right,class:^(pavucontrol)$"
-        # ];
-      };
-  };
+  #       bind = [ "CONTROL,ESCAPE,exec,killall waybar || ${waybarBin}" ];
+  #     };
+  # };
 
   services = {
     blueman-applet.enable = true;
