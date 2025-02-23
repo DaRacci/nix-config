@@ -52,6 +52,7 @@
       };
 
       settings = {
+        useDefaultSettings = true;
         general = {
           debug = false;
           instance_name = "SearXNG";
@@ -61,7 +62,7 @@
 
         server = {
           port = 8888;
-          bind_address = "127.0.0.1";
+          bind_address = "0.0.0.0";
           base_url = "https://search.racci.dev";
           secret_key = "@SECRET_KEY@";
           public_instance = false;
