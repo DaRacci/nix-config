@@ -1,4 +1,9 @@
-{ modulesPath, config, ... }:
+{
+  modulesPath,
+  config,
+  lib,
+  ...
+}:
 {
   imports = [ "${modulesPath}/virtualisation/proxmox-lxc.nix" ];
 
@@ -37,6 +42,15 @@
     searx = {
       enable = true;
       redisCreateLocally = true;
+
+      limiterSettings = {
+        botdetection.ip_limit.link_token = false;
+        botdetection.ip_lists = {
+          block_ip = [ ];
+          pass_ip = [ ];
+        };
+      };
+
       settings = {
         general = {
           debug = false;
@@ -65,11 +79,17 @@
           safe_search = 0;
           autocomplete = "";
           autocomplete_min = 4;
-          favicon_resolver = "duckduckgo";
+          # favicon_resolver = "duckduckgo";
           default_lang = "auto";
           ban_time_on_fail = 5;
           max_ban_time_on_fail = 120;
           prefer_configured_language = true;
+          formats = [
+            "html"
+            "json"
+            "csv"
+            "rss"
+          ];
         };
 
         ui = {
@@ -83,6 +103,7 @@
           search_on_category_select = true;
           hotkeys = "default";
           url_formatting = "pretty";
+          static_use_hash = true;
         };
 
         outgoing = {
@@ -130,456 +151,434 @@
           "software wikis" = { };
         };
 
-        engines = [
-          #region Web Search
-          {
-            name = "bing";
-            engine = "bing";
-            shortcut = "bi";
-            categories = [ "general" ];
-          }
-          {
-            name = "duckduckgo";
-            engine = "duckduckgo";
-            shortcut = "ddg";
-            categories = [ "general" ];
-          }
-          {
-            name = "google";
-            engine = "google";
-            shortcut = "go";
-            categories = "general";
-            use_mobile_ui = false;
-          }
-          {
-            name = "brave";
-            engine = "brave";
-            shortcut = "br";
-            timeRangeSupport = true;
-            paging = true;
-            categories = [
-              "general"
-              "web"
-            ];
-            braveCategory = "search";
-          }
-          #endregion
+        engines =
+          lib.mapAttrsToList
+            (
+              name: value:
+              value
+              // {
+                inherit name;
+                disabled = if value.disabled then true else false;
+              }
+            )
+            {
+              #region Web Search
+              "bing" = {
+                engine = "bing";
+                shortcut = "bi";
+                categories = [ "general" ];
+              };
+              "duckduckgo" = {
+                engine = "duckduckgo";
+                shortcut = "ddg";
+                categories = [ "general" ];
+              };
+              "google" = {
+                engine = "google";
+                shortcut = "go";
+                categories = "general";
+                use_mobile_ui = false;
+              };
+              "brave" = {
+                engine = "brave";
+                shortcut = "br";
+                timeRangeSupport = true;
+                paging = true;
+                categories = [
+                  "general"
+                  "web"
+                ];
+                braveCategory = "search";
+              };
+              #endregion
 
-          #region Image Search
-          {
-            name = "bing images";
-            engine = "bing_images";
-            shortcut = "bii";
-            categories = [ "images" ];
-          }
-          {
-            name = "duckduckgo images";
-            engine = "duckduckgo_extra";
-            shortcut = "ddgi";
-            categories = [
-              "images"
-              "web"
-            ];
-            ddg_category = "images";
-          }
-          {
-            name = "tineye";
-            engine = "tineye";
-            shortcut = "tin";
-            categories = [ "images" ];
-            paging = true;
-            timeout = 9.0;
-          }
-          {
-            name = "google images";
-            engine = "google_images";
-            shortcut = "goi";
-            categories = [ "images" ];
-          }
-          {
-            name = "material icons";
-            engine = "material_icons";
-            categories = [ "images" ];
-            shortcut = "mi";
-          }
-          {
-            name = "brave.images";
-            engine = "brave";
-            network = "brave";
-            shortcut = "brimg";
-            categories = [
-              "images"
-              "web"
-            ];
-            braveCategory = "images";
-          }
-          #endregion
+              #region Image Sea;rch
+              "bing images" = {
+                engine = "bing_images";
+                shortcut = "bii";
+                categories = [ "images" ];
+              };
+              "duckduckgo images" = {
+                engine = "duckduckgo_extra";
+                shortcut = "ddgi";
+                categories = [
+                  "images"
+                  "web"
+                ];
+                ddg_category = "images";
+              };
+              "tineye" = {
+                engine = "tineye";
+                shortcut = "tin";
+                categories = [ "images" ];
+                paging = true;
+                timeout = 9.0;
+              };
+              "google images" = {
+                engine = "google_images";
+                shortcut = "goi";
+                categories = [ "images" ];
+              };
+              "material icons" = {
+                engine = "material_icons";
+                categories = [ "images" ];
+                shortcut = "mi";
+              };
+              "brave.images" = {
+                engine = "brave";
+                network = "brave";
+                shortcut = "brimg";
+                categories = [
+                  "images"
+                  "web"
+                ];
+                braveCategory = "images";
+              };
+              #endregion
 
-          #region Video Search
-          {
-            name = "bing videos";
-            engine = "bing_videos";
-            shortcut = "biv";
-            categories = [
-              "videos"
-              "web"
-            ];
-          }
-          {
-            name = "duckduckgo videos";
-            engine = "duckduckgo_extra";
-            shortcut = "ddv";
-            categories = [
-              "videos"
-              "web"
-            ];
-            ddg_category = "videos";
-          }
-          {
-            name = "google videos";
-            engine = "google_videos";
-            shortcut = "gov";
-            categories = [
-              "videos"
-              "web"
-            ];
-          }
-          {
-            name = "youtube";
-            engine = "youtube_noapi";
-            shortcute = "yt";
-            categories = [ "videos" ];
-          }
-          {
-            name = "brave.videos";
-            engine = "brave";
-            network = "brave";
-            shortcut = "brvid";
-            categories = [
-              "videos"
-              "web"
-            ];
-            braveCategory = "videos";
-          }
-          #endregion
+              #region Video Search
+              "bing videos" = {
+                engine = "bing_videos";
+                shortcut = "biv";
+                categories = [
+                  "videos"
+                  "web"
+                ];
+              };
+              "duckduckgo videos" = {
+                engine = "duckduckgo_extra";
+                shortcut = "ddv";
+                categories = [
+                  "videos"
+                  "web"
+                ];
+                ddg_category = "videos";
+              };
+              "google videos" = {
+                engine = "google_videos";
+                shortcut = "gov";
+                categories = [
+                  "videos"
+                  "web"
+                ];
+              };
+              "youtube" = {
+                engine = "youtube_noapi";
+                shortcute = "yt";
+                categories = [ "videos" ];
+              };
+              "brave.videos" = {
+                engine = "brave";
+                network = "brave";
+                shortcut = "brvid";
+                categories = [
+                  "videos"
+                  "web"
+                ];
+                braveCategory = "videos";
+              };
+              #endregion
 
-          #region News Search
-          {
-            name = "bing news";
-            engine = "bing_news";
-            shortcut = "bin";
-            categories = [ "news" ];
-          }
-          {
-            name = "duckduckgo news";
-            engine = "duckduckgo_extra";
-            categories = [
-              "news"
-              "web"
-            ];
-            ddg_category = "news";
-            shortcut = "ddn";
-          }
-          {
-            name = "google news";
-            engine = "google_news";
-            shortcut = "gon";
-            categories = [ "news" ];
-          }
-          {
-            name = "hackernews";
-            engine = "hackernews";
-            shortcut = "hn";
-            categories = [
-              "it"
-              "news"
-            ];
-          }
-          {
-            name = "brave.news";
-            engine = "brave";
-            network = "brave";
-            shortcut = "brnews";
-            categories = [ "news" ];
-            braveCategory = "news";
-          }
-          #endregion
+              #region News Search
+              "bing news" = {
+                engine = "bing_news";
+                shortcut = "bin";
+                categories = [ "news" ];
+              };
+              "duckduckgo news" = {
+                engine = "duckduckgo_extra";
+                categories = [
+                  "news"
+                  "web"
+                ];
+                ddg_category = "news";
+                shortcut = "ddn";
+              };
+              "google news" = {
+                engine = "google_news";
+                shortcut = "gon";
+                categories = [ "news" ];
+              };
+              "hackernews" = {
+                engine = "hackernews";
+                shortcut = "hn";
+                categories = [
+                  "it"
+                  "news"
+                ];
+              };
+              "brave.news" = {
+                engine = "brave";
+                network = "brave";
+                shortcut = "brnews";
+                categories = [ "news" ];
+                braveCategory = "news";
+              };
+              #endregion
 
-          #region Utilities
-          {
-            name = "currency";
-            engine = "currency_convert";
-            shortcut = "cc";
-            categories = [ "utilities" ];
-          }
-          {
-            name = "duckduckgo weather";
-            engine = "duckduckgo_weather";
-            shortcut = "ddw";
-            categories = [ "utilities" ];
-          }
-          {
-            name = "duckduckgo definitions";
-            engine = "duckduckgo_definitions";
-            # shortcut = "ddd";
-            weight = 2.0;
-            categories = [ "utilities" ];
-          }
-          {
-            name = "urbandictionary";
-            engine = "xpath";
-            search_url = "https://www.urbandictionary.com/define.php?term={query}";
-            url_xpath = "//*[@class=\"word\"]/@href";
-            title_xpath = "//*[@class=\"def-header\"]";
-            content_xpath = "//*[@class=\"meaning\"]";
-            shortcut = "ud";
-            categories = [ "utilities" ];
-          }
-          {
-            name = "libretranslate";
-            engine = "libretranslate";
-            base_url = "https://libretranslate.com/translate";
-            shortcut = "lt";
-            categories = [
-              "utilities"
-              "translate"
-            ];
-          }
-          #endregion
+              #region Utilities
+              "currency" = {
+                engine = "currency_convert";
+                shortcut = "cc";
+                categories = [ "utilities" ];
+              };
+              "duckduckgo weather" = {
+                engine = "duckduckgo_weather";
+                shortcut = "ddw";
+                categories = [ "utilities" ];
+              };
+              "duckduckgo definitions" = {
+                engine = "duckduckgo_definitions";
+                # shortcut = "ddd";
+                weight = 2.0;
+                categories = [ "utilities" ];
+              };
+              "urbandictionary" = {
+                engine = "xpath";
+                search_url = "https://www.urbandictionary.com/define.php?term={query}";
+                url_xpath = "//*[@class=\"word\"]/@href";
+                title_xpath = "//*[@class=\"def-header\"]";
+                content_xpath = "//*[@class=\"meaning\"]";
+                shortcut = "ud";
+                categories = [ "utilities" ];
+              };
+              "libretranslate" = {
+                engine = "libretranslate";
+                base_url = "https://libretranslate.com/translate";
+                shortcut = "lt";
+                categories = [
+                  "utilities"
+                  "translate"
+                ];
+              };
+              #endregion
 
-          #region Shopping
-          {
-            name = "ebay";
-            engine = "ebay";
-            shortcut = "eb";
-            base_url = "https://www.ebay.com";
-            categories = [ "shopping" ];
-            timeout = 5;
-          }
-          #endregion
+              #region Shopping
+              "ebay" = {
+                engine = "ebay";
+                shortcut = "eb";
+                base_url = "https://www.ebay.com";
+                categories = [ "shopping" ];
+                timeout = 5;
+              };
+              #endregion
 
-          #region Science
-          {
-            name = "google scholar";
-            engine = "google_scholar";
-            shortcut = "gos";
-            categories = [ "science" ];
-          }
-          #endregion
+              #region Science
+              "google scholar" = {
+                engine = "google_scholar";
+                shortcut = "gos";
+                categories = [ "science" ];
+              };
+              #endregion
 
-          #region Maps
-          {
-            name = "openstreetmap";
-            engine = "openstreetmap";
-            shortcut = "osm";
-            categories = [ "map" ];
-          }
-          #endregion
+              #region Maps
+              "openstreetmap" = {
+                engine = "openstreetmap";
+                shortcut = "osm";
+                categories = [ "map" ];
+              };
+              #endregion
 
-          #region Music
-          {
-            name = "spotify";
-            engine = "spotify";
-            shortcut = "sft";
-            categories = [ "music" ];
-            api_client_id = "@SPOTIFY_CLIENT_ID";
-            api_client_secret = "@SPOTIFY_CLIENT_SECRET";
-          }
-          #endregion
+              #region Music
+              "spotify" = {
+                engine = "spotify";
+                shortcut = "sft";
+                categories = [ "music" ];
+                api_client_id = "@SPOTIFY_CLIENT_ID";
+                api_client_secret = "@SPOTIFY_CLIENT_SECRET";
+              };
+              #endregion
 
-          #region App Search Engines
-          {
-            name = "apk mirror";
-            engine = "apkmirror";
-            timeout = 4.0;
-            shortcut = "apkm";
-            categories = [
-              "it"
-              "apps"
-            ];
-          }
-          {
-            name = "apple app store";
-            engine = "apple_app_store";
-            shortcut = "aps";
-            categories = [
-              "it"
-              "apps"
-            ];
-          }
-          {
-            name = "google play apps";
-            engine = "google_play";
-            categories = [
-              "it"
-              "apps"
-            ];
-            shortcut = "gpa";
-            play_categ = "apps";
-          }
-          #endregion
+              #region App Search Engines
+              "apk mirror" = {
+                engine = "apkmirror";
+                timeout = 4.0;
+                shortcut = "apkm";
+                categories = [
+                  "it"
+                  "apps"
+                ];
+              };
+              "apple app store" = {
+                engine = "apple_app_store";
+                shortcut = "aps";
+                categories = [
+                  "it"
+                  "apps"
+                ];
+              };
+              "google play apps" = {
+                engine = "google_play";
+                categories = [
+                  "it"
+                  "apps"
+                ];
+                shortcut = "gpa";
+                play_categ = "apps";
+              };
+              #endregion
 
-          #region Package Search Engines
-          {
-            name = "alpine linux packages";
-            engine = "alpinelinux";
-            shortcut = "alp";
-            categories = [
-              "it"
-              "packages"
-            ];
-          }
-          {
-            name = "docker hub";
-            engine = "docker_hub";
-            shortcut = "dh";
-            categories = [
-              "it"
-              "packages"
-            ];
-          }
-          {
-            name = "crates.io";
-            engine = "crates";
-            shortcut = "crates";
-          }
-          {
-            name = "lib.rs";
-            engine = "lib_rs";
-            shortcut = "lrs";
-          }
-          #endregion
+              #region Package Search Engines
+              "alpine linux packages" = {
+                engine = "alpinelinux";
+                shortcut = "alp";
+                categories = [
+                  "it"
+                  "packages"
+                ];
+              };
+              "docker hub" = {
+                engine = "docker_hub";
+                shortcut = "dh";
+                categories = [
+                  "it"
+                  "packages"
+                ];
+              };
+              "crates.io" = {
+                engine = "crates";
+                shortcut = "crates";
+              };
+              "lib.rs" = {
+                engine = "lib_rs";
+                shortcut = "lrs";
+              };
+              #endregion
 
-          #region Wikis
-          {
-            name = "arch linux wiki";
-            engine = "archlinux";
-            shortcut = "alw";
-            categories = [
-              "it"
-              "software wikis"
-            ];
-          }
-          {
-            name = "nixos wiki";
-            engine = "mediawiki";
-            base_url = "https://wiki.nixos.org/";
-            search_type = "text";
-            shortcut = "nw";
-            categories = [
-              "it"
-              "software wikis"
-            ];
-          }
-          {
-            name = "wikipedia";
-            engine = "wikipedia";
-            shortcut = "wp";
-            base_url = "https://{language}.wikipedia.org/";
-            categories = [ "general" ];
-            display_type = [ "infobox" ];
-          }
-          {
-            name = "free software directory";
-            engine = "mediawiki";
-            shortcut = "fsd";
-            categories = [
-              "it"
-              "software wikis"
-            ];
-            base_url = "https://directory.fsf.org/";
-            search_type = "title";
-            timeout = 5.0;
-            about = {
-              website = "https://directory.fsf.org/";
-              wikidata_id = "Q2470288";
-            };
-          }
-          {
-            name = "wikidata";
-            engine = "wikidata";
-            shortcut = "wd";
-            categories = [ "general" ];
-            display_type = [ "infobox" ];
-            timeout = 3.0;
-            weight = 2.0;
-          }
-          #endregion
+              #region Wikis;
+              "arch linux wiki" = {
+                engine = "archlinux";
+                shortcut = "alw";
+                categories = [
+                  "it"
+                  "software wikis"
+                ];
+              };
+              "nixos wiki" = {
+                engine = "mediawiki";
+                base_url = "https://wiki.nixos.org/";
+                search_type = "text";
+                shortcut = "nw";
+                categories = [
+                  "it"
+                  "software wikis"
+                ];
+              };
+              "wikipedia" = {
+                engine = "wikipedia";
+                shortcut = "wp";
+                base_url = "https://{language}.wikipedia.org/";
+                categories = [ "general" ];
+                display_type = [ "infobox" ];
+              };
+              "free software directory" = {
+                engine = "mediawiki";
+                shortcut = "fsd";
+                categories = [
+                  "it"
+                  "software wikis"
+                ];
+                base_url = "https://directory.fsf.org/";
+                search_type = "title";
+                timeout = 5.0;
+                about = {
+                  website = "https://directory.fsf.org/";
+                  wikidata_id = "Q2470288";
+                };
+              };
+              "wikidata" = {
+                engine = "wikidata";
+                shortcut = "wd";
+                categories = [ "general" ];
+                display_type = [ "infobox" ];
+                timeout = 3.0;
+                weight = 2.0;
+              };
+              #endregion
 
-          #region Software Repositories
-          {
-            name = "bitbucket";
-            engine = "xpath";
-            paging = true;
-            searchUrl = "https://bitbucket.org/repo/all/{pageno}?name={query}";
-            urlXpath = "//article[@class=\"repo-summary\"]//a[@class=\"repo-link\"]/@href";
-            titleXpath = "//article[@class=\"repo-summary\"]//a[@class=\"repo-link\"]";
-            contentXpath = "//article[@class=\"repo-summary\"]/p";
-            categories = [
-              "it"
-              "repos"
-            ];
-            timeout = 4.0;
-          }
-          {
-            name = "gitlab";
-            engine = "gitlab";
-            base_url = "https://gitlab.com";
-            shortcut = "gl";
-            categories = [
-              "it"
-              "repos"
-            ];
-            about = {
-              website = "https://gitlab.com";
-              wikidata_id = "Q16639197";
-            };
-          }
-          {
-            name = "github";
-            engine = "github";
-            shortcut = "gh";
-            categories = [
-              "it"
-              "repos"
-            ];
-          }
-          #endregion
+              #region Software Repositories
+              "bitbucket" = {
+                engine = "xpath";
+                paging = true;
+                searchUrl = "https://bitbucket.org/repo/all/{pageno}?name={query}";
+                urlXpath = "//article[@class=\"repo-summary\"]//a[@class=\"repo-link\"]/@href";
+                titleXpath = "//article[@class=\"repo-summary\"]//a[@class=\"repo-link\"]";
+                contentXpath = "//article[@class=\"repo-summary\"]/p";
+                categories = [
+                  "it"
+                  "repos"
+                ];
+                timeout = 4.0;
+              };
+              "gitlab" = {
+                engine = "gitlab";
+                base_url = "https://gitlab.com";
+                shortcut = "gl";
+                categories = [
+                  "it"
+                  "repos"
+                ];
+                about = {
+                  website = "https://gitlab.com";
+                  wikidata_id = "Q16639197";
+                };
+              };
+              "github" = {
+                engine = "github";
+                shortcut = "gh";
+                categories = [
+                  "it"
+                  "repos"
+                ];
+              };
+              #endregion
 
-          #region Social Media
-          {
-            name = "reddit";
-            engine = "reddit";
-            shortcut = "re";
-            categories = [ "social media" ];
-            page_size = 25;
-            timeout = 10.0;
-          }
-          #endregion
+              #region Social Media
+              "reddit" = {
+                engine = "reddit";
+                shortcut = "re";
+                categories = [ "social media" ];
+                page_size = 25;
+                timeout = 10.0;
+              };
+              #endregion
 
-          #region Q&A
-          {
-            name = "stackoverflow";
-            engine = "stackexchange";
-            shortcut = "so";
-            api_site = "stackoverflow";
-            categories = [
-              "it"
-              "q&a"
-            ];
-          }
-          {
-            name = "superuser";
-            engine = "stackexchange";
-            shortcut = "su";
-            api_site = "superuser";
-            categories = [
-              "it"
-              "q&a"
-            ];
-          }
-          #endregion
-        ];
+              #region Q&A
+              "stackoverflow" = {
+                engine = "stackexchange";
+                shortcut = "so";
+                api_site = "stackoverflow";
+                categories = [
+                  "it"
+                  "q&a"
+                ];
+              };
+              "superuser" = {
+                engine = "stackexchange";
+                shortcut = "su";
+                api_site = "superuser";
+                categories = [
+                  "it"
+                  "q&a"
+                ];
+              };
+              #endregion
+
+              #region Disabled Engines
+            }
+          // (lib.genAttrs
+            [
+              "bt4g"
+              "kickass"
+              "piratebay"
+              "solidtorrents"
+              "wikicommans.files"
+              "z-library"
+            ]
+            (_engine: {
+              disabled = true;
+            })
+          );
 
         locales = {
           en = "English";
