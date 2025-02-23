@@ -235,6 +235,10 @@
               env = {
                 NIX_CONFIG = "extra-experimental-features = nix-command flakes";
               };
+
+              git-hooks = {
+
+              };
             };
           };
       };
@@ -266,6 +270,7 @@
         flake-compat.follows = "flake-compat";
       };
     };
+    git-hooks-nix.url = "github:cachix/git-hooks.nix";
 
     # Base Modules
     home-manager = {
@@ -332,6 +337,11 @@
       url = "github:VirtCode/hypr-dynamic-cursors";
       inputs.hyprland.follows = "hyprland";
     };
+    hy3 = {
+      url = "github:outfoxxed/hy3";
+      inputs.hyprland.follows = "hyprland";
+    };
+    hyprpanel.url = "github:Jas-SinghFSU/HyprPanel";
     anyrun = {
       url = "github:anyrun-org/anyrun";
       inputs = {
@@ -339,7 +349,6 @@
         flake-parts.follows = "flake-parts";
       };
     };
-    hyprpanel.url = "github:Jas-SinghFSU/HyprPanel";
 
     # Other misc modules
     arion.url = "github:hercules-ci/arion";
@@ -360,5 +369,9 @@
       url = "github:tinted-theming/schemes";
       flake = false;
     };
+
+    # Packages from PRs
+    boxflat.url = "github:DaRacci/nixpkgs/boxflat";
+    protonup-rs.url = "github:liperium/nixpkgs/protonuprs-init";
   };
 }

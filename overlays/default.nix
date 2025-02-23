@@ -1,34 +1,45 @@
 { inputs, lib, ... }:
 let
-  usePRRaw =
-    final: prev: names: owner: branch: sha256:
+  takePackages =
+    input: names:
     let
-      overlay =
-        import
-          (final.fetchzip {
-            inherit sha256;
-            url = "https://github.com/${owner}/nixpkgs/archive/${branch}.tar.gz";
-          })
-          {
-            overlays = [ ];
-            inherit (prev) config;
-          };
+      packages = input.packages or input.legacyPackages;
     in
-    lib.foldl' (acc: name: acc // { ${name} = overlay.${name}; }) { } names;
+    lib.foldl' (acc: name: acc // { ${name} = packages.${builtins.currentSystem}.${name}; }) { } names;
+
+  # If given a string, assumes the input and package name are the same.
+  # Otherwise should be defined as an attr with the input and the package name(s).
+  packagesFromOtherInstances = [
+    "boxflat"
+    "protonup-rs"
+    "nixd"
+  ];
 in
 {
+  # Packages taken from other instances of nixpkgs inputs, (i.e) pr branches and the like.
+  fromOtherInstances =
+    _final: _prev:
+    lib.pipe packagesFromOtherInstances [
+      (map (
+        input:
+        if lib.isAttrs input && input ? packages && input ? input then
+          input
+        else if lib.isString input then
+          {
+            input = inputs.${input};
+            packages = [ input ];
+          }
+        else
+          throw "Invalid input format."
+      ))
+      (map ({ input, packages }: takePackages input packages))
+      (lib.foldl' lib.recursiveUpdate { })
+    ];
+
   additions =
     final: prev:
-    let
-      usePR = usePRRaw final prev;
-    in
     prev.lib.foldl' prev.lib.recursiveUpdate { } [
-      # This one brings our custom packages from the 'pkgs' directory
       (import ../pkgs { pkgs = final; })
-      (usePR [
-        "protonup-rs"
-      ] "liperium" "protonuprs-init" "sha256-z5Zh+ih0gE+Uwl8b7//apBRbrsHTvpV0PAhQwM8mOZ4=")
-      (usePR [ "boxflat" ] "DaRacci" "boxflat" "sha256-38PXVNBXg0KcSccl9QNq7q/dYCXFD601+sdIaljzwIw=")
     ];
 
   modifications = final: prev: {
@@ -40,6 +51,5 @@ in
     });
 
     inherit lib;
-    inherit (inputs.nixd.packages.x86_64-linux) nixd;
   };
 }
