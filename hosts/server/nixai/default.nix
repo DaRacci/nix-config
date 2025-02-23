@@ -159,7 +159,7 @@
               value
               // {
                 inherit name;
-                disabled = if value.disabled then true else false;
+                disabled = value.disabled or false;
               }
             )
             (
