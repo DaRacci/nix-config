@@ -64,76 +64,10 @@ let
     builtins.listToAttrs
   ];
 
-  editorContexts = {
-    editor = {
-      vscode = "editorTextFocus";
-      zed-editor = "Editor";
-      micro = "buffer";
-    };
-    editorFull = {
-      vscode = "editorTextFocus && !editorReadOnly";
-      zed-editor = "Editor && mode == full";
-      micro = "buffer";
-    };
-  };
-
-  # If an editors value is set to null, then it is not supported.
-  actions = {
-    NewLine = {
-      editorContext = editorContexts.editorFull;
-      zed-editor = "editor::Newline";
-      vscode = null;
-      micro = "InsertNewline";
-    };
-    NewLineAbove = {
-      editorContext = editorContexts.editorFull;
-      zed-editor = "editor::NewlineAbove";
-      vscode = "editor.action.insertLineBefore";
-      micro = null;
-    };
-    NewLineBelow = {
-      editorContext = editorContexts.editorFull;
-      zed-editor = "editor::NewlineBelow";
-      vscode = "editor.action.insertLineAfter";
-      micro = null;
-    };
-    SelectLine = {
-      editorContext = editorContexts.editor;
-      zed-editor = "editor::SelectLine";
-      vscode = "editor.action.selectLines";
-      micro = "SelectLine";
-    };
-    MoveLineUp = {
-      editorContext = editorContexts.editor;
-      zed-editor = "editor::MoveLineUp";
-      vscode = "editor.action.moveLinesUpAction";
-      micro = "MoveLinesUp";
-    };
-    MoveLineDown = {
-      editorContext = editorContexts.editor;
-      zed-editor = "editor::MoveLineDown";
-      vscode = "editor.action.moveLinesDownAction";
-      micro = "MoveLinesDown";
-    };
-    Undo = {
-      editorContext = editorContexts.editor;
-      zed-editor = "editor::Undo";
-      vscode = "undo";
-      micro = "Undo";
-    };
-    Redo = {
-      editorContext = editorContexts.editor;
-      zed-editor = "editor::Redo";
-      vscode = "redo";
-      micro = "Redo";
-    };
-    GotoLine = {
-      editorContext = editorContexts.editor;
-      zed-editor = "editor::GotoLine";
-      vscode = "workbench.action.gotoLine";
-      micro = "GotoLine";
-    };
-  };
+  actions = lib.pipe (builtins.fromJSON (builtins.readFile ./bindings.json)).bindings [
+    (builtins.map (action: lib.nameValuePair action.name action))
+    builtins.listToAttrs
+  ];
 
   keybindOption = lib.mkOption {
     type =
@@ -176,9 +110,8 @@ let
       (lib.filterAttrs (_: keybind: (builtins.getAttr editor keybind.action) != null))
       (lib.mapAttrs (
         _: keybind: {
+          inherit (builtins.getAttr editor keybind.action) action context;
           bind = builtins.map (key: builtins.getAttr editor key) keybind.bind;
-          editorContext = builtins.getAttr editor keybind.action.editorContext;
-          action = builtins.getAttr editor keybind.action;
         }
       ))
     ];
@@ -207,6 +140,10 @@ in
     programs.zed-editor.userKeymaps =
       let
         bindingToAttrName = bind: if lib.isList bind then lib.concatStringsSep "-" bind else bind;
+
+        bindings = builtins.fromJSON (builtins.readFile ./bindings.json);
+        # get a list of the contexts by iterating each binding, getting the context and then removing duplicates
+        editorContexts = builtins.listToAttrs (builtins.unique (builtins.map (binding: binding.context) bindings));
       in
       lib.pipe editorContexts [
         builtins.attrValues

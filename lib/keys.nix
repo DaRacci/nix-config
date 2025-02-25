@@ -98,7 +98,7 @@ rec {
     else
       lib.getAttr symbols char;
 
-  getCharFromName = name: if (lib.mine.attrsets.hasAttr name symbols) then name else name;
+  getCharFromName = name: if (builtins.hasAttr name symbols) then name else name;
 
   getModifiersFromList = list: builtins.filter (k: builtins.elem k modifierKeys) list;
 
