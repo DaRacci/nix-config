@@ -252,7 +252,6 @@
   inputs = {
     # Packages
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nur.url = "github:nix-community/NUR";
 
     # Utils
     flake-parts = {
@@ -377,7 +376,8 @@
     };
 
     # Packages from PRs
-    boxflat.url = "github:DaRacci/nixpkgs/boxflat";
     protonup-rs.url = "github:liperium/nixpkgs/protonuprs-init";
+    lact-module.url = "github:poperigby/nixpkgs/lact-module";
+    lact.url = "github:cything/nixpkgs/lact";
   };
 }

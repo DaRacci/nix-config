@@ -18,7 +18,14 @@
 
     "${flake}/hosts/shared/optional/gaming.nix"
     "${flake}/hosts/shared/optional/tailscale.nix"
+
+    "${inputs.lact-module}/nixos/modules/services/hardware/lact.nix"
   ];
+
+  services.lact = {
+    enable = true;
+    gpuOverclock.enable = true;
+  };
 
   boot = {
     quiet.enable = true;

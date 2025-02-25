@@ -10,9 +10,9 @@ let
   # If given a string, assumes the input and package name are the same.
   # Otherwise should be defined as an attr with the input and the package name(s).
   packagesFromOtherInstances = [
-    "boxflat"
     "protonup-rs"
     "nixd"
+    "lact"
   ];
 in
 {
@@ -48,6 +48,10 @@ in
         substituteInPlace steamtinkerlaunch --replace 'PROGCMD="''${0##*/}"' 'PROGCMD="steamtinkerlaunch"'
         substituteInPlace steamtinkerlaunch --replace 'YAD=yad' 'YAD=${final.yad}'
       '';
+    });
+
+    lact = prev.lact.overrideAttrs (oldAttrs: {
+      nativeBuildInputs = oldAttrs.nativeBuildInputs ++ [ final.autoAddDriverRunpath ];
     });
 
     inherit lib;
