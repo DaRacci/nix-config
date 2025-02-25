@@ -36,12 +36,13 @@
 
     # https://zed.dev/docs/configuring-zed
     userSettings = {
+      theme = lib.mkForce "Tokyo Night";
       ui_font_size = lib.mkForce 24;
       hour_format = "hour24";
       load_direnv = "shell_hook";
       autosave = "on_focus_change";
       auto_update = false;
-      relative_line_numbers = true;
+      relative_line_numbers = false;
       restore_on_startup = "last_workspace";
       show_signature_help_after_edits = true;
 
@@ -59,6 +60,21 @@
         default_model = {
           provider = "copilot_chat";
           model = "o1-preview";
+        };
+      };
+
+      language_models = {
+        copilot_chat = { };
+        ollama = {
+          api_url = "http://localhost:11434";
+          available_models = [
+            {
+              display_name = "Llama 3.2";
+              name = "llama3.2";
+              keep_alive = "60s";
+              max_tokens = 131072;
+            }
+          ];
         };
       };
 
