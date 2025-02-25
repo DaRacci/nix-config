@@ -78,15 +78,17 @@ let
       };
       fullscreenstate = mkOption {
         type = nullOr (submodule {
-          internal = mkOption {
-            type = with types; either (enum [ "*" ]) ints.between 0 3;
-            default = null;
-            description = "Set the internal fullscreen state. internal can be * - any, 0 - none, 1 - maximize, 2 - fullscreen, 3 - maximize and fullscreen.";
-          };
-          client = mkOption {
-            type = with types; either (enum [ "*" ]) ints.between 0 3;
-            default = null;
-            description = "Set the client fullscreen state. client can be * - any, 0 - none, 1 - maximize, 2 - fullscreen, 3 - maximize and fullscreen.";
+          options = {
+            internal = mkOption {
+              type = with types; either (enum [ "*" ]) ints.between 0 3;
+              default = null;
+              description = "Set the internal fullscreen state. internal can be * - any, 0 - none, 1 - maximize, 2 - fullscreen, 3 - maximize and fullscreen.";
+            };
+            client = mkOption {
+              type = with types; either (enum [ "*" ]) ints.between 0 3;
+              default = null;
+              description = "Set the client fullscreen state. client can be * - any, 0 - none, 1 - maximize, 2 - fullscreen, 3 - maximize and fullscreen.";
+            };
           };
         });
         default = null;
@@ -512,12 +514,6 @@ let
     ];
 
 in
-# lib.trivial.pipe nonNullRules [
-#   (lib.mapAttrsToList (name: value: lib.concatStringsSep "," [
-#     "${mkRuleString name value}"
-#     matcherString
-#   ]))
-# ];
 {
   options.wayland.windowManager.hyprland.custom-settings = {
     windowrule = mkOption {
@@ -532,7 +528,7 @@ in
           };
         });
       default = [ ];
-      description = "Match rules for windows.";
+      description = "Match rules for windows, these will always use the windowmanagerv2 keyword.";
     };
   };
 

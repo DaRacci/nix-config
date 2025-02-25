@@ -1,4 +1,4 @@
-{ lib }:
+{ lib, ... }:
 {
   /*
     Recursively merge a list of attrsets into a single attrset.
@@ -9,6 +9,14 @@
     { a = { b = "foo"; c = "bar"; }; }
   */
   recursiveMergeAttrs = lib.foldl' lib.recursiveUpdate { };
+
+  # Given a set of attribute values, return the set of the corresponding attributes from the given set.
+  getAttrsByValue =
+    values: attrs:
+    lib.pipe values [
+      (lib.map (value: lib.attrNames (lib.filterAttrs (_: attr: attr == value) attrs)))
+      lib.concatLists
+    ];
 
   /*
     Filter a list of attributes to only include those that exist in a given set of attributes.

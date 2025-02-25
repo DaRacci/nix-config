@@ -25,7 +25,13 @@
       ...
     }:
     let
-      lib = inputs.nixpkgs.lib.extend (prev: _: import ./lib { lib = prev; });
+      lib = inputs.nixpkgs.lib.extend (
+        prev: _:
+        import ./lib {
+          inherit inputs;
+          lib = prev;
+        }
+      );
 
       mkPkgs =
         system: cuda: _rocm:

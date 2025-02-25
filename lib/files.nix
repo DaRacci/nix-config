@@ -1,4 +1,4 @@
-{ lib }:
+{ lib, ... }:
 rec {
   # Recursively constructs an attrset of a given folder, recursing on directories, value of attrs is the filetype
   getDir =

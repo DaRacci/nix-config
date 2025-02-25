@@ -1,7 +1,7 @@
 _: {
   imports = [
-    ./input.nix
-    ./hyprland.nix
+    ./input
+    ./hyprland
     ./theme.nix
   ];
 

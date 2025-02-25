@@ -1,122 +1,11 @@
 {
-  inputs,
   config,
   lib,
   ...
 }:
 let
   cfg = config.custom.input;
-
-  # Use the nix built-in ascii-table and then extend for special keys
-  keys =
-    (lib.attrNames (import "${inputs.nixpkgs}/lib/ascii-table.nix"))
-    ++ [
-      "SHIFT"
-      "CTRL"
-      "MOD"
-      "ALT"
-      "FN"
-      "ENTER"
-      "TAB"
-      "ESC"
-      "BACKSPACE"
-      "DELETE"
-      "INSERT"
-      "HOME"
-      "END"
-      "PAGE_UP"
-      "PAGE_DOWN"
-      "PRINT"
-      "PAUSE"
-      "BREAK"
-      "CAPS_LOCK"
-      "NUM_LOCK"
-      "SCROLL_LOCK"
-      "UP"
-      "DOWN"
-      "LEFT"
-      "RIGHT"
-    ]
-    ++ (map (i: "F${toString i}") (lib.range 1 24));
-
-  getAlphanumericName =
-    key:
-    if (builtins.stringLength key > 1 || (lib.strings.match "([A-Za-z]+)" key) != null) then
-      key
-    else
-      (builtins.replaceStrings
-        [
-          " "
-          "_"
-          "-"
-          "+"
-          "`"
-          "="
-          "["
-          "]"
-          "\\"
-          ";"
-          "'"
-          ","
-          "."
-          "/"
-          "{"
-          "}"
-          "|"
-          ":"
-          "\""
-          "<"
-          ">"
-          "?"
-          "!"
-          "#"
-          "$"
-          "%"
-          "("
-          ")"
-          "*"
-          "^"
-          "~"
-          "@"
-          "&"
-        ]
-        [
-          "SPACE"
-          "UNDERSCORE"
-          "MINUS"
-          "PLUS"
-          "BACKTICK"
-          "EQUALS"
-          "LEFT_BRACKET"
-          "RIGHT_BRACKET"
-          "BACKSLASH"
-          "SEMICOLON"
-          "APOSTROPHE"
-          "COMMA"
-          "PERIOD"
-          "SLASH"
-          "LEFT_CURLY_BRACKET"
-          "RIGHT_CURLY_BRACKET"
-          "PIPE"
-          "COLON"
-          "DOUBLE_QUOTE"
-          "LESS_THAN"
-          "GREATER_THAN"
-          "QUESTION_MARK"
-          "EXCLAMATION_MARK"
-          "HASH"
-          "DOLLAR"
-          "PERCENT"
-          "LEFT_PARENTHESIS"
-          "RIGHT_PARENTHESIS"
-          "ASTERISK"
-          "CARET"
-          "TILDE"
-          "AT"
-          "AMPERSAND"
-        ]
-        key
-      );
+  keys = lib.mine.keys.alphanumericKeys;
 
   keyType =
     with lib.types;
@@ -152,27 +41,22 @@ let
     };
 
   keymap = lib.pipe keys [
-    (lib.drop 3)
     (map lib.toLower)
     lib.unique # Remove the duplicates because of upper and lower case
     (map (
       key:
-      let
-        alphaName = getAlphanumericName key;
-        lowerAlphaName = lib.toLower alphaName;
-      in
-      lib.nameValuePair (lib.toUpper alphaName) {
-        name = alphaName;
-        char = key;
-        vscode = lowerAlphaName;
-        zed-editor = lowerAlphaName;
+      lib.nameValuePair (lib.toUpper key) {
+        name = key;
+        char = lib.mine.keys.getCharFromName key;
+        vscode = key;
+        zed-editor = key;
         # Micro is lowercase unless its a named key like "Enter" then its first letter capitalized
         micro =
           if builtins.stringLength key == 1 then
-            lowerAlphaName
+            key
           else
             let
-              charList = lib.stringToCharacters lowerAlphaName;
+              charList = lib.stringToCharacters key;
             in
             "${lib.toUpper (builtins.head charList)}${builtins.concatStringsSep "" (builtins.tail charList)}";
       }
@@ -218,6 +102,36 @@ let
       zed-editor = "editor::SelectLine";
       vscode = "editor.action.selectLines";
       micro = "SelectLine";
+    };
+    MoveLineUp = {
+      editorContext = editorContexts.editor;
+      zed-editor = "editor::MoveLineUp";
+      vscode = "editor.action.moveLinesUpAction";
+      micro = "MoveLinesUp";
+    };
+    MoveLineDown = {
+      editorContext = editorContexts.editor;
+      zed-editor = "editor::MoveLineDown";
+      vscode = "editor.action.moveLinesDownAction";
+      micro = "MoveLinesDown";
+    };
+    Undo = {
+      editorContext = editorContexts.editor;
+      zed-editor = "editor::Undo";
+      vscode = "undo";
+      micro = "Undo";
+    };
+    Redo = {
+      editorContext = editorContexts.editor;
+      zed-editor = "editor::Redo";
+      vscode = "redo";
+      micro = "Redo";
+    };
+    GotoLine = {
+      editorContext = editorContexts.editor;
+      zed-editor = "editor::GotoLine";
+      vscode = "workbench.action.gotoLine";
+      micro = "GotoLine";
     };
   };
 

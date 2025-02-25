@@ -1,12 +1,13 @@
-{ lib }:
+{ inputs, lib, ... }:
 let
-  simpleImport = path: import path { inherit lib; };
+  simpleImport = path: import path { inherit inputs lib; };
 in
 {
   mine = {
     attrsets = simpleImport ./attrsets.nix;
     files = simpleImport ./files.nix;
     hardware = simpleImport ./hardware.nix;
+    keys = simpleImport ./keys.nix;
 
     mkPostgresRolePass = role: passPath: ''
       $PSQL -tA <<'EOF'

@@ -5,7 +5,7 @@
       gaps_in = 4;
       gaps_out = 5;
       gaps_workspaces = 50;
-      border_size = 4;
+      border_size = 2;
     };
 
     animations = {
