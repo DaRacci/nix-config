@@ -8,12 +8,10 @@
 {
   imports =
     [
-      inputs.nur.modules.homeManager.default
       inputs.sops-nix.homeManagerModule
       inputs.anyrun.homeManagerModules.default
     ]
     ++ [
-      ./dynamic-linker.nix
       ./nix.nix
       ./sops.nix
       ./xdg.nix
