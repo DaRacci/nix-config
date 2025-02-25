@@ -338,6 +338,11 @@ in
           icon = "tree";
           color = "red";
         };
+        Programming = {
+          id = 7;
+          icon = "circle";
+          color = "pink";
+        };
       };
 
       userChrome = ''
@@ -347,6 +352,8 @@ in
         @import "firefox-ultima/userContent.css";
       '';
 
+      # We always want to load the user.js file because if its being updated, there are sometimes breaking changes that need it reapplied.
+      # We then load our settings which will override the user.js defaults.
       extraConfig = ''
         ${builtins.readFile "${inputs.firefox-ultima}/user.js"}
 
@@ -498,8 +505,9 @@ in
   };
 
   user.persistence = {
-    directories = map (profile: ".mozilla/firefox/${profile}") (
-      attrNames config.programs.firefox.profiles
-    );
+    directories = map (profile: {
+      directory = ".mozilla/firefox/${profile}";
+      # method = "symlink";
+    }) (attrNames config.programs.firefox.profiles);
   };
 }
