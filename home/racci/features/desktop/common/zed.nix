@@ -32,6 +32,7 @@
       "autocorrect"
       "cargo-tom"
       "cargo-appraiser"
+      "colored-zed-icons-theme"
     ];
 
     # https://zed.dev/docs/configuring-zed
@@ -61,6 +62,11 @@
           provider = "copilot_chat";
           model = "o1-preview";
         };
+      };
+
+      icon_theme = {
+        mode = "dark";
+        dark = "Colored Zed Icons Theme Dark";
       };
 
       language_models = {
@@ -202,7 +208,7 @@
       };
 
       file_finder = {
-        modal_max_width = "medium";
+        modal_max_width = "small";
       };
 
       outline_panel = { };
@@ -226,8 +232,8 @@
         };
       };
 
-      collaboration_panel.button = false;
-      chat_panel.button = "never";
+      # collaboration_panel.button = true;
+      # chat_panel.button = "never";
 
       task = {
         show_status_indicator = true;
@@ -235,7 +241,6 @@
 
       unstable.ui_density = "comfortable";
 
-      # buffer_font_family = "Zed Plex Mono";
       ui_font_family = lib.mkForce "Zed Plex Sans";
 
       terminal = {
@@ -245,8 +250,6 @@
         };
       };
     };
-
-    # TODO - Define config here, until then doing it inside zed so i can quickly revise it.
   };
 
   user.persistence.directories = [
