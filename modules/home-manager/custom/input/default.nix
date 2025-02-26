@@ -143,7 +143,9 @@ in
 
         bindings = builtins.fromJSON (builtins.readFile ./bindings.json);
         # get a list of the contexts by iterating each binding, getting the context and then removing duplicates
-        editorContexts = builtins.listToAttrs (builtins.unique (builtins.map (binding: binding.context) bindings));
+        editorContexts = builtins.listToAttrs (
+          builtins.unique (builtins.map (binding: binding.context) bindings)
+        );
       in
       lib.pipe editorContexts [
         builtins.attrValues

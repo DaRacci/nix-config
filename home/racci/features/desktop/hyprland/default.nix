@@ -169,7 +169,7 @@ with lib;
       general = {
         resize_on_border = true;
         no_focus_fallback = true;
-        layout = "hy3"; #"dwindle";
+        layout = "hy3"; # "dwindle";
         allow_tearing = true;
 
         snap.enabled = true;

@@ -198,7 +198,6 @@
               programs.nixfmt.enable = true;
               programs.shellcheck.enable = true;
               programs.statix.enable = true;
-              programs.nufmt.enable = true;
               programs.mdformat.enable = true;
               programs.mdsh.enable = true;
 
