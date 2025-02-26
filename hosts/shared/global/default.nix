@@ -6,7 +6,6 @@
     ./networking.nix
     ./nix.nix
     ./openssh.nix
-    ./passwords.nix
     ./sops.nix
     ./security.nix
     ./time.nix

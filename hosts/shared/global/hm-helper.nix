@@ -13,11 +13,18 @@ let
   hasPackage = pkg: username: builtins.elem pkg config.home-manager.users.${username}.home.packages;
   usersWithPackage = pkg: builtins.filter (username: hasPackage pkg username) hmUsers;
   anyoneHasPackage = pkg: builtins.length (usersWithPackage pkg) > 0;
-
-  enableSushi = anyoneHasPackage pkgs.sushi;
-  enableNautilus = anyoneHasPackage pkgs.nautilus;
 in
 {
-  services.gnome.sushi.enable = enableSushi;
-  environment.pathsToLink = mkIf enableNautilus [ "/share/nautilus-python/extensions" ];
+  services.gnome.sushi.enable = anyoneHasPackage pkgs.sushi;
+  environment.pathsToLink = mkIf (anyoneHasPackage pkgs.nautilus) [ "/share/nautilus-python/extensions" ];
+
+  programs = {
+    _1password.enable = anyoneHasPackage pkgs._1password-cli;
+    _1password-gui = let
+      withPackage = usersWithPackage pkgs._1password-gui;
+    in {
+      enable = builtins.length withPackage > 0;
+      polkitPolicyOwners = withPackage;
+    };
+  };
 }
