@@ -1,4 +1,5 @@
 {
+  flake,
   inputs,
   osConfig ? null,
   config,
@@ -6,16 +7,15 @@
   ...
 }:
 {
-  imports =
-    [
-      inputs.sops-nix.homeManagerModule
-      inputs.anyrun.homeManagerModules.default
-    ]
-    ++ [
-      ./nix.nix
-      ./sops.nix
-      ./xdg.nix
-    ];
+  imports = [
+    inputs.sops-nix.homeManagerModules.sops
+    inputs.anyrun.homeManagerModules.anyrun
+    inputs.nixput.homeManagerModules.nixput
+
+    ./nix.nix
+    ./sops.nix
+    ./xdg.nix
+  ] ++ builtins.attrValues (import "${flake}/modules/home-manager");
 
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";
@@ -28,4 +28,6 @@
 
   dconf.enable =
     if (osConfig != null) then pkgs.lib.mkForce osConfig.programs.dconf.enable else false;
+
+  home.stateVersion = "25.05";
 }

@@ -1,5 +1,4 @@
 {
-  flake,
   lib,
   name,
   userDirectory,
@@ -12,7 +11,6 @@
     username = name;
     homeDirectory = lib.mkDefault "/home/${name}";
 
-    stateVersion = lib.mkForce "25.05";
     sessionPath = [ "$HOME/.local/bin" ];
   };
 
@@ -21,16 +19,12 @@
     defaultSecretsMountPoint = "/run/user/${toString user.uid}/secrets.d";
   };
 
-  imports =
-    builtins.attrValues (import "${flake}/modules/home-manager")
-    ++ [
-      "${flake}/home/shared/global"
-      "${userDirectory}/global.nix"
-    ]
-    ++ (
-      let
-        hostPath = "${userDirectory}/${hostName}.nix";
-      in
-      lib.optional (hostName != null && builtins.pathExists hostPath) hostPath
-    );
+  imports = [
+    "${userDirectory}/global.nix"
+  ] ++ (
+    let
+      hostPath = "${userDirectory}/${hostName}.nix";
+    in
+    lib.optional (hostName != null && builtins.pathExists hostPath) hostPath
+  );
 }

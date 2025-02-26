@@ -1,6 +1,5 @@
 {
   flake,
-  inputs,
   pkgs,
   lib,
   name,
@@ -16,15 +15,8 @@ rec {
   inherit (pkgs.stdenv) system;
 
   modules =
-      (
-        { ... }:
-        {
-          imports = builtins.attrValues (import "${flake}/modules/nixos");
-        }
-      )
-        { ... }:
-        {
-
+    (builtins.attrValues (import "${flake}/modules/nixos"))
+    ++ [
       "${flake}/hosts/shared/global"
       "${flake}/hosts/${deviceType}/shared"
       hostDirectory
@@ -42,10 +34,14 @@ rec {
             device.role = deviceType;
           };
 
-          home-manager.useUserPackages = true;
-          home-manager.useGlobalPkgs = true;
+          home-manager = {
+            useUserPackages = true;
+            useGlobalPkgs = true;
+            sharedModules = [ "${flake}/home/shared/global" ];
+          };
 
           system.stateVersion = "25.05";
+          nixpkgs.hostPlatform = pkgs.system;
         }
       )
     ]
