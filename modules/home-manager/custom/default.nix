@@ -1,6 +1,5 @@
 _: {
   imports = [
-    ./input
     ./hyprland
     ./theme.nix
   ];

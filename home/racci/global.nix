@@ -47,7 +47,7 @@
     };
   };
 
-  custom.input = {
+  nixput = {
     enable = true;
     keybinds = {
       NewLine = "Enter";

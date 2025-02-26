@@ -274,7 +274,6 @@
         flake-compat.follows = "flake-compat";
       };
     };
-    git-hooks-nix.url = "github:cachix/git-hooks.nix";
 
     # Base Modules
     home-manager = {
@@ -315,6 +314,15 @@
     nix-alien.url = "github:thiagokokada/nix-alien";
     treefmt.url = "github:numtide/treefmt-nix";
     angrr.url = "github:linyinfeng/angrr";
+    nixput = {
+      url = "github:DaRacci/nixput";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-parts.follows = "flake-parts";
+        devenv.follows = "devenv";
+        treefmt.follows = "treefmt";
+      };
+    };
 
     # Modules only used on some systems
     nixos-wsl = {
