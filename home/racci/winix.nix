@@ -59,7 +59,10 @@ let
   '';
 in
 {
-  imports = [ ./features/cli ];
+  imports = [
+    ./features/cli.
+    ./features/desktop/zed.nix
+  ];
 
   user.sshSocket = SSH_AUTH_SOCK;
 
