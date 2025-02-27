@@ -1823,11 +1823,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1740556276,
-        "narHash": "sha256-bk1JsKzwJo6BGxhihcSawiW2JQZJpQvJAh7GkkRHiEY=",
+        "lastModified": 1740566971,
+        "narHash": "sha256-nevk0OuJHegP0NBGQe93K/h/6NRFh9W1eG4q/yJvKx0=",
         "owner": "DaRacci",
         "repo": "nixput",
-        "rev": "3e54a5aa809edf6a5c1aafb3a8bb3761d4785af6",
+        "rev": "eff1a1678c723fea02acd2384f58de8771c45745",
         "type": "github"
       },
       "original": {
