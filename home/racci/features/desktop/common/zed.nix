@@ -67,6 +67,7 @@
       icon_theme = {
         mode = "dark";
         dark = "Colored Zed Icons Theme Dark";
+        light = "Colored Zed Icons Theme Light";
       };
 
       language_models = {
@@ -151,9 +152,10 @@
         # TODO - Figure out how to do this without hard-coded paths.
         nixd.settings = {
           nixpkgs.expr = "import (builtins.getFlake \"/persist/nix-config\").inputs.nixpkgs { }";
-          options = {
+          options = rec {
             nixos.expr = "(builtins.getFlake \"/persist/nix-config\").nixosConfigurations.nixe.options";
-            home-manager.expr = "(builtins.getFlake \"/persist/nix-config\").homeConfigurations.racci.options";
+            home-manager.expr = "${nixos.expr}.home-manager.users.type.getSubOptions []";
+            # home-manager.expr = "(builtins.getFlake \"/persist/nix-config\").homeConfigurations.racci.options";
             flake-parts.expr = "(builtins.getFlake \"/persist/nix-config\").debug.options";
             flake-parts2.expr = "(builtins.getFlake \"/persist/nix-config\").currentSystem.options";
           };
