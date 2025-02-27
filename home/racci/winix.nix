@@ -60,7 +60,7 @@ let
 in
 {
   imports = [
-    ./features/cli.
+    ./features/cli
     ./features/desktop/zed.nix
   ];
 
