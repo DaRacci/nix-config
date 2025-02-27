@@ -59,5 +59,26 @@ in
     done
   '';
 
-  virtualisation.docker.enableNvidia = mkForce false;
+  environment.sessionVariables = {
+    CUDA_PATH = "${pkgs.cudatoolkit}";
+    EXTRA_LDFLAGS = "-L/lib -L${pkgs.linuxPackages.nvidia_x11_latest}/lib";
+    EXTRA_CCFLAGS = "-I/usr/include";
+    LD_LIBRARY_PATH = [
+      "/usr/lib/wsl/lib"
+      "/run/opengl-driver/lib"
+      "${pkgs.linuxPackages.nvidia_x11_latest}/lib"
+    ];
+    NIX_LD_LIBRARY_PATH_x86_64_linux = [
+      "/usr/lib/wsl/lib"
+      "/run/opengl-driver/lib"
+    ];
+  };
+
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+      mesa.drivers
+      libvdpau-va-gl
+    ];
+  };
 }

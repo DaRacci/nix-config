@@ -10,7 +10,15 @@
     "${flake}/hosts/shared/optional/containers.nix"
   ];
 
-  environment.systemPackages = with pkgs; [ wget ];
+  environment = {
+    systemPackages = with pkgs; [ wget ];
+    sessionVariables = {
+      # Don't want it using the 1080 ti or software rendering.
+      MESA_VK_DEVICE_SELECT = "10de:2204";
+      MESA_D3D12_DEFAULT_ADAPTER_NAME="Nvidia GeForce RTX 3090";
+      LIBGL_KOPPER_DRI2=true; # Fixes openGL in WSL, not really sure what is does.
+    };
+  };
 
   host = {
     drive = {

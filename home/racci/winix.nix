@@ -67,10 +67,6 @@ in
   user.sshSocket = SSH_AUTH_SOCK;
 
   home = {
-    sessionVariables = {
-      LD_LIBRARY_PATH = "/usr/lib/wsl/lib";
-    };
-
     file.".local/bin/ssh-relay" = {
       executable = true;
       source = lib.getExe RELAY_SCRIPT;
