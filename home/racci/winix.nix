@@ -61,7 +61,7 @@ in
 {
   imports = [
     ./features/cli
-    ./features/desktop/zed.nix
+    ./features/desktop/common/zed.nix
   ];
 
   user.sshSocket = SSH_AUTH_SOCK;
