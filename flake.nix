@@ -374,7 +374,7 @@
 
     # Resources
     firefox-ultima = {
-      url = "github:soulhotel/FF-ULTIMA";
+      url = "github:soulhotel/FF-ULTIMA/1.9.8.5";
       flake = false;
     };
     tinted-theming = {
