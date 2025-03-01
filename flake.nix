@@ -363,7 +363,6 @@
     };
 
     # Other misc modules
-    arion.url = "github:hercules-ci/arion";
     vscode-extensions = {
       url = "github:nix-community/nix-vscode-extensions";
       inputs = {

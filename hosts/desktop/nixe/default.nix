@@ -9,7 +9,6 @@
   imports = [
     ./hardware.nix
     inputs.jovian.nixosModules.default
-    inputs.arion.nixosModules.arion
 
     "${flake}/hosts/shared/optional/containers.nix"
     "${flake}/hosts/shared/optional/virtualisation.nix"
