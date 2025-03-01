@@ -52,14 +52,20 @@
     };
 
     settings = {
-      bar.launcher.autoDetectIcon = true;
-      bar.media.show_active_only = true;
+      bar = {
+        launcher.autoDetectIcon = true;
+        media.show_active_only = true;
 
-      bar.notifications.hideCountWhenZero = true;
-      bar.notifications.show_total = true;
+        notifications = {
+          hideCountWhenZero = true;
+          show_total = true;
+        };
 
-      bar.workspaces.show_numbered = true;
-      bar.workspaces.spacing = 1.0;
+        workspaces = {
+          show_numbered = true;
+          spacing = 1.0;
+        };
+      };
 
       menus.clock = {
         time.military = true;
@@ -71,10 +77,16 @@
         directories.enabled = false;
         powermenu.avatar.image = "/home/racci/Pictures/Media/Profile Pictures/James/Main.jpg";
         shortcuts = {
-          left.shortcut1.command = lib.getExe config.programs.firefox.package;
-          left.shortcut1.icon = "󰈹";
-          left.shortcut1.tooltip = "Firefox";
-          left.shortcut2.command = lib.getExe pkgs.spotify;
+          left = {
+            shortcut1 = {
+              command = lib.getExe config.programs.firefox.package;
+              icon = "󰈹";
+            };
+            shortcut2 = {
+              tooltip = "Firefox";
+              command = lib.getExe pkgs.spotify;
+            };
+          };
         };
         stats = {
           interval = 100;

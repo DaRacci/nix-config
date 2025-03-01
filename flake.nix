@@ -193,13 +193,15 @@
             treefmt = {
               projectRootFile = ".git/config";
 
-              programs.actionlint.enable = true;
-              programs.deadnix.enable = true;
-              programs.nixfmt.enable = true;
-              programs.shellcheck.enable = true;
-              programs.statix.enable = true;
-              programs.mdformat.enable = true;
-              programs.mdsh.enable = true;
+              programs = {
+                actionlint.enable = true;
+                deadnix.enable = true;
+                nixfmt.enable = true;
+                shellcheck.enable = true;
+                statix.enable = true;
+                mdformat.enable = true;
+                mdsh.enable = true;
+              };
 
               settings.formatter.shellcheck.excludes = [ ".envrc" ];
               settings.global.excludes = [
@@ -242,7 +244,16 @@
               };
 
               git-hooks = {
-
+                hooks = {
+                  nil.enable = true;
+                  actionlint.enable = true;
+                  deadnix.enable = true;
+                  nixfmt-rfc-style.enable = true;
+                  statix = {
+                    enable = true;
+                    settings.ignore = [ "**/modules/home-manager/purpose/development/vscode/extensions.nix" ];
+                  };
+                };
               };
             };
           };
