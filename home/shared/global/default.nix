@@ -6,6 +6,10 @@
   pkgs,
   ...
 }:
+let
+  dconfEnabled =
+    if (osConfig != null) then pkgs.lib.mkForce osConfig.programs.dconf.enable else false;
+in
 {
   imports = [
     inputs.sops-nix.homeManagerModules.sops
@@ -26,8 +30,8 @@
     fi
   '';
 
-  dconf.enable =
-    if (osConfig != null) then pkgs.lib.mkForce osConfig.programs.dconf.enable else false;
+  dconf.enable = dconfEnabled;
+  user.persistence.files = [ ".config/dconf/user" ];
 
   home.stateVersion = "25.05";
 }

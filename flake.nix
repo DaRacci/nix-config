@@ -226,6 +226,9 @@
                 git
                 home-manager
 
+                # Converting to Nix
+                dconf2nix
+
                 # Secure Boot Debugging
                 sbctl
 
@@ -326,7 +329,8 @@
     treefmt.url = "github:numtide/treefmt-nix";
     angrr.url = "github:linyinfeng/angrr";
     nixput = {
-      url = "github:DaRacci/nixput";
+      # url = "github:DaRacci/nixput";
+      url = "git+file:///home/racci/Projects/nix/nixput";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
@@ -371,6 +375,12 @@
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
       };
+    };
+
+    # Misc Plugins
+    nu-bash-env = {
+      url = "github:tesujimath/bash-env-nushell";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Other misc modules
