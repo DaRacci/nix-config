@@ -12,12 +12,5 @@
     ];
   };
 
-  user.persistence =
-    let
-      dir = ".config/obs-studio";
-    in
-    {
-      directories = [ "${dir}/basic" ];
-      files = [ "${dir}/global.ini" ];
-    };
+  user.persistence = [ ".config/obs-studio" ];
 }
