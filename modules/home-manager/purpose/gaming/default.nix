@@ -27,10 +27,7 @@ in
   config = mkIf cfg.enable {
     xdg.userDirs.extraConfig.XDG_GAME_DIR = "${config.home.homeDirectory}/Games";
     user.persistence.directories = [
-      {
-        directory = "Games";
-        method = "symlink";
-      }
+      "Games"
     ];
 
     home.packages = optionals cfg.controllerSupport (

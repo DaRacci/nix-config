@@ -60,10 +60,7 @@ in
         ".steam/registry.vdf"
       ];
       directories = [
-        {
-          directory = ".local/share/Steam";
-          method = "symlink";
-        }
+        ".local/share/Steam"
         ".config/steamtinkerlaunch"
         ".config/AdwSteamGtk"
 

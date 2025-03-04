@@ -31,7 +31,7 @@ in
   '';
 
   dconf.enable = dconfEnabled;
-  user.persistence.files = [ ".config/dconf/user" ];
+  user.persistence.directories = [ ".config/dconf" ];
 
   home.stateVersion = "25.05";
 }

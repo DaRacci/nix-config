@@ -504,10 +504,8 @@ in
     "x-scheme-handler/https" = lib.mkForce [ "firefox.desktop" ];
   };
 
-  user.persistence = {
-    directories = map (profile: {
-      directory = ".mozilla/firefox/${profile}";
-      # method = "symlink";
-    }) (attrNames config.programs.firefox.profiles);
-  };
+  # FIXME - This shouldn't be hard coded to my profile.
+  # Has a infinite recursion if config is used to make the list.
+  # user.persistence.directories = map (profile: ".mozilla/firefox/${profile}") (attrNames config.programs.firefox.profiles);
+  user.persistence.directories = [ ".mozilla/firefox/racci" ];
 }

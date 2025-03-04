@@ -12,5 +12,5 @@
     ];
   };
 
-  user.persistence = [ ".config/obs-studio" ];
+  user.persistence.directories = [ ".config/obs-studio" ];
 }

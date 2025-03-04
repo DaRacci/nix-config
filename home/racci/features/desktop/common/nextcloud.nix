@@ -11,9 +11,6 @@
   };
 
   user.persistence.directories = [
-    {
-      directory = ".config/Nextcloud";
-      method = "symlink";
-    }
+    ".config/Nextcloud"
   ];
 }

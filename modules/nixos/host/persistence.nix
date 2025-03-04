@@ -237,6 +237,16 @@ in
           };
         }
       ] ++ cfg.files;
+
+      users = lib.pipe (attrNames config.home-manager.users) [
+        (map (
+          user:
+          nameValuePair user {
+            inherit (config.home-manager.users.${user}.user.persistence) files directories;
+          }
+        ))
+        lib.listToAttrs
+      ];
     };
 
     fileSystems = {
