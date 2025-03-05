@@ -185,7 +185,7 @@
 
         perSystem =
           { system, pkgs, ... }:
-          {
+          rec {
             _module.args.pkgs = mkPkgs system false false;
 
             packages = import ./pkgs { inherit pkgs; };
@@ -207,7 +207,7 @@
               settings.global.excludes = [
                 "**/secrets.yaml"
                 "**/ssh_host_ed25519_key.pub"
-                "modules/home-manager/purpose/development/vscode/extensions.nix"
+                "modules/home-manager/purpose/development/editors/vscode/extensions.nix"
               ];
             };
 
@@ -247,6 +247,10 @@
               };
 
               git-hooks = {
+                excludes = [
+                  "modules/home-manager/purpose/development/editors/vscode/extensions.nix"
+                ];
+
                 hooks = {
                   nil.enable = true;
                   actionlint.enable = true;
@@ -254,7 +258,7 @@
                   nixfmt-rfc-style.enable = true;
                   statix = {
                     enable = true;
-                    settings.ignore = [ "**/modules/home-manager/purpose/development/vscode/extensions.nix" ];
+                    settings.ignore = treefmt.settings.global.excludes;
                   };
                 };
               };

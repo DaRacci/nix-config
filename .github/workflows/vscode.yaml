@@ -23,7 +23,7 @@ jobs:
 
       - name: Run nix4vscode
         run: |
-          DIR="modules/home-manager/purpose/development/vscode"
+          DIR="modules/home-manager/purpose/development/editors/vscode"
           CONFIG="$DIR/config.toml"
           NIX_FILE="$DIR/extensions.nix"
           VSCODE_VERSION=$(nix eval --raw nixpkgs#vscode.version)
