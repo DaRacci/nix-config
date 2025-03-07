@@ -48,15 +48,7 @@
           upstream_mode = "parallel";
           upstream_dns =
             (lib.pipe subnets [
-              (builtins.map (
-                subnet:
-                [
-                  "[/${subnet.domain}/]${subnet.dns}"
-                  "[/${subnet.ipv4_arpa}/]${subnet.dns}"
-                ]
-                ++ lib.optionals (subnet.ipv6_arpa != null) [ "[/${subnet.ipv6_arpa}/]${subnet.dns}" ]
-              ))
-              lib.flatten
+              (builtins.map (subnet: "[/${subnet.domain}/]${subnet.dns}"))
             ])
             ++ [
               #region public resolvers
@@ -96,7 +88,16 @@
           ];
 
           use_private_ptr_resolvers = true;
-          local_ptr_upstreams = builtins.map (subnet: subnet.dns) subnets;
+          local_ptr_upstreams = lib.trivial.pipe subnets [
+            (builtins.map (
+              subnet:
+              [
+                "[/${subnet.ipv4_arpa}/]${subnet.dns}"
+              ]
+              ++ lib.optionals (subnet.ipv6_arpa != null) [ "[/${subnet.ipv6_arpa}/]${subnet.dns}" ]
+            ))
+            lib.flatten
+          ];
 
           enable_dnssec = true;
           edns_client_subnet = {
