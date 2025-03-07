@@ -88,16 +88,18 @@
           ];
 
           use_private_ptr_resolvers = true;
-          local_ptr_upstreams = lib.trivial.pipe subnets [
-            (builtins.map (
-              subnet:
-              [
-                "[/${subnet.ipv4_arpa}/]${subnet.dns}"
-              ]
-              ++ lib.optionals (subnet.ipv6_arpa != null) [ "[/${subnet.ipv6_arpa}/]${subnet.dns}" ]
-            ))
-            lib.flatten
-          ];
+          local_ptr_upstreams =
+            lib.trivial.pipe subnets [
+              (builtins.map (
+                subnet:
+                [
+                  "[/${subnet.ipv4_arpa}/]${subnet.dns}"
+                ]
+                ++ lib.optionals (subnet.ipv6_arpa != null) [ "[/${subnet.ipv6_arpa}/]${subnet.dns}" ]
+              ))
+              lib.flatten
+            ]
+            ++ [ "1.1.1.1" ]; # Requires a fallback
 
           enable_dnssec = true;
           edns_client_subnet = {
