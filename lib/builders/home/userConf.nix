@@ -19,12 +19,14 @@
     defaultSecretsMountPoint = "/run/user/${toString user.uid}/secrets.d";
   };
 
-  imports = [
-    "${userDirectory}/global.nix"
-  ] ++ (
-    let
-      hostPath = "${userDirectory}/${hostName}.nix";
-    in
-    lib.optional (hostName != null && builtins.pathExists hostPath) hostPath
-  );
+  imports =
+    [
+      "${userDirectory}/global.nix"
+    ]
+    ++ (
+      let
+        hostPath = "${userDirectory}/${hostName}.nix";
+      in
+      lib.optional (hostName != null && builtins.pathExists hostPath) hostPath
+    );
 }

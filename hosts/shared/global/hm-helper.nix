@@ -16,15 +16,19 @@ let
 in
 {
   services.gnome.sushi.enable = anyoneHasPackage pkgs.sushi;
-  environment.pathsToLink = mkIf (anyoneHasPackage pkgs.nautilus) [ "/share/nautilus-python/extensions" ];
+  environment.pathsToLink = mkIf (anyoneHasPackage pkgs.nautilus) [
+    "/share/nautilus-python/extensions"
+  ];
 
   programs = {
     _1password.enable = anyoneHasPackage pkgs._1password-cli;
-    _1password-gui = let
-      withPackage = usersWithPackage pkgs._1password-gui;
-    in {
-      enable = builtins.length withPackage > 0;
-      polkitPolicyOwners = withPackage;
-    };
+    _1password-gui =
+      let
+        withPackage = usersWithPackage pkgs._1password-gui;
+      in
+      {
+        enable = builtins.length withPackage > 0;
+        polkitPolicyOwners = withPackage;
+      };
   };
 }
