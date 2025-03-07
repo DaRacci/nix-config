@@ -45,6 +45,7 @@ in
     gc = {
       automatic = true;
       dates = "daily";
+      persistent = true;
 
       # Delete older generations too
       options = "--delete-older-than 3d";
