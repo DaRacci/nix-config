@@ -333,13 +333,13 @@
     treefmt.url = "github:numtide/treefmt-nix";
     angrr.url = "github:linyinfeng/angrr";
     nixput = {
-      # url = "github:DaRacci/nixput";
-      url = "git+file:///home/racci/Projects/nix/nixput";
+      url = "github:DaRacci/nixput";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
         devenv.follows = "devenv";
         treefmt.follows = "treefmt";
+        home-manager.follows = "home-manager";
       };
     };
 
