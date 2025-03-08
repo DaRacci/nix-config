@@ -32,6 +32,6 @@ jobs:
           nix run github:nix-community/nix4vscode -- "$CONFIG" -o "$NIX_FILE"
 
       - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore(deps): Update VSCode extensions"
