@@ -226,6 +226,7 @@ with lib;
             "selection"
             "overview"
             "anyrun"
+            "gauntlet"
             "indicator.*"
             "osk"
             "hyprpicker"

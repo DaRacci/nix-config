@@ -13,7 +13,6 @@ in
 {
   imports = [
     inputs.sops-nix.homeManagerModules.sops
-    inputs.anyrun.homeManagerModules.anyrun
     # inputs.nixput.homeManagerModules.nixput
 
     ./nix.nix

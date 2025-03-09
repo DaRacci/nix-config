@@ -44,30 +44,6 @@
         "type": "github"
       }
     },
-    "anyrun": {
-      "inputs": {
-        "flake-parts": [
-          "flake-parts"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "systems": "systems"
-      },
-      "locked": {
-        "lastModified": 1735301051,
-        "narHash": "sha256-jU88Q9tP4vuvWYGQcmOdFwI9e2uMPVYJHbXdiklIH9o=",
-        "owner": "anyrun-org",
-        "repo": "anyrun",
-        "rev": "06017e753c8886d5296768dca80745ee09402a2d",
-        "type": "github"
-      },
-      "original": {
-        "owner": "anyrun-org",
-        "repo": "anyrun",
-        "type": "github"
-      }
-    },
     "aquamarine": {
       "inputs": {
         "hyprutils": [
@@ -631,6 +607,34 @@
       "original": {
         "owner": "SenchoPens",
         "repo": "fromYaml",
+        "type": "github"
+      }
+    },
+    "gauntlet": {
+      "inputs": {
+        "crane": "crane_2",
+        "flake-compat": [
+          "flake-compat"
+        ],
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1741380893,
+        "narHash": "sha256-ljhKfDL4tgUCJ4GYs75BUwDWZn89pn/GHwj3wHiqScI=",
+        "owner": "project-gauntlet",
+        "repo": "gauntlet",
+        "rev": "f96941d4360d5b77bab5411b7186e30f6064adb4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "project-gauntlet",
+        "repo": "gauntlet",
         "type": "github"
       }
     },
@@ -1946,6 +1950,7 @@
         "firefox-ultima": "firefox-ultima",
         "flake-compat": "flake-compat_2",
         "flake-parts": "flake-parts_3",
+        "gauntlet": "gauntlet",
         "home-manager": "home-manager",
         "hy3": "hy3",
         "hyprland": "hyprland",
