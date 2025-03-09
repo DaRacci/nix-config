@@ -6,6 +6,7 @@
 {
   home.packages = with pkgs; [
     # Audio
+    spotube
     spotify
     decibels
     mousai
@@ -106,5 +107,9 @@
   user.persistence.directories = [
     ".config/spotify"
     ".config/Miru"
+
+    ".local/share/spotube"
+    ".local/share/oss.krtirtho.spotube"
+    ".cache/oss.krtirtho.spotube/cached_tracks"
   ];
 }
