@@ -1,5 +1,6 @@
 {
   config,
+  pkgs,
   lib,
   ...
 }:
@@ -24,6 +25,12 @@ in
   };
 
   config = mkIf cfg.enable {
+    home.packages = with pkgs; [
+      sysprof
+      textpieces
+      letterpress
+    ];
+
     user.persistence.directories = [
       "Projects"
 

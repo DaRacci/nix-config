@@ -23,7 +23,7 @@
 
     # Misc
     switcheroo # Converter
-    # identity # Comparer
+    # identity # Comparer (FIXME :: currently conflicts with mesa-demos?????)
   ];
 
   programs.mpv = {

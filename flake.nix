@@ -301,14 +301,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     impermanence.url = "github:nix-community/impermanence";
-    crane.url = "github:ipetkov/crane/f2926e34a1599837f3256c701739529d772e36e7";
     lanzaboote = {
       url = "github:nix-community/lanzaboote/v0.4.2";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
         flake-compat.follows = "flake-compat";
-        crane.follows = "crane";
       };
     };
     nixd = {
@@ -377,6 +375,14 @@
         flake-parts.follows = "flake-parts";
         flake-compat.follows = "flake-compat";
       };
+    };
+    winapps = {
+      url = "github:winapps-org/winapps";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nixvirt = {
+      url = "github:AshleyYakeley/NixVirt";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Misc Plugins

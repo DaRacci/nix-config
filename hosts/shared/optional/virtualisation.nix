@@ -1,4 +1,8 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  ...
+}:
 
 let
   nur-no-pkgs =
@@ -12,6 +16,7 @@ let
 in
 {
   imports = [
+    # inputs.nixvirt.nixosModules.default
     # nur-no-pkgs.repos.crtified.modules.vfio
     nur-no-pkgs.repos.crtified.modules.virtualisation.nix
   ];
@@ -19,6 +24,7 @@ in
   virtualisation = {
     vfio = {
       enable = true;
+      disableEFIfb = true;
       IOMMUType = "amd";
       devices = [
         "10de:1b06"
@@ -33,6 +39,11 @@ in
         mode = "666";
       };
     };
+
+    # libvird = {
+    #   enable = true;
+    #   swtpm.enable = true;
+    # };
 
     libvirtd = {
       enable = true;
