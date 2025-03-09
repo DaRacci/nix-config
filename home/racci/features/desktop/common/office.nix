@@ -18,13 +18,6 @@
       sync-url = "https://nextcloud.racci.dev/remote.php/dav/";
       sync-user = "Racci";
     };
-
-    "app/drey/Dialect" = {
-      "live-translation" = false;
-      "translators" = {
-        "active" = "google";
-      };
-    };
   };
 
   user.persistence.directories = [
