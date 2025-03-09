@@ -47,15 +47,15 @@
     };
   };
 
-  nixput = {
-    enable = true;
-    keybinds = {
-      NewLine = "Enter";
-      NewLineAbove = "Ctrl+Shift+Enter";
-      NewLineBelow = "Ctrl+Enter";
-      SelectLine = "Ctrl+L";
-    };
-  };
+  # nixput = {
+  #   enable = false;
+  #   keybinds = {
+  #     NewLine = "Enter";
+  #     NewLineAbove = "Ctrl+Shift+Enter";
+  #     NewLineBelow = "Ctrl+Enter";
+  #     SelectLine = "Ctrl+L";
+  #   };
+  # };
 
   dconf.settings = {
     "org/virt-manager/virt-manager/connections" = {
