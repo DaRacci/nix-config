@@ -24,5 +24,7 @@ in
         categories = [ "Game" ];
       };
     };
+
+    user.persistence.directories = [ ".config/boxflat" ];
   };
 }
