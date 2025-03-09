@@ -9,7 +9,7 @@
     _1password-gui
     _1password-cli
     bitwarden-desktop
-    # bitwarden-cli
+    bitwarden-cli
   ];
 
   user.persistence = {

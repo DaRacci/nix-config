@@ -1,12 +1,74 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  ...
+}:
 {
   home.packages = with pkgs; [
-    loupe # Image viewer
+    # Audio
     spotify
-    delfin # Jellyfin client
-    clapper # Video player
-    switcheroo # Converter Utility
+    decibels
+    mousai
+
+    # Image
+    krita # Editor
+    loupe # Viewer
+    gnome-obfuscate
+
+    # Video
+    clapper # Player
+    video-trimmer
+    miru # Anime :)
+
+    # Misc
+    switcheroo # Converter
+    # identity # Comparer
   ];
+
+  programs.mpv = {
+    enable = true;
+    scripts = with pkgs.mpvScripts; [
+      youtube-upnext
+      youtube-chat
+      sponsorblock-minimal
+      quality-menu
+      reload
+
+      webtorrent-mpv-hook
+      vr-reversal
+      visualizer
+      videoclip
+      thumbfast
+      smartskip
+      mpv-notify-send
+      mpv-cheatsheet
+      mpris
+      modernz
+      memo
+
+      pkgs.mpvScripts.builtins.autocrop
+    ];
+
+    scriptOpts = {
+      thumbfast.network = "yes";
+    };
+
+    # https://mpv.io/manual/stable
+    config = {
+      # Interface
+      osc = false;
+      osd-bar = false;
+      osd-duration = 2000;
+
+      # Watch Later
+      save-position-on-quit = "yes";
+      watch-later-options = "start, sid";
+
+      title = "$${filename}";
+      keep-open = "yes";
+
+    };
+  };
 
   xdg.mimeApps =
     let
@@ -15,7 +77,7 @@
         lib.mine.attrsets.recursiveMergeAttrs (builtins.map (mime: { ${mime} = desktop; }) mimes);
     in
     {
-      # Krita and Switcheroo try to highjack all image files.
+      # Krita and Switcheroo try to hijack all image files.
       defaultApplications = forAll "org.gnome.Loupe.desktop" [
         "image/avif"
         "image/bmp"
@@ -30,5 +92,19 @@
       ];
     };
 
-  user.persistence.directories = [ ".config/spotify" ];
+  dconf.settings = with lib.hm.gvariant; {
+    "net/nokyan/Resources" = {
+      detailed-priority = true;
+      graph-data-points = mkUint32 240;
+      refresh-speed = "VeryFast";
+      sidebar-description = true;
+      sidebar-details = true;
+      sidebar-meter-type = "Graph";
+    };
+  };
+
+  user.persistence.directories = [
+    ".config/spotify"
+    ".config/Miru"
+  ];
 }

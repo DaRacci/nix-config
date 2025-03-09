@@ -1,6 +1,10 @@
 { pkgs, ... }:
 {
-  home.packages = with pkgs; [ ctop ];
+  home.packages = with pkgs; [
+    ctop
+    iotop-c
+    sysstat
+  ];
 
   programs.btop = {
     enable = true;

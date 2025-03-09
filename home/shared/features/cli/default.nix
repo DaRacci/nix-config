@@ -9,11 +9,11 @@
     ./fish.nix
     ./info.nix
     ./micro.nix
-    ./monitors.nix
     ./nix.nix
     ./nushell.nix
     ./ripgrep.nix
     ./starship.nix
+    ./sys.nix
     ./zoxide.nix
   ];
 

@@ -83,7 +83,7 @@
               icon = "󰈹";
             };
             shortcut2 = {
-              tooltip = "Firefox";
+              tooltip = "Spotify";
               command = lib.getExe pkgs.spotify;
             };
           };
