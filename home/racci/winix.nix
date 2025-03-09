@@ -76,7 +76,7 @@ in
   purpose.development = {
     enable = true;
     rust.enable = true;
-    vscode.enable = false;
+    editors.vscode.enable = false;
   };
 
   programs.git = {

@@ -11,11 +11,11 @@ in
 {
   options.purpose.development.editors.vscode = {
     enable = lib.mkEnableOption "Enable VSCode" // {
-      default = true;
+      default = cfg.enable;
     };
   };
 
-  config = lib.mkIf cfg.editors.vscode.enable {
+  config = lib.mkIf (cfg.enable && cfg.editors.vscode.enable) {
     programs.vscode = {
       enable = true;
 
@@ -92,7 +92,7 @@ in
           plugins.github.vscode-github-actions
           plugins.github.vscode-pull-request-github
         ]
-        ++ (optionals cfg.python.enable (
+        ++ (lib.optionals cfg.python.enable (
           with versionExtensions.vscode-marketplace.ms-python;
           [
             python
@@ -105,7 +105,7 @@ in
             gather
           ]
         ))
-        ++ (optionals cfg.rust.enable (
+        ++ (lib.optionals cfg.rust.enable (
           with versionExtensions.vscode-marketplace;
           [
             vadimcn.vscode-lldb
@@ -115,7 +115,7 @@ in
             rust-lang.rust-analyzer
           ]
         ))
-        ++ (optionals cfg.jvm.enable (
+        ++ (lib.optionals cfg.jvm.enable (
           with extensions.open-vscx;
           [
 
@@ -227,7 +227,7 @@ in
         }
       '';
     };
-  };
 
-  user.persistence.directories = [ ".config/Code/User/" ];
+    user.persistence.directories = [ ".config/Code/User/" ];
+  };
 }

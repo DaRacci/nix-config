@@ -32,6 +32,15 @@ in
       };
     };
 
+    fonts.fontconfig = {
+      defaultFonts = {
+        sansSerif = [ config.stylix.fonts.sansSerif.name ];
+        serif = [ config.stylix.fonts.serif.name ];
+        monospace = [ config.stylix.fonts.monospace.name ];
+        emoji = [ config.stylix.fonts.emoji.name ];
+      };
+    };
+
     # qt = {
     #   enable = true;
     #   platformTheme.name = "gtk3";
