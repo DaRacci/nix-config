@@ -307,6 +307,8 @@ in
       };
 
     profiles.${config.home.username} = {
+      containersForce = true;
+
       containers = {
         Personal = {
           id = 1;
@@ -498,10 +500,10 @@ in
   };
 
   xdg.mimeApps.defaultApplications = {
-    "text/html" = lib.mkForce [ "firefox.desktop" ];
-    "text/xml" = lib.mkForce [ "firefox.desktop" ];
-    "x-scheme-handler/http" = lib.mkForce [ "firefox.desktop" ];
-    "x-scheme-handler/https" = lib.mkForce [ "firefox.desktop" ];
+    "text/html" = [ "firefox.desktop" ];
+    "text/xml" = [ "firefox.desktop" ];
+    "x-scheme-handler/http" = [ "firefox.desktop" ];
+    "x-scheme-handler/https" = [ "firefox.desktop" ];
   };
 
   # FIXME - This shouldn't be hard coded to my profile.
