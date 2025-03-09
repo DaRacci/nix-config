@@ -322,7 +322,7 @@ in
       };
 
     services.btrfs.autoScrub = mkIf (drive.format == "btrfs") {
-      enable = mkDefault true;
+      enable = mkDefault false;
       fileSystems = [ "/persist" ];
       interval = "Wed *-*-* 02:00:00";
     };
