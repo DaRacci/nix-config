@@ -1,21 +1,21 @@
 { pkgs, ... }:
-let
-  nautEnv = pkgs.buildEnv {
-    name = "nautilus-env";
-
-    paths = with pkgs; [
-      nautilus
-      nautilus-python
-      nautilus-open-any-terminal
-    ];
-  };
-in
 {
   home.packages = with pkgs; [
-    nautEnv
+    (nautilus.overrideAttrs (oldAttrs: {
+      buildInputs = oldAttrs.buildInputs ++ [
+        gst_all_1.gst-plugins-good
+        gst_all_1.gst-plugins-bad
+        gst_all_1.gst-plugins-ugly
+      ];
+    }))
+    nautilus-python
+    nautilus-open-any-terminal
+    ffmpegthumbnailer
+
     baobab # Disk usage analyzer
     gnome-disk-utility # Disk utility
     file-roller # Archive manager
+    impression # Bootable USB creator
   ];
 
   xdg.mimeApps.defaultApplications = {
@@ -26,9 +26,19 @@ in
     "com/github/stunkymonkey/nautilus-open-any-terminal" = {
       "terminal" = "alacritty";
     };
+
+    "org/gtk/gtk4/settings/file-chooser" = {
+      sort-directories-first = true;
+      show-hidden = true;
+    };
+
+    "org/gtk/settings/file-chooser" = {
+      show-hidden = true;
+      sort-directories-first = true;
+    };
   };
 
   home.sessionVariables = {
-    NAUTILUS_4_EXTENSION_DIR = "${nautEnv}/lib/nautilus/extensions-4";
+    NAUTILUS_4_EXTENSION_DIR = "${pkgs.nautilus-python}/lib/nautilus/extensions-4";
   };
 }
