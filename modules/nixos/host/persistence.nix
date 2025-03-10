@@ -243,6 +243,7 @@ in
           user:
           nameValuePair user {
             inherit (config.home-manager.users.${user}.user.persistence) files directories;
+            inherit (config.users.users.${user}) home;
           }
         ))
         lib.listToAttrs

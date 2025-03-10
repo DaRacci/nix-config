@@ -19,5 +19,4 @@ in
   };
 
   programs.fish.enable = useFish;
-  environment.persistence."/persist".users.root.home = "/root";
 }
