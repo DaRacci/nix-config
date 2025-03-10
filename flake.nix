@@ -187,7 +187,7 @@
           rec {
             _module.args.pkgs = mkPkgs system false false;
 
-            packages = import ./pkgs { inherit pkgs; };
+            packages = import ./pkgs { inherit pkgs inputs; };
 
             treefmt = {
               projectRootFile = ".git/config";
@@ -235,6 +235,9 @@
                 age
                 sops
                 ssh-to-age
+
+                # Development
+                inputs.ags.packages.${system}.default
               ];
 
               languages = {
@@ -351,6 +354,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixarr.url = "github:rasmus-kirk/nixarr";
+    astal = {
+      url = "github:aylur/astal";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    ags = {
+      url = "github:aylur/ags";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        astal.follows = "astal";
+      };
+    };
 
     # Desktop Stuff
     hyprland.url = "github:hyprwm/Hyprland";

@@ -39,7 +39,10 @@ in
   additions =
     final: prev:
     prev.lib.foldl' prev.lib.recursiveUpdate { } [
-      (import ../pkgs { pkgs = final; })
+      (import ../pkgs {
+        pkgs = final;
+        inherit inputs;
+      })
     ];
 
   modifications = final: prev: {
