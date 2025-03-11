@@ -222,6 +222,7 @@
 
                 # Nix tools
                 nvd
+                nix-tree
                 nil
                 nixd
                 nixfmt-rfc-style
