@@ -83,7 +83,7 @@ in
     })
     (mkIf cfg.bluetooth.enable { hardware.bluetooth.enable = true; })
     (mkIf cfg.network.enable { networking.networkmanager.enable = true; })
-    (mkIf (config.host.device.role != "server") {
+    (mkIf (!config.host.device.isHeadless) {
       services = {
         dleyna-renderer.enable = true;
         dleyna-server.enable = true;
