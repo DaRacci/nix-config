@@ -220,6 +220,12 @@
                 hyperfine # Benchmarking
                 cocogitto # Conventional Commits
 
+                # Nix tools
+                nvd
+                nil
+                nixd
+                nixfmt-rfc-style
+
                 # Required Tools
                 nix
                 git
