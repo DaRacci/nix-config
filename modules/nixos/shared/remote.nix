@@ -7,6 +7,7 @@ in
     enable = lib.mkEnableOption "Enable remote features";
 
     remoteDesktop = lib.mkOption {
+      default = { };
       type = lib.types.submodule {
         options = {
           enable = lib.mkEnableOption "Enable remote desktop";
@@ -16,6 +17,15 @@ in
             default = "gnome-session";
             description = "Command to start the remote desktop session.";
           };
+        };
+      };
+    };
+
+    streaming = lib.mkOption {
+      default = { };
+      type = lib.types.submodule {
+        options = {
+          enable = lib.mkEnableOption "Enable remote streaming";
         };
       };
     };
@@ -37,6 +47,19 @@ in
         };
         desktopManager.gnome.enable = true;
       };
+
+      sunshine = lib.mkIf cfg.streaming.enable {
+        enable = true;
+        autoStart = true;
+        capSysAdmin = true;
+        openFirewall = true;
+      };
     };
+
+    home-manager.sharedModules = [
+      {
+        user.persistence.directories = [ ".config/sunshine" ];
+      }
+    ];
   };
 }

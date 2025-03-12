@@ -26,6 +26,11 @@
     gpuOverclock.enable = true;
   };
 
+  custom.remote = {
+    enable = true;
+    streaming.enable = true;
+  };
+
   boot = {
     quiet.enable = true;
     secure.enable = true;
@@ -186,10 +191,6 @@
       enableIPv6 = true;
     };
   };
-
-  # services.netdata = {
-  #   enable = true;
-  # };
 
   services = {
     ollama = {
