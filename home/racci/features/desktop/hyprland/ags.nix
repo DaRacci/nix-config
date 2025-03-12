@@ -7,9 +7,14 @@
 }:
 {
   imports = [
-    # inputs.ags.homeManagerModules.default
     inputs.hyprpanel.homeManagerModules.hyprpanel
   ];
+
+  xdg.configFile.hyprpanel.onChange = lib.mkForce ''
+    if [[ $(${pkgs.hyprpanel}/bin/hyprpanel -l) ]]; then
+       ${pkgs.hyprpanel}/bin/hyprpanel r
+    fi
+  '';
 
   programs.hyprpanel = {
     enable = true;
@@ -121,45 +126,6 @@
       };
 
       wallpaper.image = "/home/racci/Pictures/Wallpapers.17.jpeg";
-
     };
-
   };
-
-  # home.packages = with inputs.astal.packages.${pkgs.system}; [
-  #   default
-  #   io
-  # ];
-
-  # programs.ags = {
-  #   enable = true;
-  #   # configDir = "${inputs.asztal}/ags";
-
-  #   extraPackages =
-  #     with pkgs;
-  #     [
-  #       fzf
-  #       bun
-  #       gtksourceview
-  #       # webkitgtk
-  #       accountsservice
-  #       dart-sass
-  #       gtk3
-  #       gtk4
-  #     ]
-  #     ++ (with inputs.ags.packages.${pkgs.system}; [
-  #       apps
-  #       auth
-  #       battery
-  #       bluetooth
-  #       hyprland
-  #       mpris
-  #       network
-  #       notifd
-  #       powerprofiles
-  #       tray
-  #       wireplumber
-  #       inputs.astal.packages.${pkgs.system}.default
-  #     ]);
-  # };
 }
