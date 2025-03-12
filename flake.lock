@@ -234,11 +234,11 @@
     },
     "crane_2": {
       "locked": {
-        "lastModified": 1733688869,
-        "narHash": "sha256-KrhxxFj1CjESDrL5+u/zsVH0K+Ik9tvoac/oFPoxSB8=",
+        "lastModified": 1741481578,
+        "narHash": "sha256-JBTSyJFQdO3V8cgcL08VaBUByEU6P5kXbTJN6R0PFQo=",
         "owner": "ipetkov",
         "repo": "crane",
-        "rev": "604637106e420ad99907cae401e13ab6b452e7d9",
+        "rev": "bb1c9567c43e4434f54e9481eb4b8e8e0d50f0b5",
         "type": "github"
       },
       "original": {
@@ -668,11 +668,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1741380893,
-        "narHash": "sha256-ljhKfDL4tgUCJ4GYs75BUwDWZn89pn/GHwj3wHiqScI=",
+        "lastModified": 1741720553,
+        "narHash": "sha256-Ie7BHrlksomFmlS+KnTncz/aQHYeaLz0qs36dIGolT8=",
         "owner": "project-gauntlet",
         "repo": "gauntlet",
-        "rev": "f96941d4360d5b77bab5411b7186e30f6064adb4",
+        "rev": "d4e88b97a59a3770dd5fbbb99b7715313b17aae3",
         "type": "github"
       },
       "original": {
