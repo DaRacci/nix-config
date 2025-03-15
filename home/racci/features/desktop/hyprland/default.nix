@@ -20,6 +20,7 @@ with lib;
     ./looks.nix
     ./menus
     ./polkit.nix
+    ./workspaces.nix
   ];
 
   xdg.desktopEntries."org.gnome.Settings" = {
