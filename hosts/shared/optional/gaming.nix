@@ -1,4 +1,9 @@
-{ pkgs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 {
   hardware = {
     steam-hardware.enable = true;
@@ -120,5 +125,15 @@
     };
   };
 
-  networking.firewall.allowedTCPPorts = [ 24070 ];
+  networking.firewall =
+    let
+      alvrPorts = lib.optionals config.programs.alvr.enable [
+        9942 # OSC
+        8082 # Web
+      ];
+    in
+    {
+      allowedUDPPorts = alvrPorts;
+      allowedTCPPorts = [ 24070 ] ++ alvrPorts;
+    };
 }

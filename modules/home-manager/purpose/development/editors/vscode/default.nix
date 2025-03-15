@@ -203,6 +203,8 @@ in
         "gitlens.telemetry.enabled" = false;
         "gitlens.views.repositories.showStashes" = true;
 
+        "security.promptForLocalFileProtocolHandling" = false;
+
         # "platformio-ide.customPATH" = "${pkgs.platformio}/bin/platformio";
         # "platformio-ide.useBuiltinPython" = false;
         # "platformio-ide.useBuiltinPIOCore" = false;

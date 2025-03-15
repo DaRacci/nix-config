@@ -14,6 +14,10 @@
     package = pkgs.tailscale;
     useRoutingFeatures = "client";
     authKeyFile = config.sops.secrets.TAILSCALE_AUTH_KEY.path;
+    extraUpFlags = [
+      "--accept-dns=true"
+      "--accept-routes"
+    ];
   };
 
   host.persistence.directories = [ "/var/lib/tailscale" ];
