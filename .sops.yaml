@@ -13,6 +13,7 @@ creation_rules:
           - age1xct06gxt774vj3ug8j7z7j3vtnvwe29z92nh5al2xqa4uy2kxqjs67j5ay
           - age1qlkycz667c4dzzhywgp94ek5zs9u5xmp4dfd8fh48h58c4253seqajrk49
           - age10emng003r0p06xudhz8w3846vr9dl6sw4pl8hflpd7p3sejv75ds8rnf2a
+          - age1sayjklnumzyva2zuszce0uplq59cvr9z9wvv7fw6t9m70qndjutshdp0zm
   - path_regex: home/racci/secrets.yaml$
     key_groups:
       - age:
@@ -77,3 +78,9 @@ creation_rules:
           - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
           - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
           - age10emng003r0p06xudhz8w3846vr9dl6sw4pl8hflpd7p3sejv75ds8rnf2a
+  - path_regex: hosts/desktop/nixmi/secrets.yaml$
+    key_groups:
+      - age:
+          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
+          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
+          - age1sayjklnumzyva2zuszce0uplq59cvr9z9wvv7fw6t9m70qndjutshdp0zm

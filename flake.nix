@@ -17,9 +17,7 @@
   outputs =
     inputs@{
       self,
-      nixpkgs,
       flake-parts,
-      systems,
       ...
     }:
     let
@@ -106,6 +104,14 @@
                 )
                 {
                   nixe = {
+                    users = [ "racci" ];
+
+                    isoFormat = "iso";
+                    deviceType = "desktop";
+                    acceleration = "cuda";
+                  };
+
+                  nixmi = {
                     users = [ "racci" ];
 
                     isoFormat = "iso";
@@ -343,6 +349,10 @@
         treefmt.follows = "treefmt";
         home-manager.follows = "home-manager";
       };
+    };
+    disko = {
+      url = "github:nix-community/disko/latest";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Modules only used on some systems
