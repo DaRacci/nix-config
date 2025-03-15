@@ -1,10 +1,6 @@
 { pkgs, ... }:
 {
-  home.packages = with pkgs; [
-    (obsidian.override {
-      commandLineArgs = "--disable-gpu-compositing";
-    })
-  ];
+  home.packages = with pkgs; [ obsidian ];
 
   user.persistence.directories = [ ".config/obsidian" ];
 }

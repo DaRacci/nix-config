@@ -1,13 +1,6 @@
 { pkgs, ... }:
 {
-  home.packages = with pkgs; [
-    (discord.override {
-      # OpenASAR completely breaks Discord
-      # withOpenASAR = true;
-      withVencord = true;
-      nss = nss_latest;
-    })
-  ];
+  home.packages = with pkgs; [ discord ];
 
   user.persistence.directories = [
     ".config/discord"

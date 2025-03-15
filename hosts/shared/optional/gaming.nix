@@ -27,9 +27,6 @@
 
     steam = {
       enable = true;
-      package = pkgs.steam.override {
-        extraArgs = "-steamos3 -steamdeck -steampal -gamepadui";
-      };
       extest.enable = true;
       extraPackages = with pkgs; [
         xwayland-run

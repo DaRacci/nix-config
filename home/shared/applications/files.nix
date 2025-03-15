@@ -1,13 +1,7 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
-    (nautilus.overrideAttrs (oldAttrs: {
-      buildInputs = oldAttrs.buildInputs ++ [
-        gst_all_1.gst-plugins-good
-        gst_all_1.gst-plugins-bad
-        gst_all_1.gst-plugins-ugly
-      ];
-    }))
+    nautilus
     nautilus-python
     nautilus-open-any-terminal
     ffmpegthumbnailer

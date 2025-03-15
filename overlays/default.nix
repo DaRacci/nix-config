@@ -54,6 +54,50 @@ in
       nativeBuildInputs = oldAttrs.nativeBuildInputs ++ [ final.autoAddDriverRunpath ];
     });
 
+    nautilus = prev.nautilus.overrideAttrs (oldAttrs: {
+      buildInputs = oldAttrs.buildInputs ++ [
+        final.gst_all_1.gst-plugins-good
+        final.gst_all_1.gst-plugins-bad
+        final.gst_all_1.gst-plugins-ugly
+      ];
+    });
+
+    discord = prev.discord.override {
+      # OpenASAR completely breaks Discord
+      # withOpenASAR = true;
+      withVencord = true;
+      nss = final.nss_latest;
+    };
+
+    steam = prev.steam.override {
+      extraArgs = "-steamos3 -steamdeck -steampal -gamepadui";
+    };
+
+    parted = prev.parted.overrideAttrs (oldAttrs: {
+      buildInputs = oldAttrs.buildInputs ++ [
+        final.zfs
+        final.btrfs-progs
+        final.cryptsetup
+      ];
+    });
+
     inherit lib;
   };
+
+  # TODO - Only do this if the gpu is nvidia
+  electronFixes =
+    _: prev:
+    prev.lib.pipe
+      [ "vscode" "obsidian" ]
+      [
+        (map (
+          name:
+          prev.lib.nameValuePair name (
+            prev.${name}.override {
+              commandLineArgs = "--disable-gpu-compositing";
+            }
+          )
+        ))
+        prev.lib.listToAttrs
+      ];
 }

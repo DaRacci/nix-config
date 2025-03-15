@@ -19,11 +19,6 @@ in
     programs.vscode = {
       enable = true;
 
-      # TODO - Only do this if the gpu is nvidia
-      package = pkgs.vscode.override {
-        commandLineArgs = "--disable-gpu-compositing";
-      };
-
       # Allows Settings Sync to work;
       mutableExtensionsDir = true;
 
