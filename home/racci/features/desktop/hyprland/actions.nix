@@ -84,12 +84,20 @@ in
           '';
         };
 
-        # TODO: Lower Cursor Speed, Allow zooming in and out with mouse wheel
+        # TODO: Allow zooming in and out with mouse wheel
         colourPicker = pkgs.writeShellApplication {
           name = "colourPicker";
-          runtimeInputs = [ pkgs.hyprpicker ];
+          runtimeInputs = with pkgs; [
+            hyprpicker
+            wl-clipboard
+            hyprland
+            gojq
+          ];
           text = ''
-            hyprpicker --render-inactive;
+            senitivityBefore=$(hyprctl getoption input:sensitivity -j | gojq -r '.float');
+            hyprctl keyword input:sensitivity -0.6;
+            hyprpicker --render-inactive --autocopy;
+            hyprctl keyword input:sensitivity "$senitivityBefore";
           '';
         };
       in
