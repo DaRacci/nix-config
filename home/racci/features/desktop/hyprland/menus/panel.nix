@@ -10,6 +10,7 @@
     inputs.hyprpanel.homeManagerModules.hyprpanel
   ];
 
+  # TODO - Remove once https://github.com/Jas-SinghFSU/HyprPanel/issues/815 is resolved.
   xdg.configFile.hyprpanel.onChange = lib.mkForce ''
     if [[ $(${pkgs.hyprpanel}/bin/hyprpanel -l) ]]; then
        ${pkgs.hyprpanel}/bin/hyprpanel r

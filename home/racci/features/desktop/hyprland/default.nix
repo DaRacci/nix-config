@@ -15,17 +15,11 @@ with lib;
     "${flake}/home/shared/desktop/hyprland"
 
     ./actions.nix
-    ./ags.nix
-    ./clipboard.nix
     ./input.nix
     ./lock-suspend.nix
     ./looks.nix
-    ./menus.nix
-    ./notification.nix
-    ./panel.nix
+    ./menus
     ./polkit.nix
-    ./rofi.nix
-    ./runner.nix
   ];
 
   xdg.desktopEntries."org.gnome.Settings" = {
