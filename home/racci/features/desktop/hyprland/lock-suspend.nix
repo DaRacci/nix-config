@@ -8,10 +8,6 @@ let
   inherit (lib) getExe;
 in
 {
-  # wayland.windowManager.hyprland.settings = {
-  # exec = [ "pidof hypridle || ${getExe pkgs.hypridle}" ];
-  # };
-
   programs.hyprlock = {
     enable = true;
     settings =
