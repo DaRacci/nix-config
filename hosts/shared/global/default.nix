@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   imports = [
     ./generators.nix
@@ -22,7 +22,7 @@
 
   hardware.enableRedistributableFirmware = true;
 
-  programs.nix-ld.enable = true;
+  services.dbus.implementation = "broker";
 
   system.activationScripts.report-changes = ''
     LINKS=($(ls -dv /nix/var/nix/profiles/system-*-link))
@@ -30,7 +30,7 @@
       NEW=$(readlink -f ''${LINKS[-1]})
       CURRENT=$(readlink -f ''${LINKS[-2]})
 
-      ${pkgs.nvd}/bin/nvd diff $PREVIOUS $NEW
+      ${lib.getExe pkgs.nvd} diff $PREVIOUS $NEW
     fi
   '';
 }
