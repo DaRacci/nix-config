@@ -6,6 +6,11 @@
 }:
 let
   getDirectionChar = key: builtins.elemAt (lib.stringToCharacters key) 0;
+
+  uwsmExec = command: [
+    "exec"
+    "${lib.getExe' pkgs.uwsm "uwsm-app"} -s a -- ${command}"
+  ];
 in
 {
   wayland.windowManager.hyprland = {
@@ -87,30 +92,21 @@ in
               "SUPER"
               "T"
             ];
-            action = [
-              "exec"
-              (lib.getExe config.programs.alacritty.package)
-            ];
+            action = uwsmExec (lib.getExe config.programs.alacritty.package);
           }
           {
             keybind = [
               "SUPER"
               "F"
             ];
-            action = [
-              "exec"
-              (lib.getExe config.programs.firefox.package)
-            ];
+            action = uwsmExec (lib.getExe config.programs.firefox.package);
           }
           {
             keybind = [
               "SUPER"
               "E"
             ];
-            action = [
-              "exec"
-              (lib.getExe pkgs.nautilus)
-            ];
+            action = uwsmExec (lib.getExe pkgs.nautilus);
           }
         ]
         #endregion

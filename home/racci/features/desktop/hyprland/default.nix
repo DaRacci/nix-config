@@ -176,16 +176,6 @@ with lib;
         pseudotile = true;
       };
 
-      exec-once = [
-        "gnome-keyring-daemon --start --components=secrets"
-
-        # ----------------- #
-        #  Bar and Applets  #
-        # ----------------- #
-        "${lib.getExe' pkgs.blueman "blueman-tray"}"
-        "${lib.getExe pkgs.networkmanagerapplet} --indicator"
-      ];
-
       env = [
         #region NVIDIA
         "GBM_BACKEND,nvidia-drm"

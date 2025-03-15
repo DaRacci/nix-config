@@ -8,5 +8,7 @@
     preset = "male-voice-v2";
   };
 
+  custom.uwsm.sliceAllocation.app = [ "easyeffects" ];
+
   user.persistence.directories = [ ".config/easyeffects" ];
 }

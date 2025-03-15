@@ -147,5 +147,7 @@ in
           '';
         };
       };
+
+    custom.uwsm.sliceAllocation.background = [ "playerctld" ];
   };
 }

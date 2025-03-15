@@ -13,4 +13,6 @@
   user.persistence.directories = [
     ".config/Nextcloud"
   ];
+
+  custom.uwsm.sliceAllocation.background-graphical = [ "nextcloud-client" ];
 }

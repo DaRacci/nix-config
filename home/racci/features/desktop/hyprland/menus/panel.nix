@@ -13,9 +13,16 @@
   # TODO - Remove once https://github.com/Jas-SinghFSU/HyprPanel/issues/815 is resolved.
   xdg.configFile.hyprpanel.onChange = lib.mkForce ''
     if [[ $(${pkgs.hyprpanel}/bin/hyprpanel -l) ]]; then
-       ${pkgs.hyprpanel}/bin/hyprpanel r
+      ${pkgs.hyprpanel}/bin/hyprpanel r
     fi
   '';
+
+  wayland.windowManager.hyprland.settings = {
+    exec-once = builtins.map (exec: "${lib.getExe' pkgs.uwsm "uwsm-app"} -s b -- ${exec}") [
+      "${lib.getExe' pkgs.blueman "blueman-tray"}"
+      "${lib.getExe pkgs.networkmanagerapplet} --indicator"
+    ];
+  };
 
   programs.hyprpanel = {
     enable = true;
@@ -129,4 +136,6 @@
       wallpaper.image = "/home/racci/Pictures/Wallpapers.17.jpeg";
     };
   };
+
+  custom.uwsm.sliceAllocation.background = [ "hyprpaper" ];
 }

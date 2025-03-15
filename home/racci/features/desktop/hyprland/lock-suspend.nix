@@ -8,6 +8,8 @@ let
   inherit (lib) getExe;
 in
 {
+  custom.uwsm.sliceAllocation.background = [ "hypridle" ];
+
   programs.hyprlock = {
     enable = true;
     settings =

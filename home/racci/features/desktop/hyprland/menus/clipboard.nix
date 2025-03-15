@@ -8,20 +8,9 @@ let
   inherit (lib) getExe getExe';
 in
 {
-  wayland.windowManager.hyprland.settings = {
-    exec-once =
-      let
-        wl-paste = getExe' pkgs.wl-clipboard "wl-paste";
-      in
-      [
-        "${wl-paste} --type text --watch cliphist store"
-        "${wl-paste} --type image --watch cliphist store"
-      ];
-
-    bind = [
-      "SUPER,V,exec,${getExe config.programs.rofi.package} -modi clipboard:~/.local/bin/cliphist-rofi-img -show clipboard -show-icons"
-    ];
-  };
+  wayland.windowManager.hyprland.settings.bind = [
+    "SUPER,V,exec,${getExe' pkgs.uwsm "uwsm-app"} -s a -- ${getExe config.programs.rofi.package} -modi clipboard:~/.local/bin/cliphist-rofi-img -show clipboard -show-icons"
+  ];
 
   services.cliphist = {
     enable = true;
@@ -51,5 +40,10 @@ in
             ];
       }
     }/bin/cliphist-rofi-img";
+  };
+
+  systemd.user.services = {
+    cliphist.Service.Slice = "background.slice";
+    cliphist-images.Service.Slice = "background.slice";
   };
 }

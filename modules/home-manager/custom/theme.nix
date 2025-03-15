@@ -52,5 +52,7 @@ in
         [
           "hyprctl setcursor ${config.stylix.cursor.name} ${toString config.stylix.cursor.size}"
         ];
+
+    custom.uwsm.sliceAllocation.background = [ "xsettingsd" ];
   };
 }

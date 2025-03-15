@@ -11,6 +11,7 @@
     Service = {
       Restart = "always";
       ExecStart = "${pkgs.protonmail-bridge}/bin/protonmail-bridge --no-window --noninteractive --log-level info";
+      Slice = "background.slice";
     };
 
     Install = {

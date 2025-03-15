@@ -32,6 +32,7 @@
       Type = "exec";
       Restart = "on-failure";
       ExecStart = "${lib.getExe config.programs.gauntlet.package} --minimized";
+      Slice = "app-graphical.slice";
     };
 
     Install = {

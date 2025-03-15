@@ -61,4 +61,6 @@
     enable = true;
     pinentryPackage = pkgs.pinentry-rofi;
   };
+
+  custom.uwsm.sliceAllocation.background = [ "gpg-agent" ];
 }
