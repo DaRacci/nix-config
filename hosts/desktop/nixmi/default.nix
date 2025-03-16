@@ -10,7 +10,6 @@
     inputs.disko.nixosModules.disko
 
     ./hardware.nix
-    "${flake}/hosts/shared/disks/btrfs-luks`-disk.nix"
 
     "${flake}/hosts/shared/optional/containers.nix"
     "${flake}/hosts/shared/optional/virtualisation.nix"

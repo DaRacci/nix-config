@@ -11,7 +11,10 @@
     inputs.nixos-hardware.nixosModules.common-pc-ssd
     inputs.nixos-hardware.nixosModules.common-hidpi
 
-    "${flake}/hosts/shared/disks/btrfs-luks-disk.nix"
+    (import "${flake}/hosts/shared/disks/btrfs-luks-disk.nix" {
+      disk = "/dev/nvme0n1"; # FIXME :: Placeholder, replace with /dev/disk/by-id/...
+      withSwap = false;
+    })
   ];
 
   hardware = {
@@ -52,10 +55,5 @@
         memtest86.enable = true;
       };
     };
-  };
-
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-partlabel/ESP";
-    fsType = "vfat";
   };
 }

@@ -1,13 +1,19 @@
 {
-  lib,
   disk,
-
   withSwap ? false,
   swapSize ? 2,
+}:
+{
+  config,
+  lib,
 
   ...
 }:
 {
+  imports = [
+    ./neededForBoot.nix
+  ];
+
   disko.devices = {
     disk = {
       disk0 = {
@@ -20,7 +26,12 @@
             root = {
               size = "100%";
               content = import ./partitions/btrfs.nix {
-                inherit lib withSwap swapSize;
+                inherit
+                  config
+                  lib
+                  withSwap
+                  swapSize
+                  ;
               };
             };
           };

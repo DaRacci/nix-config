@@ -241,8 +241,10 @@
                 # Converting to Nix
                 dconf2nix
 
-                # Secure Boot Debugging
+                # Install & Setup Tools
                 sbctl
+                disko
+                cryptsetup
 
                 # Sops-nix
                 age
