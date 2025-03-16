@@ -32,6 +32,14 @@
 
     steam = {
       enable = true;
+      package = pkgs.steam.override {
+        extraEnv = {
+          MANGOHUD = true;
+          OBS_VKCAPTURE = true;
+        };
+
+        extraArgs = "-steamos3 -steamdeck -steampal -gamepadui";
+      };
       extest.enable = true;
       extraPackages = with pkgs; [
         xwayland-run

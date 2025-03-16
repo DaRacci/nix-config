@@ -69,10 +69,6 @@ in
       nss = final.nss_latest;
     };
 
-    steam = prev.steam.override {
-      extraArgs = "-steamos3 -steamdeck -steampal -gamepadui";
-    };
-
     parted = prev.parted.overrideAttrs (oldAttrs: {
       buildInputs = oldAttrs.buildInputs ++ [
         final.zfs
