@@ -85,6 +85,7 @@ in
         Service = {
           PassEnvironment = [ "DISPLAY" ];
           ExecStart = "${service.executablePath} ${concatStringsSep " " service.extraArgs}";
+          Slice = "app-graphical.slice";
         };
 
         Install = {
