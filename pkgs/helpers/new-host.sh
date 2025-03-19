@@ -86,7 +86,7 @@ cat "$SOPS_FILE" | yq --yaml-output "
 #shellcheck disable=SC2001 disable=SC2094
 cat <<EOF | sops --config "$SOPS_FILE" --filename-override "$SECRET_FILE" --encrypt /dev/stdin > "$SECRET_FILE"
 SSH_PRIVATE_KEY: |
-$(echo "SSH_PRIVATE_KEY" | sed 's/^/  /')
+$(echo "$SSH_PRIVATE_KEY" | sed 's/^/  /')
 EOF
 #endsection
 
