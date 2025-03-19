@@ -18,8 +18,9 @@
 
     # Video
     clapper # Player
-    video-trimmer
+    footage
     miru # Anime :)
+    parabolic
 
     # Misc
     switcheroo # Converter

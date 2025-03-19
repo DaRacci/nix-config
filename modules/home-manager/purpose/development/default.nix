@@ -29,6 +29,11 @@ in
       sysprof
       textpieces
       letterpress
+      delineate
+      iplookup-gtk
+      hashes
+      wildcard
+      devtoolbox
     ];
 
     user.persistence.directories = [

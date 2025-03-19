@@ -12,5 +12,7 @@
 
   home.packages = with pkgs; [
     health
+    fragments
+    transmission_4-gtk
   ];
 }

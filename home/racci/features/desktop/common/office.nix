@@ -8,8 +8,11 @@
     papers # PDF viewer
     decoder # QR codes
     dialect # Translation
-    gnome-graphs # Graphing
-    gnome-contacts # Contacts
+    planify
+    gnome-clocks
+    gnome-calculator
+    gnome-graphs
+    gnome-contacts
   ];
 
   dconf.settings = {
