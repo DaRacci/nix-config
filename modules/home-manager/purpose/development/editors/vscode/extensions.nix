@@ -60,13 +60,6 @@ merge
           sha256 = "1fcz8f4jgnf24kblf8m8nwgzd5pxs2gmrv235cpdgmqz38kf9n54";
 
         };
-        "fill-labs"."dependi" = vscode-utils.extensionFromVscodeMarketplace {
-          name = "dependi";
-          publisher = "fill-labs";
-          version = "0.7.13";
-          sha256 = "1dsd4qal7wmhhbzv5jmcrf8igm20dnr256s2gp1m5myhj08qlzay";
-
-        };
         "formulahendry"."code-runner" = vscode-utils.extensionFromVscodeMarketplace {
           name = "code-runner";
           publisher = "formulahendry";

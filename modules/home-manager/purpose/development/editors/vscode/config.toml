@@ -29,10 +29,6 @@ publisher_name = "esbenp"
 extension_name = "prettier-vscode"
 
 [[extensions]]
-publisher_name = "fill-labs"
-extension_name = "dependi"
-
-[[extensions]]
 publisher_name = "formulahendry"
 extension_name = "code-runner"
 
