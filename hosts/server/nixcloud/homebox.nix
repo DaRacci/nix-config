@@ -1,8 +1,14 @@
 { config, lib, ... }:
 {
-  sops.secrets.HOMEBOX_ENV = {
-    owner = config.users.users.homebox.name;
-    inherit (config.users.users.homebox) group;
+  sops.secrets = rec {
+    HOMEBOX_ENV = {
+      owner = config.users.users.homebox.name;
+      inherit (config.users.users.homebox) group;
+    };
+
+    "POSTGRES/HOMEBOX_PASSWORD" = {
+      inherit (HOMEBOX_ENV) owner group;
+    };
   };
 
   services = rec {
