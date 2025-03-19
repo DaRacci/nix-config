@@ -2,6 +2,7 @@
 {
   imports = [
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
+    ./homebox.nix
     ./immich.nix
     ./nextcloud.nix
   ];
