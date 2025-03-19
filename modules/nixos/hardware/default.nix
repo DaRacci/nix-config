@@ -10,6 +10,7 @@ let
 in
 {
   imports = [
+    ./storage
     ./backlight.nix
     ./biometrics.nix
     ./bluetooth.nix

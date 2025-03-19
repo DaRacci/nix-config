@@ -1,21 +1,17 @@
 {
   config,
   lib,
-
-  withSwap ? false,
-  swapSize ? 0,
-
-  withImpermanence ?
-    config.environment.persistence ? "/persist" && config.environment.persistence."/persist".enable,
-
-  ...
 }:
+let
+  cfg = config.hardware.storage;
+in
 {
   type = "btrfs";
   extraArgs = [ "-f" ]; # force overwrite
   subvolumes =
     {
-      "@root" = lib.mkIf (!withImpermanence) {
+      # Only enable if not using ephemeral root or if using snapshotted root
+      "@root" = lib.mkIf (!cfg.root.ephemeral.enable || cfg.root.ephemeral.type == "btrfs") {
         mountpoint = "/";
         mountOptions = [ "compress=zstd" ];
       };
@@ -28,12 +24,12 @@
         ];
       };
 
-      "@swap" = lib.mkIf withSwap {
+      "@swap" = lib.mkIf cfg.root.physicalSwap.enable {
         mountpoint = "/.swapvol";
-        swap.swapfile.size = swapSize;
+        swap.swapfile.size = "${cfg.root.physicalSwap.size}GiB";
       };
     }
-    // (lib.optionalAttrs withImpermanence {
+    // (lib.optionalAttrs cfg.withImpermanence {
       "@persist" = {
         mountpoint = "/persist";
         mountOptions = [ "compress=zstd" ];

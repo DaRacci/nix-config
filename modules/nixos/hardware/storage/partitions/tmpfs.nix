@@ -1,12 +1,8 @@
-{
-  size ? "2G",
-
-  ...
-}:
+{ size }:
 {
   fsType = "tmpfs";
   mountOptions = [
-    "size=${size}"
+    "size=${toString size}G"
     "defaults"
     "mode=755"
   ];

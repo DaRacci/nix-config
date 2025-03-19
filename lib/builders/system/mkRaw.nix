@@ -27,6 +27,7 @@ rec {
           imports = [
             inputs.home-manager.nixosModules.default
             inputs.angrr.nixosModules.angrr
+            inputs.disko.nixosModules.disko
           ];
 
           host = {

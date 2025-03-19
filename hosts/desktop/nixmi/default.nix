@@ -7,7 +7,6 @@
 {
   imports = [
     inputs.jovian.nixosModules.default
-    inputs.disko.nixosModules.disko
 
     ./hardware.nix
 
@@ -121,17 +120,8 @@
   };
 
   host = {
-    drive = {
-      enable = true;
-
-      format = "btrfs";
-      name = "Nix";
-    };
-
     persistence = {
       enable = true;
-      type = "tmpfs";
-
       directories = [
         "/var/lib/decky-loader"
         "/var/lib/private/ollama"

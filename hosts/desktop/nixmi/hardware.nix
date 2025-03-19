@@ -1,5 +1,4 @@
 {
-  flake,
   inputs,
   pkgs,
   ...
@@ -10,17 +9,24 @@
     inputs.nixos-hardware.nixosModules.common-cpu-amd-pstate
     inputs.nixos-hardware.nixosModules.common-pc-ssd
     inputs.nixos-hardware.nixosModules.common-hidpi
-
-    (import "${flake}/hosts/shared/disks/btrfs-luks-disk.nix" {
-      disk = "/dev/nvme0n1"; # FIXME :: Placeholder, replace with /dev/disk/by-id/...
-      withSwap = false;
-    })
   ];
 
   hardware = {
     graphics.manufacturer = "nvidia";
     backlight.enable = true;
     cooling.enable = true;
+
+    storage = {
+      enable = true;
+      root = {
+        devPath = "/dev/nvme0n1"; # FIXME :: Placeholder, replace with /dev/disk/by-id/...
+        ephemeral = {
+          enable = true;
+          type = "tmpfs";
+          tmpfsSize = 16;
+        };
+      };
+    };
   };
 
   boot = rec {

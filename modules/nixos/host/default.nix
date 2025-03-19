@@ -6,7 +6,6 @@ in
 {
   imports = [
     ./device.nix
-    ./drive.nix
     ./persistence.nix
   ];
 

@@ -1,11 +1,4 @@
 {
-  name ? "ESP",
-
-  ...
-}:
-{
-  inherit name;
-
   priority = 1;
   size = "512M";
   type = "EF00";

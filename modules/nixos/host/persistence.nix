@@ -8,7 +8,6 @@ with lib;
 with types;
 let
   cfg = config.host.persistence;
-  inherit (config.host) drive;
 
   defaultPerms = {
     mode = "0755";
@@ -160,17 +159,10 @@ in
     root = mkOption {
       type = str;
       default = "/persist";
+      readOnly = true;
       description = ''
         The root directory for the host's persistent state.
       '';
-    };
-
-    type = mkOption {
-      type = enum [
-        "tmpfs"
-        "snapshot"
-      ];
-      default = "tmpfs";
     };
 
     files = mkOption {
@@ -248,84 +240,6 @@ in
         ))
         lib.listToAttrs
       ];
-    };
-
-    fileSystems = {
-      "/persist" = {
-        device = "/dev/disk/by-partlabel/${drive.name}";
-        fsType = drive.format;
-        options = [
-          "subvol=@persist"
-          "compress=zstd"
-        ];
-        neededForBoot = true;
-      };
-
-      "/" = {
-        device = if cfg.type == "tmpfs" then "none" else "/dev/disk/by-partlabel/${drive.name}";
-        fsType = if cfg.type == "tmpfs" then "tmpfs" else drive.format;
-        options =
-          if cfg.type == "tmpfs" then
-            [
-              "defaults"
-              "size=16G"
-              "mode=755"
-            ]
-          else
-            [
-              "subvol=@root"
-              "compress=zstd"
-            ];
-        neededForBoot = if cfg.type == "tmpfs" then false else true;
-      };
-    };
-
-    boot.initrd =
-      let
-        phase1Systemd = config.boot.initrd.systemd.enable;
-        wipeScript = ''
-          mkdir /tmp -p
-          MNTPOINT=$(mktemp -d)
-          (
-            mount -t btrfs -o subvol=/ /dev/disk/by-partlabel/${drive.name} "$MNTPOINT"
-            trap 'umount "$MNTPOINT"' EXIT
-
-            echo "Creating needed directories"
-            mkdir -p "$MNTPOINT"/@persist/var/{log,lib/{nixos,systemd}}
-
-            echo "Cleaning root subvolume"
-            btrfs subvolume list -o "$MNTPOINT/@root" | cut -f9 -d ' ' |
-            while read -r subvolume; do
-              btrfs subvolume delete "$MNTPOINT/$subvolume"
-            done && btrfs subvolume delete "$MNTPOINT/@root"
-
-            echo "Restoring blank subvolume"
-            btrfs subvolume snapshot "$MNTPOINT/@root-blank" "$MNTPOINT/@root"
-          )
-        '';
-      in
-      mkIf (drive.format == "btrfs" && cfg.type == "snapshot") {
-        supportedFilesystems = [ "btrfs" ];
-        postDeviceCommands = lib.mkIf (!phase1Systemd) (mkBefore wipeScript);
-        systemd.services.restore-root = mkIf phase1Systemd {
-          description = "Rollback btrfs rootfs";
-          wantedBy = [ "initrd.target" ];
-          requires = [ "dev-disk-by\\x2dpartlabel-${drive.name}.device" ];
-          after = [
-            "dev-disk-by\\x2dpartlabel-${drive.name}.device"
-            "systemd-cryptsetup@${drive.name}.service"
-          ];
-          before = [ "sysroot.mount" ];
-          unitConfig.DefaultDependencies = "no";
-          serviceConfig.Type = "oneshot";
-          script = wipeScript;
-        };
-      };
-
-    services.btrfs.autoScrub = mkIf (drive.format == "btrfs") {
-      enable = mkDefault false;
-      fileSystems = [ "/persist" ];
-      interval = "Wed *-*-* 02:00:00";
     };
 
     # services.snapper.configs = mkIf (drive.format == "btrfs") (builtins.foldl' recursiveUpdate { }
