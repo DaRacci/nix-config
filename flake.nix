@@ -413,10 +413,7 @@
     # Other misc modules
     vscode-extensions = {
       url = "github:nix-community/nix-vscode-extensions";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-compat.follows = "flake-compat";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Resources
