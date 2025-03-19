@@ -49,11 +49,11 @@ in
       ]
       ++ groups;
 
-    hashedPasswordFile = mkIf (!skipPassword) config.sops.secrets."${name}-passwd".path;
+    hashedPasswordFile = mkIf (!skipPassword) config.sops.secrets."USER_PASSWORD/${name}".path;
     openssh.authorizedKeys.keyFiles = mkIf (!skipSSHKey) [ sourceSSHKey ];
   };
 
-  sops.secrets."${name}-passwd" = mkIf (!skipPassword) {
+  sops.secrets."USER_PASSWORD/${name}" = mkIf (!skipPassword) {
     sopsFile = "${hostDirectory}/secrets.yaml";
     neededForUsers = true;
   };
