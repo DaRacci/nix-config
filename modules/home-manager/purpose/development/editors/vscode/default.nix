@@ -104,7 +104,6 @@ in
           with versionExtensions.vscode-marketplace;
           [
             vadimcn.vscode-lldb
-            fill-labs.dependi
             jscearcy.rust-doc-viewer
             dustypomerleau.rust-syntax
             rust-lang.rust-analyzer
