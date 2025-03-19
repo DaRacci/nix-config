@@ -13,11 +13,6 @@
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
   host = {
-    drive = {
-      format = "btrfs";
-      name = "Nix";
-    };
-
     device.isHeadless = true;
   };
 
