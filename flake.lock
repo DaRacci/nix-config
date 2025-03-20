@@ -689,15 +689,16 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1742123296,
-        "narHash": "sha256-fM2MoOEWTpwFA6LT60yoPYoP9XC2eN3/v8mAb9eJx28=",
-        "owner": "project-gauntlet",
+        "lastModified": 1742473200,
+        "narHash": "sha256-tJTNBHROJ3cA3OTR9wibB14c0VUTruyK2qsxcLGA9ww=",
+        "owner": "DaRacci",
         "repo": "gauntlet",
-        "rev": "b47906fbad6ccc6b8df42a689fb8120b170f113d",
+        "rev": "1262e1b6b1a5fa0ebd7b858c191d8803804e94a4",
         "type": "github"
       },
       "original": {
-        "owner": "project-gauntlet",
+        "owner": "DaRacci",
+        "ref": "fix-nix",
         "repo": "gauntlet",
         "type": "github"
       }
@@ -1032,11 +1033,11 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1741265302,
-        "narHash": "sha256-2HSbWe1r5DYulPzMXZYSluiwG/T+5904YmJSrPJ8tEo=",
+        "lastModified": 1742321353,
+        "narHash": "sha256-VMQWJn8aU6KUcXBhUdcUMhQGS9xFY2g8uohQ+2M/qw0=",
         "owner": "VirtCode",
         "repo": "hypr-dynamic-cursors",
-        "rev": "261bc1668f7de45b48ba6a40d5d727025575390b",
+        "rev": "9f40dc905e5b7e00f0c00956a5c2b007b26c50c2",
         "type": "github"
       },
       "original": {

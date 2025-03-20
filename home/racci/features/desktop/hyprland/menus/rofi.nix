@@ -9,12 +9,9 @@
     enable = true;
     package = pkgs.rofi-wayland;
     plugins = with pkgs; [
-      rofi-vpn
-      rofi-top
-      rofi-mpd
-      rofi-systemd
-      rofi-bluetooth
-      # rofi-file-browser
+      rofi-games
+      rofi-emoji-wayland
+      rofi-calc
     ];
 
     cycle = true;
