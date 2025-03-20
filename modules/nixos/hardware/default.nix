@@ -15,6 +15,7 @@ in
     ./biometrics.nix
     ./bluetooth.nix
     ./cooling.nix
+    ./display.nix
     ./openrgb.nix
   ];
 
