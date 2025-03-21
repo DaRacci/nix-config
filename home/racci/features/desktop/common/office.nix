@@ -2,7 +2,7 @@
 {
   home.packages = with pkgs; [
     gnome-calendar
-    errands # To-do
+    # errands # To-do
     newsflash # RSS
     wike # Wiki
     papers # PDF viewer

@@ -118,7 +118,7 @@
     };
 
     monado = {
-      enable = true;
+      enable = false;
       highPriority = true;
       package = pkgs.monado;
     };

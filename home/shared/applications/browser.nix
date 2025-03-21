@@ -36,6 +36,8 @@ in
     };
   };
 
+  stylix.targets.firefox.profileNames = [ "racci" ];
+
   programs.firefox = {
     enable = true;
     package = pkgs.firefox;

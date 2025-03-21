@@ -65,7 +65,7 @@ with lib;
     plugins = [
       # hyprfocus
       inputs.hy3.packages.x86_64-linux.hy3
-      inputs.hyprland-dynamic-cursors.packages.${pkgs.stdenv.hostPlatform.system}.hypr-dynamic-cursors
+      # inputs.hyprland-dynamic-cursors.packages.${pkgs.stdenv.hostPlatform.system}.hypr-dynamic-cursors
     ];
 
     custom-settings = {
