@@ -26,7 +26,7 @@
     ];
 
     storage = {
-      enable = true;
+      enable = false;
       root = {
         label = "Nix";
         devPath = "/dev/disk/by-id/nvme-KINGSTON_SKC3000D2048G_50026B76857EB93E";
@@ -84,41 +84,41 @@
   };
 
   fileSystems = {
-    # "/boot" = {
-    #   device = "/dev/disk/by-partlabel/ESP";
-    #   fsType = "vfat";
-    # };
+    "/boot" = {
+      device = "/dev/disk/by-partlabel/ESP";
+      fsType = "vfat";
+    };
 
-    # "/nix" = {
-    #   device = "/dev/disk/by-partlabel/Nix";
-    #   fsType = "btrfs";
-    #   options = [
-    #     "subvol=@store"
-    #     "noatime"
-    #     "compress=zstd"
-    #   ];
-    #   neededForBoot = true;
-    # };
+    "/nix" = {
+      device = "/dev/disk/by-partlabel/Nix";
+      fsType = "btrfs";
+      options = [
+        "subvol=@store"
+        "noatime"
+        "compress=zstd"
+      ];
+      neededForBoot = true;
+    };
 
-    # "/persist" = {
-    #   device = "/dev/disk/by-partlabel/Nix";
-    #   fsType = "btrfs";
-    #   options = [
-    #     "subvol=@persist"
-    #     "compress=zstd"
-    #   ];
-    #   neededForBoot = true;
-    # };
+    "/persist" = {
+      device = "/dev/disk/by-partlabel/Nix";
+      fsType = "btrfs";
+      options = [
+        "subvol=@persist"
+        "compress=zstd"
+      ];
+      neededForBoot = true;
+    };
 
-    # "/" = {
-    #   device = "none";
-    #   fsType = "tmpfs";
-    #   options = [
-    #     "defaults"
-    #     "size=16G"
-    #     "mode=755"
-    #   ];
-    #   neededForBoot = false;
-    # };
+    "/" = {
+      device = "none";
+      fsType = "tmpfs";
+      options = [
+        "defaults"
+        "size=16G"
+        "mode=755"
+      ];
+      neededForBoot = false;
+    };
   };
 }
