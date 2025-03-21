@@ -388,8 +388,7 @@
     };
     hyprpanel.url = "github:Jas-SinghFSU/HyprPanel";
     gauntlet = {
-      # TODO - Swap back once https://github.com/project-gauntlet/gauntlet/pull/63 is merged.
-      url = "github:DaRacci/gauntlet/fix-nix";
+      url = "github:project-gauntlet/gauntlet";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";

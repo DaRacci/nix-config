@@ -689,16 +689,15 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1742473200,
+        "lastModified": 1742491050,
         "narHash": "sha256-tJTNBHROJ3cA3OTR9wibB14c0VUTruyK2qsxcLGA9ww=",
-        "owner": "DaRacci",
+        "owner": "project-gauntlet",
         "repo": "gauntlet",
-        "rev": "1262e1b6b1a5fa0ebd7b858c191d8803804e94a4",
+        "rev": "aacf78a377593c11c93732e7356c22f0ab378a99",
         "type": "github"
       },
       "original": {
-        "owner": "DaRacci",
-        "ref": "fix-nix",
+        "owner": "project-gauntlet",
         "repo": "gauntlet",
         "type": "github"
       }
