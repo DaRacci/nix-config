@@ -48,7 +48,9 @@ in
       persistent = true;
 
       # Delete older generations too
-      options = "--delete-older-than 3d";
+      # TODO :: Is there a way to keep the last 2 generations?
+      # maybe also clean generations not only if 14 days old but if unused for 14 days
+      options = "--delete-older-than 14d";
     };
 
     # This will add each flake input as a registry
