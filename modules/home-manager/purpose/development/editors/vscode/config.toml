@@ -127,3 +127,43 @@ extension_name = "vscode-lldb"
 [[extensions]]
 extension_name = "material-theme"
 publisher_name = "zhuangtongfa"
+
+[[extensions]]
+extension_name = "better-comments"
+publisher_name = "aaron-bond"
+
+[[extensions]]
+extension_name = "vscode-todo-highlight"
+publisher_name = "wayou"
+
+[[extensions]]
+extension_name = "python"
+publisher_name = "ms-python"
+
+[[extensions]]
+extension_name = "vscode-pylance"
+publisher_name = "ms-python"
+
+[[extensions]]
+extension_name = "debugpy"
+publisher_name = "ms-python"
+
+[[extensions]]
+extension_name = "black-formatter"
+publisher_name = "ms-python"
+
+[[extensions]]
+extension_name = "isort"
+publisher_name = "ms-python"
+
+[[extensions]]
+extension_name = "pylint"
+publisher_name = "ms-python"
+
+[[extensions]]
+extension_name = "mypy-type-checker"
+publisher_name = "ms-python"
+
+[[extensions]]
+extension_name = "gather"
+publisher_name = "ms-python"

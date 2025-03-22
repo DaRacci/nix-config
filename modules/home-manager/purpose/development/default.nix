@@ -6,7 +6,7 @@
 }:
 with lib;
 let
-  cfg = config.purpose.development;
+  cfg = config.purpose;
 in
 {
   imports = [
@@ -24,7 +24,17 @@ in
     };
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf cfg.development.enable {
+    assertions = [
+      {
+        assertion = !cfg.enable;
+        message = ''
+          You have enabled development but not the purpose module itself, which is required.
+          Ensure that `purpose.enable` is set to true.
+        '';
+      }
+    ];
+
     home.packages = with pkgs; [
       sysprof
       textpieces

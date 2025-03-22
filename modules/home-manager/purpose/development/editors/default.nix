@@ -4,7 +4,6 @@ _: {
   ];
 
   options.purpose.development.editors = {
-
   };
 
   config = {
