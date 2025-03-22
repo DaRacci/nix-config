@@ -22,14 +22,7 @@ jobs:
           ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
 
       - name: Run nix4vscode
-        run: |
-          DIR="modules/home-manager/purpose/development/editors/vscode"
-          CONFIG="$DIR/config.toml"
-          NIX_FILE="$DIR/extensions.nix"
-          VSCODE_VERSION=$(nix eval --raw nixpkgs#vscode.version)
-
-          sed -i "s/vscode_version = \".*\"/vscode_version = \"$VSCODE_VERSION\"/" "$CONFIG"
-          nix run github:nix-community/nix4vscode -- "$CONFIG" -o "$NIX_FILE"
+        run: nix develop --no-pure-eval --accept-flake-config --command "dump-vscode"
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5

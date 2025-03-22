@@ -237,6 +237,7 @@
                 nix
                 git
                 home-manager
+                inputs.nix4vscode.packages.${system}.nix4vscode
 
                 # Converting to Nix
                 dconf2nix
@@ -258,6 +259,28 @@
 
               env = {
                 NIX_CONFIG = "extra-experimental-features = nix-command flakes";
+              };
+
+              scripts = {
+                update-vscode.exec = ''
+                  DIR="modules/home-manager/purpose/development/editors/vscode"
+                  CONFIG="$DIR/config.toml"
+                  NIX_FILE="$DIR/extensions.nix"
+                  VSCODE_VERSION=${pkgs.vscode.version}
+
+                  sed -i "s/vscode_version = \".*\"/vscode_version = \"$VSCODE_VERSION\"/" "$CONFIG"
+                  nix4vscode "$CONFIG" -o "$NIX_FILE"
+                '';
+                dump-vscode.exec = ''
+                  code --list-extensions | while read extension; do
+                    publisher_name=$(echo "$extension" | cut -d '.' -f 1)
+                    extension_name=$(echo "$extension" | cut -d '.' -f 2-)
+                    echo '[[extensions]]'
+                    echo 'publisher_name = "'$publisher_name'"'
+                    echo 'extension_name = "'$extension_name'"'
+                    echo
+                  done
+                '';
               };
 
               git-hooks = {
@@ -284,7 +307,7 @@
     # Packages
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    # Utils
+    # Utils & Helpers for usage inside the flake
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
@@ -303,6 +326,10 @@
     devenv = {
       url = "github:cachix/devenv";
       inputs.flake-compat.follows = "flake-compat";
+    };
+    nix4vscode = {
+      url = "github:nix-community/nix4vscode/nix4vscode-v0.0.9";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Base Modules
