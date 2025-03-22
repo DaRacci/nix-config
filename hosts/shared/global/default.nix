@@ -9,6 +9,7 @@
     ./openssh.nix
     ./sops.nix
     ./security.nix
+    ./stylix.nix
     ./time.nix
     ./zram.nix
   ];

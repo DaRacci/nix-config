@@ -1,8 +1,6 @@
-{ flake, ... }:
+{ ... }:
 {
   imports = [
-    "${flake}/hosts/shared/optional/stylix.nix"
-
     ./appimage.nix
     ./xdg.nix
   ];
