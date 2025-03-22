@@ -52,6 +52,8 @@
       enable = true;
       blender.enable = false;
     };
+
+    diy.printing.enable = true;
   };
 
   programs.looking-glass-client = {

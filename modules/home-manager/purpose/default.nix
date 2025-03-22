@@ -6,6 +6,7 @@ in
 {
   imports = [
     ./development
+    ./diy
     ./gaming
     ./modelling
   ];

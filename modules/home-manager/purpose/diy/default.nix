@@ -8,6 +8,10 @@ let
   cfg = config.purpose.diy;
 in
 {
+  imports = [
+    ./printing.nix
+  ];
+
   options.purpose.diy = {
     enable = lib.mkEnableOption "diy";
   };
