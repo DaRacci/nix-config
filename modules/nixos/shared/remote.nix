@@ -61,5 +61,7 @@ in
         user.persistence.directories = [ ".config/sunshine" ];
       }
     ];
+
+    networking.firewall.allowedTCPPorts = [ 47990 ];
   };
 }
