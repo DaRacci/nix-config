@@ -35,7 +35,6 @@
       package = pkgs.steam.override {
         extraEnv = {
           MANGOHUD = true;
-          OBS_VKCAPTURE = true;
         };
 
         extraArgs = "-steamos3 -steamdeck -steampal -gamepadui";
