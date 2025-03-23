@@ -32,57 +32,57 @@ in
             enableExtensionUpdateCheck = false;
             enableUpdateCheck = false;
 
-            extensions = [
+            extensions = with plugins; [
               # Theme & Looks
-              plugins.pkief.material-icon-theme
-              plugins.aaron-bond.better-comments
-              plugins.wayou.vscode-todo-highlight
+              pkief.material-icon-theme
+              aaron-bond.better-comments
+              wayou.vscode-todo-highlight
 
               # Workspaces & Projects
-              plugins.mkhl.direnv
-              plugins.editorconfig.editorconfig
-              plugins.alefragnani.project-manager
-              plugins.ms-vscode-remote.remote-ssh
+              mkhl.direnv
+              editorconfig.editorconfig
+              alefragnani.project-manager
+              ms-vscode-remote.remote-ssh
 
               # Sidebar Additions
-              plugins.gruntfuggly.todo-tree
-              plugins.eamodio.gitlens
+              gruntfuggly.todo-tree
+              eamodio.gitlens
 
               # Language Support
-              versionExtensions.vscode-marketplace.redhat.vscode-xml
+              redhat.vscode-xml
               versionExtensions.vscode-marketplace.redhat.vscode-yaml
-              plugins.tamasfe.even-better-toml
-              plugins.matthewpi.caddyfile-support
-              plugins.coolbear.systemd-unit-file
-              plugins.hashicorp.terraform
-              plugins.bierner.markdown-preview-github-styles
-              plugins.ruschaaf.extended-embedded-languages
+              tamasfe.even-better-toml
+              matthewpi.caddyfile-support
+              coolbear.systemd-unit-file
+              hashicorp.terraform
+              bierner.markdown-preview-github-styles
+              ruschaaf.extended-embedded-languages
 
               # LSP Servers
-              plugins.jnoortheen.nix-ide
-              plugins.ms-vscode.powershell
+              jnoortheen.nix-ide
+              ms-vscode.powershell
 
               # Formatters
-              plugins.esbenp.prettier-vscode
+              esbenp.prettier-vscode
 
               # Containers
-              plugins.ms-azuretools.vscode-docker
+              ms-azuretools.vscode-docker
 
               # AI
-              plugins.github.copilot
-              plugins.github.copilot-chat
+              github.copilot
+              github.copilot-chat
 
               # Other
-              plugins.formulahendry.code-runner
+              formulahendry.code-runner
               # platformio.platformio-ide
 
               # Bash Extensions
-              plugins.rogalmic.bash-debug
-              plugins.foxundermoon.shell-format
+              rogalmic.bash-debug
+              foxundermoon.shell-format
 
               # Integrations
-              plugins.github.vscode-github-actions
-              plugins.github.vscode-pull-request-github
+              github.vscode-github-actions
+              github.vscode-pull-request-github
             ];
 
             userSettings = {
@@ -242,7 +242,7 @@ in
 
           rust = lib.mkIf cfg.rust.enable (mkProfile {
             extensions = with plugins; [
-              vadimcn.vscode-lldb
+              versionExtensions.vscode-marketplace.vadimcn.vscode-lldb
               jscearcy.rust-doc-viewer
               dustypomerleau.rust-syntax
               rust-lang.rust-analyzer
