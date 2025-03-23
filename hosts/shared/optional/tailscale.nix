@@ -14,6 +14,7 @@
     package = pkgs.tailscale;
     useRoutingFeatures = "client";
     authKeyFile = config.sops.secrets.TAILSCALE_AUTH_KEY.path;
+    extraDaemonFlags = [ "--no-logs-no-support" ];
     extraUpFlags = [
       "--accept-dns=true"
       "--accept-routes"
