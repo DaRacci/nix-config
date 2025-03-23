@@ -1506,16 +1506,16 @@
         "systems": "systems_4"
       },
       "locked": {
-        "lastModified": 1741877599,
-        "narHash": "sha256-wQnIadWpKVZ90hBsHesq8w+Aoaqk7XAvDZDCUkTGqwU=",
+        "lastModified": 1741697217,
+        "narHash": "sha256-fiDT6RPzZG3tHABOpohedAg1MARgfa7P7C7TLMMyFuc=",
         "owner": "nix-community",
         "repo": "nix4vscode",
-        "rev": "9559544fd92d1e35fde0fb27d86649eb423ab829",
+        "rev": "00fb8f2484fc0dace4801974777f988ff7929057",
         "type": "github"
       },
       "original": {
         "owner": "nix-community",
-        "ref": "nix4vscode-v0.0.9",
+        "ref": "nix4vscode-v0.0.8",
         "repo": "nix4vscode",
         "type": "github"
       }

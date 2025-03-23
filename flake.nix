@@ -330,7 +330,7 @@
       inputs.flake-compat.follows = "flake-compat";
     };
     nix4vscode = {
-      url = "github:nix-community/nix4vscode/nix4vscode-v0.0.9";
+      url = "github:nix-community/nix4vscode/nix4vscode-v0.0.8";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
