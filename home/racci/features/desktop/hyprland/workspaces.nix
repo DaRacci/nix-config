@@ -49,6 +49,11 @@ let
       name = "Gaming";
       monitor = monitors.left;
       startup = [ "steam.desktop" ];
+      extraRules = {
+        rounding = "false";
+        shadow = "false";
+
+      };
     };
     "9" = {
       name = "Miscellaneous";
@@ -78,7 +83,9 @@ in
       lib.mapAttrsToList (
         id: value:
         let
-          assignNotNull = key: value: if value != null then key + ":" + value else null;
+          assignNotNull =
+            key: value:
+            if (value != null && (builtins.stringLength value > 0)) then key + ":" + value else null;
           uwsmCommand = exe: "${lib.getExe' pkgs.uwsm "uwsm-app"} -s a -- ${exe}";
           executableToCommand =
             exe:
@@ -90,14 +97,16 @@ in
               } ${uwsmCommand exe.executable}"
             else
               null;
-          args = builtins.filter (v: v != null) [
-            id
-            (assignNotNull "defaultName" value.name)
-            (assignNotNull "monitor" value.monitor)
-            (assignNotNull "" (
-              builtins.concatStringsSep ";" (builtins.map executableToCommand value.startup or [ ])
-            ))
-          ];
+          args =
+            builtins.filter (v: v != null) [
+              id
+              (assignNotNull "defaultName" value.name)
+              (assignNotNull "monitor" value.monitor)
+              (assignNotNull "on-created-empty" (
+                builtins.concatStringsSep "&&" (builtins.map executableToCommand value.startup or [ ])
+              ))
+            ]
+            ++ (lib.mapAttrsToList (k: v: "${k}:${v}") (value.extraRules or { }));
         in
         builtins.concatStringsSep "," args
       ) workspaces;
