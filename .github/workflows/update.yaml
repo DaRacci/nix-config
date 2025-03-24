@@ -32,7 +32,6 @@ jobs:
             merge-queue
             automated
           pr-assignees: DaRacci
-          pr-reviewers: DaRacci
           token: ${{ secrets.GH_TOKEN_FOR_UPDATES }}
           sign-commits: true
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
