@@ -17,7 +17,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.packages = with pkgs; [ (blender.override { cudaSupport = true; }) ];
+    home.packages = with pkgs; [ blender ];
 
     user.persistence.directories = [ ".config/blender" ];
   };

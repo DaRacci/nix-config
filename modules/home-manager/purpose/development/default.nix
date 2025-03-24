@@ -27,7 +27,7 @@ in
   config = mkIf cfg.development.enable {
     assertions = [
       {
-        assertion = !cfg.enable;
+        assertion = cfg.enable;
         message = ''
           You have enabled development but not the purpose module itself, which is required.
           Ensure that `purpose.enable` is set to true.

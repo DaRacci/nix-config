@@ -1,11 +1,10 @@
 {
   config,
-  pkgs,
   lib,
   ...
 }:
 let
-  cfg = config.purpose.diy;
+  cfg = config.purpose;
 in
 {
   imports = [
@@ -16,9 +15,15 @@ in
     enable = lib.mkEnableOption "diy";
   };
 
-  config = lib.mkIf cfg.enable {
-    home.packages = with pkgs; [
-
+  config = lib.mkIf cfg.diy.enable {
+    assertions = [
+      {
+        assertion = cfg.enable;
+        message = ''
+          You have enabled diy but not the purpose module itself, which is required.
+          Ensure that `purpose.enable` is set to true.
+        '';
+      }
     ];
   };
 }

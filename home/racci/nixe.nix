@@ -21,6 +21,8 @@
   ];
 
   purpose = {
+    enable = true;
+
     development = {
       enable = true;
       rust.enable = true;
@@ -53,7 +55,10 @@
       blender.enable = false;
     };
 
-    diy.printing.enable = true;
+    diy = {
+      enable = true;
+      printing.enable = true;
+    };
   };
 
   programs.looking-glass-client = {
