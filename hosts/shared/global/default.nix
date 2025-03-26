@@ -7,6 +7,7 @@
     ./networking.nix
     ./nix.nix
     ./openssh.nix
+    ./scheduler.nix
     ./sops.nix
     ./security.nix
     ./stylix.nix
