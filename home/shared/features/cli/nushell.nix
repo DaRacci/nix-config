@@ -1,4 +1,5 @@
 {
+  inputs,
   osConfig ? null,
   config,
   pkgs,
@@ -7,6 +8,11 @@
 }:
 lib.mkIf (osConfig == null || osConfig.users.users.${config.home.username}.shell.pname == "nushell")
   {
+    home.packages = [
+      inputs.bash-env-nushell.packages.${pkgs.system}.default
+      inputs.bash-env-json.packages.${pkgs.system}.default
+    ];
+
     programs.nushell = {
       enable = true;
 
@@ -15,73 +21,8 @@ lib.mkIf (osConfig == null || osConfig.users.users.${config.home.username}.shell
       };
 
       extraEnv = ''
-        def --env load-sh-env [path: path] {
-          let columns = (open $path
-            | lines
-            | filter {|line| (not ($line | is-empty)) and ($line | str starts-with "export ") }
-            | each {|line| $line | str substring 7..}
-            | split column '=' name value
-            | upsert value {|e| $e.value | str trim -c '"' }
-            | upsert value {|e| replace_env_vars $e.value })
-
-          for element in $columns {
-            load-env { $"($element.name)": $element.value }
-          }
-        }
-
-        def generic_type [variable: any] {
-          mut type = ($variable | describe)
-          let open_index = ($type | str index-of '<')
-
-          if $open_index != -1 {
-            $type = ($type | str substring ..($open_index - 1))
-          }
-
-          $type
-        }
-
-        def replace_env_vars [string: string] {
-          mut string = $string
-          let regex = '\$(?:\{?(?P<key>[A-z_]+)(?::(?P<op>\+|-)(?P<else>[^}]*))?}?)'
-          let matches = ($string | rg -o $regex -r "$0|$key|$op|$else" | lines | split column "|" original key op else)
-          mut last_key = ""
-          mut last_matched = false
-
-          for $match in $matches {
-            mut value = ""
-
-            if ($last_key == $match.key and $match.op == '+') {
-              if ($last_matched) {
-                $value = $match.else
-              }
-            } else {
-              $value = ($env | get -i $match.key)
-
-              # Test for using default value
-              if ($value == null and match.op == "-") {
-                $value = $match.else
-              } else {
-                let type = (generic_type $value)
-
-                $value = (match $type {
-                  nothing | closure | record => null
-                  list => ($value | str join ":")
-                  _ => ($value | into string)
-                })
-              }
-            }
-
-            $last_key = $match.key
-            $last_matched = ($value != null)
-            if ($value != null) {
-              $string = ($string | str replace -n $match.original $value)
-            }
-          }
-
-          $string
-        }
-
-        load-sh-env /etc/profiles/per-user/${config.home.username}/etc/profile.d/hm-session-vars.sh
+        use "${inputs.bash-env-nushell}/bash-env.nu"
+        bash-env ${config.home.sessionVariablesPackage} | load-env
       '';
 
       extraConfig = ''
@@ -123,9 +64,11 @@ lib.mkIf (osConfig == null || osConfig.users.users.${config.home.username}.shell
             case_sensitive: false
             quick: true
             partial: true
-            algorithm: "fuzzy"
+            algorithm: "prefix"
+            use_ls_colors: true
             external: {
               enable: true
+              max_results: 100
               completer: $external_completer
             }
           }

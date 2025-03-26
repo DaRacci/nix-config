@@ -419,7 +419,11 @@
     };
 
     # Misc Plugins
-    nu-bash-env = {
+    bash-env-json = {
+      url = "github:tesujimath/bash-env-json";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    bash-env-nushell = {
       url = "github:tesujimath/bash-env-nushell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
