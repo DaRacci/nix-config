@@ -58,6 +58,19 @@ in
       cmakeFlags = oldAttrs.cmakeFlags ++ [
         (lib.cmakeFeature "CUDA_TOOLKIT_ROOT_DIR" "${prev.cudaPackages.cudatoolkit}")
       ];
+      preFixup =
+        builtins.replaceStrings
+          [ ")\n" ]
+          [
+            ''
+              --set __GLX_VENDOR_LIBRARY_NAME mesa
+              --set __EGL_VENDOR_LIBRARY_FILENAMES ${prev.mesa}/share/glvnd/egl_vendor.d/50_mesa.json
+              --set MESA_LOADER_DRIVER_OVERRIDE zink
+              --set GALLIUM_DRIVER zink
+              )
+            ''
+          ]
+          oldAttrs.preFixup;
     });
 
     nautilus = prev.nautilus.overrideAttrs (oldAttrs: {

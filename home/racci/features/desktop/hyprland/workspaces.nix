@@ -68,47 +68,35 @@ let
 in
 {
   wayland.windowManager.hyprland.settings = {
-    workspace =
-      # [
-      #   "1, on-created-empty:alacritty"
-
-      # "3, rounding:false, decorate:false"
-      # "name:coding, rounding:false, decorate:false, gapsin:0, gapsout:0, border:false, monitor:DP-1"
-      # "8,bordersize:8"
-      # "name:Hello, monitor:DP-1, default:true"
-      # "name:gaming, monitor:desc:Chimei Innolux Corporation 0x150C, default:true"
-      # "5, on-created-empty:[float] firefox"
-      # "special:scratchpad, on-created-empty:alacritty"
-      # ]
-      lib.mapAttrsToList (
-        id: value:
-        let
-          assignNotNull =
-            key: value:
-            if (value != null && (builtins.stringLength value > 0)) then key + ":" + value else null;
-          uwsmCommand = exe: "${lib.getExe' pkgs.uwsm "uwsm-app"} -s a -- ${exe}";
-          executableToCommand =
-            exe:
-            if builtins.isString exe then
-              uwsmCommand exe
-            else if builtins.isAttrs exe then
-              "${
-                if exe ? options then "[${builtins.concatStringsSep ";" exe.options}]" else ""
-              } ${uwsmCommand exe.executable}"
-            else
-              null;
-          args =
-            builtins.filter (v: v != null) [
-              id
-              (assignNotNull "defaultName" value.name)
-              (assignNotNull "monitor" value.monitor)
-              (assignNotNull "on-created-empty" (
-                builtins.concatStringsSep "&&" (builtins.map executableToCommand value.startup or [ ])
-              ))
-            ]
-            ++ (lib.mapAttrsToList (k: v: "${k}:${v}") (value.extraRules or { }));
-        in
-        builtins.concatStringsSep "," args
-      ) workspaces;
+    workspace = lib.mapAttrsToList (
+      id: value:
+      let
+        assignNotNull =
+          key: value:
+          if (value != null && (builtins.stringLength value > 0)) then key + ":" + value else null;
+        uwsmCommand = exe: "${lib.getExe' pkgs.uwsm "uwsm-app"} -s a -- ${exe}";
+        executableToCommand =
+          exe:
+          if builtins.isString exe then
+            uwsmCommand exe
+          else if builtins.isAttrs exe then
+            "${
+              if exe ? options then "[${builtins.concatStringsSep ";" exe.options}]" else ""
+            } ${uwsmCommand exe.executable}"
+          else
+            null;
+        args =
+          builtins.filter (v: v != null) [
+            id
+            (assignNotNull "defaultName" value.name)
+            (assignNotNull "monitor" value.monitor)
+            (assignNotNull "on-created-empty" (
+              builtins.concatStringsSep "&&" (builtins.map executableToCommand value.startup or [ ])
+            ))
+          ]
+          ++ (lib.mapAttrsToList (k: v: "${k}:${v}") (value.extraRules or { }));
+      in
+      builtins.concatStringsSep "," args
+    ) workspaces;
   };
 }

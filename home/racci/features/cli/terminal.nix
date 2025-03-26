@@ -101,6 +101,7 @@ in
     zellij = {
       enable = true;
       settings = {
+        show_startup_tips = false;
         ui = {
           pane_frames = {
             rounded_corners = true;
@@ -113,7 +114,7 @@ in
 
     helix = {
       enable = true;
-      defaultEditor = true;
+      defaultEditor = false;
 
       settings = {
         editor = {
