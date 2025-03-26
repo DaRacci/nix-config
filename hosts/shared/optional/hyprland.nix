@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   ...
 }:
 {
@@ -13,8 +14,8 @@
   };
 
   hardware.graphics = {
-    package = pkgs.mesa;
-    package32 = pkgs.pkgsi686Linux.mesa;
+    package = lib.mkDefault pkgs.mesa;
+    package32 = lib.mkDefault pkgs.pkgsi686Linux.mesa;
     enable32Bit = true;
   };
 

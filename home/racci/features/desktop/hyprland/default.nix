@@ -63,7 +63,7 @@ with lib;
 
     plugins = with pkgs.hyprlandPlugins; [
       hy3
-      hyprfocus
+      # hyprfocus
       hypr-dynamic-cursors
     ];
 
