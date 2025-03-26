@@ -163,7 +163,7 @@ in
         workspace_back_and_forth = true;
         allow_workspace_cycles = true;
         workspace_center_on = 1;
-        focus_preferred_method = 0;
+        focus_preferred_method = 1;
         movefocus_cycles_fullscreen = false;
         allow_pin_fullscreen = true;
       };

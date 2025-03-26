@@ -48,7 +48,6 @@
           };
 
           overlays = [
-            inputs.hyprland-contrib.overlays.default
             inputs.lix-module.overlays.lixFromNixpkgs
             inputs.angrr.overlays.default
             inputs.hyprpanel.overlay
@@ -401,20 +400,6 @@
     nixarr.url = "github:rasmus-kirk/nixarr";
 
     # Desktop Stuff
-    hyprland.url = "github:hyprwm/Hyprland";
-    hyprland-plugins = {
-      url = "github:hyprwm/hyprland-plugins";
-      inputs.hyprland.follows = "hyprland";
-    };
-    hyprland-contrib.url = "github:hyprwm/contrib";
-    hyprland-dynamic-cursors = {
-      url = "github:VirtCode/hypr-dynamic-cursors";
-      inputs.hyprland.follows = "hyprland";
-    };
-    hy3 = {
-      url = "github:outfoxxed/hy3";
-      inputs.hyprland.follows = "hyprland";
-    };
     hyprpanel.url = "github:Jas-SinghFSU/HyprPanel";
     gauntlet = {
       url = "github:project-gauntlet/gauntlet";

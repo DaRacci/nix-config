@@ -1,7 +1,5 @@
 {
-  inputs,
   pkgs,
-  lib,
   ...
 }:
 {
@@ -10,19 +8,15 @@
   programs.hyprland = {
     enable = true;
     withUWSM = true;
-    package = inputs.hyprland.packages.${pkgs.system}.hyprland;
-    portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
+    package = pkgs.hyprland;
+    portalPackage = pkgs.xdg-desktop-portal-hyprland;
   };
 
-  hardware.graphics =
-    let
-      hyprland-packages = inputs.hyprland.inputs.nixpkgs.legacyPackages.${pkgs.system};
-    in
-    {
-      package = lib.mkOverride 50 hyprland-packages.mesa.drivers;
-      package32 = lib.mkOverride 50 hyprland-packages.pkgsi686Linux.mesa.drivers;
-      enable32Bit = true;
-    };
+  hardware.graphics = {
+    package = pkgs.mesa;
+    package32 = pkgs.pkgsi686Linux.mesa;
+    enable32Bit = true;
+  };
 
   services = {
     xserver.updateDbusEnvironment = true;

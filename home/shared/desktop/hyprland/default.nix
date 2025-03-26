@@ -1,13 +1,11 @@
 {
   flake,
   osConfig ? null,
-  inputs,
   pkgs,
   ...
 }:
 {
   imports = [
-    inputs.hyprland.homeManagerModules.default
     "${flake}/home/shared/desktop/common"
     "${flake}/home/shared/desktop/wayland"
   ];

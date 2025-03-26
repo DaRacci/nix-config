@@ -2,7 +2,6 @@
 # TODO Show me the key integration for placement size & quick launching
 {
   flake,
-  inputs,
   config,
   pkgs,
   lib,
@@ -62,10 +61,10 @@ with lib;
   wayland.windowManager.hyprland = {
     systemd.enable = false;
 
-    plugins = [
-      # hyprfocus
-      inputs.hy3.packages.x86_64-linux.hy3
-      # inputs.hyprland-dynamic-cursors.packages.${pkgs.stdenv.hostPlatform.system}.hypr-dynamic-cursors
+    plugins = with pkgs.hyprlandPlugins; [
+      hy3
+      hyprfocus
+      hypr-dynamic-cursors
     ];
 
     custom-settings = {

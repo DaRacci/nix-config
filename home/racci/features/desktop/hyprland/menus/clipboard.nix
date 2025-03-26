@@ -12,6 +12,10 @@ in
     "SUPER,V,exec,${getExe' pkgs.uwsm "uwsm-app"} -s a -- ${getExe config.programs.rofi.package} -modi clipboard:~/.local/bin/cliphist-rofi-img -show clipboard -show-icons"
   ];
 
+  home.packages = with pkgs; [
+    wl-clipboard
+  ];
+
   services.cliphist = {
     enable = true;
     allowImages = true;
