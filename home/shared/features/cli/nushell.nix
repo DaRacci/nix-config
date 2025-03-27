@@ -22,7 +22,7 @@ lib.mkIf (osConfig == null || osConfig.users.users.${config.home.username}.shell
 
       extraEnv = ''
         use "${inputs.bash-env-nushell}/bash-env.nu"
-        bash-env ${config.home.sessionVariablesPackage} | load-env
+        bash-env ${config.home.sessionVariablesPackage}/etc/profile.d/hm-session-vars.sh | load-env
       '';
 
       extraConfig = ''
@@ -76,7 +76,6 @@ lib.mkIf (osConfig == null || osConfig.users.users.${config.home.username}.shell
       '';
 
       shellAliases = {
-        neofetch = "${pkgs.hyfetch}/bin/neowofetch";
         nuut = "sudo nu -i --env-config $nu.env-path --config $nu.config-path";
       };
     };
