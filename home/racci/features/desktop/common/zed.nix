@@ -40,7 +40,7 @@
       theme = lib.mkForce "Tokyo Night";
       ui_font_size = lib.mkForce 24;
       hour_format = "hour24";
-      load_direnv = "shell_hook";
+      load_direnv = "direct";
       autosave = "on_focus_change";
       auto_update = false;
       relative_line_numbers = false;
