@@ -73,10 +73,13 @@ in
     };
   };
 
-  purpose.development = {
+  purpose = {
     enable = true;
-    rust.enable = true;
-    editors.vscode.enable = false;
+    development = {
+      enable = true;
+      rust.enable = true;
+      editors.vscode.enable = false;
+    };
   };
 
   programs.git = {
