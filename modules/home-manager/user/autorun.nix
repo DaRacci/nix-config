@@ -18,6 +18,21 @@ let
           example = "1password";
           description = ''
             Name of the service.
+
+            Inherited from the package attribute name by default.
+          '';
+        };
+
+        slice = mkOption {
+          type = types.enum [
+            "app-graphical"
+            "background"
+            "background-graphical"
+          ];
+          default = "app-graphical";
+          example = "app-graphical";
+          description = ''
+            Slice to run the service in.
           '';
         };
 
@@ -41,10 +56,12 @@ let
 
         executablePath = mkOption {
           type = types.str;
-          default = "${config.package}/bin/${config.name}";
+          default = lib.getExe config.package;
           example = "${pkgs._1password-gui}/bin/1password";
           description = ''
             Path to the executable.
+
+            If lib.getExe does not find the correct executable, you can override this option.
           '';
         };
       };
@@ -78,19 +95,17 @@ in
       nameValuePair "autoRun--${service.name}" {
         Unit = {
           Description = "Auto-Run ${service.name} at Login.";
-          After = [ "graphical-session.target" ];
-          PartOf = [ "graphical-session.target" ];
+          After = [ config.wayland.systemd.target ];
+          PartOf = [ config.wayland.systemd.target ];
         };
 
         Service = {
           PassEnvironment = [ "DISPLAY" ];
           ExecStart = "${service.executablePath} ${concatStringsSep " " service.extraArgs}";
-          Slice = "app-graphical.slice";
+          Slice = service.slice;
         };
 
-        Install = {
-          WantedBy = [ "graphical-session.target" ];
-        };
+        Install.WantedBy = [ config.wayland.systemd.target ];
       }
     ) cfg.services;
   };

@@ -54,5 +54,6 @@ in
         ];
 
     custom.uwsm.sliceAllocation.background = [ "xsettingsd" ];
+    systemd.user.services.xsettingsd.Unit.After = [ "graphical-session.target" ];
   };
 }

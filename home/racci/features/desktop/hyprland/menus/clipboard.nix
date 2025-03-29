@@ -46,8 +46,12 @@ in
     }/bin/cliphist-rofi-img";
   };
 
-  systemd.user.services = {
-    cliphist.Service.Slice = "background.slice";
-    cliphist-images.Service.Slice = "background.slice";
+  systemd.user.services = rec {
+    cliphist = {
+      Service.Slice = "background.slice";
+      Unit.After = [ "graphical-session.target" ];
+    };
+
+    cliphist-images = cliphist;
   };
 }
