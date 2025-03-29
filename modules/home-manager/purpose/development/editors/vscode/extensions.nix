@@ -84,8 +84,8 @@ merge
         "github"."copilot" = vscode-utils.extensionFromVscodeMarketplace {
           name = "copilot";
           publisher = "github";
-          version = "1.291.0";
-          sha256 = "011icv6p93xfg3kpsk5aqjkmd63xx9m3w1zn1848han2b2v7srqg";
+          version = "1.293.0";
+          sha256 = "1547pgnszhv44l7gln1hwna7g9l1066w6k5a5xihy70ghwv0h21g";
 
         };
         "github"."copilot-chat" = vscode-utils.extensionFromVscodeMarketplace {
