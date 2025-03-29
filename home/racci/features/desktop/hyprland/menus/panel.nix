@@ -133,7 +133,7 @@
         };
       };
 
-      wallpaper.image = "/home/racci/Pictures/Wallpapers.17.jpeg";
+      wallpaper.image = config.stylix.image;
     };
   };
 

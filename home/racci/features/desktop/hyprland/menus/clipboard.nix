@@ -47,11 +47,12 @@ in
   };
 
   systemd.user.services = rec {
-    cliphist = {
-      Service.Slice = "background.slice";
-      Unit.After = [ "graphical-session.target" ];
-    };
-
+    cliphist.Unit.After = [ "graphical-session.target" ];
     cliphist-images = cliphist;
   };
+
+  custom.uwsm.sliceAllocation.background = [
+    "cliphist"
+    "cliphist-images"
+  ];
 }
