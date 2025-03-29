@@ -95,7 +95,7 @@ in
           ];
           text = ''
             senitivityBefore=$(hyprctl getoption input:sensitivity -j | gojq -r '.float');
-            hyprctl keyword input:sensitivity -0.6;
+            hyprctl keyword input:sensitivity -0.8;
             hyprpicker --render-inactive --autocopy;
             hyprctl keyword input:sensitivity "$senitivityBefore";
           '';
