@@ -18,7 +18,6 @@ with lib;
     ./lock-suspend.nix
     ./looks.nix
     ./menus
-    ./polkit.nix
     ./workspaces.nix
   ];
 
@@ -47,6 +46,8 @@ with lib;
       }
     }/bin/wlprop";
   };
+
+  services.hyprpolkitagent.enable = true;
 
   wayland.windowManager.hyprland = {
     systemd.enable = false;
