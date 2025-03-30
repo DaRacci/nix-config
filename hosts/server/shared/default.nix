@@ -5,7 +5,10 @@
   ...
 }:
 {
-  imports = [ "${flake}/hosts/shared/optional/tailscale.nix" ];
+  imports = [
+    "${flake}/hosts/shared/optional/tailscale.nix"
+    ./uptime.nix
+  ];
 
   services = {
     getty.autologinUser = "root";
