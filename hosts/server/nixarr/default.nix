@@ -241,7 +241,7 @@
       reverse_proxy localhost:8787
     '';
     "bazarr.racci.dev" = ''
-      reverse_proxy localhost:${config.util-nixarr.bazarr.listenPort}
+      reverse_proxy localhost:${config.util-nixarr.services.bazarr.listenPort}
     '';
     "prowlarr.racci.dev" = ''
       reverse_proxy localhost:9696
