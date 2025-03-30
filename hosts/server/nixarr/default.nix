@@ -247,4 +247,9 @@
       reverse_proxy localhost:9696
     '';
   };
+
+  system.activationScripts."ensure-transmission-dirs".text = ''
+    mkdir -p /data/media/.incomplete
+    mkdir -p /data/media/Downloads
+  '';
 }
