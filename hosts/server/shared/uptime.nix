@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 {
   sops.secrets."UPGRADE_STATUS_ID" = { };
 
@@ -21,32 +21,40 @@
         UNIQUE_ID_FILE = config.sops.secrets.UPGRADE_STATUS_ID.path;
       };
 
-      script = ''
-        #!/usr/bin/env nix-shell
-        #!nix-shell -i bash -p systemd curl perl perlPackages.URI::EscapeXS
-        set -euo pipefail
+      execStart = pkgs.writeShellApplication {
+        name = "upgrade-status";
+        runtimeInputs = [
+          pkgs.curl
+          pkgs.perl
+          pkgs.perlPackages.URIEscapeXS
+        ];
+        runtimeEnv = {
+          UPTIME_ENDPOINT = "https://uptime.racci.dev/api/push";
+          UNIQUE_ID_FILE = config.sops.secrets.UPGRADE_STATUS_ID.path;
+        };
+        text = ''
+          URL="$UPTIME_ENDPOINT/$(cat $UNIQUE_ID_FILE)"
+          STATUS=$(systemctl is-active nixos-upgrade.service)
 
-        URL="$UPTIME_ENDPOINT/$(cat $UNIQUE_ID_FILE)"
-        STATUS=$(systemctl is-active nixos-upgrade.service)
+          function url_encode() {
+            echo -n "$1" | perl -MURI::Escape::XS -e 'print encodeURIComponent(<STDIN>);'
+          }
 
-        function url_encode() {
-          echo -n "$1" | perl -MURI::Escape::XS -e 'print encodeURIComponent(<STDIN>);'
-        }
+          if [ "$STATUS" = "failed" ]; then
+            LOG=$(url_encode "$(journalctl -u nixos-upgrade --lines=10 --no-pager)")
+            URL="$URL?status=down&msg=$LOG&ping="
+          else
+            LAST_PROFILE_DATE=$(nix profile history --profile /nix/var/nix/profiles/system | grep '^Version' | awk -F'[()]+' '{print $2}' | tail -n 1)
+            MSG=$(url_encode "Last upgrade: $LAST_PROFILE_DATE")
+            echo "Last upgrade: $LAST_PROFILE_DATE"
+            echo "Encoded message: $MSG"
+            URL="$URL?status=up&msg=$MSG&ping="
+          fi
 
-        if [ "$STATUS" = "failed" ]; then
-          LOG=$(url_encode "$(journalctl -u nixos-upgrade --lines=10 --no-pager)")
-          URL="$URL?status=down&msg=$LOG&ping="
-        else
-          LAST_PROFILE_DATE=$(nix profile history --profile /nix/var/nix/profiles/system | grep '^Version' | awk -F'[()]+' '{print $2}' | tail -n 1)
-          MSG=$(url_encode "Last upgrade: $LAST_PROFILE_DATE")
-          echo "Last upgrade: $LAST_PROFILE_DATE"
-          echo "Encoded message: $MSG"
-          URL="$URL?status=up&msg=$MSG&ping="
-        fi
-
-        echo "Sending request to $URL"
-        curl -s "$URL"
-      '';
+          echo "Sending request to $URL"
+          curl -s "$URL"
+        '';
+      };
     };
   };
 }
