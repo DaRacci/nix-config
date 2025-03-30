@@ -21,17 +21,13 @@
         UNIQUE_ID_FILE = config.sops.secrets.UPGRADE_STATUS_ID.path;
       };
 
-      execStart = pkgs.writeShellApplication {
+      serviceConfig.execStart = pkgs.writeShellApplication {
         name = "upgrade-status";
         runtimeInputs = [
           pkgs.curl
           pkgs.perl
           pkgs.perlPackages.URIEscapeXS
         ];
-        runtimeEnv = {
-          UPTIME_ENDPOINT = "https://uptime.racci.dev/api/push";
-          UNIQUE_ID_FILE = config.sops.secrets.UPGRADE_STATUS_ID.path;
-        };
         text = ''
           URL="$UPTIME_ENDPOINT/$(cat $UNIQUE_ID_FILE)"
           STATUS=$(systemctl is-active nixos-upgrade.service)
