@@ -34,6 +34,7 @@
             pkgs.curl
             pkgs.perl
             pkgs.perlPackages.URIEscapeXS
+            pkgs.systemd
           ];
           text = ''
             export PERL5LIB=${pkgs.perlPackages.URIEscapeXS}/lib/perl5/site_perl
