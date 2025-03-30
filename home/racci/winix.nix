@@ -82,10 +82,13 @@ in
     };
   };
 
-  programs.git = {
-    signing.key = lib.mkForce "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKR0l+66/jg7SdHgam44I26+yJaEIa7cEO2QBtshzDxb";
-    extraConfig.gpg.ssh.program = lib.mkForce "ssh-keygen";
-    extraConfig.core.sshCommand = lib.mkForce "ssh-keygen";
+  programs = {
+    zellij.settings.mouse_mode = false;
+    git = {
+      signing.key = lib.mkForce "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKR0l+66/jg7SdHgam44I26+yJaEIa7cEO2QBtshzDxb";
+      extraConfig.gpg.ssh.program = lib.mkForce "ssh-keygen";
+      extraConfig.core.sshCommand = lib.mkForce "ssh-keygen";
+    };
   };
 
   systemd.user.services."wsl-ssh-agent-relay" = {
