@@ -22,7 +22,7 @@
         UNIQUE_ID_FILE = config.sops.secrets.UPGRADE_STATUS_ID.path;
       };
 
-      serviceConfig.execStart = pkgs.writeShellApplication {
+      serviceConfig.ExecStart = pkgs.writeShellApplication {
         name = "upgrade-status";
         runtimeInputs = [
           pkgs.curl
