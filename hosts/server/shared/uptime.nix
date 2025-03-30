@@ -6,7 +6,7 @@
     timers.upgrade-status = {
       wantedBy = [ "timers.target" ];
       timerConfig = {
-        OnCalendar = "*:0/3";
+        OnCalendar = "*-*-* *:00/3:00:00";
         Persistent = true;
         Unit = "upgrade-status.service";
       };
