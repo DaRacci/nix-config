@@ -11,7 +11,7 @@
     timers.upgrade-status = {
       wantedBy = [ "timers.target" ];
       timerConfig = {
-        OnCalendar = "*-*-* *:00/3:00:00";
+        OnCalendar = "*-*-* *:00/0:15:00";
         Persistent = true;
         Unit = "upgrade-status.service";
       };
@@ -42,7 +42,7 @@
             export PERL5LIB="${pkgs.perlPackages.URIEscapeXS}/lib/perl5/site_perl"
 
             URL="$UPTIME_ENDPOINT/$(cat "$UNIQUE_ID_FILE")"
-            STATUS=$(systemctl is-active nixos-upgrade.service || true)
+            STATUS=$(systemctl is-failed nixos-upgrade.service || true)
 
             function url_encode() {
               echo -n "$1" | perl -MURI::Escape::XS -e 'print encodeURIComponent(<STDIN>);'
