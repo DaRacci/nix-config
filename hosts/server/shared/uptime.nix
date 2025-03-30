@@ -30,11 +30,13 @@
       serviceConfig.ExecStart = lib.getExe (
         pkgs.writeShellApplication {
           name = "upgrade-status";
-          runtimeInputs = [
-            pkgs.curl
-            pkgs.perl
-            pkgs.perlPackages.URIEscapeXS
-            pkgs.systemd
+          runtimeInputs = with pkgs; [
+            curl
+            perl
+            perlPackages.URIEscapeXS
+            systemd
+            gawk
+            nix
           ];
           text = ''
             export PERL5LIB="${pkgs.perlPackages.URIEscapeXS}/lib/perl5/site_perl"
