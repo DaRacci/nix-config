@@ -22,11 +22,6 @@
       requires = [ "network-online.target" ];
       after = [ "network-online.target" ];
 
-      environment = {
-        UPTIME_ENDPOINT = "https://uptime.racci.dev/api/push";
-        UNIQUE_ID_FILE = config.sops.secrets.UPGRADE_STATUS_ID.path;
-      };
-
       serviceConfig.ExecStart = lib.getExe (
         pkgs.writeShellApplication {
           name = "upgrade-status";
@@ -35,6 +30,10 @@
             pkgs.perl
             pkgs.perlPackages.URIEscapeXS
           ];
+          runtimeEnvironment = {
+            UPTIME_ENDPOINT = "https://uptime.racci.dev/api/push";
+            UNIQUE_ID_FILE = config.sops.secrets.UPGRADE_STATUS_ID.path;
+          };
           text = ''
             URL="$UPTIME_ENDPOINT/$(cat "$UNIQUE_ID_FILE")"
             STATUS=$(systemctl is-active nixos-upgrade.service)
