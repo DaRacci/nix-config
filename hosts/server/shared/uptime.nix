@@ -36,7 +36,7 @@
             pkgs.perlPackages.URIEscapeXS
           ];
           text = ''
-            PEARL5LIB=${pkgs.perlPackages.URIEscapeXS}/lib/perl5/site_perl
+            export PEARL5LIB=${pkgs.perlPackages.URIEscapeXS}/lib/perl5/site_perl
 
             URL="$UPTIME_ENDPOINT/$(cat "$UNIQUE_ID_FILE")"
             STATUS=$(systemctl is-active nixos-upgrade.service)
