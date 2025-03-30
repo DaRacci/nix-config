@@ -37,10 +37,10 @@
             pkgs.systemd
           ];
           text = ''
-            export PERL5LIB=${pkgs.perlPackages.URIEscapeXS}/lib/perl5/site_perl
+            export PERL5LIB="${pkgs.perlPackages.URIEscapeXS}/lib/perl5/site_perl"
 
             URL="$UPTIME_ENDPOINT/$(cat "$UNIQUE_ID_FILE")"
-            STATUS=$(systemctl is-active nixos-upgrade.service)
+            STATUS=$(systemctl is-active nixos-upgrade.service || true)
 
             function url_encode() {
               echo -n "$1" | perl -MURI::Escape::XS -e 'print encodeURIComponent(<STDIN>);'
