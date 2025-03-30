@@ -29,7 +29,7 @@
           pkgs.perlPackages.URIEscapeXS
         ];
         text = ''
-          URL="$UPTIME_ENDPOINT/$(cat $UNIQUE_ID_FILE)"
+          URL="$UPTIME_ENDPOINT/$(cat "$UNIQUE_ID_FILE")"
           STATUS=$(systemctl is-active nixos-upgrade.service)
 
           function url_encode() {
