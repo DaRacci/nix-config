@@ -1,8 +1,8 @@
-# TODO :: Fix TUN permissions in deployment in proxmox inside Infra
 {
   modulesPath,
   inputs,
   config,
+  lib,
   ...
 }:
 {
@@ -16,6 +16,12 @@
     format = "binary";
     sopsFile = ./wg.conf;
   };
+
+  vpnNamespaces.wg.accessibleFrom = lib.mkForce [
+    "192.168.0.0/16"
+    "100.100.0.0/16"
+    "127.0.0.1"
+  ];
 
   nixarr = {
     enable = true;
