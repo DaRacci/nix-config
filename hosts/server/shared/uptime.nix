@@ -11,8 +11,8 @@
     timers.upgrade-status = {
       wantedBy = [ "timers.target" ];
       timerConfig = {
-        OnCalendar = "*-*-* *:00/0:15:00";
         Persistent = true;
+        OnUnitActiveSec = "15min";
         Unit = "upgrade-status.service";
       };
     };
