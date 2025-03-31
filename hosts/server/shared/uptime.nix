@@ -45,7 +45,7 @@
             STATUS=$(systemctl is-failed nixos-upgrade.service || true)
 
             function url_encode() {
-              perl -MURI::Escape::XS -e 'print encodeURIComponent(<STDIN>);' "$1"
+              perl -MURI::Escape::XS -e 'print encodeURIComponent($ARGV[0]);' "$1"
             }
 
             if [ "$STATUS" = "failed" ]; then
