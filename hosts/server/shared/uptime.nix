@@ -12,7 +12,7 @@
       wantedBy = [ "timers.target" ];
       timerConfig = {
         Persistent = true;
-        OnUnitActiveSec = "15min";
+        OnUnitInactiveSec = "15min";
         Unit = "upgrade-status.service";
       };
     };
