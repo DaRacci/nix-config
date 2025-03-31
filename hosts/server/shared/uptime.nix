@@ -45,11 +45,11 @@
             STATUS=$(systemctl is-failed nixos-upgrade.service || true)
 
             function url_encode() {
-              echo -n "$1" | perl -MURI::Escape::XS -e 'print encodeURIComponent(<STDIN>);'
+              perl -MURI::Escape::XS -e 'print encodeURIComponent(<STDIN>);' "$1"
             }
 
             if [ "$STATUS" = "failed" ]; then
-              LOG=$(url_encode "$(journalctl -u nixos-upgrade --lines=10 --no-pager)")
+              LOG=$(url_encode "$(journalctl -u nixos-upgrade --lines=10 --no-pager --output cat)")
               URL="$URL?status=down&msg=$LOG&ping="
             else
               LAST_PROFILE_DATE=$(nix profile history --profile /nix/var/nix/profiles/system | grep '^Version' | awk -F'[()]+' '{print $2}' | tail -n 1)
