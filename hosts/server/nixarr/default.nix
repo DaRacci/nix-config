@@ -221,28 +221,28 @@
   };
 
   services.caddy.virtualHosts = {
-    "jellyfin.racci.dev".extraConfig = ''
+    jellyfin.extraConfig = ''
       reverse_proxy localhost:8096
     '';
-    "jellysesrr.racci.dev".extraConfig = ''
+    jellysesrr.extraConfig = ''
       reverse_proxy localhost:${toString config.util-nixarr.services.jellyseerr.port}
     '';
-    "transmission.racci.dev".extraConfig = ''
+    transmission.extraConfig = ''
       reverse_proxy localhost:${toString config.nixarr.transmission.uiPort}
     '';
-    "sonarr.racci.dev".extraConfig = ''
+    sonarr.extraConfig = ''
       reverse_proxy localhost:8989
     '';
-    "radarr.racci.dev".extraConfig = ''
+    radarr.extraConfig = ''
       reverse_proxy localhost:7878
     '';
-    "readarr.racci.dev".extraConfig = ''
+    readarr.extraConfig = ''
       reverse_proxy localhost:8787
     '';
-    "bazarr.racci.dev".extraConfig = ''
+    bazarr.extraConfig = ''
       reverse_proxy localhost:${toString config.util-nixarr.services.bazarr.listenPort}
     '';
-    "prowlarr.racci.dev".extraConfig = ''
+    prowlarr.extraConfig = ''
       reverse_proxy localhost:9696
     '';
   };
