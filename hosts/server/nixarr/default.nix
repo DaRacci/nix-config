@@ -25,8 +25,6 @@
 
   nixarr = {
     enable = true;
-    mediaDir = "/data/media";
-    stateDir = "/data/media/.state/nixarr";
 
     vpn = {
       enable = true;
@@ -43,8 +41,7 @@
       flood.enable = true;
       extraAllowedIps = [ "100.100.0.0/16" ];
       extraSettings = {
-        incomplete-dir = "/data/media/.incomplete";
-        download-dir = "/data/media/Downloads";
+        rpc-host-whitelist = [ "transmission.racci.dev" ];
       };
     };
 
