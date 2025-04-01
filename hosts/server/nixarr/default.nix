@@ -227,6 +227,11 @@
     sonarr.enable = true;
   };
 
+  systemd.services.flaresolverr.vpnConfinement = {
+    enable = true;
+    vpnNamespace = "wg";
+  };
+
   services = {
     flaresolverr.enable = true;
 
