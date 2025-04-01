@@ -13,6 +13,7 @@ let
     "protonup-rs"
     "nixd"
     "lact"
+    "flaresolverr"
   ];
 in
 {

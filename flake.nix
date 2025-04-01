@@ -448,5 +448,6 @@
     protonup-rs.url = "github:liperium/nixpkgs/protonuprs-init";
     lact-module.url = "github:poperigby/nixpkgs/lact-module";
     lact.url = "github:cything/nixpkgs/lact";
+    flaresolverr.url = "github:paveloom/nixpkgs/flaresolverr";
   };
 }

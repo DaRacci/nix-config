@@ -670,6 +670,22 @@
         "type": "github"
       }
     },
+    "flaresolverr": {
+      "locked": {
+        "lastModified": 1741630128,
+        "narHash": "sha256-MxoDiMC4BQ6u6W/AVoi7weRdMm2WBoJiiCRS0VZjpKM=",
+        "owner": "paveloom",
+        "repo": "nixpkgs",
+        "rev": "57b5c192cd37d38dfa98553b95752d5e9b46ab6c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "paveloom",
+        "ref": "flaresolverr",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "fromYaml": {
       "flake": false,
       "locked": {
@@ -1588,6 +1604,7 @@
         "firefox-ultima": "firefox-ultima",
         "flake-compat": "flake-compat_2",
         "flake-parts": "flake-parts_3",
+        "flaresolverr": "flaresolverr",
         "gauntlet": "gauntlet",
         "home-manager": "home-manager",
         "hyprpanel": "hyprpanel",
