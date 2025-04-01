@@ -227,31 +227,35 @@
     sonarr.enable = true;
   };
 
-  services.caddy.virtualHosts = {
-    jellyfin.extraConfig = ''
-      reverse_proxy localhost:8096
-    '';
-    jellysesrr.extraConfig = ''
-      reverse_proxy localhost:${toString config.util-nixarr.services.jellyseerr.port}
-    '';
-    transmission.extraConfig = ''
-      reverse_proxy localhost:${toString config.nixarr.transmission.uiPort}
-    '';
-    sonarr.extraConfig = ''
-      reverse_proxy localhost:8989
-    '';
-    radarr.extraConfig = ''
-      reverse_proxy localhost:7878
-    '';
-    readarr.extraConfig = ''
-      reverse_proxy localhost:8787
-    '';
-    bazarr.extraConfig = ''
-      reverse_proxy localhost:${toString config.util-nixarr.services.bazarr.listenPort}
-    '';
-    prowlarr.extraConfig = ''
-      reverse_proxy localhost:9696
-    '';
+  services = {
+    flaresolverr.enable = true;
+
+    caddy.virtualHosts = {
+      jellyfin.extraConfig = ''
+        reverse_proxy localhost:8096
+      '';
+      jellysesrr.extraConfig = ''
+        reverse_proxy localhost:${toString config.util-nixarr.services.jellyseerr.port}
+      '';
+      transmission.extraConfig = ''
+        reverse_proxy localhost:${toString config.nixarr.transmission.uiPort}
+      '';
+      sonarr.extraConfig = ''
+        reverse_proxy localhost:8989
+      '';
+      radarr.extraConfig = ''
+        reverse_proxy localhost:7878
+      '';
+      readarr.extraConfig = ''
+        reverse_proxy localhost:8787
+      '';
+      bazarr.extraConfig = ''
+        reverse_proxy localhost:${toString config.util-nixarr.services.bazarr.listenPort}
+      '';
+      prowlarr.extraConfig = ''
+        reverse_proxy localhost:9696
+      '';
+    };
   };
 
   system.activationScripts."ensure-transmission-dirs".text = ''
