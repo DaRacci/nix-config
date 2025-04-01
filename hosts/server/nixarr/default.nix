@@ -250,7 +250,7 @@
       jellyfin.extraConfig = ''
         reverse_proxy localhost:8096
       '';
-      jellysesrr.extraConfig = ''
+      jellyseerr.extraConfig = ''
         reverse_proxy localhost:${toString config.util-nixarr.services.jellyseerr.port}
       '';
       transmission.extraConfig = ''
