@@ -41,7 +41,8 @@
       flood.enable = true;
       extraAllowedIps = [ "100.100.0.0/16" ];
       extraSettings = {
-        rpc-host-whitelist = [ "transmission.racci.dev" ];
+        rpc-host-whitelist-enabled = true;
+        rpc-host-whitelist = "transmission.racci.dev";
       };
     };
 
