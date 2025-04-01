@@ -219,10 +219,23 @@
       };
     };
 
-    bazarr.enable = true;
-    radarr.enable = true;
-    readarr.enable = true;
-    sonarr.enable = true;
+    bazarr = {
+      enable = true;
+      # Broken atm
+      # vpn.enable = true;
+    };
+    radarr = {
+      enable = true;
+      vpn.enable = true;
+    };
+    readarr = {
+      enable = true;
+      vpn.enable = true;
+    };
+    sonarr = {
+      enable = true;
+      vpn.enable = true;
+    };
   };
 
   systemd.services.flaresolverr.vpnConfinement = {
