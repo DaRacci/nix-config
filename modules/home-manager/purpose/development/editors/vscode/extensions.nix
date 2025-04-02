@@ -49,8 +49,8 @@ merge
         "eamodio"."gitlens" = vscode-utils.extensionFromVscodeMarketplace {
           name = "gitlens";
           publisher = "eamodio";
-          version = "16.3.3";
-          sha256 = "14pr7zmdpj7939w5625p13h6j7aacjv414cnvmfxljarr1lc9kwx";
+          version = "17.0.0";
+          sha256 = "1vpxhl31vipzkf9lcvi3mzisi503mdjkr62j5fkrsgcbz0hh49wx";
 
         };
         "editorconfig"."editorconfig" = vscode-utils.extensionFromVscodeMarketplace {
@@ -286,8 +286,8 @@ merge
           "rust-lang"."rust-analyzer" = vscode-utils.extensionFromVscodeMarketplace {
             name = "rust-analyzer";
             publisher = "rust-lang";
-            version = "0.3.2353";
-            sha256 = "17v14ndf3hagnq9ry5c410clsh4cl8kxbhm5ybf50j6dz4yw6vv2";
+            version = "0.3.2362";
+            sha256 = "0zwlb7hllbixpm48w80cd19d09drm2cjndchmib48nzpniw0x8pa";
             arch = "linux-x64";
 
           };
@@ -320,8 +320,8 @@ merge
         "rust-lang"."rust-analyzer" = vscode-utils.extensionFromVscodeMarketplace {
           name = "rust-analyzer";
           publisher = "rust-lang";
-          version = "0.3.2353";
-          sha256 = "1hh2cd7vkhj4dmfjdbp5jric9c7wscw4qn3x0mkqybwbdw1z07n2";
+          version = "0.3.2362";
+          sha256 = "06wl79l7zwcm6lyn1y593fcgsmmgpfnsrqndfdahwgy51q5cgrr6";
           arch = "linux-arm64";
 
         };
@@ -362,8 +362,8 @@ merge
       "rust-lang"."rust-analyzer" = vscode-utils.extensionFromVscodeMarketplace {
         name = "rust-analyzer";
         publisher = "rust-lang";
-        version = "0.3.2353";
-        sha256 = "036xsdmb0a4hjhnsjacayin837pvaik915zq9m9g0ga48c5jcaj2";
+        version = "0.3.2362";
+        sha256 = "0jkqyz6m9wz4y47ah5k6rxsqwfc3csb7jrsgi9w3a31cgm7a7vwf";
         arch = "darwin-x64";
 
       };
@@ -404,8 +404,8 @@ merge
     "rust-lang"."rust-analyzer" = vscode-utils.extensionFromVscodeMarketplace {
       name = "rust-analyzer";
       publisher = "rust-lang";
-      version = "0.3.2353";
-      sha256 = "0clh93mb205nmgvmrl51qxx1vxb9yjfz54pzxip7mvvmp21zjsxz";
+      version = "0.3.2362";
+      sha256 = "1fmnzg3ikmbcrlxjqfcac2zhj2k3jhrniyqy6ai3mia90wmmk999";
       arch = "darwin-arm64";
 
     };
