@@ -169,45 +169,5 @@
       enabled = true;
       max-accuracy-level = "exact";
     };
-
-    "org/gtk/gtk4/Settings/FileChooser" = {
-      show-hidden = true;
-      sort-directories-first = true;
-    };
-
-    "org/gtk/gtk4/settings/file-chooser" = {
-      date-format = "regular";
-      location-mode = "path-bar";
-      show-hidden = true;
-      show-size-column = true;
-      show-type-column = true;
-      sidebar-width = 140;
-      sort-column = "name";
-      sort-directories-first = true;
-      sort-order = "ascending";
-      type-format = "category";
-      view-type = "list";
-      window-size = mkTuple [
-        1400
-        1000
-      ];
-    };
-
-    "org/gtk/settings/file-chooser" = {
-      date-format = "regular";
-      location-mode = "path-bar";
-      show-hidden = true;
-      show-size-column = true;
-      show-type-column = true;
-      sidebar-width = 140;
-      sort-column = "name";
-      sort-directories-first = true;
-      sort-order = "ascending";
-      type-format = "category";
-      window-size = mkTuple [
-        1400
-        1000
-      ];
-    };
   };
 }

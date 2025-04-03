@@ -24,15 +24,19 @@
     "org/gtk/gtk4/settings/file-chooser" = {
       sort-directories-first = true;
       show-hidden = true;
+      location-mode = "path-bar";
     };
 
     "org/gtk/settings/file-chooser" = {
       show-hidden = true;
       sort-directories-first = true;
+      location-mode = "path-bar";
     };
   };
 
   home.sessionVariables = {
     NAUTILUS_4_EXTENSION_DIR = "${pkgs.nautilus-python}/lib/nautilus/extensions-4";
   };
+
+  user.persistence.files = [ "config/gtk-3.0/bookmarks" ];
 }
