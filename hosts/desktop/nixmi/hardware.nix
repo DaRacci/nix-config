@@ -18,7 +18,7 @@
     storage = {
       enable = true;
       root = {
-        devPath = "/dev/nvme0n1"; # FIXME :: Placeholder, replace with /dev/disk/by-id/...
+        devPath = "/dev/disk/by-id/nvme-KINGSTON_SKC3000D4096G_50026B7686F8E2BA";
         ephemeral = {
           enable = true;
           type = "tmpfs";
