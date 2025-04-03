@@ -45,13 +45,6 @@
         terminal = 18;
       };
     };
-
-    iconTheme = {
-      enable = true;
-      light = "Adwaita";
-      dark = "Adwaita-dark";
-      package = pkgs.adwaita-icon-theme;
-    };
   };
 
   # nixput = {
