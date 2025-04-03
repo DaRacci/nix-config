@@ -21,22 +21,19 @@ in
     home.packages =
       with pkgs;
       (optional cfg.enableSatisfactory ficsit-cli)
-      ++ (optional cfg.enableBeatSaber beatsabermodmanager)
+      ++ (optional cfg.enableBeatSaber bs-manager)
       ++ (optionals cfg.enableThunderstore [
         gale
         r2modman
       ])
       ++ (optional cfg.enableNexus (nexusmods-app.override { _7zz = _7zz-rar; }));
 
-    xdg.mimeApps.defaultApplications = mkIf cfg.enableBeatSaber {
-      "x-scheme-handler/beatsaver" = "BeatSaberModManager-url-beatsaver.desktop";
-      "x-scheme-handler/modelsaber" = "BeatSaberModManager-url-modelsaber.desktop";
-      "x-scheme-handler/bsplaylist" = "BeatSaberModManager-url-bsplaylist.desktop";
-    };
-
     user.persistence.directories =
       (optional cfg.enableSatisfactory ".local/share/ficsit")
-      ++ (optional cfg.enableBeatSaber ".config/BeatSaberModManager")
+      ++ (optionals cfg.enableBeatSaber [
+        ".config/bs-manager"
+        ".local/share/BSManager"
+      ])
       ++ (optionals cfg.enableThunderstore [
         ".config/r2modman"
         ".config/r2modmanPlus-local"
