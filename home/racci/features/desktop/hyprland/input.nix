@@ -185,6 +185,11 @@ in
         workspace_swipe_fingers = 3;
       };
 
+      misc = {
+        key_press_enables_dpms = false;
+        mouse_move_enables_dpms = true;
+      };
+
       bind = [
         # (binding mainMod "b" "exec" "${lib.getExe pkgs.hdrop} -f -b ${lib.getExe pkgs.overskride}")
       ];
