@@ -22,10 +22,10 @@ in
 
       lanzaboote = {
         enable = true;
-        pkiBundle = "/etc/secureboot";
+        pkiBundle = "/var/lib/sbctl";
       };
     };
 
-    host.persistence.directories = [ "/etc/secureboot" ];
+    host.persistence.directories = [ "/var/lib/sbctl" ];
   };
 }

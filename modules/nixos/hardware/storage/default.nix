@@ -5,7 +5,6 @@ in
 {
   imports = [
     ./ephemeral.nix
-    ./luks.nix
     ./maintenance.nix
   ];
 
