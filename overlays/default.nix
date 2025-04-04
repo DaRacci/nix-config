@@ -100,20 +100,21 @@ in
     inherit lib;
   };
 
-  # TODO - Only do this if the gpu is nvidia
   electronFixes =
     _: prev:
-    prev.lib.pipe
-      [ "vscode" "obsidian" ]
-      [
-        (map (
-          name:
-          prev.lib.nameValuePair name (
-            prev.${name}.override {
-              commandLineArgs = "--disable-gpu-compositing";
-            }
-          )
-        ))
-        prev.lib.listToAttrs
-      ];
+    lib.mkIf prev.config.cudaSupport (
+      prev.lib.pipe
+        [ "vscode" "obsidian" ]
+        [
+          (map (
+            name:
+            prev.lib.nameValuePair name (
+              prev.${name}.override {
+                commandLineArgs = "--disable-gpu-compositing";
+              }
+            )
+          ))
+          prev.lib.listToAttrs
+        ]
+    );
 }

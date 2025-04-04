@@ -18,6 +18,7 @@ with lib;
     ./lock-suspend.nix
     ./looks.nix
     ./menus
+    ./nvidia.nix
     ./workspaces.nix
   ];
 
@@ -170,14 +171,6 @@ with lib;
       };
 
       env = [
-        #region NVIDIA
-        "GBM_BACKEND,nvidia-drm"
-        "__GLX_VENDOR_LIBRARY_NAME,nvidia"
-        "LIBVA_DRIVER_NAME,nvidia"
-        "__GL_GSYNC_ALLOWED,1"
-        "__GL_VRR_ALLOWED,1"
-        #endregion
-
         #region XDG
         "XDG_CURRENT_DESKTOP,Hyprland"
         "XDG_SESSION_TYPE,wayland"

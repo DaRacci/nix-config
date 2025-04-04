@@ -30,7 +30,7 @@
       );
 
       mkPkgs =
-        system: cuda: _rocm:
+        system: cuda: rocm:
         import inputs.nixpkgs {
           inherit system;
           config = {
@@ -44,7 +44,7 @@
             ];
 
             cudaSupport = cuda;
-            rocmSupport = false; # FIXME for some reason this is breaking shit when it shouldn't???
+            rocmSupport = rocm;
           };
 
           overlays = [
@@ -115,7 +115,7 @@
 
                     isoFormat = "iso";
                     deviceType = "desktop";
-                    acceleration = "cuda";
+                    acceleration = "rocm";
                   };
 
                   winix = {
