@@ -6,7 +6,6 @@
 }:
 let
   inherit (lib) getExe;
-  uwsmExec = exe: "${lib.getExe' pkgs.uwsm "uwsm-app"} -s a -- ${exe}";
 in
 {
   wayland.windowManager.hyprland.settings = {
@@ -103,14 +102,14 @@ in
       in
       [
         # OCR
-        "Super+Shift,T,exec,${uwsmExec (getExe ocrRegion)}"
+        "Super+Shift,T,exec,${getExe ocrRegion}"
 
         # Color Picker
-        "Super+Shift,C,exec,${uwsmExec (getExe colourPicker)}"
+        "Super+Shift,C,exec,${getExe colourPicker}"
 
         # Screenshot
-        ",Print,exec,${uwsmExec (getExe screenshot)} area"
-        "SUPER,Print,exec,${uwsmExec (getExe screenshot)} output"
+        ",Print,exec,${getExe screenshot} area"
+        "SUPER,Print,exec,${getExe screenshot} output"
       ];
   };
 }
