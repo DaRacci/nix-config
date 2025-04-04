@@ -102,7 +102,7 @@ in
 
   electronFixes =
     _: prev:
-    lib.mkIf prev.config.cudaSupport (
+    lib.optionalAttrs prev.config.cudaSupport (
       prev.lib.pipe
         [ "vscode" "obsidian" ]
         [
