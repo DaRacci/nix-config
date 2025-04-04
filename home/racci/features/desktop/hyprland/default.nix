@@ -247,9 +247,6 @@ with lib;
         vfr = true;
         vrr = true;
 
-        mouse_move_enables_dpms = true;
-        key_press_enables_dpms = true;
-
         animate_manual_resizes = false;
         animate_mouse_windowdragging = false;
 
