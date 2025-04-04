@@ -18,6 +18,7 @@
     storage = {
       enable = true;
       root = {
+        enableLuks = true;
         devPath = "/dev/disk/by-id/nvme-KINGSTON_SKC3000D4096G_50026B7686F8E2BA";
         ephemeral = {
           enable = true;
