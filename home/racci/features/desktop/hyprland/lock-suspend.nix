@@ -85,7 +85,7 @@ in
           }
           # Active Media
           {
-            text = "cmd[update:1000] ${pkgs.playerctl}/bin/playerctl metadata --format '{{title}}  {{artist}}'";
+            text = "cmd[update:1000] ${lib.getExe pkgs.playerctl} metadata --format '{{title}}  {{artist}}'";
             color = textColour;
             font_size = 18;
             font_family = fontFamily;
