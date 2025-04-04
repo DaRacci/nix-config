@@ -47,9 +47,9 @@
   };
 
   # Fix from https://github.com/hyprwm/Hyprland/issues/7704#issuecomment-2449563257
-  environment.etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool-in-wayland-compositors.json".text =
-    lib.mkIf (config.hardware.graphics.manufacturer == "nvidia") (
-      builtins.toJSON {
+  environment.etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool-in-wayland-compositors.json" =
+    lib.mkIf (config.hardware.graphics.manufacturer == "nvidia") {
+      text = builtins.toJSON {
         rules = [
           {
             pattern = {
@@ -77,6 +77,6 @@
             ];
           }
         ];
-      }
-    );
+      };
+    };
 }
