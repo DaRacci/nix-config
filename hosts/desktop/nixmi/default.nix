@@ -45,7 +45,7 @@
 
     steam = {
       enable = true;
-      updater.splash = "vendor";
+      updater.splash = "steamos";
 
       autoStart = false;
       user = "racci";
