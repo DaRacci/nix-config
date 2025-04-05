@@ -45,6 +45,7 @@ in
         "podman"
         "git"
         "libvirtd"
+        "kvm"
         "adbusers"
       ]
       ++ groups;
