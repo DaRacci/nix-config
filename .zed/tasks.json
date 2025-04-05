@@ -1,0 +1,12 @@
+[
+  {
+    "label": "Rebuild & Switch System",
+    "command": "sudo nixos-rebuild switch --flake .#nixmi --impure --accept-flake-config -L",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "no_focus",
+    "reveal_target": "dock",
+    "hide": "on_success",
+    "shell": "system"
+  }
+]
