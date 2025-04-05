@@ -443,12 +443,16 @@ in
       virtio-win
     ];
   };
-  host.persistence.directories = [
-    {
-      directory = "/var/lib/libvirt/qemu";
-      user = "qemu-libvirtd";
-      group = "qemu-libvirtd";
-      mode = "u=rwx,g=rx,o=rx";
-    }
-  ];
+  host.persistence.directories =
+    let
+      commonArgs = {
+        user = "qemu-libvirtd";
+        group = "qemu-libvirtd";
+        mode = "u=rwx,g=rx,o=rx";
+      };
+    in
+    [
+      (commonArgs // { directory = "/var/lib/libvirt/qemu"; })
+      (commonArgs // { directory = "/var/lib/libvirt/images"; })
+    ];
 }
