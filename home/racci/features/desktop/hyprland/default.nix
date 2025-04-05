@@ -171,12 +171,6 @@ with lib;
       };
 
       env = [
-        #region XDG
-        "XDG_CURRENT_DESKTOP,Hyprland"
-        "XDG_SESSION_TYPE,wayland"
-        "XDG_SESSION_DESKTOP,Hyprland"
-        #endregion
-
         #region Toolkit Backends
         "GTK_BACKEND,wayland,x11"
         "QT_QPA_PLATFORM,wayland;xcb"

@@ -66,7 +66,7 @@ in
 
   config = {
     wayland.windowManager.hyprland.settings = lib.pipe cfg [
-      (lib.groupBy (
+      (builtins.groupBy (
         attr: "bind${lib.concatStrings (if attr.modifiers != null then attr.modifiers else [ ])}"
       ))
       (builtins.mapAttrs (
