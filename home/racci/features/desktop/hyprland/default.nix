@@ -145,13 +145,8 @@ with lib;
         direct_scanout = 2;
       };
 
-      monitor = [
-        "DP-2,      2560x1440@165,  0x0,        1, vrr, 1" # Center Monitor
-        "DP-1,      2560x1440@144,  auto-left,  1, vrr, 1" # Left Monitor
-        "DP-3,      2560x1440@144,  auto-right, 1, vrr, 1" # Right Monitor
-        "HDMI-A-1,  2732x2048@90,   auto-right, 2"
-        "HDMI-A-1,  disable" # Disable Virtual Monitor, will be managed by sunshine.
-        ",          preferred,      auto,       1" # Fallback Rule
+      monitor = lib.mkAfter [
+        ", preferred, auto, 1" # Fallback Rule
       ];
 
       general = {
@@ -231,8 +226,8 @@ with lib;
         );
 
       misc = {
-        vfr = true;
-        vrr = true;
+        # vfr = true;
+        # vrr = true;
 
         animate_manual_resizes = false;
         animate_mouse_windowdragging = false;
