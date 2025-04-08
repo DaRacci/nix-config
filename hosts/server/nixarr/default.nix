@@ -236,6 +236,10 @@
       enable = true;
       vpn.enable = true;
     };
+    lidarr = {
+      enable = true;
+      vpn.enable = true;
+    };
   };
 
   systemd.services.flaresolverr.vpnConfinement = {
@@ -270,6 +274,9 @@
       '';
       prowlarr.extraConfig = ''
         reverse_proxy localhost:9696
+      '';
+      lidarr.extraConfig = ''
+        reverse_proxy localhost:8686
       '';
     };
   };
