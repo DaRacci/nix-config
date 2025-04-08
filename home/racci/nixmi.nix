@@ -8,6 +8,7 @@
 
     "${flake}/home/shared/features/games"
     "${flake}/home/shared/applications"
+    "${flake}/home/shared/features/windows.nix"
   ];
 
   user.persistence.enable = true;

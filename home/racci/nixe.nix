@@ -104,24 +104,4 @@
       ];
     };
   };
-
-  # virtualisation.libvirt.connections."qemu:///system" = {
-  #   domains = [
-  #     {
-  #       definition = nixvirt.lib.domain.writeXML (
-  #         nixvirt.lib.domain.templates.windows {
-  #           name = "Gaming";
-  #           uuid = "d232a15b-f7f2-4b26-b6d4-445e855d1317";
-  #           memory = {
-  #             count = 24;
-  #             unit = "GiB";
-  #           };
-  #           storage_vol =
-  #         }
-  #       );
-  #       active = null;
-  #       restart = null;
-  #     }
-  #   ];
-  # };
 }
