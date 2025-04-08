@@ -403,10 +403,10 @@ in
       '';
 
       search = {
-        default = "Google";
+        default = "google";
         force = true;
         order = [
-          "Google"
+          "google"
           "Nix Packages"
           "Nix Options"
           "NixOS Wiki"
@@ -420,11 +420,7 @@ in
           in
           {
             "Nix Packages" = {
-              urls = [
-                {
-                  template = "${searchNixURL}packages?type=packages&query={searchTerms}";
-                }
-              ];
+              urls = [ { template = "${searchNixURL}packages?type=packages&query={searchTerms}"; } ];
               icon = searchNixIcon;
               definedAliases = [ "@np" ];
             };
@@ -436,44 +432,30 @@ in
             };
 
             "NixOS Wiki" = {
-              urls = [
-                {
-                  template = "https://nixos.wiki/index.php?search={searchTerms}";
-                }
-              ];
-              iconUpdateURL = "https://nixos.wiki/favicon.png";
+              urls = [ { template = "https://nixos.wiki/index.php?search={searchTerms}"; } ];
+              icon = "https://nixos.wiki/favicon.png";
               updateInterval = 24 * 60 * 60 * 1000; # every day
               definedAliases = [ "@nw" ];
             };
 
             "Home Manager Options" = {
-              urls = [
-                {
-                  template = "https://home-manager-options.extranix.com/?query={searchTerms}";
-                }
-              ];
+              urls = [ { template = "https://home-manager-options.extranix.com/?query={searchTerms}"; } ];
               icon = searchNixIcon;
               definedAliases = [ "@hmo" ];
             };
 
             "Proton DB" = {
-              urls = [
-                {
-                  template = "https://www.protondb.com/search?q={searchTerms}";
-                }
-              ];
-              iconUpdateURL = "https://www.protondb.com/favicon.ico";
+              urls = [ { template = "https://www.protondb.com/search?q={searchTerms}"; } ];
+              icon = "https://www.protondb.com/favicon.ico";
               updateInterval = 24 * 60 * 60 * 1000; # every day
               definedAliases = [ "@pdb" ];
             };
 
             "Github" = {
               urls = [
-                {
-                  template = "https://github.com/search?ref=opensearch&type=repositories&q={searchTerms}";
-                }
+                { template = "https://github.com/search?ref=opensearch&type=repositories&q={searchTerms}"; }
               ];
-              iconUpdateURL = "https://github.githubassets.com/favicons/favicon.png";
+              icon = "https://github.githubassets.com/favicons/favicon.png";
               updateInterval = 24 * 60 * 60 * 1000;
               definedAliases = [ "@gh" ];
             };
@@ -486,16 +468,12 @@ in
             };
 
             "NixPkgsIssues" = {
-              urls = [
-                {
-                  template = "https://github.com/NixOS/nixpkgs/issues?q={searchTerms}";
-                }
-              ];
+              urls = [ { template = "https://github.com/NixOS/nixpkgs/issues?q={searchTerms}"; } ];
               icon = "https://nixos.org/logo/nixos-logo-only-hires.png";
               definedAliases = [ "@npi" ];
             };
 
-            "Google".metaData.alias = "@g"; # builtin engines only support specifying one additional alias
+            "google".metaData.alias = "@g"; # builtin engines only support specifying one additional alias
           };
       };
     };
