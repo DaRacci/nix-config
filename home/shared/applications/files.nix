@@ -38,5 +38,5 @@
     NAUTILUS_4_EXTENSION_DIR = "${pkgs.nautilus-python}/lib/nautilus/extensions-4";
   };
 
-  user.persistence.files = [ "config/gtk-3.0/bookmarks" ];
+  user.persistence.files = [ ".config/gtk-3.0/bookmarks" ];
 }
