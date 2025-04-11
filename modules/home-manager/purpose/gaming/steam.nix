@@ -55,6 +55,10 @@ in
       ];
     };
 
+    systemd.user.tmpfiles.rules = [
+      "L+ %h/.local/share/Steam/steamapps - - - - %h/Games/SteamLibrary"
+    ];
+
     user.persistence = {
       files = [
         ".steam/registry.vdf"
