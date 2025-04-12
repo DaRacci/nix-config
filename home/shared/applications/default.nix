@@ -8,6 +8,7 @@
     ./recording.nix
     ./social.nix
     ./streamdeck.nix
+    ./system.nix
     ./terminal.nix
   ];
 }

@@ -1,6 +1,5 @@
 {
   config,
-  pkgs,
   lib,
   ...
 }:
@@ -35,8 +34,6 @@ in
   };
 
   config = {
-    environment.systemPackages = with pkgs; [ nvtopPackages.full ];
-
     services.xserver.videoDrivers =
       if (cfg.graphics.manufacturer == "nvidia") then
         [ "nvidia" ]

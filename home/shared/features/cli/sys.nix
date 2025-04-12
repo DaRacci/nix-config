@@ -4,17 +4,20 @@
     ctop
     iotop-c
     sysstat
+    nvtopPackages.full
   ];
 
-  programs.btop = {
-    enable = true;
-    package = pkgs.btop;
-    settings = { };
-  };
+  programs = {
+    btop = {
+      enable = true;
+      package = pkgs.btop;
+      settings = { };
+    };
 
-  programs.bottom = {
-    enable = true;
-    package = pkgs.bottom;
-    settings = { };
+    bottom = {
+      enable = true;
+      package = pkgs.bottom;
+      settings = { };
+    };
   };
 }
