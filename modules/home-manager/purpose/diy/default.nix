@@ -8,6 +8,7 @@ let
 in
 {
   imports = [
+    ./cad.nix
     ./printing.nix
   ];
 
