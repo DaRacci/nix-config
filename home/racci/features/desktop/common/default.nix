@@ -1,6 +1,9 @@
 { pkgs, ... }:
 {
   imports = [
+    ./keyboard.nix
+    ./kvm.nix
+    ./misc.nix
     ./mobile.nix
     ./nextcloud.nix
     ./office.nix
@@ -14,5 +17,6 @@
     health
     fragments
     transmission_4-gtk
+    kooha
   ];
 }

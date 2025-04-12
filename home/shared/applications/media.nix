@@ -6,7 +6,6 @@
 {
   home.packages = with pkgs; [
     # Audio
-    spotube
     spotify
     decibels
     mousai
@@ -79,19 +78,30 @@
         lib.mine.attrsets.recursiveMergeAttrs (builtins.map (mime: { ${mime} = desktop; }) mimes);
     in
     {
-      # Krita and Switcheroo try to hijack all image files.
-      defaultApplications = forAll "org.gnome.Loupe.desktop" [
-        "image/avif"
-        "image/bmp"
-        "image/gif"
-        "image/heic"
-        "image/vnd.microsoft.icon"
-        "image/jpeg"
-        "image/png"
-        "image/svg+xml"
-        "image/tiff"
-        "image/webp"
-      ];
+      # Krita and Switcheroo try to hijack a lot of file types
+      defaultApplications =
+        (forAll "org.gnome.Decibles.desktop" [
+          "audio/aiff"
+          "audio/flac"
+          "audio/mp4"
+          "audio/mpeg"
+          "audio/ogg"
+          "audio/opus"
+          "audio/wav"
+          "audio/webm"
+        ])
+        ++ (forAll "org.gnome.Loupe.desktop" [
+          "image/avif"
+          "image/bmp"
+          "image/gif"
+          "image/heic"
+          "image/vnd.microsoft.icon"
+          "image/jpeg"
+          "image/png"
+          "image/svg+xml"
+          "image/tiff"
+          "image/webp"
+        ]);
     };
 
   dconf.settings = with lib.hm.gvariant; {
