@@ -308,6 +308,9 @@
     # Packages
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    # Upsteam Programs
+    lan-mouse.url = "github:feschber/lan-mouse";
+
     # Utils & Helpers for usage inside the flake
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
