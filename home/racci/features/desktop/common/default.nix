@@ -5,9 +5,9 @@
     ./kvm.nix
     ./misc.nix
     ./mobile.nix
-    ./nextcloud.nix
     ./office.nix
     ./secrets.nix
+    ./sync.nix
     ./zed.nix
   ];
 

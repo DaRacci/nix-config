@@ -11,6 +11,10 @@
     gnome-disk-utility
     file-roller # Archive manager
     impression # Bootable USB creator
+
+    # Backup tools
+    pika-backup
+    deja-dup
   ];
 
   xdg.mimeApps.defaultApplications = {
