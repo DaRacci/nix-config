@@ -34,6 +34,8 @@ in
       target = ".mozilla/firefox/${config.home.username}/chrome/firefox-ultima";
       source = inputs.firefox-ultima;
     };
+
+    packages = [ pkgs.varia ];
   };
 
   stylix.targets.firefox.profileNames = [ "racci" ];
@@ -51,7 +53,7 @@ in
         /**
           ---- EXTENSIONS
           Check about:debugging#/runtime/this-firefox for extension/add-on ID strings.
-          You can use about:policies to debug issues with extensions.
+          You can use about:policies to debug issues with extension installations.
         */
         Extensions =
           trivial.pipe
@@ -95,6 +97,10 @@ in
                 "violentmonkey"
                 "{aecec67f-0d10-4fa7-b7c7-609a2db280cf}"
               ]
+              [
+                "varia-integrator"
+                "giantpinkrobots@protonmail.com"
+              ]
 
               # Site Improvements
               [
@@ -112,6 +118,10 @@ in
               [
                 "return-youtube-dislikes"
                 "{762f9885-5a13-4abd-9c77-433dcd38b8fd}"
+              ]
+              [
+                "indie-wiki-buddy"
+                "{cb31ec5d-c49a-4e5a-b240-16c767444f62}"
               ]
             ]
             [
