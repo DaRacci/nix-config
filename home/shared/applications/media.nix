@@ -90,7 +90,7 @@
           "audio/wav"
           "audio/webm"
         ])
-        ++ (forAll "org.gnome.Loupe.desktop" [
+        // (forAll "org.gnome.Loupe.desktop" [
           "image/avif"
           "image/bmp"
           "image/gif"
