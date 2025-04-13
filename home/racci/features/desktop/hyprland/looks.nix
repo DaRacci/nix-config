@@ -33,7 +33,7 @@
         "borderangle, 1, 30, fluentDecel, once"
         "workspaces, 1, 4, easeOutCubic, fade"
 
-        "layers, 1, 6, easeOutCubic, slide"
+        "layers, 1, 6, easeOutCubic, slide top"
       ];
     };
 

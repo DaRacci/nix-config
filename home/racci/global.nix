@@ -11,6 +11,10 @@
   stylix = {
     base16Scheme = "${inputs.tinted-theming}/base16/tokyo-night-dark.yaml";
 
+    opacity = {
+      popups = 0.9;
+    };
+
     cursor = {
       package = pkgs.bibata-cursors;
       name = "Bibata-Modern-Ice";
