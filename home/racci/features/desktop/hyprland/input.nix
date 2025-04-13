@@ -11,137 +11,77 @@ let
     "exec"
     "${lib.getExe' pkgs.uwsm "uwsm-app"} -s a -- ${command}"
   ];
+
+  programShortcuts = {
+    "SUPER+T" = lib.getExe config.programs.alacritty.package;
+    "SUPER+F" = lib.getExe config.programs.firefox.package;
+    "SUPER+E" = lib.getExe pkgs.nautilus;
+  };
 in
 {
   wayland.windowManager.hyprland = {
     custom-settings = {
       bind =
-        [
-          {
-            keybind = [
-              "SUPER"
-              "ALT"
-              "RIGHT"
-            ];
-            action = [
-              "movecurrentworkspacetomonitor"
-              "+1"
-            ];
-          }
-          {
-            keybind = [
-              "SUPER"
-              "ALT"
-              "LEFT"
-            ];
-            action = [
-              "movecurrentworkspacetomonitor"
-              "-1"
-            ];
-          }
-          {
-            keybind = [
-              "SUPER"
-              "SHIFT"
-              "S"
-            ];
-            action = [
-              "movetoworkspace"
-              "special"
-            ];
-          }
-          {
-            keybind = [
-              "SUPER"
-              "S"
-            ];
-            action = [ "togglespecialworkspace" ];
-          }
-        ]
-        #region Directional focus & movement
-        ++ (builtins.concatLists (
-          builtins.map (key: [
-            {
-              keybind = [
-                "SUPER"
-                "SHIFT"
-                key
-              ];
-              action = [
-                "hy3:movewindow"
-                (lib.toLower (getDirectionChar key))
-              ];
-            }
-            {
-              keybind = [
-                "SUPER"
-                key
-              ];
-              action = [
-                "hy3:movefocus"
-                (lib.toLower (getDirectionChar key))
-              ];
-            }
-          ]) lib.mine.keys.directionalKeys
-        ))
+        {
+          "SUPER+ALT+RIGHT" = [
+            "movecurrentworkspacetomonitor"
+            "+1"
+          ];
+          "SUPER+ALT+LEFT" = [
+            "movecurrentworkspacetomonitor"
+            "-1"
+          ];
+
+          #region Graveyard
+          "SUPER+SHIFT+S" = [
+            "movetoworkspace"
+            "special"
+          ];
+          "SUPER+S" = [ "togglespecialworkspace" ];
+          #endregion
+        }
+        #region Focus & Movement
+        // (lib.pipe lib.mine.keys.directionalKeys [
+          (builtins.map (key: [
+            (lib.nameValuePair "SUPER+SHIFT+${key}" [
+              "hy3:movewindow"
+              (lib.toLower (getDirectionChar key))
+            ])
+            (lib.nameValuePair "SUPER+${key}" [
+              "hy3:movefocus"
+              (lib.toLower (getDirectionChar key))
+            ])
+          ]))
+          builtins.concatLists
+          lib.listToAttrs
+        ])
         #endregion
-        #region Exec commands
-        ++ [
-          {
-            keybind = [
-              "SUPER"
-              "T"
-            ];
-            action = uwsmExec (lib.getExe config.programs.alacritty.package);
-          }
-          {
-            keybind = [
-              "SUPER"
-              "F"
-            ];
-            action = uwsmExec (lib.getExe config.programs.firefox.package);
-          }
-          {
-            keybind = [
-              "SUPER"
-              "E"
-            ];
-            action = uwsmExec (lib.getExe pkgs.nautilus);
-          }
-        ]
+        #region Program Shortcuts
+        // (builtins.mapAttrs (_: uwsmExec) programShortcuts)
         #endregion
-        #region Workspace keybinds
-        ++ (builtins.concatLists (
-          builtins.genList (
+        #region Workspaces
+        // (lib.pipe 10 [
+          (builtins.genList (
             x:
             let
-              workspace = builtins.toString (x + 1 - ((x + 1) / 10) * 10);
+              workspaceId = builtins.toString (x + 1 - ((x + 1) / 10) * 10);
             in
-            [
-              {
-                keybind = [
-                  "SUPER"
-                  workspace
-                ];
-                action = [
-                  "workspace"
-                  (toString (x + 1))
-                ];
-              }
-              {
-                keybind = [
-                  "SUPER"
-                  "SHIFT"
-                  workspace
-                ];
-                action = [
-                  "movetoworkspace"
-                  (toString (x + 1))
-                ];
-              }
-            ]
-          ) 10
-        ))
+            {
+              "SUPER+${workspaceId}" = [
+                "workspace"
+                (builtins.toString (x + 1))
+              ];
+              "SUPER+SHIFT+${workspaceId}" = [
+                "movetoworkspace"
+                (builtins.toString (x + 1))
+              ];
+            }
+          ))
+          lib.mergeAttrsList
+        ])
+      #endregion
+      #region Media
+
       #endregion
       ;
     };

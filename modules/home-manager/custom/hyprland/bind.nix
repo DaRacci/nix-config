@@ -2,14 +2,18 @@
 with lib.types;
 let
   inherit (lib) mkOption;
-  cfg = config.wayland.windowManager.hyprland.custom-settings.bind;
+  cfg = config.wayland.windowManager.hyprland.custom-settings;
 
-  keybindOption = lib.mkOption {
-    type = lib.mine.keys.keyType;
+  mkBindKeyword = attr: "bind${lib.concatStrings (attr.value.modifiers or [ ])}";
 
-    description = "The key(s) to use for this action";
-    default = null;
-  };
+  keybindOption =
+    name:
+    lib.mkOption {
+      type = lib.mine.keys.keyType;
+      description = "The key(s) to use for this action";
+      default = lib.splitString "+" name;
+      readonly = true;
+    };
 
   bindModifiersOption = mkOption {
     type =
@@ -48,27 +52,47 @@ let
   };
 in
 {
-  options.wayland.windowManager.hyprland.custom-settings = {
+  options.wayland.windowManager.hyprland.custom-settings = with types; {
     bind = mkOption {
-      type =
-        with types;
-        (listOf (submodule {
-          options = {
-            keybind = keybindOption;
-            modifiers = bindModifiersOption;
-            action = actionOption;
-          };
-        }));
-      default = [ ];
-      description = "Binding rules.";
+      type = attrsOf (
+        either (listOf nonEmptyStr) (
+          submodule (
+            { name, ... }:
+            {
+              options = {
+                keybind = keybindOption name;
+                modifiers = bindModifiersOption;
+                action = actionOption;
+              };
+            }
+          )
+        )
+      );
+      apply =
+        attrs:
+        builtins.mapAttrs (
+          name: obj:
+          {
+            keybind = lib.splitString "+" name;
+          }
+          // (
+            if lib.isList obj then
+              {
+                action = obj;
+              }
+            else
+              obj
+          )
+        ) attrs;
+      default = { };
+      description = "Binding rules";
     };
   };
 
   config = {
-    wayland.windowManager.hyprland.settings = lib.pipe cfg [
-      (builtins.groupBy (
-        attr: "bind${lib.concatStrings (if attr.modifiers != null then attr.modifiers else [ ])}"
-      ))
+    wayland.windowManager.hyprland.settings = lib.pipe cfg.bind [
+      lib.attrsToList
+      (builtins.groupBy mkBindKeyword)
       (builtins.mapAttrs (
         _: list:
         builtins.map (
