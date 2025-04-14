@@ -8,6 +8,7 @@ in
     files = simpleImport ./files.nix;
     hardware = simpleImport ./hardware.nix;
     keys = simpleImport ./keys.nix;
+    hypr = simpleImport ./hypr.nix;
 
     mkPostgresRolePass = role: passPath: ''
       $PSQL -tA <<'EOF'

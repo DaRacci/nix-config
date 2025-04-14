@@ -17,7 +17,7 @@ rec {
   specialKeys = [
     "ENTER"
     "TAB"
-    "ESC"
+    "ESCAPE"
     "BACKSPACE"
     "DELETE"
     "INSERT"
@@ -107,8 +107,10 @@ rec {
   keyType =
     with lib.types;
     (oneOf [
-      (either str alphanumericKeysEnum)
-      (listOf (either str alphanumericKeysEnum))
+      str
+      alphanumericKeysEnum
+      (listOf str)
+      (listOf alphanumericKeysEnum)
     ])
     // {
       check =

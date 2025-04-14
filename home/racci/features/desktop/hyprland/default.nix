@@ -249,27 +249,6 @@ with lib;
         mod = "SUPER";
 
         bindings = {
-          submaps = {
-            resize = ''
-              bind=ALT,R,submap,resize
-              submap=resize
-
-              binde=,right,resizeactive,10 0
-              binde=,left,resizeactive,-10 0
-              binde=,up,resizeactive,0 -10
-              binde=,down,resizeactive,0 10
-
-              binde=,right,resizeactive,50 0
-              binde=,left,resizeactive,-50 0
-              binde=,up,resizeactive,0 -50
-              binde=,down,resizeactive,0 50
-
-              bind=,escape,submap,reset
-              bind=,enter,submap,reset
-              submap=reset
-            '';
-          };
-
           global = {
             audio =
               let
@@ -296,15 +275,9 @@ with lib;
               bindm = ${mod}, mouse:272, movewindow     # Move active window
               bindm = ${mod}, mouse:273, resizewindow   # Resize active window
             '';
-
-            session = ''
-              bind = CTRL_ALT,DELETE,exit           # Exit session
-            '';
           };
         };
       in
-      builtins.concatStringsSep "\n" (
-        builtins.attrValues bindings.global ++ builtins.attrValues bindings.submaps
-      );
+      builtins.concatStringsSep "\n" (builtins.attrValues bindings.global);
   };
 }

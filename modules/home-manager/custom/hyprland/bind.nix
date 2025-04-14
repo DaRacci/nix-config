@@ -4,7 +4,20 @@ let
   inherit (lib) mkOption;
   cfg = config.wayland.windowManager.hyprland.custom-settings;
 
-  mkBindKeyword = attr: "bind${lib.concatStrings (attr.value.modifiers or [ ])}";
+  mkBindKeyword = modifiers: "bind${lib.concatStrings modifiers}";
+
+  mkSubmapKeybindOption =
+    descMod:
+    lib.mkOption {
+      type = oneOf [
+        nonEmptyStr
+        lib.mine.keys.keyType
+        (listOf lib.mine.keys.keyType)
+      ];
+      description = "The keybind to ${descMod} the submap.";
+      default = null;
+      apply = keybind: if lib.isString keybind then lib.splitString "+" keybind else keybind;
+    };
 
   keybindOption =
     name:
@@ -12,47 +25,30 @@ let
       type = lib.mine.keys.keyType;
       description = "The key(s) to use for this action";
       default = lib.splitString "+" name;
-      readonly = true;
+      readOnly = true;
     };
-
-  bindModifiersOption = mkOption {
-    type =
-      let
-        mods = enum [
-          "l" # locked, will also work when an input inhibitor (e.g. a lockscreen) is active.
-          "r" # release, will trigger on release of a key.
-          "o" # longPress, will trigger on long press of a key.
-          "e" # repeat, will repeat when held.
-          "n" # non-consuming, key/mouse events will be passed to the active window in addition to triggering the dispatcher.
-          "m" # mouse, see below.
-          "t" # transparent, cannot be shadowed by other binds.
-          "i" # ignore mods, will ignore modifiers.
-          "s" # separate, will arbitrarily combine keys between each mod/key, see [Keysym combos](#keysym-combos) above.
-          "d" # has description, will allow you to write a description for your bind.
-          "p" # bypasses the app's requests to inhibit keybinds.
-        ];
-      in
-      nullOr (either mods (listOf mods));
-    default = null;
-    description = "The modifier keys to use for this action";
-    apply =
-      mods:
-      if mods == null then
-        null
-      else if lib.isList mods then
-        mods
-      else
-        [ mods ];
-  };
 
   actionOption = mkOption {
     type = either str (listOf str);
     description = "The action to perform when the keybind is triggered.";
     apply = action: if lib.isList action then action else [ action ];
   };
+
+  mkBind =
+    keybind: action:
+    let
+      keybindList = if builtins.isString keybind then [ keybind ] else keybind;
+      modifierKeys = lib.mine.keys.getModifiersFromList keybindList;
+      modifiers = builtins.concatStringsSep "+" modifierKeys;
+      joinedKeybind = builtins.concatStringsSep "," (
+        builtins.filter (k: !builtins.elem k modifierKeys) keybindList
+      );
+      joinedAction = builtins.concatStringsSep "," action;
+    in
+    "${modifiers}, ${joinedKeybind}, ${joinedAction}";
 in
 {
-  options.wayland.windowManager.hyprland.custom-settings = with types; {
+  options.wayland.windowManager.hyprland.custom-settings = with types; rec {
     bind = mkOption {
       type = attrsOf (
         either (listOf nonEmptyStr) (
@@ -61,7 +57,7 @@ in
             {
               options = {
                 keybind = keybindOption name;
-                modifiers = bindModifiersOption;
+                modifiers = lib.mine.hypr.optionTypes.bindModifier;
                 action = actionOption;
               };
             }
@@ -74,6 +70,7 @@ in
           name: obj:
           {
             keybind = lib.splitString "+" name;
+            modifiers = [ ];
           }
           // (
             if lib.isList obj then
@@ -87,27 +84,58 @@ in
       default = { };
       description = "Binding rules";
     };
+
+    submaps = mkOption {
+      type = attrsOf (submodule {
+        options = {
+          enter = mkSubmapKeybindOption "activate";
+          reset = mkSubmapKeybindOption "reset";
+          binds = bind;
+        };
+      });
+    };
   };
 
   config = {
-    wayland.windowManager.hyprland.settings = lib.pipe cfg.bind [
-      lib.attrsToList
-      (builtins.groupBy mkBindKeyword)
-      (builtins.mapAttrs (
-        _: list:
-        builtins.map (
-          bind:
-          let
-            modifierKeys = lib.mine.keys.getModifiersFromList bind.keybind;
-            modifiers = builtins.concatStringsSep "+" modifierKeys;
-            keybind = builtins.concatStringsSep "," (
-              builtins.filter (k: !builtins.elem k modifierKeys) bind.keybind
-            );
-            action = builtins.concatStringsSep "," bind.action;
-          in
-          "${modifiers}, ${keybind}, ${action}"
-        ) list
-      ))
-    ];
+    wayland.windowManager.hyprland = {
+      settings = lib.mine.attrsets.recursiveMergeAttrs [
+        (lib.pipe cfg.bind [
+          lib.attrsToList
+          (builtins.groupBy (v: mkBindKeyword v.value.modifiers))
+          (builtins.mapAttrs (_: list: builtins.map (v: mkBind v.value.keybind v.value.action) list))
+        ])
+      ];
+
+      extraConfig = lib.pipe cfg.submaps [
+        (lib.mapAttrsToList (
+          name: submap:
+          ''
+            bind=${
+              mkBind submap.enter [
+                "submap"
+                name
+              ]
+            }
+            submap=${name}
+          ''
+          + (lib.pipe submap.binds [
+            (lib.mapAttrsToList (name: bind: "${mkBindKeyword bind.modifiers}=${mkBind name bind.action}"))
+            (builtins.concatStringsSep "\n")
+          ])
+          + ''
+
+            bind=${
+              mkBind submap.reset [
+                "submap"
+                "reset"
+              ]
+            }
+            submap=reset
+          ''
+        ))
+        # builtins.concatLists
+        (builtins.concatStringsSep "\n")
+      ];
+    };
   };
 }

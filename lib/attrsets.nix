@@ -18,6 +18,16 @@
       lib.concatLists
     ];
 
+  getAttrNameByValue =
+    value: attrs:
+    let
+      attrNames = lib.attrNames (lib.filterAttrs (_: attr: attr == value) attrs);
+    in
+    if builtins.length attrNames == 1 then
+      builtins.head attrNames
+    else
+      throw "Multiple attributes found for value ${value}: ${builtins.toString attrNames}";
+
   /*
     Filter a list of attributes to only include those that exist in a given set of attributes.
 

@@ -6,6 +6,18 @@
 }:
 let
   getDirectionChar = key: builtins.elemAt (lib.stringToCharacters key) 0;
+  getDirectionXYInt =
+    key: int:
+    let
+      dirInt =
+        if key == "UP" || key == "RIGHT" then
+          -int
+        else if key == "DOWN" || key == "LEFT" then
+          int
+        else
+          throw "Invalid direction key provided, expected UP, DOWN, LEFT or RIGHT";
+    in
+    if key == "UP" || key == "DOWN" then "0 ${toString dirInt}" else "${toString dirInt} 0";
 
   uwsmExec = command: [
     "exec"
@@ -38,6 +50,27 @@ in
             "special"
           ];
           "SUPER+S" = [ "togglespecialworkspace" ];
+          #endregion
+
+          "CTRL+ALT+DELETE" = [ "exit" ];
+
+          #region Media
+          XF86AudioRaiseVolume = [
+            "exec"
+            "${lib.getExe' pkgs.wireplumber "wpctl"} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"
+          ];
+          XF86AudioLowerVolume = [
+            "exec"
+            "${lib.getExe' pkgs.wireplumber "wpctl"} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-"
+          ];
+          XF86AudioMute = [
+            "exec"
+            "${lib.getExe' pkgs.wireplumber "wpctl"} set-mute @DEFAULT_AUDIO_SINK@ toggle"
+          ];
+          XF86AudioMicMute = [
+            "exec"
+            "${lib.getExe' pkgs.wireplumber "wpctl"} set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
+          ];
           #endregion
         }
         #region Focus & Movement
@@ -84,6 +117,27 @@ in
 
       #endregion
       ;
+
+      submaps = {
+        resize = {
+          enter = "ALT+R";
+          reset = "ESCAPE";
+
+          binds = lib.pipe lib.mine.keys.directionalKeys [
+            (builtins.map (
+              key:
+              (lib.nameValuePair key {
+                modifiers = lib.mine.hypr.types.bindModifier.repeat;
+                action = [
+                  "resizeactive"
+                  (getDirectionXYInt key 50)
+                ];
+              })
+            ))
+            lib.listToAttrs
+          ];
+        };
+      };
     };
 
     settings = {
