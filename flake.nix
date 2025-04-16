@@ -85,7 +85,7 @@
 
             builders = mkBuilders false false;
             buildersWithCuda = mkBuilders true false;
-            buildersWithRocm = mkBuilders false true;
+            buildersWithRocm = mkBuilders false false;
             # TODO - Scan the folders for all the configurations and generate the list.
             configurations =
               builtins.mapAttrs
