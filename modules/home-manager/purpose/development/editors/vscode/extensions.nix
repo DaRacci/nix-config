@@ -49,8 +49,8 @@ merge
         "eamodio"."gitlens" = vscode-utils.extensionFromVscodeMarketplace {
           name = "gitlens";
           publisher = "eamodio";
-          version = "17.0.2";
-          sha256 = "0dhzghr46jqy4b3xy6ypcbb6x9iwspjzpq4zkca0ycfc7fzv179v";
+          version = "17.0.3";
+          sha256 = "1vf49mz20zmfpfkq325c762x34qz017s1gfm93rphmvqsbk4skcd";
 
         };
         "editorconfig"."editorconfig" = vscode-utils.extensionFromVscodeMarketplace {
@@ -84,8 +84,8 @@ merge
         "github"."copilot" = vscode-utils.extensionFromVscodeMarketplace {
           name = "copilot";
           publisher = "github";
-          version = "1.301.0";
-          sha256 = "18pnqrbp3y8jy1nxfkgfnvqm7v64spmraba0cx4wz6qbb5m9f8zr";
+          version = "1.303.0";
+          sha256 = "0ckb07l67dv0z3r8waksl7jh5b62r2c412mr5lfx4j98idv667f6";
 
         };
         "github"."copilot-chat" = vscode-utils.extensionFromVscodeMarketplace {
