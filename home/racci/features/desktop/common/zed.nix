@@ -4,8 +4,6 @@
     enable = true;
     installRemoteServer = true;
     extraPackages = with pkgs; [
-      nerd-fonts.jetbrains-mono
-
       # LSPs & other tools for zed
       autocorrect
       dockerfile-language-server-nodejs
