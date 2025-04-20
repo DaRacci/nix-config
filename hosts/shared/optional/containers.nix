@@ -11,6 +11,8 @@ with lib;
       enable = mkForce true;
       package = pkgs.docker;
 
+      daemon.settings.features.cdi = true;
+
       autoPrune = {
         enable = true;
         dates = "weekly";
