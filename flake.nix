@@ -115,7 +115,7 @@
 
                     isoFormat = "iso";
                     deviceType = "desktop";
-                    acceleration = "rocm";
+                    acceleration = "cuda";
                   };
 
                   winix = {

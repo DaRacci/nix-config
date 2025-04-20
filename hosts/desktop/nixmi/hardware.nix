@@ -11,7 +11,10 @@
   ];
 
   hardware = {
-    graphics.manufacturer = "amd";
+    graphics.manufacturer = [
+      "amd"
+      "nvidia"
+    ];
     backlight.enable = true;
     cooling.enable = true;
 

@@ -7,6 +7,8 @@
 let
   inherit (lib) mkIf mkEnableOption optionalString;
   cfg = config.hardware;
+
+  enableNvidia = cfg.graphics.hasNvidia && !config.host.device.isHeadless;
 in
 {
   options.hardware.backlight = {
@@ -25,7 +27,7 @@ in
     ];
 
     #region Nvidia Specific fix from https://discourse.nixos.org/t/ddcci-kernel-driver/22186/4
-    services.udev.extraRules = optionalString (cfg.graphics.manufacturer == "nvidia") ''
+    services.udev.extraRules = optionalString enableNvidia ''
       SUBSYSTEM=="i2c-dev", ACTION=="add",\
         ATTR{name}=="NVIDIA i2c adapter*",\
         TAG+="ddcci",\
@@ -33,7 +35,7 @@ in
         ENV{SYSTEMD_WANTS}+="ddcci@$kernel.service"
     '';
 
-    systemd.services."ddcci@" = mkIf (cfg.graphics.manufacturer == "nvidia") {
+    systemd.services."ddcci@" = mkIf enableNvidia {
       scriptArgs = "%i";
       script = ''
         echo Trying to attach ddcci to $1

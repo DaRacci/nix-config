@@ -6,6 +6,20 @@
 let
   inherit (lib) mkIf optionals mkOption;
   cfg = config.hardware;
+
+  testHas =
+    manufacturer:
+    if cfg.graphics.manufacturer == null then
+      false
+    else if builtins.isString cfg.graphics.manufacturer then
+      cfg.graphics.manufacturer == manufacturer
+    else if builtins.isList cfg.graphics.manufacturer then
+      builtins.elem manufacturer cfg.graphics.manufacturer
+    else
+      false;
+
+  hasNvidia = testHas "nvidia";
+  hasAmd = testHas "amd";
 in
 {
   imports = [
@@ -21,35 +35,49 @@ in
   options.hardware = {
     graphics = {
       manufacturer = mkOption {
-        type = lib.types.enum [
-          "unknown"
-          "amd"
-          "intel"
-          "nvidia"
-        ];
-        default = "unknown";
-        description = "The manufacturer of your GPU";
+        type =
+          with lib.types;
+          let
+            manufacturers = enum [
+              "amd"
+              "nvidia"
+            ];
+          in
+          nullOr (either manufacturers (listOf manufacturers));
+        default = null;
+        description = "The manufacturer of your GPU(s)";
+      };
+
+      hasNvidia = mkOption {
+        type = lib.types.bool;
+        default = hasNvidia;
+        readOnly = true;
+        description = "Whether or not the system has an Nvidia GPU";
+      };
+
+      hasAmd = mkOption {
+        type = lib.types.bool;
+        default = hasAmd;
+        readOnly = true;
+        description = "Whether or not the system has an AMD GPU";
       };
     };
   };
 
   config = {
     services.xserver.videoDrivers =
-      if (cfg.graphics.manufacturer == "nvidia") then
-        [ "nvidia" ]
-      else if (cfg.graphics.manufacturer == "amd") then
-        [ "amdgpu" ]
-      else
-        [
-          "modesetting"
-          "fbdev"
-        ];
+      (lib.optionals hasNvidia [ "nvidia" ])
+      ++ (lib.optionals hasAmd [ "amdgpu" ])
+      ++ (lib.optionals ((builtins.length cfg.graphics.manufacturer) == 0)) [
+        "modesetting"
+        "fbdev"
+      ];
 
     hardware = {
       graphics.enable = true;
 
-      nvidia-container-toolkit.enable = cfg.graphics.manufacturer == "nvidia";
-      nvidia = mkIf (cfg.graphics.manufacturer == "nvidia") {
+      nvidia-container-toolkit.enable = hasNvidia;
+      nvidia = mkIf hasNvidia {
         package = config.boot.kernelPackages.nvidiaPackages.beta;
         open = true;
         nvidiaSettings = true;
@@ -61,7 +89,7 @@ in
       };
     };
 
-    boot.kernelParams = optionals (cfg.graphics.manufacturer == "nvidia") [
+    boot.kernelParams = optionals hasNvidia [
       "nvidia.NVreg_EnableResizableBar=1"
     ];
   };
