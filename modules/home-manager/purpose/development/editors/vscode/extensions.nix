@@ -287,7 +287,7 @@ merge
             name = "rust-analyzer";
             publisher = "rust-lang";
             version = "0.3.2379";
-            sha256 = "0axvyy2rvi6agw0ngx12cn4h2hl03awdj3kjv9pndi8b6sdrhwqg";
+            sha256 = "1xllw962c15475wya0prsjy5yjni6zxfc51psghgjs7dz2vc18q0";
             arch = "linux-x64";
 
           };
@@ -321,7 +321,7 @@ merge
           name = "rust-analyzer";
           publisher = "rust-lang";
           version = "0.3.2379";
-          sha256 = "109chf48qbcaq90n92jl4irlpwj97cr3g2c8jf5yhfsdnwrd7ki7";
+          sha256 = "1xllw962c15475wya0prsjy5yjni6zxfc51psghgjs7dz2vc18q0";
           arch = "linux-arm64";
 
         };
@@ -363,7 +363,7 @@ merge
         name = "rust-analyzer";
         publisher = "rust-lang";
         version = "0.3.2379";
-        sha256 = "11vkcv0ys619avzfm0wxyqfw99b231i2dmqa99x7kncmn860a2ga";
+        sha256 = "1xllw962c15475wya0prsjy5yjni6zxfc51psghgjs7dz2vc18q0";
         arch = "darwin-x64";
 
       };
@@ -405,7 +405,7 @@ merge
       name = "rust-analyzer";
       publisher = "rust-lang";
       version = "0.3.2379";
-      sha256 = "13yrfij2dv9dwkyd77s1hlip2dkkpcykw3fqfrk297dr0f8vl5jy";
+      sha256 = "1xllw962c15475wya0prsjy5yjni6zxfc51psghgjs7dz2vc18q0";
       arch = "darwin-arm64";
 
     };
