@@ -12,5 +12,10 @@
     ];
   };
 
-  user.persistence.directories = [ ".config/obs-studio" ];
+  home.packages = with pkgs; [ handbrake ];
+
+  user.persistence.directories = [
+    ".config/obs-studio"
+    ".config/ghb"
+  ];
 }
