@@ -454,5 +454,9 @@ in
     [
       (commonArgs // { directory = "/var/lib/libvirt/qemu"; })
       (commonArgs // { directory = "/var/lib/libvirt/images"; })
+      {
+        directory = "/var/lib/swtpm-localca";
+        mode = "u=rwx,g=rw,o=";
+      }
     ];
 }
