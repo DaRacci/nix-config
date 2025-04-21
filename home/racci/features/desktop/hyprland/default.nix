@@ -48,6 +48,9 @@ with lib;
     }/bin/wlprop";
   };
 
+  # TODO add button to panel for toggling vigiland
+  home.packages = with pkgs; [ vigiland ];
+
   services.hyprpolkitagent.enable = true;
 
   wayland.windowManager.hyprland = {

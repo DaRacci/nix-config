@@ -310,6 +310,7 @@
 
     # Upsteam Programs
     lan-mouse.url = "github:feschber/lan-mouse";
+    vigiland.url = "github:jappie3/vigiland";
 
     # Utils & Helpers for usage inside the flake
     flake-parts = {

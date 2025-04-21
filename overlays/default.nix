@@ -14,6 +14,7 @@ let
     "nixd"
     "lact"
     "flaresolverr"
+    "vigiland"
   ];
 in
 {
