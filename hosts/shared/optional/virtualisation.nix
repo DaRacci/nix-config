@@ -1,6 +1,6 @@
 {
-  config,
   pkgs,
+  lib,
   ...
 }:
 
@@ -21,7 +21,11 @@ in
     nur-no-pkgs.repos.crtified.modules.virtualisation.nix
   ];
 
+  services.spice-autorandr.enable = true;
+
   virtualisation = {
+    spiceUSBRedirection.enable = true;
+
     vfio = {
       enable = true;
       disableEFIfb = true;
@@ -40,11 +44,6 @@ in
       };
     };
 
-    # libvird = {
-    #   enable = true;
-    #   swtpm.enable = true;
-    # };
-
     libvirtd = {
       enable = true;
       onBoot = "ignore";
@@ -53,9 +52,18 @@ in
       allowedBridges = [ "${bridgeInterface}" ];
 
       qemu = {
-        runAsRoot = true;
-        ovmf.enable = true;
+        runAsRoot = false;
         swtpm.enable = true;
+        ovmf = {
+          enable = true;
+          packages = [
+            (pkgs.OVMFFull.override {
+              secureBoot = true;
+              tpmSupport = true;
+              msVarsTemplate = true;
+            }).fd
+          ];
+        };
       };
 
       # deviceACL = [
@@ -63,16 +71,6 @@ in
       #   "/dev/kvm"
       #   "/dev/shm/looking-glass"
       # ];
-    };
-  };
-
-  environment.etc = {
-    "ovmf/edk2-x86_64-secure-code.fd" = {
-      source = config.virtualisation.libvirtd.qemu.package + "/share/qemu/edk2-x86_64-secure-code.fd";
-    };
-
-    "ovmf/edk2-i386-vars.fd" = {
-      source = config.virtualisation.libvirtd.qemu.package + "/share/qemu/edk2-i386-vars.fd";
     };
   };
 
@@ -426,11 +424,82 @@ in
                 "win11-gaming"
               ]
           );
+
+        qemuFirmware = pkgs.runCommandNoCC "qemu-firmware" { } ''
+          mkdir -p $out/share/firmware
+
+          cat <<EOF > $out/share/firmware/30-edk2-ovmf-x64-sb-enrolled.json
+          {
+            "description": "OVMF with SB+SMM, SB enabled, MS certs enrolled",
+            "interface-types": ["uefi"],
+            "mapping": {
+              "device": "flash",
+              "mode": "split",
+              "executable": {
+                "filename": "/run/libvirt/nix-ovmf/OVMF_CODE.ms.fd",
+                "format": "raw"
+              },
+              "nvram-template": {
+                "filename": "/run/libvirt/nix-ovmf/OVMF_VARS.ms.fd",
+                "format": "raw"
+              }
+            },
+            "targets": [
+              {
+                "architecture": "x86_64",
+                "machines": ["pc-q35-*"]
+              }
+            ],
+            "features": [
+              "acpi-s3",
+              "enrolled-keys",
+              "requires-smm",
+              "secure-boot",
+              "verbose-dynamic"
+            ],
+            "tags": []
+          }
+          EOF
+
+          cat <<EOF > $out/share/firmware/40-edk2-ovmf-x64-sb.json
+          {
+            "description": "OVMF with SB+SMM, SB enabled",
+            "interface-types": ["uefi"],
+            "mapping": {
+              "device": "flash",
+              "mode": "split",
+              "executable": {
+                "filename": "/run/libvirt/nix-ovmf/OVMF_CODE.fd",
+                "format": "raw"
+              },
+              "nvram-template": {
+                "filename": "/run/libvirt/nix-ovmf/OVMF_VARS.fd",
+                "format": "raw"
+              }
+            },
+            "targets": [
+              {
+                "architecture": "x86_64",
+                "machines": ["pc-q35-*"]
+              }
+            ],
+            "features": [
+              "acpi-s3",
+              "secure-boot",
+              "requires-smm",
+              "verbose-dynamic"
+            ],
+            "tags": []
+          }
+        '';
       in
-      [
-        "L+ /var/lib/libvirt/hooks/qemu - - - - ${pkgs.lib.getExe per-machine}"
-      ]
-      ++ machines;
+      lib.mkBefore (
+        [
+          "L+ /var/lib/libvirt/hooks/qemu - - - - ${pkgs.lib.getExe per-machine}"
+          "L+ /var/lib/qemu/firmware - - - - ${qemuFirmware}/share/firmware"
+        ]
+        ++ machines
+      );
   };
 
   environment = {
@@ -454,6 +523,14 @@ in
     [
       (commonArgs // { directory = "/var/lib/libvirt/qemu"; })
       (commonArgs // { directory = "/var/lib/libvirt/images"; })
+      {
+        directory = "/var/lib/libvirt/swtpm";
+        mode = "u=rwx,g=rx,o=rx";
+      }
+      {
+        directory = "/var/lib/libvirt/secrets";
+        mode = "u=rw,g=x,o=x";
+      }
       {
         directory = "/var/lib/swtpm-localca";
         mode = "u=rwx,g=rw,o=";
