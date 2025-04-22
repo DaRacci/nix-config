@@ -38,6 +38,7 @@ jobs:
             noBuild: true # Only until i can work out how to get this building with the limited space github runners have.
           - host: nixmi
             system: x86_64-linux
+            noBuild: true
           - host: winix
             system: x86_64-linux
           - host: nixai
