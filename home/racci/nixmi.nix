@@ -14,7 +14,9 @@
   user.persistence.enable = true;
 
   wayland.windowManager.hyprland.settings.monitor = [
-    "HDMI-A-1, 2560x1440@144, auto, 1" # Integrated Graphics
+    "DP-6,      2560x1440@165,  0x0,        1, vrr, 1" # Center Monitor
+    "DP-4,      2560x1440@144,  auto-left,  1, vrr, 1" # Left Monitor
+    "DP-5,      2560x1440@144,  auto-right, 1, vrr, 1" # Right Monitor
   ];
 
   purpose = {
@@ -52,6 +54,21 @@
     diy = {
       enable = true;
       printing.enable = true;
+    };
+  };
+
+  programs.looking-glass-client = {
+    enable = true;
+    settings = {
+      input = {
+        captureOnFocus = false;
+        autoCapture = false;
+        escapeKey = "KEY_END";
+      };
+
+      win = {
+        fullScreen = true;
+      };
     };
   };
 }
