@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   lib,
   ...
@@ -16,10 +17,15 @@ let
 in
 {
   imports = [
-    # inputs.nixvirt.nixosModules.default
-    # nur-no-pkgs.repos.crtified.modules.vfio
     nur-no-pkgs.repos.crtified.modules.virtualisation.nix
   ];
+
+  boot = {
+    kernelModules = [ config.kernelPackages.kvmfr ];
+    extraModprobeConfig = ''
+      options kvmfr static_size_mb=64
+    '';
+  };
 
   services.spice-autorandr.enable = true;
 
@@ -501,6 +507,10 @@ in
         ++ machines
       );
   };
+
+  services.udev.extraRules = ''
+    SUBSYSTEM=="kvmfr", OWNER="user", GROUP="kvm", MODE="0660";
+  '';
 
   environment = {
     sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
