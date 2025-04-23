@@ -37,14 +37,11 @@ in
       manufacturer = mkOption {
         type =
           with lib.types;
-          let
-            manufacturers = enum [
-              "amd"
-              "nvidia"
-            ];
-          in
-          nullOr (either manufacturers (listOf manufacturers));
-        default = null;
+          listOf (enum [
+            "amd"
+            "nvidia"
+          ]);
+        default = [ ];
         description = "The manufacturer of your GPU(s)";
       };
 
