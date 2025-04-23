@@ -1,4 +1,9 @@
-{ pkgs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 {
   home.packages = with pkgs; [
     nautilus
@@ -43,5 +48,8 @@
     NAUTILUS_4_EXTENSION_DIR = "${pkgs.nautilus-python}/lib/nautilus/extensions-4";
   };
 
-  user.persistence.files = [ ".config/gtk-3.0/bookmarks" ];
+  # Persist the bookmarks if the user doesn't declaratively set them
+  user.persistence.files = lib.optionals (!(config.xdg.configFile ? "gtk-3.0/bookmarks")) [
+    ".config/gtk-3.0/bookmarks"
+  ];
 }
