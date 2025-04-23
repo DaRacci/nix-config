@@ -34,8 +34,6 @@ in
       target = ".mozilla/firefox/${config.home.username}/chrome/firefox-ultima";
       source = inputs.firefox-ultima;
     };
-
-    packages = [ pkgs.varia ];
   };
 
   stylix.targets.firefox.profileNames = [ "racci" ];
@@ -96,10 +94,6 @@ in
               [
                 "violentmonkey"
                 "{aecec67f-0d10-4fa7-b7c7-609a2db280cf}"
-              ]
-              [
-                "varia-integrator"
-                "giantpinkrobots@protonmail.com"
               ]
 
               # Site Improvements
