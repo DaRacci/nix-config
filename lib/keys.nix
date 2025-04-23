@@ -78,6 +78,17 @@ rec {
     "PIPE" = "|";
   };
 
+  additionalKeys = [
+    "XF86AudioRaiseVolume"
+    "XF86AudioLowerVolume"
+    "XF86AudioMute"
+    "XF86AudioMicMute"
+    "XF86AudioPlay"
+    "XF86AudioPause"
+    "XF86AudioNext"
+    "XF86AudioPrev"
+  ];
+
   alphanumericKeys = lib.concatLists [
     (lib.mine.attrsets.getAttrsByValue (lib.range 65 90) asciiKeys) # A-Z
     (lib.mine.attrsets.getAttrsByValue (lib.range 97 122) asciiKeys) # a-z
@@ -87,6 +98,7 @@ rec {
     directionalKeys
     (builtins.attrNames symbols)
     functionKeys
+    additionalKeys
   ];
 
   getAlphanumericName =
