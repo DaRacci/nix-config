@@ -24,6 +24,10 @@
     };
   };
 
+  xdg.mimeApps.defaultApplications = {
+    "application/pdf" = "org.gnome.Papers.desktop";
+  };
+
   user.persistence.directories = [
     ".config/news-flash"
     ".config/evolution"
