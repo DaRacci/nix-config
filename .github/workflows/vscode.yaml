@@ -24,6 +24,9 @@ jobs:
       - name: Run nix4vscode
         run: nix develop --no-pure-eval --accept-flake-config --command "update-vscode"
 
+      - name: Build Extensions
+        run: ./utils/build-vscode-extensions.sh
+
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
