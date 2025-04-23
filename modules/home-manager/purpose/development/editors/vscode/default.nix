@@ -29,7 +29,6 @@ in
           plugins = (import ./extensions.nix) { inherit pkgs lib; };
 
           commonProfile = {
-            enableExtensionUpdateCheck = false;
             enableUpdateCheck = false;
 
             extensions = with plugins; [
@@ -129,7 +128,7 @@ in
               };
               #endregion
 
-              #region Language Formattings
+              #region Language Formatters
               "evenBetterToml.formatter.alignComments" = true;
               "evenBetterToml.formatter.alignEntries" = true;
               "evenBetterToml.formatter.allowedBlankLines" = 1;
@@ -234,7 +233,9 @@ in
             ];
         in
         {
-          default = mkProfile { };
+          default = mkProfile {
+            enableExtensionUpdateCheck = false;
+          };
 
           jvm = lib.mkIf cfg.jvm.enable (mkProfile {
 
