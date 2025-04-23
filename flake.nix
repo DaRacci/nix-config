@@ -294,6 +294,7 @@
                   actionlint.enable = true;
                   deadnix.enable = true;
                   nixfmt-rfc-style.enable = true;
+                  shellcheck.enable = true;
                   statix = {
                     enable = true;
                     settings.ignore = treefmt.settings.global.excludes;
@@ -308,7 +309,7 @@
     # Packages
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    # Upsteam Programs
+    # Upstream Programs
     lan-mouse.url = "github:feschber/lan-mouse";
     vigiland.url = "github:jappie3/vigiland";
 
