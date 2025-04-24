@@ -412,10 +412,10 @@ in
       '';
 
       search = {
-        default = "DuckDuckGo";
+        default = "ddg";
         force = true;
         order = [
-          "DuckDuckGo"
+          "ddg"
           "Nix Packages"
           "Nix Options"
           "NixOS Wiki"

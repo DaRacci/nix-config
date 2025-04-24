@@ -36,7 +36,7 @@ in
     };
 
     connector = lib.mkOption {
-      type = lib.types.string;
+      type = lib.types.str;
       example = "HDMI-A-1";
       description = ''
         The connector to use for the virtual display.

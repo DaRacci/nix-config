@@ -29,8 +29,6 @@ in
           plugins = (import ./extensions.nix) { inherit pkgs lib; };
 
           commonProfile = {
-            enableUpdateCheck = false;
-
             extensions = with plugins; [
               # Theme & Looks
               pkief.material-icon-theme
@@ -238,6 +236,7 @@ in
         in
         {
           default = mkProfile {
+            enableUpdateCheck = false;
             enableExtensionUpdateCheck = false;
           };
 
