@@ -42,6 +42,11 @@ in
     enable = true;
     package = pkgs.firefox;
 
+    languagePacks = [
+      "en-GB"
+      "en-US"
+    ];
+
     /**
       ---- POLICIES
       Check about:policies#documentation for options.
@@ -407,15 +412,16 @@ in
       '';
 
       search = {
-        default = "google";
+        default = "DuckDuckGo";
         force = true;
         order = [
-          "google"
+          "DuckDuckGo"
           "Nix Packages"
           "Nix Options"
           "NixOS Wiki"
           "Home Manager Options"
           "Proton DB"
+          "Wayback Machine"
         ];
         engines =
           let
@@ -475,6 +481,12 @@ in
               urls = [ { template = "https://github.com/NixOS/nixpkgs/issues?q={searchTerms}"; } ];
               icon = "https://nixos.org/logo/nixos-logo-only-hires.png";
               definedAliases = [ "@npi" ];
+            };
+
+            "Wayback Machine" = {
+              urls = [ { template = "https://web.archive.org/web/*/{searchTerms}"; } ];
+              icon = "https://archive.org/offshoot_assets/favicon.ico";
+              definedAliases = [ "@wbm" ];
             };
 
             "google".metaData.alias = "@g"; # builtin engines only support specifying one additional alias
