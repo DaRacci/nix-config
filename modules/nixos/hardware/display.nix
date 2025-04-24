@@ -24,7 +24,7 @@ in
 
     # TODO :: Validate that its formatted correctly
     resolution = lib.mkOption {
-      type = lib.types.string;
+      type = lib.types.str;
       example = "1920x1080";
       description = "Resolution of the virtual display";
     };

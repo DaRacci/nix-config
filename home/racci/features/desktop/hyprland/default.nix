@@ -117,6 +117,7 @@ with lib;
             { title = "^(Save As)(.*)$"; }
             { title = "^(Library)(.*)$"; }
             { title = "^(File Upload)(.*)$"; }
+            { title = "^(Open Firefox in Troubleshoot Mode?)$"; }
           ];
           rule = {
             center = true;
@@ -127,14 +128,18 @@ with lib;
           matcher.class = "(steam_app)";
           rule.immediate = true;
         }
+        # Panel Dropdown Menus
         {
-          matcher.class = "^(org.pulseaudio.pavucontrol)$";
+          matcher = [
+            { class = "^(org.pulseaudio.pavucontrol)$"; }
+            { class = "^(\.blueman-manager-wrapped)$"; }
+          ];
           rule = {
             float = true;
             size = "33%";
             move = {
-              x = "33%";
-              y = 50;
+              x = "63%";
+              y = 67; # This is the exact position top of the window below the floating panel.
             };
           };
         }
@@ -229,8 +234,8 @@ with lib;
         );
 
       misc = {
-        # vfr = true;
-        # vrr = true;
+        vfr = true;
+        vrr = true;
 
         animate_manual_resizes = false;
         animate_mouse_windowdragging = false;

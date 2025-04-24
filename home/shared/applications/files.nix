@@ -23,7 +23,7 @@
   ];
 
   xdg.mimeApps.defaultApplications = {
-    "inode/directory" = [ "nautilus.desktop;org.gnome.Nautilus.desktop" ];
+    "inode/directory" = [ "org.gnome.Nautilus.desktop" ];
   };
 
   dconf.settings = {
