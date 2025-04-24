@@ -201,6 +201,10 @@ in
                   };
                 };
               };
+
+              "projectManager.git.baseFolders" = [
+                "${config.home.homeDirectory}/Projects"
+              ];
               #endregion
 
               #region Security
