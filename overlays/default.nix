@@ -15,6 +15,7 @@ let
     "lact"
     "flaresolverr"
     "vigiland"
+    "stl-thumb"
   ];
 in
 {
@@ -50,10 +51,6 @@ in
         substituteInPlace steamtinkerlaunch --replace 'PROGCMD="''${0##*/}"' 'PROGCMD="steamtinkerlaunch"'
         substituteInPlace steamtinkerlaunch --replace 'YAD=yad' 'YAD=${final.yad}'
       '';
-    });
-
-    lact = prev.lact.overrideAttrs (oldAttrs: {
-      nativeBuildInputs = oldAttrs.nativeBuildInputs ++ [ final.autoAddDriverRunpath ];
     });
 
     orca-slicer = prev.orca-slicer.overrideAttrs (oldAttrs: {

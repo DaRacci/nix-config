@@ -962,11 +962,11 @@
     },
     "lact": {
       "locked": {
-        "lastModified": 1742569496,
-        "narHash": "sha256-CzFWkqYw+aimkGw5R7nGkYBGo1WIG53ctBPmdeD1k90=",
+        "lastModified": 1745346107,
+        "narHash": "sha256-+iUn89qrKqBXD6vd8TvFJPwzuZ9iiV3FzX7I/gG0FLQ=",
         "owner": "cything",
         "repo": "nixpkgs",
-        "rev": "8f36e4747d12d72fcb7159a9938e1e6774f59e04",
+        "rev": "21846b25c4e56f24c70db76993ca66236449a5ae",
         "type": "github"
       },
       "original": {
@@ -1678,6 +1678,7 @@
         "nixvirt": "nixvirt",
         "protonup-rs": "protonup-rs",
         "sops-nix": "sops-nix",
+        "stl-thumb": "stl-thumb",
         "stylix": "stylix",
         "tinted-theming": "tinted-theming",
         "treefmt": "treefmt",
@@ -1763,6 +1764,21 @@
       "original": {
         "owner": "Mic92",
         "repo": "sops-nix",
+        "type": "github"
+      }
+    },
+    "stl-thumb": {
+      "locked": {
+        "lastModified": 1737418440,
+        "narHash": "sha256-krfrAKlzokMqMtXwgLTbB3aTTsnExdVOgw6Yuw8A0AQ=",
+        "owner": "SyntaxualSugar",
+        "repo": "stl-thumb_0.5.0",
+        "rev": "257eef70a24518fc9f3e369574fa4a966c59a29e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "SyntaxualSugar",
+        "repo": "stl-thumb_0.5.0",
         "type": "github"
       }
     },

@@ -9,7 +9,11 @@
     nautilus
     nautilus-python
     nautilus-open-any-terminal
+
+    # Thumbnailers
     ffmpegthumbnailer
+    nufraw-thumbnailer
+    stl-thumb
 
     collision
     baobab # Disk usage analyzer

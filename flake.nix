@@ -309,9 +309,14 @@
     # Packages
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    # Upstream Programs
+    # Upstream & PR Programs
     lan-mouse.url = "github:feschber/lan-mouse";
     vigiland.url = "github:jappie3/vigiland";
+    protonup-rs.url = "github:liperium/nixpkgs/protonuprs-init";
+    lact-module.url = "github:poperigby/nixpkgs/lact-module";
+    lact.url = "github:cything/nixpkgs/lact";
+    flaresolverr.url = "github:paveloom/nixpkgs/flaresolverr";
+    stl-thumb.url = "github:SyntaxualSugar/stl-thumb_0.5.0";
 
     # Utils & Helpers for usage inside the flake
     flake-parts = {
@@ -448,11 +453,5 @@
       url = "github:tinted-theming/schemes";
       flake = false;
     };
-
-    # Packages from PRs
-    protonup-rs.url = "github:liperium/nixpkgs/protonuprs-init";
-    lact-module.url = "github:poperigby/nixpkgs/lact-module";
-    lact.url = "github:cything/nixpkgs/lact";
-    flaresolverr.url = "github:paveloom/nixpkgs/flaresolverr";
   };
 }
