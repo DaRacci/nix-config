@@ -36,16 +36,6 @@
         };
       };
     };
-
-    display = {
-      virtual = {
-        enable = true;
-        resolution = "2048x2732";
-        refreshRate = 120;
-        edidBinary = ./ipad-pro-edid.bin;
-        connector = "HDMI-A-1";
-      };
-    };
   };
 
   boot = rec {

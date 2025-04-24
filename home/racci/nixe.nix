@@ -16,8 +16,6 @@
     "DP-2,      2560x1440@165,  0x0,        1, vrr, 1" # Center Monitor
     "DP-1,      2560x1440@144,  auto-left,  1, vrr, 1" # Left Monitor
     "DP-3,      2560x1440@144,  auto-right, 1, vrr, 1" # Right Monitor
-    "HDMI-A-1,  2732x2048@90,   auto-right, 2"
-    "HDMI-A-1,  disable" # Disable Virtual Monitor, will be managed by sunshine.
   ];
 
   purpose = {
