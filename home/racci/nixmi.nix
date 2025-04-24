@@ -21,6 +21,8 @@
     "HDMI-A-2,  disable" # Disable Virtual Monitor, will be managed by sunshine.
   ];
 
+  custom.audio.disabledDevices = [ "alsa_card.pci-0000_01_00.1" ];
+
   purpose = {
     enable = true;
 

@@ -28,4 +28,17 @@
     transmission_4-gtk
     kooha
   ];
+
+  custom = {
+    audio = {
+      disabledDevices = [
+        # Disable monitoring line
+        "alsa_output.usb-Focusrite_Scarlett_Solo_4th_Gen_S1VXX1F360DBE3-00.analog-stereo"
+
+        # Disable things that really shouldn't have built-in audio devices
+        "alsa_card.usb-046d_HD_Pro_Webcam_C920_AC8BDE4F-02"
+        "alsa_card.usb-Sony_Interactive_Entertainment_Wireless_Controller-00"
+      ];
+    };
+  };
 }
