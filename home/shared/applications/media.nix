@@ -8,7 +8,6 @@
     # Audio
     spotify
     decibels
-    mousai
 
     # Image
     krita # Editor
@@ -16,13 +15,11 @@
     gnome-obfuscate
 
     # Video
-    clapper # Player
     footage
-    miru # Anime :)
     parabolic
 
     # Misc
-    switcheroo # Converter
+    # switcheroo # Converter
     # identity # Comparer (FIXME :: currently conflicts with mesa-demos?????)
   ];
 
@@ -117,10 +114,5 @@
 
   user.persistence.directories = [
     ".config/spotify"
-    ".config/Miru"
-
-    ".local/share/spotube"
-    ".local/share/oss.krtirtho.spotube"
-    ".cache/oss.krtirtho.spotube/cached_tracks"
   ];
 }
