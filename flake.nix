@@ -377,7 +377,10 @@
       };
     };
     stylix.url = "github:danth/stylix";
-    nix-alien.url = "github:thiagokokada/nix-alien";
+    nix-alien = {
+      url = "github:thiagokokada/nix-alien";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     treefmt.url = "github:numtide/treefmt-nix";
     angrr.url = "github:linyinfeng/angrr";
     nixput = {
