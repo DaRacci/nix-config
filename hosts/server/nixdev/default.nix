@@ -1,7 +1,5 @@
-{ modulesPath, config, ... }:
+{ config, ... }:
 {
-  imports = [ "${modulesPath}/virtualisation/proxmox-lxc.nix" ];
-
   sops.secrets = {
     GITHUB_TOKEN = {
       owner = config.users.users.runner.name;

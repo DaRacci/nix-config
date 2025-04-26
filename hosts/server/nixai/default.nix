@@ -1,12 +1,9 @@
 {
-  modulesPath,
   config,
   lib,
   ...
 }:
 {
-  imports = [ "${modulesPath}/virtualisation/proxmox-lxc.nix" ];
-
   sops.secrets = {
     SEARXNG_ENVIRONMENT = {
       owner = config.users.users."searx".name;

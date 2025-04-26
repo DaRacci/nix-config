@@ -1,16 +1,11 @@
 {
-  modulesPath,
   inputs,
   config,
   lib,
   ...
 }:
 {
-  imports = [
-    "${modulesPath}/virtualisation/proxmox-lxc.nix"
-
-    inputs.nixarr.nixosModules.default
-  ];
+  imports = [ inputs.nixarr.nixosModules.default ];
 
   sops.secrets.wireguard = {
     format = "binary";

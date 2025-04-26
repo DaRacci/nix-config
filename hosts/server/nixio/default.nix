@@ -2,7 +2,6 @@
 {
   flake,
   config,
-  modulesPath,
   lib,
   ...
 }:
@@ -63,7 +62,6 @@ let
 in
 {
   imports = [
-    "${modulesPath}/virtualisation/proxmox-lxc.nix"
     (importFile ./adguard.nix)
     (importFile ./database.nix)
     (importFile ./proxy.nix)

@@ -1,11 +1,14 @@
 {
   flake,
+  modulesPath,
   config,
   lib,
   ...
 }:
 {
   imports = [
+    "${modulesPath}/virtualisation/proxmox-lxc.nix"
+
     "${flake}/hosts/shared/optional/tailscale.nix"
     ./uptime.nix
   ];

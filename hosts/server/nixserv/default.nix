@@ -3,12 +3,9 @@
   config,
   pkgs,
   lib,
-  modulesPath,
   ...
 }:
 {
-  imports = [ "${modulesPath}/virtualisation/proxmox-lxc.nix" ];
-
   sops.secrets = {
     ATTIC_ENVIRONMENT = {
       owner = config.services.atticd.user;

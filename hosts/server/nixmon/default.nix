@@ -1,7 +1,4 @@
-{ modulesPath, ... }:
-{
-  imports = [ "${modulesPath}/virtualisation/proxmox-lxc.nix" ];
-
+_: {
   sops.secrets = { };
 
   services = {
