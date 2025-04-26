@@ -26,32 +26,31 @@
 
   programs.hyprpanel = {
     enable = true;
-    theme = "tokyo_night";
 
     hyprland.enable = true;
     overwrite.enable = true;
 
-    layout = {
-      "bar.layouts" = {
-        "*" = {
-          left = [
-            "dashboard"
-            "workspaces"
-            "windowtitle"
-          ];
-          middle = [ "media" ];
-          right = [
-            "volume"
-            "bluetooth"
-            "systray"
-            "clock"
-            "notifications"
-          ];
+    settings = {
+      layout = {
+        "bar.layouts" = {
+          "*" = {
+            left = [
+              "dashboard"
+              "workspaces"
+              "windowtitle"
+            ];
+            middle = [ "media" ];
+            right = [
+              "volume"
+              "bluetooth"
+              "systray"
+              "clock"
+              "notifications"
+            ];
+          };
         };
       };
-    };
 
-    settings = {
       bar = {
         launcher.autoDetectIcon = true;
         media.show_active_only = true;
@@ -99,6 +98,7 @@
       };
 
       theme = {
+        name = "tokyo_night";
         font = {
           name = "Ubuntu Nerd Font";
           size = "1.1rem";
