@@ -336,16 +336,16 @@
     "firefox-ultima": {
       "flake": false,
       "locked": {
-        "lastModified": 1739085807,
-        "narHash": "sha256-fGTo0uWGFfRMJAQWzvchv3FnZxnGFGDx4kA0dfi1mSc=",
+        "lastModified": 1743195756,
+        "narHash": "sha256-qYROFUVuezMhRkoYGW+7RINDrKrUyBUzJ5BTur4uhFA=",
         "owner": "soulhotel",
         "repo": "FF-ULTIMA",
-        "rev": "d2234a5491aadff0bef8ca24f9bd72a732f830e0",
+        "rev": "a37626e12b014c6432f63c263239d57ed016c866",
         "type": "github"
       },
       "original": {
         "owner": "soulhotel",
-        "ref": "1.9.8.5",
+        "ref": "1.9.9",
         "repo": "FF-ULTIMA",
         "type": "github"
       }
