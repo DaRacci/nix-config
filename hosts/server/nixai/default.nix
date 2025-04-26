@@ -18,7 +18,7 @@
       host = "0.0.0.0";
       openFirewall = true;
       environment = {
-        OLLAMA_BASE_URLS = "http://nixe:11434";
+        OLLAMA_BASE_URLS = "http://nixmi:11434";
 
         PDF_EXTRACT_IMAGES = "true";
         ENABLE_RAG_LOCAL_WEB_FETCH = "true";
