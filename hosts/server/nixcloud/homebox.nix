@@ -28,7 +28,7 @@
       };
     };
 
-    caddy.virtualHosts."photos".extraConfig = ''
+    caddy.virtualHosts.homebox.extraConfig = ''
       reverse_proxy http://${homebox.settings.HBOX_WEB_HOST}:${toString homebox.settings.HBOX_WEB_PORT}
     '';
 
