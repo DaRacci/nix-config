@@ -38,7 +38,7 @@ jobs:
             noBuild: true # Only until i can work out how to get this building with the limited space github runners have.
           - host: nixmi
             system: x86_64-linux
-            noBuild: true
+            extraSpace: true
           - host: winix
             system: x86_64-linux
           - host: nixai
@@ -65,11 +65,27 @@ jobs:
           ref: ${{ inputs.branch }}
 
       - name: Free Disk Space
+        if: matrix.extraSpace == true
         uses: jlumbroso/free-disk-space@main
-        continue-on-error: true
         with:
           swap-storage: true
           tool-cache: true
+      - name: Create Dir for Mounting more Disk Space ❄
+        if: matrix.extraSpace == true
+        run: sudo mkdir /nix
+      - name: Maximize Disk Space
+        if: matrix.extraSpace == true
+        uses: easimon/maximize-build-space@v8
+        with:
+          build-mount-path: /nix
+          remove-dotnet: true
+          remove-android: true
+          remove-haskell: true
+          remove-codeql: true
+          remove-docker-images: true
+          temp-reserve-mb: 100
+          swap-size-mb: 4096
+          root-reserve-mb: 1024
 
       - uses: ./.github/actions/setup-nix
         with:
