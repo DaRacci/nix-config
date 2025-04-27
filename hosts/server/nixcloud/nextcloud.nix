@@ -61,7 +61,6 @@ in
           calendar
           groupfolders
           impersonate
-          maps
           notes
           notify_push
           spreed
