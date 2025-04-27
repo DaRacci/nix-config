@@ -49,6 +49,7 @@ in
               };
 
               password = mkOption {
+                default = { };
                 type = submodule {
                   options = {
                     path = mkOption {
@@ -84,7 +85,7 @@ in
       builtins.attrValues
       (map (
         database:
-        lib.nameValuePair "POSTGRES/${lib.toUpper database.database}" (
+        lib.nameValuePair "POSTGRES/${lib.toUpper database.database}_PASSWORD" (
           lib.optionalAttrs (database.password.owner != null) {
             inherit (database.password) owner;
           }

@@ -73,7 +73,7 @@ in
     };
   };
 
-  config = rec {
+  config = {
     server.dashboard.items = lib.pipe cfg.virtualHosts [
       (builtins.mapAttrs (
         name: cfg: {
@@ -112,7 +112,7 @@ in
     };
 
     security.acme.certs = lib.mkIf isNixio (
-      lib.pipe services.caddy.virtualHosts [
+      lib.pipe config.services.caddy.virtualHosts [
         builtins.attrNames
         (builtins.filter (name: lib.strings.hasSuffix ".${cfg.domain}" name))
         (map (name: lib.nameValuePair name { }))

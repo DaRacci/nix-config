@@ -16,9 +16,11 @@ in
     ATTIC_ENVIRONMENT = atticOwned;
   };
 
-  server.database.postgres = {
-    attic = {
-      password = atticOwned;
+  server = {
+    database.postgres = {
+      attic = {
+        password = atticOwned;
+      };
     };
 
     proxy.virtualHosts = {

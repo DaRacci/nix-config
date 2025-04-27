@@ -45,7 +45,7 @@
           HBOX_DATABASE_HOST = db.host;
           HBOX_DATABASE_PORT = db.port;
           HBOX_DATABASE_USERNAME = db.user;
-          HBOX_DATABASE_DATABASE = db.name;
+          HBOX_DATABASE_DATABASE = db.database;
         };
     };
   };

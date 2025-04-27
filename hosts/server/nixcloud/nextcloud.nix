@@ -99,7 +99,7 @@ in
           dbuser = db.user;
           dbname = db.database;
           dbhost = db.host;
-          dbpassFile = db.passwordFile;
+          dbpassFile = db.password.path;
         };
 
       settings = {
