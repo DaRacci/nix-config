@@ -39,9 +39,6 @@
   };
 
   server = {
-    database.postgres = {
-      n8n = { };
-    };
 
     proxy.virtualHosts = {
       coder.extraConfig = ''
