@@ -47,10 +47,6 @@
       coder.extraConfig = ''
         reverse_proxy http://${config.services.coder.listenAddress}
       '';
-
-      n8n.extraConfig = ''
-        reverse_proxy http://${config.services.n8n.settings.host}:${config.services.n8n.settings.port}
-      '';
     };
   };
 
