@@ -49,6 +49,13 @@ in
     services.dashy.settings = {
       sections = lib.pipe serverConfigurations [
         (builtins.map (config: config.server.dashboard))
+        (builtins.map (
+          config:
+          config
+          // {
+            items = builtins.attrValues config.items;
+          }
+        ))
       ];
     };
   };
