@@ -109,7 +109,6 @@
             api_key = "!env_var RADARR_API_KEY";
 
             include = [
-              { template = "radarr-quality-definition-anime"; }
               { template = "radarr-quality-profile-anime"; }
               { template = "radarr-custom-formats-anime"; }
             ];
