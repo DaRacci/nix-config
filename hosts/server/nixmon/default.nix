@@ -1,6 +1,12 @@
 _: {
   sops.secrets = { };
 
+  server.proxy.virtualHosts = {
+    uptime.extraConfig = ''
+      reverse_proxy http://localhost:3001
+    '';
+  };
+
   services = {
     uptime-kuma = {
       enable = true;
@@ -16,12 +22,6 @@ _: {
     #     bind = "";
     #   };
     # };
-
-    caddy.virtualHosts = {
-      uptime.extraConfig = ''
-        reverse_proxy http://localhost:3001
-      '';
-    };
   };
 
   networking.firewall.allowedTCPPorts = [ 3001 ];

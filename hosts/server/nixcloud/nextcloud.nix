@@ -34,9 +34,17 @@ in
     "NEXTCLOUD/S3FS_AUTH" = ncOwned;
   };
 
-  server.database.postgres = {
-    nextcloud = {
-      password = ncOwned;
+  server = {
+    database.postgres = {
+      nextcloud = {
+        password = ncOwned;
+      };
+    };
+
+    proxy.virtualHosts = {
+      "nc".extraConfig = ''
+        reverse_proxy http://localhost:80
+      '';
     };
   };
 
@@ -191,10 +199,6 @@ in
       port = 9200;
       plugins = [ pkgs.elasticsearchPlugins.ingest-attachment ];
     };
-
-    caddy.virtualHosts."nc".extraConfig = ''
-      reverse_proxy http://localhost:80
-    '';
 
     passSecretService.enable = true;
   };

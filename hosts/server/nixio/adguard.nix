@@ -1,4 +1,4 @@
-{ subnets, mkVirtualHost, ... }:
+{ subnets, ... }:
 { config, lib, ... }:
 {
   systemd.services.adguardhome = {
@@ -174,15 +174,13 @@
           ];
       };
     };
+  };
 
-    caddy.virtualHosts = lib.listToAttrs [
-      (mkVirtualHost "adguard" {
-        # TODO - DNS over HTTPS
-        extraConfig = ''
-          reverse_proxy http://${config.services.adguardhome.host}:${toString config.services.adguardhome.port}
-        '';
-      })
-    ];
+  server.proxy.virtualHosts = {
+    # TODO - DNS over HTTPS
+    adguard.extraConfig = ''
+      reverse_proxy http://${config.services.adguardhome.host}:${toString config.services.adguardhome.port}
+    '';
   };
 
   networking.firewall =

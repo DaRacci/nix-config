@@ -20,6 +20,19 @@ in
     attic = {
       password = atticOwned;
     };
+
+    proxy.virtualHosts = {
+      cache.extraConfig = ''
+        encode {
+          zstd
+          match {
+            header Content-Type application/x-nix-archive
+          }
+        }
+
+        reverse_proxy http://127.0.0.1:8080
+      '';
+    };
   };
 
   environment.systemPackages = with pkgs; [ attic-client ];
@@ -95,19 +108,6 @@ in
     # TODO - Migrate to nixio instance
     postgresql = {
       enable = true;
-    };
-
-    caddy.virtualHosts = {
-      cache.extraConfig = ''
-        encode {
-          zstd
-          match {
-            header Content-Type application/x-nix-archive
-          }
-        }
-
-        reverse_proxy http://127.0.0.1:8080
-      '';
     };
   };
 

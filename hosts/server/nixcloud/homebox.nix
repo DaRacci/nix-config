@@ -7,16 +7,28 @@
     };
   };
 
-  server.database.postgres = {
-    homebox = {
-      password = {
-        owner = config.users.users.homebox.name;
-        inherit (config.users.users.homebox) group;
+  server = {
+    database.postgres = {
+      homebox = {
+        password = {
+          owner = config.users.users.homebox.name;
+          inherit (config.users.users.homebox) group;
+        };
       };
+    };
+
+    proxy.virtualHosts = {
+      homebox.extraConfig =
+        let
+          cfg = config.services.homebox.settings;
+        in
+        ''
+          reverse_proxy http://${cfg.HBOX_WEB_HOST}:${toString cfg.HBOX_WEB_PORT}
+        '';
     };
   };
 
-  services = rec {
+  services = {
     homebox = {
       enable = true;
       settings =
@@ -36,10 +48,6 @@
           HBOX_DATABASE_DATABASE = db.name;
         };
     };
-
-    caddy.virtualHosts.homebox.extraConfig = ''
-      reverse_proxy http://${homebox.settings.HBOX_WEB_HOST}:${toString homebox.settings.HBOX_WEB_PORT}
-    '';
   };
 
   systemd.services = {

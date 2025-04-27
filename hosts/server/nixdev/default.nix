@@ -19,7 +19,7 @@
     };
   };
 
-  services = rec {
+  services = {
     coder = {
       enable = true;
       accessUrl = "https://coder.racci.dev";
@@ -36,9 +36,22 @@
       };
     };
 
-    caddy.virtualHosts.coder.extraConfig = ''
-      reverse_proxy http://${coder.listenAddress}
-    '';
+  };
+
+  server = {
+    database.postgres = {
+      n8n = { };
+    };
+
+    proxy.virtualHosts = {
+      coder.extraConfig = ''
+        reverse_proxy http://${config.services.coder.listenAddress}
+      '';
+
+      n8n.extraConfig = ''
+        reverse_proxy http://${config.services.n8n.settings.host}:${config.services.n8n.settings.port}
+      '';
+    };
   };
 
   users.extraUsers.coder = {

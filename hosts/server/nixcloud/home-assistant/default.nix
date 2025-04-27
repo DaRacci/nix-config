@@ -12,6 +12,12 @@
     restartUnits = [ "home-assistant.service" ];
   };
 
+  server.proxy.virtualHosts = {
+    hassio.extraConfig = ''
+      reverse_proxy http://localhost:8123
+    '';
+  };
+
   services = {
     home-assistant = {
       enable = true;
@@ -29,9 +35,5 @@
         history = { };
       };
     };
-
-    caddy.virtualHosts.hassio.extraConfig = ''
-      reverse_proxy http://localhost:8123
-    '';
   };
 }

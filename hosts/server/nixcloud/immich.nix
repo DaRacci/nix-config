@@ -15,9 +15,21 @@ in
     "IMMICH/ENV" = immichOwned;
   };
 
-  server.database.postgres = {
-    immich = {
-      password = immichOwned;
+  server = {
+    database.postgres = {
+      immich = {
+        password = immichOwned;
+      };
+    };
+
+    proxy.virtualHosts = {
+      "photos".extraConfig =
+        let
+          cfg = config.services.immich;
+        in
+        ''
+          reverse_proxy http://${cfg.host}:${toString cfg.port}
+        '';
     };
   };
 
@@ -45,14 +57,6 @@ in
         enable = true;
       };
     };
-
-    caddy.virtualHosts."photos".extraConfig =
-      let
-        cfg = config.services.immich;
-      in
-      ''
-        reverse_proxy http://${cfg.host}:${toString cfg.port}
-      '';
   };
 
   networking = {

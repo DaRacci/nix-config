@@ -12,7 +12,7 @@
   };
 
   services = {
-    # TODO - Add fallback ollama for when nixe is down
+    # TODO - Add fallback ollama for when nixmi is down
     open-webui = {
       enable = true;
       host = "0.0.0.0";
@@ -644,15 +644,15 @@
       };
       environmentFile = config.sops.secrets.SEARXNG_ENVIRONMENT.path;
     };
+  };
 
-    caddy.virtualHosts = {
-      "ai".extraConfig = ''
-        reverse_proxy http://${config.services.open-webui.host}:${toString config.services.open-webui.port}
-      '';
-      "search".extraConfig = ''
-        reverse_proxy http://${config.services.searx.settings.server.bind_address}:${toString config.services.searx.settings.server.port}
-      '';
-    };
+  server.proxy.virtualHosts = {
+    ai.extraConfig = ''
+      reverse_proxy http://${config.services.open-webui.host}:${toString config.services.open-webui.port}
+    '';
+    search.extraConfig = ''
+      reverse_proxy http://${config.services.searx.settings.server.bind_address}:${toString config.services.searx.settings.server.port}
+    '';
   };
 
   networking.firewall.allowedTCPPorts = [ config.services.searx.settings.server.port ];

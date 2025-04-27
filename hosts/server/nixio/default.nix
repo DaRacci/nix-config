@@ -48,17 +48,7 @@ let
       ++ pipe
     );
 
-  mkVirtualHost =
-    name: config:
-    lib.nameValuePair "${name}.racci.dev" (
-      {
-        hostName = "${name}.racci.dev";
-        useACMEHost = "${name}.racci.dev";
-      }
-      // config
-    );
-
-  importFile = path: import path { inherit subnets fromAllServers mkVirtualHost; };
+  importFile = path: import path { inherit subnets fromAllServers; };
 in
 {
   imports = [
