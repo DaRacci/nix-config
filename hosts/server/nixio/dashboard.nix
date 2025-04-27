@@ -29,14 +29,10 @@
         };
 
         pageInfo = {
-
+          title = "Dashboard";
         };
 
         sections = [ ];
-
-        layout = {
-
-        };
       };
     };
   };
