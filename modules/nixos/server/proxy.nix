@@ -10,7 +10,7 @@
   ...
 }:
 let
-  inherit (lib) mkOption types;
+  inherit (lib) mkOption mkDefault types;
   cfg = config.server.proxy;
 
   serverConfigurations = lib.trivial.pipe flake.nixosConfigurations [
@@ -73,8 +73,18 @@ in
     };
   };
 
-  config = lib.mkIf isNixio rec {
-    services.caddy = {
+  config = rec {
+    server.dashboard.items = lib.pipe cfg.virtualHosts [
+      (builtins.mapAttrs (
+        name: cfg: {
+          title = mkDefault name;
+          url = mkDefault "https://${cfg.baseUrl}/";
+          icon = mkDefault "auto-fetched";
+        }
+      ))
+    ];
+
+    services.caddy = lib.mkIf isNixio {
       # Aggregate virtualHosts & Updates references to localhost in extraConfig & changes the attr name to the baseUrl.
       virtualHosts = lib.pipe serverConfigurations [
         (builtins.map (
@@ -101,11 +111,13 @@ in
       ];
     };
 
-    security.acme.certs = lib.pipe services.caddy.virtualHosts [
-      builtins.attrNames
-      (builtins.filter (name: lib.strings.hasSuffix ".${cfg.domain}" name))
-      (map (name: lib.nameValuePair name { }))
-      builtins.listToAttrs
-    ];
+    security.acme.certs = lib.mkIf isNixio (
+      lib.pipe services.caddy.virtualHosts [
+        builtins.attrNames
+        (builtins.filter (name: lib.strings.hasSuffix ".${cfg.domain}" name))
+        (map (name: lib.nameValuePair name { }))
+        builtins.listToAttrs
+      ]
+    );
   };
 }

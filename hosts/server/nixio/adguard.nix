@@ -1,6 +1,21 @@
 { subnets, ... }:
 { config, lib, ... }:
 {
+  server = {
+    proxy.virtualHosts = {
+      # TODO - DNS over HTTPS
+      adguard.extraConfig = ''
+        reverse_proxy http://${config.services.adguardhome.host}:${toString config.services.adguardhome.port}
+      '';
+    };
+
+    dashboard.items = {
+      adguard = {
+        title = "AdGuard Home";
+      };
+    };
+  };
+
   systemd.services.adguardhome = {
     requires = [ "acme-finished-adguard.racci.dev.target" ];
     serviceConfig.LoadCredential =
@@ -174,13 +189,6 @@
           ];
       };
     };
-  };
-
-  server.proxy.virtualHosts = {
-    # TODO - DNS over HTTPS
-    adguard.extraConfig = ''
-      reverse_proxy http://${config.services.adguardhome.host}:${toString config.services.adguardhome.port}
-    '';
   };
 
   networking.firewall =

@@ -19,6 +19,7 @@ let
 in
 {
   imports = [
+    (importModule ./dashboard.nix)
     (importModule ./database.nix)
     (importModule ./proxy.nix)
   ];
