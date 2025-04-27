@@ -37,7 +37,7 @@
         in
         {
           HBOX_MODE = "production";
-          HBOX_OPTIONS_ALLOW_REGISTRATION = true;
+          HBOX_OPTIONS_ALLOW_REGISTRATION = "true";
 
           HBOX_WEB_HOST = "0.0.0.0";
           HBOX_WEB_PORT = "7745";
