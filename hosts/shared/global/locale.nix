@@ -20,4 +20,6 @@
       package = pkgs.automatic-timezoned;
     };
   };
+
+  location.provider = "geoclue2";
 }
