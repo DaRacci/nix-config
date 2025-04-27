@@ -1,17 +1,16 @@
+{ config, ... }:
 {
-  services = {
-    home-assistant.config = {
-      recorder.db_url = "postgresql://hass@nixio/hass";
-    };
+  server.database.postgres = {
+    hassio = { };
+  };
 
-    postgresql = {
-      ensureDatabases = [ "hash" ];
-      ensureUsers = [
-        {
-          name = "hash";
-          ensureDBOwnership = true;
-        }
-      ];
-    };
+  services = {
+    home-assistant.config =
+      let
+        db = config.server.database.postgres.hassio;
+      in
+      {
+        recorder.db_url = "postgresql://${db.user}@${db.host}/${db.name}";
+      };
   };
 }

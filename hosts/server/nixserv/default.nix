@@ -5,19 +5,25 @@
   lib,
   ...
 }:
+let
+  atticOwned = {
+    owner = config.services.atticd.user;
+    inherit (config.services.atticd) group;
+  };
+in
 {
   sops.secrets = {
-    ATTIC_ENVIRONMENT = {
-      owner = config.services.atticd.user;
-      inherit (config.services.atticd) group;
-    };
-    "POSTGRES/ATTIC_PASSWORD" = {
-      owner = "postgres";
-      group = "postgres";
+    ATTIC_ENVIRONMENT = atticOwned;
+  };
+
+  server.database.postgres = {
+    attic = {
+      password = atticOwned;
     };
   };
 
   environment.systemPackages = with pkgs; [ attic-client ];
+  nix.settings.trusted-users = [ "builder" ];
 
   users = {
     users = {
@@ -42,8 +48,6 @@
       gid = 949;
     };
   };
-
-  nix.settings.trusted-users = [ "builder" ];
 
   services = {
     atticd = {
@@ -88,15 +92,9 @@
       };
     };
 
+    # TODO - Migrate to nixio instance
     postgresql = {
       enable = true;
-      ensureDatabases = [ "attic" ];
-      ensureUsers = [
-        {
-          name = "attic";
-          ensureDBOwnership = true;
-        }
-      ];
     };
 
     caddy.virtualHosts = {
@@ -112,10 +110,6 @@
       '';
     };
   };
-
-  systemd.services.postgresql.postStart =
-    lib.mine.mkPostgresRolePass "attic"
-      config.sops.secrets."POSTGRES/ATTIC_PASSWORD".path;
 
   networking.firewall.allowedTCPPorts = [ 8080 ];
 }

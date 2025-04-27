@@ -4,6 +4,12 @@
   lib,
   ...
 }:
+let
+  ncOwned = {
+    owner = config.users.users.nextcloud.name;
+    inherit (config.users.users.nextcloud) group;
+  };
+in
 {
   users = {
     users.nextcloud = {
@@ -23,24 +29,22 @@
     groups.protonmail-bridge.members = [ "protonmail-bridge" ];
   };
 
-  sops.secrets =
-    let
-      ncOwned = {
-        owner = config.users.users.nextcloud.name;
-        inherit (config.users.users.nextcloud) group;
-      };
-    in
-    {
-      "NEXTCLOUD/admin-password" = ncOwned;
-      "NEXTCLOUD/S3FS_AUTH" = ncOwned;
-      "POSTGRES/NEXTCLOUD_PASSWORD" = ncOwned;
+  sops.secrets = {
+    "NEXTCLOUD/admin-password" = ncOwned;
+    "NEXTCLOUD/S3FS_AUTH" = ncOwned;
+  };
+
+  server.database.postgres = {
+    nextcloud = {
+      password = ncOwned;
     };
+  };
 
   services = rec {
     nextcloud = {
       enable = true;
       configureRedis = true;
-      package = pkgs.nextcloud30;
+      package = pkgs.nextcloud31;
       appstoreEnable = true;
       extraAppsEnable = true;
       extraApps = {
@@ -75,16 +79,20 @@
         memcached = true;
       };
 
-      config = {
-        adminuser = "admin";
-        adminpassFile = config.sops.secrets."NEXTCLOUD/admin-password".path;
+      config =
+        let
+          db = config.server.database.postgres.nextcloud;
+        in
+        {
+          adminuser = "admin";
+          adminpassFile = config.sops.secrets."NEXTCLOUD/admin-password".path;
 
-        dbtype = "pgsql";
-        dbuser = "nextcloud";
-        dbname = "nextcloud";
-        dbhost = "nixio";
-        dbpassFile = config.sops.secrets."POSTGRES/NEXTCLOUD_PASSWORD".path;
-      };
+          dbtype = "pgsql";
+          dbuser = db.user;
+          dbname = db.database;
+          dbhost = db.host;
+          dbpassFile = db.passwordFile;
+        };
 
       settings = {
         default_phone_region = "AU";
@@ -184,16 +192,6 @@
       plugins = [ pkgs.elasticsearchPlugins.ingest-attachment ];
     };
 
-    postgresql = {
-      ensureDatabases = [ nextcloud.config.dbname ];
-      ensureUsers = [
-        {
-          name = nextcloud.config.dbuser;
-          ensureDBOwnership = true;
-        }
-      ];
-    };
-
     caddy.virtualHosts."nc".extraConfig = ''
       reverse_proxy http://localhost:80
     '';
@@ -204,15 +202,6 @@
   virtualisation.docker.enable = true;
 
   systemd.services = {
-    postgresql = {
-      enable = lib.mkForce false;
-      postStart = ''
-        ${lib.mine.mkPostgresRolePass config.services.nextcloud.config.dbname
-          config.sops.secrets."POSTGRES/NEXTCLOUD_PASSWORD".path
-        }
-      '';
-    };
-
     protonmail-bridge = {
       after = lib.mkForce [ "network.target" ];
       wantedBy = lib.mkForce [ "default.target" ];

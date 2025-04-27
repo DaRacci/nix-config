@@ -10,6 +10,7 @@
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
 
     "${flake}/hosts/shared/optional/tailscale.nix"
+    "${flake}/modules/nixos/server"
     ./uptime.nix
   ];
 
