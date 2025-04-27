@@ -8,7 +8,7 @@ let
   inherit (lib) mkOption types;
   cfg = config.server.database;
 
-  isNixio = config.networking.hostName == "nixio";
+  isNixio = config.host.name == "nixio";
   nixioConfig = flake.nixosConfigurations.nixio.config;
   getNixioConfig = path: if isNixio then config.${path} else nixioConfig.${path};
 
