@@ -109,7 +109,7 @@ in
     };
 
     systemd.services.postgresql = {
-      enable = lib.mkDefault isNixio;
+      enable = lib.mkDefault (isNixio || config.services.postgresql.enable);
       postStart = lib.pipe cfg.postgres [
         builtins.attrValues
         (map (database: lib.mine.mkPostgresRolePass database.user database.password.path))
