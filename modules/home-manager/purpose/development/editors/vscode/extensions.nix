@@ -84,8 +84,8 @@ merge
         "github"."copilot" = vscode-utils.extensionFromVscodeMarketplace {
           name = "copilot";
           publisher = "github";
-          version = "1.311.0";
-          sha256 = "0d3k1bd27yvyqz57ic85kckhmp9i13dnv5yfg1crdxh9h2safxsd";
+          version = "1.312.0";
+          sha256 = "0sflac0wyc52walfaakxq5jh6whrvyhjjxyq5x4zszp9y89qxhqa";
 
         };
         "github"."copilot-chat" = vscode-utils.extensionFromVscodeMarketplace {
@@ -210,8 +210,8 @@ merge
         "pkief"."material-icon-theme" = vscode-utils.extensionFromVscodeMarketplace {
           name = "material-icon-theme";
           publisher = "pkief";
-          version = "5.21.2";
-          sha256 = "00p10xzccy6y3qk2fsa21jibkq9335ac9sl9abwwg8l2wimhaiqw";
+          version = "5.22.0";
+          sha256 = "15m2g18q0ysr363f7jf50kxv4frbpzkflvykq757k1dljx4h5m8k";
 
         };
         "rogalmic"."bash-debug" = vscode-utils.extensionFromVscodeMarketplace {
