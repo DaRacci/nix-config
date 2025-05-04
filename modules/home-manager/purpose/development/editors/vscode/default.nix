@@ -54,10 +54,10 @@ in
               hashicorp.terraform
               bierner.markdown-preview-github-styles
               ruschaaf.extended-embedded-languages
+              versionExtensions.vscode-marketplace.jamief.vscode-ssh-config-enhanced
 
               # LSP Servers
               jnoortheen.nix-ide
-              ms-vscode.powershell
 
               # Formatters
               esbenp.prettier-vscode
@@ -71,6 +71,8 @@ in
 
               # Other
               formulahendry.code-runner
+              markis.code-coverage
+              versionExtensions.vscode-marketplace.vadimcn.vscode-lldb
               # platformio.platformio-ide
 
               # Bash Extensions
@@ -246,10 +248,22 @@ in
 
           rust = lib.mkIf cfg.rust.enable (mkProfile {
             extensions = with plugins; [
-              versionExtensions.vscode-marketplace.vadimcn.vscode-lldb
               jscearcy.rust-doc-viewer
               dustypomerleau.rust-syntax
               rust-lang.rust-analyzer
+            ];
+          });
+
+          dotnet = lib.mkIf cfg.dotnet.enable (mkProfile {
+            extensions = with plugins; [
+              ms-dotnettools.csharp
+              ms-dotnettools.csdevkit
+              ms-dotnettools.vscode-dotnet-runtime
+
+              ms-vscode.powershell
+              pspester.pester-test
+              ironmansoftware.powershellprotools
+              tylerleonhardt.vscode-inline-values-powershell
             ];
           });
 

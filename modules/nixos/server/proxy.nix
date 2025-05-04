@@ -37,7 +37,7 @@ in
 
         All virtual hosts are also added to acme for automatic certificate management.
 
-        Each virtual host will have the value configred in <server.proxy.domain> added as the basedomain,
+        Each virtual host will have the value configured in <server.proxy.domain> added as the basedomain,
         with this attributes name as the subdomain.
 
         Defining virtualHosts on any machine except NixIO will do nothing on that machine but are instead aggregated on NixIO.

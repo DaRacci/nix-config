@@ -22,6 +22,10 @@ in
     python = {
       enable = mkEnableOption "Enable Python Development";
     };
+
+    dotnet = {
+      enable = mkEnableOption "Enable .NET Development, this includes PowerShell";
+    };
   };
 
   config = mkIf cfg.development.enable {
@@ -36,6 +40,7 @@ in
     ];
 
     home.packages = with pkgs; [
+      act
       sysprof
       textpieces
       letterpress
@@ -45,6 +50,14 @@ in
       wildcard
       devtoolbox
     ];
+
+    xdg.configFile."act/actrc".text = ''
+      -P ubuntu-latest=catthehacker/ubuntu:act-latest
+      -P ubuntu-latest=catthehacker/ubuntu:22.04
+      -P ubuntu-latest=catthehacker/ubuntu:20.04
+      -P ubuntu-latest=catthehacker/ubuntu:18.04
+      --use-new-action-cache
+    '';
 
     user.persistence.directories = [
       "Projects"
