@@ -250,6 +250,17 @@ with lib;
 
         middle_click_paste = false;
       };
+
+      plugins = {
+        hy3 = {
+          no_gaps_when_only = 1;
+          tab_first_window = false;
+
+          autotile = {
+            enable = true;
+          };
+        };
+      };
     };
 
     extraConfig =
