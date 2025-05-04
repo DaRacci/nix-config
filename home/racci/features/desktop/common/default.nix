@@ -8,6 +8,7 @@
     ./office.nix
     ./secrets.nix
     ./sync.nix
+    ./work.nix
     ./zed.nix
   ];
 

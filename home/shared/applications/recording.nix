@@ -7,7 +7,7 @@
       wlrobs
       obs-vkcapture
       obs-pipewire-audio-capture
-      looking-glass-obs
+      # looking-glass-obs
       input-overlay
     ];
   };

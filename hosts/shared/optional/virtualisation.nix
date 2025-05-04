@@ -23,7 +23,7 @@ in
   boot = {
     extraModulePackages = [ config.boot.kernelPackages.kvmfr ];
     extraModprobeConfig = ''
-      options kvmfr static_size_mb=64
+      options kvmfr static_size_mb=128
     '';
   };
 

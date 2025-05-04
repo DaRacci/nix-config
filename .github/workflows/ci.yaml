@@ -65,16 +65,16 @@ jobs:
           ref: ${{ inputs.branch }}
 
       - name: Free Disk Space
-        if: matrix.extraSpace == true
+        if: ${{ matrix.extraSpace == true && !env.ACT }}
         uses: jlumbroso/free-disk-space@main
         with:
           swap-storage: true
           tool-cache: true
       - name: Create Dir for Mounting more Disk Space ❄
-        if: matrix.extraSpace == true
+        if: ${{ matrix.extraSpace == true && !env.ACT }}
         run: sudo mkdir /nix
       - name: Maximize Disk Space
-        if: matrix.extraSpace == true
+        if: ${{ matrix.extraSpace == true && !env.ACT }}
         uses: easimon/maximize-build-space@v10
         with:
           build-mount-path: /nix
@@ -86,6 +86,9 @@ jobs:
           temp-reserve-mb: 100
           swap-size-mb: 4096
           root-reserve-mb: 1024
+      - name: Ensure correct permissions for /nix
+        if: ${{ matrix.extraSpace == true && !env.ACT }}
+        run: sudo chown -R root:root /nix
 
       - uses: ./.github/actions/setup-nix
         with:
