@@ -18,9 +18,9 @@
     misc.vfr = lib.mkForce false; # Monitors have brightness artifacts at different refresh rates, ultimatum is to just send all frames even if they are redundent.
 
     monitor = [
-      "DP-6,      3840x2160@240,  0x0,        1, vrr" # Center Monitor
-      "DP-1,      2560x1440@144,  auto-left,  1, vrr" # Left Monitor
-      "HDMI-A-1,  2560x1440@144,  auto-right, 1, vrr" # Right Monitor
+      "DP-6,      3840x2160@240,  0x0,        1, vrr, 1" # Center Monitor
+      "DP-1,      2560x1440@144,  auto-left,  1, vrr, 1" # Left Monitor
+      "HDMI-A-1,  2560x1440@144,  auto-right, 1, vrr, 1" # Right Monitor
 
       "HDMI-A-2,  2732x2048@90,   auto-right, 2"
       "HDMI-A-2,  disable" # Disable Virtual Monitor, will be managed by sunshine.
