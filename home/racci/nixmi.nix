@@ -1,5 +1,6 @@
 {
   flake,
+  lib,
   ...
 }:
 {
@@ -13,15 +14,34 @@
 
   user.persistence.enable = true;
 
-  wayland.windowManager.hyprland.settings.monitor = [
-    "DP-6,      2560x1440@165,  0x0,        1, vrr, 1" # Center Monitor
-    "DP-4,      2560x1440@144,  auto-left,  1, vrr, 1" # Left Monitor
-    "DP-5,      2560x1440@144,  auto-right, 1, vrr, 1" # Right Monitor
-    "HDMI-A-2,  2732x2048@90,   auto-right, 2"
-    "HDMI-A-2,  disable" # Disable Virtual Monitor, will be managed by sunshine.
+  wayland.windowManager.hyprland.settings = {
+    misc.vfr = lib.mkForce false; # Monitors have brightness artifacts at different refresh rates, ultimatum is to just send all frames even if they are redundent.
+
+    monitor = [
+      "DP-6,      3840x2160@240,  0x0,        1, vrr" # Center Monitor
+      "DP-1,      2560x1440@144,  auto-left,  1, vrr" # Left Monitor
+      "HDMI-A-1,  2560x1440@144,  auto-right, 1, vrr" # Right Monitor
+
+      "HDMI-A-2,  2732x2048@90,   auto-right, 2"
+      "HDMI-A-2,  disable" # Disable Virtual Monitor, will be managed by sunshine.
+    ];
+  };
+
+  custom.audio.disabledDevices = [
+    "alsa_card.pci-0000_01_00.1" # Dedicated GPU
+    "alsa_card.pci-0000_74_00.1" # HDMI Audio
+
+    "alsa_input.usb-C-Media_Electronics_Inc._USB_Advanced_Audio_Device-00.analog-stereo" # Acasis Dock
+    "alsa_output.usb-C-Media_Electronics_Inc._USB_Advanced_Audio_Device-00.analog-stereo" # Acasis Dock
   ];
 
-  custom.audio.disabledDevices = [ "alsa_card.pci-0000_01_00.1" ];
+  programs.ssh.matchBlocks = {
+    "windows-work" = {
+      hostname = "192.168.122.79";
+      user = "AzureAD\\james@amt.com.au";
+      identitiesOnly = true;
+    };
+  };
 
   purpose = {
     enable = true;
@@ -29,6 +49,7 @@
     development = {
       enable = true;
       rust.enable = true;
+      dotnet.enable = true;
     };
 
     gaming = {
