@@ -31,6 +31,7 @@ runs:
     # Setup TS so we can access the cache
     - name: Tailscale
       uses: tailscale/github-action@v3
+      if: ${{ !env.ACT }}
       with:
         oauth-client-id: ${{ inputs.TS_OAUTH_CLIENT_ID }}
         oauth-secret: ${{ inputs.TS_OAUTH_SECRET }}
@@ -38,6 +39,7 @@ runs:
 
     - name: Setup Attic cache
       uses: ryanccn/attic-action@v0
+      if: ${{ !env.ACT }}
       with:
         endpoint: ${{ inputs.ATTIC_ENDPOINT }}
         cache: ${{ inputs.ATTIC_CACHE }}
