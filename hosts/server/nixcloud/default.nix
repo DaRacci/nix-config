@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ./home-assistant
     ./homebox.nix
     ./immich.nix
     ./nextcloud.nix

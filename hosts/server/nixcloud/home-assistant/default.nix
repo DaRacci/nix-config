@@ -2,8 +2,8 @@
 {
   imports = [
     ./postgresql.nix
-    ./weather.nix
-    ./zones.nix
+    # ./weather.nix
+    # ./zones.nix
   ];
 
   sops.secrets."home-assistant-secrets.yaml" = {
