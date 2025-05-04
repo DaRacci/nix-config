@@ -26,9 +26,6 @@
       nvidiaBusId = "PCI:1:0:0";
     };
 
-    backlight.enable = true;
-    cooling.enable = true;
-
     storage = {
       enable = true;
       root = {
