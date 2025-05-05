@@ -88,27 +88,28 @@
     };
   };
 
-  systemd.services.n8n.environment =
+  systemd.services.n8n =
     let
       db = config.server.database.postgres.n8n;
     in
     {
-      DB_TYPE = "postgresdb";
-      DB_POSTGRESDB_DATABASE = db.database;
-      DB_POSTGRESDB_HOST = db.host;
-      DB_POSTGRESDB_PORT = toString db.port;
-      DB_POSTGRESDB_USERNAME = db.user;
-      DB_POSTGRESDB_PASSWORD_FILE = db.password.path;
+      serviceConfig.LoadCredential = [
+        "n8n-postgres-password:${db.password.path}"
+      ];
+
+      environment = {
+        DB_TYPE = "postgresdb";
+        DB_POSTGRESDB_DATABASE = db.database;
+        DB_POSTGRESDB_HOST = db.host;
+        DB_POSTGRESDB_PORT = toString db.port;
+        DB_POSTGRESDB_USERNAME = db.user;
+        DB_POSTGRESDB_PASSWORD_FILE = "\${CREDENTIALS_DIRECTORY}/n8n-postgres-password";
+      };
     };
 
   server = {
     database.postgres = {
-      n8n = {
-        password = {
-          owner = config.users.users.n8n.name;
-          inherit (config.users.users.n8n) group;
-        };
-      };
+      n8n = { };
     };
 
     proxy.virtualHosts = {
