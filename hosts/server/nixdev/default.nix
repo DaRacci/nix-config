@@ -24,6 +24,10 @@
       enable = true;
       accessUrl = "https://coder.racci.dev";
       listenAddress = "0.0.0.0:8080";
+
+      database = {
+        createLocally = false;
+      };
     };
 
     github-runners = {
@@ -110,6 +114,12 @@
   server = {
     database.postgres = {
       n8n = { };
+      coder = {
+        password = {
+          owner = config.users.users.coder.name;
+          inherit (config.users.users.coder) group;
+        };
+      };
     };
 
     proxy.virtualHosts = {

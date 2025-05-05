@@ -5,12 +5,6 @@
   lib,
   ...
 }:
-let
-  shouldCopyPostgres =
-    config:
-    (builtins.hasAttr "postgresql" config.systemd.services)
-    && !config.systemd.services.postgresql.enable;
-in
 {
   # For backups to be placed in the minio data directory.
   users.users.postgres.extraGroups = [ "minio" ];
@@ -58,6 +52,10 @@ in
       ))
     ];
 
+  server.database.postgres = {
+    postgres = { };
+  };
+
   services = {
     couchdb = {
       enable = true;
@@ -91,58 +89,11 @@ in
         ])
       );
 
-      extensions =
-        ps:
-        fromAllServers [
-          (builtins.filter shouldCopyPostgres)
-          (builtins.map (config: config.services.postgresql.extensions ps))
-          builtins.concatLists
-          lib.unique
-        ];
-
-      ensureDatabases = fromAllServers [
-        (builtins.filter (
-          config:
-          (shouldCopyPostgres config) && (builtins.length config.services.postgresql.ensureDatabases) >= 1
-        ))
-        (builtins.map (config: config.services.postgresql.ensureDatabases))
-        builtins.concatLists
-        lib.unique
-      ];
-
-      ensureUsers = fromAllServers [
-        (builtins.filter (
-          config: (shouldCopyPostgres config) && (builtins.length config.services.postgresql.ensureUsers) >= 1
-        ))
-        (builtins.map (config: config.services.postgresql.ensureUsers))
-        builtins.concatLists
-        lib.unique
-      ];
-
-      initialScript = fromAllServers [
-        (builtins.filter (
-          config: (shouldCopyPostgres config) && config.services.postgresql.initialScript != null
-        ))
-        (builtins.map (config: config.services.postgresql.initialScript))
-        (builtins.filter (path: path != null))
-        (builtins.map (path: builtins.readFile path))
-        (builtins.concatStringsSep "\n")
-        (pkgs.writeText "init-sql-script")
-      ];
-
       settings = {
         password_encryption = "scram-sha-256";
 
-        shared_preload_libraries = fromAllServers [
-          (builtins.filter (
-            config:
-            (shouldCopyPostgres config) && config.services.postgresql.settings.shared_preload_libraries != null
-          ))
-          (builtins.map (config: config.services.postgresql.settings.shared_preload_libraries))
-          (builtins.map (preload: if lib.isString preload then [ preload ] else preload))
-          builtins.concatLists
-          lib.unique
-        ];
+        # IDK how this works so just copying over it from immich for now.
+        search_path = "\"$user\", public, vectors";
       };
     };
 
@@ -167,31 +118,6 @@ in
         };
       };
     };
-  };
-
-  systemd.services.postgresql = {
-    postStart =
-      fromAllServers [
-        (builtins.filter (
-          config: (shouldCopyPostgres config) && config.systemd.services.postgresql.postStart != [ ]
-        ))
-        (builtins.map (config: config.systemd.services.postgresql.postStart))
-        (builtins.concatStringsSep "\n")
-      ]
-      + (builtins.concatStringsSep "\n" [
-        (lib.mine.mkPostgresRolePass "postgres" config.sops.secrets."POSTGRES/POSTGRES_PASSWORD".path)
-      ]);
-
-    serviceConfig.ExecStartPost = fromAllServers [
-      (builtins.filter (
-        config:
-        (shouldCopyPostgres config) && config.systemd.services.postgresql.serviceConfig.ExecStartPost != [ ]
-      ))
-      (builtins.map (config: config.systemd.services.postgresql.serviceConfig.ExecStartPost))
-      lib.flatten
-      # We don't want to run the pre-start scripts from each server.
-      (builtins.filter (script: !lib.hasSuffix "postgresql-post-start" script))
-    ];
   };
 
   networking.firewall.allowedTCPPorts = [ config.services.couchdb.port ];

@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   immichOwned = {
     owner = config.users.users.immich.name;
@@ -57,6 +57,7 @@ in
         enable = true;
       };
     };
+    postgresql.enable = lib.mkForce false;
   };
 
   networking = {
