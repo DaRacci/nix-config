@@ -15,7 +15,7 @@
   user.persistence.enable = true;
 
   wayland.windowManager.hyprland.settings = {
-    misc.vfr = lib.mkForce false; # Monitors have brightness artifacts at different refresh rates, ultimatum is to just send all frames even if they are redundent.
+    misc.vfr = lib.mkForce false; # Monitors have brightness artifacts at different refresh rates, ultimatum is to just send all frames even if they are redundant.
 
     monitor = [
       "DP-6,      3840x2160@240,  0x0,        1, vrr, 1" # Center Monitor
@@ -63,6 +63,7 @@
         enableSatisfactory = true;
         enableBeatSaber = true;
         enableThunderstore = true;
+        enableNexus = true;
       };
 
       simulator = {

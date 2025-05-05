@@ -15,8 +15,8 @@ in
     };
   };
 
-  config = lib.mkIf (cfg.enable && cfg.editors.vscode.enable) {
-    stylix.targets.vscode.profileNames = [ "default" ];
+  config = lib.mkIf (cfg.enable && cfg.editors.vscode.enable) rec {
+    stylix.targets.vscode.profileNames = builtins.attrNames programs.vscode.profiles;
 
     programs.vscode = {
       enable = true;
@@ -106,6 +106,7 @@ in
 
               "github.copilot.enable"."*" = true;
               "github.copilot.advanced".indentationMode."*" = true;
+              "github.copilot.nextEditSuggestions.enabled" = true;
 
               "files.autoSave" = "afterDelay";
               "files.eol" = "\n";
@@ -205,6 +206,9 @@ in
               "projectManager.git.baseFolders" = [
                 "${config.home.homeDirectory}/Projects"
               ];
+
+              # Connecting to a NixOS or NuShell host breaks without this.
+              "remote.SSH.permitPtyAllocation" = true;
               #endregion
 
               #region Security
@@ -231,7 +235,9 @@ in
               {
                 userSettings = {
                   "settings.ignoredExtensions" = lib.map (ext: ext.vscodeExtUniqueId) providedAttrs.extensions;
-                  "workbench.settings.applyToAllProfiles" = builtins.attrNames providedAttrs.userSettings;
+                  "workbench.settings.applyToAllProfiles" = builtins.attrNames providedAttrs.userSettings ++ [
+                    "workbench.colorTheme" # Managed by Stylix
+                  ];
                 };
               }
             ];
@@ -265,6 +271,11 @@ in
               ironmansoftware.powershellprotools
               tylerleonhardt.vscode-inline-values-powershell
             ];
+
+            userSettings = {
+              # Required by ironmansoftware.powershellprotools
+              "terminal.integrated.enablePersistentSessions" = false;
+            };
           });
 
           python = lib.mkIf cfg.python.enable (mkProfile {
