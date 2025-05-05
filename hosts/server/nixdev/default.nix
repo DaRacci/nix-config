@@ -103,7 +103,12 @@
 
   server = {
     database.postgres = {
-      n8n = { };
+      n8n = {
+        password = {
+          owner = config.users.users.n8n.name;
+          inherit (config.users.users.n8n) group;
+        };
+      };
     };
 
     proxy.virtualHosts = {
