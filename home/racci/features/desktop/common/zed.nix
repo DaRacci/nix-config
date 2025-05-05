@@ -58,7 +58,7 @@
         enable_experimental_live_diffs = true;
         default_model = {
           provider = "copilot_chat";
-          model = "o1-preview";
+          model = "o1";
         };
       };
 
