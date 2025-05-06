@@ -37,8 +37,7 @@
         in
         {
           createLocally = false;
-          inherit (db) host;
-          database = db.name;
+          inherit (db) host database;
           username = db.user;
 
           # This comes from the environment file
