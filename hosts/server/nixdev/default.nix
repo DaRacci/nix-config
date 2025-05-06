@@ -7,7 +7,7 @@
     };
     CODER_ENV = {
       owner = config.users.users.coder.name;
-      inherit (config.users.users.coder.runner) group;
+      inherit (config.users.users.coder) group;
     };
   };
 
