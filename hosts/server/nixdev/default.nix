@@ -5,6 +5,10 @@
       owner = config.users.users.runner.name;
       group = config.users.groups.runner.name;
     };
+    CODER_ENV = {
+      owner = config.users.users.coder.name;
+      inherit (config.users.users.coder.runner) group;
+    };
   };
 
   users = {
@@ -25,9 +29,21 @@
       accessUrl = "https://coder.racci.dev";
       listenAddress = "0.0.0.0:8080";
 
-      database = {
-        createLocally = false;
-      };
+      environment.file = config.sops.secrets.CODER_ENV.path;
+
+      database =
+        let
+          db = config.server.database.postgres.coder;
+        in
+        {
+          createLocally = false;
+          inherit (db) host;
+          database = db.name;
+          username = db.user;
+
+          # This comes from the environment file
+          password = "\${CODER_PASSWORD}";
+        };
     };
 
     github-runners = {
