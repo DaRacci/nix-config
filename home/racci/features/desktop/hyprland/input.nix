@@ -52,7 +52,7 @@ in
           "SUPER+S" = [ "togglespecialworkspace" ];
           #endregion
 
-          "CTRL+ALT+DELETE" = [ "exit" ];
+          "CTRL+ALT+DELETE" = [ "uwsm stop" ];
 
           #region Media
           XF86AudioRaiseVolume = [
