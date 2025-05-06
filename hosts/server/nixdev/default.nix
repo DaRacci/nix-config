@@ -58,7 +58,7 @@
 
     n8n = {
       enable = true;
-      webhookUrl = "";
+      webhookUrl = "n8n.racci.dev";
       # Schema Reference https://github.com/n8n-io/n8n/blob/master/packages/cli/src/config/schema.ts
       # https://github.com/n8n-io/n8n/blob/master/packages/%40n8n/config/src/index.ts
       settings = {
@@ -123,7 +123,7 @@
         DB_POSTGRESDB_HOST = db.host;
         DB_POSTGRESDB_PORT = toString db.port;
         DB_POSTGRESDB_USERNAME = db.user;
-        DB_POSTGRESDB_PASSWORD_FILE = "\${CREDENTIALS_DIRECTORY}/n8n-postgres-password";
+        DB_POSTGRESDB_PASSWORD_FILE = "%d/n8n-postgres-password";
       };
     };
 
@@ -159,6 +159,9 @@
   };
 
   networking.firewall = {
-    allowedTCPPorts = [ 8080 ];
+    allowedTCPPorts = [
+      config.services.n8n.settings.port
+      8080
+    ];
   };
 }
