@@ -28,8 +28,7 @@ let
     attrPath:
     lib.pipe serverConfigurations [
       (builtins.filter (cfg: cfg.host.name != "nixio"))
-      (builtins.filter (cfg: lib.mine.attrsets.hasAttrPath cfg attrPath))
-      (builtins.map (cfg: lib.mine.attrsets.getAttrPath cfg attrPath))
+      (builtins.map (cfg: lib.attrsets.attrByPath (lib.splitString "." attrPath) null cfg))
       (builtins.filter (
         item:
         if lib.isList item then
@@ -207,7 +206,19 @@ in
       }
       // (lib.optionalAttrs isNixio {
         postStart = builtins.concatStringsSep "\n" (
-          (gatherAllInstances "services.postgresql.postStart")
+          (lib.pipe (gatherAllInstances "systemd.services.postgresql.postStart") [
+            # This skips the default postgresql start script https://github.com/NixOS/nixpkgs/blob/5b35d248e9206c1f3baf8de6a7683fee126364aa/nixos/modules/services/databases/postgresql.nix#L626-L640
+            # Probably going to break in the future since its a hardcoded length.
+            (builtins.map (
+              script:
+              lib.pipe script [
+                (lib.strings.splitString "\n")
+                (lib.drop 14)
+                (builtins.concatStringsSep "\n")
+              ]
+            ))
+            (builtins.filter (script: script != ""))
+          ])
           ++ (lib.pipe serverConfigurations [
             (builtins.map (cfg: builtins.attrValues cfg.server.database.postgres))
             builtins.concatLists
@@ -216,10 +227,10 @@ in
         );
 
         serviceConfig.ExecStartPost =
-          lib.pipe (gatherAllInstances "services.postgresql.serviceConfig.ExecStartPost")
+          lib.pipe (gatherAllInstances "systemd.services.postgresql.serviceConfig.ExecStartPost")
             [
               builtins.concatLists
-              # We don't want to run the pre-start scripts from each server.
+              # We don't want to run the post-start scripts from each server.
               (builtins.filter (script: !lib.hasSuffix "postgresql-post-start" script))
             ];
       });

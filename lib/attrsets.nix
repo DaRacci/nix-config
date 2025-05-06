@@ -103,36 +103,4 @@
         );
     in
     f [ ] attrList;
-
-  hasAttrPath =
-    cfg: attrPath:
-    (lib.pipe attrPath [
-      (lib.splitString ".")
-      (lib.lists.foldl'
-        (
-          acc: attr:
-          if acc.present && acc.config ? "${attr}" then
-            {
-              present = true;
-              config = acc.config.${attr};
-            }
-          else
-            {
-              present = false;
-              config = { };
-            }
-        )
-        {
-          present = true;
-          config = cfg;
-        }
-      )
-    ]).present;
-
-  getAttrPath =
-    cfg: attrPath:
-    lib.pipe attrPath [
-      (lib.splitString ".")
-      (lib.lists.foldl' (acc: attr: acc.${attr}) cfg)
-    ];
 }
