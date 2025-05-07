@@ -57,8 +57,8 @@
         default_open_ai_model = null;
         enable_experimental_live_diffs = true;
         default_model = {
-          provider = "copilot_chat";
-          model = "o1";
+          provider = "zed.dev";
+          model = "claude-3-7-sonnet-latest";
         };
       };
 
