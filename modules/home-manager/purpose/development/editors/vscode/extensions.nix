@@ -84,8 +84,8 @@ merge
         "github"."copilot" = vscode-utils.extensionFromVscodeMarketplace {
           name = "copilot";
           publisher = "github";
-          version = "1.312.0";
-          sha256 = "0sflac0wyc52walfaakxq5jh6whrvyhjjxyq5x4zszp9y89qxhqa";
+          version = "1.314.0";
+          sha256 = "1nkvfjj4mhnxdgr28vqvcxknrbni8vgx46lb0kiry8rnrr385w4z";
 
         };
         "github"."copilot-chat" = vscode-utils.extensionFromVscodeMarketplace {
@@ -337,8 +337,8 @@ merge
           "rust-lang"."rust-analyzer" = vscode-utils.extensionFromVscodeMarketplace {
             name = "rust-analyzer";
             publisher = "rust-lang";
-            version = "0.3.2441";
-            sha256 = "0b38l6a8m2l644h5sr86pq9hf186fqbqrhcl7qnimvbiz5sbmgip";
+            version = "0.3.2449";
+            sha256 = "1jwdkf2lwdhgkgph23l1qb7r31d138ncc2209z96m4faqd5hp4ar";
             arch = "linux-x64";
 
           };
@@ -387,8 +387,8 @@ merge
         "rust-lang"."rust-analyzer" = vscode-utils.extensionFromVscodeMarketplace {
           name = "rust-analyzer";
           publisher = "rust-lang";
-          version = "0.3.2441";
-          sha256 = "17l4zk2897ks988xq4ywzx0rgcn38qr3y2b7i1a60g4jgvfwj5qp";
+          version = "0.3.2449";
+          sha256 = "0ld6b65adab9x201zlmk15hz7ybbxrakby6ddz13d8m69q8c2794";
           arch = "linux-arm64";
 
         };
@@ -445,8 +445,8 @@ merge
       "rust-lang"."rust-analyzer" = vscode-utils.extensionFromVscodeMarketplace {
         name = "rust-analyzer";
         publisher = "rust-lang";
-        version = "0.3.2441";
-        sha256 = "1xfbxnvbjlf78z1q4kgkbiayc6l7gxd67sw2ycn190y7xf0mbgv4";
+        version = "0.3.2449";
+        sha256 = "1isfci227vwsmn7jq0by91vl9634hj8ar54v7i63zfz2db3yvcbj";
         arch = "darwin-x64";
 
       };
@@ -503,8 +503,8 @@ merge
     "rust-lang"."rust-analyzer" = vscode-utils.extensionFromVscodeMarketplace {
       name = "rust-analyzer";
       publisher = "rust-lang";
-      version = "0.3.2441";
-      sha256 = "15y5yp5wgi1gvwpzd82v0yj6fmap0nrwklc47pbwkfb8kvgaw9gg";
+      version = "0.3.2449";
+      sha256 = "11yqza56r523aj6v3gaw8f1743p8cl6dxigrls8kv6xzczy7awp4";
       arch = "darwin-arm64";
 
     };
