@@ -34,6 +34,13 @@ in
       };
   };
 
+  environment.etc."1password/custom_allowed_browsers" = {
+    mode = "755";
+    text = mkIf (anyoneHasPackage pkgs._1password-gui) ''
+      floorp
+    '';
+  };
+
   networking.firewall = lib.mkIf (anyoneHasOption (user: user.services.kdeconnect.enable)) rec {
     allowedTCPPortRanges = [
       {

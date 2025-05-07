@@ -72,6 +72,8 @@
       enableJIT = true;
       enableTCPIP = true;
 
+      extensions = ps: with ps; [ system_stats ];
+
       authentication = lib.mkOverride 10 (
         ''
           # TYPE  DATABASE  USER  ADDRESS   AUTH-METHOD   [AUTH-OPTIONS]
