@@ -39,4 +39,4 @@ priority_rules:
   - name: priority for queue `duplicated default from merge on approval`
     conditions:
       - "#approved-reviews-by>=1"
-    priority: 2500
+    priority: 2750
