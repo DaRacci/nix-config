@@ -34,9 +34,9 @@ in
       };
   };
 
-  environment.etc."1password/custom_allowed_browsers" = {
+  environment.etc."1password/custom_allowed_browsers" = mkIf (anyoneHasPackage pkgs._1password-gui) {
     mode = "755";
-    text = mkIf (anyoneHasPackage pkgs._1password-gui) ''
+    text = ''
       floorp
     '';
   };
