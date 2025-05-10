@@ -9,7 +9,6 @@
       owner = config.users.users.coder.name;
       inherit (config.users.users.coder) group;
     };
-    N8N_ENV = { };
   };
 
   users = {
@@ -108,20 +107,21 @@
     };
   };
 
-  systemd.services.n8n = {
-    serviceConfig.EnvironmentFile = config.sops.secrets.N8N_ENV.path;
-    environment =
-      let
-        db = config.server.database.postgres.n8n;
-      in
-      {
+  systemd.services.n8n =
+    let
+      db = config.server.database.postgres.n8n;
+    in
+    {
+      serviceConfig.LoadCredential = [ "n8n-postgres-password:${db.password.path}" ];
+      environment = {
         DB_TYPE = "postgresdb";
         DB_POSTGRESDB_DATABASE = db.database;
         DB_POSTGRESDB_HOST = db.host;
         DB_POSTGRESDB_PORT = toString db.port;
         DB_POSTGRESDB_USERNAME = db.user;
+        DB_POSTGRESDB_PASSWORD_FILE = "%d/n8n-postgres-password";
       };
-  };
+    };
 
   server = {
     database.postgres = {
