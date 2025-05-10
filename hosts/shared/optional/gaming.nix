@@ -13,28 +13,28 @@
     };
   };
 
-  programs = {
-    gamescope = {
-      enable = true;
-      package = pkgs.gamescope;
-      args = [
-        "-w 2560" # Upscaled from Resolution
-        "-h 1440" # Upscaled from Resolution
-        "-W 2560" # Real Resolution
-        "-H 1440" # Real Resolution
-        "-r 0" # Uncap framerate
-        "--rt"
-        "--adaptive-sync"
-        "--fullscreen"
-        "--mangoapp"
-      ];
-    };
+  nixpkgs.overlays = [
+    (_: prev: {
+      gamescope-session = prev.gamescope-session.overrideAttrs (_: {
+        prePatch = ''
+          substituteInPlace gamescope-session \
+            --replace-fail "-w 1280 -h 800" "-w 3840 -h 2160" \
+            --replace-fail "exec gamescope \\" "
+            export STEAM_DISPLAY_REFRESH_LIMITS=48,240
+            export STEAM_GAMESCOPE_FORCE_HDR_DEFAULT=1
+            export STEAM_GAMESCOPE_FORCE_OUTPUT_TO_HDR10PQ_DEFAULT=1
+            exec gamescope \\"
+        '';
+      });
+    })
+  ];
 
+  programs = {
     steam = {
       enable = true;
       package = pkgs.steam.override {
         extraEnv = {
-          MANGOHUD = true;
+          # MANGOHUD = true;
         };
 
         extraArgs = "-steamos3 -steamdeck -steampal -gamepadui";
