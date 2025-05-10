@@ -81,7 +81,25 @@ in
         }
       ];
     })
-    (mkIf cfg.bluetooth.enable { hardware.bluetooth.enable = true; })
+    (mkIf cfg.bluetooth.enable {
+      system.activationScripts = {
+        rfkillUnblockBluetooth.text = ''
+          rfkill unblock bluetooth
+        '';
+      };
+
+      hardware.bluetooth = {
+        enable = true;
+        settings.General = {
+          Experimental = true;
+          KernelExperimental = lib.mkDefault true;
+        };
+      };
+
+      services.blueman.enable = true;
+
+      host.persistence.directories = [ "/var/lib/bluetooth" ];
+    })
     (mkIf cfg.network.enable { networking.networkmanager.enable = true; })
     (mkIf (!config.host.device.isHeadless) {
       services = {

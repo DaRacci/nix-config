@@ -26,19 +26,6 @@ in
   };
 
   config = mkIf cfg.enable {
-    system.activationScripts = {
-      rfkillUnblockBluetooth.text = ''
-        rfkill unblock bluetooth
-      '';
-    };
-
-    hardware.bluetooth.input = {
-      General = {
-        # Allows bluetooth battery level to be checked.
-        Experimental = true;
-      };
-    };
-
     services = {
       blueman.enable = true;
       udev = {
@@ -53,7 +40,5 @@ in
         '';
       };
     };
-
-    host.persistence.directories = [ "/var/lib/bluetooth" ];
   };
 }
