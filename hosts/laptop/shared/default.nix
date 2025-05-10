@@ -1,7 +1,7 @@
 { ... }:
 {
   imports = [
-    ./power.nix
+    ../../desktop/shared/power.nix
     ../../desktop/shared/appimage.nix
     ../../desktop/shared/xdg.nix
   ];
