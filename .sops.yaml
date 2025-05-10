@@ -42,7 +42,7 @@ creation_rules:
           - age1qlkycz667c4dzzhywgp94ek5zs9u5xmp4dfd8fh48h58c4253seqajrk49
           - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
           - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
-  - path_regex: hosts/server/nixcloud/secrets.yaml$
+  - path_regex: hosts/server/nixcloud/
     key_groups:
       - age:
           - age1vn626zvqf9hhnwur37fzww0xqts5jp45uuhetk2caggx75wp4umshj235u

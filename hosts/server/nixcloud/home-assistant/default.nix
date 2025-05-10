@@ -7,7 +7,9 @@
   ];
 
   sops.secrets."home-assistant-secrets.yaml" = {
-    owner = "hash";
+    sopsFile = ./secrets.yaml;
+    key = "";
+    owner = "hass";
     path = "/var/lib/hass/secrets.yaml";
     restartUnits = [ "home-assistant.service" ];
   };
