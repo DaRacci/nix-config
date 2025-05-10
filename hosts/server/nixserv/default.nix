@@ -81,7 +81,7 @@ in
             db = config.server.database.postgres.attic;
           in
           {
-            url = "postgresql://${db.user}@${db.host}:${db.port}/${db.database}";
+            url = "postgresql://${db.user}@${db.host}:${toString db.port}/${db.database}";
             heartbeat = true;
           };
 
