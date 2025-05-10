@@ -1,5 +1,5 @@
 # TODO - Look into TPM2
-# TODO - Look into SELinux
+# TODO - Look into SELinux or AppArmour
 let
   userLimit = 32768;
 in
@@ -9,8 +9,15 @@ in
     protectKernelImage = true;
 
     rtkit.enable = true;
-
     polkit.enable = true;
+
+    sudo.enable = false;
+    sudo-rs = {
+      enable = true;
+      execWheelOnly = true;
+    };
+
+    tpm2.enable = true;
 
     pam.loginLimits = [
       # { domain = "@wheel"; item = "nofile"; type = "soft"; value = "524288"; }
