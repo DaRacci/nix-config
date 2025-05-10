@@ -34,6 +34,11 @@ in
       target = ".mozilla/firefox/${config.home.username}/chrome/firefox-ultima";
       source = inputs.firefox-ultima;
     };
+
+    file."firefox-ultima-floorp" = {
+      target = ".floorp/${config.home.username}/chrome/firefox-ultima";
+      source = inputs.firefox-ultima;
+    };
   };
 
   stylix = {
@@ -320,6 +325,9 @@ in
             "toolkit.telemetry.updatePing.enabled" = lock-false;
             "toolkit.telemetry.bhrPing.enabled" = lock-false;
             "toolkit.telemetry.firstShutdownPing.enabled" = lock-false;
+
+            # Misc stuff
+            "browser.toolbars.bookmarks.visibility" = mkLockedValue "never";
           };
         };
 
