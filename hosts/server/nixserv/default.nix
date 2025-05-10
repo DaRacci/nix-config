@@ -76,10 +76,14 @@ in
         soft-delete-caches = false;
         require-proof-of-possession = true;
 
-        database = {
-          url = "postgresql://attic@localhost:5432/attic";
-          heartbeat = true;
-        };
+        database =
+          let
+            db = config.server.database.postgres.attic;
+          in
+          {
+            url = "postgresql://${db.user}@${db.host}:${db.port}/${db.database}";
+            heartbeat = true;
+          };
 
         storage = {
           type = "s3";
@@ -105,11 +109,6 @@ in
           default-retention-period = "14 days";
         };
       };
-    };
-
-    # TODO - Migrate to nixio instance
-    postgresql = {
-      enable = true;
     };
   };
 
