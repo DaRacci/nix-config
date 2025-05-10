@@ -103,8 +103,7 @@ in
     (mkIf cfg.network.enable { networking.networkmanager.enable = true; })
     (mkIf (!config.host.device.isHeadless) {
       services = {
-        dleyna-renderer.enable = true;
-        dleyna-server.enable = true;
+        dleyna.enable = true;
 
         gnome.gnome-keyring.enable = true;
         udisks2.enable = true;
