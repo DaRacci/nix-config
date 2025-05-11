@@ -26,10 +26,7 @@
       "POSTGRES/POSTGRES_PASSWORD" = {
         owner = config.users.users.postgres.name;
         group = config.users.groups.postgres.name;
-        restartUnits = [
-          "postgresql.service"
-          "pgadmin.service"
-        ];
+        restartUnits = [ "postgresql.service" ];
         mode = "0440";
       };
     }
@@ -48,6 +45,7 @@
           owner = config.users.users.postgres.name;
           group = config.users.groups.postgres.name;
           # TODO - do i need to clean up the reload services?
+          restartUnits = [ "postgresql.service" ];
         }
       ))
     ];
