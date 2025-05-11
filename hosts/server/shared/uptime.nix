@@ -1,4 +1,5 @@
 {
+  flake,
   config,
   pkgs,
   lib,
@@ -8,7 +9,7 @@
   sops.secrets."UPGRADE_STATUS_ID" = { };
 
   systemd = {
-    timers.upgrade-status = {
+    timers.upgrade-status = lib.mkIf (flake ? rev) {
       wantedBy = [ "timers.target" ];
       timerConfig = {
         Persistent = true;
@@ -17,7 +18,7 @@
       };
     };
 
-    services.upgrade-status = {
+    services.upgrade-status = lib.mkIf (flake ? rev) {
       wantedBy = [ "multi-user.target" ];
       requires = [ "network-online.target" ];
       after = [ "network-online.target" ];
