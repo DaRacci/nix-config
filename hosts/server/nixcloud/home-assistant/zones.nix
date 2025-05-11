@@ -4,7 +4,7 @@
       homeassistant = {
         name = "Home - USA";
         latitude = "!secret home_usa_latitude";
-        country = "USA";
+        country = "US";
         longitude = "!secret home_usa_longitude";
         elevation = "!secret home_usa_elevation";
         unit_system = "metric";

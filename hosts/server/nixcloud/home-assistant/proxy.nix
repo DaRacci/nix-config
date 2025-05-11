@@ -6,7 +6,7 @@
         inherit (config.services.home-assistant.config) http;
       in
       ''
-        reverse_proxy http://${http.host}:${toString http.port}
+        reverse_proxy http://${http.server_host}:${toString http.server_port}
       '';
   };
 
