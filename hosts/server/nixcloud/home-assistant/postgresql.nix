@@ -5,7 +5,7 @@ _: {
 
   services = {
     home-assistant.config = {
-      recorder.db_url = "!secret POSTGRESDB_URL";
+      recorder.db_url = "!secret POSTGRESQL_URL";
     };
   };
 }
