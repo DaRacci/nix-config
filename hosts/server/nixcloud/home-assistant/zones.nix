@@ -8,6 +8,7 @@
         longitude = "!secret home_usa_longitude";
         elevation = "!secret home_usa_elevation";
         unit_system = "metric";
+        temperature_unit = "C";
         time_zone = "America/Los_Angeles";
       };
 

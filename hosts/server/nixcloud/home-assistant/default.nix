@@ -21,6 +21,7 @@
       openFirewall = true;
       package = pkgs.home-assistant.override { extraPackages = ps: [ ps.psycopg2 ]; };
 
+      configWritable = true;
       config = {
         frontend = { };
         history = { };
