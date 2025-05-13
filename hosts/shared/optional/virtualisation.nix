@@ -70,13 +70,17 @@ in
             }).fd
           ];
         };
-      };
 
-      # deviceACL = [
-      #   "/dev/vfio/vfio"
-      #   "/dev/kvm"
-      #   "/dev/shm/looking-glass"
-      # ];
+        verbatimConfig = ''
+          cgroup_device_acl = [
+            "/dev/null", "/dev/full", "/dev/zero",
+            "/dev/random", "/dev/urandom",
+            "/dev/ptmx", "/dev/kvm", "/dev/kqemu",
+            "/dev/rtc","/dev/hpet", "/dev/vfio/vfio",
+            "/dev/kvmfr0"
+          ]
+        '';
+      };
     };
   };
 
@@ -509,7 +513,7 @@ in
   };
 
   services.udev.extraRules = ''
-    SUBSYSTEM=="kvmfr", OWNER="user", GROUP="kvm", MODE="0660";
+    SUBSYSTEM=="kvmfr", OWNER="racci", GROUP="kvm", MODE="0660";
   '';
 
   environment = {
