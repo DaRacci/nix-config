@@ -12,6 +12,8 @@
       nil
       shellcheck
       shfmt
+      powershell
+      powershell-editor-services
 
       libz
     ];
@@ -54,11 +56,10 @@
         default_width = 640;
         default_height = 320;
 
-        default_open_ai_model = null;
         enable_experimental_live_diffs = true;
         default_model = {
-          provider = "zed.dev";
-          model = "claude-3-7-sonnet-latest";
+          provider = "copilot_chat";
+          model = "o4-mini";
         };
       };
 
@@ -89,6 +90,8 @@
       };
 
       edit_predictions = {
+        mode = "eager";
+        enabled_in_assistant = true;
         disabled_globs = [
           "**/.env*"
           "**/*.pem"
@@ -157,6 +160,10 @@
             flake-parts.expr = "(builtins.getFlake \"/persist/nix-config\").debug.options";
             flake-parts2.expr = "(builtins.getFlake \"/persist/nix-config\").currentSystem.options";
           };
+        };
+
+        powershell-es = {
+          binary.path = lib.getBin pkgs.powershell-editor-services;
         };
       };
 
