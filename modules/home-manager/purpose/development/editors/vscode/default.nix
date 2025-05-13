@@ -92,10 +92,13 @@ in
               "window.zoomLevel" = 3;
               "window.titleBarStyle" = "custom";
 
+              "terminal.integrated.fontSize" = lib.mkForce 12;
+
               "explorer.excludeGitIgnore" = true;
               #endregion
 
               "editor.formatOnSave" = true;
+              "editor.formatOnSaveMode" = "modificationsIfAvailable";
               "editor.autoClosingQuotes" = "always";
               "editor.autoClosingBrackets" = "always";
               "editor.inlineSuggest.enabled" = true;
