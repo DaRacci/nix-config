@@ -11,6 +11,7 @@
   ];
 
   hardware = {
+    cooling.enable = false;
     graphics.manufacturer = [
       "amd"
       "nvidia"
@@ -41,7 +42,7 @@
 
     display = {
       virtual = {
-        enable = true;
+        enable = false;
         resolution = "2048x2732";
         refreshRate = 120;
         edidBinary = ./ipad-pro-edid.bin;

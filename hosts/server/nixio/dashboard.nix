@@ -10,11 +10,15 @@
       settings = {
         appConfig = {
           language = "en-AU";
-          statusCheck = true;
-          statusCheckInterval = 300;
+          defaultOpeningMethod = "newtab";
+          faviconApi = "local";
           enableMultiTasking = true;
-          showSplashScreen = true;
+          preventWriteToDisk = true;
           disableUpdateChecks = true;
+
+          auth = {
+
+          };
 
           # TODO - Maybe replace with the ai searx instance?
           webSearch = {

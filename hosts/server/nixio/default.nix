@@ -52,6 +52,7 @@ let
 in
 {
   imports = [
+    ./tunnel
     (importFile ./adguard.nix)
     ./dashboard.nix
     (importFile ./database.nix)
