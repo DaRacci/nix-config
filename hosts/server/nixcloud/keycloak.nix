@@ -12,11 +12,7 @@
       hostname = "keycloak.racci.dev";
 
       proxy-protocol-enabled = true;
-      proxy-trusted-addresses = [
-        "192.168.1.0/24"
-        "192.168.2.0/24"
-        "100.0.0.0/8"
-      ];
+      proxy-trusted-addresses = "192.168.1.0/24,192.168.2.0/24,100.0.0.0/8";
     };
 
     database =
@@ -24,7 +20,7 @@
         db = config.server.database.postgres.keycloak;
       in
       {
-        createLocally = false;
+        useSSL = false;
         type = "postgresql";
         inherit (db) host port;
         username = db.user;
@@ -41,7 +37,7 @@
         cfg = config.services.keycloak.settings;
       in
       ''
-        reverse_proxy http://${cfg.http-host}:${cfg.http-port}
+        reverse_proxy http://${cfg.http-host}:${toString cfg.http-port}
       '';
   };
 }
