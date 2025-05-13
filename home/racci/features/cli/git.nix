@@ -4,9 +4,10 @@
     git = {
       enable = true;
       package = pkgs.gitAndTools.gitFull;
+      lfs.enable = true;
+
       userEmail = "me@racci.dev";
       userName = "DaRacci";
-      lfs.enable = false;
 
       ignores = [ ".idea" ];
 
