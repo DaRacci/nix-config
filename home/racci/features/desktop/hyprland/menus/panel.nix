@@ -52,6 +52,7 @@
       };
 
       bar = {
+        autoHide = "fullscreen";
         launcher.autoDetectIcon = true;
         media.show_active_only = true;
 
@@ -60,8 +61,10 @@
           show_total = true;
         };
 
+        # TODO - Specify Icon per Workspace Manually.
         workspaces = {
-          show_numbered = true;
+          monitorSpecific = true;
+          showWsIcons = true;
           spacing = 1.0;
         };
       };
