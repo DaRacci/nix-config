@@ -8,6 +8,8 @@
   imports = [
     "${flake}/home/shared/desktop/common"
     "${flake}/home/shared/desktop/wayland"
+
+    ./nvidia.nix
   ];
 
   wayland.windowManager.hyprland = {

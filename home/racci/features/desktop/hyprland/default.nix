@@ -18,7 +18,6 @@ with lib;
     ./lock-suspend.nix
     ./looks.nix
     ./menus
-    ./nvidia.nix
     ./workspaces.nix
   ];
 
@@ -52,6 +51,15 @@ with lib;
   home.packages = with pkgs; [ vigiland ];
 
   services.hyprpolkitagent.enable = true;
+
+  xdg.configFile."uwsm/env".text = config.lib.shell.exportAll {
+    #region Toolkit Backends
+    GTK_BACKEND = "wayland,x11";
+    QT_QPA_PLATFORM = "wayland;xcb";
+    # "SDL_VIDEODRIVER,wayland" # Breaks osu! hardware acceleration
+    CLUTTER_BACKEND = "wayland";
+    #endregion
+  };
 
   wayland.windowManager.hyprland = {
     systemd.enable = false;
@@ -160,27 +168,11 @@ with lib;
       general = {
         resize_on_border = true;
         no_focus_fallback = true;
-        layout = "hy3"; # "dwindle";
+        layout = "hy3";
         allow_tearing = true;
 
         snap.enabled = true;
       };
-
-      dwindle = {
-        preserve_split = true;
-        smart_split = true;
-        smart_resizing = true;
-        pseudotile = true;
-      };
-
-      env = [
-        #region Toolkit Backends
-        "GTK_BACKEND,wayland,x11"
-        "QT_QPA_PLATFORM,wayland;xcb"
-        # "SDL_VIDEODRIVER,wayland" # Breaks osu! hardware acceleration
-        "CLUTTER_BACKEND,wayland"
-        #endregion
-      ];
 
       layerrule =
         [
