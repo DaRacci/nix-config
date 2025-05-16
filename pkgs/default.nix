@@ -1,8 +1,5 @@
 { pkgs }:
 {
-  # Modding
-  ficsit-cli = pkgs.callPackage ./ficsit-cli { };
-
   # VR Stuff
   alvr = pkgs.callPackage ./alvr { };
 
