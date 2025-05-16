@@ -102,14 +102,6 @@
                     builders.system.build system n v
                 )
                 {
-                  nixe = {
-                    users = [ "racci" ];
-
-                    isoFormat = "iso";
-                    deviceType = "desktop";
-                    acceleration = "cuda";
-                  };
-
                   nixmi = {
                     users = [ "racci" ];
 
@@ -167,16 +159,6 @@
                     deviceType = "server";
                     acceleration = "rocm";
                   };
-
-                  #|----------------------|
-                  #|  Deprecated Systems  |
-                  #|----------------------|
-                  # surnix = {
-                  #   users = [ "racci" ];
-
-                  #   isoFormat = "iso";
-                  #   deviceType = "laptop";
-                  # };
                 };
 
             users = lib.genAttrs [ "racci" ] (name: builders.home.mkHomeManager system name { });

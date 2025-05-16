@@ -33,9 +33,6 @@ jobs:
       # TODO - Use a step to determine the hosts dynamically from the flake
       matrix:
         include:
-          - host: nixe
-            system: x86_64-linux
-            noBuild: true # Only until i can work out how to get this building with the limited space github runners have.
           - host: nixmi
             system: x86_64-linux
             extraSpace: true
@@ -105,7 +102,7 @@ jobs:
         run: nix eval --impure --accept-flake-config .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
 
       - name: Build ${{ matrix.host }}
-        if: matrix.noBuild != true
+        # if: matrix.noBuild != true
         env:
           _system: ${{ matrix.system }}
         run: nix build --impure --accept-flake-config .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel

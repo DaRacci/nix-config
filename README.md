@@ -47,7 +47,6 @@ This is my interpretation of the perfect nix flake, this powers my desktops, vms
 > These probably won't happen honestly
 
 - Cosmic Desktop once stabalised
-- SteamDeck like desktop mode
 
 [home-manager]: https://github.com/nix-community/home-manager
 [impermanence]: https://github.com/nix-community/impermanence
