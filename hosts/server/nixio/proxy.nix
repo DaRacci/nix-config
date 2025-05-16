@@ -59,6 +59,7 @@ _:
     package = pkgs.caddy;
     email = "admin@racci.dev";
 
+    # Certs are handled by acme
     globalConfig = ''
       auto_https "disable_certs"
     '';

@@ -102,8 +102,10 @@ in
                     "localhost"
                     "0.0.0.0"
                     "127.0.0.1"
+                    "[::]"
+                    "[::1]"
                     "::1"
-                  ] (builtins.genList (_: config.system.name) 4) value.extraConfig;
+                  ] (builtins.genList (_: config.system.name) 6) value.extraConfig;
             }
           ) config.server.proxy.virtualHosts)
         ))
