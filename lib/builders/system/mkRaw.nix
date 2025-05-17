@@ -38,7 +38,6 @@ rec {
           home-manager = {
             useUserPackages = true;
             useGlobalPkgs = true;
-            sharedModules = [ "${flake}/home/shared/global" ];
           };
 
           system.stateVersion = "25.05";

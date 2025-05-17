@@ -1,4 +1,5 @@
 {
+  flake,
   lib,
   name,
   userDirectory,
@@ -12,6 +13,7 @@
     homeDirectory = lib.mkDefault "/home/${name}";
 
     sessionPath = [ "$HOME/.local/bin" ];
+    stateVersion = "25.05";
   };
 
   sops = lib.mkIf (user != null) {
@@ -21,6 +23,7 @@
 
   imports =
     [
+      "${flake}/home/shared/global"
       "${userDirectory}/global.nix"
     ]
     ++ (

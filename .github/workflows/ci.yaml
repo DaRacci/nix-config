@@ -12,6 +12,126 @@ on:
         type: string
 
 jobs:
+  determine-affected:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      all-hosts: ${{ steps.set-matrix.outputs.all-hosts }}
+      build-all: ${{ steps.set-matrix.outputs.build-all }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup-nix
+        with:
+          arch: x86_64-linux
+          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
+          ATTIC_ENDPOINT: ${{ secrets.ATTIC_ENDPOINT }}
+          ATTIC_CACHE: ${{ secrets.ATTIC_CACHE }}
+          ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
+
+      - name: Get hosts from flake
+        id: get-hosts
+        run: |
+          ALL_HOSTS=$(nix flake show --impure --json | jq -r '.nixosConfigurations | keys | .[]' | jq -R . | jq -s .)
+          echo "All hosts from flake: $ALL_HOSTS"
+          echo "all-hosts=$ALL_HOSTS" >> "$GITHUB_OUTPUT"
+
+          # Special Properties
+          NO_BUILD=()
+          EXTRA_SPACE=("nixmi" "winix")
+
+          deviceTypes=$(find hosts -maxdepth 1 -type d -name '*' | grep -oP 'hosts/\K[^/]+' | grep -v shared)
+          echo "host-types=$(echo "$deviceTypes" | jq -R . | jq -s .)" >> "$GITHUB_OUTPUT"
+
+          users_imports="{}"
+          declare -a host_entries
+          for host in $(echo "$ALL_HOSTS" | jq -r '.[]'); do
+            noBuild=false
+            if [[ " ${NO_BUILD[*]} " = *" $host "* ]]; then
+              noBuild=true
+            fi
+            extraSpace=false
+            if [[ " ${EXTRA_SPACE[*]} " = *" $host "* ]]; then
+              extraSpace=true
+            fi
+
+            hostType="unknown"
+            for deviceType in $deviceTypes; do
+              if [ -d "hosts/$deviceType/$host" ]; then
+                hostType="$deviceType"
+                break
+              fi
+            done
+
+            imports=$(./utils/get-imports.nu "OS" "$host" | jq -c .)
+            users=$(nix eval --impure --json .#nixosConfigurations.nixmi.config.home-manager.users --apply builtins.attrNames | jq -c .)
+            for user in $(echo "$users" | jq -r '.[]'); do
+              if [[ "$(echo "$users_imports" | jq -r ".$user == null")" == "true" ]]; then
+                users_imports=$(echo "$users_imports" | jq \
+                  --arg username "$user" \
+                  --argjson user "$(./utils/get-imports.nu "HOME" "$user" | jq -c .)" \
+                  '.[$username] = $user')
+              fi
+
+              imports=$(jq -s '.[0] + .[1]' <(echo "$imports") <(echo "$users_imports" | jq -c ".$user"))
+            done
+
+            entry=$(jq -n \
+              --arg host "$host" \
+              --arg system "x86_64-linux" \
+              --arg hostType "$hostType" \
+              --argjson users "$users" \
+              --argjson imports "$imports" \
+              --argjson extraSpace "$extraSpace" \
+              --argjson noBuild "$noBuild" \
+              '{host: $host, system: $system, hostType: $hostType, users: $users, imports: $imports, extraSpace: $extraSpace, noBuild: $noBuild}')
+
+            host_entries+=("$entry")
+          done
+
+          HOST_DETAILS=$(jq -s 'map({key: .host, value: .}) | from_entries' <<<"${host_entries[@]}")
+          echo "Host details: $HOST_DETAILS"
+          echo "host-details=($HOST_DETAILS | jq -c .)" >> "$GITHUB_OUTPUT"
+
+      - name: Determine affected hosts
+        id: set-matrix
+        run: |
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -v '^D' || true)
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          HOST_DETAILS=$(echo "${{steps.get-hosts.outputs.host-details}}" | jq -c .)
+
+          declare -a build_hosts
+          if echo "$CHANGED_FILES" | grep -qE '(^flake\.nix$|^flake\.lock$|^lib/|^overlays/|^pkgs/)'; then
+            echo "Found changes in core files. All hosts will be rebuilt."
+            build_hosts=("$(echo "$HOST_DETAILS" | jq -r 'keys[]')")
+          else
+            rebuild_json=$(jq --argjson changed "$(jq -R -s -c . <<<"$CHANGED_FILES")" '
+              . as $hosts |
+              to_entries
+              | map(select(.value.imports |
+                  any( . as $imp | ($changed | index($imp)) )))
+              | map(.key)
+            ' <<<"$HOST_DETAILS")
+
+            mapfile -t build_hosts < <(jq -r '.[]' <<<"$rebuild_json")
+          fi
+
+          declare -a matrix_entries
+          for host in "${build_hosts[@]}"; do
+            entry=$(echo "$HOST_DETAILS" | jq -r ".$host")
+            matrix_entries+=("$entry")
+          done
+
+          MATRIX_JSON="$(printf '%s\n' "${matrix_entries[@]}" | jq -s .)"
+          echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
+
   checks:
     runs-on: ubuntu-latest
     steps:
@@ -24,34 +144,16 @@ jobs:
         uses: DeterminateSystems/flake-checker-action@main
 
   build:
+    needs: determine-affected
+    if: needs.determine-affected.outputs.matrix != '[]'
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.host }}-${{ matrix.system }}
       cancel-in-progress: true
     strategy:
       fail-fast: false
-      # TODO - Use a step to determine the hosts dynamically from the flake
       matrix:
-        include:
-          - host: nixmi
-            system: x86_64-linux
-            extraSpace: true
-          - host: winix
-            system: x86_64-linux
-          - host: nixai
-            system: x86_64-linux
-          - host: nixarr
-            system: x86_64-linux
-          - host: nixcloud
-            system: x86_64-linux
-          - host: nixdev
-            system: x86_64-linux
-          - host: nixio
-            system: x86_64-linux
-          - host: nixmon
-            system: x86_64-linux
-          - host: nixserv
-            system: x86_64-linux
+        include: ${{ fromJSON(needs.determine-affected.outputs.matrix) }}
 
     name: ${{ matrix.host }} on ${{ matrix.system }}
 
@@ -62,16 +164,18 @@ jobs:
           ref: ${{ inputs.branch }}
 
       - name: Free Disk Space
-        if: ${{ matrix.extraSpace == true && !env.ACT }}
+        if: ${{ matrix.extraSpace && !env.ACT }}
         uses: jlumbroso/free-disk-space@main
         with:
           swap-storage: true
           tool-cache: true
+
       - name: Create Dir for Mounting more Disk Space ❄
-        if: ${{ matrix.extraSpace == true && !env.ACT }}
+        if: ${{ matrix.extraSpace && !env.ACT }}
         run: sudo mkdir /nix
+
       - name: Maximize Disk Space
-        if: ${{ matrix.extraSpace == true && !env.ACT }}
+        if: ${{ matrix.extraSpace && !env.ACT }}
         uses: easimon/maximize-build-space@v10
         with:
           build-mount-path: /nix
@@ -83,8 +187,9 @@ jobs:
           temp-reserve-mb: 100
           swap-size-mb: 4096
           root-reserve-mb: 1024
+
       - name: Ensure correct permissions for /nix
-        if: ${{ matrix.extraSpace == true && !env.ACT }}
+        if: ${{ matrix.extraSpace && !env.ACT }}
         run: sudo chown -R root:root /nix
 
       - uses: ./.github/actions/setup-nix
@@ -102,7 +207,7 @@ jobs:
         run: nix eval --impure --accept-flake-config .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
 
       - name: Build ${{ matrix.host }}
-        # if: matrix.noBuild != true
+        if: ${{ !matrix.noBuild }}
         env:
           _system: ${{ matrix.system }}
         run: nix build --impure --accept-flake-config .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel

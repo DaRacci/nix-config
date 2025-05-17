@@ -161,7 +161,7 @@
                   };
                 };
 
-            users = lib.genAttrs [ "racci" ] (name: builders.home.mkHomeManager system name { });
+            users = lib.genAttrs [ "racci" "root" ] (name: builders.home.mkHomeManager system name { });
           in
           {
             nixosConfigurations = builtins.mapAttrs (_n: v: v.system) configurations;
