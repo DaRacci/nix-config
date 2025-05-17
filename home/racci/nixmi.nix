@@ -6,6 +6,7 @@
 {
   imports = [
     ./features/desktop/hyprland
+    ./features/desktop/plasma
 
     "${flake}/home/shared/features/games"
     "${flake}/home/shared/applications"
