@@ -14,6 +14,7 @@ with lib;
     "${flake}/home/shared/desktop/hyprland"
 
     ./actions.nix
+    ./display.nix
     ./input.nix
     ./lock-suspend.nix
     ./looks.nix
@@ -157,13 +158,10 @@ with lib;
     settings = {
       debug.disable_logs = true;
 
-      render = {
-        direct_scanout = 2;
+      ecosystem = {
+        no_update_news = true;
+        no_donation_nag = true;
       };
-
-      monitor = lib.mkAfter [
-        ", preferred, auto, 1" # Fallback Rule
-      ];
 
       general = {
         resize_on_border = true;

@@ -7,8 +7,8 @@
 let
   monitors = {
     left = "DP-1";
-    center = "DP-2";
-    right = "DP-3";
+    center = "DP-6";
+    right = "HDMI-A-1";
   };
 
   workspaces = {
@@ -52,7 +52,6 @@ let
       extraRules = {
         rounding = "false";
         shadow = "false";
-
       };
     };
     "9" = {
