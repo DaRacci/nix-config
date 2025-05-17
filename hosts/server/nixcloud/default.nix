@@ -4,7 +4,7 @@
     ./home-assistant
     ./homebox.nix
     ./immich.nix
-    ./keycloak.nix
+    ./identity.nix
     ./nextcloud.nix
   ];
 
