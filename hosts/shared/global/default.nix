@@ -1,8 +1,9 @@
 { pkgs, lib, ... }:
 {
   imports = [
+    ./hm-helpers
+
     ./generators.nix
-    ./hm-helper.nix
     ./locale.nix
     ./networking.nix
     ./nix.nix
