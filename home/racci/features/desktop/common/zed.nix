@@ -47,6 +47,10 @@
       restore_on_startup = "last_workspace";
       show_signature_help_after_edits = true;
 
+      features = {
+        edit_prediction_provider = "copilot";
+      };
+
       assistant = {
         enabled = true;
         version = "2";
@@ -60,6 +64,41 @@
         default_model = {
           provider = "copilot_chat";
           model = "o4-mini";
+        };
+
+        default_profile = "write";
+        profiles = {
+          write = {
+            name = "Write";
+            tools = {
+              open = true;
+              create_directory = true;
+              batch_tool = true;
+              code_actions = true;
+              code_symbols = true;
+              contents = true;
+              copy_path = true;
+              create_file = true;
+              delete_path = false;
+              diagnostics = true;
+              edit_file = true;
+              fetch = true;
+              list_directory = true;
+              move_path = true;
+              now = true;
+              find_path = true;
+              read_file = true;
+              grep = true;
+              rename = true;
+              symbol_info = true;
+              terminal = true;
+              thinking = true;
+              web_search = true;
+            };
+
+            enable_all_context_servers = true;
+            context_servers = { };
+          };
         };
       };
 
@@ -100,6 +139,17 @@
           "**/*.crt"
           "**/secrets.yml"
         ];
+      };
+
+      diagnostics = {
+        include_warnings = false;
+        inline = {
+          enabled = true;
+          update_debounce_ms = 150;
+          padding = 4;
+          min_column = 0;
+          max_severity = null;
+        };
       };
 
       scrollbar = {
@@ -154,16 +204,15 @@
         nixd.settings = {
           nixpkgs.expr = "import (builtins.getFlake \"/persist/nix-config\").inputs.nixpkgs { }";
           options = rec {
-            nixos.expr = "(builtins.getFlake \"/persist/nix-config\").nixosConfigurations.nixe.options";
+            nixos.expr = "(builtins.getFlake \"/persist/nix-config\").nixosConfigurations.(builtins.replaceStrings [\"\\n\"] [\"\"] (builtins.readFile /etc/hostname)).options";
             home-manager.expr = "${nixos.expr}.home-manager.users.type.getSubOptions []";
-            # home-manager.expr = "(builtins.getFlake \"/persist/nix-config\").homeConfigurations.racci.options";
             flake-parts.expr = "(builtins.getFlake \"/persist/nix-config\").debug.options";
             flake-parts2.expr = "(builtins.getFlake \"/persist/nix-config\").currentSystem.options";
           };
         };
 
         powershell-es = {
-          binary.path = lib.getBin pkgs.powershell-editor-services;
+          binary.path = lib.getExe pkgs.powershell-editor-services;
         };
       };
 
@@ -256,7 +305,17 @@
           ZELLIJ = "";
         };
       };
+
+      telemetry = {
+        diagnostics = false;
+        metrics = false;
+      };
     };
+  };
+
+  xdg.configFile."zed/settings.json" = {
+    force = true;
+
   };
 
   user.persistence.directories = [
