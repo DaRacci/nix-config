@@ -39,7 +39,6 @@ jobs:
         run: |
           ALL_HOSTS=$(nix flake show --impure --json | jq -r '.nixosConfigurations | keys | .[]' | jq -R . | jq -s .)
           echo "All hosts from flake: $ALL_HOSTS"
-          echo "all-hosts=$ALL_HOSTS" >> "$GITHUB_OUTPUT"
 
           # Special Properties
           NO_BUILD=()
