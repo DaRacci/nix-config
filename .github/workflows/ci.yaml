@@ -45,7 +45,7 @@ jobs:
           EXTRA_SPACE=("nixmi" "winix")
 
           deviceTypes=$(find hosts -maxdepth 1 -type d -name '*' | grep -oP 'hosts/\K[^/]+' | grep -v shared)
-          echo "host-types=$(echo "$deviceTypes" | jq -R . | jq -s .)" >> "$GITHUB_OUTPUT"
+          echo "host-types=$(echo "$deviceTypes" | jq -R . | jq -c -s .)" >> "$GITHUB_OUTPUT"
 
           users_imports="{}"
           declare -a host_entries
