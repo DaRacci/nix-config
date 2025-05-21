@@ -95,7 +95,7 @@ jobs:
 
           HOST_DETAILS=$(jq -s 'map({key: .host, value: .}) | from_entries' <<<"${host_entries[@]}")
           echo "Host details: $HOST_DETAILS"
-          echo "host-details=($HOST_DETAILS | jq -c .)" >> "$GITHUB_OUTPUT"
+          echo "host-details=$(echo "$HOST_DETAILS" | jq -c .)" >> "$GITHUB_OUTPUT"
 
       - name: Determine affected hosts
         id: set-matrix
