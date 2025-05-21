@@ -45,7 +45,7 @@ jobs:
           EXTRA_SPACE=("nixmi" "winix")
 
           deviceTypes=$(find hosts -maxdepth 1 -type d -name '*' | grep -oP 'hosts/\K[^/]+' | grep -v shared)
-          echo "host-types=$(echo "$deviceTypes" | jq -R . | jq -c -s .)" >> "$GITHUB_OUTPUT"
+          echo "host-types=\"$(echo "$deviceTypes" | jq -R . | jq -c -s .)\"" >> "$GITHUB_OUTPUT"
 
           users_imports="{}"
           declare -a host_entries
@@ -95,7 +95,7 @@ jobs:
 
           HOST_DETAILS=$(jq -s 'map({key: .host, value: .}) | from_entries' <<<"${host_entries[@]}")
           echo "Host details: $HOST_DETAILS"
-          echo "host-details=$(echo "$HOST_DETAILS" | jq -c .)" >> "$GITHUB_OUTPUT"
+          echo "host-details=\"$(echo "$HOST_DETAILS" | jq -c .)\"" >> "$GITHUB_OUTPUT"
 
       - name: Determine affected hosts
         id: set-matrix
