@@ -49,87 +49,135 @@ jobs:
 
           users_imports="{}"
           declare -a host_entries
-          for host in $(echo "$ALL_HOSTS" | jq -r '.[]'); do
-            noBuild=false
-            if [[ " ${NO_BUILD[*]} " = *" $host "* ]]; then
-              noBuild=true
-            fi
-            extraSpace=false
-            if [[ " ${EXTRA_SPACE[*]} " = *" $host "* ]]; then
-              extraSpace=true
-            fi
-
-            hostType="unknown"
-            for deviceType in $deviceTypes; do
-              if [ -d "hosts/$deviceType/$host" ]; then
-                hostType="$deviceType"
-                break
+          if [[ "$ALL_HOSTS" == "null" || -z "$ALL_HOSTS" ]]; then
+            echo "No hosts found in flake"
+            echo "host-details=\"{}\"" >> "$GITHUB_OUTPUT"
+          else
+            for host in $(echo "$ALL_HOSTS" | jq -r '.[]'); do
+              noBuild=false
+              if [[ " ${NO_BUILD[*]} " = *" $host "* ]]; then
+                noBuild=true
               fi
-            done
-
-            imports=$(./utils/get-imports.nu "OS" "$host" | jq -c .)
-            users=$(nix eval --impure --json .#nixosConfigurations.nixmi.config.home-manager.users --apply builtins.attrNames | jq -c .)
-            for user in $(echo "$users" | jq -r '.[]'); do
-              if [[ "$(echo "$users_imports" | jq -r ".$user == null")" == "true" ]]; then
-                users_imports=$(echo "$users_imports" | jq \
-                  --arg username "$user" \
-                  --argjson user "$(./utils/get-imports.nu "HOME" "$user" | jq -c .)" \
-                  '.[$username] = $user')
+              extraSpace=false
+              if [[ " ${EXTRA_SPACE[*]} " = *" $host "* ]]; then
+                extraSpace=true
               fi
 
-              imports=$(jq -s '.[0] + .[1]' <(echo "$imports") <(echo "$users_imports" | jq -c ".$user"))
+              hostType="unknown"
+              for deviceType in $deviceTypes; do
+                if [ -d "hosts/$deviceType/$host" ]; then
+                  hostType="$deviceType"
+                  break
+                fi
+              done
+
+              imports=$(./utils/get-imports.nu "OS" "$host" | jq -c . || echo "[]")
+              users=$(nix eval --impure --json .#nixosConfigurations.nixmi.config.home-manager.users --apply builtins.attrNames 2>/dev/null | jq -c . || echo "[]")
+              for user in $(echo "$users" | jq -r '.[]' 2>/dev/null || echo ""); do
+                if [[ -z "$user" ]]; then
+                  continue
+                fi
+                if [[ "$(echo "$users_imports" | jq -r ".$user == null")" == "true" ]]; then
+                  user_imports=$(./utils/get-imports.nu "HOME" "$user" 2>/dev/null | jq -c . || echo "[]")
+                  users_imports=$(echo "$users_imports" | jq \
+                    --arg username "$user" \
+                    --argjson user "$user_imports" \
+                    '.[$username] = $user')
+                fi
+
+                imports=$(jq -s '.[0] + .[1]' <(echo "$imports") <(echo "$users_imports" | jq -c ".$user"))
+              done
+
+              entry=$(jq -n \
+                --arg host "$host" \
+                --arg system "x86_64-linux" \
+                --arg hostType "$hostType" \
+                --argjson users "$users" \
+                --argjson imports "$imports" \
+                --argjson extraSpace "$extraSpace" \
+                --argjson noBuild "$noBuild" \
+                '{host: $host, system: $system, hostType: $hostType, users: $users, imports: $imports, extraSpace: $extraSpace, noBuild: $noBuild}')
+
+              host_entries+=("$entry")
             done
 
-            entry=$(jq -n \
-              --arg host "$host" \
-              --arg system "x86_64-linux" \
-              --arg hostType "$hostType" \
-              --argjson users "$users" \
-              --argjson imports "$imports" \
-              --argjson extraSpace "$extraSpace" \
-              --argjson noBuild "$noBuild" \
-              '{host: $host, system: $system, hostType: $hostType, users: $users, imports: $imports, extraSpace: $extraSpace, noBuild: $noBuild}')
-
-            host_entries+=("$entry")
-          done
-
-          HOST_DETAILS=$(jq -s 'map({key: .host, value: .}) | from_entries' <<<"${host_entries[@]}")
-          echo "Host details: $HOST_DETAILS"
-          echo "host-details=\"$(echo "$HOST_DETAILS" | jq -c .)\"" >> "$GITHUB_OUTPUT"
+            if [[ ${#host_entries[@]} -eq 0 ]]; then
+              echo "No valid host entries found"
+              echo "host-details=\"{}\"" >> "$GITHUB_OUTPUT"
+            else
+              HOST_DETAILS=$(jq -s 'map({key: .host, value: .}) | from_entries' <<<"${host_entries[@]}" || echo "{}")
+              echo "Host details: $HOST_DETAILS"
+              echo "host-details=\"$(echo "$HOST_DETAILS" | jq -c .)\"" >> "$GITHUB_OUTPUT"
+            fi
+          fi
 
       - name: Determine affected hosts
         id: set-matrix
         run: |
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -v '^D' || true)
+          if [[ -n "${{ github.event.before }}" ]]; then
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -v '^D' || true)
+          else
+            # If github.event.before is not available (e.g., on workflow_dispatch)
+            # Get all files in the repo as changed
+            CHANGED_FILES=$(find . -type f | grep -v "^./.git" || true)
+          fi
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
-          HOST_DETAILS=$(echo "${{steps.get-hosts.outputs.host-details}}" | jq -c .)
+          HOST_DETAILS="${{steps.get-hosts.outputs.host-details}}"
+
+          # Check if HOST_DETAILS is valid JSON
+          if ! echo "$HOST_DETAILS" | jq . &>/dev/null; then
+            echo "Invalid HOST_DETAILS JSON. Setting empty matrix."
+            echo "Raw JSON: $HOST_DETAILS"
+            echo "matrix=[]" >> "$GITHUB_OUTPUT"
+            echo "build-all=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
           declare -a build_hosts
           if echo "$CHANGED_FILES" | grep -qE '(^flake\.nix$|^flake\.lock$|^lib/|^overlays/|^pkgs/)'; then
             echo "Found changes in core files. All hosts will be rebuilt."
-            build_hosts=("$(echo "$HOST_DETAILS" | jq -r 'keys[]')")
+            build_hosts=("$(echo "$HOST_DETAILS" | jq -r 'keys[]' 2>/dev/null || echo "")")
+            echo "build-all=true" >> "$GITHUB_OUTPUT"
           else
-            rebuild_json=$(jq --argjson changed "$(jq -R -s -c . <<<"$CHANGED_FILES")" '
+            echo "build-all=false" >> "$GITHUB_OUTPUT"
+            changed_json=$(printf '%s\n' "$CHANGED_FILES" | jq -R . | jq -s -c . 2>/dev/null || echo "[]")
+            rebuild_json=$(jq --argjson changed "$changed_json" '
               . as $hosts |
               to_entries
               | map(select(.value.imports |
                   any( . as $imp | ($changed | index($imp)) )))
               | map(.key)
-            ' <<<"$HOST_DETAILS")
+            ' <<<"$HOST_DETAILS" 2>/dev/null || echo "[]")
 
-            mapfile -t build_hosts < <(jq -r '.[]' <<<"$rebuild_json")
+            mapfile -t build_hosts < <(jq -r '.[]' <<<"$rebuild_json" 2>/dev/null || echo "")
           fi
 
           declare -a matrix_entries
           for host in "${build_hosts[@]}"; do
-            entry=$(echo "$HOST_DETAILS" | jq -r ".$host")
-            matrix_entries+=("$entry")
+            if [[ -z "$host" ]]; then
+              continue
+            fi
+            entry=$(echo "$HOST_DETAILS" | jq -r ".$host" 2>/dev/null)
+            if [[ -n "$entry" && "$entry" != "null" ]]; then
+              matrix_entries+=("$entry")
+            fi
           done
 
-          MATRIX_JSON="$(printf '%s\n' "${matrix_entries[@]}" | jq -s .)"
-          echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
+          if [[ ${#matrix_entries[@]} -eq 0 ]]; then
+            echo "No valid matrix entries found"
+            echo "matrix=[]" >> "$GITHUB_OUTPUT"
+          else
+            MATRIX_JSON="$(printf '%s\n' "${matrix_entries[@]}" | jq -s . 2>/dev/null || echo "[]")"
+            # Ensure matrix is valid JSON
+            if [[ -z "$MATRIX_JSON" || "$MATRIX_JSON" == "null" ]]; then
+              echo "matrix=[]" >> "$GITHUB_OUTPUT"
+            else
+              echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
+              echo "all-hosts=\"$(echo "$HOST_DETAILS" | jq -r 'keys' 2>/dev/null || echo "[]")\"" >> "$GITHUB_OUTPUT"
+            fi
+          fi
 
   checks:
     runs-on: ubuntu-latest

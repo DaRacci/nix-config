@@ -1,6 +1,8 @@
 #!/usr/bin/env nix-shell
 #!nix-shell -i nu -p nushell nix jq
 
+use std/log
+
 def main [
   type: string,
   system: string
@@ -12,8 +14,8 @@ def main [
   } else if $type == "HOME" {
       nix eval --impure --json $".#homeConfigurations.($system)" --apply $"(cat ./utils/get-hm-imports.nix)" | from json
   } else {
-      echo "Invalid type. Use 'OS' or 'HOME'."
-      return
+      log critical "Invalid type: $type; expected 'OS' or 'HOME'"
+      exit 1
   }
 
   let our_imports = $all_imports
