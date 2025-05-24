@@ -4,25 +4,16 @@ on:
   push:
   workflow_dispatch:
   workflow_call:
-    inputs:
-      branch:
-        description: Branch name to build on
-        default: ""
-        required: false
-        type: string
 
 jobs:
   determine-affected:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
-      all-hosts: ${{ steps.set-matrix.outputs.all-hosts }}
-      build-all: ${{ steps.set-matrix.outputs.build-all }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch }}
           fetch-depth: 0
 
       - uses: ./.github/actions/setup-nix
@@ -107,7 +98,11 @@ jobs:
             else
               HOST_DETAILS=$(jq -s 'map({key: .host, value: .}) | from_entries' <<<"${host_entries[@]}" || echo "{}")
               echo "Host details: $HOST_DETAILS"
-              echo "host-details=\"$(echo "$HOST_DETAILS" | jq -c .)\"" >> "$GITHUB_OUTPUT"
+              {
+                echo 'host-details<<EOF'
+                echo "$HOST_DETAILS" | jc -c .
+                echo EOF
+              } >> "$GITHUB_OUTPUT"
             fi
           fi
 
@@ -124,14 +119,13 @@ jobs:
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
-          HOST_DETAILS="${{steps.get-hosts.outputs.host-details}}"
+          HOST_DETAILS='${{steps.get-hosts.outputs.host-details}}'
 
           # Check if HOST_DETAILS is valid JSON
           if ! echo "$HOST_DETAILS" | jq . &>/dev/null; then
             echo "Invalid HOST_DETAILS JSON. Setting empty matrix."
             echo "Raw JSON: $HOST_DETAILS"
             echo "matrix=[]" >> "$GITHUB_OUTPUT"
-            echo "build-all=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -139,9 +133,7 @@ jobs:
           if echo "$CHANGED_FILES" | grep -qE '(^flake\.nix$|^flake\.lock$|^lib/|^overlays/|^pkgs/)'; then
             echo "Found changes in core files. All hosts will be rebuilt."
             build_hosts=("$(echo "$HOST_DETAILS" | jq -r 'keys[]' 2>/dev/null || echo "")")
-            echo "build-all=true" >> "$GITHUB_OUTPUT"
           else
-            echo "build-all=false" >> "$GITHUB_OUTPUT"
             changed_json=$(printf '%s\n' "$CHANGED_FILES" | jq -R . | jq -s -c . 2>/dev/null || echo "[]")
             rebuild_json=$(jq --argjson changed "$changed_json" '
               . as $hosts |
@@ -174,8 +166,11 @@ jobs:
             if [[ -z "$MATRIX_JSON" || "$MATRIX_JSON" == "null" ]]; then
               echo "matrix=[]" >> "$GITHUB_OUTPUT"
             else
-              echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
-              echo "all-hosts=\"$(echo "$HOST_DETAILS" | jq -r 'keys' 2>/dev/null || echo "[]")\"" >> "$GITHUB_OUTPUT"
+              {
+                echo "matrix<<EOF"
+                echo "$MATRIX_JSON" | jc -c .
+                echo EOF
+              } >> "$GITHUB_OUTPUT"
             fi
           fi
 
@@ -184,8 +179,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.branch }}
 
       - name: Check Nix flake Nixpkgs inputs
         uses: DeterminateSystems/flake-checker-action@main
@@ -207,8 +200,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.branch }}
 
       - name: Free Disk Space
         if: ${{ matrix.extraSpace && !env.ACT }}
@@ -275,8 +266,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.branch }}
 
       - uses: ./.github/actions/setup-nix
         with:
