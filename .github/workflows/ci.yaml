@@ -100,7 +100,7 @@ jobs:
               echo "Host details: $HOST_DETAILS"
               {
                 echo 'host-details<<EOF'
-                echo "$HOST_DETAILS" | jc -c .
+                echo "$HOST_DETAILS" | jq -c .
                 echo EOF
               } >> "$GITHUB_OUTPUT"
             fi
