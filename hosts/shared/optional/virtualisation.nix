@@ -513,7 +513,7 @@ in
   };
 
   services.udev.extraRules = ''
-    SUBSYSTEM=="kvmfr", OWNER="racci", GROUP="kvm", MODE="0660";
+    SUBSYSTEM=="kvmfr", OWNER="racci", GROUP="kvm", MODE="0660"
   '';
 
   environment = {

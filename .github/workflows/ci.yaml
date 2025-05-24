@@ -168,7 +168,7 @@ jobs:
             else
               {
                 echo "matrix<<EOF"
-                echo "$MATRIX_JSON" | jc -c .
+                echo "$MATRIX_JSON" | jq -c .
                 echo EOF
               } >> "$GITHUB_OUTPUT"
             fi
