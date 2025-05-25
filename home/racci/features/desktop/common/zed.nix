@@ -51,7 +51,7 @@
         edit_prediction_provider = "copilot";
       };
 
-      assistant = {
+      agent = {
         enabled = true;
         version = "2";
 
@@ -130,7 +130,7 @@
 
       edit_predictions = {
         mode = "eager";
-        enabled_in_assistant = true;
+        enabled_in_text_threads = true;
         disabled_globs = [
           "**/.env*"
           "**/*.pem"
