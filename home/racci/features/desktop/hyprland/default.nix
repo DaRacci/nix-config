@@ -164,6 +164,14 @@ with lib;
         enforce_permissions = true;
       };
 
+      permission = lib.map (plugin: "${plugin}/lib/lib${plugin.pname}.so,plugin,allow") (
+        with pkgs.hyprlandPlugins;
+        [
+          hy3
+          hypr-dynamic-cursors
+        ]
+      );
+
       general = {
         resize_on_border = true;
         no_focus_fallback = true;

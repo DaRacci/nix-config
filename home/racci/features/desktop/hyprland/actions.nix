@@ -8,10 +8,10 @@ let
   inherit (lib) getExe;
 in
 {
-  wayland.windowManager.hyprland.settings = {
-    bind =
-      let
-        ocrRegion = pkgs.writeShellApplication {
+  wayland.windowManager.hyprland.settings =
+    let
+      ocrRegion = lib.getExe (
+        pkgs.writeShellApplication {
           name = "ocrRegion";
           runtimeInputs = [
             pkgs.uutils-coreutils-noprefix
@@ -37,9 +37,11 @@ in
               --category="action" \
               --icon="edit-copy";
           '';
-        };
+        }
+      );
 
-        screenshot = pkgs.writeShellApplication {
+      screenshot = lib.getExe (
+        pkgs.writeShellApplication {
           name = "screenshot";
           runtimeInputs = [
             pkgs.grimblast
@@ -81,10 +83,12 @@ in
               satty --filename "''${savePath}" --fullscreen --output-filename "''${savePathAnnotated}";
             fi
           '';
-        };
+        }
+      );
 
-        # TODO: Allow zooming in and out with mouse wheel
-        colourPicker = pkgs.writeShellApplication {
+      # TODO: Allow zooming in and out with mouse wheel
+      colourPicker = lib.getExe (
+        pkgs.writeShellApplication {
           name = "colourPicker";
           runtimeInputs = with pkgs; [
             hyprpicker
@@ -98,18 +102,26 @@ in
             hyprpicker --render-inactive --autocopy;
             hyprctl keyword input:sensitivity "$senitivityBefore";
           '';
-        };
-      in
-      [
+        }
+      );
+    in
+    {
+      bind = [
         # OCR
-        "Super+Shift,T,exec,${getExe ocrRegion}"
+        "Super+Shift,T,exec,${ocrRegion}"
 
         # Color Picker
-        "Super+Shift,C,exec,${getExe colourPicker}"
+        "Super+Shift,C,exec,${colourPicker}"
 
         # Screenshot
-        ",Print,exec,${getExe screenshot} area"
-        "SUPER,Print,exec,${getExe screenshot} output"
+        ",Print,exec,${screenshot} area"
+        "SUPER,Print,exec,${screenshot} output"
       ];
-  };
+
+      permission = builtins.map (exe: "${exe},screencopy,allow") [
+        ocrRegion
+        screenshot
+        colourPicker
+      ];
+    };
 }
