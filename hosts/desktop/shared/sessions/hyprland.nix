@@ -5,13 +5,14 @@
   ...
 }:
 {
-  programs.uwsm.enable = true;
-
-  programs.hyprland = {
-    enable = true;
-    withUWSM = true;
-    package = pkgs.hyprland;
-    portalPackage = pkgs.xdg-desktop-portal-hyprland;
+  programs = {
+    uwsm.enable = true;
+    hyprland = {
+      enable = true;
+      withUWSM = true;
+      package = pkgs.hyprland;
+      portalPackage = pkgs.xdg-desktop-portal-hyprland;
+    };
   };
 
   hardware.graphics = {
@@ -30,22 +31,7 @@
     hyprlock = { };
   };
 
-  xdg.portal = {
-    enable = true;
-    xdgOpenUsePortal = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-
-    config = {
-      Hyprland = {
-        default = [
-          "hyprland"
-          "gtk"
-        ];
-
-        "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
-      };
-    };
-  };
+  xdg.portal.enable = true;
 
   # Fix from https://github.com/hyprwm/Hyprland/issues/7704#issuecomment-2449563257
   environment.etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool-in-wayland-compositors.json" =
