@@ -87,7 +87,9 @@ in
             userSettings = {
               #region Look & Feel
               "workbench.startupEditor" = "none";
+
               "workbench.iconTheme" = "material-icon-theme";
+              "markdown-preview-github-styles.colorTheme" = "dark";
 
               "window.zoomLevel" = 3;
               "window.titleBarStyle" = "custom";
@@ -140,6 +142,8 @@ in
               "evenBetterToml.formatter.arrayAutoExpand" = true;
               "evenBetterToml.formatter.arrayTrailingComma" = true;
               "evenBetterToml.formatter.columnWidth" = 80;
+
+              "markdown.validate.enabled" = true;
               #endregion
 
               #region Telemetry & Data Collection

@@ -9,7 +9,7 @@
     papers # PDF viewer
     decoder # QR codes
     dialect # Translation
-    planify
+    # planify
     gnome-clocks
     gnome-calculator
     gnome-graphs

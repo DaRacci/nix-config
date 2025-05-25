@@ -53,10 +53,14 @@ in
 
     xdg.configFile."act/actrc".text = ''
       -P ubuntu-latest=catthehacker/ubuntu:act-latest
-      -P ubuntu-latest=catthehacker/ubuntu:22.04
-      -P ubuntu-latest=catthehacker/ubuntu:20.04
-      -P ubuntu-latest=catthehacker/ubuntu:18.04
+      -P ubuntu-24.04=catthehacker/ubuntu:act-24.04
+      -P ubuntu-22.04=catthehacker/ubuntu:act-22.04
+      -P ubuntu-20.04=catthehacker/ubuntu:act-20.04
+      -P ubuntu-18.04=catthehacker/ubuntu:act-18.04
       --use-new-action-cache
+      --action-offline-mode
+      --pull false
+      --artifact-server-path /tmp/artifacts
     '';
 
     user.persistence.directories = [

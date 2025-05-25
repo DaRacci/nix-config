@@ -29,6 +29,7 @@ EXCLUDE=(
 
   "$HOME_PREFIX/.cache"
 
+  "$HOME_PREFIX/.cargo"
   "$HOME_PREFIX/.mozilla/firefox/*/cache2/entries"
   "$HOME_PREFIX/.steam"
   "$HOME_PREFIX/.pki"
@@ -71,6 +72,5 @@ for app in "${ELECTRON_APPS[@]}"; do
   done
 done
 
-# Join it into a string separated by commas
 EXCLUDE_STR=$(IFS=,; echo "${EXCLUDE[*]}")
 fd --one-file-system --prune --base-directory / --type f --hidden --exclude "{$EXCLUDE_STR}" "$@"

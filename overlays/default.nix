@@ -83,7 +83,7 @@ in
     discord = prev.discord.override {
       # OpenASAR completely breaks Discord
       # withOpenASAR = true;
-      withVencord = true;
+      withVencord = false;
       nss = final.nss_latest;
     };
 

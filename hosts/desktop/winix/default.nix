@@ -22,8 +22,7 @@
   };
 
   services = {
-    dleyna-renderer.enable = false;
-    dleyna-server.enable = false;
+    dleyna.enable = false;
     power-profiles-daemon.enable = false;
     libinput.enable = false;
 
