@@ -5,7 +5,6 @@
     gnome-maps
     door-knocker
     bustle
-    luminance
   ];
 
   user.persistence.directories = [ ".local/share/gnome-maps" ];
