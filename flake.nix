@@ -46,7 +46,6 @@
             inputs.lix-module.overlays.lixFromNixpkgs
             inputs.angrr.overlays.default
             inputs.hyprpanel.overlay
-            inputs.gauntlet.overlays.default
           ] ++ (builtins.attrValues (import ./overlays { inherit self inputs lib; }));
         };
     in
@@ -297,13 +296,26 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
     # Upstream & PR Programs
-    lan-mouse.url = "github:feschber/lan-mouse";
-    vigiland.url = "github:jappie3/vigiland";
+    lan-mouse = {
+      url = "github:feschber/lan-mouse";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    vigiland = {
+      url = "github:jappie3/vigiland";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     protonup-rs.url = "github:liperium/nixpkgs/protonuprs-init";
     lact-module.url = "github:poperigby/nixpkgs/lact-module";
     lact.url = "github:cything/nixpkgs/lact";
     flaresolverr.url = "github:paveloom/nixpkgs/flaresolverr";
     stl-thumb.url = "github:SyntaxualSugar/stl-thumb_0.5.0";
+
+    # Misc Flake Inputs for other Inputs
+    systems.url = "github:nix-systems/default";
+    flake-utils = {
+      url = "github:numtide/flake-utils";
+      inputs.systems.follows = "systems";
+    };
 
     # Utils & Helpers for usage inside the flake
     flake-parts = {
@@ -323,11 +335,18 @@
     };
     devenv = {
       url = "github:cachix/devenv";
-      inputs.flake-compat.follows = "flake-compat";
+      inputs = {
+        cachix.follows = "";
+        flake-compat.follows = "flake-compat";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
     nix4vscode = {
       url = "github:nix-community/nix4vscode/nix4vscode-v0.0.8";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        systems.follows = "systems";
+      };
     };
 
     # Base Modules
@@ -347,6 +366,7 @@
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
         flake-compat.follows = "flake-compat";
+        pre-commit-hooks-nix.follows = "";
       };
     };
     nixd = {
@@ -354,22 +374,45 @@
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
+        treefmt-nix.follows = "treefmt";
       };
     };
     lix-module = {
       url = "git+https://git.lix.systems/lix-project/nixos-module.git?ref=stable";
       inputs = {
         nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
         lix.follows = "";
       };
     };
-    stylix.url = "github:danth/stylix";
+    stylix = {
+      url = "github:danth/stylix";
+      inputs = {
+        flake-compat.follows = "flake-compat";
+        flake-utils.follows = "flake-utils";
+        git-hooks.follows = "";
+        home-manager.follows = "home-manager";
+        nur.follows = "nur";
+      };
+    };
     nix-alien = {
       url = "github:thiagokokada/nix-alien";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-compat.follows = "flake-compat";
     };
-    treefmt.url = "github:numtide/treefmt-nix";
-    angrr.url = "github:linyinfeng/angrr";
+    treefmt = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    angrr = {
+      url = "github:linyinfeng/angrr";
+      inputs = {
+        treefmt-nix.follows = "treefmt";
+        nixpkgs.follows = "nixpkgs";
+        flake-parts.follows = "flake-parts";
+        flake-compat.follows = "flake-compat";
+      };
+    };
     nixput = {
       url = "github:DaRacci/nixput";
       inputs = {
@@ -397,21 +440,32 @@
       url = "github:Jovian-Experiments/Jovian-NixOS";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixarr.url = "github:rasmus-kirk/nixarr";
-
-    # Desktop Stuff
-    hyprpanel.url = "github:Jas-SinghFSU/HyprPanel";
-    gauntlet = {
-      url = "github:project-gauntlet/gauntlet";
+    nixarr = {
+      url = "github:rasmus-kirk/nixarr";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.website-builder.follows = "";
+    };
+    nur = {
+      url = "github:nix-community/NUR";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
-        flake-compat.follows = "flake-compat";
+        treefmt-nix.follows = "treefmt";
       };
+    };
+
+    # Desktop Stuff
+    hyprpanel = {
+      url = "github:Jas-SinghFSU/HyprPanel";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     winapps = {
       url = "github:winapps-org/winapps";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-compat.follows = "flake-compat";
+        flake-utils.follows = "flake-utils";
+      };
     };
     nixvirt = {
       url = "github:AshleyYakeley/NixVirt";
@@ -421,17 +475,27 @@
     # Misc Plugins
     bash-env-json = {
       url = "github:tesujimath/bash-env-json";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
     };
     bash-env-nushell = {
       url = "github:tesujimath/bash-env-nushell";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        bash-env-json.follows = "bash-env-json";
+        flake-utils.follows = "flake-utils";
+      };
     };
 
     # Other misc modules
     vscode-extensions = {
       url = "github:nix-community/nix-vscode-extensions";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
     };
 
     # Resources
@@ -442,6 +506,11 @@
     tinted-theming = {
       url = "github:tinted-theming/schemes";
       flake = false;
+    };
+    stylix-wallpaper = {
+      url = "https://nextcloud.racci.dev/s/Hy8qkAWYwqSTjKp/download/17.jpeg";
+      flake = false;
+      type = "file";
     };
   };
 }
