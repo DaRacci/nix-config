@@ -5,21 +5,22 @@ inputs:
   arch:
     description: "What architecture to install for"
     required: true
+    default: "x86_64-linux"
   TS_OAUTH_CLIENT_ID:
     description: "Tailscale OAuth Client ID"
-    required: true
+    required: false
   TS_OAUTH_SECRET:
     description: "Tailscale OAuth Secret"
-    required: true
+    required: false
   ATTIC_ENDPOINT:
     description: "Attic endpoint"
-    required: true
+    required: false
   ATTIC_CACHE:
     description: "Attic cache"
-    required: true
+    required: false
   ATTIC_TOKEN:
     description: "Attic token"
-    required: true
+    required: false
 
 runs:
   using: composite
@@ -27,11 +28,13 @@ runs:
     - uses: DeterminateSystems/nix-installer-action@main
       with:
         source-url: "${{ format('https://install.lix.systems/lix/lix-installer-{0}', inputs.arch) }}"
+        extra-conf: |
+          accept-flake-config = true
 
     # Setup TS so we can access the cache
     - name: Tailscale
       uses: tailscale/github-action@v3
-      if: ${{ !env.ACT }}
+      if: ${{ !env.ACT && inputs.TS_OAUTH_CLIENT_ID && inputs.TS_OAUTH_SECRET }}
       with:
         oauth-client-id: ${{ inputs.TS_OAUTH_CLIENT_ID }}
         oauth-secret: ${{ inputs.TS_OAUTH_SECRET }}
@@ -39,7 +42,7 @@ runs:
 
     - name: Setup Attic cache
       uses: ryanccn/attic-action@v0
-      if: ${{ !env.ACT }}
+      if: ${{ !env.ACT && inputs.ATTIC_ENDPOINT && inputs.ATTIC_CACHE && inputs.ATTIC_TOKEN }}
       with:
         endpoint: ${{ inputs.ATTIC_ENDPOINT }}
         cache: ${{ inputs.ATTIC_CACHE }}

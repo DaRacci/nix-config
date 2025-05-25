@@ -36,12 +36,7 @@
           config = {
             allowUnfree = true;
             allowUnfreePredicate = _: true;
-            permittedInsecurePackages = [
-              "aspnetcore-runtime-6.0.36"
-              "dotnet-sdk-6.0.428"
-              "dotnet-sdk-7.0.410"
-              "dotnet-runtime-7.0.20"
-            ];
+            permittedInsecurePackages = [ ];
 
             cudaSupport = cuda;
             rocmSupport = rocm;
@@ -362,7 +357,7 @@
       };
     };
     lix-module = {
-      url = "https://git.lix.systems/lix-project/nixos-module/archive/stable.tar.gz";
+      url = "git+https://git.lix.systems/lix-project/nixos-module.git?ref=stable";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         lix.follows = "";

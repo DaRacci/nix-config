@@ -6,108 +6,248 @@ on:
   workflow_call:
 
 jobs:
-  determine-affected:
+  discover-packages:
+    name: Discover Packages
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.get-packages.outputs.matrix }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-nix
 
+      - name: Get packages from flake
+        id: get-packages
+        run: |
+          PACKAGES_WITH_ARCH=$(nix flake show --impure --json | jq '
+            .packages | {
+              package: [ to_entries[].value | keys[] | select(startswith("devenv-") | not) ] | unique,
+              arch: [ keys[] ]
+            }
+          ')
+          echo "All architectures with packages: $PACKAGES_WITH_ARCH"
+          {
+            echo 'matrix<<EOF'
+            echo "$PACKAGES_WITH_ARCH"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+  build-packages:
+    needs: discover-packages
+    if: ${{ needs.discover-packages.outputs.matrix != '[]' }}
+    strategy:
+      matrix: ${{ fromJson(needs.discover-packages.outputs.matrix) }}
+      fail-fast: false
+    runs-on: ${{ matrix.system == 'aarch64-linux' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    name: Build package ${{ matrix.package }} on ${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-nix
         with:
-          arch: x86_64-linux
+          arch: ${{ matrix.arch }}
           TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
           ATTIC_ENDPOINT: ${{ secrets.ATTIC_ENDPOINT }}
           ATTIC_CACHE: ${{ secrets.ATTIC_CACHE }}
           ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
 
+      - name: Build Package
+        run: nix build .#${{ matrix.package }} -L --show-trace --no-link --print-out-paths
+
+  discover-users:
+    name: Discover Users
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.get-users.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-nix
+
+      - name: Get users from flake
+        id: get-users
+        run: |
+          ALL_USERS=$(nix eval --json ".#homeConfigurations" --apply builtins.attrNames)
+          echo "All users from flake: $ALL_USERS"
+          {
+            echo 'matrix<<EOF'
+            echo "$ALL_USERS" | jq -c -s '.[] | map({user: .})' || echo "[]"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+  enrich-users:
+    runs-on: ubuntu-latest
+    needs: discover-users
+    if: ${{ needs.discover-users.outputs.matrix != '[]' }}
+    strategy:
+      matrix:
+        include: ${{ fromJson(needs.discover-users.outputs.matrix) }}
+      fail-fast: false
+    name: Enrich user ${{ matrix.user }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-nix
+
+      - name: Get User Imports
+        run: |
+          USER_IMPORTS=$(./utils/get-imports.nu "HOME" "${{ matrix.user }}" | jq -c . || echo "[]")
+          echo "$USER_IMPORTS" > imports.json
+      - name: Upload Imports Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.user }}-user-imports
+          path: imports.json
+          if-no-files-found: error
+
+  discover-hosts:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.get-hosts.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-nix
+
       - name: Get hosts from flake
         id: get-hosts
         run: |
-          ALL_HOSTS=$(nix flake show --impure --json | jq -r '.nixosConfigurations | keys | .[]' | jq -R . | jq -s .)
+          ALL_HOSTS=$(nix flake show --impure --json | jq -r '.nixosConfigurations | keys | .[]' | jq -R . | jq -s . || echo "[]")
           echo "All hosts from flake: $ALL_HOSTS"
+          {
+            echo 'matrix<<EOF'
+            echo "$ALL_HOSTS"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+  enrich-hosts:
+    runs-on: ubuntu-latest
+    needs: [discover-hosts, enrich-users]
+    if: ${{ needs.discover-hosts.outputs.matrix != '[]' }}
+    strategy:
+      matrix:
+        host: ${{ fromJson(needs.discover-hosts.outputs.matrix) }}
+      fail-fast: false
+    name: Enrich host ${{ matrix.host }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-nix
 
-          # Special Properties
-          NO_BUILD=()
-          EXTRA_SPACE=("nixmi" "winix")
+      - name: Get Host Imports
+        id: get-imports
+        run: |
+          HOST_IMPORTS=$(./utils/get-imports.nu "OS" "${{ matrix.host }}" | jq -c . || echo "[]")
+          {
+            echo 'host-imports<<EOF'
+            echo "$HOST_IMPORTS"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
 
-          deviceTypes=$(find hosts -maxdepth 1 -type d -name '*' | grep -oP 'hosts/\K[^/]+' | grep -v shared)
-          echo "host-types=\"$(echo "$deviceTypes" | jq -R . | jq -c -s .)\"" >> "$GITHUB_OUTPUT"
+      - name: Get Host Users
+        id: get-users
+        run: |
+          HOST_USERS=$(nix eval --impure --json .#nixosConfigurations.${{ matrix.host }}.config.home-manager.users --apply builtins.attrNames 2>/dev/null | jq -c . || echo "[]")
+          echo "Host users: $HOST_USERS"
+          {
+            echo 'host-users<<EOF'
+            echo "$HOST_USERS"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
 
-          users_imports="{}"
-          declare -a host_entries
-          if [[ "$ALL_HOSTS" == "null" || -z "$ALL_HOSTS" ]]; then
-            echo "No hosts found in flake"
-            echo "host-details=\"{}\"" >> "$GITHUB_OUTPUT"
-          else
-            for host in $(echo "$ALL_HOSTS" | jq -r '.[]'); do
-              noBuild=false
-              if [[ " ${NO_BUILD[*]} " = *" $host "* ]]; then
-                noBuild=true
-              fi
-              extraSpace=false
-              if [[ " ${EXTRA_SPACE[*]} " = *" $host "* ]]; then
-                extraSpace=true
-              fi
+      - name: Download User Imports Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-user-imports"
 
-              hostType="unknown"
-              for deviceType in $deviceTypes; do
-                if [ -d "hosts/$deviceType/$host" ]; then
-                  hostType="$deviceType"
-                  break
-                fi
-              done
+      - name: Aggregate Imports
+        run: |
+          HOST_IMPORTS='${{ steps.get-imports.outputs.host-imports }}'
+          HOST_USERS='${{ steps.get-users.outputs.host-users }}'
 
-              imports=$(./utils/get-imports.nu "OS" "$host" | jq -c . || echo "[]")
-              users=$(nix eval --impure --json .#nixosConfigurations.nixmi.config.home-manager.users --apply builtins.attrNames 2>/dev/null | jq -c . || echo "[]")
-              for user in $(echo "$users" | jq -r '.[]' 2>/dev/null || echo ""); do
-                if [[ -z "$user" ]]; then
-                  continue
-                fi
-                if [[ "$(echo "$users_imports" | jq -r ".$user == null")" == "true" ]]; then
-                  user_imports=$(./utils/get-imports.nu "HOME" "$user" 2>/dev/null | jq -c . || echo "[]")
-                  users_imports=$(echo "$users_imports" | jq \
-                    --arg username "$user" \
-                    --argjson user "$user_imports" \
-                    '.[$username] = $user')
-                fi
+          IMPORTS=$(echo "$HOST_IMPORTS" | jq -c . || echo "[]")
 
-                imports=$(jq -s '.[0] + .[1]' <(echo "$imports") <(echo "$users_imports" | jq -c ".$user"))
-              done
-
-              entry=$(jq -n \
-                --arg host "$host" \
-                --arg system "x86_64-linux" \
-                --arg hostType "$hostType" \
-                --argjson users "$users" \
-                --argjson imports "$imports" \
-                --argjson extraSpace "$extraSpace" \
-                --argjson noBuild "$noBuild" \
-                '{host: $host, system: $system, hostType: $hostType, users: $users, imports: $imports, extraSpace: $extraSpace, noBuild: $noBuild}')
-
-              host_entries+=("$entry")
-            done
-
-            if [[ ${#host_entries[@]} -eq 0 ]]; then
-              echo "No valid host entries found"
-              echo "host-details=\"{}\"" >> "$GITHUB_OUTPUT"
-            else
-              HOST_DETAILS=$(jq -s 'map({key: .host, value: .}) | from_entries' <<<"${host_entries[@]}" || echo "{}")
-              echo "Host details: $HOST_DETAILS"
-              {
-                echo 'host-details<<EOF'
-                echo "$HOST_DETAILS" | jq -c .
-                echo EOF
-              } >> "$GITHUB_OUTPUT"
+          for user in $(echo "$HOST_USERS" | jq -r '.[]' 2>/dev/null || echo ""); do
+            if [[ -z "$user" ]]; then
+              continue
             fi
-          fi
 
-      - name: Determine affected hosts
+            user_imports_file="$user-user-imports/imports.json"
+            if [[ -f "$user_imports_file" ]]; then
+              user_imports=$(jq -c . "$user_imports_file" || echo "[]")
+              IMPORTS=$(jq -s '.[0] + .[1]' <(echo "$IMPORTS") <(echo "$user_imports"))
+            else
+              echo "No imports found for user $user"
+            fi
+          done
+
+          echo "Aggregated imports for host ${{ matrix.host }}: $IMPORTS"
+          jq -n \
+            --arg host "${{ matrix.host }}" \
+            --arg system "x86_64-linux" \
+            --argjson imports "$IMPORTS" \
+            '{host: $host, system: $system, imports: $imports}' > "details.json"
+
+      - name: Upload Host Details Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "${{ matrix.host }}-host-details"
+          path: "details.json"
+          if-no-files-found: error
+  aggregate-hosts:
+    runs-on: ubuntu-latest
+    needs: enrich-hosts
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Host Details Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-host-details"
+
+      - name: Aggregate Host Details
         id: set-matrix
+        run: |
+          HOST_DETAILS=$(find . -wholename '*-host-details/details.json' -exec cat {} + | jq -s 'map({key: .host, value: .}) | from_entries' || echo "{}")
+          echo "Aggregated host details: $HOST_DETAILS"
+          {
+            echo 'matrix<<EOF'
+            echo "$HOST_DETAILS" | jq -c .
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: geekyeggo/delete-artifact@v5
+        if: ${{ always() }}
+        with:
+          name: "*-host-details.json"
+
+      - uses: geekyeggo/delete-artifact@v5
+        if: ${{ always() }}
+        with:
+          name: "*-user-imports.json"
+
+  determine-affected:
+    runs-on: ubuntu-latest
+    needs: [enrich-hosts]
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-nix
+
+      - name: Download Host Details Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-host-details"
+      - name: Aggregate Host Details
+        id: hosts
+        run: |
+          HOST_DETAILS=$(find . -wholename '*-host-details/details.json' -exec cat {} + | jq -c -s 'map({key: .host, value: .}) | from_entries' || echo "{}")
+          echo "Aggregated host details: $HOST_DETAILS"
+          {
+            echo 'details<<EOF'
+            echo "$HOST_DETAILS"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Get Changes
+        id: changes
         run: |
           if [[ -n "${{ github.event.before }}" ]]; then
             CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -v '^D' || true)
@@ -116,69 +256,73 @@ jobs:
             # Get all files in the repo as changed
             CHANGED_FILES=$(find . -type f | grep -v "^./.git" || true)
           fi
-          echo "Changed files:"
-          echo "$CHANGED_FILES"
 
-          HOST_DETAILS='${{steps.get-hosts.outputs.host-details}}'
+          # Strip leading './' from file paths
+          CHANGED_FILES="${CHANGED_FILES#./}"
+          echo "Changed files: $CHANGED_FILES"
 
-          # Check if HOST_DETAILS is valid JSON
-          if ! echo "$HOST_DETAILS" | jq . &>/dev/null; then
-            echo "Invalid HOST_DETAILS JSON. Setting empty matrix."
-            echo "Raw JSON: $HOST_DETAILS"
-            echo "matrix=[]" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+          {
+            echo 'files<<EOF'
+            echo "$CHANGED_FILES" | jq -R . | jq -s -c .
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
 
-          declare -a build_hosts
-          if echo "$CHANGED_FILES" | grep -qE '(^flake\.nix$|^flake\.lock$|^lib/|^overlays/|^pkgs/)'; then
-            echo "Found changes in core files. All hosts will be rebuilt."
-            build_hosts=("$(echo "$HOST_DETAILS" | jq -r 'keys[]' 2>/dev/null || echo "")")
-          else
-            changed_json=$(printf '%s\n' "$CHANGED_FILES" | jq -R . | jq -s -c . 2>/dev/null || echo "[]")
-            rebuild_json=$(jq --argjson changed "$changed_json" '
-              . as $hosts |
-              to_entries
-              | map(select(.value.imports |
-                  any( . as $imp | ($changed | index($imp)) )))
-              | map(.key)
-            ' <<<"$HOST_DETAILS" 2>/dev/null || echo "[]")
+      - name: Determine affected hosts
+        id: set-matrix
+        run: |
+          HOST_DETAILS='${{ steps.hosts.outputs.details }}'
+          CHANGED_FILES='${{ steps.changes.outputs.files }}'
+          GLOBAL_FILES=(
+            "flake.nix"
+            "flake.lock"
+            "lib/"
+            "overlays/"
+            "pkgs/"
+          )
 
-            mapfile -t build_hosts < <(jq -r '.[]' <<<"$rebuild_json" 2>/dev/null || echo "")
-          fi
-
-          declare -a matrix_entries
-          for host in "${build_hosts[@]}"; do
-            if [[ -z "$host" ]]; then
-              continue
-            fi
-            entry=$(echo "$HOST_DETAILS" | jq -r ".$host" 2>/dev/null)
-            if [[ -n "$entry" && "$entry" != "null" ]]; then
-              matrix_entries+=("$entry")
+          for pattern in "${GLOBAL_FILES[@]}"; do
+            if echo "$CHANGED_FILES" | jq -e --arg pattern "$pattern" 'map(select(startswith($pattern))) | length > 0' > /dev/null; then
+              echo "Found changes in global files: $pattern. All hosts will be rebuilt."
+              BUILD_HOSTS=$(echo "$HOST_DETAILS" | jq 'keys' 2>/dev/null || echo "[]")
+              break
             fi
           done
 
-          if [[ ${#matrix_entries[@]} -eq 0 ]]; then
-            echo "No valid matrix entries found"
-            echo "matrix=[]" >> "$GITHUB_OUTPUT"
-          else
-            MATRIX_JSON="$(printf '%s\n' "${matrix_entries[@]}" | jq -s . 2>/dev/null || echo "[]")"
-            # Ensure matrix is valid JSON
-            if [[ -z "$MATRIX_JSON" || "$MATRIX_JSON" == "null" ]]; then
-              echo "matrix=[]" >> "$GITHUB_OUTPUT"
-            else
-              {
-                echo "matrix<<EOF"
-                echo "$MATRIX_JSON" | jq -c .
-                echo EOF
-              } >> "$GITHUB_OUTPUT"
-            fi
+          # If no global changes, filter hosts based on changed files
+          if [[ -z "$BUILD_HOSTS" ]]; then
+            echo "Filtering hosts based on changed files."
+            BUILD_HOSTS=$(jq --argjson changed "$CHANGED_FILES" '
+              . as $hosts |
+              to_entries | map(select(.value.imports |
+                any(. as $imp | ($changed[] | index($imp)))))
+              | map(.key)
+            ' <<< "$HOST_DETAILS" 2>/dev/null || echo "[]")
           fi
+
+          # Special Rules
+          EXTRA_SPACE='["nixmi", "winix"]'
+          NO_BUILD='[]'
+
+          echo "Hosts to be rebuilt: $BUILD_HOSTS"
+          {
+            echo 'matrix<<EOF'
+            jq \
+              --argjson rule_extra_space "$EXTRA_SPACE" \
+              --argjson rule_no_build "$NO_BUILD" \
+              -e '
+                . | map({
+                  host: .,
+                  system: "x86_64-linux",
+                  extraSpace: IN($rule_extra_space[]),
+                  noBuild: IN($rule_no_build[])
+                })' <<< "$BUILD_HOSTS" 2>/dev/null || echo "[]"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
 
   checks:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Check Nix flake Nixpkgs inputs
         uses: DeterminateSystems/flake-checker-action@main
@@ -195,11 +339,10 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.determine-affected.outputs.matrix) }}
 
-    name: ${{ matrix.host }} on ${{ matrix.system }}
+    name: Build ${{ matrix.host }} on ${{ matrix.system }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Free Disk Space
         if: ${{ matrix.extraSpace && !env.ACT }}
