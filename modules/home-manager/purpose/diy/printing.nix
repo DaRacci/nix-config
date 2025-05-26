@@ -24,7 +24,7 @@ in
     ];
 
     home.packages = with pkgs; [
-      orca-slicer
+      orca-slicer-zink
     ];
 
     user.persistence.directories = [
