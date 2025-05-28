@@ -21,7 +21,10 @@ let
     in
     pkgs.writeShellApplication {
       name = "ssh-to-age";
-      runtimeInputs = [ pkgs.ssh-to-age ];
+      runtimeInputs = [
+        pkgs.uutils-coreutils-noprefix
+        pkgs.ssh-to-age
+      ];
       text = ''
         if [ ! -d "${dir}" ]; then
             mkdir -p "${dir}";
