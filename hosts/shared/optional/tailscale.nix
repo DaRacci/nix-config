@@ -7,6 +7,10 @@
 {
   sops.secrets.TAILSCALE_AUTH_KEY = {
     sopsFile = "${flake}/hosts/secrets.yaml";
+    restartUnits = [
+      "tailscaled-autoconnect.service"
+      "tailscaled.service"
+    ];
   };
 
   services.tailscale = {
