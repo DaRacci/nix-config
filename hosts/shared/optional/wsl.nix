@@ -77,7 +77,8 @@ in
   hardware.graphics = {
     enable = true;
     extraPackages = with pkgs; [
-      mesa
+      config.hardware.graphics.package
+      config.hardware.graphics.package32
       libvdpau-va-gl
     ];
   };

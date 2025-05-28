@@ -12,10 +12,15 @@
 
   hardware = {
     cooling.enable = false;
-    graphics.manufacturer = [
-      "amd"
-      "nvidia"
-    ];
+
+    graphics = {
+      reduceMesa = true;
+
+      manufacturer = [
+        "amd"
+        "nvidia"
+      ];
+    };
 
     nvidia.prime = {
       offload = {

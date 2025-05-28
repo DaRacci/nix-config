@@ -115,43 +115,36 @@
                   nixarr = {
                     isoFormat = "proxmox-lxc";
                     deviceType = "server";
-                    acceleration = "rocm";
                   };
 
                   nixcloud = {
                     isoFormat = "proxmox-lxc";
                     deviceType = "server";
-                    acceleration = "rocm";
                   };
 
                   nixdev = {
                     isoFormat = "proxmox-lxc";
                     deviceType = "server";
-                    acceleration = "rocm";
                   };
 
                   nixio = {
                     isoFormat = "proxmox-lxc";
                     deviceType = "server";
-                    acceleration = "rocm";
                   };
 
                   nixmon = {
                     isoFormat = "proxmox-lxc";
                     deviceType = "server";
-                    acceleration = "rocm";
                   };
 
                   nixserv = {
                     isoFormat = "proxmox-lxc";
                     deviceType = "server";
-                    acceleration = "rocm";
                   };
 
                   nixai = {
                     isoFormat = "proxmox-lxc";
                     deviceType = "server";
-                    acceleration = "rocm";
                   };
                 };
 

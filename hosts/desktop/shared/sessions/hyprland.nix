@@ -15,12 +15,6 @@
     };
   };
 
-  hardware.graphics = {
-    package = lib.mkDefault pkgs.mesa;
-    package32 = lib.mkDefault pkgs.pkgsi686Linux.mesa;
-    enable32Bit = true;
-  };
-
   services = {
     xserver.updateDbusEnvironment = true;
     gnome.gnome-keyring.enable = true;

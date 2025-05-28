@@ -1,5 +1,6 @@
 {
   flake,
+  config,
   inputs,
   pkgs,
   ...
@@ -88,7 +89,8 @@
       libuuid
       libxkbcommon
       libxml2
-      mesa
+      config.hardware.graphics.package
+      config.hardware.graphics.package32
       nspr
       nss
       openssl

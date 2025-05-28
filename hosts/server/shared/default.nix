@@ -17,9 +17,6 @@
   services = {
     getty.autologinUser = "root";
     resolved.enable = lib.mkForce false;
-    journald.extraConfig = ''
-      SystemMaxUse=256M
-    '';
   };
 
   nix = {
