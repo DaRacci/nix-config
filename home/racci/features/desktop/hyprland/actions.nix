@@ -4,9 +4,6 @@
   lib,
   ...
 }:
-let
-  inherit (lib) getExe;
-in
 {
   wayland.windowManager.hyprland.settings =
     let

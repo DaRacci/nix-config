@@ -28,6 +28,7 @@
     fragments
     transmission_4-gtk
     kooha
+    gnome-online-accounts-gtk
   ];
 
   custom = {

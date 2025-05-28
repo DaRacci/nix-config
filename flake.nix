@@ -309,6 +309,13 @@
       url = "github:numtide/flake-utils";
       inputs.systems.follows = "systems";
     };
+    git-hooks = {
+      url = "github:cachix/git-hooks.nix";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-compat.follows = "flake-compat";
+      };
+    };
 
     # Utils & Helpers for usage inside the flake
     flake-parts = {
@@ -359,7 +366,7 @@
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
         flake-compat.follows = "flake-compat";
-        pre-commit-hooks-nix.follows = "";
+        pre-commit-hooks-nix.follows = "git-hooks";
       };
     };
     nixd = {
@@ -382,8 +389,7 @@
       url = "github:danth/stylix";
       inputs = {
         flake-compat.follows = "flake-compat";
-        flake-utils.follows = "flake-utils";
-        git-hooks.follows = "";
+        git-hooks.follows = "git-hooks";
         home-manager.follows = "home-manager";
         nur.follows = "nur";
       };

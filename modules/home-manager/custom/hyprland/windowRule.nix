@@ -119,14 +119,16 @@ let
           either str (submodule {
             options = {
               width = mkOption {
-                type = nullOr int;
+                type = nullOr (either percentString int);
                 default = null;
                 description = "Set the window width.";
+                apply = toString;
               };
               height = mkOption {
-                type = nullOr int;
+                type = nullOr (either percentString int);
                 default = null;
                 description = "Set the window height.";
+                apply = toString;
               };
             };
           })
