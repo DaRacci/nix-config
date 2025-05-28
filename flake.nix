@@ -161,7 +161,7 @@
           rec {
             _module.args.pkgs = mkPkgs system false false;
 
-            packages = import ./pkgs { inherit pkgs; };
+            packages = import ./pkgs { inherit inputs pkgs; };
 
             treefmt = {
               projectRootFile = ".git/config";
@@ -297,11 +297,16 @@
       url = "github:jappie3/vigiland";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    protonup-rs.url = "github:liperium/nixpkgs/protonuprs-init";
-    lact-module.url = "github:poperigby/nixpkgs/lact-module";
-    lact.url = "github:cything/nixpkgs/lact";
-    flaresolverr.url = "github:paveloom/nixpkgs/flaresolverr";
-    stl-thumb.url = "github:SyntaxualSugar/stl-thumb_0.5.0";
+    protonup-rs = {
+      url = "https://raw.githubusercontent.com/liperium/nixpkgs/refs/heads/protonuprs-init/pkgs/by-name/pr/protonup-rs/package.nix";
+      flake = false;
+      type = "file";
+    };
+    lact-module = {
+      url = "https://raw.githubusercontent.com/poperigby/nixpkgs/refs/heads/lact-module/nixos/modules/services/hardware/lact.nix";
+      flake = false;
+      type = "file";
+    };
 
     # Misc Flake Inputs for other Inputs
     systems.url = "github:nix-systems/default";

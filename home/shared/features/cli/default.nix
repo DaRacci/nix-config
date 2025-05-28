@@ -9,7 +9,6 @@
     ./fish.nix
     ./info.nix
     ./micro.nix
-    ./nix.nix
     ./nushell.nix
     ./ripgrep.nix
     ./starship.nix

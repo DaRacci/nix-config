@@ -13,7 +13,7 @@
     # Thumbnailers
     ffmpegthumbnailer
     nufraw-thumbnailer
-    stl-thumb
+    # stl-thumb
 
     collision
     baobab # Disk usage analyzer

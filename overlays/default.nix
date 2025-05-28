@@ -10,12 +10,8 @@ let
   # If given a string, assumes the input and package name are the same.
   # Otherwise should be defined as an attr with the input and the package name(s).
   packagesFromOtherInstances = [
-    "protonup-rs"
     "nixd"
-    "lact"
-    "flaresolverr"
     "vigiland"
-    "stl-thumb"
   ];
 in
 {
@@ -42,7 +38,10 @@ in
   additions =
     final: prev:
     prev.lib.foldl' prev.lib.recursiveUpdate { } [
-      (import ../pkgs { pkgs = final; })
+      (import ../pkgs {
+        inherit inputs;
+        pkgs = final;
+      })
     ];
 
   modifications = final: prev: {

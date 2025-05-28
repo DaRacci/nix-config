@@ -7,7 +7,6 @@
     # System Info
     inxi
     pciutils
-    glxinfo
     xorg.xdpyinfo
     hyfetch
   ];

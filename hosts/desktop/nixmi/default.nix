@@ -20,12 +20,15 @@
     "${flake}/hosts/shared/optional/gaming.nix"
     "${flake}/hosts/shared/optional/tailscale.nix"
 
-    "${inputs.lact-module}/nixos/modules/services/hardware/lact.nix"
+    "${inputs.lact-module}"
   ];
 
-  services.lact = {
-    enable = true;
-    gpuOverclock.enable = true;
+  services = {
+    lact = {
+      enable = true;
+      gpuOverclock.enable = true;
+    };
+    hardware.bolt.enable = true;
   };
 
   custom.remote = {

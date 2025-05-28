@@ -1,4 +1,7 @@
-{ pkgs }:
+{
+  inputs,
+  pkgs,
+}:
 {
   # VR Stuff
   alvr = pkgs.callPackage ./alvr { };
@@ -15,4 +18,14 @@
   # Helper Stuff
   new-host = pkgs.callPackage ./helpers/new-host.nix { };
   list-ephemeral = pkgs.callPackage ./list-ephemeral { };
+
+  # PR Packages
+  protonup-rs = (pkgs.callPackage "${inputs.protonup-rs}" { }).overrideAttrs (oldAttrs: {
+    cargoHash = "sha256-02uOVJtU52EWQn+Z2rHCum9+jodByYTDcLyMkgfpjwc=";
+    cargoDeps = oldAttrs.cargoDeps.overrideAttrs (oldAttrs: {
+      vendorStaging = oldAttrs.vendorStaging.overrideAttrs (_old: {
+        outputHash = "sha256-02uOVJtU52EWQn+Z2rHCum9+jodByYTDcLyMkgfpjwc=";
+      });
+    });
+  });
 }

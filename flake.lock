@@ -429,22 +429,6 @@
         "type": "github"
       }
     },
-    "flaresolverr": {
-      "locked": {
-        "lastModified": 1741630128,
-        "narHash": "sha256-MxoDiMC4BQ6u6W/AVoi7weRdMm2WBoJiiCRS0VZjpKM=",
-        "owner": "paveloom",
-        "repo": "nixpkgs",
-        "rev": "57b5c192cd37d38dfa98553b95752d5e9b46ab6c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "paveloom",
-        "ref": "flaresolverr",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "fromYaml": {
       "flake": false,
       "locked": {
@@ -647,36 +631,16 @@
         "type": "github"
       }
     },
-    "lact": {
-      "locked": {
-        "lastModified": 1745346107,
-        "narHash": "sha256-+iUn89qrKqBXD6vd8TvFJPwzuZ9iiV3FzX7I/gG0FLQ=",
-        "owner": "cything",
-        "repo": "nixpkgs",
-        "rev": "21846b25c4e56f24c70db76993ca66236449a5ae",
-        "type": "github"
-      },
-      "original": {
-        "owner": "cything",
-        "ref": "lact",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "lact-module": {
+      "flake": false,
       "locked": {
-        "lastModified": 1738470782,
-        "narHash": "sha256-rTZd/zZOXwt/TwXJo8UEehVyj4YRkLqEwt9ALjv+oXQ=",
-        "owner": "poperigby",
-        "repo": "nixpkgs",
-        "rev": "3546ebb8020476cddd6beaff0f3b9188d9ab31ad",
-        "type": "github"
+        "narHash": "sha256-4Zv1eT3n4VpEvPRUKvysuYqXfD/NR5fKXzixBQZ9+4w=",
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/poperigby/nixpkgs/refs/heads/lact-module/nixos/modules/services/hardware/lact.nix"
       },
       "original": {
-        "owner": "poperigby",
-        "ref": "lact-module",
-        "repo": "nixpkgs",
-        "type": "github"
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/poperigby/nixpkgs/refs/heads/lact-module/nixos/modules/services/hardware/lact.nix"
       }
     },
     "lan-mouse": {
@@ -1152,19 +1116,15 @@
       }
     },
     "protonup-rs": {
+      "flake": false,
       "locked": {
-        "lastModified": 1722031822,
-        "narHash": "sha256-z5Zh+ih0gE+Uwl8b7//apBRbrsHTvpV0PAhQwM8mOZ4=",
-        "owner": "liperium",
-        "repo": "nixpkgs",
-        "rev": "701738af26f64e28508bb955c9bc50f539ef8a38",
-        "type": "github"
+        "narHash": "sha256-Towqai1vxSob76R+iG2m/DQbOpwSbTEJd0lvtbn6TX0=",
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/liperium/nixpkgs/refs/heads/protonuprs-init/pkgs/by-name/pr/protonup-rs/package.nix"
       },
       "original": {
-        "owner": "liperium",
-        "ref": "protonuprs-init",
-        "repo": "nixpkgs",
-        "type": "github"
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/liperium/nixpkgs/refs/heads/protonuprs-init/pkgs/by-name/pr/protonup-rs/package.nix"
       }
     },
     "root": {
@@ -1178,13 +1138,11 @@
         "flake-compat": "flake-compat",
         "flake-parts": "flake-parts_2",
         "flake-utils": "flake-utils",
-        "flaresolverr": "flaresolverr",
         "git-hooks": "git-hooks_2",
         "home-manager": "home-manager",
         "hyprpanel": "hyprpanel",
         "impermanence": "impermanence",
         "jovian": "jovian",
-        "lact": "lact",
         "lact-module": "lact-module",
         "lan-mouse": "lan-mouse",
         "lanzaboote": "lanzaboote",
@@ -1202,7 +1160,6 @@
         "nur": "nur",
         "protonup-rs": "protonup-rs",
         "sops-nix": "sops-nix",
-        "stl-thumb": "stl-thumb",
         "stylix": "stylix",
         "stylix-wallpaper": "stylix-wallpaper",
         "systems": "systems_2",
@@ -1290,21 +1247,6 @@
       "original": {
         "owner": "Mic92",
         "repo": "sops-nix",
-        "type": "github"
-      }
-    },
-    "stl-thumb": {
-      "locked": {
-        "lastModified": 1737418440,
-        "narHash": "sha256-krfrAKlzokMqMtXwgLTbB3aTTsnExdVOgw6Yuw8A0AQ=",
-        "owner": "SyntaxualSugar",
-        "repo": "stl-thumb_0.5.0",
-        "rev": "257eef70a24518fc9f3e369574fa4a966c59a29e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "SyntaxualSugar",
-        "repo": "stl-thumb_0.5.0",
         "type": "github"
       }
     },
