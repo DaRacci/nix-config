@@ -118,7 +118,7 @@
         DB_POSTGRESDB_DATABASE = db.database;
         DB_POSTGRESDB_HOST = db.host;
         DB_POSTGRESDB_PORT = toString db.port;
-        DB_POSTGRESDB_USERNAME = db.user;
+        DB_POSTGRESDB_USER = db.user;
         DB_POSTGRESDB_PASSWORD_FILE = "%d/n8n-postgres-password";
       };
     };
