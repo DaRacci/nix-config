@@ -45,13 +45,6 @@ in
     ];
 
   modifications = final: prev: {
-    steamtinkerlaunch = prev.steamtinkerlaunch.overrideAttrs (_oldAttrs: {
-      postPatch = ''
-        substituteInPlace steamtinkerlaunch --replace 'PROGCMD="''${0##*/}"' 'PROGCMD="steamtinkerlaunch"'
-        substituteInPlace steamtinkerlaunch --replace 'YAD=yad' 'YAD=${final.yad}'
-      '';
-    });
-
     orca-slicer = prev.orca-slicer.overrideAttrs (oldAttrs: {
       cmakeFlags = oldAttrs.cmakeFlags ++ [
         (lib.cmakeFeature "CUDA_TOOLKIT_ROOT_DIR" "${prev.cudaPackages.cudatoolkit}")
@@ -71,6 +64,10 @@ in
       # withOpenASAR = true;
       withVencord = false;
       nss = final.nss_latest;
+    };
+
+    bottles = prev.bottles.override {
+      removeWarningPopup = true;
     };
 
     inherit lib;
