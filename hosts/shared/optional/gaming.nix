@@ -33,30 +33,20 @@
     steam = {
       enable = true;
       package = pkgs.steam.override {
-        extraEnv = {
-          # MANGOHUD = true;
-        };
-
         extraArgs = "-steamos3 -steamdeck -steampal -gamepadui";
       };
       extest.enable = true;
       extraPackages = with pkgs; [
         xwayland-run
-        proton-ge-bin
 
         # Steam logs errors about missing these, not sure for what though.
         xorg.xwininfo
         usbutils
       ];
+      extraCompatPackages = [ pkgs.proton-ge-bin ];
 
       remotePlay.openFirewall = true;
       localNetworkGameTransfers.openFirewall = true;
-    };
-
-    envision = {
-      enable = true;
-      openFirewall = true;
-      package = pkgs.envision;
     };
   };
 
