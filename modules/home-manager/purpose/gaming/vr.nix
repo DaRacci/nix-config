@@ -77,8 +77,6 @@ in
       ".config/alvr"
       ".android"
       ".SideQuest"
-      ".config/envision"
-      ".local/share/envision"
       ".config/wivrn"
     ];
   };

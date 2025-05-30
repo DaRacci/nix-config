@@ -10,7 +10,7 @@
     decibels
 
     # Image
-    krita # Editor
+    gimp3 # Editor
     loupe # Viewer
     gnome-obfuscate
 
@@ -22,7 +22,7 @@
 
     # Misc
     # switcheroo # Converter
-    # identity # Comparer (FIXME :: currently conflicts with mesa-demos?????)
+    identity # Comparer
   ];
 
   programs.mpv = {
