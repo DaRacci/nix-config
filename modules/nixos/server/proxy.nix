@@ -21,6 +21,20 @@ let
       config: config.server.proxy ? virtualHosts && config.server.proxy.virtualHosts != { }
     ))
   ];
+
+  replaceLocalHost =
+    host: str:
+    if host == "nixio" then
+      str
+    else
+      builtins.replaceStrings [
+        "localhost"
+        "0.0.0.0"
+        "127.0.0.1"
+        "[::]"
+        "[::1]"
+        "::1"
+      ] (builtins.genList (_: host) 6) str;
 in
 {
   options.server.proxy = with types; {
@@ -66,6 +80,25 @@ in
                   - Rewrite localhost/127.0.0.1/0.0.0.0 to the machines domain name.
                 '';
               };
+
+              l4 = mkOption {
+                default = null;
+                type = nullOr (submodule {
+                  options = {
+                    listenPort = mkOption {
+                      type = types.port;
+                      default = null;
+                      description = "Port to listen on for L4 traffic";
+                    };
+
+                    config = mkOption {
+                      type = str;
+                      default = "";
+                      description = "Configuration for the L4 plugin";
+                    };
+                  };
+                });
+              };
             };
           }
         )
@@ -85,7 +118,37 @@ in
     ];
 
     services.caddy = lib.mkIf isNixio {
-      # Aggregate virtualHosts & Updates references to localhost in extraConfig & changes the attr name to the baseUrl.
+      globalConfig = ''
+        layer4 {
+          ${lib.pipe serverConfigurations [
+            (builtins.filter (cfg: cfg.server.proxy ? virtualHosts && cfg.server.proxy.virtualHosts != { }))
+            (builtins.map (
+              cfg:
+              lib.pipe cfg.server.proxy.virtualHosts [
+                builtins.attrValues
+                (builtins.filter (vh: vh.l4 != null))
+                (builtins.map (
+                  vh:
+                  lib.mine.attrsets.recursiveMergeAttrs [
+                    vh
+                    {
+                      l4.config = replaceLocalHost cfg.host.name vh.l4.config;
+                    }
+                  ]
+                ))
+              ]
+            ))
+            lib.flatten
+            (builtins.map (cfg: ''
+              ${cfg.baseUrl}:${toString cfg.l4.listenPort} {
+                ${cfg.l4.config}
+              }
+            ''))
+            lib.flatten
+            (builtins.concatStringsSep "\n")
+          ]}
+      '';
+
       virtualHosts = lib.pipe serverConfigurations [
         (builtins.map (
           config:
@@ -94,18 +157,7 @@ in
             lib.nameValuePair value.baseUrl {
               hostName = value.baseUrl;
               useACMEHost = value.baseUrl;
-              extraConfig =
-                if config.host.name == "nixio" then
-                  value.extraConfig
-                else
-                  builtins.replaceStrings [
-                    "localhost"
-                    "0.0.0.0"
-                    "127.0.0.1"
-                    "[::]"
-                    "[::1]"
-                    "::1"
-                  ] (builtins.genList (_: config.system.name) 6) value.extraConfig;
+              extraConfig = replaceLocalHost config.host.name value.extraConfig;
             }
           ) config.server.proxy.virtualHosts)
         ))

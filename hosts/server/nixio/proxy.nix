@@ -56,7 +56,10 @@ _:
 
   services.caddy = {
     enable = true;
-    package = pkgs.caddy;
+    package = pkgs.caddy.withPlugins {
+      plugins = [ "github.com/mholt/caddy-l4@master" ];
+      hash = "sha256-Jj/3L6grkUuSz96qYxpm1X/PuzPouUGxqXfrPeprzr8=";
+    };
     email = "admin@racci.dev";
 
     # Certs are handled by acme

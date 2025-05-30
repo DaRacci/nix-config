@@ -138,6 +138,9 @@ in
           assertion = isNixio || !config.services.postgresql.enable;
           message = ''
             PostgreSQL is enabled but you have configured databases for management with NixIO.
+            If this is on purpose and you want NixIO to manage these, set `services.postgresl.enable` to `false`.
+
+            Configured databases: ${builtins.toString config.services.postgresql.ensureDatabases}
           '';
         }
       ];
@@ -202,7 +205,7 @@ in
       {
         # Sometimes this can get enabled on accident even if `services.postgresql.enable` is false.
         # This is due to some modules making changes to the service without any conditions for if postgres is local or not.
-        enable = lib.mkDefault (isNixio || config.services.postgresql.enable);
+        enable = isNixio || config.services.postgresql.enable;
       }
       // (lib.optionalAttrs isNixio {
         postStart = builtins.concatStringsSep "\n" (

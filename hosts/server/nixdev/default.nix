@@ -9,6 +9,10 @@
       owner = config.users.users.coder.name;
       inherit (config.users.users.coder) group;
     };
+    WINDMILL_DATABASE_URL = {
+      owner = config.users.users.coder.name;
+      inherit (config.users.users.coder) group;
+    };
   };
 
   users = {
@@ -105,6 +109,17 @@
         };
       };
     };
+
+    windmill = {
+      enable = true;
+      baseUrl = "https://windmill.racci.dev";
+      database = {
+        createLocally = true; # Let NixIO Pick up on its postStart script.
+        urlPath = config.sops.secrets.WINDMILL_DATABASE_URL.path;
+      };
+    };
+
+    postgresql.enable = false;
   };
 
   systemd.services.n8n =
@@ -124,13 +139,16 @@
     };
 
   server = {
-    database.postgres = {
-      n8n = { };
-      coder = {
-        password = {
-          owner = config.users.users.coder.name;
-          inherit (config.users.users.coder) group;
+    database = {
+      postgres = {
+        coder = {
+          password = {
+            owner = config.users.users.coder.name;
+            inherit (config.users.users.coder) group;
+          };
         };
+        n8n = { };
+        windmill = { };
       };
     };
 
@@ -142,6 +160,21 @@
       n8n.extraConfig = ''
         reverse_proxy http://${config.services.n8n.settings.host}:${toString config.services.n8n.settings.port}
       '';
+
+      windmill = {
+        extraConfig = ''
+          reverse_proxy /ws/* http://${toString config.services.windmill.lspPort}
+          reverse_proxy /* http://${toString config.services.windmill.serverPort}
+        '';
+        l4 = {
+          listenPort = 25;
+          config = ''
+            proxy {
+              to localhost:2525
+            }
+          '';
+        };
+      };
     };
   };
 
