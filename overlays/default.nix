@@ -60,9 +60,8 @@ in
     });
 
     discord = prev.discord.override {
-      # OpenASAR completely breaks Discord
-      # withOpenASAR = true;
-      withVencord = false;
+      withOpenASAR = true;
+      withVencord = true;
       nss = final.nss_latest;
     };
 
