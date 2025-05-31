@@ -119,34 +119,35 @@ in
 
     services.caddy = lib.mkIf isNixio {
       globalConfig = ''
-        layer4 {
-          ${lib.pipe serverConfigurations [
-            (builtins.filter (cfg: cfg.server.proxy ? virtualHosts && cfg.server.proxy.virtualHosts != { }))
-            (builtins.map (
-              cfg:
-              lib.pipe cfg.server.proxy.virtualHosts [
-                builtins.attrValues
-                (builtins.filter (vh: vh.l4 != null))
-                (builtins.map (
-                  vh:
-                  lib.mine.attrsets.recursiveMergeAttrs [
-                    vh
-                    {
-                      l4.config = replaceLocalHost cfg.host.name vh.l4.config;
-                    }
-                  ]
-                ))
-              ]
-            ))
-            lib.flatten
-            (builtins.map (cfg: ''
-              ${cfg.baseUrl}:${toString cfg.l4.listenPort} {
-                ${cfg.l4.config}
-              }
-            ''))
-            lib.flatten
-            (builtins.concatStringsSep "\n")
-          ]}
+          layer4 {
+            ${lib.pipe serverConfigurations [
+              (builtins.filter (cfg: cfg.server.proxy ? virtualHosts && cfg.server.proxy.virtualHosts != { }))
+              (builtins.map (
+                cfg:
+                lib.pipe cfg.server.proxy.virtualHosts [
+                  builtins.attrValues
+                  (builtins.filter (vh: vh.l4 != null))
+                  (builtins.map (
+                    vh:
+                    lib.mine.attrsets.recursiveMergeAttrs [
+                      vh
+                      {
+                        l4.config = replaceLocalHost cfg.host.name vh.l4.config;
+                      }
+                    ]
+                  ))
+                ]
+              ))
+              lib.flatten
+              (builtins.map (cfg: ''
+                ${cfg.baseUrl}:${toString cfg.l4.listenPort} {
+                  ${cfg.l4.config}
+                }
+              ''))
+              lib.flatten
+              (builtins.concatStringsSep "\n")
+            ]}
+        }
       '';
 
       virtualHosts = lib.pipe serverConfigurations [
