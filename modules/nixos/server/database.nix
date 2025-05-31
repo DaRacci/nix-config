@@ -208,25 +208,34 @@ in
         enable = isNixio || config.services.postgresql.enable;
       }
       // (lib.optionalAttrs isNixio {
-        postStart = builtins.concatStringsSep "\n" (
-          (lib.pipe (gatherAllInstances "systemd.services.postgresql.postStart") [
-            # This skips the default postgresql start script https://github.com/NixOS/nixpkgs/blob/5b35d248e9206c1f3baf8de6a7683fee126364aa/nixos/modules/services/databases/postgresql.nix#L626-L640
-            # Probably going to break in the future since its a hardcoded length.
-            (builtins.map (
-              script:
-              lib.pipe script [
-                (lib.strings.splitString "\n")
-                (lib.drop 14)
-                (builtins.concatStringsSep "\n")
-              ]
-            ))
-            (builtins.filter (script: script != ""))
-          ])
-          ++ (lib.pipe serverConfigurations [
-            (builtins.map (cfg: builtins.attrValues cfg.server.database.postgres))
-            builtins.concatLists
-            (builtins.map (database: lib.mine.mkPostgresRolePass database.user database.password.path))
-          ])
+        postStart = lib.mkAfter (
+          builtins.concatStringsSep "\n" (
+            (lib.pipe (gatherAllInstances "systemd.services.postgresql.postStart") [
+              # This skips the default postgresql start script https://github.com/NixOS/nixpkgs/blob/5b35d248e9206c1f3baf8de6a7683fee126364aa/nixos/modules/services/databases/postgresql.nix#L626-L640
+              (builtins.map (
+                script:
+                let
+                  # Assuming port 5432 as its the default.
+                  startLine = ''PSQL="psql --port=5432"'';
+                  endLine = "fi";
+                  lines = lib.strings.splitString "\n" script;
+                  startIndex = lib.lists.findFirstIndex (str: startLine == str) 0 lines;
+                  endIndex = lib.lists.findFirstIndex (str: endLine == str) 0 lines;
+                in
+                lib.pipe lines [
+                  (lib.drop startIndex)
+                  (lib.take (builtins.length lines - (startIndex - endIndex)))
+                  (builtins.concatStringsSep "\n")
+                ]
+              ))
+              (builtins.filter (script: script != ""))
+            ])
+            ++ (lib.pipe serverConfigurations [
+              (builtins.map (cfg: builtins.attrValues cfg.server.database.postgres))
+              builtins.concatLists
+              (builtins.map (database: lib.mine.mkPostgresRolePass database.user database.password.path))
+            ])
+          )
         );
 
         serviceConfig.ExecStartPost =
