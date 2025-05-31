@@ -1,7 +1,7 @@
 [
   {
     "label": "Rebuild & Switch System",
-    "command": "sudo nixos-rebuild switch --flake .#$(hostname) --impure --accept-flake-config -L",
+    "command": "sudo nixos-rebuild switch --flake .#$(hostname) --accept-flake-config -L",
     "use_new_terminal": false,
     "allow_concurrent_runs": false,
     "reveal": "no_focus",

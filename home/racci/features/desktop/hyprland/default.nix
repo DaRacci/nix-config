@@ -1,7 +1,7 @@
 # TODO - Game mode that disables fancy animations and pauses swww-random-wallpaper
 # TODO Show me the key integration for placement size & quick launching
 {
-  flake,
+  self,
   config,
   pkgs,
   lib,
@@ -10,8 +10,8 @@
 with lib;
 {
   imports = [
-    "${flake}/home/racci/features/desktop/common"
-    "${flake}/home/shared/desktop/hyprland"
+    "${self}/home/racci/features/desktop/common"
+    "${self}/home/shared/desktop/hyprland"
 
     ./actions.nix
     ./display.nix

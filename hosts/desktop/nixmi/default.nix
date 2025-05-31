@@ -1,5 +1,5 @@
 {
-  flake,
+  self,
   config,
   inputs,
   pkgs,
@@ -11,14 +11,14 @@
 
     ./hardware.nix
 
-    "${flake}/hosts/shared/optional/containers.nix"
-    "${flake}/hosts/shared/optional/virtualisation.nix"
+    "${self}/hosts/shared/optional/containers.nix"
+    "${self}/hosts/shared/optional/virtualisation.nix"
 
-    "${flake}/hosts/desktop/shared/sessions/hyprland.nix"
-    "${flake}/hosts/desktop/shared/sessions/plasma.nix"
+    "${self}/hosts/desktop/shared/sessions/hyprland.nix"
+    "${self}/hosts/desktop/shared/sessions/plasma.nix"
 
-    "${flake}/hosts/shared/optional/gaming.nix"
-    "${flake}/hosts/shared/optional/tailscale.nix"
+    "${self}/hosts/shared/optional/gaming.nix"
+    "${self}/hosts/shared/optional/tailscale.nix"
 
     "${inputs.lact-module}"
   ];

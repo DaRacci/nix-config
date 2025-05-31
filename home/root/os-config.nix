@@ -1,5 +1,5 @@
 {
-  flake,
+  self,
   config,
   pkgs,
   lib,
@@ -15,7 +15,7 @@ in
     shell = if useFish then pkgs.fish else pkgs.nushell;
     isNormalUser = mkForce false;
 
-    openssh.authorizedKeys.keyFiles = [ "${flake}/home/racci/id_ed25519.pub" ];
+    openssh.authorizedKeys.keyFiles = [ "${self}/home/racci/id_ed25519.pub" ];
   };
 
   programs.fish.enable = useFish;

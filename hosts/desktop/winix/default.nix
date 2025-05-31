@@ -1,13 +1,13 @@
-{ flake, pkgs, ... }:
+{ self, pkgs, ... }:
 {
 
   imports = [
-    flake.inputs.nixos-wsl.nixosModules.wsl
+    self.inputs.nixos-wsl.nixosModules.wsl
 
     ./hardware.nix
 
-    "${flake}/hosts/shared/optional/wsl.nix"
-    "${flake}/hosts/shared/optional/containers.nix"
+    "${self}/hosts/shared/optional/wsl.nix"
+    "${self}/hosts/shared/optional/containers.nix"
   ];
 
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];

@@ -1,12 +1,12 @@
 {
-  flake,
+  self,
   config,
   lib,
   ...
 }:
 let
   isNixio = config.host.name == "nixio";
-  nixioConfig = flake.nixosConfigurations.nixio.config;
+  nixioConfig = self.nixosConfigurations.nixio.config;
   getNixioConfig =
     attrPath:
     let

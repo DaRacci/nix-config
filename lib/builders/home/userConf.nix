@@ -1,5 +1,5 @@
 {
-  flake,
+  self,
   lib,
   name,
   userDirectory,
@@ -23,7 +23,7 @@
 
   imports =
     [
-      "${flake}/home/shared/global"
+      "${self}/home/shared/global"
       "${userDirectory}/global.nix"
     ]
     ++ (

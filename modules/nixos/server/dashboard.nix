@@ -3,7 +3,7 @@
   ...
 }:
 {
-  flake,
+  self,
   config,
   pkgs,
   lib,
@@ -11,7 +11,7 @@
 }:
 let
   inherit (lib) mkOption types;
-  serverConfigurations = lib.trivial.pipe flake.nixosConfigurations [
+  serverConfigurations = lib.trivial.pipe self.nixosConfigurations [
     builtins.attrValues
     (builtins.map (host: host.config))
     (builtins.filter (config: config.host.device.role == "server"))

@@ -1,6 +1,6 @@
-{ flake, ... }:
+{ self, ... }:
 {
-  imports = [ "${flake}/home/shared/features/cli" ];
+  imports = [ "${self}/home/shared/features/cli" ];
 
   user.persistence.enable = false;
   stylix.enable = false;

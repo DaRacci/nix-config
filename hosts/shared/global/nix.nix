@@ -1,5 +1,5 @@
 {
-  flake,
+  self,
   pkgs,
   lib,
   config,
@@ -34,6 +34,7 @@ in
       experimental-features = [
         "nix-command"
         "flakes"
+        "pipe-operator"
       ];
 
       substituters = map (sub: sub.url) (lib.attrValues caches);
@@ -62,7 +63,7 @@ in
   };
 
   sops.secrets.CACHE_PUSH_KEY = {
-    sopsFile = "${flake}/hosts/secrets.yaml";
+    sopsFile = "${self}/hosts/secrets.yaml";
     restartUnits = [ "attic-watch-store.service" ];
   };
 

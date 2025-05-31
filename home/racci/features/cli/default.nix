@@ -1,7 +1,7 @@
-{ flake, ... }:
+{ self, ... }:
 {
   imports = [
-    "${flake}/home/shared/features/cli"
+    "${self}/home/shared/features/cli"
     ./cava.nix
     ./fastfetch.nix
     ./git.nix

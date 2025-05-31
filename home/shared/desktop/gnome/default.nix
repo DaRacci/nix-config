@@ -1,12 +1,12 @@
-{ flake, pkgs, ... }:
+{ self, pkgs, ... }:
 let
   inherit (pkgs) lib;
 in
 {
   imports = [
-    "${flake}/home/shared/desktop/common"
-    "${flake}/home/shared/desktop/wayland"
-    "${flake}/home/shared/desktop/x11"
+    "${self}/home/shared/desktop/common"
+    "${self}/home/shared/desktop/wayland"
+    "${self}/home/shared/desktop/x11"
 
     ./dconf-base.nix
     ./dconf-extensions.nix

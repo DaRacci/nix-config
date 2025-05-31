@@ -6,7 +6,7 @@
 {
   imports = [ ./features/cli ];
 
-  home.packages = [ inputs.nix-alien.packages.${builtins.currentSystem}.nix-alien ];
+  home.packages = [ inputs.nix-alien.packages.${pkgs.system}.nix-alien ];
 
   stylix = {
     base16Scheme = "${inputs.tinted-theming}/base16/tokyo-night-dark.yaml";

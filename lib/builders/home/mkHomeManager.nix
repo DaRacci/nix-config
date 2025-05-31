@@ -1,31 +1,31 @@
 {
-  flake,
+  self,
   pkgs,
   name,
   ...
 }:
 let
-  userDirectory = "${flake}/home/${name}";
+  userDirectory = "${self}/home/${name}";
 in
-flake.inputs.home-manager.lib.homeManagerConfiguration {
+self.inputs.home-manager.lib.homeManagerConfiguration {
   inherit pkgs;
 
   extraSpecialArgs = {
-    inherit flake;
-    inherit (flake) inputs outputs;
+    inherit self;
+    inherit (self) inputs outputs;
   };
 
   modules = [
     {
       imports = [
-        flake.inputs.stylix.homeManagerModules.stylix
+        self.inputs.stylix.homeModules.stylix
       ];
     }
     (
       { lib, ... }:
       import ./userConf.nix {
         inherit
-          flake
+          self
           lib
           name
           userDirectory

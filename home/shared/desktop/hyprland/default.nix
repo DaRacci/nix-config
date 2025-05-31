@@ -1,13 +1,13 @@
 {
-  flake,
+  self,
   osConfig ? null,
   pkgs,
   ...
 }:
 {
   imports = [
-    "${flake}/home/shared/desktop/common"
-    "${flake}/home/shared/desktop/wayland"
+    "${self}/home/shared/desktop/common"
+    "${self}/home/shared/desktop/wayland"
 
     ./nvidia.nix
   ];

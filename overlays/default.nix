@@ -1,23 +1,24 @@
 { inputs, lib, ... }:
 let
   takePackages =
-    input: names:
+    system: input: names:
     let
       packages = input.packages or input.legacyPackages;
     in
-    lib.foldl' (acc: name: acc // { ${name} = packages.${builtins.currentSystem}.${name}; }) { } names;
+    lib.foldl' (acc: name: acc // { ${name} = packages.${system}.${name}; }) { } names;
 
   # If given a string, assumes the input and package name are the same.
   # Otherwise should be defined as an attr with the input and the package name(s).
   packagesFromOtherInstances = [
     "nixd"
+    "nil"
     "vigiland"
   ];
 in
 {
   # Packages taken from other instances of nixpkgs inputs, (i.e) pr branches and the like.
   fromOtherInstances =
-    _final: _prev:
+    final: _prev:
     lib.pipe packagesFromOtherInstances [
       (map (
         input:
@@ -31,7 +32,7 @@ in
         else
           throw "Invalid input format."
       ))
-      (map ({ input, packages }: takePackages input packages))
+      (map ({ input, packages }: takePackages final.system input packages))
       (lib.foldl' lib.recursiveUpdate { })
     ];
 

@@ -1,5 +1,5 @@
 {
-  flake,
+  self,
   outputs,
   config,
   pkgs,
@@ -15,7 +15,7 @@ let
     hostName:
     pkgs.writeTextFile {
       name = "${hostName}_ed25519.pub";
-      text = builtins.readFile (lib.mine.files.findFile flake "${hostName}/ssh_host_ed25519_key.pub");
+      text = builtins.readFile (lib.mine.files.findFile self "${hostName}/ssh_host_ed25519_key.pub");
     };
 
   hostSSHPubKey = mkPubKey config.host.name;

@@ -1,6 +1,6 @@
 # TODO - Authentik to unify login across services
 {
-  flake,
+  self,
   config,
   lib,
   ...
@@ -35,7 +35,7 @@ let
 
   fromAllServers =
     pipe:
-    lib.trivial.pipe flake.nixosConfigurations (
+    lib.trivial.pipe self.nixosConfigurations (
       [
         # Exclude the current host
         (lib.filterAttrs (name: _: name != config.system.name))

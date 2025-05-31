@@ -1,5 +1,5 @@
 {
-  flake,
+  self,
   modulesPath,
   config,
   lib,
@@ -9,8 +9,8 @@
   imports = [
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
 
-    "${flake}/hosts/shared/optional/tailscale.nix"
-    "${flake}/modules/nixos/server"
+    "${self}/hosts/shared/optional/tailscale.nix"
+    "${self}/modules/nixos/server"
     ./uptime.nix
   ];
 
@@ -23,7 +23,7 @@
     distributedBuilds = true;
     buildMachines = lib.mkIf (config.system.name != "nixserv") [
       {
-        hostName = flake.nixosConfigurations.nixserv.config.system.name;
+        hostName = self.nixosConfigurations.nixserv.config.system.name;
         system = "x86_64-linux";
         protocol = "ssh-ng";
         sshUser = "builder";

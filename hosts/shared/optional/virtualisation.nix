@@ -7,7 +7,10 @@
 }:
 
 let
-  nur-no-pkgs = import inputs.nur { };
+  crtified = import "${inputs.crtified-nur}/default.nix" {
+    inherit pkgs;
+  };
+
   bridgeInterface = "br0";
   ethInterface = "eth0";
   cores = 24;
@@ -16,7 +19,7 @@ let
 in
 {
   imports = [
-    nur-no-pkgs.repos.crtified.modules.virtualisation.nix
+    crtified.modules.virtualisation.nix
   ];
 
   boot = {

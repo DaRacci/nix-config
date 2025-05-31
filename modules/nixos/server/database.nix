@@ -4,7 +4,7 @@
   ...
 }:
 {
-  flake,
+  self,
   config,
   pkgs,
   lib,
@@ -17,7 +17,7 @@ let
   postgresHost = if isNixio then "localhost" else "nixio";
   postgresPort = getNixioConfig "services.postgresql.settings.port";
 
-  serverConfigurations = lib.trivial.pipe flake.nixosConfigurations [
+  serverConfigurations = lib.trivial.pipe self.nixosConfigurations [
     builtins.attrValues
     (builtins.map (host: host.config))
     (builtins.filter (cfg: cfg.host.device.role == "server"))

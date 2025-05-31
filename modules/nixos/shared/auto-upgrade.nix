@@ -1,5 +1,5 @@
 {
-  flake,
+  self,
   config,
   lib,
   ...
@@ -24,7 +24,7 @@ in
   config = mkIf cfg.enable {
     system.autoUpgrade =
       let
-        isClean = flake ? rev;
+        isClean = self ? rev;
       in
       {
         enable = isClean;
@@ -32,7 +32,6 @@ in
         randomizedDelaySec = "45min";
         flags = [
           "--refresh"
-          "--impure"
           "--accept-flake-config"
           "--no-update-lock-file"
         ];

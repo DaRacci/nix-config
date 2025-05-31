@@ -6,6 +6,7 @@
       experimental-features = [
         "nix-command"
         "flakes"
+        "pipe-operator"
       ];
       warn-dirty = false;
     };

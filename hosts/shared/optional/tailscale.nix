@@ -1,12 +1,12 @@
 {
-  flake,
+  self,
   config,
   pkgs,
   ...
 }:
 {
   sops.secrets.TAILSCALE_AUTH_KEY = {
-    sopsFile = "${flake}/hosts/secrets.yaml";
+    sopsFile = "${self}/hosts/secrets.yaml";
     restartUnits = [
       "tailscaled-autoconnect.service"
       "tailscaled.service"

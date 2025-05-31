@@ -18,7 +18,7 @@ jobs:
       - name: Get packages from flake
         id: get-packages
         run: |
-          PACKAGES_WITH_ARCH=$(nix flake show --impure --json | jq '
+          PACKAGES_WITH_ARCH=$(nix flake show --no-pure-eval --json | jq '
             .packages | {
               package: [ to_entries[].value | keys[] | select(startswith("devenv-") | not) ] | unique,
               arch: [ keys[] ]
@@ -139,7 +139,7 @@ jobs:
       - name: Get Host Users
         id: get-users
         run: |
-          HOST_USERS=$(nix eval --impure --json .#nixosConfigurations.${{ matrix.host }}.config.home-manager.users --apply builtins.attrNames 2>/dev/null | jq -c . || echo "[]")
+          HOST_USERS=$(nix eval --json .#nixosConfigurations.${{ matrix.host }}.config.home-manager.users --apply builtins.attrNames 2>/dev/null | jq -c . || echo "[]")
           echo "Host users: $HOST_USERS"
           {
             echo 'host-users<<EOF'
@@ -385,13 +385,13 @@ jobs:
       - name: Evaluate ${{ matrix.host }}
         env:
           _system: ${{ matrix.system }}
-        run: nix eval --impure --accept-flake-config .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
+        run: nix eval --accept-flake-config .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
 
       - name: Build ${{ matrix.host }}
         if: ${{ !matrix.noBuild }}
         env:
           _system: ${{ matrix.system }}
-        run: nix build --impure --accept-flake-config .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
+        run: nix build --accept-flake-config .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
 
   test:
     concurrency:
@@ -403,7 +403,7 @@ jobs:
         include:
           - command: fmt -L -- --ci
             system: x86_64-linux
-          - command: flake check --impure --allow-import-from-derivation
+          - command: flake check --no-pure-eval --allow-import-from-derivation
             system: x86_64-linux
     runs-on: ubuntu-latest
     steps:

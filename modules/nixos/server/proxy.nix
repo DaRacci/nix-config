@@ -4,7 +4,7 @@
   ...
 }:
 {
-  flake,
+  self,
   config,
   lib,
   ...
@@ -13,7 +13,7 @@ let
   inherit (lib) mkOption mkDefault types;
   cfg = config.server.proxy;
 
-  serverConfigurations = lib.trivial.pipe flake.nixosConfigurations [
+  serverConfigurations = lib.trivial.pipe self.nixosConfigurations [
     builtins.attrValues
     (builtins.map (host: host.config))
     (builtins.filter (config: config.host.device.role == "server"))

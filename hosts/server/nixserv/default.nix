@@ -1,5 +1,5 @@
 {
-  flake,
+  self,
   config,
   pkgs,
   lib,
@@ -48,7 +48,7 @@ in
         home = "/var/lib/builder";
         openssh.authorizedKeys.keyFiles = builtins.map (
           system: builtins.elemAt system.config.users.users.root.openssh.authorizedKeys.keyFiles 0
-        ) (lib.attrValues flake.nixosConfigurations);
+        ) (lib.attrValues self.nixosConfigurations);
       };
 
       atticd = {

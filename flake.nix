@@ -28,7 +28,11 @@
       );
 
       mkPkgs =
-        system: cuda: rocm:
+        {
+          system ? "x86_64-linux",
+          accelerators ? [ ],
+          ...
+        }:
         import inputs.nixpkgs {
           inherit system;
           config = {
@@ -36,8 +40,8 @@
             allowUnfreePredicate = _: true;
             permittedInsecurePackages = [ ];
 
-            cudaSupport = cuda;
-            rocmSupport = rocm;
+            cudaSupport = builtins.elem "cuda" accelerators;
+            rocmSupport = builtins.elem "rocm" accelerators;
           };
 
           overlays = [
@@ -57,6 +61,8 @@
         imports = [
           inputs.devenv.flakeModule
           inputs.treefmt.flakeModule
+
+          ./flake/dev
         ];
 
         systems = [
@@ -66,219 +72,78 @@
 
         flake =
           let
-            system = builtins.currentSystem;
             mkBuilders =
-              cuda: rocm:
+              args:
               import ./lib/builders {
-                inherit inputs lib;
-                flake = self;
-                pkgs = mkPkgs system cuda rocm;
+                inherit self inputs lib;
+                pkgs = mkPkgs args;
               };
 
-            builders = mkBuilders false false;
-            buildersWithCuda = mkBuilders true false;
-            buildersWithRocm = mkBuilders false false;
-            # TODO - Scan the folders for all the configurations and generate the list.
-            configurations =
-              builtins.mapAttrs
-                (
-                  n: v:
-                  if (builtins.hasAttr "acceleration" v) then
-                    if (v.acceleration == "cuda") then
-                      buildersWithCuda.system.build system n v
-                    else if (v.acceleration == "rocm") then
-                      buildersWithRocm.system.build system n v
-                    else
-                      builders.system.build system n v
-                  else
-                    builders.system.build system n v
+            readDirNoCommons =
+              dir:
+              builtins.readDir dir
+              |> builtins.attrNames
+              |> builtins.filter (name: name != "shared")
+              |> builtins.filter (name: name != "secrets.yaml");
+
+            accelerationHosts = {
+              cuda = [
+                "nixmi"
+                "winix"
+              ];
+              rocm = [ ];
+            };
+
+            hosts =
+              readDirNoCommons ./hosts
+              |> builtins.map (deviceType: lib.nameValuePair deviceType (readDirNoCommons ./hosts/${deviceType}))
+              |> builtins.listToAttrs;
+            hostNames = hosts |> builtins.attrValues |> lib.flatten;
+
+            userHosts =
+              readDirNoCommons ./home
+              |> builtins.map (
+                user:
+                lib.nameValuePair user (
+                  readDirNoCommons ./home/${user}
+                  |> builtins.map (file: lib.removeSuffix ".nix" file)
+                  |> builtins.filter (rootFile: builtins.elem rootFile hostNames)
                 )
-                {
-                  nixmi = {
-                    users = [ "racci" ];
-
-                    isoFormat = "iso";
-                    deviceType = "desktop";
-                    acceleration = "cuda";
-                  };
-
-                  winix = {
-                    users = [ "racci" ];
-
-                    isoFormat = "iso";
-                    deviceType = "desktop";
-                    acceleration = "cuda";
-                  };
-
-                  nixarr = {
-                    isoFormat = "proxmox-lxc";
-                    deviceType = "server";
-                  };
-
-                  nixcloud = {
-                    isoFormat = "proxmox-lxc";
-                    deviceType = "server";
-                  };
-
-                  nixdev = {
-                    isoFormat = "proxmox-lxc";
-                    deviceType = "server";
-                  };
-
-                  nixio = {
-                    isoFormat = "proxmox-lxc";
-                    deviceType = "server";
-                  };
-
-                  nixmon = {
-                    isoFormat = "proxmox-lxc";
-                    deviceType = "server";
-                  };
-
-                  nixserv = {
-                    isoFormat = "proxmox-lxc";
-                    deviceType = "server";
-                  };
-
-                  nixai = {
-                    isoFormat = "proxmox-lxc";
-                    deviceType = "server";
-                  };
-                };
-
-            users = lib.genAttrs [ "racci" "root" ] (name: builders.home.mkHomeManager system name { });
+              )
+              |> lib.flatten
+              |> builtins.listToAttrs;
           in
           {
-            nixosConfigurations = builtins.mapAttrs (_n: v: v.system) configurations;
+            nixosConfigurations =
+              hosts
+              |> lib.mapAttrsToList (
+                deviceType: hostNames:
+                builtins.map (
+                  hostName:
+                  lib.nameValuePair hostName {
+                    inherit deviceType;
+                    users = userHosts |> lib.filterAttrs (_: v: builtins.elem hostName v) |> builtins.attrNames;
+                    accelerators =
+                      accelerationHosts |> lib.filterAttrs (_: v: builtins.elem hostName v) |> builtins.attrNames;
+                  }
+                ) hostNames
+              )
+              |> lib.flatten
+              |> builtins.listToAttrs
+              |> builtins.mapAttrs (hostName: hostAttrs: (mkBuilders hostAttrs).mkSystem hostName hostAttrs);
 
-            homeConfigurations = users;
+            homeConfigurations =
+              readDirNoCommons ./home
+              |> builtins.map (user: lib.nameValuePair user ((mkBuilders { }).home.mkHomeManager user { }))
+              |> builtins.listToAttrs;
           };
 
         perSystem =
-          { system, pkgs, ... }:
-          rec {
-            _module.args.pkgs = mkPkgs system false false;
+          { pkgs, ... }:
+          {
+            _module.args.pkgs = mkPkgs { };
 
             packages = import ./pkgs { inherit inputs pkgs; };
-
-            treefmt = {
-              projectRootFile = ".git/config";
-
-              programs = {
-                actionlint.enable = true;
-                deadnix.enable = true;
-                nixfmt.enable = true;
-                shellcheck.enable = true;
-                statix.enable = true;
-                mdformat.enable = true;
-                mdsh.enable = true;
-              };
-
-              settings.formatter.shellcheck.excludes = [ ".envrc" ];
-              settings.global.excludes = [
-                "**/secrets.yaml"
-                "**/ssh_host_ed25519_key.pub"
-                "modules/home-manager/purpose/development/editors/vscode/extensions.nix"
-              ];
-            };
-
-            devenv.shells.default = {
-              # Fixes https://github.com/cachix/devenv/issues/528
-              containers = lib.mkForce { };
-
-              packages = with pkgs; [
-                # Cli Tools
-                act # Github Action testing
-                hyperfine # Benchmarking
-                cocogitto # Conventional Commits
-
-                # Nix tools
-                nvd
-                nix-tree
-                nil
-                nixd
-                nixfmt-rfc-style
-
-                # Required Tools
-                nix
-                git
-                home-manager
-                inputs.nix4vscode.packages.${system}.nix4vscode
-
-                # Converting to Nix
-                dconf2nix
-
-                # Install & Setup Tools
-                sbctl
-                disko
-                cryptsetup
-
-                # Sops-nix
-                age
-                sops
-                ssh-to-age
-              ];
-
-              languages = {
-                nix.enable = false;
-              };
-
-              env = {
-                NIX_CONFIG = "extra-experimental-features = nix-command flakes";
-              };
-
-              scripts = {
-                update-vscode.exec = ''
-                  DIR="modules/home-manager/purpose/development/editors/vscode"
-                  CONFIG="$DIR/config.toml"
-                  NIX_FILE="$DIR/extensions.nix"
-                  VSCODE_VERSION=${pkgs.vscode.version}
-
-                  sed -i "s/vscode_version = \".*\"/vscode_version = \"$VSCODE_VERSION\"/" "$CONFIG"
-                  nix4vscode "$CONFIG" -o "$NIX_FILE"
-                '';
-                dump-vscode.exec = ''
-                  echo 'vscode_version = "'${pkgs.vscode.version}'"'
-                  echo
-                  echo 'extensions = ['
-                  (code --list-extensions 2>/dev/null) | while read extension; do
-                    publisher_name=$(echo "$extension" | cut -d '.' -f 1)
-                    extension_name=$(echo "$extension" | cut -d '.' -f 2-)
-                    echo "  \"$publisher_name.$extension_name\""
-                  done
-                  echo ']'
-                  echo
-                '';
-              };
-
-              git-hooks = {
-                excludes = [
-                  "modules/home-manager/purpose/development/editors/vscode/extensions.nix"
-                ];
-
-                hooks = {
-                  check-added-large-files.enable = true;
-                  check-case-conflicts.enable = true;
-                  check-executables-have-shebangs.enable = true;
-                  check-shebang-scripts-are-executable.enable = true;
-                  check-merge-conflicts.enable = true;
-                  detect-private-keys.enable = true;
-                  fix-byte-order-marker.enable = true;
-                  mixed-line-endings.enable = true;
-                  trim-trailing-whitespace.enable = true;
-
-                  nil.enable = true;
-                  actionlint.enable = true;
-                  deadnix.enable = true;
-                  nixfmt-rfc-style.enable = true;
-                  shellcheck.enable = true;
-                  statix = {
-                    enable = true;
-                    settings.ignore = treefmt.settings.global.excludes;
-                  };
-                };
-              };
-            };
           };
       };
 
@@ -305,6 +170,11 @@
       flake = false;
       type = "file";
     };
+    # TODO - Remove once upstream is up to 0.6.2
+    nix-tree = {
+      url = "github:utdemir/nix-tree";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Misc Flake Inputs for other Inputs
     systems.url = "github:nix-systems/default";
@@ -321,6 +191,10 @@
     };
 
     # Utils & Helpers for usage inside the flake
+    devenv-root = {
+      url = "file+file:///dev/null";
+      flake = false;
+    };
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
@@ -380,6 +254,13 @@
         treefmt-nix.follows = "treefmt";
       };
     };
+    nil = {
+      url = "github:oxalica/nil/main";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+    };
     lix-module = {
       url = "git+https://git.lix.systems/lix-project/nixos-module.git?ref=stable";
       inputs = {
@@ -394,7 +275,7 @@
         flake-compat.follows = "flake-compat";
         git-hooks.follows = "git-hooks";
         home-manager.follows = "home-manager";
-        nur.follows = "nur";
+        nur.follows = "";
       };
     };
     nix-alien = {
@@ -447,13 +328,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.website-builder.follows = "";
     };
-    nur = {
-      url = "github:nix-community/NUR";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-parts.follows = "flake-parts";
-        treefmt-nix.follows = "treefmt";
-      };
+    crtified-nur = {
+      url = "github:CRTified/nur-packages";
+      flake = false; # We aren't going to use this as a flake
     };
 
     # Desktop Stuff

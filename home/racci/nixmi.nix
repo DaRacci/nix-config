@@ -1,5 +1,5 @@
 {
-  flake,
+  self,
   lib,
   ...
 }:
@@ -8,9 +8,9 @@
     ./features/desktop/hyprland
     ./features/desktop/plasma
 
-    "${flake}/home/shared/features/games"
-    "${flake}/home/shared/applications"
-    "${flake}/home/shared/features/windows.nix"
+    "${self}/home/shared/features/games"
+    "${self}/home/shared/applications"
+    "${self}/home/shared/features/windows.nix"
   ];
 
   user.persistence.enable = true;

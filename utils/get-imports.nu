@@ -10,9 +10,9 @@ def main [
   let thisSource = nix flake archive --json | jq -r '.path'
 
   let all_imports = if $type == "OS" {
-      nix eval --impure --json $".#nixosConfigurations.($object)" --apply $"(cat ./utils/get-os-imports.nix)" | from json
+      nix eval --json $".#nixosConfigurations.($object)" --apply $"(cat ./utils/get-os-imports.nix)" | from json
   } else if $type == "HOME" {
-      nix eval --impure --json $".#homeConfigurations.($object)" --apply $"(cat ./utils/get-hm-imports.nix)" | from json
+      nix eval --json $".#homeConfigurations.($object)" --apply $"(cat ./utils/get-hm-imports.nix)" | from json
   } else {
       log critical "Invalid type: $type; expected 'OS' or 'HOME'"
       exit 1

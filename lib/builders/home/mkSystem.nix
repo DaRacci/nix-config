@@ -1,5 +1,5 @@
 {
-  flake,
+  self,
   name,
   groups ? [ ],
   hostName ? null,
@@ -19,7 +19,7 @@ let
     optional
     ;
 
-  userDirectory = "${flake}/home/${name}";
+  userDirectory = "${self}/home/${name}";
   user = config.users.users.${name};
   sourceSSHKey = "${userDirectory}/id_ed25519.pub";
   skipSSHKey = !(builtins.pathExists sourceSSHKey);
@@ -63,13 +63,13 @@ in
     backupFileExtension = "bak";
 
     extraSpecialArgs = {
-      inherit flake;
-      inherit (flake) inputs outputs;
+      inherit self;
+      inherit (self) inputs outputs;
     };
 
     users.${name} = import ./userConf.nix {
       inherit
-        flake
+        self
         lib
         name
         user

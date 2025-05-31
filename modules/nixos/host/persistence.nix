@@ -1,5 +1,5 @@
 {
-  flake,
+  self,
   config,
   lib,
   ...
@@ -192,7 +192,7 @@ in
     };
   };
 
-  imports = [ flake.inputs.impermanence.nixosModules.impermanence ];
+  imports = [ self.inputs.impermanence.nixosModules.impermanence ];
 
   config = mkIf cfg.enable {
     programs.fuse.userAllowOther = true;

@@ -1,5 +1,5 @@
 {
-  flake,
+  self,
   inputs,
   osConfig ? null,
   config,
@@ -18,7 +18,7 @@ in
     ./nix.nix
     ./sops.nix
     ./xdg.nix
-  ] ++ builtins.attrValues (import "${flake}/modules/home-manager");
+  ] ++ builtins.attrValues (import "${self}/modules/home-manager");
 
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";
