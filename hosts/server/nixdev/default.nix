@@ -169,8 +169,8 @@
         l4 = {
           listenPort = 25;
           config = ''
-            proxy {
-              to localhost:2525
+            route {
+              proxy localhost:2525
             }
           '';
         };
