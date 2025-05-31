@@ -57,8 +57,8 @@ _:
   services.caddy = {
     enable = true;
     package = pkgs.caddy.withPlugins {
-      plugins = [ "github.com/mholt/caddy-l4@master" ];
-      hash = "sha256-Jj/3L6grkUuSz96qYxpm1X/PuzPouUGxqXfrPeprzr8=";
+      plugins = [ "github.com/mholt/caddy-l4@v0.0.0-20250530154005-4d3c80e89c5f" ];
+      hash = "sha256-uo3mVKqijNUztHLm7tXtgSUPVxzkO9TfF+CPJ01gAN4=";
     };
     email = "admin@racci.dev";
 
