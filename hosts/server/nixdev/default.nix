@@ -162,10 +162,14 @@
       '';
 
       windmill = {
-        extraConfig = ''
-          reverse_proxy /ws/* http://${toString config.services.windmill.lspPort}
-          reverse_proxy /* http://${toString config.services.windmill.serverPort}
-        '';
+        extraConfig =
+          let
+            cfg = config.services.windmill;
+          in
+          ''
+            reverse_proxy /ws/* http://localhost:${toString cfg.lspPort}
+            reverse_proxy /* http://localhost:${toString cfg.serverPort}
+          '';
         l4 = {
           listenPort = 25;
           config = ''
@@ -193,6 +197,7 @@
       8080
       config.services.windmill.serverPort
       config.services.windmill.lspPort
+      2525
     ];
   };
 }
