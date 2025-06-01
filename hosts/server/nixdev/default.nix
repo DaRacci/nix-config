@@ -191,6 +191,8 @@
     allowedTCPPorts = [
       config.services.n8n.settings.port
       8080
+      config.services.windmill.serverPort
+      config.services.windmill.lspPort
     ];
   };
 }
