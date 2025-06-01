@@ -22,7 +22,60 @@
   services = {
     home-assistant = {
       enable = true;
-      package = pkgs.home-assistant.override { extraPackages = ps: [ ps.psycopg2 ]; };
+      package = pkgs.home-assistant.override {
+        extraPackages =
+          ps: with ps; [
+            psycopg2
+            aiogithubapi
+            adguardhome
+
+            androidtvremote2
+            pyatv
+            hap-python
+            aiohomekit
+            pynetgear
+            pychromecast
+            govee-ble
+            govee-local-api
+            pyschlage
+            pytile
+            python-miio
+
+            caldav
+
+            jellyfin-apiclient-python
+            aiopyarr
+
+            mcp
+            aiohttp-sse
+            ollama
+            pyopenweathermap
+            wyoming
+            spotifyaio
+
+            aiounifi
+            uiprotect
+            unifi-discovery
+          ];
+      };
+      customComponents = with pkgs.home-assistant-custom-components; [
+        moonraker
+        adaptive_lighting
+      ];
+      customLovelaceModules = with pkgs.home-assistant-custom-lovelace-modules; [
+        weather-chart-card
+        versatile-thermostat-ui-card
+        vacuum-card
+        universal-remote-card
+        plotly-chart-card
+        mushroom
+        mini-media-player
+        mini-graph-card
+        hourly-weather
+        clock-weather-card
+        bubble-card
+        auto-entities
+      ];
 
       configWritable = true;
       config = {
