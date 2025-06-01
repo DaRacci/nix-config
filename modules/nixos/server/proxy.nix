@@ -71,6 +71,16 @@ in
                 readOnly = true;
               };
 
+              ports = mkOption {
+                type = types.listOf types.port;
+                default = [ ];
+                description = ''
+                  Ports to be opened from the host for NixIO to forward traffic to.
+
+                  These ports will only accept traffic from the defined subnets for security.
+                '';
+              };
+
               extraConfig = mkOption {
                 type = str;
                 description = ''
@@ -173,6 +183,54 @@ in
         (map (name: lib.nameValuePair name { }))
         builtins.listToAttrs
       ]
+    );
+
+    networking.firewall = lib.mkIf (!isNixio) (
+      let
+        allCombinations =
+          cfg.virtualHosts
+          |> builtins.attrValues
+          |> builtins.map (vh: vh.ports)
+          |> lib.flatten
+          |> builtins.map (
+            port:
+            lib.genAttrs config.server.network.subnets (subnet: {
+              inherit subnet port;
+            })
+          )
+          |> lib.flatten;
+      in
+      {
+        extraCommands =
+          allCombinations
+          |> builtins.map (
+            v:
+            ''
+              iptables -A nixos-fw -p tcp --source ${v.ipv4.cidr} --dport ${toString v.port} -j nixos-fw-accept
+              iptables -A nixos-fw -p udp --source ${v.ipv4.cidr} --dport ${toString v.port} -j nixos-fw-accept
+            ''
+            + (lib.optionalString (v: v.ipv6.cidr != null) ''
+              ip6tables -A nixos-fw -p tcp --source ${v.ipv6.cidr} --dport ${toString v.port} -j nixos-fw-accept
+              ip6tables -A nixos-fw -p udp --source ${v.ipv6.cidr} --dport ${toString v.port} -j nixos-fw-accept
+            '')
+          )
+          |> builtins.concatStringsSep "\n";
+
+        extraStopCommands =
+          allCombinations
+          |> builtins.map (
+            v:
+            ''
+              iptables -D nixos-fw -p tcp --source ${v.ipv4.cidr} --dport ${toString v.port} -j nixos-fw-accept || true
+              iptables -D nixos-fw -p udp --source ${v.ipv4.cidr} --dport ${toString v.port} -j nixos-fw-accept || true
+            ''
+            + (lib.optionalString (v: v.ipv6.cidr != null) ''
+              ip6tables -D nixos-fw -p tcp --source ${v.ipv6.cidr} --dport ${toString v.port} -j nixos-fw-accept || true
+              ip6tables -D nixos-fw -p udp --source ${v.ipv6.cidr} --dport ${toString v.port} -j nixos-fw-accept || true
+            '')
+          )
+          |> builtins.concatStringsSep "\n";
+      }
     );
   };
 }

@@ -1,4 +1,4 @@
-{ subnets, fromAllServers, ... }:
+{ fromAllServers, ... }:
 {
   config,
   pkgs,
@@ -78,11 +78,11 @@
           local   all       all             peer
           local   all       all             scram-sha-256
         ''
-        + (lib.pipe subnets [
+        + (lib.pipe config.server.network.subnets [
           (builtins.map (
             subnet:
-            [ "host  all  all  ${subnet.ipv4_cidr}  scram-sha-256" ]
-            ++ lib.optionals (subnet.ipv6_cidr != null) [ "host  all  all  ${subnet.ipv6_cidr}  scram-sha-256" ]
+            [ "host  all  all  ${subnet.ipv4.cidr}  scram-sha-256" ]
+            ++ lib.optionals (subnet.ipv6.cidr != null) [ "host  all  all  ${subnet.ipv6.cidr}  scram-sha-256" ]
           ))
           lib.flatten
           (builtins.concatStringsSep "\n")

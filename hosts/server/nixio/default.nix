@@ -6,33 +6,6 @@
   ...
 }:
 let
-  subnets = [
-    {
-      dns = "100.100.100.100:53";
-      ipv4_cidr = "100.64.0.0/10";
-      ipv4_arpa = "64.100.in-addr.arpa";
-      ipv6_cidr = "fd7a:115c:a1e0::/48";
-      ipv6_arpa = "0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.e.1.a.c.5.1.1.a.7.d.f.ip6.arpa";
-      domain = "degu-beta.ts.net";
-    }
-    {
-      dns = "192.168.1.1:53";
-      ipv4_cidr = "192.168.1.0/24";
-      ipv4_arpa = "1.168.192.in-addr.arpa";
-      ipv6_cidr = null;
-      ipv6_arpa = null;
-      domain = "home";
-    }
-    {
-      dns = "192.168.2.1:53";
-      ipv4_cidr = "192.168.2.0/24";
-      ipv4_arpa = "2.168.192.in-addr.arpa";
-      ipv6_cidr = null;
-      ipv6_arpa = null;
-      domain = "localdomain";
-    }
-  ];
-
   fromAllServers =
     pipe:
     lib.trivial.pipe self.nixosConfigurations (
@@ -48,12 +21,12 @@ let
       ++ pipe
     );
 
-  importFile = path: import path { inherit subnets fromAllServers; };
+  importFile = path: import path { inherit fromAllServers; };
 in
 {
   imports = [
     ./tunnel
-    (importFile ./adguard.nix)
+    ./adguard.nix
     ./dashboard.nix
     (importFile ./database.nix)
     (importFile ./proxy.nix)
@@ -68,4 +41,35 @@ in
 
   services.tailscale = { };
   #endregion
+
+  server.network.subnets = [
+    {
+      dns = "100.100.100.100:53";
+      domain = "degu-beta.ts.net";
+      ipv4 = {
+        cidr = "100.64.0.0/10";
+        arpa = "64.100.in-addr.arpa";
+      };
+      ipv6 = {
+        cidr = "fd7a:115c:a1e0::/48";
+        arpa = "0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.e.1.a.c.5.1.1.a.7.d.f.ip6.arpa";
+      };
+    }
+    {
+      dns = "192.168.1.1:53";
+      domain = "home";
+      ipv4 = {
+        cidr = "192.168.1.0/24";
+        arpa = "1.168.192.in-addr.arpa";
+      };
+    }
+    {
+      dns = "192.168.2.1:53";
+      domain = "localdomain";
+      ipv4 = {
+        cidr = "192.168.2.0/24";
+        arpa = "2.168.192.in-addr.arpa";
+      };
+    }
+  ];
 }

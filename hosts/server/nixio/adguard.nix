@@ -1,4 +1,3 @@
-{ subnets, ... }:
 { config, lib, ... }:
 {
   server = {
@@ -62,7 +61,7 @@
           anonymize_client_ip = false;
           upstream_mode = "parallel";
           upstream_dns =
-            (lib.pipe subnets [
+            (lib.pipe config.server.network.subnets [
               (builtins.map (subnet: "[/${subnet.domain}/]${subnet.dns}"))
             ])
             ++ [
@@ -89,10 +88,10 @@
             "::1/128"
           ];
 
-          private_networks = lib.trivial.pipe subnets [
+          private_networks = lib.trivial.pipe config.server.network.subnets [
             (builtins.map (subnet: [
-              subnet.ipv4_cidr
-              subnet.ipv6_cidr
+              subnet.ipv4.cidr
+              subnet.ipv6.cidr
             ]))
             lib.flatten
             (builtins.filter (subnet: subnet != null))
@@ -104,13 +103,13 @@
 
           use_private_ptr_resolvers = true;
           local_ptr_upstreams =
-            lib.trivial.pipe subnets [
+            lib.trivial.pipe config.server.network.subnets [
               (builtins.map (
                 subnet:
                 [
-                  "[/${subnet.ipv4_arpa}/]${subnet.dns}"
+                  "[/${subnet.ipv4.arpa}/]${subnet.dns}"
                 ]
-                ++ lib.optionals (subnet.ipv6_arpa != null) [ "[/${subnet.ipv6_arpa}/]${subnet.dns}" ]
+                ++ lib.optionals (subnet.ipv6.arpa != null) [ "[/${subnet.ipv6.arpa}/]${subnet.dns}" ]
               ))
               lib.flatten
             ]
@@ -124,14 +123,14 @@
         };
 
         user_rules =
-          lib.trivial.pipe subnets [
+          lib.trivial.pipe config.server.network.subnets [
             (builtins.map (
               subnet:
               [
-                "*.racci.dev^$client=${subnet.ipv4_cidr},dnsrewrite=${config.system.name}.${subnet.domain}"
+                "*.racci.dev^$client=${subnet.ipv4.cidr},dnsrewrite=${config.system.name}.${subnet.domain}"
               ]
-              ++ lib.optionals (subnet.ipv6_cidr != null) [
-                "*.racci.dev^$client=${subnet.ipv6_cidr},dnsrewrite=${config.system.name}.${subnet.domain}"
+              ++ lib.optionals (subnet.ipv6.cidr != null) [
+                "*.racci.dev^$client=${subnet.ipv6.cidr},dnsrewrite=${config.system.name}.${subnet.domain}"
               ]
             ))
             lib.flatten
