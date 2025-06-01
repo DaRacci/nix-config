@@ -80,11 +80,9 @@
         scripts =
           let
             nuSelectHost = ''
-              const ARCHS = [${builtins.attrNames self.allSystems |> builtins.concatStringsSep " "}]
               const HOSTS = [${builtins.attrNames self.nixosConfigurations |> builtins.concatStringsSep " "}]]
               let selected = $HOSTS | input list -f
-              let arch = $ARCHS | input list -f
-              let flake_attr = $".#nixosConfigurations.($arch).($selected).config.system.build.toplevel"
+              let flake_attr = $".#nixosConfigurations.($selected).config.system.build.toplevel"
             '';
           in
           {
