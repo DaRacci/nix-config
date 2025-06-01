@@ -27,10 +27,11 @@
           ps: with ps; [
             psycopg2
             aiogithubapi
-            adguardhome
+            aiobotocore
 
             androidtvremote2
             pyatv
+            base36 # Soft dep for homekit
             hap-python
             aiohomekit
             pynetgear
@@ -52,6 +53,7 @@
             pyopenweathermap
             wyoming
             spotifyaio
+            adguardhome
 
             aiounifi
             uiprotect
