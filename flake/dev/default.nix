@@ -141,6 +141,7 @@
                   log info $"Selected host: ($flake_attr)"
                   log info $"Command: ($command_args)"
 
+                  let current_host = cat /etc/hostname | str trim
                   if $selected == $current_host {
                     log info "Rebuilding current host"
                     sudo nixos-rebuild ...$command_args
