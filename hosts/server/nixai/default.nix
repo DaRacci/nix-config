@@ -4,6 +4,10 @@
   ...
 }:
 {
+  imports = [
+    ./voice.nix
+  ];
+
   sops.secrets = {
     SEARXNG_ENVIRONMENT = {
       owner = config.users.users."searx".name;
