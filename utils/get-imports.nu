@@ -1,5 +1,4 @@
-#!/usr/bin/env nix-shell
-#!nix-shell -i nu -p nushell jq
+#!/usr/bin/env -S nix shell nixpkgs#nushell nixpkgs#jq --command nu
 
 use std/log
 

@@ -1,5 +1,4 @@
-#!/usr/bin/env nix-shell
-#!nix-shell -i bash -p jq
+#!/usr/bin/env -S nix shell nixpkgs#jq --command bash
 # shellcheck shell=bash disable=SC1008
 
 set -euo pipefail
