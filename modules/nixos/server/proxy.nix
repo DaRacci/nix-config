@@ -82,7 +82,8 @@ in
               };
 
               extraConfig = mkOption {
-                type = str;
+                type = nullOr str;
+                default = null;
                 description = ''
                   Configuration to be placed in `<services.caddy.virtualHosts.${name}.extraConfig>`
 
@@ -168,7 +169,8 @@ in
             lib.nameValuePair value.baseUrl {
               hostName = value.baseUrl;
               useACMEHost = value.baseUrl;
-              extraConfig = replaceLocalHost config.host.name value.extraConfig;
+              extraConfig =
+                if value.extraConfig == null then "" else replaceLocalHost config.host.name value.extraConfig;
             }
           ) config.server.proxy.virtualHosts)
         ))
@@ -185,7 +187,7 @@ in
       ]
     );
 
-    networking.firewall = lib.mkIf (!isNixio) (
+    networking.firewall =
       let
         allCombinations =
           cfg.virtualHosts
@@ -194,14 +196,23 @@ in
           |> lib.flatten
           |> builtins.map (
             port:
-            lib.genAttrs config.server.network.subnets (subnet: {
-              inherit subnet port;
-            })
+            builtins.map (
+              subnet:
+              subnet
+              // {
+                inherit port;
+              }
+            ) config.server.network.subnets
           )
           |> lib.flatten;
+
+        allPorts = allCombinations |> builtins.map (v: v.port) |> lib.unique;
       in
       {
-        extraCommands =
+        allowedTCPPorts = lib.mkIf isNixio allPorts;
+        allowedUDPPorts = lib.mkIf isNixio allPorts;
+
+        extraCommands = lib.mkIf (!isNixio) (
           allCombinations
           |> builtins.map (
             v:
@@ -209,14 +220,15 @@ in
               iptables -A nixos-fw -p tcp --source ${v.ipv4.cidr} --dport ${toString v.port} -j nixos-fw-accept
               iptables -A nixos-fw -p udp --source ${v.ipv4.cidr} --dport ${toString v.port} -j nixos-fw-accept
             ''
-            + (lib.optionalString (v: v.ipv6.cidr != null) ''
+            + (lib.optionalString (v.ipv6.cidr != null) ''
               ip6tables -A nixos-fw -p tcp --source ${v.ipv6.cidr} --dport ${toString v.port} -j nixos-fw-accept
               ip6tables -A nixos-fw -p udp --source ${v.ipv6.cidr} --dport ${toString v.port} -j nixos-fw-accept
             '')
           )
-          |> builtins.concatStringsSep "\n";
+          |> builtins.concatStringsSep "\n"
+        );
 
-        extraStopCommands =
+        extraStopCommands = lib.mkIf (!isNixio) (
           allCombinations
           |> builtins.map (
             v:
@@ -224,13 +236,13 @@ in
               iptables -D nixos-fw -p tcp --source ${v.ipv4.cidr} --dport ${toString v.port} -j nixos-fw-accept || true
               iptables -D nixos-fw -p udp --source ${v.ipv4.cidr} --dport ${toString v.port} -j nixos-fw-accept || true
             ''
-            + (lib.optionalString (v: v.ipv6.cidr != null) ''
+            + (lib.optionalString (v.ipv6.cidr != null) ''
               ip6tables -D nixos-fw -p tcp --source ${v.ipv6.cidr} --dport ${toString v.port} -j nixos-fw-accept || true
               ip6tables -D nixos-fw -p udp --source ${v.ipv6.cidr} --dport ${toString v.port} -j nixos-fw-accept || true
             '')
           )
-          |> builtins.concatStringsSep "\n";
-      }
-    );
+          |> builtins.concatStringsSep "\n"
+        );
+      };
   };
 }

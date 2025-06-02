@@ -122,10 +122,8 @@ in
         ];
 
         trusted_proxies = [
-          "192.168.1.0/24"
-          "192.168.2.0/24"
-          "100.64.0.0/10"
-        ];
+          "::1" # For notify_push
+        ] ++ (config.server.network.subnets |> builtins.map (v: v.ipv4.cidr));
 
         twofactor_enforced = true;
         twofactor_enforced_groups = [ ];
@@ -163,6 +161,7 @@ in
       notify_push = {
         enable = true;
         package = pkgs.nextcloud-notify_push;
+        nextcloudUrl = "http://localhost:80";
       };
     };
 
