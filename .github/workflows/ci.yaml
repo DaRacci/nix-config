@@ -6,52 +6,6 @@ on:
   workflow_call:
 
 jobs:
-  discover-packages:
-    name: Discover Packages
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.get-packages.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-nix
-
-      - name: Get packages from flake
-        id: get-packages
-        run: |
-          PACKAGES_WITH_ARCH=$(nix flake show --no-pure-eval --json | jq '
-            .packages | {
-              package: [ to_entries[].value | keys[] | select(startswith("devenv-") | not) ] | unique,
-              arch: [ keys[] ]
-            }
-          ')
-          echo "All architectures with packages: $PACKAGES_WITH_ARCH"
-          {
-            echo 'matrix<<EOF'
-            echo "$PACKAGES_WITH_ARCH"
-            echo EOF
-          } >> "$GITHUB_OUTPUT"
-  build-packages:
-    needs: discover-packages
-    if: ${{ needs.discover-packages.outputs.matrix != '[]' }}
-    strategy:
-      matrix: ${{ fromJson(needs.discover-packages.outputs.matrix) }}
-      fail-fast: false
-    runs-on: ${{ matrix.arch == 'aarch64-linux' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
-    name: Build package ${{ matrix.package }} on ${{ matrix.arch }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-nix
-        with:
-          arch: ${{ matrix.arch }}
-          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
-          ATTIC_ENDPOINT: ${{ secrets.ATTIC_ENDPOINT }}
-          ATTIC_CACHE: ${{ secrets.ATTIC_CACHE }}
-          ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
-
-      - name: Build Package
-        run: nix build .#${{ matrix.package }} -L --show-trace --no-link --print-out-paths
-
   discover-users:
     name: Discover Users
     runs-on: ubuntu-latest
