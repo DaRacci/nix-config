@@ -43,7 +43,7 @@
             pytile
             python-miio
             python-kasa
-            google_nest_sdm
+            google-nest-sdm
 
             caldav
 
