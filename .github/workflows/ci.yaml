@@ -8,13 +8,11 @@ on:
 jobs:
   discover-users:
     name: Discover Users
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       matrix: ${{ steps.get-users.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-nix
-
       - name: Get users from flake
         id: get-users
         run: |
@@ -25,8 +23,27 @@ jobs:
             echo "$ALL_USERS" | jq -c -s '.[] | map({user: .})' || echo "[]"
             echo EOF
           } >> "$GITHUB_OUTPUT"
+
+  discover-hosts:
+    name: Discover Hosts
+    runs-on: self-hosted
+    outputs:
+      matrix: ${{ steps.get-hosts.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get hosts from flake
+        id: get-hosts
+        run: |
+          ALL_HOSTS=$(nix flake show --no-pure-eval --json | jq -r '.nixosConfigurations | keys | .[]' | jq -R . | jq -s . || echo "[]")
+          echo "All hosts from flake: $ALL_HOSTS"
+          {
+            echo 'matrix<<EOF'
+            echo "$ALL_HOSTS"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
   enrich-users:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: discover-users
     if: ${{ needs.discover-users.outputs.matrix != '[]' }}
     strategy:
@@ -36,8 +53,6 @@ jobs:
     name: Enrich user ${{ matrix.user }}
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-nix
-
       - name: Get User Imports
         run: |
           USER_IMPORTS=$(./utils/get-imports.nu "HOME" "${{ matrix.user }}" | jq -c . || echo "[]")
@@ -49,26 +64,8 @@ jobs:
           path: imports.json
           if-no-files-found: error
 
-  discover-hosts:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.get-hosts.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-nix
-
-      - name: Get hosts from flake
-        id: get-hosts
-        run: |
-          ALL_HOSTS=$(nix flake show --impure --json | jq -r '.nixosConfigurations | keys | .[]' | jq -R . | jq -s . || echo "[]")
-          echo "All hosts from flake: $ALL_HOSTS"
-          {
-            echo 'matrix<<EOF'
-            echo "$ALL_HOSTS"
-            echo EOF
-          } >> "$GITHUB_OUTPUT"
   enrich-hosts:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [discover-hosts, enrich-users]
     if: ${{ needs.discover-hosts.outputs.matrix != '[]' }}
     strategy:
@@ -78,8 +75,6 @@ jobs:
     name: Enrich host ${{ matrix.host }}
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-nix
-
       - name: Get Host Imports
         id: get-imports
         run: |
@@ -142,7 +137,7 @@ jobs:
           if-no-files-found: error
 
   determine-affected:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [enrich-hosts]
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -150,7 +145,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: ./.github/actions/setup-nix
 
       - name: Download Host Details Artifacts
         uses: actions/download-artifact@v4
@@ -222,7 +216,7 @@ jobs:
 
           # Special Rules
           EXTRA_SPACE='["nixmi", "winix"]'
-          NO_BUILD='[]'
+          NO_BUILD='["nixmi", "winix"]'
 
           echo "Hosts to be rebuilt: $BUILD_HOSTS"
           {
@@ -241,7 +235,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
   cleanup:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [determine-affected]
     if: ${{ always() }}
     steps:

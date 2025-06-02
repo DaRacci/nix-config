@@ -5,7 +5,7 @@ let
   # Doing this to silence the warning about collectModules being an internal function
   inherit
     (
-      (import (system._module.specialArgs.flake.inputs.nixpkgs + "/lib/modules.nix") {
+      (import (system._module.specialArgs.self.inputs.nixpkgs + "/lib/modules.nix") {
         lib = lib.extend (
           _: prev: {
             trivial = prev.trivial // {

@@ -30,7 +30,7 @@ runs:
         source-url: "${{ format('https://install.lix.systems/lix/lix-installer-{0}', inputs.arch) }}"
         extra-conf: |
           accept-flake-config = true
-          experimental-features = nix-command flakes pipe-operator pipe-operators
+          experimental-features = nix-command flakes pipe-operator
 
     # Setup TS so we can access the cache
     - name: Tailscale
