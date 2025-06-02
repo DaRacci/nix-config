@@ -1,10 +1,13 @@
-{ config, ... }:
 {
+  config,
+  ...
+}:
+{
+  imports = [
+    ./ci.nix
+  ];
+
   sops.secrets = {
-    GITHUB_TOKEN = {
-      owner = config.users.users.runner.name;
-      group = config.users.groups.runner.name;
-    };
     CODER_ENV = {
       owner = config.users.users.coder.name;
       inherit (config.users.users.coder) group;
@@ -12,18 +15,6 @@
     WINDMILL_DATABASE_URL = {
       owner = config.users.users.coder.name;
       inherit (config.users.users.coder) group;
-    };
-  };
-
-  users = {
-    users.runner = {
-      name = "runner";
-      group = "runner";
-      isSystemUser = true;
-    };
-
-    groups.runner = {
-      name = "runner";
     };
   };
 
@@ -47,16 +38,6 @@
           # This comes from the environment file
           password = "\${CODER_PASSWORD}";
         };
-    };
-
-    github-runners = {
-      runner = {
-        enable = true;
-        user = null;
-        group = null;
-        url = "https://github.com/DaRacci/nix-config";
-        tokenFile = config.sops.secrets.GITHUB_TOKEN.path;
-      };
     };
 
     n8n = {
