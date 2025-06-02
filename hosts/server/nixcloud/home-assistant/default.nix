@@ -5,6 +5,7 @@
 }:
 {
   imports = [
+    ./matter.nix
     ./postgresql.nix
     ./proxy.nix
     # ./weather.nix
@@ -41,6 +42,8 @@
             pyschlage
             pytile
             python-miio
+            python-kasa
+            google_nest_sdm
 
             caldav
 
@@ -82,7 +85,7 @@
       configWritable = true;
       config = {
         frontend = { };
-        history = { };
+        default_config = { };
 
         isal = { };
 
