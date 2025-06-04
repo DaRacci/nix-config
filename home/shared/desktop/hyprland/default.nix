@@ -12,13 +12,19 @@
     ./nvidia.nix
   ];
 
-  wayland.windowManager.hyprland = {
+  wayland.windowManager.hyprland = rec {
     enable = true;
     package = if (osConfig != null) then osConfig.programs.hyprland.package else pkgs.hyprland;
     portalPackage = pkgs.xdg-desktop-portal-hyprland;
 
     xwayland.enable = true;
     systemd.enable = false;
+
+    settings = {
+      permission = [
+        "${portalPackage}/libexec/xdg-desktop-portal-hyprland, screencopy, allow"
+      ];
+    };
   };
 
   xdg.portal = {

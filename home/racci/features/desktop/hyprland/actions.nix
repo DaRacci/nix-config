@@ -114,10 +114,12 @@
         "SUPER,Print,exec,${screenshot} output"
       ];
 
-      permission = builtins.map (exe: "${exe},screencopy,allow") [
-        ocrRegion
-        screenshot
-        colourPicker
-      ];
+      permission = builtins.map (exe: "${lib.getExe exe},screencopy,allow") (
+        with pkgs;
+        [
+          grim
+          hyprpicker
+        ]
+      );
     };
 }
