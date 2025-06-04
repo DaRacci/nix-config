@@ -22,7 +22,7 @@
           text = ''
             TEMP_FILE="$(mktemp --suffix=.png)";
 
-            grimblast --freeze save area "$TEMP_FILE";
+            GRIMBLAST_HIDE_CURSOR=1 grimblast --freeze save area "$TEMP_FILE";
             tesseract "$TEMP_FILE" - | wl-copy;
             paplay ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/camera-shutter.oga;
             rm "$TEMP_FILE";
@@ -48,7 +48,6 @@
             pkgs.libnotify
           ];
           text = ''
-            # Require an input of either "area" or "output"
             if [ $# -ne 1 ] || [ "$1" != "area" ] && [ "$1" != "output" ]; then
               echo "Usage: screenshot <area|output>";
               exit 1;
@@ -61,7 +60,7 @@
             savePath="''${savePath}.png";
             mkdir -p "''${datedFolder}";
 
-            grimblast --freeze copysave "$CAPTURE" "$savePath";
+            GRIMBLAST_HIDE_CURSOR=1 grimblast --freeze copysave "$CAPTURE" "$savePath";
             paplay ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/camera-shutter.oga;
 
             ACTION=$(notify-send \
