@@ -245,7 +245,7 @@ with lib;
         new_window_takes_over_fullscreen = 2;
         allow_session_lock_restore = true;
 
-        initial_workspace_tracking = 2;
+        initial_workspace_tracking = 1;
 
         middle_click_paste = false;
       };
