@@ -18,7 +18,7 @@ let
         custom-settings = {
           bind.${bind} = [
             "exec"
-            "${uwsmExec "b" "${hdropExe} --background --floating --class ${class} ${exec}"}"
+            "${uwsmExec "b" "${hdropExe} --background --class ${class} ${exec}"}"
           ];
           windowrule = [
             {
@@ -26,9 +26,8 @@ let
               rule = lib.mkMerge [
                 {
                   float = lib.mkDefault true;
-                  pin = lib.mkDefault true;
                   size = lib.mkDefault "33%";
-                  move = lib.mkDefault {
+                  move = {
                     x = lib.mkDefault "33%";
                     y = lib.mkDefault "67";
                   };
@@ -40,7 +39,7 @@ let
         };
 
         settings.exec-once = [
-          (uwsmExec "b" "${hdropExe} --background --floating --class ${class} ${exec}")
+          (uwsmExec "b" "${hdropExe} --background --class ${class} ${exec}")
         ];
       };
     };

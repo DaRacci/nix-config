@@ -25,7 +25,7 @@
 
   services = {
     lact = {
-      enable = true;
+      enable = false;
       gpuOverclock.enable = true;
     };
     hardware.bolt.enable = true;

@@ -116,24 +116,27 @@ let
       };
       size = mkOption {
         type = nullOr (
-          either str (submodule {
-            options = {
-              width = mkOption {
-                type = nullOr (either percentString int);
-                default = null;
-                description = "Set the window width.";
-                apply = toString;
+          either str (
+            either str (submodule {
+              options = {
+                width = mkOption {
+                  type = nullOr (either percentString int);
+                  default = null;
+                  description = "Set the window width.";
+                  apply = toString;
+                };
+                height = mkOption {
+                  type = nullOr (either percentString int);
+                  default = null;
+                  description = "Set the window height.";
+                  apply = toString;
+                };
               };
-              height = mkOption {
-                type = nullOr (either percentString int);
-                default = null;
-                description = "Set the window height.";
-                apply = toString;
-              };
-            };
-          })
+            })
+          )
         );
         default = null;
+        apply = v: if builtins.isAttrs v then "${v.width} ${v.height}" else v;
         description = "Set the window size.";
       };
       center = mkOption {
