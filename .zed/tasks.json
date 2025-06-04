@@ -1,12 +1,16 @@
 [
   {
     "label": "Rebuild & Switch System",
-    "command": "sudo nixos-rebuild switch --flake .#$(hostname) --accept-flake-config -L",
+    "command": "sudo nixos-rebuild switch --flake .#(hostname) --accept-flake-config -L",
     "use_new_terminal": false,
     "allow_concurrent_runs": false,
     "reveal": "no_focus",
     "reveal_target": "dock",
     "hide": "on_success",
     "shell": "system"
+  },
+  {
+    "label": "Get Nix Value at Cursor",
+    "command": "$ZED_WORKTREE_ROOT/flake/dev/scripts/get-symbol-value.nu '$ZED_SYMBOL' '$ZED_FILE'"
   }
 ]
