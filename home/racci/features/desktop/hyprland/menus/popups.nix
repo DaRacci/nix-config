@@ -4,63 +4,48 @@
   ...
 }:
 let
-  uwsmExec = slice: exec: "${lib.getExe' pkgs.uwsm "uwsm-app"} -s ${slice} -- ${exec}";
-  hdropExe = lib.getExe pkgs.hdrop;
-  mkDropdown =
-    {
-      bind,
-      exec,
-      class,
-      rule ? { },
-    }:
-    {
-      wayland.windowManager.hyprland = {
-        custom-settings = {
-          bind.${bind} = [
-            "exec"
-            "${uwsmExec "b" "${hdropExe} --background --class ${class} ${exec}"}"
-          ];
-          windowrule = [
-            {
-              matcher.class = "^${class}$";
-              rule = lib.mkMerge [
-                {
-                  float = lib.mkDefault true;
-                  size = lib.mkDefault "33%";
-                  move = {
-                    x = lib.mkDefault "33%";
-                    y = lib.mkDefault "67";
-                  };
-                }
-                rule
-              ];
-            }
-          ];
-        };
-
-        settings.exec-once = [
-          (uwsmExec "b" "${hdropExe} --background --class ${class} ${exec}")
-        ];
-      };
-    };
-
+  inherit (lib) getExe;
 in
-lib.mkMerge [
-  (mkDropdown {
-    bind = "SUPER+b";
-    exec = lib.getExe pkgs.bitwarden;
-    class = "Bitwarden";
-  })
-  (mkDropdown {
-    bind = "SUPER+c";
-    exec = lib.getExe pkgs.gnome-calculator;
-    class = "org.gnome.Calculator";
-    rule = {
-      size = {
-        width = "19%";
-        height = "33%";
+{
+  wayland.windowManager.hyprland.custom-settings.slideIn = [
+    {
+      bind = "SUPER+b";
+      exec = getExe pkgs.bitwarden;
+      class = "Bitwarden";
+      side = "top";
+    }
+    {
+      bind = "SUPER+c";
+      exec = getExe pkgs.gnome-calculator;
+      class = "org.gnome.Calculator";
+      side = "top";
+      rule = {
+        size = {
+          width = "19%";
+          height = "33%";
+        };
+        move.x = "40%";
       };
-      move.x = "40%";
-    };
-  })
-]
+    }
+    {
+      bind = "SUPER+d";
+      class = "me.iepure.devtoolbox";
+      exec = getExe pkgs.devtoolbox;
+      side = "top";
+    }
+    {
+      bind = "SUPER+e";
+      exec = getExe pkgs.nautilus;
+      class = "org.gnome.Nautilus";
+      side = "right";
+      rule = {
+        size = {
+          width = "33%";
+          height = "33%";
+        };
+        move.x = "33%";
+        move.y = "67%";
+      };
+    }
+  ];
+}

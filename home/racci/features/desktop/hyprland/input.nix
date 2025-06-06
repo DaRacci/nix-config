@@ -27,7 +27,7 @@ let
   programShortcuts = {
     "SUPER+T" = lib.getExe config.programs.alacritty.package;
     "SUPER+F" = lib.getExe config.programs.firefox.package;
-    "SUPER+E" = lib.getExe pkgs.nautilus;
+    "SUPER+SHIFT+E" = lib.getExe pkgs.nautilus;
   };
 in
 {

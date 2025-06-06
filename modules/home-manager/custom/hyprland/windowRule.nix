@@ -208,6 +208,11 @@ let
 
       #region Dynamic Rules
       # TODO - Animation, border colour,
+      animation = mkOption {
+        type = nullOr (listOf str);
+        default = null;
+        description = "sets the animations for the window. Can be a single animation or a comma separated list of animations. See the Animations page for more information.";
+      };
       idleinhibit = mkOption {
         type = nullOr (enum [
           "none"
