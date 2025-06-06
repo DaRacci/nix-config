@@ -66,6 +66,7 @@
           monitorSpecific = true;
           showWsIcons = true;
           spacing = 1.0;
+          ignored = "-[0-9]{1,2}"; # Ignore Special Workspaces
         };
       };
 
