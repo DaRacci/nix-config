@@ -84,8 +84,8 @@ merge
         "github"."copilot" = vscode-utils.extensionFromVscodeMarketplace {
           name = "copilot";
           publisher = "github";
-          version = "1.326.0";
-          sha256 = "1mdg7xnwz0qkxl3lmsal1mvlx02qxgzbz349mfb41hg8fsdh57vd";
+          version = "1.330.0";
+          sha256 = "08lcf1ybjsjmmm239axxv12fjgfcgggc4nai4h259wlbg886gd1m";
 
         };
         "github"."copilot-chat" = vscode-utils.extensionFromVscodeMarketplace {
@@ -98,8 +98,8 @@ merge
         "github"."vscode-github-actions" = vscode-utils.extensionFromVscodeMarketplace {
           name = "vscode-github-actions";
           publisher = "github";
-          version = "0.27.1";
-          sha256 = "0pq97nl5h170r5cwsvps9z059lvj7a9aik2w84fnn3mjficrlwlq";
+          version = "0.27.2";
+          sha256 = "06afix94nxb9vbkgmygg02pyczb09cmvr1l8d2b9alsxhk2i0r69";
 
         };
         "github"."vscode-pull-request-github" = vscode-utils.extensionFromVscodeMarketplace {
