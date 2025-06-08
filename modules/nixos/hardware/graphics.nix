@@ -139,8 +139,29 @@ in
       };
     };
 
-    boot.kernelParams = optionals hasNvidia [
-      "nvidia.NVreg_EnableResizableBar=1"
-    ];
+    boot.kernelParams =
+      optionals hasNvidia [
+        "nvidia.NVreg_EnableResizableBar=1"
+      ]
+      ++ optionals hasAmd [
+        "amdgpu.dcdebugmask=0x400" # Fix stuttering under wayland on Kernel 6.11+
+      ];
+
+    # https://wiki.nixos.org/wiki/AMD_GPU#HIP
+    systemd.tmpfiles.rules = mkIf hasAmd (
+      let
+        rocmEnv = pkgs.symlinkJoin {
+          name = "rocm-combined";
+          paths = with pkgs.rocmPackages; [
+            rocblas
+            hipblas
+            clr
+          ];
+        };
+      in
+      [
+        "L+    /opt/rocm   -    -    -     -    ${rocmEnv}"
+      ]
+    );
   };
 }
