@@ -27,8 +27,6 @@ let
     uwsm
     ;
 
-  # cfg = config.wayland.windowManager.hyprland;
-
   commonOptions = {
     bind = mkOption {
       type = str;
@@ -62,15 +60,14 @@ let
   slideInRule = direction: {
     float = mkDefault true;
     size = {
-      width = "20nr%";
-      height = "97%"; # TODO :: based on hyprpanel gap
+      width = mkDefault "20%";
+      height = mkDefault "97%";
     };
     move = {
-      x = mkDefault "84%"; # TODO :: based on hyprland gap
-      y = mkDefault "67";
+      x = mkDefault "80%";
+      y = mkDefault "3%";
     };
     animation = [
-      # "windows, 1, 8, fluentDecel, slide left"
       "global, 1, 8, fluentDecel, slide ${direction}"
     ];
   };
@@ -123,16 +120,9 @@ in
             matcher.class = "^${item.class}$";
             rule = mkMerge [
               ((if item.side == "left" || item.side == "right" then slideInRule else dropDownRule) item.side)
-              # item.rule
+              item.rule
             ];
           });
-
-        # windowrule = [
-        #   {
-        #     inherit rule;
-        #     matcher.class = "^${class}$";
-        #   }
-        # ];
       };
     };
   };
