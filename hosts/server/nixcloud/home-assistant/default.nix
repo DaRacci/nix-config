@@ -31,6 +31,7 @@
             aiobotocore
 
             androidtvremote2
+            adb-shell # Soft dep for androidtv
             pyatv
             base36 # Soft dep for homekit
             hap-python

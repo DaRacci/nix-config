@@ -70,6 +70,32 @@ _:
     logFormat = ''
       format console
     '';
+
+    extraConfig = ''
+      (cors) {
+        @cors_preflight{args.0} method OPTIONS
+        @cors{args.0} header Origin {args.0}
+
+        handle @cors_preflight{args.0} {
+          header {
+            Access-Control-Allow-Origin "{args.0}"
+            Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+            Access-Control-Allow-Headers *
+            Access-Control-Max-Age "3600"
+            defer
+          }
+          respond "" 204
+        }
+
+        handle @cors{args.0} {
+          header {
+            Access-Control-Allow-Origin "{args.0}"
+            Access-Control-Expose-Headers *
+            defer
+          }
+        }
+      }
+    '';
   };
 
   security.acme = {
