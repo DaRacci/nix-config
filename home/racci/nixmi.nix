@@ -21,10 +21,7 @@
     monitor = [
       "DP-6,      3840x2160@240,  0x0,        1, vrr, 1, cm ,hdredid,bitdepth,10,sdrbrightness, 1.4, sdrsaturation, 1" # Center Monitor
       "DP-1,      2560x1440@144,  -2560x360,  1, vrr, 1" # Left Monitor
-      "HDMI-A-1,  2560x1440@144,  3840x360,   1, vrr, 0" # Right Monitor
-
-      "HDMI-A-2,  2732x2048@90,   auto-right, 2"
-      "HDMI-A-2,  disable" # Disable Virtual Monitor, will be managed by sunshine.
+      "HDMI-A-1,  2560x1440@120,  3840x360,   1, vrr, 0" # Right Monitor
     ];
   };
 
