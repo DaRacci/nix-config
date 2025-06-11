@@ -22,7 +22,6 @@
       l4 = {
         listenPort = 10300;
         config = ''
-          bind 0.0.0.0
           route {
             proxy localhost:${toString l4.listenPort}
           }
@@ -35,7 +34,6 @@
       l4 = {
         listenPort = 10200;
         config = ''
-          bind 0.0.0.0
           route {
             proxy localhost:${toString l4.listenPort}
           }
