@@ -83,7 +83,7 @@ in
             name:
             prev.lib.nameValuePair name (
               prev.${name}.override {
-                commandLineArgs = "--disable-gpu-compositing";
+                commandLineArgs = "--disable-gpu-compositing --enable-features=WebRTCPipeWireCapturer";
               }
             )
           ))
