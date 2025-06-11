@@ -82,7 +82,6 @@
             nuSelectHost = ''
               const HOSTS = [${builtins.attrNames self.nixosConfigurations |> builtins.concatStringsSep " "}]]
               let selected = $HOSTS | input list -f
-              let flake_attr = $".#nixosConfigurations.($selected).config.system.build.toplevel"
             '';
           in
           {
@@ -113,7 +112,7 @@
               exec = ''
                 def main [...args: string] {
                   ${nuSelectHost}
-
+                  let top_level = $".#nixosConfigurations.($selected).config.system.build.toplevel"
                   nix build --no-link --accept-flake-config $flake_attr
                   ${lib.getExe inputs'.nix-tree.packages.default} $flake_attr
                 }
@@ -132,11 +131,11 @@
                     "switch"
                     "--accept-flake-config"
                     "--flake"
-                    $flake_attr
+                    $".#($selected)"
                     ...($args)
                   ]
 
-                  log info $"Selected host: ($flake_attr)"
+                  log info $"Selected host: ($selected)"
                   log info $"Command: ($command_args)"
 
                   let current_host = cat /etc/hostname | str trim
