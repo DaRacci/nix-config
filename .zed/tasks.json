@@ -10,6 +10,15 @@
     "shell": "system"
   },
   {
+    "label": "Format current file",
+    "command": "nix fmt -- $ZED_FILE",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": true,
+    "reveal": "never",
+    "hide": "on_success",
+    "shell": "system"
+  },
+  {
     "label": "Get Nix Value at Cursor",
     "command": "$ZED_WORKTREE_ROOT/flake/dev/scripts/get-symbol-value.nu '$ZED_SYMBOL' '$ZED_FILE'"
   }
