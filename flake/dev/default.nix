@@ -113,8 +113,8 @@
                 def main [...args: string] {
                   ${nuSelectHost}
                   let top_level = $".#nixosConfigurations.($selected).config.system.build.toplevel"
-                  nix build --no-link --accept-flake-config $flake_attr
-                  ${lib.getExe inputs'.nix-tree.packages.default} $flake_attr
+                  nix build --no-link --accept-flake-config $top_level
+                  ${lib.getExe inputs'.nix-tree.packages.default} $top_level
                 }
               '';
             };
