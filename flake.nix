@@ -165,11 +165,6 @@
       flake = false;
       type = "file";
     };
-    lact-module = {
-      url = "https://raw.githubusercontent.com/poperigby/nixpkgs/refs/heads/lact-module/nixos/modules/services/hardware/lact.nix";
-      flake = false;
-      type = "file";
-    };
     # TODO - Remove once upstream is up to 0.6.2
     nix-tree = {
       url = "github:utdemir/nix-tree";
@@ -272,6 +267,8 @@
     stylix = {
       url = "github:danth/stylix";
       inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-parts.follows = "flake-parts";
         flake-compat.follows = "flake-compat";
         git-hooks.follows = "git-hooks";
         home-manager.follows = "home-manager";

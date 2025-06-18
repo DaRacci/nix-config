@@ -1,5 +1,6 @@
 {
   self,
+  config,
   inputs,
   pkgs,
   ...
@@ -18,15 +19,9 @@
 
     "${self}/hosts/shared/optional/gaming.nix"
     "${self}/hosts/shared/optional/tailscale.nix"
-
-    "${inputs.lact-module}"
   ];
 
   services = {
-    lact = {
-      enable = false;
-      gpuOverclock.enable = true;
-    };
     hardware.bolt.enable = true;
   };
 

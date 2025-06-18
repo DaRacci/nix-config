@@ -46,12 +46,6 @@ in
     ];
 
   modifications = final: prev: {
-    orca-slicer = prev.orca-slicer.overrideAttrs (oldAttrs: {
-      cmakeFlags = oldAttrs.cmakeFlags ++ [
-        (lib.cmakeFeature "CUDA_TOOLKIT_ROOT_DIR" "${prev.cudaPackages.cudatoolkit}")
-      ];
-    });
-
     nautilus = prev.nautilus.overrideAttrs (oldAttrs: {
       buildInputs = oldAttrs.buildInputs ++ [
         final.gst_all_1.gst-plugins-good

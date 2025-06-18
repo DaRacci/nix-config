@@ -313,11 +313,6 @@
     };
   };
 
-  xdg.configFile."zed/settings.json" = {
-    force = true;
-
-  };
-
   user.persistence.directories = [
     ".config/zed"
     ".local/share/zed"
