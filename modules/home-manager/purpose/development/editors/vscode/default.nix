@@ -55,6 +55,7 @@ in
               bierner.markdown-preview-github-styles
               ruschaaf.extended-embedded-languages
               versionExtensions.vscode-marketplace.jamief.vscode-ssh-config-enhanced
+              keesschollaart.vscode-home-assistant
 
               # LSP Servers
               jnoortheen.nix-ide
@@ -72,7 +73,7 @@ in
               # Other
               formulahendry.code-runner
               markis.code-coverage
-              versionExtensions.vscode-marketplace.vadimcn.vscode-lldb
+              # versionExtensions.vscode-marketplace.vadimcn.vscode-lldb
               # platformio.platformio-ide
 
               # Bash Extensions

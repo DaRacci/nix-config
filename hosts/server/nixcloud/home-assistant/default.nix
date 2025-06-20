@@ -67,6 +67,7 @@
       customComponents = with pkgs.home-assistant-custom-components; [
         moonraker
         adaptive_lighting
+        waste_collection_schedule
       ];
       customLovelaceModules = with pkgs.home-assistant-custom-lovelace-modules; [
         weather-chart-card

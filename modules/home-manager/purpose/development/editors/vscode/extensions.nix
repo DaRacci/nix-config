@@ -137,6 +137,13 @@ merge
           sha256 = "0fizwx057nghy8k0xz66f1narxps47d5asl26jr7aq1h1ypncnn7";
 
         };
+        "keesschollaart"."vscode-home-assistant" = vscode-utils.extensionFromVscodeMarketplace {
+          name = "vscode-home-assistant";
+          publisher = "keesschollaart";
+          version = "2.0.0";
+          sha256 = "0phrpyjfd0dih0vr0l7h4mv4cgj4jch0s20n2y0rgby30j7nawr8";
+
+        };
         "markis"."code-coverage" = vscode-utils.extensionFromVscodeMarketplace {
           name = "code-coverage";
           publisher = "markis";

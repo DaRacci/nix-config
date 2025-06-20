@@ -1,4 +1,4 @@
-vscode_version = "1.100.1"
+vscode_version = "1.100.2"
 
 [[extensions]]
 publisher_name = "alefragnani"
@@ -203,3 +203,7 @@ publisher_name = "ironmansoftware"
 [[extensions]]
 extension_name = "vscode-inline-values-powershell"
 publisher_name = "tylerleonhardt"
+
+[[extensions]]
+extension_name = "vscode-home-assistant"
+publisher_name = "keesschollaart"

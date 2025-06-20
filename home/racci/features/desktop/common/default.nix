@@ -2,7 +2,6 @@
 {
   imports = [
     ./keyboard.nix
-    ./kvm.nix
     ./misc.nix
     ./mobile.nix
     ./office.nix
