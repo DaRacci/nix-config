@@ -39,12 +39,8 @@ in
       class = "org.gnome.Nautilus";
       side = "right";
       rule = {
-        size = {
-          width = "33%";
-          height = "33%";
-        };
-        move.x = "33%";
-        move.y = "67%";
+        size.width = "19%";
+        move.x = "81%";
       };
     }
   ];

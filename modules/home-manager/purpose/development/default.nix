@@ -49,6 +49,7 @@ in
       hashes
       wildcard
       devtoolbox
+      d-spy
     ];
 
     xdg.configFile."act/actrc".text = ''

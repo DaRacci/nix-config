@@ -80,7 +80,7 @@ with lib;
             float = true;
             pin = true;
             opacity = 1.0;
-            size = "25%";
+            # size = "25%";
             move = {
               x = "73%";
               y = "72%";
@@ -113,6 +113,7 @@ with lib;
             { title = "^(Confirm to replace files)$"; }
             { title = "^(File Operation Progress)$"; }
             { class = "^(org.pulseaudio.pavucontrol)$"; }
+            { title = "^(About)$"; }
           ];
           rule.float = true;
         }
@@ -127,6 +128,7 @@ with lib;
             { title = "^(Library)(.*)$"; }
             { title = "^(File Upload)(.*)$"; }
             { title = "^(Open Firefox in Troubleshoot Mode?)$"; }
+            { title = "^(MainPicker)"; } # ScreenShare Picker
           ];
           rule = {
             center = true;
