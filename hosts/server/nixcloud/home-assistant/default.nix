@@ -95,6 +95,8 @@
         "automation ui" = "!include automations.yaml";
         "scene manual" = [ ];
         "scene ui" = "!include scenes.yaml";
+
+        lovelace.mode = "yaml";
       };
     };
   };

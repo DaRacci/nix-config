@@ -253,7 +253,6 @@
       url = "github:oxalica/nil/main";
       inputs = {
         nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
       };
     };
     lix-module = {
