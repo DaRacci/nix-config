@@ -24,6 +24,7 @@ in
       home = "/var/lib/protonmail-bridge";
       group = "protonmail-bridge";
       createHome = true;
+      uid = 385;
     };
     groups.protonmail-bridge.members = [ "protonmail-bridge" ];
   };
