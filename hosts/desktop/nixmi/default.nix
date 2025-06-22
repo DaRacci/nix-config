@@ -165,6 +165,8 @@
       package = pkgs.ollama;
       environmentVariables = {
         OLLAMA_ORIGINS = "http://192.168.0.0:*,app://obsidian.md:*";
+        OLLAMA_KV_CACHE_TYPE = "q8_0";
+        OLLAMA_FLASH_ATTENTION = "1";
       };
     };
   };
