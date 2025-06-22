@@ -45,6 +45,7 @@
             python-miio
             python-kasa
             google-nest-sdm
+            pyarlo
 
             caldav
 
