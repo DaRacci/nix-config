@@ -21,7 +21,6 @@ in
     groups.nextcloud.gid = 997;
 
     users.protonmail-bridge = {
-      isSystemUser = true;
       home = "/var/lib/protonmail-bridge";
       group = "protonmail-bridge";
       createHome = true;
