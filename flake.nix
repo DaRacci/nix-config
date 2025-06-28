@@ -47,7 +47,6 @@
           overlays = [
             inputs.lix-module.overlays.lixFromNixpkgs
             inputs.angrr.overlays.default
-            inputs.hyprpanel.overlay
           ] ++ (builtins.attrValues (import ./overlays { inherit self inputs lib; }));
         };
     in
@@ -330,10 +329,6 @@
     };
 
     # Desktop Stuff
-    hyprpanel = {
-      url = "github:Jas-SinghFSU/HyprPanel";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     winapps = {
       url = "github:winapps-org/winapps";
       inputs = {
@@ -375,7 +370,7 @@
 
     # Resources
     firefox-ultima = {
-      url = "github:soulhotel/FF-ULTIMA/1.9.9";
+      url = "github:soulhotel/FF-ULTIMA/3.0";
       flake = false;
     };
     tinted-theming = {
