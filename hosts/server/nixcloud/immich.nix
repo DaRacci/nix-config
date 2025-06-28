@@ -35,7 +35,7 @@ in
 
   services = {
     immich = {
-      enable = true;
+      enable = false;
       host = "0.0.0.0";
       secretsFile = config.sops.secrets."IMMICH/ENV".path;
       environment = {
