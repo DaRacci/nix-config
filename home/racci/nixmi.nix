@@ -1,6 +1,5 @@
 {
   self,
-  lib,
   ...
 }:
 {
@@ -16,11 +15,9 @@
   user.persistence.enable = true;
 
   wayland.windowManager.hyprland.settings = {
-    misc.vfr = lib.mkForce false; # Monitors have brightness artifacts at different refresh rates, ultimatum is to just send all frames even if they are redundant.
-
     monitor = [
-      "DP-6,      3840x2160@240,  0x0,        1, vrr, 1, cm ,hdredid,bitdepth,10,sdrbrightness, 1.4, sdrsaturation, 1" # Center Monitor
-      "DP-1,      2560x1440@144,  -2560x360,  1, vrr, 1" # Left Monitor
+      "DP-6,      3840x2160@240,  0x0,        1, vrr, 2, cm,auto,bitdepth,10,sdrbrightness, 1.4, sdrsaturation, 1" # Center Monitor
+      "DP-1,      2560x1440@144,  -2560x360,  1, vrr, 2" # Left Monitor
       "HDMI-A-1,  2560x1440@120,  3840x360,   1, vrr, 0" # Right Monitor
     ];
   };
