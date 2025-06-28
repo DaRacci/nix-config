@@ -384,7 +384,7 @@ in
         extraConfig = ''
           ${builtins.readFile "${inputs.firefox-ultima}/user.js"}
 
-          // This must be done manually so they are placed after the above user.js defaults.
+          // This must be done manually so they are placed after the after user.js defaults.
           // Using the settings option will place them before the defaults.
           ${
             let
@@ -406,10 +406,13 @@ in
                 "ultima.OS.kde" = false;
                 "ultima.disable.alltabs.button" = true;
                 "ultima.disable.windowcontrols.button" = true;
-                "ultima.disable.verticaltab.bar" = true;
-                "ultima.disable.verticaltab.bar.withindicator" = false;
-                "ultima.tabs.sidebery.autohide" = true;
+                "ultima.sidebery.autohide" = true;
+
+                # Completely disable built-in vertical bar
                 "ultima.tabs.vertical.hide" = true;
+                "ultima.tabs.vertical.hide.in.screenedge" = false;
+
+                "ultima.navbar.hidebuttons" = false;
                 "ultima.urlbar.hidebuttons" = true;
                 "ultima.urlbar.centered" = true;
                 "ultima.theme.extensions" = true;
