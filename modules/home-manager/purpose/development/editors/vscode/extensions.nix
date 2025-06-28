@@ -49,8 +49,8 @@ merge
         "eamodio"."gitlens" = vscode-utils.extensionFromVscodeMarketplace {
           name = "gitlens";
           publisher = "eamodio";
-          version = "17.2.0";
-          sha256 = "17z8j05kwv4a61903mg6584nly6syqi3q6sm0jc0022zfals3fwf";
+          version = "17.2.1";
+          sha256 = "0gc86knv8dpmwygvmhh36f30ddcsjzdr36sy3l2y4505j46h77nn";
 
         };
         "editorconfig"."editorconfig" = vscode-utils.extensionFromVscodeMarketplace {
@@ -84,15 +84,15 @@ merge
         "github"."copilot" = vscode-utils.extensionFromVscodeMarketplace {
           name = "copilot";
           publisher = "github";
-          version = "1.336.0";
-          sha256 = "15hkhmk4cbp8v4sdysyn1s9jcq4cqpp1np4ibgf5spppwmy9i27c";
+          version = "1.338.0";
+          sha256 = "1zx81ymjl37mzqs2bcfbzgp50r5mm7yiydf9bjyq9phgrfbxllyi";
 
         };
         "github"."copilot-chat" = vscode-utils.extensionFromVscodeMarketplace {
           name = "copilot-chat";
           publisher = "github";
-          version = "0.28.2";
-          sha256 = "1r8wjjs0y432sqv2cwlpj2carygy6r0iv80ljaailcc1ww07va53";
+          version = "0.28.3";
+          sha256 = "0fcsbwrhcr4d4hd5b5k7ncsv97w0x49iz9c2majjx1pd2xnaacpn";
 
         };
         "github"."vscode-github-actions" = vscode-utils.extensionFromVscodeMarketplace {
@@ -217,8 +217,8 @@ merge
         "ms-python"."vscode-pylance" = vscode-utils.extensionFromVscodeMarketplace {
           name = "vscode-pylance";
           publisher = "ms-python";
-          version = "2025.6.1";
-          sha256 = "0vmw660qdfxk8mz7l5anxhw9k7kw0cawp7h6l9fh34rmypnbjqdf";
+          version = "2025.6.2";
+          sha256 = "171m8dnkr6l8nqnp9pfx5j91yan56llhbj80i7xk3yapzn9vjz2w";
 
         };
         "ms-vscode"."powershell" = vscode-utils.extensionFromVscodeMarketplace {
