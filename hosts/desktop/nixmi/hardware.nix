@@ -57,7 +57,7 @@
   };
 
   boot = rec {
-    kernelPackages = pkgs.linuxPackages_xanmod_latest;
+    kernelPackages = pkgs.linuxKernel.packages.linux_zen;
     kernelModules = [ "v4l2loopback" ];
     extraModulePackages = [
       kernelPackages.v4l2loopback
@@ -78,8 +78,6 @@
     loader = {
       efi.canTouchEfiVariables = true;
 
-      #? TODO :: Globalise
-      #? TODO :: Custom Windows Entry
       grub = {
         efiSupport = true;
 
