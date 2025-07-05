@@ -49,8 +49,8 @@ merge
         "eamodio"."gitlens" = vscode-utils.extensionFromVscodeMarketplace {
           name = "gitlens";
           publisher = "eamodio";
-          version = "17.2.1";
-          sha256 = "0gc86knv8dpmwygvmhh36f30ddcsjzdr36sy3l2y4505j46h77nn";
+          version = "17.2.2";
+          sha256 = "1fmiq2y9xmz39jl564nmnbhh488gv5745pz18nd7dvigaa1b9fkd";
 
         };
         "editorconfig"."editorconfig" = vscode-utils.extensionFromVscodeMarketplace {
@@ -91,8 +91,8 @@ merge
         "github"."copilot-chat" = vscode-utils.extensionFromVscodeMarketplace {
           name = "copilot-chat";
           publisher = "github";
-          version = "0.28.4";
-          sha256 = "08krn3mnyj0zbnqkwzxjn6n9042pripsjci2lpk59ywqsml1zlrw";
+          version = "0.28.5";
+          sha256 = "0wgr7bdn22l7r5qkxkr45nxqg234132qk6i4sd9qas1ihn8f45mk";
 
         };
         "github"."vscode-github-actions" = vscode-utils.extensionFromVscodeMarketplace {
@@ -304,16 +304,16 @@ merge
           "ms-dotnettools"."csdevkit" = vscode-utils.extensionFromVscodeMarketplace {
             name = "csdevkit";
             publisher = "ms-dotnettools";
-            version = "1.20.35";
-            sha256 = "0m4ila5h83m0051lp1r98fq59cy5hw8zz91vdfchcbbsg4ddm6vf";
+            version = "1.30.32";
+            sha256 = "16jjnxbkv10203jiwb9jx14nhs4h7hhh33cp9zfq2fzda5jkmy86";
             arch = "linux-x64";
 
           };
           "ms-dotnettools"."csharp" = vscode-utils.extensionFromVscodeMarketplace {
             name = "csharp";
             publisher = "ms-dotnettools";
-            version = "2.80.16";
-            sha256 = "1iwlp587c2wj6snq2f2jzjxif0qzkypliylc9yadadn0h06g45dg";
+            version = "2.84.19";
+            sha256 = "0sy99swa1qs7y4mlqal2rgkha9434vd7088xns0asnzmz2r9fiyr";
             arch = "linux-x64";
 
           };
@@ -362,16 +362,16 @@ merge
         "ms-dotnettools"."csdevkit" = vscode-utils.extensionFromVscodeMarketplace {
           name = "csdevkit";
           publisher = "ms-dotnettools";
-          version = "1.20.35";
-          sha256 = "0xfyjal2vff5n4c19d1xgl4ngc1w57ma7hz4psx7wpa70sqgj568";
+          version = "1.30.32";
+          sha256 = "03bjn4wgm6dh0j42g75cx3np2r3sayqpwxg2pjxgxlz4j1swpsmh";
           arch = "linux-arm64";
 
         };
         "ms-dotnettools"."csharp" = vscode-utils.extensionFromVscodeMarketplace {
           name = "csharp";
           publisher = "ms-dotnettools";
-          version = "2.80.16";
-          sha256 = "1jz0ww1h815q015s5xpxhvyw8l3ja3xg9a19q4sfc679prkfg4nw";
+          version = "2.84.19";
+          sha256 = "0xfj96zyfng1ccmadj6j0jinhm99qcrs9zal3yl8pplf3lb8yza2";
           arch = "linux-arm64";
 
         };
@@ -412,16 +412,16 @@ merge
       "ms-dotnettools"."csdevkit" = vscode-utils.extensionFromVscodeMarketplace {
         name = "csdevkit";
         publisher = "ms-dotnettools";
-        version = "1.20.35";
-        sha256 = "0a5z87k41yyqh1yiwqd6p1wa20ksm9jfwg7g9x4m0jsvflvqdfjv";
+        version = "1.30.32";
+        sha256 = "0lzq7miva4rhz4aglxk9c8gfl1d5b6rsivzbfs7slhsywxvl6s82";
         arch = "darwin-x64";
 
       };
       "ms-dotnettools"."csharp" = vscode-utils.extensionFromVscodeMarketplace {
         name = "csharp";
         publisher = "ms-dotnettools";
-        version = "2.80.16";
-        sha256 = "0rs2pr6gdpj2ff1q5q658rrkdp7qk0j0nxxnl2n95ngqfdszj4ya";
+        version = "2.84.19";
+        sha256 = "0pmgx6rd211100ir229dqjx4wyx1ha34jky5s90fvdrzbjhj8z4m";
         arch = "darwin-x64";
 
       };
@@ -470,16 +470,16 @@ merge
     "ms-dotnettools"."csdevkit" = vscode-utils.extensionFromVscodeMarketplace {
       name = "csdevkit";
       publisher = "ms-dotnettools";
-      version = "1.20.35";
-      sha256 = "0z8l4wnzc32r91f69pksshwl3vy8cg5bqm8lq447ma1sq112hnrs";
+      version = "1.30.32";
+      sha256 = "1sq6wsfkrymrvmldk2w35k6c7mps1r90isv6j527cm5gnmyrr701";
       arch = "darwin-arm64";
 
     };
     "ms-dotnettools"."csharp" = vscode-utils.extensionFromVscodeMarketplace {
       name = "csharp";
       publisher = "ms-dotnettools";
-      version = "2.80.16";
-      sha256 = "176dvc9vyq40hpsrrxnslc7x38h9zya29va02wkpsjzc1kh9klra";
+      version = "2.84.19";
+      sha256 = "1n7j9jl3v40iir1wi9fw4qapr7dw4znf0p7jwjb2g5q078b5mcvg";
       arch = "darwin-arm64";
 
     };
