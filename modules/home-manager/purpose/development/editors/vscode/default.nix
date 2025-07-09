@@ -56,6 +56,7 @@ in
               ruschaaf.extended-embedded-languages
               versionExtensions.vscode-marketplace.jamief.vscode-ssh-config-enhanced
               keesschollaart.vscode-home-assistant
+              owensimon.combinatorc
 
               # LSP Servers
               jnoortheen.nix-ide

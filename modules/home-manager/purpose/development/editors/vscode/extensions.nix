@@ -235,6 +235,13 @@ merge
           sha256 = "0p8rx867pdwyzx1bcjf069zzi8nfvhb3bjv7q3v8dd43l4n2dmhg";
 
         };
+        "owensimon"."combinatorc" = vscode-utils.extensionFromVscodeMarketplace {
+          name = "combinatorc";
+          publisher = "owensimon";
+          version = "1.0.0";
+          sha256 = "0ff4id557drwi4ysgap9k46aig7zrckg10kpbv2gs4dw6vylw7a4";
+
+        };
         "pkief"."material-icon-theme" = vscode-utils.extensionFromVscodeMarketplace {
           name = "material-icon-theme";
           publisher = "pkief";

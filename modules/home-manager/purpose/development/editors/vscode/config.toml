@@ -207,3 +207,7 @@ publisher_name = "tylerleonhardt"
 [[extensions]]
 extension_name = "vscode-home-assistant"
 publisher_name = "keesschollaart"
+
+[[extensions]]
+extension_name = "combinatorc"
+publisher_name = "owensimon"
