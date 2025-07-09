@@ -48,9 +48,6 @@ with lib;
     }/bin/wlprop";
   };
 
-  # TODO add button to panel for toggling vigiland
-  home.packages = with pkgs; [ vigiland ];
-
   services.hyprpolkitagent.enable = true;
 
   xdg.configFile."uwsm/env".text = config.lib.shell.exportAll {

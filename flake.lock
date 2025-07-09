@@ -146,6 +146,33 @@
         "type": "github"
       }
     },
+    "chaotic-nyx": {
+      "inputs": {
+        "flake-schemas": "flake-schemas",
+        "home-manager": [
+          "home-manager"
+        ],
+        "jovian": "jovian",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay"
+      },
+      "locked": {
+        "lastModified": 1751549328,
+        "narHash": "sha256-Pzh9+N0palTIX+O2NygrUmMS8omB86SnYthLwE5cu5g=",
+        "owner": "chaotic-cx",
+        "repo": "nyx",
+        "rev": "53209f5724858da5e3e5db3db404c325b4da5414",
+        "type": "github"
+      },
+      "original": {
+        "owner": "chaotic-cx",
+        "ref": "nyxpkgs-unstable",
+        "repo": "nyx",
+        "type": "github"
+      }
+    },
     "crane": {
       "locked": {
         "lastModified": 1750266157,
@@ -374,6 +401,20 @@
         "type": "github"
       }
     },
+    "flake-schemas": {
+      "locked": {
+        "lastModified": 1721999734,
+        "narHash": "sha256-G5CxYeJVm4lcEtaO87LKzOsVnWeTcHGKbKxNamNWgOw=",
+        "rev": "0a5c42297d870156d9c57d8f99e476b738dcd982",
+        "revCount": 75,
+        "type": "tarball",
+        "url": "https://api.flakehub.com/f/pinned/DeterminateSystems/flake-schemas/0.1.5/0190ef2f-61e0-794b-ba14-e82f225e55e6/source.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://flakehub.com/f/DeterminateSystems/flake-schemas/%3D0.1.5.tar.gz"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": [
@@ -591,41 +632,21 @@
       "inputs": {
         "nix-github-actions": "nix-github-actions",
         "nixpkgs": [
+          "chaotic-nyx",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1750403547,
-        "narHash": "sha256-XDDINMbHTtKQeSRpX5mwq20z23Wg/I/G4JUinA3V8Xg=",
+        "lastModified": 1751529406,
+        "narHash": "sha256-jwKDHyUycp678zDYa5Hyfq3msO73YMXdZPxp96dU7po=",
         "owner": "Jovian-Experiments",
         "repo": "Jovian-NixOS",
-        "rev": "52b86b86d925ec00c836ecc6d36f9c947bb15736",
+        "rev": "b2e5ce654e4f5bf8905c2e07a96dcf4966e6277d",
         "type": "github"
       },
       "original": {
         "owner": "Jovian-Experiments",
         "repo": "Jovian-NixOS",
-        "type": "github"
-      }
-    },
-    "lan-mouse": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "rust-overlay": "rust-overlay"
-      },
-      "locked": {
-        "lastModified": 1749745056,
-        "narHash": "sha256-olWqCB8v4WmRvId1IsY/yDwxDSwWW3tHdNkyRkEssbM=",
-        "owner": "feschber",
-        "repo": "lan-mouse",
-        "rev": "e46fe60b3e24be83de38701faa99a4fbd9186f08",
-        "type": "github"
-      },
-      "original": {
-        "owner": "feschber",
-        "repo": "lan-mouse",
         "type": "github"
       }
     },
@@ -769,6 +790,7 @@
     "nix-github-actions": {
       "inputs": {
         "nixpkgs": [
+          "chaotic-nyx",
           "jovian",
           "nixpkgs"
         ]
@@ -1083,6 +1105,7 @@
         "angrr": "angrr",
         "bash-env-json": "bash-env-json",
         "bash-env-nushell": "bash-env-nushell",
+        "chaotic-nyx": "chaotic-nyx",
         "crtified-nur": "crtified-nur",
         "devenv": "devenv",
         "devenv-root": "devenv-root",
@@ -1094,8 +1117,10 @@
         "git-hooks": "git-hooks_2",
         "home-manager": "home-manager",
         "impermanence": "impermanence",
-        "jovian": "jovian",
-        "lan-mouse": "lan-mouse",
+        "jovian": [
+          "chaotic-nyx",
+          "jovian"
+        ],
         "lanzaboote": "lanzaboote",
         "lix-module": "lix-module",
         "nil": "nil",
@@ -1117,7 +1142,6 @@
         "systems": "systems_3",
         "tinted-theming": "tinted-theming",
         "treefmt": "treefmt",
-        "vigiland": "vigiland",
         "vscode-extensions": "vscode-extensions",
         "winapps": "winapps"
       }
@@ -1125,16 +1149,16 @@
     "rust-overlay": {
       "inputs": {
         "nixpkgs": [
-          "lan-mouse",
+          "chaotic-nyx",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1740623427,
-        "narHash": "sha256-3SdPQrZoa4odlScFDUHd4CUPQ/R1gtH4Mq9u8CBiK8M=",
+        "lastModified": 1751510438,
+        "narHash": "sha256-m8PjOoyyCR4nhqtHEBP1tB/jF+gJYYguSZmUmVTEAQE=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "d342e8b5fd88421ff982f383c853f0fc78a847ab",
+        "rev": "7f415261f298656f8164bd636c0dc05af4e95b6b",
         "type": "github"
       },
       "original": {
@@ -1418,26 +1442,6 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
-        "type": "github"
-      }
-    },
-    "vigiland": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1719400387,
-        "narHash": "sha256-Y/MUjPWd09YGUWBIXSjQGAcRmgKLcHAMYNjWvDTiV2c=",
-        "owner": "jappie3",
-        "repo": "vigiland",
-        "rev": "62d0d6be2e19690c88e627eff76161ba41adbf97",
-        "type": "github"
-      },
-      "original": {
-        "owner": "jappie3",
-        "repo": "vigiland",
         "type": "github"
       }
     },

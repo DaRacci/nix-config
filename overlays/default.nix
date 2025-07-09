@@ -12,7 +12,6 @@ let
   packagesFromOtherInstances = [
     "nixd"
     "nil"
-    "vigiland"
   ];
 in
 {

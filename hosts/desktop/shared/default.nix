@@ -1,4 +1,5 @@
 {
+  inputs,
   pkgs,
   ...
 }:
@@ -7,7 +8,13 @@
     ./appimage.nix
     ./power.nix
     ./scheduler.nix
+
+    inputs.chaotic-nyx.nixosModules.default
   ];
+
+  chaotic = {
+
+  };
 
   services.gvfs.enable = true;
 

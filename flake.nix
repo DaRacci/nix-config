@@ -151,14 +151,6 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
     # Upstream & PR Programs
-    lan-mouse = {
-      url = "github:feschber/lan-mouse";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    vigiland = {
-      url = "github:jappie3/vigiland";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     protonup-rs = {
       url = "https://raw.githubusercontent.com/liperium/nixpkgs/refs/heads/protonuprs-init/pkgs/by-name/pr/protonup-rs/package.nix";
       flake = false;
@@ -314,10 +306,14 @@
         flake-compat.follows = "flake-compat";
       };
     };
-    jovian = {
-      url = "github:Jovian-Experiments/Jovian-NixOS";
-      inputs.nixpkgs.follows = "nixpkgs";
+    chaotic-nyx = {
+      url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        home-manager.follows = "home-manager";
+      };
     };
+    jovian.follows = "chaotic-nyx/jovian";
     nixarr = {
       url = "github:rasmus-kirk/nixarr";
       inputs.nixpkgs.follows = "nixpkgs";
