@@ -1,11 +1,20 @@
-{ pkgs, ... }:
 {
-  home.packages = with pkgs; [
-    ctop
-    iotop-c
-    sysstat
-    nvtopPackages.full
-  ];
+  osConfig,
+  pkgs,
+  lib,
+  ...
+}:
+{
+  home.packages =
+    with pkgs;
+    [
+      ctop
+      iotop-c
+      sysstat
+    ]
+    ++ lib.optionals osConfig.hardware.graphics.hasAcceleration [
+      nvtopPackages.full
+    ];
 
   programs = {
     btop = {

@@ -95,6 +95,13 @@ in
       '';
     };
 
+    hasAcceleration = mkOption {
+      type = lib.types.bool;
+      default = hasNvidia || hasAmd;
+      readOnly = true;
+      description = "Whether or not the system has GPU acceleration";
+    };
+
     hasNvidia = mkOption {
       type = lib.types.bool;
       default = hasNvidia;
