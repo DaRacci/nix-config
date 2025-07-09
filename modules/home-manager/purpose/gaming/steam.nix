@@ -72,6 +72,8 @@ in
         ".config/WarThunder"
         ".config/Gaijin"
         ".config/unity3d/IronGate/Valheim"
+        ".config/StardewValley"
+        ".factorio"
       ];
     };
   };
