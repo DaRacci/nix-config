@@ -248,7 +248,7 @@
       reverse_proxy localhost:8096
     '';
     jellyseerr.extraConfig = ''
-      reverse_proxy localhost:${toString config.util-nixarr.services.jellyseerr.port}
+      reverse_proxy localhost:${toString config.nixarr.jellyseerr.port}
     '';
     transmission.extraConfig = ''
       reverse_proxy localhost:${toString config.nixarr.transmission.uiPort}
@@ -263,7 +263,7 @@
       reverse_proxy localhost:8787
     '';
     bazarr.extraConfig = ''
-      reverse_proxy localhost:${toString config.util-nixarr.services.bazarr.listenPort}
+      reverse_proxy localhost:${toString config.nixarr.bazarr.port}
     '';
     prowlarr.extraConfig = ''
       reverse_proxy localhost:9696
