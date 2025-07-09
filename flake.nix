@@ -259,9 +259,6 @@
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
-        flake-compat.follows = "flake-compat";
-        git-hooks.follows = "git-hooks";
-        home-manager.follows = "home-manager";
         nur.follows = "";
       };
     };

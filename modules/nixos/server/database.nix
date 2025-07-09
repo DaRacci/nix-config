@@ -161,52 +161,45 @@ in
       lib.listToAttrs
     ];
 
-    services.postgresql =
-      lib.mergeAttrs
-        {
-          package = pkgs.postgresql_17;
-        }
-        (
-          lib.optionalAttrs isNixio rec {
-            ensureDatabases = lib.pipe serverConfigurations [
-              (builtins.map (cfg: builtins.attrNames cfg.server.database.postgres))
-              lib.flatten
+    services.postgresql = lib.optionalAttrs isNixio rec {
+      ensureDatabases = lib.pipe serverConfigurations [
+        (builtins.map (cfg: builtins.attrNames cfg.server.database.postgres))
+        lib.flatten
+      ];
+
+      ensureUsers = builtins.map (database: {
+        name = database;
+        ensureDBOwnership = true;
+      }) ensureDatabases;
+
+      # Some modules configure initialScripts for postgres so we should ensure they are executed
+      initialScript = lib.mkIf isNixio (
+        lib.pipe (gatherAllInstances "services.postgresql.initialScript") [
+          (builtins.map (path: builtins.readFile path))
+          (builtins.concatStringsSep "\n")
+          (pkgs.writeText "init-postgresql-script")
+        ]
+      );
+
+      settings = {
+        shared_preload_libraries =
+          lib.pipe (gatherAllInstances "services.postgresql.settings.shared_preload_libraries")
+            [
+              (builtins.map (preload: if lib.isString preload then [ preload ] else preload))
+              builtins.concatLists
+              lib.unique
             ];
+      };
 
-            ensureUsers = builtins.map (database: {
-              name = database;
-              ensureDBOwnership = true;
-            }) ensureDatabases;
-
-            # Some modules configure initialScripts for postgres so we should ensure they are executed
-            initialScript = lib.mkIf isNixio (
-              lib.pipe (gatherAllInstances "services.postgresql.initialScript") [
-                (builtins.map (path: builtins.readFile path))
-                (builtins.concatStringsSep "\n")
-                (pkgs.writeText "init-postgresql-script")
-              ]
-            );
-
-            settings = {
-              shared_preload_libraries =
-                lib.pipe (gatherAllInstances "services.postgresql.settings.shared_preload_libraries")
-                  [
-                    (builtins.map (preload: if lib.isString preload then [ preload ] else preload))
-                    builtins.concatLists
-                    lib.unique
-                  ];
-            };
-
-            extensions =
-              ps:
-              lib.pipe serverConfigurations [
-                (builtins.filter (cfg: cfg.host.name != "nixio"))
-                (builtins.map (cfg: cfg.services.postgresql.extensions ps))
-                builtins.concatLists
-                lib.unique
-              ];
-          }
-        );
+      extensions =
+        ps:
+        lib.pipe serverConfigurations [
+          (builtins.filter (cfg: cfg.host.name != "nixio"))
+          (builtins.map (cfg: cfg.services.postgresql.extensions ps))
+          builtins.concatLists
+          lib.unique
+        ];
+    };
 
     systemd.services.postgresql =
       {
