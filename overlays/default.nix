@@ -12,6 +12,7 @@ let
   packagesFromOtherInstances = [
     "nixd"
     "nil"
+    "quickshell"
   ];
 in
 {
@@ -62,6 +63,13 @@ in
     bottles = prev.bottles.override {
       removeWarningPopup = true;
     };
+
+    quickshell = prev.quickshell.overrideAttrs (oldAttrs: {
+      buildInputs = oldAttrs.buildInputs or [ ] ++ [
+        final.qt6.full
+        final.kdePackages.kirigami
+      ];
+    });
 
     inherit lib;
   };

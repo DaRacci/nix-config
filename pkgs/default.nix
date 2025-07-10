@@ -14,6 +14,8 @@
 
   # Misc
   orca-slicer-zink = pkgs.callPackage ./orca-slicer-zink { };
+  caelestia-shell = pkgs.callPackage ./caelestia/shell.nix { };
+  caelestia-cli = pkgs.callPackage ./caelestia/cli.nix { };
 
   # Helper Stuff
   new-host = pkgs.callPackage ./helpers/new-host.nix { };

@@ -1100,6 +1100,26 @@
         "url": "https://raw.githubusercontent.com/liperium/nixpkgs/refs/heads/protonuprs-init/pkgs/by-name/pr/protonup-rs/package.nix"
       }
     },
+    "quickshell": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1752007746,
+        "narHash": "sha256-iFgYM6lYfEJrCHaqvXjr+tbrUQHxptXomi+nMKe7SJk=",
+        "owner": "quickshell-mirror",
+        "repo": "quickshell",
+        "rev": "3d594e16dd3850973336c70014a948dc97837d39",
+        "type": "github"
+      },
+      "original": {
+        "owner": "quickshell-mirror",
+        "repo": "quickshell",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "angrr": "angrr",
@@ -1136,6 +1156,7 @@
         "nixput": "nixput",
         "nixvirt": "nixvirt",
         "protonup-rs": "protonup-rs",
+        "quickshell": "quickshell",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
         "stylix-wallpaper": "stylix-wallpaper",
