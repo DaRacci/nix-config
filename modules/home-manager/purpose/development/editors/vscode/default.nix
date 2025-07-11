@@ -17,7 +17,7 @@ in
   };
 
   config =
-    lib.mkIf (cfg.enable && cfg.editors.vscode.enable) ({
+    lib.mkIf (cfg.enable && cfg.editors.vscode.enable) {
       programs.vscode = {
         enable = true;
         mutableExtensionsDir = false;
@@ -312,7 +312,7 @@ in
       };
 
       user.persistence.directories = [ ".config/Code/User/" ];
-    })
+    }
     // lib.optionalAttrs (osConfig ? stylix && osConfig.stylix.enable) {
       # Must use osConfig to avoid infinite recursion, not great but it works.
       stylix.targets.vscode.profileNames = builtins.attrNames config.programs.vscode.profiles;
