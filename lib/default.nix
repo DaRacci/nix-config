@@ -11,7 +11,7 @@ in
     hypr = simpleImport ./hypr.nix;
 
     mkPostgresRolePass = role: passPath: ''
-      $PSQL -tA <<'EOF'
+      psql -tA <<'EOF'
         DO $$
         DECLARE password TEXT;
         BEGIN

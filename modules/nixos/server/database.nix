@@ -161,90 +161,68 @@ in
       lib.listToAttrs
     ];
 
-    services.postgresql = lib.optionalAttrs isNixio rec {
-      ensureDatabases = lib.pipe serverConfigurations [
-        (builtins.map (cfg: builtins.attrNames cfg.server.database.postgres))
-        lib.flatten
-      ];
-
-      ensureUsers = builtins.map (database: {
-        name = database;
-        ensureDBOwnership = true;
-      }) ensureDatabases;
-
-      # Some modules configure initialScripts for postgres so we should ensure they are executed
-      initialScript = lib.mkIf isNixio (
-        lib.pipe (gatherAllInstances "services.postgresql.initialScript") [
-          (builtins.map (path: builtins.readFile path))
-          (builtins.concatStringsSep "\n")
-          (pkgs.writeText "init-postgresql-script")
-        ]
-      );
-
-      settings = {
-        shared_preload_libraries =
-          lib.pipe (gatherAllInstances "services.postgresql.settings.shared_preload_libraries")
-            [
-              (builtins.map (preload: if lib.isString preload then [ preload ] else preload))
-              builtins.concatLists
-              lib.unique
+    services.postgresql =
+      lib.mergeAttrs
+        {
+          package = lib.mkDefault pkgs.postgresql_17;
+        }
+        (
+          lib.optionalAttrs isNixio rec {
+            ensureDatabases = lib.pipe serverConfigurations [
+              (builtins.map (cfg: builtins.attrNames cfg.server.database.postgres))
+              lib.flatten
             ];
-      };
 
-      extensions =
-        ps:
-        lib.pipe serverConfigurations [
-          (builtins.filter (cfg: cfg.host.name != "nixio"))
-          (builtins.map (cfg: cfg.services.postgresql.extensions ps))
-          builtins.concatLists
-          lib.unique
-        ];
-    };
+            ensureUsers = builtins.map (database: {
+              name = database;
+              ensureDBOwnership = true;
+            }) ensureDatabases;
 
-    systemd.services.postgresql =
-      {
-        # Sometimes this can get enabled on accident even if `services.postgresql.enable` is false.
-        # This is due to some modules making changes to the service without any conditions for if postgres is local or not.
-        enable = isNixio || config.services.postgresql.enable;
-      }
-      // (lib.optionalAttrs isNixio {
-        postStart = lib.mkAfter (
-          builtins.concatStringsSep "\n" (
-            (lib.pipe (gatherAllInstances "systemd.services.postgresql.postStart") [
-              # This skips the default postgresql start script https://github.com/NixOS/nixpkgs/blob/5b35d248e9206c1f3baf8de6a7683fee126364aa/nixos/modules/services/databases/postgresql.nix#L626-L640
-              (builtins.map (
-                script:
-                let
-                  # Assuming port 5432 as its the default.
-                  startLine = ''PSQL="psql --port=5432"'';
-                  endLine = "fi";
-                  lines = lib.strings.splitString "\n" script;
-                  startIndex = lib.lists.findFirstIndex (str: startLine == str) 0 lines;
-                  endIndex = lib.lists.findFirstIndex (str: endLine == str) 0 lines;
-                in
-                lib.pipe lines [
-                  (lib.drop startIndex)
-                  (lib.take (builtins.length lines - (startIndex - endIndex)))
-                  (builtins.concatStringsSep "\n")
-                ]
-              ))
-              (builtins.filter (script: script != ""))
-            ])
-            ++ (lib.pipe serverConfigurations [
-              (builtins.map (cfg: builtins.attrValues cfg.server.database.postgres))
-              builtins.concatLists
-              (builtins.map (database: lib.mine.mkPostgresRolePass database.user database.password.path))
-            ])
-          )
+            # Some modules configure initialScripts for postgres so we should ensure they are executed
+            initialScript = lib.mkIf isNixio (
+              lib.pipe (gatherAllInstances "services.postgresql.initialScript") [
+                (builtins.map (path: builtins.readFile path))
+                (builtins.concatStringsSep "\n")
+                (pkgs.writeText "init-postgresql-script")
+              ]
+            );
+
+            settings = {
+              shared_preload_libraries =
+                lib.pipe (gatherAllInstances "services.postgresql.settings.shared_preload_libraries")
+                  [
+                    (builtins.map (preload: if lib.isString preload then [ preload ] else preload))
+                    builtins.concatLists
+                    lib.unique
+                  ];
+            };
+
+            extensions =
+              ps:
+              lib.pipe serverConfigurations [
+                (builtins.filter (cfg: cfg.host.name != "nixio"))
+                (builtins.map (cfg: cfg.services.postgresql.extensions ps))
+                builtins.concatLists
+                lib.unique
+              ];
+          }
         );
 
-        serviceConfig.ExecStartPost =
-          lib.pipe (gatherAllInstances "systemd.services.postgresql.serviceConfig.ExecStartPost")
-            [
-              builtins.concatLists
-              # We don't want to run the post-start scripts from each server.
-              (builtins.filter (script: !lib.hasSuffix "postgresql-post-start" script))
-            ];
-      });
+    systemd.services.postgresql-setup = lib.optionalAttrs isNixio {
+      postStart = lib.mkAfter (
+        builtins.concatStringsSep "\n" (
+          (gatherAllInstances "systemd.services.postgresql-setup.postStart")
+          ++ (lib.pipe serverConfigurations [
+            (builtins.map (cfg: builtins.attrValues cfg.server.database.postgres))
+            builtins.concatLists
+            (builtins.map (database: lib.mine.mkPostgresRolePass database.user database.password.path))
+          ])
+        )
+      );
+
+      serviceConfig.ExecStartPost =
+        gatherAllInstances "systemd.services.postgresql-setup.serviceConfig.ExecStartPost"
+        |> builtins.concatLists;
+    };
   };
 }
