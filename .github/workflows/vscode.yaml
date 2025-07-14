@@ -5,6 +5,10 @@ on:
   schedule:
     - cron: "0 0 * * */3"
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,6 +16,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: ./.github/actions/setup-nix
         with:
           arch: x86_64-linux
@@ -27,7 +33,11 @@ jobs:
       - name: Build Extensions
         run: ./utils/build-vscode-extensions.sh
 
-      - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v6
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
         with:
-          commit_message: "chore(deps): Update VSCode extensions"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(deps): Update VSCode extensions"
+          branch: update-vscode-extensions
+          title: "chore(deps): Update VSCode extensions"
+          labels: "dependencies, automated"

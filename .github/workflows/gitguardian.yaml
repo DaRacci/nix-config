@@ -2,6 +2,10 @@ name: GitGuardian scan
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   scanning:
     name: GitGuardian scan
