@@ -6,6 +6,7 @@
     # ./immich.nix
     ./identity.nix
     ./nextcloud.nix
+    ./search.nix
   ];
 
   proxmoxLXC = {
