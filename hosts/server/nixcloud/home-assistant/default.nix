@@ -47,7 +47,6 @@
             google-nest-sdm
             pyarlo
             pysensibo
-            pyuptimekuma
 
             caldav
 
