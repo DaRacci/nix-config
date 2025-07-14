@@ -4,6 +4,7 @@
     ./home-assistant
     ./homebox.nix
     # ./immich.nix
+    ./mqtt.nix
     ./identity.nix
     ./nextcloud.nix
     ./search.nix
