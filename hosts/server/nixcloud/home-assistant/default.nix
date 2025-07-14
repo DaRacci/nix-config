@@ -46,6 +46,7 @@
             python-kasa
             google-nest-sdm
             pyarlo
+            pysensibo
 
             caldav
 
