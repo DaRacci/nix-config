@@ -7,7 +7,7 @@
     xdgOpenUsePortal = true;
   };
 
-  services.xserver = {
+  services = {
     enable = true;
 
     displayManager.gdm = {

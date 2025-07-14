@@ -27,7 +27,7 @@
     libinput.enable = false;
 
     gnome = {
-      core-utilities.enable = false;
+      core-apps.enable = false;
       gnome-browser-connector.enable = false;
       gnome-initial-setup.enable = false;
       gnome-user-share.enable = false;

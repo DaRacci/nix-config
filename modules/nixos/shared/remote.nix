@@ -39,15 +39,6 @@ in
         openFirewall = true;
       };
 
-      xserver = lib.mkIf cfg.remoteDesktop.enable {
-        enable = true;
-        displayManager.gdm = {
-          enable = true;
-          autoSuspend = false;
-        };
-        desktopManager.gnome.enable = true;
-      };
-
       sunshine = lib.mkIf cfg.streaming.enable {
         enable = true;
         autoStart = true;
