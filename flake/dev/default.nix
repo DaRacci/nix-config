@@ -49,6 +49,7 @@
           nixd
           nixfmt-rfc-style
           nix-init
+          nh
 
           # Required Tools
           nix
