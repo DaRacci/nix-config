@@ -1,6 +1,6 @@
-{ config, lib, ... }:
+{ ... }:
 {
-  time = lib.mkIf (!config.host.device.isHeadless) {
+  time = {
     timeZone = "Australia/Sydney";
     hardwareClockInLocalTime = true;
   };
