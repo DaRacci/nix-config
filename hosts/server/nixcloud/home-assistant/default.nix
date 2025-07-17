@@ -47,6 +47,7 @@
             google-nest-sdm
             pyarlo
             pysensibo
+            pkgs.ssh-terminal-manager
 
             caldav
 

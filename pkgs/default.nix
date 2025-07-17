@@ -17,6 +17,10 @@
   caelestia-shell = pkgs.callPackage ./caelestia/shell.nix { };
   caelestia-cli = pkgs.callPackage ./caelestia/cli.nix { };
 
+  # Home Assistant Python Packages
+  terminal-manager = pkgs.python3Packages.callPackage ./python/terminal-manager.nix { };
+  ssh-terminal-manager = pkgs.python3Packages.callPackage ./python/ssh-terminal-manager.nix { };
+
   # Helper Stuff
   new-host = pkgs.callPackage ./helpers/new-host.nix { };
   list-ephemeral = pkgs.callPackage ./list-ephemeral { };
