@@ -10,7 +10,7 @@
       logType = [ "all" ];
       listeners = [
         {
-          address = "127.0.0.1";
+          address = "0.0.0.0";
           users.root = {
             acl = [ "readwrite #" ];
             passwordFile = config.sops.secrets."MQTT_ROOT_PASSWORD".path;
@@ -37,7 +37,6 @@
         listenPort = 1883;
         config = ''
           route {
-            tls
             proxy localhost:${toString l4.listenPort}
           }
         '';
