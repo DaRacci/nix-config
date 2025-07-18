@@ -48,6 +48,7 @@
             pyarlo
             pysensibo
             pkgs.ssh-terminal-manager
+            pkgs.pyuptimekuma
 
             caldav
 
@@ -72,7 +73,6 @@
         waste_collection_schedule
         philips_airpurifier_coap
         smartir
-        tuya_local
         sleep_as_android
       ];
       customLovelaceModules = with pkgs.home-assistant-custom-lovelace-modules; [
