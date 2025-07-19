@@ -47,6 +47,7 @@
             google-nest-sdm
             pyarlo
             pysensibo
+            paho-mqtt
             pkgs.ssh-terminal-manager
             pkgs.pyuptimekuma
 

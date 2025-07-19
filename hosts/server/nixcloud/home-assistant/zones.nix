@@ -2,22 +2,22 @@
   services = {
     home-assistant.config = {
       homeassistant = {
-        name = "Home - USA";
-        latitude = "!secret home_usa_latitude";
-        country = "US";
-        longitude = "!secret home_usa_longitude";
-        elevation = "!secret home_usa_elevation";
+        name = "Home - Australia";
+        latitude = "!secret home_aus_latitude";
+        country = "AU";
+        longitude = "!secret home_aus_longitude";
+        elevation = "!secret home_aus_elevation";
         unit_system = "metric";
         temperature_unit = "C";
-        time_zone = "America/Los_Angeles";
+        time_zone = "Australia/Sydney";
       };
 
       zone = [
         {
-          name = "Home - Australia";
+          name = "Home - USA";
           icon = "mdi:human-male-female-child";
-          latitude = "!secret home_aus_latitude";
-          longitude = "!secret home_aus_longitude";
+          latitude = "!secret home_usa_latitude";
+          longitude = "!secret home_usa_longitude";
           radius = "200";
         }
       ];
