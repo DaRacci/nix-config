@@ -11,7 +11,7 @@
 
     "${self}/hosts/shared/optional/tailscale.nix"
     "${self}/modules/nixos/server"
-    ./uptime.nix
+    ./metrics.nix
   ];
 
   services = {
