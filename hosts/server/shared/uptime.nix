@@ -44,12 +44,34 @@
 
             URL="$UPTIME_ENDPOINT/$(cat "$UNIQUE_ID_FILE")"
             STATUS=$(systemctl is-failed nixos-upgrade.service || true)
+            IS_RUNNING=$(systemctl is-active nixos-upgrade.service || true)
 
             function url_encode() {
               perl -MURI::Escape::XS -e 'print encodeURIComponent($ARGV[0]);' "$1"
             }
 
-            if [ "$STATUS" = "failed" ]; then
+            if [ "$IS_RUNNING" = "active" ]; then
+              echo "NixOS upgrade is currently running."
+              RUNNING_TIME=$(systemctl show -p ActiveEnterTimestamp --value nixos-upgrade.service)
+              RUNNING_TIME=$(date -d "$RUNNING_TIME" +%s)
+              CURRENT_TIME=$(date +%s)
+              ELAPSED_TIME=$((CURRENT_TIME - RUNNING_TIME))
+              ELAPSED_HOURS=$((ELAPSED_TIME / 3600))
+              ELAPSED_MINUTES=$(( (ELAPSED_TIME % 3600) / 60 ))
+              ELAPSED_SECONDS=$((ELAPSED_TIME % 60 ))
+              MSG="elapsed time: "
+              if [ "$ELAPSED_HOURS" -gt 0 ]; then
+                MSG="''${MSG}''${ELAPSED_HOURS}h "
+              fi
+              if [ "$ELAPSED_MINUTES" -gt 0 ]; then
+                MSG="''${MSG}''${ELAPSED_MINUTES}m "
+              fi
+              MSG="Upgrade in progress, ''${MSG}''${ELAPSED_SECONDS}s"
+              echo "$MSG"
+              MSG=$(url_encode "$MSG")
+              URL="$URL?status=up&msg=$MSG&ping="
+            elif [ "$STATUS" = "failed" ]; then
+              echo "NixOS upgrade has failed."
               LOG=$(url_encode "$(journalctl -u nixos-upgrade --lines=10 --no-pager --output cat)")
               URL="$URL?status=down&msg=$LOG&ping="
             else
