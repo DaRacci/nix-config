@@ -69,7 +69,7 @@ let
           IS_RUNNING=$(systemctl is-active nixos-upgrade.service || true)
           LAST_PROFILE_DATE=$(nix profile history --profile /nix/var/nix/profiles/system | grep '^Version' | awk -F'[()]+' '{print $2}' | tail -n 1)
 
-          if [ "$IS_RUNNING" = "active" ]; then
+          if [ "$IS_RUNNING" = "active" ] || [ "$STATUS" = "activating" ]; then
             echo "Upgrading"
             ${systemdUnitRunningTimeFormatted "nixos-upgrade.service"}
             echo "elapsed:''${ELAPSED_HOURS}h ''${ELAPSED_MINUTES}m ''${ELAPSED_SECONDS}s"
