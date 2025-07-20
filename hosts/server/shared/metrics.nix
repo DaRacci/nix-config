@@ -63,8 +63,7 @@ let
         name = "NixOS Upgrade Status";
         icon = "mdi:update";
         type = "sensor";
-        unit_of_measurement = "";
-        device_class = "";
+        device_class = "enum";
         path = pkgs.writeShellScript "upgrade-status" ''
           STATUS=$(systemctl is-failed nixos-upgrade.service || true)
           IS_RUNNING=$(systemctl is-active nixos-upgrade.service || true)
@@ -79,8 +78,10 @@ let
             LOG=$(journalctl -u nixos-upgrade --lines=10 --no-pager --output cat)
             echo "log:$LOG"
           else
-            echo "Last upgrade: $LAST_PROFILE_DATE"
+            echo "$LAST_PROFILE_DATE"
           fi
+
+          echo "last_profile_date:$LAST_PROFILE_DATE"
         '';
       };
     };
@@ -168,7 +169,6 @@ in
         );
       };
 
-      # TODO - Harden
       hacompanion = {
         description = "Hacompanion for monitor system metrics";
 
@@ -179,6 +179,9 @@ in
         path = with pkgs; [
           hacompanion
           lm_sensors
+          systemd
+          nix
+          gawk
         ];
 
         serviceConfig = {
@@ -189,7 +192,10 @@ in
           EnvironmentFile = config.sops.secrets.HACOMPANION_ENV.path;
           StateDirectory = "hacompanion";
           WorkingDirectory = "/var/lib/hacompanion";
-          BindReadOnlyPaths = [ hacompanionToml ];
+          BindReadOnlyPaths = [
+            hacompanionToml
+            "/nix/var/nix/profiles/system"
+          ];
         };
       };
     };
