@@ -36,13 +36,25 @@ let
     sensor = {
       webcam.enabled = false;
       cpu_temp.enabled = false;
-      cpu_usage.enabled = true;
-      uptime.enabled = true;
-      memory.enabled = true;
+      cpu_usage = {
+        enabled = true;
+        name = "CPU Usage";
+      };
+      uptime = {
+        enabled = true;
+        name = "Last Boot";
+      };
+      memory = {
+        enabled = true;
+        name = "Memory";
+      };
       power.enabled = false;
-      companion_running.enabled = true;
+      companion_running.enabled = false;
       online_check.enabled = false;
-      load_avg.enabled = true;
+      load_avg = {
+        enabled = true;
+        name = "Load Average";
+      };
       audio_volume.enabled = false;
     };
 
