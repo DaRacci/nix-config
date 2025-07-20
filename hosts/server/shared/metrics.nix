@@ -6,7 +6,7 @@
   ...
 }:
 let
-  # Creates the variabels ELAPSED_{HOURS, MINUTES, SECONDS} for the systemd unit running time
+  # Creates the variables ELAPSED_{HOURS, MINUTES, SECONDS} for the systemd unit running time
   systemdUnitRunningTimeFormatted = unitName: ''
     RUNNING_TIME=$(systemctl show -p ActiveEnterTimestamp --value ${unitName})
     RUNNING_TIME=$(date -d "$RUNNING_TIME" +%s)
@@ -90,7 +90,9 @@ in
 {
   sops.secrets = {
     UPGRADE_STATUS_ID = { };
-    HACOMPANION_ENV = { };
+    HACOMPANION_ENV = {
+      sopsFile = "${self}/hosts/secrets.yaml";
+    };
   };
 
   systemd = {
