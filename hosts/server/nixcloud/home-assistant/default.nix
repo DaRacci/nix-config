@@ -80,6 +80,7 @@
         weather-chart-card
         versatile-thermostat-ui-card
         vacuum-card
+        decluttering-card
         universal-remote-card
         plotly-chart-card
         mushroom
@@ -89,6 +90,7 @@
         clock-weather-card
         bubble-card
         auto-entities
+        card-mod
       ];
 
       configWritable = true;
