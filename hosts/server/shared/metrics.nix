@@ -75,6 +75,7 @@ let
             echo "elapsed:''${ELAPSED_HOURS}h ''${ELAPSED_MINUTES}m ''${ELAPSED_SECONDS}s"
           elif [ "$STATUS" = "failed" ]; then
             echo "Upgrade failed"
+            echo "icon:mdi:alert"
             LOG=$(journalctl -u nixos-upgrade --lines=10 --no-pager --output cat)
             echo "log:$LOG"
           else
