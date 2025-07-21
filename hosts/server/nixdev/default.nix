@@ -90,17 +90,6 @@
         };
       };
     };
-
-    windmill = {
-      enable = true;
-      baseUrl = "https://windmill.racci.dev";
-      database = {
-        createLocally = true; # Let NixIO Pick up on its postStart script.
-        urlPath = config.sops.secrets.WINDMILL_DATABASE_URL.path;
-      };
-    };
-
-    postgresql.enable = false;
   };
 
   systemd.services.n8n =
@@ -141,25 +130,6 @@
       n8n.extraConfig = ''
         reverse_proxy http://${config.services.n8n.settings.host}:${toString config.services.n8n.settings.port}
       '';
-
-      windmill = {
-        extraConfig =
-          let
-            cfg = config.services.windmill;
-          in
-          ''
-            reverse_proxy /ws/* http://localhost:${toString cfg.lspPort}
-            reverse_proxy /* http://localhost:${toString cfg.serverPort}
-          '';
-        l4 = {
-          listenPort = 25;
-          config = ''
-            route {
-              proxy localhost:2525
-            }
-          '';
-        };
-      };
     };
   };
 
@@ -176,8 +146,6 @@
     allowedTCPPorts = [
       config.services.n8n.settings.port
       8080
-      config.services.windmill.serverPort
-      config.services.windmill.lspPort
       2525
     ];
   };
