@@ -71,7 +71,7 @@ in
             };
 
             zigbee2mqtt = {
-              passwordFile = secrets."ZIGBEE2MQTT_SECRETS".path;
+              passwordFile = secrets."MQTT_PASSWORDS/ZIGBEE2MQTT".path;
               acl = [
                 "topic readwrite homeassistant/#"
                 "topic readwrite zigbee2mqtt/#"
