@@ -20,12 +20,17 @@
     };
 
     zigbee2mqtt = {
-      enable = false;
+      enable = true;
       settings = {
         homeassistant = true;
         mqtt.server = "mqtt://localhost:1883";
-        serial.port = "/dev/ttyACM0";
+        serial = {
+          port = "tcp://SLZB-06M:6638";
+          baudrate = 115200;
+          adapter = "ezsp";
+        };
         frontend.enabled = true;
+        advanced.transmit_power = 20;
       };
     };
   };
