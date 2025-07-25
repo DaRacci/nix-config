@@ -4,8 +4,15 @@ _: {
   };
 
   services = {
-    home-assistant.config = {
-      recorder.db_url = "!secret POSTGRESQL_URL";
+    home-assistant = {
+      extraPackages =
+        ps: with ps; [
+          psycopg2
+        ];
+
+      config = {
+        recorder.db_url = "!secret POSTGRESQL_URL";
+      };
     };
   };
 }

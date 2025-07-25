@@ -27,47 +27,13 @@
       package = pkgs.home-assistant.override {
         extraPackages =
           ps: with ps; [
-            psycopg2
             aiogithubapi
-            aiobotocore
-
-            androidtvremote2
-            adb-shell # Soft dep for androidtv
-            pyatv
-            base36 # Soft dep for homekit
-            hap-python
-            aiohomekit
             pynetgear
-            pychromecast
-            govee-ble
-            govee-local-api
-            pyschlage
-            pytile
-            python-miio
-            python-kasa
             google-nest-sdm
             pyarlo
-            pysensibo
-            paho-mqtt
             pkgs.ssh-terminal-manager
             pkgs.pyuptimekuma
-
-            caldav
-
-            jellyfin-apiclient-python
-            aiopyarr
-
-            mcp
-            aiohttp-sse
-            ollama
-            pyopenweathermap
-            wyoming
             spotifyaio
-            adguardhome
-
-            aiounifi
-            uiprotect
-            unifi-discovery
           ];
       };
       customComponents = with pkgs.home-assistant-custom-components; [
