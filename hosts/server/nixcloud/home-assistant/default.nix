@@ -5,7 +5,8 @@
 }:
 {
   imports = [
-    ./matter.nix
+    ./connections.nix
+    ./connectivity.nix
     ./postgresql.nix
     ./proxy.nix
     # ./weather.nix
