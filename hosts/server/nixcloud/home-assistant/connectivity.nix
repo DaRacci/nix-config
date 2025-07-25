@@ -56,31 +56,31 @@ in
             device = {
               passwordFile = secrets."MQTT_PASSWORDS/DEVICES".path;
               acl = [
-                "pattern readwrite homeassistant/+/%u/#"
-                "pattern read homeassistant/status"
-                "topic read $SYS/#"
+                "readwrite homeassistant/+/%u/#"
+                "read homeassistant/status"
+                "read $SYS/#"
               ];
             };
 
             homeassistant = {
               passwordFile = secrets."MQTT_PASSWORDS/HA".path;
               acl = [
-                "topic readwrite homeassistant/#"
-                "topic read SleepAsAndroid/#"
+                "readwrite homeassistant/#"
+                "read SleepAsAndroid/#"
               ];
             };
 
             zigbee2mqtt = {
               passwordFile = secrets."MQTT_PASSWORDS/ZIGBEE2MQTT".path;
               acl = [
-                "topic readwrite homeassistant/#"
-                "topic readwrite zigbee2mqtt/#"
+                "readwrite homeassistant/#"
+                "readwrite zigbee2mqtt/#"
               ];
             };
 
             sleepasandroid = {
               passwordFile = secrets."MQTT_PASSWORDS/SLEEPASANDROID".path;
-              acl = [ "topic readwrite SleepAsAndroid/#" ];
+              acl = [ "readwrite SleepAsAndroid/#" ];
             };
           };
         }
