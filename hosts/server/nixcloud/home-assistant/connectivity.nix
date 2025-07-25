@@ -12,7 +12,8 @@ in
     "MQTT_PASSWORDS/HA" = { };
     "MQTT_PASSWORDS/DEVICES" = { };
     "MQTT_PASSWORDS/SLEEPASANDROID" = { };
-    "MQTT_PASSWORDS/ZIGBEE2MQTT" = { };
+    # Must not be nested so that zigbee2mqtt can access it
+    "MQTT_PASSWORDS_ZIGBEE2MQTT" = { };
 
     "ZIGBEE2MQTT_SECRETS" = {
       owner = config.users.users.zigbee2mqtt.name;
@@ -71,7 +72,7 @@ in
             };
 
             zigbee2mqtt = {
-              passwordFile = secrets."MQTT_PASSWORDS/ZIGBEE2MQTT".path;
+              passwordFile = secrets."MQTT_PASSWORDS_ZIGBEE2MQTT".path;
               acl = [
                 "readwrite homeassistant/#"
                 "readwrite zigbee2mqtt/#"
@@ -94,7 +95,7 @@ in
         mqtt = {
           server = "mqtt://localhost:1883";
           user = "zigbee2mqtt";
-          password = "!secrets.yaml MQTT_PASSWORDS/ZIGBEE2MQTT";
+          password = "!secrets.yaml MQTT_PASSWORDS_ZIGBEE2MQTT";
         };
         serial = {
           port = "tcp://SLZB-06M:6638";
