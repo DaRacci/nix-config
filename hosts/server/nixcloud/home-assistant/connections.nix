@@ -3,6 +3,7 @@ _: {
     extraComponents = [
       # Service Connections
       "openweathermap"
+      "met"
       "sun"
       "caldav"
 

@@ -29,11 +29,13 @@
           ps: with ps; [
             aiogithubapi
             pynetgear
-            google-nest-sdm
             pyarlo
+            google-nest-sdm
             pkgs.ssh-terminal-manager
             pkgs.pyuptimekuma
             spotifyaio
+
+            aiobotocore # For S3 Backup to Minio
           ];
       };
       customComponents = with pkgs.home-assistant-custom-components; [
