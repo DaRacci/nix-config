@@ -102,7 +102,10 @@ in
           baudrate = 115200;
           adapter = "ember";
         };
-        frontend.enabled = true;
+        frontend = {
+          enabled = true;
+          package = "zigbee2mqtt-windfront";
+        };
         advanced.transmit_power = 20;
       };
     };
