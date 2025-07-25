@@ -1,7 +1,4 @@
-{
-  ...
-}:
-{
+_: {
   services = {
     # TODO - Add fallback ollama for when nixmi is down
     open-webui = {

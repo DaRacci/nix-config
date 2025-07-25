@@ -4,7 +4,7 @@
 }:
 
 let
-  secrets = config.sops.secrets;
+  inherit (config.sops) secrets;
 in
 {
   sops.secrets = {
