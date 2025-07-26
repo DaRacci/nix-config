@@ -32,40 +32,22 @@ wsl --import NixOS .\NixOS\ nixos-wsl.tar.gz --version 2
 wsl -d NixOS
 ```
 
-#### 3. Configure WSL Settings
-Edit `%USERPROFILE%\.wslconfig` on your Windows system to include the following:
-
-```conf
-[wsl2]
-kernelCommandLine = cgroup_no_v1=all
-
-# Optional: Increase memory allocation for NixOS
-memory=8GB
-processors=4
-
-# Optional: Enable nested virtualization
-nestedVirtualization=true
-```
-
-#### 4. Configure NixOS-WSL
+#### 3. Configure NixOS-WSL
 After starting your NixOS-WSL instance:
 
 ```bash
 # Clone this repository
 sudo git clone https://github.com/DaRacci/nix-config.git /etc/nixos
 
-# Apply the WSL configuration (winix host)
+# Apply the WSL configuration
 sudo nixos-rebuild switch --flake /etc/nixos#winix
-
-# Setup home-manager for your user
-home-manager switch --flake /etc/nixos#racci@winix
 ```
 
-#### 5. WSL-Specific Features
+#### 4. WSL-Specific Features
 
-The `winix` configuration includes:
+The WSL configuration includes:
 - SSH agent relay between Windows and WSL
-- GPU acceleration support (CUDA for development)
+- Hardware acceleration support for development
 - Remote desktop capabilities
 - Optimized for headless operation
 
@@ -99,38 +81,8 @@ wpa_cli
 ping nixos.org
 ```
 
-#### 3. Disk Partitioning
-
-##### Option A: Manual Partitioning
-```bash
-# Example for UEFI systems with single disk
-parted /dev/sda -- mklabel gpt
-parted /dev/sda -- mkpart root ext4 512MB -8GB
-parted /dev/sda -- mkpart swap linux-swap -8GB 100%
-parted /dev/sda -- mkpart ESP fat32 1MB 512MB
-parted /dev/sda -- set 3 esp on
-
-# Format partitions
-mkfs.ext4 -L nixos /dev/sda1
-mkswap -L swap /dev/sda2
-mkfs.fat -F 32 -n boot /dev/sda3
-
-# Mount filesystems
-mount /dev/disk/by-label/nixos /mnt
-mkdir -p /mnt/boot
-mount /dev/disk/by-label/boot /mnt/boot
-swapon /dev/sda2
-```
-
-##### Option B: Disko (Declarative Disk Setup)
-```bash
-# Clone the repository first
-git clone https://github.com/DaRacci/nix-config.git
-cd nix-config
-
-# Use disko configuration (if available for your host)
-sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko hosts/{device-type}/{hostname}/disko.nix
-```
+#### 3. Disk Setup
+Follow standard NixOS installation procedures for disk partitioning and filesystem setup as described in the [NixOS manual](https://nixos.org/manual/nixos/stable/index.html#sec-installation).
 
 #### 4. Generate Hardware Configuration
 ```bash
@@ -164,9 +116,6 @@ reboot
 
 # After reboot, ensure configuration is applied
 sudo nixos-rebuild switch --flake /etc/nixos#{hostname}
-
-# Setup home-manager for users
-home-manager switch --flake /etc/nixos#username@hostname
 ```
 
 ## Existing NixOS System Migration
@@ -175,14 +124,14 @@ home-manager switch --flake /etc/nixos#username@hostname
 
 #### 1. Backup Current Configuration
 ```bash
-# Backup current configuration
+# Backup current configuration (adjust path if using flakes)
 sudo cp -r /etc/nixos /etc/nixos.backup
 ```
 
 #### 2. Clone This Repository
 ```bash
-# Clone to /etc/nixos
-sudo git clone https://github.com/DaRacci/nix-config.git /tmp/nix-config
+# Clone to a working directory
+git clone https://github.com/DaRacci/nix-config.git /tmp/nix-config
 sudo cp -r /tmp/nix-config/* /etc/nixos/
 ```
 
@@ -194,9 +143,8 @@ sudo mkdir -p /etc/nixos/hosts/{device-type}/{hostname}
 # Migrate your hardware configuration
 sudo cp /etc/nixos.backup/hardware-configuration.nix /etc/nixos/hosts/{device-type}/{hostname}/hardware.nix
 
-# Create default.nix based on your old configuration.nix
-sudo cp /etc/nixos.backup/configuration.nix /etc/nixos/hosts/{device-type}/{hostname}/default.nix
-# Edit default.nix to follow the new structure
+# Create default.nix based on your old configuration
+# Edit to follow the new structure
 ```
 
 #### 4. Test and Apply
@@ -208,45 +156,4 @@ sudo nixos-rebuild build --flake .#{hostname}
 sudo nixos-rebuild switch --flake .#{hostname}
 ```
 
-## Troubleshooting
 
-### Common Issues
-
-#### Build Failures
-```bash
-# Clear nix store if needed
-sudo nix-collect-garbage -d
-
-# Rebuild with verbose output
-sudo nixos-rebuild switch --flake .#{hostname} --verbose
-
-# Check for syntax errors
-nix flake check
-```
-
-#### SSH Issues in WSL
-```bash
-# Restart SSH agent relay service
-systemctl --user restart wsl-ssh-agent-relay
-ssh-relay status
-```
-
-#### Home Manager Issues
-```bash
-# Clear home-manager generations
-home-manager generations | head -n 5 | awk '{print $7}' | xargs home-manager remove-generations
-
-# Rebuild home configuration
-home-manager switch --flake .#username@hostname --verbose
-```
-
-#### GPU Acceleration Not Working
-1. Ensure host is listed in accelerationHosts in flake.nix
-2. Verify drivers are properly configured in hardware.nix
-3. Check module imports for CUDA/ROCm support
-
-### Getting Help
-
-- Check [GitHub Issues](https://github.com/DaRacci/nix-config/issues)
-- Review NixOS manual: [nixos.org/manual](https://nixos.org/manual/nixos/stable/)
-- Join NixOS community: [discourse.nixos.org](https://discourse.nixos.org/)
