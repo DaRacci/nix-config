@@ -9,7 +9,6 @@
   imports = [
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
 
-    "${self}/hosts/shared/optional/tailscale.nix"
     "${self}/modules/nixos/server"
     ./metrics.nix
   ];
@@ -23,6 +22,13 @@
       extraConfig = ''
         MulticastDNS=yes
       '';
+    };
+
+    avahi = {
+      enable = true;
+      domainName = "localdomain";
+      nssmdns4 = true;
+      nssmdns6 = true;
     };
   };
 

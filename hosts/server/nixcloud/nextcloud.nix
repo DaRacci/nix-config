@@ -216,8 +216,6 @@ in
         User = config.users.users.protonmail-bridge.name;
       };
     };
-
-    nextcloud-setup.after = [ "tailscaled.service" ];
   };
 
   networking = {
