@@ -11,11 +11,11 @@
 
   sops.secrets =
     {
-      COUCHDB_SETTINGS = {
-        owner = config.users.users.couchdb.name;
-        group = config.users.groups.couchdb.name;
-        restartUnits = [ "couchdb.service" ];
-      };
+      # COUCHDB_SETTINGS = {
+      #   owner = config.users.users.couchdb.name;
+      #   group = config.users.groups.couchdb.name;
+      #   restartUnits = [ "couchdb.service" ];
+      # };
 
       PGADMIN_PASSWORD = {
         owner = config.users.users.pgadmin.name;
@@ -56,7 +56,7 @@
 
   services = {
     couchdb = {
-      enable = true;
+      enable = false;
       package = pkgs.couchdb3;
       bindAddress = "0.0.0.0";
       extraConfigFiles = [
