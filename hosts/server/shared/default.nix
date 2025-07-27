@@ -16,24 +16,20 @@
   services = {
     getty.autologinUser = "root";
     resolved = {
-      domains = [
-        "localdomain"
-      ];
+      enable = true;
       extraConfig = ''
         MulticastDNS=yes
       '';
     };
-
-    avahi = {
-      enable = true;
-      domainName = "localdomain";
-      nssmdns4 = true;
-      nssmdns6 = true;
-    };
   };
 
+  proxmoxLXC = {
+    manageNetwork = true;
+    manageHostName = true;
+  };
   networking = {
     domain = "localdomain";
+    useHostResolvConf = false;
   };
 
   nix = {
