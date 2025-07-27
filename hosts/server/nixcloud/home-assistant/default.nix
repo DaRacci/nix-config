@@ -66,6 +66,7 @@
       config = {
         frontend = { };
         default_config = { };
+        zeroconf = { };
 
         isal = { };
 

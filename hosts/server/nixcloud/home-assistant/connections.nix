@@ -14,6 +14,7 @@ _: {
       # Devices
       "androidtv"
       "androidtv_remote"
+      "cast"
       "apple_tv"
       "schlage"
       "sensibo"
@@ -21,6 +22,9 @@ _: {
       "tplink"
       "unifiprotect"
       "mobile_app"
+      "homekit"
+      "homekit_controller"
+      "zha"
 
       # Arr Suite
       "radarr"
