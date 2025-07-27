@@ -16,7 +16,18 @@
 
   services = {
     getty.autologinUser = "root";
-    resolved.enable = lib.mkForce false;
+    resolved = {
+      domains = [
+        "localdomain"
+      ];
+      extraConfig = ''
+        MulticastDNS=yes
+      '';
+    };
+  };
+
+  networking = {
+    domain = "localdomain";
   };
 
   nix = {
