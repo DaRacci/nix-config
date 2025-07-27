@@ -120,5 +120,8 @@
     };
   };
 
-  networking.firewall.allowedTCPPorts = [ config.services.couchdb.port ];
+  networking.firewall.allowedTCPPorts = [
+    config.services.postgresql.settings.port
+    config.services.couchdb.port
+  ];
 }
