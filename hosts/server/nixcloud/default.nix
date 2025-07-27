@@ -11,7 +11,5 @@
 
   proxmoxLXC = {
     privileged = false;
-    manageNetwork = false;
-    manageHostName = false;
   };
 }
