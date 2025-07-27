@@ -14,16 +14,17 @@ _: {
       # Devices
       "androidtv"
       "androidtv_remote"
-      "cast"
       "apple_tv"
+      "cast"
+      "govee_light_local"
+      "homekit"
+      "homekit_controller"
+      "mobile_app"
       "schlage"
       "sensibo"
       "tile"
       "tplink"
       "unifiprotect"
-      "mobile_app"
-      "homekit"
-      "homekit_controller"
       "zha"
 
       # Arr Suite
