@@ -15,12 +15,6 @@
 
   services = {
     getty.autologinUser = "root";
-    resolved = {
-      enable = true;
-      extraConfig = ''
-        MulticastDNS=yes
-      '';
-    };
   };
 
   proxmoxLXC = {
@@ -29,7 +23,6 @@
   };
   networking = {
     domain = "localdomain";
-    useHostResolvConf = false;
   };
 
   nix = {
