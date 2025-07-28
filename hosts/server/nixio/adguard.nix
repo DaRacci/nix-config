@@ -45,6 +45,8 @@
           bind_hosts = [ "0.0.0.0" ];
           port = 53;
 
+          hostsfile_enabled = false;
+
           #region Cache Settings
           cache_size = 4194304;
           cache_ttl_min = 0;
