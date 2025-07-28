@@ -22,6 +22,10 @@
   };
 
   services = {
+    avahi = {
+      enable = true;
+    };
+
     home-assistant = {
       enable = true;
       package = pkgs.home-assistant.override {
