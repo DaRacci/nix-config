@@ -17,18 +17,6 @@ _:
   server.proxy = {
     domain = "racci.dev";
     virtualHosts = {
-      minio.extraConfig = ''
-        redir /console /console/
-
-        handle_path /console* {
-          reverse_proxy http://localhost${config.services.minio.consoleAddress}
-        }
-
-        reverse_proxy {
-          to http://localhost${config.services.minio.listenAddress}
-        }
-      '';
-
       pve.extraConfig = ''
         reverse_proxy {
           to https://192.168.2.210:8006
@@ -36,11 +24,6 @@ _:
             tls_insecure_skip_verify
           }
         }
-      '';
-
-      # TODO - move out of dockge
-      finance.extraConfig = ''
-        reverse_proxy http://dockge:3000
       '';
 
       # TODO - replace with komodo & run off a nix machine
