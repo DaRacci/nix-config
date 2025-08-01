@@ -10,6 +10,7 @@
   monocoque = pkgs.callPackage ./monocoque { };
 
   # MCP Servers
+  mcpo = pkgs.python3Packages.callPackage inputs.mcpo { };
   github-actions-mcp-server = pkgs.callPackage ./github-actions-mcp-server { };
 
   # Misc

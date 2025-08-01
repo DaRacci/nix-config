@@ -1,12 +1,11 @@
 {
-  inputs,
   config,
   pkgs,
   lib,
   ...
 }:
 let
-  mcpo = with pkgs.python3Packages; toPythonApplication (callPackage inputs.mcpo { });
+  mcpo = with pkgs.python3Packages; toPythonApplication (pkgs.mcpo);
   npx = lib.getExe' pkgs.nodejs "npx";
   uvx = lib.getExe' pkgs.uv "uvx";
 
