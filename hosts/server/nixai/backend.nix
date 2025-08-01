@@ -46,6 +46,15 @@ in
   services.ollama = {
     enable = true;
     package = pkgs.ollama;
+    loadModels = [
+      "gemma3n:e4b"
+    ];
+    environmentVariables = {
+      OLLAMA_KEEP_ALIVE = "-1";
+      OLLAMA_MAX_LOADED_MODELS = "2";
+      OLLAMA_KV_CACHE_TYPE = "q4_0";
+      OLLAMA_FLASH_ATTENTION = "1";
+    };
   };
 
   systemd.services.mcpo = {
