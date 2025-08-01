@@ -47,7 +47,8 @@
           overlays = [
             inputs.lix-module.overlays.lixFromNixpkgs
             inputs.angrr.overlays.default
-          ] ++ (builtins.attrValues (import ./overlays { inherit self inputs lib; }));
+          ]
+          ++ (builtins.attrValues (import ./overlays { inherit self inputs lib; }));
         };
     in
     flake-parts.lib.mkFlake
@@ -155,11 +156,6 @@
       url = "https://raw.githubusercontent.com/liperium/nixpkgs/refs/heads/protonuprs-init/pkgs/by-name/pr/protonup-rs/package.nix";
       flake = false;
       type = "file";
-    };
-    # TODO - Remove once upstream is up to 0.6.2
-    nix-tree = {
-      url = "github:utdemir/nix-tree";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Misc Flake Inputs for other Inputs
