@@ -674,6 +674,18 @@
         "url": "https://git.lix.systems/lix-project/nixos-module.git"
       }
     },
+    "mcpo": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-tP0HH3g3qoO/paSZCwZrcEM/0spKz/q8nGWPPe9lRGY=",
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/codgician/nixpkgs/refs/heads/mcpo-init/pkgs/development/python-modules/mcpo/default.nix"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/codgician/nixpkgs/refs/heads/mcpo-init/pkgs/development/python-modules/mcpo/default.nix"
+      }
+    },
     "nil": {
       "inputs": {
         "nixpkgs": [
@@ -1102,9 +1114,9 @@
         ],
         "lanzaboote": "lanzaboote",
         "lix-module": "lix-module",
+        "mcpo": "mcpo",
         "nil": "nil",
         "nix-alien": "nix-alien",
-        "nix-tree": "nix-tree",
         "nix4vscode": "nix4vscode",
         "nixarr": "nixarr",
         "nixd": "nixd",

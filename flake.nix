@@ -157,6 +157,11 @@
       flake = false;
       type = "file";
     };
+    mcpo = {
+      url = "https://raw.githubusercontent.com/codgician/nixpkgs/refs/heads/mcpo-init/pkgs/development/python-modules/mcpo/default.nix";
+      flake = false;
+      type = "file";
+    };
 
     # Misc Flake Inputs for other Inputs
     systems.url = "github:nix-systems/default";
