@@ -45,7 +45,7 @@
           };
 
           overlays = [
-            inputs.lix-module.overlays.lixFromNixpkgs
+            inputs.lix-module.overlays.default
             inputs.angrr.overlays.default
           ]
           ++ (builtins.attrValues (import ./overlays { inherit self inputs lib; }));
@@ -247,11 +247,10 @@
       };
     };
     lix-module = {
-      url = "git+https://git.lix.systems/lix-project/nixos-module.git?ref=stable";
+      url = "git+https://git.lix.systems/lix-project/nixos-module.git?ref=release-2.93";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-utils.follows = "flake-utils";
-        lix.follows = "";
       };
     };
     stylix = {
