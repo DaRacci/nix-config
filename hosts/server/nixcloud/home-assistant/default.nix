@@ -7,6 +7,7 @@
   imports = [
     ./connections.nix
     ./connectivity.nix
+    ./dashboard.nix
     ./postgresql.nix
     ./proxy.nix
     # ./weather.nix
@@ -49,22 +50,6 @@
         smartir
         sleep_as_android
       ];
-      customLovelaceModules = with pkgs.home-assistant-custom-lovelace-modules; [
-        weather-chart-card
-        versatile-thermostat-ui-card
-        vacuum-card
-        decluttering-card
-        universal-remote-card
-        plotly-chart-card
-        mushroom
-        mini-media-player
-        mini-graph-card
-        hourly-weather
-        clock-weather-card
-        bubble-card
-        auto-entities
-        card-mod
-      ];
 
       configWritable = true;
       config = {
@@ -78,8 +63,6 @@
         "automation ui" = "!include automations.yaml";
         "scene manual" = [ ];
         "scene ui" = "!include scenes.yaml";
-
-        lovelace.mode = "yaml";
       };
     };
   };
