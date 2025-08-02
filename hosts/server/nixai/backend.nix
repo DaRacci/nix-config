@@ -48,8 +48,6 @@ in
 
     templates = {
       mcpoConfig = {
-        # todo can we reload instead?
-        restartUnits = [ "mcpo.service" ];
         content =
           let
             placeholder = config.sops.placeholder;
@@ -122,7 +120,7 @@ in
     ];
 
     serviceConfig = {
-      ExecStart = "${lib.getExe mcpo} --config \${CREDENTIALS_DIRECTORY}/config.json";
+      ExecStart = "${lib.getExe mcpo} --config \${CREDENTIALS_DIRECTORY}/config.json --hot-reload";
       WorkingDirectory = "/var/lib/mcpo";
       StateDirectory = "mcpo";
       RuntimeDirectory = "mcpo";
