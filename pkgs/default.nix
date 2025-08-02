@@ -12,6 +12,7 @@
   # MCP Servers
   mcpo = pkgs.python3Packages.callPackage inputs.mcpo { };
   github-actions-mcp-server = pkgs.callPackage ./github-actions-mcp-server { };
+  mcp-sequential-thinking = pkgs.python3Packages.callPackage ./mcp-sequential-thinking { };
 
   # Misc
   orca-slicer-zink = pkgs.callPackage ./orca-slicer-zink { };

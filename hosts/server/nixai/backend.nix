@@ -9,37 +9,85 @@ let
   npx = lib.getExe' pkgs.nodejs "npx";
   uvx = lib.getExe' pkgs.uv "uvx";
 
-  mcpoConfig = pkgs.writers.writeJSON "mcpo-config" {
-    mcpServers = {
-      memory = {
-        command = npx;
-        args = [
-          "-y"
-          "@modelcontextprotocol/server-memory"
-        ];
-      };
-      time = {
-        command = uvx;
-        args = [
-          "mcp-server-time"
-          "--local-timezone=${config.time.timeZone}"
-        ];
-      };
-      nixos = {
-        command = uvx;
-        args = [ "mcp-nixos" ];
-      };
-      context7 = {
-        command = npx;
-        args = [
-          "-y"
-          "@upstash/context7-mcp"
-        ];
+  mkNpxServer = package: {
+    command = npx;
+    args = [
+      "-y"
+      package
+    ];
+  };
+  mkNpxServerWithArgs =
+    package: args:
+    let
+      base = mkNpxServer package;
+    in
+    base
+    // {
+      args = base.args ++ args;
+    };
+
+  mkUvxServer = package: {
+    command = uvx;
+    args = [ package ];
+  };
+  mkUvxServerWithArgs =
+    package: args:
+    let
+      base = mkUvxServer package;
+    in
+    base
+    // {
+      args = base.args ++ args;
+    };
+in
+{
+  sops = {
+    secrets = {
+      "MCP/HASSIO_TOKEN" = { };
+    };
+
+    templates = {
+      mcpoConfig = {
+        # todo can we reload instead?
+        restartUnits = [ "mcpo.service" ];
+        content =
+          let
+            placeholder = config.sops.placeholder;
+          in
+          builtins.toJSON {
+            mcpServers = {
+              memory = mkNpxServer "@modelcontextprotocol/server-memory";
+              time = mkUvxServerWithArgs "mcp-server-time" [
+                "--local-timezone=${config.time.timeZone}"
+              ];
+              nixos = mkUvxServer "mcp-nixos";
+              context7 = mkNpxServer "@upstash/context7-mcp";
+              sequential-thinking = {
+                command = lib.getExe pkgs.mcp-sequential-thinking;
+              };
+              github-actions = {
+                command = lib.getExe pkgs.github-actions-mcp-server;
+              };
+              git = mkUvxServer "mcp-server-git";
+              fetch = mkUvxServer "mcp-server-fetch";
+              diff = mkNpxServer "diff-mcp";
+              github = mkNpxServer "github-mcp";
+              filesystem = mkNpxServerWithArgs "@modelcontextprotocol/server-filesystem" [
+                "/var/lib/mcpo/filesystem"
+              ];
+              hassio = {
+                type = "sse";
+                url = "https://hassio.racci.dev/mcp_server/sse";
+                headers = {
+                  Authorization = "Bearer ${placeholder."MCP/HASSIO_TOKEN"}";
+                };
+              };
+            };
+          };
       };
     };
   };
-in
-{
+
   # Runs like shit because iGPU ROCM doesn't work
   # Waiting for https://github.com/ollama/ollama/issues/2033 so it can run under vulkan
   services.ollama = {
@@ -69,14 +117,32 @@ in
       nodejs
       uv
       git
+      diffutils
+      gh
     ];
 
     serviceConfig = {
-      ExecStart = "${lib.getExe mcpo} --config ${mcpoConfig}";
+      ExecStart = "${lib.getExe mcpo} --config \${CREDENTIALS_DIRECTORY}/config.json";
       WorkingDirectory = "/var/lib/mcpo";
       StateDirectory = "mcpo";
       RuntimeDirectory = "mcpo";
       DynamicUser = true;
+
+      NoNewPrivileges = true;
+      ProtectClock = true;
+      PrivateDevices = true;
+      PrivateMounts = true;
+      PrivateTmp = true;
+      PrivateUsers = true;
+      ProtectHome = true;
+      ProtectHostname = true;
+      ProtectKernelLogs = true;
+      ProtectKernelModules = true;
+      ProtectKernelTunables = true;
+      RestrictNamespaces = true;
+      RestrictRealtime = true;
+      RestrictSUIDSGID = true;
+      LoadCredential = [ "config.json:${config.sops.templates.mcpoConfig.path}" ];
     };
   };
 
