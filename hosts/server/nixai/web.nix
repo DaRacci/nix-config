@@ -1,4 +1,8 @@
-_: {
+{
+  config,
+  ...
+}:
+{
   services = {
     # TODO - Add fallback ollama for when nixmi is down
     open-webui = {
@@ -23,5 +27,18 @@ _: {
         WHISPER_MODEL_AUTO_UPDATE = "true";
       };
     };
+  };
+
+  server = {
+    proxy.virtualHosts.ai =
+      let
+        cfg = config.services.open-webui;
+      in
+      {
+        ports = [ cfg.port ];
+        extraConfig = ''
+          reverse_proxy http://${cfg.host}:${toString cfg.port}
+        '';
+      };
   };
 }
