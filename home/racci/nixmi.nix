@@ -14,13 +14,34 @@
 
   user.persistence.enable = true;
 
-  wayland.windowManager.hyprland.settings = {
-    monitor = [
-      "DP-6,      3840x2160@240,  0x0,        1, vrr, 2, cm,auto,bitdepth,10,sdrbrightness, 1.4, sdrsaturation, 1" # Center Monitor
-      "DP-1,      2560x1440@144,  -2560x360,  1, vrr, 2" # Left Monitor
-      "HDMI-A-1,  2560x1440@120,  3840x360,   1, vrr, 0" # Right Monitor
-    ];
-  };
+  wayland.windowManager.hyprland.extraConfig = ''
+    monitorv2 {
+      output = DP-6
+      mode = 3840x2160@240
+      position = 0x0
+      scale = 1
+      vrr = true
+
+      supports_wide_color = true
+      supports_hdr = true
+      sdr_min_luminance = 0.005
+      sdr_max_luminance = 350
+    }
+    monitorv2 {
+      output = DP-1
+      mode = 2560x1440@144
+      position = -2560x360
+      scale = 1
+      vrr = true
+    }
+    monitorv2 {
+      output = HDMI-A-1
+      mode = 2560x1440@120
+      position = 3840x360
+      scale = 1
+      vrr = false
+    }
+  '';
 
   custom.audio.disabledDevices = [
     "alsa_card.pci-0000_01_00.1" # Dedicated GPU
