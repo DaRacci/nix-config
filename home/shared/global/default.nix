@@ -18,7 +18,8 @@ in
     ./nix.nix
     ./sops.nix
     ./xdg.nix
-  ] ++ builtins.attrValues (import "${self}/modules/home-manager");
+  ]
+  ++ builtins.attrValues (import "${self}/modules/home-manager");
 
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";

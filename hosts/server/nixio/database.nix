@@ -71,23 +71,21 @@
 
       extensions = ps: with ps; [ system_stats ];
 
-      authentication = (
-        ''
-          # TYPE  DATABASE  USER  ADDRESS   AUTH-METHOD   [AUTH-OPTIONS]
-          local   all       all             peer
-          local   all       all             trust
-          local   all       all             scram-sha-256
-        ''
-        + (lib.pipe config.server.network.subnets [
-          (builtins.map (
-            subnet:
-            [ "host  all  all  ${subnet.ipv4.cidr}  scram-sha-256" ]
-            ++ lib.optionals (subnet.ipv6.cidr != null) [ "host  all  all  ${subnet.ipv6.cidr}  scram-sha-256" ]
-          ))
-          lib.flatten
-          (builtins.concatStringsSep "\n")
-        ])
-      );
+      authentication = ''
+        # TYPE  DATABASE  USER  ADDRESS   AUTH-METHOD   [AUTH-OPTIONS]
+        local   all       all             peer
+        local   all       all             trust
+        local   all       all             scram-sha-256
+      ''
+      + (lib.pipe config.server.network.subnets [
+        (builtins.map (
+          subnet:
+          [ "host  all  all  ${subnet.ipv4.cidr}  scram-sha-256" ]
+          ++ lib.optionals (subnet.ipv6.cidr != null) [ "host  all  all  ${subnet.ipv6.cidr}  scram-sha-256" ]
+        ))
+        lib.flatten
+        (builtins.concatStringsSep "\n")
+      ]);
 
       settings = {
         password_encryption = "scram-sha-256";

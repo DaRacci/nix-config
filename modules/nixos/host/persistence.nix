@@ -114,7 +114,8 @@ let
         type = path;
         internal = true;
       };
-    } // dirPermsOpts;
+    }
+    // dirPermsOpts;
   };
 
   rootFile = submodule [
@@ -218,7 +219,8 @@ in
         "/var/lib/nixos"
         "/var/log"
         "/etc/NetworkManager/system-connections"
-      ] ++ cfg.directories;
+      ]
+      ++ cfg.directories;
 
       files = [
         "/etc/machine-id"
@@ -228,7 +230,8 @@ in
             mode = "u=rwx,g=rx,o=rx";
           };
         }
-      ] ++ cfg.files;
+      ]
+      ++ cfg.files;
 
       users = lib.pipe (attrNames config.home-manager.users) [
         (filter (user: config.home-manager.users.${user}.user.persistence.enable))

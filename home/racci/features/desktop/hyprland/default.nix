@@ -180,56 +180,55 @@ with lib;
         snap.enabled = true;
       };
 
-      layerrule =
+      layerrule = [
+        "xray 1, .*"
+        #region No Animations
+      ]
+      ++ (trivial.pipe
         [
-          "xray 1, .*"
-          #region No Animations
+          "walker"
+          "selection"
+          "overview"
+          "anyrun"
+          "gauntlet"
+          "indicator.*"
+          "osk"
+          "hyprpicker"
+          "noanim"
         ]
-        ++ (trivial.pipe
-          [
-            "walker"
-            "selection"
-            "overview"
-            "anyrun"
-            "gauntlet"
-            "indicator.*"
-            "osk"
-            "hyprpicker"
-            "noanim"
-          ]
-          [
-            (map (layer: "noanim, ${layer}"))
-            #endregion
-            #region Ags
-          ]
-        )
-        ++ [
-          "animation slide top, sideleft.*"
-          "animation slide top, sideright.*"
-          "blur, session"
+        [
+          (map (layer: "noanim, ${layer}"))
+          #endregion
+          #region Ags
         ]
-        ++ (trivial.pipe
-          [
-            "bar"
-            "corner.*"
-            "dock"
-            "indicator.*"
-            "indicator*"
-            "overview"
-            "cheatsheet"
-            "sideright"
-            "sideleft"
-            "osk"
-          ]
-          [
-            (map (layer: [
-              "blur, ${layer}"
-              "ignorealpha 0.6, ${layer}"
-            ]))
-            flatten
-            #endregion
-          ]
-        );
+      )
+      ++ [
+        "animation slide top, sideleft.*"
+        "animation slide top, sideright.*"
+        "blur, session"
+      ]
+      ++ (trivial.pipe
+        [
+          "bar"
+          "corner.*"
+          "dock"
+          "indicator.*"
+          "indicator*"
+          "overview"
+          "cheatsheet"
+          "sideright"
+          "sideleft"
+          "osk"
+        ]
+        [
+          (map (layer: [
+            "blur, ${layer}"
+            "ignorealpha 0.6, ${layer}"
+          ]))
+          flatten
+          #endregion
+        ]
+      );
 
       misc = {
         vfr = true;

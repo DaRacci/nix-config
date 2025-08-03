@@ -11,30 +11,28 @@ let
   mkMesa =
     pkg:
     (pkg.override {
-      galliumDrivers =
-        [
-          "llvmpipe"
-        ]
-        ++ (lib.optionals hasAmd [
-          "radeonsi"
-        ])
-        ++ (lib.optionals hasNvidia [
-          "zink"
-        ])
-        ++ (lib.optionals (config ? wsl) [
-          "d3d12"
-        ]);
+      galliumDrivers = [
+        "llvmpipe"
+      ]
+      ++ (lib.optionals hasAmd [
+        "radeonsi"
+      ])
+      ++ (lib.optionals hasNvidia [
+        "zink"
+      ])
+      ++ (lib.optionals (config ? wsl) [
+        "d3d12"
+      ]);
 
-      vulkanDrivers =
-        [
-          "swrast"
-        ]
-        ++ (lib.optionals hasAmd [
-          "amd"
-        ])
-        ++ (lib.optionals (config ? wsl) [
-          "microsoft-experimental"
-        ]);
+      vulkanDrivers = [
+        "swrast"
+      ]
+      ++ (lib.optionals hasAmd [
+        "amd"
+      ])
+      ++ (lib.optionals (config ? wsl) [
+        "microsoft-experimental"
+      ]);
 
       eglPlatforms = lib.optionals (!config.host.device.isHeadless) [
         "x11"

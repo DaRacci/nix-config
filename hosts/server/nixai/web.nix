@@ -7,7 +7,7 @@
   sops =
     let
       db = config.server.database.postgres.open_webui;
-      placeholder = config.sops.placeholder;
+      inherit (config.sops) placeholder;
     in
     {
       templates.openweb-ui-env.content = lib.toShellVars {

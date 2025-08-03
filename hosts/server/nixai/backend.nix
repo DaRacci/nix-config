@@ -5,7 +5,7 @@
   ...
 }:
 let
-  mcpo = with pkgs.python3Packages; toPythonApplication (pkgs.mcpo);
+  mcpo = with pkgs.python3Packages; toPythonApplication pkgs.mcpo;
   npx = lib.getExe' pkgs.nodejs "npx";
   uvx = lib.getExe' pkgs.uv "uvx";
 
@@ -51,7 +51,7 @@ in
       mcpoConfig = {
         content =
           let
-            placeholder = config.sops.placeholder;
+            inherit (config.sops) placeholder;
           in
           builtins.toJSON {
             mcpServers = {

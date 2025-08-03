@@ -16,7 +16,8 @@ in
     defaultSopsFile = "${hostDirectory}/secrets.yaml";
     age.sshKeyPaths = [
       "${config.host.persistence.root}/etc/ssh/ssh_host_ed25519_key"
-    ] ++ (map getKeyPath keys);
+    ]
+    ++ (map getKeyPath keys);
 
     secrets = {
       SSH_PRIVATE_KEY = {
