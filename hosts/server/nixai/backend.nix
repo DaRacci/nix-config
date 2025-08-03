@@ -44,6 +44,7 @@ in
   sops = {
     secrets = {
       "MCP/HASSIO_TOKEN" = { };
+      "MCP/GITHUB_TOKEN" = { };
     };
 
     templates = {
@@ -63,13 +64,9 @@ in
               sequential-thinking = {
                 command = lib.getExe pkgs.mcp-sequential-thinking;
               };
-              github-actions = {
-                command = lib.getExe pkgs.github-actions-mcp-server;
-              };
               git = mkUvxServer "mcp-server-git";
               fetch = mkUvxServer "mcp-server-fetch";
               diff = mkNpxServer "diff-mcp";
-              github = mkNpxServer "github-mcp";
               filesystem = mkNpxServerWithArgs "@modelcontextprotocol/server-filesystem" [
                 "/var/lib/mcpo/filesystem"
               ];
@@ -78,6 +75,13 @@ in
                 url = "https://hassio.racci.dev/mcp_server/sse";
                 headers = {
                   Authorization = "Bearer ${placeholder."MCP/HASSIO_TOKEN"}";
+                };
+              };
+              github = {
+                type = "streamable-http";
+                url = "https://api.githubcopilot.com/mcp";
+                headers = {
+                  Authorization = "Bearer ${placeholder."MCP/GITHUB_TOKEN"}";
                 };
               };
             };
