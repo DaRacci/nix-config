@@ -20,7 +20,7 @@
 
   services = {
     coder = {
-      enable = true;
+      enable = false;
       accessUrl = "https://coder.racci.dev";
       listenAddress = "0.0.0.0:8080";
 

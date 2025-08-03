@@ -9,46 +9,45 @@
   # For backups to be placed in the minio data directory.
   users.users.postgres.extraGroups = [ "minio" ];
 
-  sops.secrets =
-    {
-      # COUCHDB_SETTINGS = {
-      #   owner = config.users.users.couchdb.name;
-      #   group = config.users.groups.couchdb.name;
-      #   restartUnits = [ "couchdb.service" ];
-      # };
+  sops.secrets = {
+    # COUCHDB_SETTINGS = {
+    #   owner = config.users.users.couchdb.name;
+    #   group = config.users.groups.couchdb.name;
+    #   restartUnits = [ "couchdb.service" ];
+    # };
 
-      PGADMIN_PASSWORD = {
-        owner = config.users.users.pgadmin.name;
-        group = config.users.groups.pgadmin.name;
-        restartUnits = [ "pgadmin.service" ];
-      };
+    PGADMIN_PASSWORD = {
+      owner = config.users.users.pgadmin.name;
+      group = config.users.groups.pgadmin.name;
+      restartUnits = [ "pgadmin.service" ];
+    };
 
-      "POSTGRES/POSTGRES_PASSWORD" = {
+    "POSTGRES/POSTGRES_PASSWORD" = {
+      owner = config.users.users.postgres.name;
+      group = config.users.groups.postgres.name;
+      restartUnits = [ "postgresql.service" ];
+      mode = "0440";
+    };
+  }
+  // fromAllServers [
+    (builtins.map (config: config.sops.secrets))
+    lib.mergeAttrsList
+    (lib.filterAttrs (
+      name: secret: lib.strings.hasPrefix "POSTGRES/" secret.name && lib.hasSuffix "_PASSWORD" secret.name
+    ))
+    (builtins.mapAttrs (
+      _: value:
+      (builtins.removeAttrs value [ "sopsFileHash" ])
+      // {
+        sopsFile = config.sops.defaultSopsFile;
+        # Update owner and groups because it will always be only postgres on this server.
         owner = config.users.users.postgres.name;
         group = config.users.groups.postgres.name;
+        # TODO - do i need to clean up the reload services?
         restartUnits = [ "postgresql.service" ];
-        mode = "0440";
-      };
-    }
-    // fromAllServers [
-      (builtins.map (config: config.sops.secrets))
-      lib.mergeAttrsList
-      (lib.filterAttrs (
-        name: secret: lib.strings.hasPrefix "POSTGRES/" secret.name && lib.hasSuffix "_PASSWORD" secret.name
-      ))
-      (builtins.mapAttrs (
-        _: value:
-        (builtins.removeAttrs value [ "sopsFileHash" ])
-        // {
-          sopsFile = config.sops.defaultSopsFile;
-          # Update owner and groups because it will always be only postgres on this server.
-          owner = config.users.users.postgres.name;
-          group = config.users.groups.postgres.name;
-          # TODO - do i need to clean up the reload services?
-          restartUnits = [ "postgresql.service" ];
-        }
-      ))
-    ];
+      }
+    ))
+  ];
 
   server.database.postgres = {
     postgres = { };
@@ -72,10 +71,11 @@
 
       extensions = ps: with ps; [ system_stats ];
 
-      authentication = lib.mkOverride 10 (
+      authentication = (
         ''
           # TYPE  DATABASE  USER  ADDRESS   AUTH-METHOD   [AUTH-OPTIONS]
           local   all       all             peer
+          local   all       all             trust
           local   all       all             scram-sha-256
         ''
         + (lib.pipe config.server.network.subnets [
