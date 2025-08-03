@@ -151,10 +151,7 @@ in
   server.proxy.virtualHosts.mcpo = {
     ports = [ 8000 ];
     extraConfig = ''
-      rewrite {
-        if {path} is /
-        to /docs
-      }
+      redir / /docs
 
       reverse_proxy http://localhost:8000
     '';
