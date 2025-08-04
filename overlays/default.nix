@@ -12,7 +12,6 @@ let
   packagesFromOtherInstances = [
     "nixd"
     "nil"
-    "quickshell"
   ];
 in
 {
@@ -112,7 +111,7 @@ in
     _: prev:
     lib.optionalAttrs prev.config.cudaSupport (
       prev.lib.pipe
-        [ "vscode" "obsidian" ]
+        [ "vscode" "obsidian" "protonmail-desktop" ]
         [
           (map (
             name:
