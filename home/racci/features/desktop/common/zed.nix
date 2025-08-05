@@ -39,7 +39,6 @@
     userSettings = {
       theme = lib.mkForce "Tokyo Night";
       ui_font_size = lib.mkForce 24;
-      hour_format = "hour24";
       load_direnv = "direct";
       autosave = "on_focus_change";
       auto_update = false;
@@ -53,14 +52,12 @@
 
       agent = {
         enabled = true;
-        version = "2";
 
         button = true;
         dock = "right";
         default_width = 640;
         default_height = 320;
 
-        enable_experimental_live_diffs = true;
         default_model = {
           provider = "copilot_chat";
           model = "o4-mini";
@@ -109,7 +106,6 @@
       };
 
       language_models = {
-        copilot_chat = { };
         ollama = {
           api_url = "http://localhost:11434";
           available_models = [
@@ -254,7 +250,7 @@
       };
 
       inlay_hints = {
-        enabled = false;
+        enabled = true;
         show_type_hints = true;
         show_parameter_hints = true;
         show_other_hints = true;
@@ -288,15 +284,6 @@
         };
       };
 
-      # collaboration_panel.button = true;
-      # chat_panel.button = "never";
-
-      task = {
-        show_status_indicator = true;
-      };
-
-      unstable.ui_density = "comfortable";
-
       ui_font_family = lib.mkForce "Zed Plex Sans";
 
       terminal = {
@@ -309,6 +296,10 @@
       telemetry = {
         diagnostics = false;
         metrics = false;
+      };
+
+      journal = {
+        hour_format = "hour24";
       };
     };
   };
