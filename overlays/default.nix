@@ -111,7 +111,7 @@ in
     _: prev:
     lib.optionalAttrs prev.config.cudaSupport (
       prev.lib.pipe
-        [ "vscode" "obsidian" "protonmail-desktop" ]
+        [ "vscode" "obsidian" ]
         [
           (map (
             name:

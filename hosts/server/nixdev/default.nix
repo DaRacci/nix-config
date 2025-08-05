@@ -8,10 +8,6 @@
   ];
 
   sops.secrets = {
-    CODER_ENV = {
-      owner = config.users.users.coder.name;
-      inherit (config.users.users.coder) group;
-    };
     WINDMILL_DATABASE_URL = {
       owner = config.users.users.coder.name;
       inherit (config.users.users.coder) group;
@@ -19,27 +15,6 @@
   };
 
   services = {
-    coder = {
-      enable = false;
-      accessUrl = "https://coder.racci.dev";
-      listenAddress = "0.0.0.0:8080";
-
-      environment.file = config.sops.secrets.CODER_ENV.path;
-
-      database =
-        let
-          db = config.server.database.postgres.coder;
-        in
-        {
-          createLocally = false;
-          inherit (db) host database;
-          username = db.user;
-
-          # This comes from the environment file
-          password = "\${CODER_PASSWORD}";
-        };
-    };
-
     n8n = {
       enable = true;
       webhookUrl = "n8n.racci.dev";
@@ -111,30 +86,16 @@
   server = {
     database = {
       postgres = {
-        coder = {
-          password = {
-            owner = config.users.users.coder.name;
-            inherit (config.users.users.coder) group;
-          };
-        };
         n8n = { };
         windmill = { };
       };
     };
 
     proxy.virtualHosts = {
-      coder.extraConfig = ''
-        reverse_proxy http://${config.services.coder.listenAddress}
-      '';
-
       n8n.extraConfig = ''
         reverse_proxy http://${config.services.n8n.settings.host}:${toString config.services.n8n.settings.port}
       '';
     };
-  };
-
-  users.extraUsers.coder = {
-    extraGroups = [ "docker" ];
   };
 
   virtualisation.docker = {
