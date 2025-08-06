@@ -100,7 +100,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Download User Imports Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: "*-user-imports"
 
@@ -150,7 +150,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download Host Details Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: "*-host-details"
       - name: Aggregate Host Details
