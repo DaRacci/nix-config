@@ -28,6 +28,10 @@
   new-host = pkgs.callPackage ./helpers/new-host.nix { };
   list-ephemeral = pkgs.callPackage ./list-ephemeral { };
 
+  # Wine Apps
+  take-control-viewer = pkgs.callPackage ./take-control-viewer {
+    inherit (inputs.erosanix.lib.x86_64-linux) mkWindowsAppNoCC;
+  };
   # PR Packages
   protonup-rs = (pkgs.callPackage "${inputs.protonup-rs}" { }).overrideAttrs (oldAttrs: {
     cargoHash = "sha256-02uOVJtU52EWQn+Z2rHCum9+jodByYTDcLyMkgfpjwc=";

@@ -278,6 +278,29 @@
         "type": "github"
       }
     },
+    "erosanix": {
+      "inputs": {
+        "flake-compat": [
+          "flake-compat"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1753879613,
+        "narHash": "sha256-oYhCJSAIZiu3maM2q6JBzh0+MYd4KTaq5eNFIstUurE=",
+        "owner": "emmanuelrosa",
+        "repo": "erosanix",
+        "rev": "0ad38bd182cd737f0f4b878ea04cb3676ecd4000",
+        "type": "github"
+      },
+      "original": {
+        "owner": "emmanuelrosa",
+        "repo": "erosanix",
+        "type": "github"
+      }
+    },
     "firefox-gnome-theme": {
       "flake": false,
       "locked": {
@@ -1115,6 +1138,7 @@
         "devenv": "devenv",
         "devenv-root": "devenv-root",
         "disko": "disko",
+        "erosanix": "erosanix",
         "firefox-ultima": "firefox-ultima",
         "flake-compat": "flake-compat",
         "flake-parts": "flake-parts_2",

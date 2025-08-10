@@ -14,6 +14,8 @@
     gnome-calculator
     gnome-graphs
     gnome-contacts
+
+    take-control-viewer
   ];
 
   dconf.settings = {

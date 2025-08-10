@@ -94,11 +94,15 @@ in
   # Waiting for https://github.com/ollama/ollama/issues/2033 so it can run under vulkan
   services.ollama = {
     enable = true;
-    package = pkgs.ollama;
+    # acceleration = "rocm";
+    rocmOverrideGfx = "10.3.0";
     loadModels = [
+      "qwen3:1.7b"
+      "gemma3n:e2b"
       "gemma3n:e4b"
     ];
     environmentVariables = {
+      HCC_AMDGPU_TARGET = "gfx1031";
       OLLAMA_KEEP_ALIVE = "-1";
       OLLAMA_MAX_LOADED_MODELS = "2";
       OLLAMA_KV_CACHE_TYPE = "q4_0";
@@ -156,4 +160,8 @@ in
       reverse_proxy http://localhost:8000
     '';
   };
+
+  systemd.tmpfiles.rules = [
+    "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"
+  ];
 }

@@ -91,7 +91,9 @@
                 "nixmi"
                 "winix"
               ];
-              rocm = [ ];
+              rocm = [
+                # "nixai"
+              ];
             };
 
             hosts =
@@ -212,6 +214,14 @@
         systems.follows = "systems";
       };
     };
+    # Windows App Packaging
+    erosanix = {
+      url = "github:emmanuelrosa/erosanix";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-compat.follows = "flake-compat";
+      };
+    };
 
     # Base Modules
     home-manager = {
@@ -319,9 +329,18 @@
       url = "github:CRTified/nur-packages";
       flake = false; # We aren't going to use this as a flake
     };
-    quickshell = {
-      url = "github:quickshell-mirror/quickshell";
-      inputs.nixpkgs.follows = "nixpkgs";
+    caelestia = {
+      url = "github:caelestia-dots/shell";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
+    caelestia-cli = {
+      url = "github:caelestia-dots/cli";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        app2unit.follows = "caelestia/app2unit";
+      };
     };
 
     # Desktop Stuff
