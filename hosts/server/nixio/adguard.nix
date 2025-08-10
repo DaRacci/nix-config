@@ -141,6 +141,7 @@
             "@@||nextcloud.racci.dev^$dnsrewrite" # Nextcloud isn't hosted internally yet.
             "@@||cloud.racci.dev^$dnsrewrite" # Digital Ocean DNS
             "@@||s.youtube.com^$important" # Fix YouTube history for IOS App
+            "@@||ipinfo.io^$important" # Blocked by HaGeZi's Ultimate Blocklist but needed.
           ];
 
         tls = {
