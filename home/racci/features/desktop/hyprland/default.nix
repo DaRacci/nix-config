@@ -152,6 +152,14 @@ with lib;
           };
         }
       ];
+
+      permission.plugin =
+        with pkgs.hyprlandPlugins;
+        [
+          hy3
+          hypr-dynamic-cursors
+        ]
+        |> lib.map (plugin: "${plugin}/lib/lib${plugin.pname}.so");
     };
 
     settings = {
@@ -162,14 +170,6 @@ with lib;
         no_donation_nag = true;
         enforce_permissions = true;
       };
-
-      permission = lib.map (plugin: "${plugin}/lib/lib${plugin.pname}.so,plugin,allow") (
-        with pkgs.hyprlandPlugins;
-        [
-          hy3
-          hypr-dynamic-cursors
-        ]
-      );
 
       general = {
         resize_on_border = true;

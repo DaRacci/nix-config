@@ -1,6 +1,7 @@
 _: {
   imports = [
     ./bind.nix
+    ./permission.nix
     ./slideIn.nix
     ./windowRule.nix
   ];

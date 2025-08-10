@@ -5,121 +5,122 @@
   ...
 }:
 {
-  wayland.windowManager.hyprland.settings =
-    let
-      ocrRegion = lib.getExe (
-        pkgs.writeShellApplication {
-          name = "ocrRegion";
-          runtimeInputs = [
-            pkgs.uutils-coreutils-noprefix
-            pkgs.grimblast
-            pkgs.tesseract
-            pkgs.wl-clipboard
-            pkgs.pulseaudio
-            pkgs.sound-theme-freedesktop
-            pkgs.libnotify
-          ];
-          text = ''
-            TEMP_FILE="$(mktemp --suffix=.png)";
+  wayland.windowManager.hyprland = {
+    custom-settings.permission.screenCopy =
+      [
+        pkgs.grim
+        pkgs.hyprpicker
+      ]
+      |> builtins.map (exe: lib.getExe exe);
 
-            GRIMBLAST_HIDE_CURSOR=1 grimblast --freeze save area "$TEMP_FILE";
-            tesseract "$TEMP_FILE" - | wl-copy;
-            paplay ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/camera-shutter.oga;
-            rm "$TEMP_FILE";
+    settings =
+      let
+        ocrRegion = lib.getExe (
+          pkgs.writeShellApplication {
+            name = "ocrRegion";
+            runtimeInputs = [
+              pkgs.uutils-coreutils-noprefix
+              pkgs.grimblast
+              pkgs.tesseract
+              pkgs.wl-clipboard
+              pkgs.pulseaudio
+              pkgs.sound-theme-freedesktop
+              pkgs.libnotify
+            ];
+            text = ''
+              TEMP_FILE="$(mktemp --suffix=.png)";
 
-            notify-send \
-              "OCR Text Copied" \
-              "Text copied to clipboard" \
-              --app-name="hyprland" \
-              --category="action" \
-              --icon="edit-copy";
-          '';
-        }
-      );
+              GRIMBLAST_HIDE_CURSOR=1 grimblast --freeze save area "$TEMP_FILE";
+              tesseract "$TEMP_FILE" - | wl-copy;
+              paplay ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/camera-shutter.oga;
+              rm "$TEMP_FILE";
 
-      screenshot = lib.getExe (
-        pkgs.writeShellApplication {
-          name = "screenshot";
-          runtimeInputs = [
-            pkgs.grimblast
-            pkgs.satty
-            pkgs.pulseaudio
-            pkgs.sound-theme-freedesktop
-            pkgs.libnotify
-          ];
-          text = ''
-            if [ $# -ne 1 ] || [ "$1" != "area" ] && [ "$1" != "output" ]; then
-              echo "Usage: screenshot <area|output>";
-              exit 1;
-            fi
-            CAPTURE=$1;
+              notify-send \
+                "OCR Text Copied" \
+                "Text copied to clipboard" \
+                --app-name="hyprland" \
+                --category="action" \
+                --icon="edit-copy";
+            '';
+          }
+        );
 
-            datedFolder="${config.xdg.userDirs.pictures}/Screenshots/$(date '+%Y/%m')";
-            savePath="''${datedFolder}/Screenshot_$(date '+%Y%m%d_%H%M%S')";
-            savePathAnnotated="''${savePath}_annotated.png";
-            savePath="''${savePath}.png";
-            mkdir -p "''${datedFolder}";
+        screenshot = lib.getExe (
+          pkgs.writeShellApplication {
+            name = "screenshot";
+            runtimeInputs = [
+              pkgs.grimblast
+              pkgs.satty
+              pkgs.pulseaudio
+              pkgs.sound-theme-freedesktop
+              pkgs.libnotify
+            ];
+            text = ''
+              if [ $# -ne 1 ] || [ "$1" != "area" ] && [ "$1" != "output" ]; then
+                echo "Usage: screenshot <area|output>";
+                exit 1;
+              fi
+              CAPTURE=$1;
 
-            GRIMBLAST_HIDE_CURSOR=1 grimblast --freeze copysave "$CAPTURE" "$savePath";
-            paplay ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/camera-shutter.oga;
+              datedFolder="${config.xdg.userDirs.pictures}/Screenshots/$(date '+%Y/%m')";
+              savePath="''${datedFolder}/Screenshot_$(date '+%Y%m%d_%H%M%S')";
+              savePathAnnotated="''${savePath}_annotated.png";
+              savePath="''${savePath}.png";
+              mkdir -p "''${datedFolder}";
 
-            ACTION=$(notify-send \
-              "Screenshot Captured" \
-              "Screenshot saved at $savePath" \
-              --app-name="hyprland" \
-              --category="action" \
-              --icon="$savePath" \
-              --app-name="Screenshot" \
-              --action=Open \
-              --action=Edit);
+              GRIMBLAST_HIDE_CURSOR=1 grimblast --freeze copysave "$CAPTURE" "$savePath";
+              paplay ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/camera-shutter.oga;
 
-            if [ "$ACTION" = 0 ]; then
-              xdg-open "$savePath";
-            elif [ "$ACTION" = 1 ]; then
-              satty --filename "''${savePath}" --fullscreen --output-filename "''${savePathAnnotated}";
-            fi
-          '';
-        }
-      );
+              ACTION=$(notify-send \
+                "Screenshot Captured" \
+                "Screenshot saved at $savePath" \
+                --app-name="hyprland" \
+                --category="action" \
+                --icon="$savePath" \
+                --app-name="Screenshot" \
+                --action=Open \
+                --action=Edit);
 
-      # TODO: Allow zooming in and out with mouse wheel
-      colourPicker = lib.getExe (
-        pkgs.writeShellApplication {
-          name = "colourPicker";
-          runtimeInputs = with pkgs; [
-            hyprpicker
-            wl-clipboard
-            hyprland
-            gojq
-          ];
-          text = ''
-            senitivityBefore=$(hyprctl getoption input:sensitivity -j | gojq -r '.float');
-            hyprctl keyword input:sensitivity -0.8;
-            hyprpicker --render-inactive --autocopy;
-            hyprctl keyword input:sensitivity "$senitivityBefore";
-          '';
-        }
-      );
-    in
-    {
-      bind = [
-        # OCR
-        "Super+Shift,T,exec,${ocrRegion}"
+              if [ "$ACTION" = 0 ]; then
+                xdg-open "$savePath";
+              elif [ "$ACTION" = 1 ]; then
+                satty --filename "''${savePath}" --fullscreen --output-filename "''${savePathAnnotated}";
+              fi
+            '';
+          }
+        );
 
-        # Color Picker
-        "Super+Shift,C,exec,${colourPicker}"
+        # TODO: Allow zooming in and out with mouse wheel
+        colourPicker = lib.getExe (
+          pkgs.writeShellApplication {
+            name = "colourPicker";
+            runtimeInputs = with pkgs; [
+              hyprpicker
+              wl-clipboard
+              hyprland
+              gojq
+            ];
+            text = ''
+              sensitivityBefore=$(hyprctl getoption input:sensitivity -j | gojq -r '.float');
+              hyprctl keyword input:sensitivity -0.8;
+              hyprpicker --render-inactive --autocopy;
+              hyprctl keyword input:sensitivity "$sensitivityBefore";
+            '';
+          }
+        );
+      in
+      {
+        bind = [
+          # OCR
+          "Super+Shift,T,exec,${ocrRegion}"
 
-        # Screenshot
-        ",Print,exec,${screenshot} area"
-        "SUPER,Print,exec,${screenshot} output"
-      ];
+          # Color Picker
+          "Super+Shift,C,exec,${colourPicker}"
 
-      permission = builtins.map (exe: "${lib.getExe exe},screencopy,allow") (
-        with pkgs;
-        [
-          grim
-          hyprpicker
-        ]
-      );
-    };
+          # Screenshot
+          ",Print,exec,${screenshot} area"
+          "SUPER,Print,exec,${screenshot} output"
+        ];
+      };
+  };
 }
