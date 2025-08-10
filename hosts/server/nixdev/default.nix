@@ -7,13 +7,6 @@
     ./ci.nix
   ];
 
-  sops.secrets = {
-    WINDMILL_DATABASE_URL = {
-      owner = config.users.users.coder.name;
-      inherit (config.users.users.coder) group;
-    };
-  };
-
   services = {
     n8n = {
       enable = true;
@@ -87,7 +80,6 @@
     database = {
       postgres = {
         n8n = { };
-        windmill = { };
       };
     };
 
