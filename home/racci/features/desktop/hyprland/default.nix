@@ -19,6 +19,7 @@ with lib;
     ./lock-suspend.nix
     ./looks.nix
     ./menus
+    ./windows.nix
     ./workspaces.nix
   ];
 
@@ -68,99 +69,13 @@ with lib;
       hypr-dynamic-cursors
     ];
 
-    custom-settings = {
-      windowrule = [
-        {
-          matcher.title = "^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$";
-          rule = {
-            keepaspectratio = true;
-            float = true;
-            pin = true;
-            opacity = 1.0;
-            # size = "25%";
-            move = {
-              x = "73%";
-              y = "72%";
-            };
-          };
-        }
-        {
-          matcher = [
-            { title = "^(Assetto Corsa)$"; }
-            { title = "^(AC2)$"; }
-          ];
-          rule = {
-            float = true;
-            center = true;
-            norounding = true;
-            opacity = 1.0;
-            size = "7680x1440";
-          };
-        }
-        {
-          matcher = [
-            { class = "^(file_progress)$"; }
-            { class = "^(confirm)$"; }
-            { class = "^(dialog)$"; }
-            { class = "^(download)$"; }
-            { class = "^(notification)$"; }
-            { class = "^(error)$"; }
-            { class = "^(confirmreset)$"; }
-            { title = "^(branchdialog)$"; }
-            { title = "^(Confirm to replace files)$"; }
-            { title = "^(File Operation Progress)$"; }
-            { class = "^(org.pulseaudio.pavucontrol)$"; }
-            { title = "^(About)$"; }
-          ];
-          rule.float = true;
-        }
-        {
-          matcher = [
-            { title = "^(Steam Settings)(.*)$"; }
-            { title = "^(Open File)(.*)$"; }
-            { title = "^(Select a File)(.*)$"; }
-            { title = "^(Choose wallpaper)(.*)$"; }
-            { title = "^(Open Folder)(.*)$"; }
-            { title = "^(Save As)(.*)$"; }
-            { title = "^(Library)(.*)$"; }
-            { title = "^(File Upload)(.*)$"; }
-            { title = "^(Open Firefox in Troubleshoot Mode?)$"; }
-            { title = "^(MainPicker)"; } # ScreenShare Picker
-          ];
-          rule = {
-            center = true;
-            float = true;
-          };
-        }
-        {
-          matcher.class = "(steam_app)";
-          rule.immediate = true;
-        }
-        # Panel Dropdown Menus
-        {
-          matcher = [
-            { class = "^(org.pulseaudio.pavucontrol)$"; }
-            { class = "^(\.blueman-manager-wrapped)$"; }
-          ];
-          rule = {
-            float = true;
-            size = "33%";
-            move = {
-              x = "63%";
-              y = 67; # This is the exact position top of the window below the floating panel.
-            };
-          };
-        }
-      ];
-
-      permission.plugin =
-        with pkgs.hyprlandPlugins;
-        [
-          hy3
-          hypr-dynamic-cursors
-        ]
-        |> lib.map (plugin: "${plugin}/lib/lib${plugin.pname}.so");
-    };
+    custom-settings.permission.plugin =
+      with pkgs.hyprlandPlugins;
+      [
+        hy3
+        hypr-dynamic-cursors
+      ]
+      |> lib.map (plugin: "${plugin}/lib/lib${plugin.pname}.so");
 
     settings = {
       debug.disable_logs = true;
@@ -231,9 +146,6 @@ with lib;
       );
 
       misc = {
-        vfr = true;
-        vrr = true;
-
         animate_manual_resizes = false;
         animate_mouse_windowdragging = false;
 

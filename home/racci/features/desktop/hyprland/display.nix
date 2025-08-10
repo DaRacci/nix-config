@@ -4,6 +4,18 @@
 }:
 {
   wayland.windowManager.hyprland.settings = {
+    misc = {
+      vfr = true;
+      vrr = 3;
+    };
+
+    xwayland = {
+      enabled = true;
+      use_nearest_neighbor = false;
+      force_zero_scaling = true;
+      create_abstract_socket = false;
+    };
+
     experimental.xx_color_management_v4 = true;
 
     render = {
@@ -12,6 +24,8 @@
       cm_fs_passthrough = 2;
       cm_enabled = true;
       send_content_type = true;
+      cm_auto_hdr = true;
+      new_render_scheduling = true;
     };
 
     monitor = lib.mkAfter [

@@ -190,6 +190,7 @@
 
       lsp = {
         nil = {
+          binary.path = lib.getExe pkgs.nil;
           initialization_options = {
             formatting = {
               command = [ "nixfmt" ];
@@ -198,6 +199,7 @@
         };
         # TODO - Figure out how to do this without hard-coded paths.
         nixd.settings = {
+          binary.path = lib.getExe pkgs.nixd;
           nixpkgs.expr = "import (builtins.getFlake \"/persist/nix-config\").inputs.nixpkgs { }";
           options = rec {
             nixos.expr = "(builtins.getFlake \"/persist/nix-config\").nixosConfigurations.(builtins.replaceStrings [\"\\n\"] [\"\"] (builtins.readFile /etc/hostname)).options";
