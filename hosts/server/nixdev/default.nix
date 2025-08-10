@@ -52,10 +52,10 @@
           authenticationMethod = "email";
         };
 
-        expression = {
-          evaluator = "tournament";
-          reportDifference = true;
-        };
+        # expression = {
+        #   evaluator = "tournament";
+        #   reportDifference = true;
+        # };
       };
     };
   };
