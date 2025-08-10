@@ -63,13 +63,6 @@ in
       removeWarningPopup = true;
     };
 
-    quickshell = prev.quickshell.overrideAttrs (oldAttrs: {
-      buildInputs = oldAttrs.buildInputs or [ ] ++ [
-        final.qt6.full
-        final.kdePackages.kirigami
-      ];
-    });
-
     mcpo = prev.mcpo.overridePythonAttrs (oldAttrs: rec {
       version = "0.0.17";
       src = oldAttrs.src.override {

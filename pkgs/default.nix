@@ -15,8 +15,6 @@
 
   # Misc
   orca-slicer-zink = pkgs.callPackage ./orca-slicer-zink { };
-  caelestia-shell = pkgs.callPackage ./caelestia/shell.nix { };
-  caelestia-cli = pkgs.callPackage ./caelestia/cli.nix { };
 
   # Home Assistant Python Packages
   terminal-manager = pkgs.python3Packages.callPackage ./python/terminal-manager.nix { };
@@ -29,15 +27,6 @@
 
   # Wine Apps
   take-control-viewer = pkgs.callPackage ./take-control-viewer {
-    inherit (inputs.erosanix.lib.x86_64-linux) mkWindowsAppNoCC;
+    inherit (inputs.erosanix.lib.${pkgs.system}) mkWindowsAppNoCC;
   };
-  # PR Packages
-  protonup-rs = (pkgs.callPackage "${inputs.protonup-rs}" { }).overrideAttrs (oldAttrs: {
-    cargoHash = "sha256-02uOVJtU52EWQn+Z2rHCum9+jodByYTDcLyMkgfpjwc=";
-    cargoDeps = oldAttrs.cargoDeps.overrideAttrs (oldAttrs: {
-      vendorStaging = oldAttrs.vendorStaging.overrideAttrs (_old: {
-        outputHash = "sha256-02uOVJtU52EWQn+Z2rHCum9+jodByYTDcLyMkgfpjwc=";
-      });
-    });
-  });
 }

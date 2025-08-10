@@ -154,11 +154,6 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
     # Upstream & PR Programs
-    protonup-rs = {
-      url = "https://raw.githubusercontent.com/liperium/nixpkgs/refs/heads/protonuprs-init/pkgs/by-name/pr/protonup-rs/package.nix";
-      flake = false;
-      type = "file";
-    };
     mcpo = {
       url = "https://raw.githubusercontent.com/codgician/nixpkgs/refs/heads/mcpo-init/pkgs/development/python-modules/mcpo/default.nix";
       flake = false;
@@ -264,7 +259,7 @@
       };
     };
     stylix = {
-      url = "github:danth/stylix";
+      url = "github:nix-community/stylix";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
@@ -339,7 +334,6 @@
       url = "github:caelestia-dots/cli";
       inputs = {
         nixpkgs.follows = "nixpkgs";
-        app2unit.follows = "caelestia/app2unit";
       };
     };
 

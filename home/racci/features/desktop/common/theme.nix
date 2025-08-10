@@ -45,5 +45,9 @@
         terminal = 18;
       };
     };
+
+    targets = {
+      qt.platform = "qtct";
+    };
   };
 }
