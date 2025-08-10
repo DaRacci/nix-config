@@ -88,7 +88,7 @@ _: {
             content = "game";
             idleinhibit = "always";
             immediate = true;
-            allowsinput = true;
+            allowsInput = true;
             renderunfocused = true;
           };
         }
@@ -98,7 +98,7 @@ _: {
             { class = "^(1Password)$"; }
             { class = "^(Bitwarden)$"; }
           ];
-          rule.noscreenshare = true;
+          rule.noScreenshare = true;
         }
         # Panel Dropdown Menus
         {

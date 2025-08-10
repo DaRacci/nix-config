@@ -49,7 +49,7 @@
             pin = true;
             center = true;
             stayfocused = true;
-            noclosefor = 250; # Sometimes the window closes immediately, this should help.
+            noCloseFor = 250; # Sometimes the window closes immediately, this should help.
           };
         }
       ];

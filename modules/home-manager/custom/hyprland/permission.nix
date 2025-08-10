@@ -5,7 +5,7 @@
 }:
 let
   inherit (lib) mkOption;
-  cfg = config.wayland.windowManager.hyprland.custom-settings.permissions;
+  cfg = config.wayland.windowManager.hyprland.custom-settings.permission;
 in
 {
   options.wayland.windowManager.hyprland.custom-settings.permission = {
