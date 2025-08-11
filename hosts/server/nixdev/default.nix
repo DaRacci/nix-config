@@ -51,11 +51,6 @@
 
           authenticationMethod = "email";
         };
-
-        # expression = {
-        #   evaluator = "tournament";
-        #   reportDifference = true;
-        # };
       };
     };
   };

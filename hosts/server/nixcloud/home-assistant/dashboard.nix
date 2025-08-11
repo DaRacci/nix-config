@@ -1,10 +1,9 @@
 {
-
   pkgs,
   ...
 }:
 {
-  services.home-assistant = {
+  services.home-assistant = rec {
     customLovelaceModules = with pkgs.home-assistant-custom-lovelace-modules; [
       auto-entities
       bubble-card
@@ -23,9 +22,41 @@
     ];
 
     config = {
+      frontend = {
+        themes = "!include_dir_merge_named themes/";
+      };
+
+      template = [
+        {
+          trigger = [
+            {
+              trigger = "event";
+              event_type = "bubble_card_update_modules";
+            }
+          ];
+          sensor = [
+            {
+              name = "Bubble Card Modules";
+              state = "saved";
+              icon = "mdi:puzzle";
+              attributes = {
+                modules = "{{ trigger.event.data.modules }}";
+                last_updated = "{{ trigger.event.data.last_updated }}";
+              };
+            }
+          ];
+        }
+      ];
+
       lovelace = {
         mode = "yaml";
-        resources =
+        resources = [
+          {
+            url = "/local/nixos-lovelace-modules/bubble-pop-up-fix.js";
+            type = "module";
+          }
+        ]
+        ++ (
           [
             "Home-Assistant-Lovelace-Local-Conditional-card/local-conditional-card.js"
             "button-card/button-card.js"
@@ -42,8 +73,13 @@
           ]
           |> builtins.map (resource: {
             type = "module";
-            url = "/hacsfiles/${resource}.";
-          });
+            url = "/local/community/${resource}";
+          })
+        )
+        ++ (builtins.map (card: {
+          url = "/local/nixos-lovelace-modules/${card.entrypoint or (card.pname + ".js")}?${card.version}";
+          type = "module";
+        }) customLovelaceModules);
       };
     };
   };
