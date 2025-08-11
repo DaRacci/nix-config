@@ -25,7 +25,6 @@
       cm_enabled = true;
       send_content_type = true;
       cm_auto_hdr = true;
-      new_render_scheduling = true;
     };
 
     monitor = lib.mkAfter [
