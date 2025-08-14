@@ -10,7 +10,6 @@ let
   # If given a string, assumes the input and package name are the same.
   # Otherwise should be defined as an attr with the input and the package name(s).
   packagesFromOtherInstances = [
-    "nixd"
     "nil"
   ];
 in

@@ -238,24 +238,22 @@
         pre-commit-hooks-nix.follows = "git-hooks";
       };
     };
-    nixd = {
-      url = "github:nix-community/nixd";
-      inputs = {
-        flake-parts.follows = "flake-parts";
-        treefmt-nix.follows = "treefmt";
-      };
-    };
     nil = {
       url = "github:oxalica/nil/main";
       inputs = {
         nixpkgs.follows = "nixpkgs";
       };
     };
+    lix = {
+      url = "git+https://git.lix.systems/lix-project/lix.git?ref=release-2.93";
+      flake = false; # Prevents adding too many additional inputs since the lix-module also does it this way.
+    };
     lix-module = {
       url = "git+https://git.lix.systems/lix-project/nixos-module.git?ref=release-2.93";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-utils.follows = "flake-utils";
+        lix.follows = "lix";
       };
     };
     stylix = {
