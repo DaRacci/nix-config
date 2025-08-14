@@ -23,7 +23,7 @@ def main [
   }
 
   let our_imports = $all_imports
-    | filter { $in | str starts-with $thisSource }
+    | where { $in | str starts-with $thisSource }
     | each { $in | str substring (($thisSource | str length) + 1)..  }
 
   echo $our_imports | to json
