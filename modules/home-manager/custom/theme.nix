@@ -41,12 +41,6 @@ in
       };
     };
 
-    # qt = {
-    #   enable = true;
-    #   platformTheme.name = "gtk3";
-    #   style.name = "adwaita-qt6";
-    # };
-
     wayland.windowManager.hyprland.settings.exec-once =
       mkIf config.wayland.windowManager.hyprland.enable
         [

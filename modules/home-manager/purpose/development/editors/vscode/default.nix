@@ -7,6 +7,14 @@
 }:
 let
   cfg = config.purpose.development;
+
+  profiles = [
+    "default"
+    "rust"
+    "jvm"
+    "dotnet"
+    "python"
+  ];
 in
 {
   options.purpose.development.editors.vscode = {
@@ -314,7 +322,7 @@ in
     })
 
     (lib.mkIf (config ? stylix && config.stylix.enable) {
-      stylix.targets.vscode.profileNames = builtins.attrNames config.programs.vscode.profiles;
+      stylix.targets.vscode.profileNames = profiles;
     })
   ];
 }

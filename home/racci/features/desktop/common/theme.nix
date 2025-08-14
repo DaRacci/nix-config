@@ -17,10 +17,6 @@
       size = 32;
     };
 
-    icons = {
-      enable = true;
-    };
-
     fonts = {
       emoji = {
         package = pkgs.openmoji-color;
