@@ -15,7 +15,6 @@
     "${self}/hosts/shared/optional/virtualisation.nix"
 
     "${self}/hosts/desktop/shared/sessions/hyprland.nix"
-    "${self}/hosts/desktop/shared/sessions/plasma.nix"
 
     "${self}/hosts/shared/optional/gaming.nix"
     "${self}/hosts/shared/optional/tailscale.nix"
