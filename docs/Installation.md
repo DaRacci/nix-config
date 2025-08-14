@@ -72,7 +72,7 @@ The WSL configuration includes:
 sudo systemctl start wpa_supplicant
 wpa_cli
 > add_network
-> set_network 0 ssid "YourSSID" 
+> set_network 0 ssid "YourSSID"
 > set_network 0 psk "YourPassword"
 > enable_network 0
 > quit
