@@ -31,11 +31,7 @@ jobs:
       - name: Build Extensions
         run: ./utils/build-vscode-extensions.sh
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
+      - name: Commit Changes
+        uses: stefanzweifel/git-auto-commit-action@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore(deps): Update VSCode extensions"
-          branch: update-vscode-extensions
-          title: "chore(deps): Update VSCode extensions"
-          labels: "dependencies, automated"
+          commit_message: "chore(deps): Update VSCode extensions"
