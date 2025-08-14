@@ -21,8 +21,7 @@ in
 
   config = {
     wayland.windowManager.hyprland.settings.permission =
-      [ ]
-      ++ (lib.optionals ((builtins.length cfg.screenCopy) > 0) lib.map (
+      (lib.optionals ((builtins.length cfg.screenCopy) > 0) lib.map (
         app: "${app}, screencopy, allow"
       ) cfg.screenCopy)
       ++ (lib.optionals ((builtins.length cfg.plugin) > 0) lib.map (

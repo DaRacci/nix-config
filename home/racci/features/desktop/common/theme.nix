@@ -5,7 +5,7 @@
 }:
 {
   stylix = {
-    base16Scheme = "${inputs.tinted-theming}/base16/tokyo-night-dark.yaml";
+    base16Scheme = "${inputs.stylix.inputs.tinted-schemes}/base16/tokyo-night-dark.yaml";
 
     opacity = {
       popups = 0.9;
@@ -15,6 +15,10 @@
       package = pkgs.bibata-cursors;
       name = "Bibata-Modern-Ice";
       size = 32;
+    };
+
+    icons = {
+      enable = true;
     };
 
     fonts = {
@@ -46,8 +50,5 @@
       };
     };
 
-    targets = {
-      qt.platform = "qtct";
-    };
   };
 }

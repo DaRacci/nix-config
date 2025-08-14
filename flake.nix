@@ -324,17 +324,14 @@
       url = "github:CRTified/nur-packages";
       flake = false; # We aren't going to use this as a flake
     };
-    caelestia = {
+    caelestia-shell = {
       url = "github:caelestia-dots/shell";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.caelestia-cli.follows = "caelestia-cli";
     };
     caelestia-cli = {
       url = "github:caelestia-dots/cli";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Desktop Stuff
@@ -381,15 +378,6 @@
     firefox-ultima = {
       url = "github:soulhotel/FF-ULTIMA/3.0";
       flake = false;
-    };
-    tinted-theming = {
-      url = "github:tinted-theming/schemes";
-      flake = false;
-    };
-    stylix-wallpaper = {
-      url = "https://nextcloud.racci.dev/s/Hy8qkAWYwqSTjKp/download/17.jpeg";
-      flake = false;
-      type = "file";
     };
   };
 }

@@ -167,53 +167,7 @@
         "type": "github"
       }
     },
-    "caelestia": {
-      "inputs": {
-        "caelestia-cli": "caelestia-cli",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "quickshell": "quickshell"
-      },
-      "locked": {
-        "lastModified": 1754808701,
-        "narHash": "sha256-ZED+pxtqG/zAMdRIzW0dFfG47u0+hEZmI1EzJy2dKBg=",
-        "owner": "caelestia-dots",
-        "repo": "shell",
-        "rev": "5d513eeb252c25b782051acd41e229974ab6e493",
-        "type": "github"
-      },
-      "original": {
-        "owner": "caelestia-dots",
-        "repo": "shell",
-        "type": "github"
-      }
-    },
     "caelestia-cli": {
-      "inputs": {
-        "caelestia-shell": [
-          "caelestia"
-        ],
-        "nixpkgs": [
-          "caelestia",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1754708376,
-        "narHash": "sha256-RtOqlQ8i4EFCtPJYT6hX39EEO7sjGzSbO3tKIto/Yw4=",
-        "owner": "caelestia-dots",
-        "repo": "cli",
-        "rev": "9489f0d4f629bfd8751ff55784a9587d54eb40f1",
-        "type": "github"
-      },
-      "original": {
-        "owner": "caelestia-dots",
-        "repo": "cli",
-        "type": "github"
-      }
-    },
-    "caelestia-cli_2": {
       "inputs": {
         "app2unit": "app2unit",
         "caelestia-shell": "caelestia-shell",
@@ -248,7 +202,7 @@
           "caelestia-cli",
           "nixpkgs"
         ],
-        "quickshell": "quickshell_2"
+        "quickshell": "quickshell"
       },
       "locked": {
         "lastModified": 1752721662,
@@ -256,6 +210,30 @@
         "owner": "caelestia-dots",
         "repo": "shell",
         "rev": "5292a9ab44252c2f993b48b79191f2237e967eb7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "caelestia-dots",
+        "repo": "shell",
+        "type": "github"
+      }
+    },
+    "caelestia-shell_2": {
+      "inputs": {
+        "caelestia-cli": [
+          "caelestia-cli"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "quickshell": "quickshell_2"
+      },
+      "locked": {
+        "lastModified": 1755066326,
+        "narHash": "sha256-oWD4ipCVizfZJkHXC1t/qsgnoWxMuif/Xky+98WB/ao=",
+        "owner": "caelestia-dots",
+        "repo": "shell",
+        "rev": "a10054db213de4738db7112904afeea352fd73c1",
         "type": "github"
       },
       "original": {
@@ -1217,27 +1195,6 @@
     "quickshell": {
       "inputs": {
         "nixpkgs": [
-          "caelestia",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1753595452,
-        "narHash": "sha256-vqkSDvh7hWhPvNjMjEDV4KbSCv2jyl2Arh73ZXe274k=",
-        "ref": "refs/heads/master",
-        "rev": "a5431dd02dc23d9ef1680e67777fed00fe5f7cda",
-        "revCount": 665,
-        "type": "git",
-        "url": "https://git.outfoxxed.me/outfoxxed/quickshell"
-      },
-      "original": {
-        "type": "git",
-        "url": "https://git.outfoxxed.me/outfoxxed/quickshell"
-      }
-    },
-    "quickshell_2": {
-      "inputs": {
-        "nixpkgs": [
           "caelestia-cli",
           "caelestia-shell",
           "nixpkgs"
@@ -1257,13 +1214,34 @@
         "url": "https://git.outfoxxed.me/outfoxxed/quickshell"
       }
     },
+    "quickshell_2": {
+      "inputs": {
+        "nixpkgs": [
+          "caelestia-shell",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1753595452,
+        "narHash": "sha256-vqkSDvh7hWhPvNjMjEDV4KbSCv2jyl2Arh73ZXe274k=",
+        "ref": "refs/heads/master",
+        "rev": "a5431dd02dc23d9ef1680e67777fed00fe5f7cda",
+        "revCount": 665,
+        "type": "git",
+        "url": "https://git.outfoxxed.me/outfoxxed/quickshell"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://git.outfoxxed.me/outfoxxed/quickshell"
+      }
+    },
     "root": {
       "inputs": {
         "angrr": "angrr",
         "bash-env-json": "bash-env-json",
         "bash-env-nushell": "bash-env-nushell",
-        "caelestia": "caelestia",
-        "caelestia-cli": "caelestia-cli_2",
+        "caelestia-cli": "caelestia-cli",
+        "caelestia-shell": "caelestia-shell_2",
         "chaotic-nyx": "chaotic-nyx",
         "crtified-nur": "crtified-nur",
         "devenv": "devenv",
@@ -1297,9 +1275,7 @@
         "nixvirt": "nixvirt",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
-        "stylix-wallpaper": "stylix-wallpaper",
         "systems": "systems_2",
-        "tinted-theming": "tinted-theming",
         "treefmt": "treefmt",
         "vscode-extensions": "vscode-extensions",
         "winapps": "winapps"
@@ -1421,18 +1397,6 @@
         "type": "github"
       }
     },
-    "stylix-wallpaper": {
-      "flake": false,
-      "locked": {
-        "narHash": "sha256-1rlzU5fe9URUM6EuhO007gZ5kmccM7L8q1hAYY3lCY0=",
-        "type": "file",
-        "url": "https://nextcloud.racci.dev/s/Hy8qkAWYwqSTjKp/download/17.jpeg"
-      },
-      "original": {
-        "type": "file",
-        "url": "https://nextcloud.racci.dev/s/Hy8qkAWYwqSTjKp/download/17.jpeg"
-      }
-    },
     "systems": {
       "locked": {
         "lastModified": 1681028828,
@@ -1497,22 +1461,6 @@
       }
     },
     "tinted-schemes": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1750770351,
-        "narHash": "sha256-LI+BnRoFNRa2ffbe3dcuIRYAUcGklBx0+EcFxlHj0SY=",
-        "owner": "tinted-theming",
-        "repo": "schemes",
-        "rev": "5a775c6ffd6e6125947b393872cde95867d85a2a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "tinted-theming",
-        "repo": "schemes",
-        "type": "github"
-      }
-    },
-    "tinted-theming": {
       "flake": false,
       "locked": {
         "lastModified": 1750770351,

@@ -53,7 +53,7 @@ in
           "hyprctl setcursor ${config.stylix.cursor.name} ${toString config.stylix.cursor.size}"
         ];
 
-    xdg.dataFile =
+    xdg.dataFile = lib.mkIf (config.stylix.image != null) (
       let
         magick = lib.getExe' pkgs.imagemagick "magick";
         wallpaperManipulations = pkgs.runCommandNoCC "wallpaperManipulations" { } ''
@@ -70,7 +70,8 @@ in
         "wallpaper.sqre".source = "${wallpaperManipulations}/wallpaper.sqre";
         "wallpaper.blur".source = "${wallpaperManipulations}/wallpaper.blur";
         "wallpaper.quad".source = "${wallpaperManipulations}/wallpaper.quad";
-      };
+      }
+    );
 
     custom.uwsm.sliceAllocation.background = [ "xsettingsd" ];
     systemd.user.services.xsettingsd.Unit.After = [ "graphical-session.target" ];
