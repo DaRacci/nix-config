@@ -15,7 +15,7 @@ jobs:
     outputs:
       matrix: ${{ steps.get-users.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
       - name: Get users from flake
         id: get-users
         run: |
@@ -33,7 +33,7 @@ jobs:
     outputs:
       matrix: ${{ steps.get-hosts.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
       - name: Get hosts from flake
         id: get-hosts
         run: |
@@ -55,7 +55,7 @@ jobs:
       fail-fast: false
     name: Enrich user ${{ matrix.user }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
       - name: Get User Imports
         run: |
           USER_IMPORTS=$(./utils/get-imports.nu "HOME" "${{ matrix.user }}" | jq -c . || echo "[]")
@@ -77,7 +77,7 @@ jobs:
       fail-fast: false
     name: Enrich host ${{ matrix.host }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
       - name: Get Host Imports
         id: get-imports
         run: |
@@ -145,7 +145,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -255,7 +255,7 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - name: Check Nix flake Nixpkgs inputs
         uses: DeterminateSystems/flake-checker-action@main
@@ -275,7 +275,7 @@ jobs:
     name: Build ${{ matrix.host }} on ${{ matrix.system }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - name: Free Disk Space
         if: ${{ matrix.extraSpace && !env.ACT }}
@@ -341,7 +341,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - uses: ./.github/actions/setup-nix
         with:
