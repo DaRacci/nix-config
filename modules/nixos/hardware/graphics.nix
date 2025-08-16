@@ -133,7 +133,7 @@ in
 
       nvidia-container-toolkit.enable = hasNvidia;
       nvidia = mkIf hasNvidia {
-        package = config.boot.kernelPackages.nvidiaPackages.beta;
+        package = config.boot.kernelPackages.nvidiaPackages.latest;
         open = true;
         nvidiaSettings = true;
         nvidiaPersistenced = true;
