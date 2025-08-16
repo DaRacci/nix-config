@@ -49,7 +49,6 @@ in
       expand: false;
       orientation: horizontal;
       background-color: transparent;
-      # background-image: url("~/.local/share/wallpaper.sqre", width);
       children: [ "wallframe" , "inputbar" ];
     }
     wallframe {
@@ -57,7 +56,6 @@ in
       spacing: 0em;
       padding: 0em;
       expand: false;
-      # background-image: url("~/.local/share/wallpaper.quad", width);
     }
 
     // Inputs //
