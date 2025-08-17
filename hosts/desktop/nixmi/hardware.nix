@@ -14,7 +14,7 @@
     cooling.enable = false;
 
     graphics = {
-      reduceMesa = true;
+      reduceMesa = false;
 
       manufacturer = [
         "amd"
