@@ -28,7 +28,6 @@ others.
 
 **Note:** This repository uses `devenv` for devShells and checks. You must provide the `devenv-root` input override for all calls to `nix flake check` and `nix develop`. This is done by adding the following argument to these commands.
 
-
 ```
 --override-input devenv-root "file+file://$PWD/.devenv/root"
 ```
@@ -38,9 +37,13 @@ Without this override, pure flake evaluation will fail with a directory error. F
 ## Coding Style & Naming Conventions
 
 - **Indentation**: 2 spaces for Nix expressions. No tabs allowed.
+
 - **File names**: lowercase, hyphen‑separated (e.g., `my‑service.nix`).
+
 - **Module keys**: follow `services.<name>.<subkey>` pattern.
+
 - **Imports**: prefer relative imports (`./modules/*.nix`).
+
 - **Linting**: run `nix flake check` before each PR; it runs Hydra checks.
 
 - **YAML/JSON/other structured strings**: When you need to generate configuration files or strings in formats like JSON or YAML, prefer defining the data as a Nix attribute set and using a converter such as `builtins.toJSON` (for JSON) to produce the string. This approach is more maintainable and less error-prone than writing raw formatted strings directly in Nix.
