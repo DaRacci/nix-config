@@ -76,7 +76,7 @@ stdenv.mkDerivation rec {
     description = "A device manager for driving and flight simulators, for use with common simulator software titles";
     homepage = "https://github.com/Spacefreak18/monocoque";
     license = lib.licenses.gpl3Only;
-    maintainers = with lib.maintainers; [ ];
+    maintainers = [ ];
     mainProgram = "monocoque";
     platforms = lib.platforms.all;
   };

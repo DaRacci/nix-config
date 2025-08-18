@@ -71,6 +71,9 @@ in
       dependencies = oldAttrs.dependencies ++ [
         final.python3Packages.watchdog
       ];
+      meta = oldAttrs.meta // {
+        mainProgram = "mcpo";
+      };
     });
 
     python3Packages = prev.python3Packages.overrideScope (
@@ -95,6 +98,12 @@ in
         });
       }
     );
+
+    hacompanion = prev.hacompanion.overrideAttrs (oldAttrs: {
+      meta = oldAttrs.meta // {
+        mainProgram = "hacompanion";
+      };
+    });
 
     inherit lib;
   };
