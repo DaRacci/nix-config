@@ -14,7 +14,7 @@
 
   services.kanidm = {
     enableServer = true;
-    package = pkgs.kanidm_1_6;
+    package = pkgs.kanidm_1_7;
     serverSettings =
       let
         certDirectory = config.security.acme.certs."auth.racci.dev".directory;
