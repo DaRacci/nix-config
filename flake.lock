@@ -813,7 +813,7 @@
     "mcpo": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-GI0uE3m92Xj4LsnwkUmF4hSJeRi3OB3zu1oVTCgiRAI=",
+        "narHash": "sha256-4ieP92lZzzocqwp018DaAOF3j+CXQ/vPr+eJWNLy6mg=",
         "type": "file",
         "url": "https://raw.githubusercontent.com/codgician/nixpkgs/refs/heads/mcpo-init/pkgs/development/python-modules/mcpo/default.nix"
       },
