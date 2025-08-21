@@ -52,7 +52,8 @@ jobs:
     strategy:
       matrix:
         include: ${{ fromJson(needs.discover-users.outputs.matrix) }}
-      fail-fast: false
+      # If one fails theres probably a larger issue
+      fail-fast: true
     name: Enrich user ${{ matrix.user }}
     steps:
       - uses: actions/checkout@v4
@@ -74,7 +75,8 @@ jobs:
     strategy:
       matrix:
         host: ${{ fromJson(needs.discover-hosts.outputs.matrix) }}
-      fail-fast: false
+      # If one fails theres probably a larger issue
+      fail-fast: true
     name: Enrich host ${{ matrix.host }}
     steps:
       - uses: actions/checkout@v4
