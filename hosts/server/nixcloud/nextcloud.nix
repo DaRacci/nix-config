@@ -19,14 +19,6 @@ in
     };
 
     groups.nextcloud.gid = 997;
-
-    users.protonmail-bridge = {
-      home = "/var/lib/protonmail-bridge";
-      group = "protonmail-bridge";
-      createHome = true;
-      uid = 385;
-    };
-    groups.protonmail-bridge.members = [ "protonmail-bridge" ];
   };
 
   sops.secrets = {
@@ -207,26 +199,9 @@ in
       port = 9200;
       plugins = [ pkgs.elasticsearchPlugins.ingest-attachment ];
     };
-
-    passSecretService.enable = true;
   };
 
   virtualisation.docker.enable = true;
-
-  systemd.services = {
-    protonmail-bridge = {
-      after = lib.mkForce [ "network.target" ];
-      wantedBy = lib.mkForce [ "default.target" ];
-      script = "${pkgs.protonmail-bridge}/bin/protonmail-bridge --no-window --noninteractive --log-level info";
-      path = [ pkgs.pass ];
-
-      serviceConfig = {
-        Restart = "always";
-        RestartSec = "5";
-        User = config.users.users.protonmail-bridge.name;
-      };
-    };
-  };
 
   networking = {
     firewall = {
