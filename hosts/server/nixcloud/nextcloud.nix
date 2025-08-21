@@ -34,9 +34,12 @@ in
     };
 
     proxy.virtualHosts = {
-      "nc".extraConfig = ''
-        reverse_proxy http://localhost:80
-      '';
+      nc = {
+        public = true;
+        extraConfig = ''
+          reverse_proxy http://localhost:80
+        '';
+      };
     };
   };
 

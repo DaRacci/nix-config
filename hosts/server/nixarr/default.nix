@@ -244,12 +244,18 @@
   services.flaresolverr.enable = true;
 
   server.proxy.virtualHosts = {
-    jellyfin.extraConfig = ''
-      reverse_proxy localhost:8096
-    '';
-    jellyseerr.extraConfig = ''
-      reverse_proxy localhost:${toString config.nixarr.jellyseerr.port}
-    '';
+    jellyfin = {
+      public = true;
+      extraConfig = ''
+        reverse_proxy localhost:8096
+      '';
+    };
+    jellyseerr = {
+      public = true;
+      extraConfig = ''
+        reverse_proxy localhost:${toString config.nixarr.jellyseerr.port}
+      '';
+    };
     transmission.extraConfig = ''
       reverse_proxy localhost:${toString config.nixarr.transmission.uiPort}
     '';

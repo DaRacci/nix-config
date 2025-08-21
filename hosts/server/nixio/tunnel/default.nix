@@ -25,9 +25,6 @@
       "8d42e9b2-3814-45ea-bbb5-9056c8f017e2" = {
         credentialsFile = config.sops.secrets.CF_CREDS.path;
         default = "http_status:404";
-        ingress = {
-          "test.racci.dev" = "https://nc.racci.dev";
-        };
       };
     };
   };

@@ -40,14 +40,23 @@ _:
   services.caddy = {
     enable = true;
     package = pkgs.caddy.withPlugins {
-      plugins = [ "github.com/mholt/caddy-l4@v0.0.0-20250530154005-4d3c80e89c5f" ];
-      hash = "sha256-NLFl+ix36z6X1Anr1F6rdMPwSEysSVl84Ad71zprsbU=";
+      plugins = [
+        "github.com/mholt/caddy-l4@v0.0.0-20250530154005-4d3c80e89c5f"
+        "github.com/WeidiDeng/caddy-cloudflare-ip@v0.0.0-20231130002422-f53b62aa13cb"
+      ];
+      hash = "sha256-Ege47fq2366FGkGxLcnpfePZdtnfv/dQGRBx3YY34Ow=";
     };
     email = "admin@racci.dev";
 
     # Certs are handled by acme
     globalConfig = ''
       auto_https "disable_certs"
+
+      servers {
+        trusted_proxies cloudflare
+        trusted_proxies static private_ranges 110.174.120.26
+        client_ip_headers X-Forwarded-For Cf-Connecting-Ip
+      }
     '';
 
     logFormat = ''
@@ -55,6 +64,12 @@ _:
     '';
 
     extraConfig = ''
+      # Automatic Import for all Virtual Hosts
+      (default) { }
+
+      # Automatic Import for all Virtual Hosts with `server.proxy.virtualHosts.<name>.public = true`
+      (public) { }
+
       (cors) {
         @cors_preflight{args[0]} method OPTIONS
         @cors{args[0]} header Origin {args[0]}
