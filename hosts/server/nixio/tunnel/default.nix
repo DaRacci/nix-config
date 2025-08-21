@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   ...
 }:
 {
@@ -32,11 +31,4 @@
       };
     };
   };
-
-  # TODO - Remove once https://github.com/NixOS/nixpkgs/pull/403277 is merged
-  systemd.services.cloudflared-tunnel-8d42e9b2-3814-45ea-bbb5-9056c8f017e2.serviceConfig.LoadCredential =
-    lib.mkForce [
-      "credentials.json:${config.sops.secrets.CF_CREDS.path}"
-      "cert.pem:${config.sops.secrets.CF_CERT.path}"
-    ];
 }
