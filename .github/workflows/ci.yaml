@@ -59,7 +59,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get User Imports
         run: |
-          USER_IMPORTS=$(./utils/get-imports.nu "HOME" "${{ matrix.user }}" | jq -c . || echo "[]")
+          USER_IMPORTS=$(./utils/get-imports.nu "HOME" "${{ matrix.user }}" | jq -c .)
           echo "$USER_IMPORTS" > imports.json
       - name: Upload Imports Artifact
         uses: actions/upload-artifact@v4
@@ -83,7 +83,7 @@ jobs:
       - name: Get Host Imports
         id: get-imports
         run: |
-          HOST_IMPORTS=$(./utils/get-imports.nu "OS" "${{ matrix.host }}" | jq -c . || echo "[]")
+          HOST_IMPORTS=$(./utils/get-imports.nu "OS" "${{ matrix.host }}" | jq -c .)
           {
             echo 'host-imports<<EOF'
             echo "$HOST_IMPORTS"
