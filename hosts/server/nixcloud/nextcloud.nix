@@ -106,10 +106,19 @@ in
         maintenance_window_start = 15; # 2 AM Sydney time
         log_type = "file";
 
-        mail_from_address = "no-reply";
         mail_domain = "racci.dev";
-        mail_smtpmode = "sendmail";
-        mail_sendmailmode = "pipe";
+        mail_from_address = "no-reply";
+        mail_smtpmode = "smtp";
+        mail_smtphost = "mail.protonmail.ch";
+        mail_smtpport = 25;
+
+        mail_smtpstreamoptions = {
+          ssl = {
+            allow_self_signed = true;
+            verify_peer = false;
+            verify_peer_name = false;
+          };
+        };
 
         preview_imaginary_url = "http://127.0.0.1:${toString imaginary.port}";
         enabledPreviewProviders = [
