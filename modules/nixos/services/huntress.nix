@@ -35,7 +35,7 @@ in
     };
   };
 
-  config = lib.mkIf (cfg.enable) {
+  config = lib.mkIf cfg.enable {
     systemd.services = {
       huntress-agent = {
         description = "Protects your computer by detecting the malicious footholds used by hackers.";
