@@ -15,6 +15,7 @@
 
   # Misc
   orca-slicer-zink = pkgs.callPackage ./orca-slicer-zink { };
+  huntress = pkgs.callPackage ./huntress { };
 
   # Home Assistant Python Packages
   terminal-manager = pkgs.python3Packages.callPackage ./python/terminal-manager.nix { };
