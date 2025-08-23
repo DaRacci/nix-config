@@ -81,8 +81,8 @@
           ];
 
           fallback_dns = [
-            "tls://doh.mullvad.net"
-            "tls://dns.google"
+            #   "tls://doh.mullvad.net"
+            #   "tls://dns.google"
           ];
 
           trusted_proxies = [
