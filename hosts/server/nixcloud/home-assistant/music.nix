@@ -7,7 +7,6 @@ _: {
     music-assistant = {
       enable = true;
       providers = [
-        "airplay"
         "chromecast"
         "hass"
         "hass_players"
