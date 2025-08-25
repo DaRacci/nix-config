@@ -40,9 +40,6 @@ _: {
       "wyoming"
       "mcp"
       "mcp_server"
-
-      # Misc
-      "music_assistant"
     ];
   };
 }

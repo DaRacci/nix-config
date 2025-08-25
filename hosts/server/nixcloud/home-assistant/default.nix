@@ -8,6 +8,7 @@
     ./connections.nix
     ./connectivity.nix
     ./dashboard.nix
+    ./music.nix
     ./postgresql.nix
     ./proxy.nix
     # ./weather.nix
