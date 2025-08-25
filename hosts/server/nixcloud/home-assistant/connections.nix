@@ -12,6 +12,7 @@ _: {
       "unifi"
 
       # Devices
+      "alexa_devices"
       "androidtv"
       "androidtv_remote"
       "apple_tv"
@@ -31,6 +32,7 @@ _: {
       "radarr"
       "sonarr"
       "jellyfin"
+      "transmission"
 
       # Assistant
       "ollama"
@@ -38,6 +40,9 @@ _: {
       "wyoming"
       "mcp"
       "mcp_server"
+
+      # Misc
+      "music_assistant"
     ];
   };
 }
