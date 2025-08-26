@@ -310,9 +310,16 @@
       inputs = {
         nixpkgs.follows = "nixpkgs";
         home-manager.follows = "home-manager";
+        jovian.follows = "jovian";
       };
     };
-    jovian.follows = "chaotic-nyx/jovian";
+    jovian = {
+      url = "github:Jovian-Experiments/Jovian-NixOS";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        nix-github-actions.follows = "";
+      };
+    };
     nixarr = {
       url = "github:rasmus-kirk/nixarr";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -374,7 +381,7 @@
 
     # Resources
     firefox-ultima = {
-      url = "github:soulhotel/FF-ULTIMA/3.0";
+      url = "github:soulhotel/FF-ULTIMA";
       flake = false;
     };
   };

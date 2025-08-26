@@ -222,7 +222,9 @@
         "home-manager": [
           "home-manager"
         ],
-        "jovian": "jovian",
+        "jovian": [
+          "jovian"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -390,16 +392,15 @@
     "firefox-ultima": {
       "flake": false,
       "locked": {
-        "lastModified": 1750847705,
-        "narHash": "sha256-vm9Ci/j24ryWyDVr2tgbeUhnUx6XZx/EiME9cDRyNjY=",
+        "lastModified": 1756070090,
+        "narHash": "sha256-7OZoaMLzMBzRXmI0IkuCcMP68YN25j5ymnCXhBVh7vQ=",
         "owner": "soulhotel",
         "repo": "FF-ULTIMA",
-        "rev": "07c68fb34717781805add81d0cef83f8ccb30dea",
+        "rev": "9576adf790eabfc659eaae4705be343bd7b44ca0",
         "type": "github"
       },
       "original": {
         "owner": "soulhotel",
-        "ref": "3.0",
         "repo": "FF-ULTIMA",
         "type": "github"
       }
@@ -674,18 +675,17 @@
     },
     "jovian": {
       "inputs": {
-        "nix-github-actions": "nix-github-actions",
+        "nix-github-actions": [],
         "nixpkgs": [
-          "chaotic-nyx",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1755931229,
-        "narHash": "sha256-j8ghatY34DbEnHe42r8VtAe05WyMUK+d66uGKsfLbbk=",
+        "lastModified": 1756201372,
+        "narHash": "sha256-bK5j5cwJgO5AZXlDl5AgISzpOv9YV1Fcv2nDr9RW/5o=",
         "owner": "Jovian-Experiments",
         "repo": "Jovian-NixOS",
-        "rev": "bcad5af8eb475df936f6cf2d04b076dc6784af95",
+        "rev": "9f6745bd704ab7f2617d41c2b02f4fd5f9ed0e89",
         "type": "github"
       },
       "original": {
@@ -877,29 +877,6 @@
       "original": {
         "owner": "numtide",
         "repo": "nix-filter",
-        "type": "github"
-      }
-    },
-    "nix-github-actions": {
-      "inputs": {
-        "nixpkgs": [
-          "chaotic-nyx",
-          "jovian",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1729697500,
-        "narHash": "sha256-VFTWrbzDlZyFHHb1AlKRiD/qqCJIripXKiCSFS8fAOY=",
-        "owner": "zhaofengli",
-        "repo": "nix-github-actions",
-        "rev": "e418aeb728b6aa5ca8c5c71974e7159c2df1d8cf",
-        "type": "github"
-      },
-      "original": {
-        "owner": "zhaofengli",
-        "ref": "matrix-name",
-        "repo": "nix-github-actions",
         "type": "github"
       }
     },
@@ -1179,10 +1156,7 @@
         "git-hooks": "git-hooks_2",
         "home-manager": "home-manager",
         "impermanence": "impermanence",
-        "jovian": [
-          "chaotic-nyx",
-          "jovian"
-        ],
+        "jovian": "jovian",
         "lanzaboote": "lanzaboote",
         "lix": "lix",
         "lix-module": "lix-module",

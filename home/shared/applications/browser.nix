@@ -413,7 +413,7 @@ in
                 "ultima.tabs.vertical.hide.in.screenedge" = false;
 
                 "ultima.navbar.hidebuttons" = false;
-                "ultima.urlbar.hidebuttons" = true;
+                "ultima.urlbar.hide.buttons" = true;
                 "ultima.urlbar.centered" = true;
                 "ultima.theme.extensions" = true;
                 "ultima.theme.menubar" = true;
