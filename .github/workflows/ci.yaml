@@ -340,6 +340,9 @@ jobs:
             system: x86_64-linux
           - command: flake check --no-pure-eval --allow-import-from-derivation
             system: x86_64-linux
+          - command: develop --no-pure-eval --command true
+            system: x86_64-linux
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
