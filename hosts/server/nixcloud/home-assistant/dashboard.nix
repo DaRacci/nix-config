@@ -48,6 +48,37 @@
         }
       ];
 
+      sensor = [
+        {
+          platform = "template";
+          sensors = {
+            lights_on_count = {
+              unique_id = "lightsoncount";
+              friendly_name = "Lights on count";
+              value_template = ''
+                {% set lights_on = states.light
+                  | selectattr("state", "eq", "on")
+                  | list
+                  | count %}
+                {{ lights_on }}
+              '';
+            };
+            window_open_count = {
+              unique_id = "windowopencount";
+              friendly_name = "Window open count";
+              value_template = ''
+                {% set windows_on = states.binary_sensor
+                  | selectattr("attributes.device_class", "eq", "window")
+                  | selectattr("state", "eq", "on")
+                  | list
+                  | count %}
+                {{ windows_on }}
+              '';
+            };
+          };
+        }
+      ];
+
       lovelace = {
         mode = "yaml";
         resources = [
