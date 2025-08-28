@@ -141,11 +141,11 @@
           };
 
         perSystem =
-          { pkgs, ... }:
+          { pkgs, system, ... }:
           {
-            _module.args.pkgs = mkPkgs { };
+            _module.args.pkgs = mkPkgs { inherit system; };
 
-            packages = import ./pkgs { inherit inputs pkgs; };
+            packages = import ./pkgs { inherit inputs pkgs lib; };
           };
       };
 

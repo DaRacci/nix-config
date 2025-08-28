@@ -38,7 +38,7 @@ in
     final: prev:
     prev.lib.foldl' prev.lib.recursiveUpdate { } [
       (import ../pkgs {
-        inherit inputs;
+        inherit inputs lib;
         pkgs = final;
       })
     ];
