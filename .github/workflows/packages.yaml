@@ -20,16 +20,29 @@ jobs:
       - name: Get packages from flake
         id: get-packages
         run: |
-          PACKAGES_WITH_ARCH=$(nix flake show --no-pure-eval --json | jq '
-            .packages | {
-              package: [ to_entries[].value | keys[] | select(startswith("devenv-") | not) ] | unique,
-              arch: [ keys[] ]
-            }
-          ')
-          echo "All architectures with packages: $PACKAGES_WITH_ARCH"
+          FLAKE_JSON=$(nix flake show --no-pure-eval --json)
+          ARCHS=$(echo "$FLAKE_JSON" | jq -r '.packages | keys[]')
+          INCLUDE_JSON='[]'
+          for ARCH in $ARCHS; do
+            PKGS=$(echo "$FLAKE_JSON" | jq -r --arg arch "$ARCH" '.packages[$arch] | keys[] | select(startswith("devenv-") | not)')
+            for PKG in $PKGS; do
+              BROKEN=$(nix eval --json --system "$ARCH" ".#${PKG}.meta.broken" 2>/dev/null)
+              if [ "$BROKEN" != "true" ]; then
+                INCLUDE_JSON=$(echo "$INCLUDE_JSON" | jq --arg pkg "$PKG" --arg arch "$ARCH" '. + [{package:$pkg, arch:$arch}]')
+              else
+                echo "Skipping broken package $PKG on $ARCH"
+              fi
+            done
+          done
+          if [ "$(echo "$INCLUDE_JSON" | jq 'length')" -eq 0 ]; then
+            MATRIX_JSON='[]'
+          else
+            MATRIX_JSON=$(jq -n --argjson include "$INCLUDE_JSON" '{include:$include}')
+          fi
+          echo "Calculated matrix: $MATRIX_JSON"
           {
             echo 'matrix<<EOF'
-            echo "$PACKAGES_WITH_ARCH"
+            echo "$MATRIX_JSON"
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
