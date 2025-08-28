@@ -17,4 +17,15 @@ _: {
       ];
     };
   };
+
+  server.proxy.virtualHosts.music = {
+    ports = [
+      8095 # UI
+      8097 # Seems to be used for auth callbacks.
+      8098 # Stream Server
+    ];
+    extraConfig = ''
+      reverse_proxy http://localhost:8095
+    '';
+  };
 }
