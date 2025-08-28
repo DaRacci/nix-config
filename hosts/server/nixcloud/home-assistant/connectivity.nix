@@ -105,7 +105,6 @@ in
       enable = true;
       package = pkgs.zigbee2mqtt_2;
       settings = {
-        homeassistant = true;
         mqtt = {
           server = "mqtt://localhost:1883";
           user = "zigbee2mqtt";
