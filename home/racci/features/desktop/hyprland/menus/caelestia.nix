@@ -111,6 +111,10 @@ in
               enabled = true;
             }
             {
+              id = "idleInhibitor";
+              enabled = true;
+            }
+            {
               id = "power";
               enabled = true;
             }
@@ -140,7 +144,7 @@ in
 
         border = {
           rounding = 25;
-          thickness = 5;
+          thickness = 8;
         };
 
         dashboard = {
