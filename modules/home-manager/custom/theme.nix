@@ -12,35 +12,11 @@ in
 {
   options.custom.theme = {
     enable = mkEnableOption "Theming" // {
-      default =
-        osConfig != null && hasAttr "stylix" osConfig && osConfig.stylix.enable && hasAttr "stylix" config;
+      default = osConfig != null && hasAttr "stylix" osConfig && osConfig.stylix.enable;
     };
   };
 
-  config = mkIf cfg.enable rec {
-    gtk = {
-      iconTheme = {
-        name = "Adwaita";
-        package = pkgs.adwaita-icon-theme;
-      };
-    };
-
-    services.xsettingsd = {
-      enable = true;
-      settings = {
-        "Net/IconThemeName" = "${gtk.iconTheme.name}";
-      };
-    };
-
-    fonts.fontconfig = {
-      defaultFonts = {
-        sansSerif = [ config.stylix.fonts.sansSerif.name ];
-        serif = [ config.stylix.fonts.serif.name ];
-        monospace = [ config.stylix.fonts.monospace.name ];
-        emoji = [ config.stylix.fonts.emoji.name ];
-      };
-    };
-
+  config = mkIf cfg.enable {
     wayland.windowManager.hyprland.settings.exec-once =
       mkIf config.wayland.windowManager.hyprland.enable
         [
@@ -66,8 +42,5 @@ in
         "wallpaper.quad".source = "${wallpaperManipulations}/wallpaper.quad";
       }
     );
-
-    custom.uwsm.sliceAllocation.background = [ "xsettingsd" ];
-    systemd.user.services.xsettingsd.Unit.After = [ "graphical-session.target" ];
   };
 }
