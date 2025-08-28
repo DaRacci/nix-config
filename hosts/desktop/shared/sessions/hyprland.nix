@@ -5,6 +5,10 @@
   ...
 }:
 {
+  imports = [
+    ./default.nix
+  ];
+
   programs = {
     uwsm.enable = true;
     hyprland = {

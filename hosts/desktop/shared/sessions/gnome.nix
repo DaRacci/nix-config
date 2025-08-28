@@ -1,5 +1,9 @@
 { pkgs, lib, ... }:
 {
+  imports = [
+    ./default.nix
+  ];
+
   programs.xwayland.enable = true;
 
   xdg.portal = {
