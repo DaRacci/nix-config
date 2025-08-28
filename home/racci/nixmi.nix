@@ -22,6 +22,7 @@
       scale = 1
       vrr = true
 
+      bitdepth = 10
       supports_wide_color = true
       supports_hdr = true
       sdr_min_luminance = 0.005
