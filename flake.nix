@@ -145,7 +145,7 @@
           {
             _module.args.pkgs = mkPkgs { inherit system; };
 
-            packages = import ./pkgs { inherit inputs pkgs lib; };
+            packages = import ./pkgs { inherit inputs pkgs; };
           };
       };
 
