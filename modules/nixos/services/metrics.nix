@@ -256,7 +256,7 @@ in
             {
               Type = "simple";
               DynamicUser = true;
-              ExecStart = "${lib.getExe pkgs.hacompanion} -config ${hacompanionToml}";
+              ExecStart = "${lib.getExe pkgs.hacompanion} -quiet -config ${hacompanionToml}";
               Restart = "on-failure";
               EnvironmentFile = config.sops.secrets.HACOMPANION_ENV.path;
               StateDirectory = "hacompanion";
