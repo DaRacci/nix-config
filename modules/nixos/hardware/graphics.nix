@@ -150,6 +150,7 @@ in
       ]
       ++ optionals hasAmd [
         "amdgpu.dcdebugmask=0x400" # Fix stuttering under wayland on Kernel 6.11+
+        "amdgpu.dc=1" # Use modern DC Engine
       ];
 
     # https://wiki.nixos.org/wiki/AMD_GPU#HIP
