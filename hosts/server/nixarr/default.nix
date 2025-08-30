@@ -7,6 +7,8 @@
 {
   imports = [ inputs.nixarr.nixosModules.default ];
 
+  users.users.jellyfin.extraGroups = [ "video" ];
+
   sops.secrets.wireguard = {
     format = "binary";
     sopsFile = ./wg.conf;
@@ -17,6 +19,10 @@
     "100.100.0.0/16"
     "127.0.0.1"
   ];
+
+  hardware.graphics = {
+    enable = true;
+  };
 
   nixarr = {
     enable = true;
