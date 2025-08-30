@@ -6,6 +6,7 @@ _: {
       "met"
       "sun"
       "caldav"
+      "speedtestdotnet"
 
       # Network Stuff
       "adguard"
