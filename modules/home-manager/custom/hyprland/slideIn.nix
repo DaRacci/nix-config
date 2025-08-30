@@ -27,6 +27,9 @@ let
     uwsm
     ;
 
+  windowToEdgeDistance = 5 + 2 + 8; # gap + border + padding
+  barWidth = 56;
+
   commonOptions = {
     bind = mkOption {
       type = str;
@@ -45,15 +48,17 @@ let
       default = { };
       description = "Additional window rules for the slide-in popup.";
     };
-    side = mkOption {
+    position = mkOption {
       type = enum [
         "left"
         "right"
         "top"
         "bottom"
+        "edge"
+        "side"
       ];
       default = "top";
-      description = "Direction from which the popup slides in. Can be 'left', 'right', 'top', or 'bottom'.";
+      description = "Direction from which the popup slides in. Can be 'left', 'right', 'top', 'bottom', or 'edge' and 'side' (which will determine based on cursor position).";
     };
   };
 
@@ -61,11 +66,11 @@ let
     float = mkDefault true;
     size = {
       width = mkDefault "20%";
-      height = mkDefault "97%";
+      height = mkDefault "98%";
     };
     move = {
       x = mkDefault "80%";
-      y = mkDefault "3%";
+      y = mkDefault "${toString windowToEdgeDistance}";
     };
     animation = [
       "global, 1, 8, fluentDecel, slide ${direction}"
@@ -77,16 +82,86 @@ let
     size = mkDefault "33%";
     move = {
       x = mkDefault "33%";
-      y = mkDefault "67";
+      y = mkDefault "${toString windowToEdgeDistance}";
     };
     animation = [
       "global, 1, 8, fluentDecel, slide ${direction}"
     ];
   };
 
+  isEdgePosition = position: position == "edge" || position == "bottom" || position == "top";
+
   uwsmApp = getExe' uwsm "uwsm-app";
   hdropExe = getExe hdrop;
-  mkExec = exec: class: "${uwsmApp} -s b -- ${hdropExe} --background --class ${class} ${exec}";
+
+  invokeScript = lib.getExe (
+    pkgs.writeShellApplication {
+      name = "invoke-hdrop";
+      runtimeInputs = with pkgs; [
+        jq
+        uwsm
+        hdrop
+      ];
+      text = ''
+        if [ "$#" -ne 5 ]; then
+          echo "Usage: $0 <class> <exec> <position> <width> <height>"
+          exit 1
+        fi
+        class="$1"
+        exec="$2"
+        position="$3"
+        width="$4"
+        height="$5"
+        gap=${toString windowToEdgeDistance}
+
+        if [[ "$width" == *% ]]; then
+          width=''${width//%/}
+        fi
+        if [[ "$height" == *% ]]; then
+          height=''${height//%/}
+        fi
+
+        curInfo=$(hyprctl cursorpos -j)
+        monInfo=$(hyprctl monitors -j)
+        activeName=$(hyprctl activeworkspace -j | jq -r .monitor)
+        activeMon=$(echo "$monInfo" | jq --arg m "$activeName" '.[] | select(.name == $m)')
+
+        # Determine left or right if a side popin
+        if [ "$position" = "side" ]; then
+          cursorX=$(echo "$curInfo" | jq '.x')
+          monX=$(echo "$activeMon" | jq '.x')
+          relX=$(( cursorX - monX ))
+          monWidth=$(echo "$activeMon" | jq '.width')
+          if [ "$relX" -le $(( monWidth / 2 )) ]; then
+            position="left"
+            gap=$(( gap + ${toString barWidth} ))
+          else
+            position="right"
+          fi
+        fi
+
+        # If position is edge, determine top or bottom
+        if [ "$position" = "edge" ]; then
+          cursorY=$(echo "$curInfo" | jq '.y')
+          monY=$(echo "$activeMon" | jq '.y')
+          monHeight=$(echo "$activeMon" | jq '.height')
+          relY=$(( cursorY - monY ))
+          if [ "$relY" -le $(( monHeight / 2 )) ]; then
+            position="top"
+            gap=$(( gap + ${toString barWidth} ))
+          else
+            position="bottom"
+          fi
+        fi
+
+        ${uwsmApp} -s b -- ${hdropExe} -f -g "$gap" -h "$height" -w "$width" -p "$position" --class "$class" "$exec"
+
+
+      '';
+    }
+  );
+
+  mkExec = app: "${uwsmApp} -s b -- ${hdropExe} --background --class ${app.class} ${app.exec}";
 
   cfg = config.wayland.windowManager.hyprland.custom-settings.slideIn;
 in
@@ -101,7 +176,7 @@ in
 
   config = mkIf (cfg != [ ]) {
     wayland.windowManager.hyprland = {
-      settings.exec-once = map (item: mkExec item.exec item.class) cfg;
+      settings.exec-once = map (app: mkExec app) cfg;
 
       custom-settings = {
         bind =
@@ -110,25 +185,32 @@ in
             item:
             nameValuePair item.bind [
               "exec"
-              (mkExec item.exec item.class)
+              (builtins.concatStringsSep " " [
+                invokeScript
+                item.class
+                item.exec
+                item.position
+                (
+                  if (lib.hasAttrByPath [ "size" "width" ] item.rule) && item.rule.size.width != null then
+                    item.rule.size.width
+                  else if (isEdgePosition item.position) then
+                    "33%"
+                  else
+                    "20%"
+                )
+                (
+                  if (lib.hasAttrByPath [ "size" "height" ] item.rule) && item.rule.size.height != null then
+                    item.rule.size.height
+                  else if (isEdgePosition item.position) then
+                    "33%"
+                  else
+                    "98%"
+                )
+              ])
             ]
           )
           |> lib.listToAttrs;
-        windowrule =
-          cfg
-          |> map (item: {
-            matcher.class = "^${item.class}$";
-            rule = mkMerge [
-              ((if item.side == "left" || item.side == "right" then slideInRule else dropDownRule) item.side)
-              item.rule
-            ];
-          });
       };
     };
   };
-
-  # config = mkIf (false) (
-  # mkMerge (mkAll config.wayland.windowManager.hyprland.custom-settings.slideIns slideInRule)
-  # ++ (mkAll config.wayland.windowManager.hyprland.custom-settings.dropDowns dropDownRule)
-  # );
 }

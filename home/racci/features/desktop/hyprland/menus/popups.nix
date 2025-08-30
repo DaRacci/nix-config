@@ -12,35 +12,35 @@ in
       bind = "SUPER+b";
       exec = getExe pkgs.bitwarden;
       class = "Bitwarden";
-      side = "top";
+      position = "edge";
     }
     {
       bind = "SUPER+c";
       exec = getExe pkgs.gnome-calculator;
       class = "org.gnome.Calculator";
-      side = "top";
+      position = "edge";
       rule = {
         size = {
           width = "19%";
           height = "33%";
         };
-        move.x = "40%";
+        # move.x = "40%";
       };
     }
     {
       bind = "SUPER+d";
       class = "me.iepure.devtoolbox";
       exec = getExe pkgs.devtoolbox;
-      side = "top";
+      side = "edge";
     }
     {
       bind = "SUPER+e";
       exec = getExe pkgs.nautilus;
       class = "org.gnome.Nautilus";
-      side = "right";
+      position = "side";
       rule = {
-        size.width = "19%";
-        move.x = "81%";
+        size.width = "18%";
+        # move.x = "81%";
       };
     }
   ];
