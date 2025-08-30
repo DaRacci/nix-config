@@ -84,8 +84,8 @@ merge
         "github"."copilot" = vscode-utils.extensionFromVscodeMarketplace {
           name = "copilot";
           publisher = "github";
-          version = "1.361.0";
-          sha256 = "0x8wnis6pvmbywvwzzif5qpv2d719ac7pxw70cqykin6xsnwp8v4";
+          version = "1.364.0";
+          sha256 = "07r1ssk3cslvdss9zpadq9vpqwwimwvx1bb6pq44wxdg38ddnw76";
 
         };
         "github"."copilot-chat" = vscode-utils.extensionFromVscodeMarketplace {
@@ -303,8 +303,8 @@ merge
           "hashicorp"."terraform" = vscode-utils.extensionFromVscodeMarketplace {
             name = "terraform";
             publisher = "hashicorp";
-            version = "2.34.5";
-            sha256 = "0q7574ckcay0di0h65m5hxmc0z5jiyv771gzpa06z0v54simzrrw";
+            version = "2.35.0";
+            sha256 = "0v754bwwx0j37nj904aa3jc1c7ivbp68h149n0qw4i3s8klk0ckx";
             arch = "linux-x64";
 
           };
@@ -361,8 +361,8 @@ merge
         "hashicorp"."terraform" = vscode-utils.extensionFromVscodeMarketplace {
           name = "terraform";
           publisher = "hashicorp";
-          version = "2.34.5";
-          sha256 = "0f409l9syxfc3qmyib5015fr3gggvr0krgldiib35k62r4g0f41q";
+          version = "2.35.0";
+          sha256 = "1g965h7ha15favwvzs05yc5d0094kcrg0iyddnzdysbl0zyp82iq";
           arch = "linux-arm64";
 
         };
@@ -411,8 +411,8 @@ merge
       "hashicorp"."terraform" = vscode-utils.extensionFromVscodeMarketplace {
         name = "terraform";
         publisher = "hashicorp";
-        version = "2.34.5";
-        sha256 = "0x9s0xanlzci0755n3izbzw0da3alb8l138pn4hf7hv130xsqqqw";
+        version = "2.35.0";
+        sha256 = "0hggqpsixmy4llldildnwlskx3ypy5f0pw9mh69nw3m2rfvkgciq";
         arch = "darwin-x64";
 
       };
@@ -469,8 +469,8 @@ merge
     "hashicorp"."terraform" = vscode-utils.extensionFromVscodeMarketplace {
       name = "terraform";
       publisher = "hashicorp";
-      version = "2.34.5";
-      sha256 = "1wf968f5q984r0m7frimabaaahmv8c781dsrddylpgi33mw0p5dp";
+      version = "2.35.0";
+      sha256 = "0knnz2ym1l8x5qhdiajqlx2i0mmflpzs148p5bx84f3xgiv95kxj";
       arch = "darwin-arm64";
 
     };

@@ -3,9 +3,6 @@ creation_rules:
     key_groups:
       - age:
           - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
-          - age1rm3j9r0fulw4c2l9cfa9tvrznzw2aehgy2xc700lxrxqq00efghsy9wgv7
-          - age1hxxjcpvm9cz88xu6d5jv82uavhqg3jjk4e770a0pc2gzak5gs4zsp4798j
-          - age10f7nnwsce2zj8905m7xelejm37uckp6tn7jk0eteghprjg2uducsgs9yss
           - age1vn626zvqf9hhnwur37fzww0xqts5jp45uuhetk2caggx75wp4umshj235u
           - age1zeu2cj6mt0nllar0myzhlsgwp0xk2px83vskplu0s2ul87g9634svuhjpw
           - age1azcacxqvwankaf5ma98jk7swwpn6uxmwvdz0azq5fnulrlwk747sr9x2z9
@@ -18,24 +15,6 @@ creation_rules:
     key_groups:
       - age:
           - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
-  - path_regex: hosts/desktop/nixe/secrets.yaml$
-    key_groups:
-      - age:
-          - age1rm3j9r0fulw4c2l9cfa9tvrznzw2aehgy2xc700lxrxqq00efghsy9wgv7
-          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
-          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
-  - path_regex: hosts/laptop/surnix/secrets.yaml$
-    key_groups:
-      - age:
-          - age1hxxjcpvm9cz88xu6d5jv82uavhqg3jjk4e770a0pc2gzak5gs4zsp4798j
-          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
-          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
-  - path_regex: hosts/desktop/winix/secrets.yaml$
-    key_groups:
-      - age:
-          - age10f7nnwsce2zj8905m7xelejm37uckp6tn7jk0eteghprjg2uducsgs9yss
-          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
-          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
   - path_regex: hosts/server/nixarr/
     key_groups:
       - age:

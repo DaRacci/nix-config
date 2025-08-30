@@ -1,7 +1,6 @@
 {
   inputs,
   pkgs,
-  lib,
 }:
 {
   # VR Stuff
@@ -22,14 +21,14 @@
   terminal-manager = pkgs.python3Packages.callPackage ./python/terminal-manager.nix { };
   ssh-terminal-manager = pkgs.python3Packages.callPackage ./python/ssh-terminal-manager.nix { };
   pyuptimekuma = pkgs.python3Packages.callPackage ./python/pyuptimekuma.nix { };
+  pyarlo = pkgs.python3Packages.callPackage ./python/pyarlo.nix { };
 
   # Helper Stuff
   new-host = pkgs.callPackage ./helpers/new-host.nix { };
   list-ephemeral = pkgs.callPackage ./list-ephemeral { };
-}
-// (lib.optionalAttrs (inputs.erosanix.lib ? pkgs.system) {
+
   # Wine Apps
   take-control-viewer = pkgs.callPackage ./take-control-viewer {
-    inherit (inputs.erosanix.lib.${pkgs.system}) mkWindowsAppNoCC;
+    inherit (inputs.erosanix.lib.x86_64-linux) mkWindowsAppNoCC;
   };
-})
+}

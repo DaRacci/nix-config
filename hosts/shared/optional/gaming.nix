@@ -57,18 +57,6 @@
       openFirewall = true;
       autoStart = true;
       defaultRuntime = true;
-      extraPackages = with pkgs; [
-        monado-vulkan-layers
-        stardust-xr-server
-        stardust-xr-flatland
-        stardust-xr-gravity
-        stardust-xr-magnetar
-        stardust-xr-phobetor
-        stardust-xr-protostar
-        stardust-xr-atmosphere
-        stardust-xr-sphereland
-        wlx-overlay-s
-      ];
       monadoEnvironment = {
 
       };

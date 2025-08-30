@@ -10,11 +10,24 @@
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
 
     "${self}/modules/nixos/server"
-    ./metrics.nix
   ];
 
   services = {
     getty.autologinUser = "root";
+
+    metrics = {
+      enable = true;
+      upgradeStatus.enable = true;
+      hacompanion = {
+        enable = true;
+        sensor = {
+          cpu_usage.enable = true;
+          uptime.enable = true;
+          memory.enable = true;
+          load_avg.enable = true;
+        };
+      };
+    };
   };
 
   proxmoxLXC = {

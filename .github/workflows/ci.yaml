@@ -220,8 +220,8 @@ jobs:
           fi
 
           # Special Rules
-          EXTRA_SPACE='["nixmi", "winix"]'
-          NO_BUILD='["nixmi", "winix"]'
+          EXTRA_SPACE='["nixmi"]'
+          NO_BUILD='["nixmi"]'
 
           echo "Hosts to be rebuilt: $BUILD_HOSTS"
           {

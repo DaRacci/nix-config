@@ -12,8 +12,7 @@ This is my interpretation of the perfect nix flake, this powers my desktops, vms
 
 - [NixOS]-managed
   - Desktops
-    - [nixe] (Personal Desktop)
-    - [winix] (WSL 2 instance on Windows for Work)
+    - [nixmi] (Personal Desktop)
   - Servers
     - [nixai] (Locally hosted AI)
     - [nixcloud] (Replacing usage of external cloud services)
@@ -53,7 +52,7 @@ This is my interpretation of the perfect nix flake, this powers my desktops, vms
 [nixai]: ./hosts/server/nixai/
 [nixcloud]: ./hosts/server/nixcloud/
 [nixdev]: ./hosts/server/nixdev/
-[nixe]: ./hosts/desktop/nixe/
+[nixmi]: ./hosts/desktop/nixmi/
 [nixio]: ./hosts/server/nixio/
 [nixmon]: ./hosts/server/nixmon/
 [nixos]: https://nixos.org/
@@ -61,4 +60,3 @@ This is my interpretation of the perfect nix flake, this powers my desktops, vms
 [sops]: https://github.com/mozilla/sops
 [sops-nix]: https://github.com/Mic92/sops-nix
 [update-flake-lock]: https://github.com/DeterminateSystems/update-flake-lock
-[winix]: ./hosts/desktop/winix/

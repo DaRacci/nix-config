@@ -35,10 +35,10 @@
           ps: with ps; [
             aiogithubapi
             pynetgear
-            pyarlo
             google-nest-sdm
             pkgs.ssh-terminal-manager
             pkgs.pyuptimekuma
+            pkgs.pyarlo
             spotifyaio
 
             aiobotocore # For S3 Backup to Minio
