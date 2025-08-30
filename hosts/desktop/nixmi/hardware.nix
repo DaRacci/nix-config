@@ -80,9 +80,6 @@
 
       grub = {
         efiSupport = true;
-
-        # TODO :: Better theme
-        theme = pkgs.nixos-grub2-theme;
         memtest86.enable = true;
       };
     };
