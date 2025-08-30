@@ -88,11 +88,14 @@
           }
         ]
         ++ (
+          # These are installed via HACS normally, but we need to include them here to actually activate them.
           [
-            "Home-Assistant-Lovelace-Local-Conditional-card/local-conditional-card.js"
             "button-card/button-card.js"
             "config-template-card/config-template-card.js"
+            "custom-brand-icons/custom-brand-icons.js"
             "ha-floorplan/floorplan.js"
+            "hass-selfhst-icons/hass-selfhst-icons.js"
+            "Home-Assistant-Lovelace-Local-Conditional-card/local-conditional-card.js"
             "lovelace-hass-arlo/hass-arlo.js"
             "lovelace-layout-card/layout-card.js"
             "lovelace-navbar-card/navbar-card.js"
