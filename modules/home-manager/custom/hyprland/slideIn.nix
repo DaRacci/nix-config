@@ -8,8 +8,6 @@ let
   inherit (lib)
     mkOption
     nameValuePair
-    mkMerge
-    mkDefault
     mkIf
     getExe
     getExe'
@@ -62,33 +60,6 @@ let
     };
   };
 
-  slideInRule = direction: {
-    float = mkDefault true;
-    size = {
-      width = mkDefault "20%";
-      height = mkDefault "98%";
-    };
-    move = {
-      x = mkDefault "80%";
-      y = mkDefault "${toString windowToEdgeDistance}";
-    };
-    animation = [
-      "global, 1, 8, fluentDecel, slide ${direction}"
-    ];
-  };
-
-  dropDownRule = direction: {
-    float = mkDefault true;
-    size = mkDefault "33%";
-    move = {
-      x = mkDefault "33%";
-      y = mkDefault "${toString windowToEdgeDistance}";
-    };
-    animation = [
-      "global, 1, 8, fluentDecel, slide ${direction}"
-    ];
-  };
-
   isEdgePosition = position: position == "edge" || position == "bottom" || position == "top";
 
   uwsmApp = getExe' uwsm "uwsm-app";
@@ -126,7 +97,6 @@ let
         activeName=$(hyprctl activeworkspace -j | jq -r .monitor)
         activeMon=$(echo "$monInfo" | jq --arg m "$activeName" '.[] | select(.name == $m)')
 
-        # Determine left or right if a side popin
         if [ "$position" = "side" ]; then
           cursorX=$(echo "$curInfo" | jq '.x')
           monX=$(echo "$activeMon" | jq '.x')
@@ -140,7 +110,6 @@ let
           fi
         fi
 
-        # If position is edge, determine top or bottom
         if [ "$position" = "edge" ]; then
           cursorY=$(echo "$curInfo" | jq '.y')
           monY=$(echo "$activeMon" | jq '.y')
@@ -155,8 +124,6 @@ let
         fi
 
         ${uwsmApp} -s b -- ${hdropExe} -f -g "$gap" -h "$height" -w "$width" -p "$position" --class "$class" "$exec"
-
-
       '';
     }
   );

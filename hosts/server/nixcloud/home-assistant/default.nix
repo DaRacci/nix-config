@@ -39,7 +39,7 @@
             pkgs.ssh-terminal-manager
             pkgs.pyuptimekuma
             pkgs.pyarlo
-            spotifyaioarlo
+            spotifyaio
 
             aiobotocore # For S3 Backup to Minio
           ];

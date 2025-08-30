@@ -31,7 +31,7 @@ in
       bind = "SUPER+d";
       class = "me.iepure.devtoolbox";
       exec = getExe pkgs.devtoolbox;
-      side = "edge";
+      position = "edge";
     }
     {
       bind = "SUPER+e";
