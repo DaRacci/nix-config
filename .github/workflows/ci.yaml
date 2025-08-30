@@ -52,13 +52,14 @@ jobs:
     strategy:
       matrix:
         include: ${{ fromJson(needs.discover-users.outputs.matrix) }}
-      fail-fast: false
+      # If one fails theres probably a larger issue
+      fail-fast: true
     name: Enrich user ${{ matrix.user }}
     steps:
       - uses: actions/checkout@v4
       - name: Get User Imports
         run: |
-          USER_IMPORTS=$(./utils/get-imports.nu "HOME" "${{ matrix.user }}" | jq -c . || echo "[]")
+          USER_IMPORTS=$(./utils/get-imports.nu "HOME" "${{ matrix.user }}" | jq -c .)
           echo "$USER_IMPORTS" > imports.json
       - name: Upload Imports Artifact
         uses: actions/upload-artifact@v4
@@ -74,14 +75,15 @@ jobs:
     strategy:
       matrix:
         host: ${{ fromJson(needs.discover-hosts.outputs.matrix) }}
-      fail-fast: false
+      # If one fails theres probably a larger issue
+      fail-fast: true
     name: Enrich host ${{ matrix.host }}
     steps:
       - uses: actions/checkout@v4
       - name: Get Host Imports
         id: get-imports
         run: |
-          HOST_IMPORTS=$(./utils/get-imports.nu "OS" "${{ matrix.host }}" | jq -c . || echo "[]")
+          HOST_IMPORTS=$(./utils/get-imports.nu "OS" "${{ matrix.host }}" | jq -c .)
           {
             echo 'host-imports<<EOF'
             echo "$HOST_IMPORTS"
@@ -218,8 +220,8 @@ jobs:
           fi
 
           # Special Rules
-          EXTRA_SPACE='["nixmi", "winix"]'
-          NO_BUILD='["nixmi", "winix"]'
+          EXTRA_SPACE='["nixmi"]'
+          NO_BUILD='["nixmi"]'
 
           echo "Hosts to be rebuilt: $BUILD_HOSTS"
           {
@@ -338,6 +340,9 @@ jobs:
             system: x86_64-linux
           - command: flake check --no-pure-eval --allow-import-from-derivation
             system: x86_64-linux
+          - command: develop --no-pure-eval --command true
+            system: x86_64-linux
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

@@ -45,9 +45,10 @@
           };
 
           overlays = [
-            inputs.lix-module.overlays.lixFromNixpkgs
+            inputs.lix-module.overlays.default
             inputs.angrr.overlays.default
-          ] ++ (builtins.attrValues (import ./overlays { inherit self inputs lib; }));
+          ]
+          ++ (builtins.attrValues (import ./overlays { inherit self inputs lib; }));
         };
     in
     flake-parts.lib.mkFlake
@@ -88,9 +89,10 @@
             accelerationHosts = {
               cuda = [
                 "nixmi"
-                "winix"
               ];
-              rocm = [ ];
+              rocm = [
+                # "nixai"
+              ];
             };
 
             hosts =
@@ -138,9 +140,9 @@
           };
 
         perSystem =
-          { pkgs, ... }:
+          { pkgs, system, ... }:
           {
-            _module.args.pkgs = mkPkgs { };
+            _module.args.pkgs = mkPkgs { inherit system; };
 
             packages = import ./pkgs { inherit inputs pkgs; };
           };
@@ -151,15 +153,10 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
     # Upstream & PR Programs
-    protonup-rs = {
-      url = "https://raw.githubusercontent.com/liperium/nixpkgs/refs/heads/protonuprs-init/pkgs/by-name/pr/protonup-rs/package.nix";
+    mcpo = {
+      url = "https://raw.githubusercontent.com/codgician/nixpkgs/refs/heads/mcpo-init/pkgs/development/python-modules/mcpo/default.nix";
       flake = false;
       type = "file";
-    };
-    # TODO - Remove once upstream is up to 0.6.2
-    nix-tree = {
-      url = "github:utdemir/nix-tree";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Misc Flake Inputs for other Inputs
@@ -211,6 +208,14 @@
         systems.follows = "systems";
       };
     };
+    # Windows App Packaging
+    erosanix = {
+      url = "github:emmanuelrosa/erosanix";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-compat.follows = "flake-compat";
+      };
+    };
 
     # Base Modules
     home-manager = {
@@ -232,29 +237,26 @@
         pre-commit-hooks-nix.follows = "git-hooks";
       };
     };
-    nixd = {
-      url = "github:nix-community/nixd";
-      inputs = {
-        flake-parts.follows = "flake-parts";
-        treefmt-nix.follows = "treefmt";
-      };
-    };
     nil = {
       url = "github:oxalica/nil/main";
       inputs = {
         nixpkgs.follows = "nixpkgs";
       };
     };
+    lix = {
+      url = "git+https://git.lix.systems/lix-project/lix.git?ref=release-2.93";
+      flake = false; # Prevents adding too many additional inputs since the lix-module also does it this way.
+    };
     lix-module = {
-      url = "git+https://git.lix.systems/lix-project/nixos-module.git?ref=stable";
+      url = "git+https://git.lix.systems/lix-project/nixos-module.git?ref=release-2.93";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-utils.follows = "flake-utils";
-        lix.follows = "";
+        lix.follows = "lix";
       };
     };
     stylix = {
-      url = "github:danth/stylix";
+      url = "github:nix-community/stylix";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
@@ -307,9 +309,16 @@
       inputs = {
         nixpkgs.follows = "nixpkgs";
         home-manager.follows = "home-manager";
+        jovian.follows = "jovian";
       };
     };
-    jovian.follows = "chaotic-nyx/jovian";
+    jovian = {
+      url = "github:Jovian-Experiments/Jovian-NixOS";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        nix-github-actions.follows = "";
+      };
+    };
     nixarr = {
       url = "github:rasmus-kirk/nixarr";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -319,8 +328,13 @@
       url = "github:CRTified/nur-packages";
       flake = false; # We aren't going to use this as a flake
     };
-    quickshell = {
-      url = "github:quickshell-mirror/quickshell";
+    caelestia-shell = {
+      url = "github:caelestia-dots/shell";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.caelestia-cli.follows = "caelestia-cli";
+    };
+    caelestia-cli = {
+      url = "github:caelestia-dots/cli";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -366,17 +380,8 @@
 
     # Resources
     firefox-ultima = {
-      url = "github:soulhotel/FF-ULTIMA/3.0";
+      url = "github:soulhotel/FF-ULTIMA";
       flake = false;
-    };
-    tinted-theming = {
-      url = "github:tinted-theming/schemes";
-      flake = false;
-    };
-    stylix-wallpaper = {
-      url = "https://nextcloud.racci.dev/s/Hy8qkAWYwqSTjKp/download/17.jpeg";
-      flake = false;
-      type = "file";
     };
   };
 }

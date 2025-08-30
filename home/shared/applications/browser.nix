@@ -413,7 +413,7 @@ in
                 "ultima.tabs.vertical.hide.in.screenedge" = false;
 
                 "ultima.navbar.hidebuttons" = false;
-                "ultima.urlbar.hidebuttons" = true;
+                "ultima.urlbar.hide.buttons" = true;
                 "ultima.urlbar.centered" = true;
                 "ultima.theme.extensions" = true;
                 "ultima.theme.menubar" = true;
@@ -447,26 +447,30 @@ in
             in
             {
               "Nix Packages" = {
-                urls = [ { template = "${searchNixURL}packages?type=packages&query={searchTerms}"; } ];
+                urls = [
+                  { template = "${searchNixURL}packages?type=packages&query={searchTerms}&channel=unstable"; }
+                ];
                 icon = searchNixIcon;
                 definedAliases = [ "@np" ];
               };
 
               "Nix Options" = {
-                urls = [ { template = "${searchNixURL}options?query={searchTerms}"; } ];
+                urls = [ { template = "${searchNixURL}options?query={searchTerms}&channel=unstable"; } ];
                 icon = searchNixIcon;
                 definedAliases = [ "@no" ];
               };
 
               "NixOS Wiki" = {
-                urls = [ { template = "https://nixos.wiki/index.php?search={searchTerms}"; } ];
+                urls = [ { template = "https://wiki.nixos.org/w/index.php?search={searchTerms}"; } ];
                 icon = "https://nixos.wiki/favicon.png";
                 updateInterval = 24 * 60 * 60 * 1000; # every day
                 definedAliases = [ "@nw" ];
               };
 
               "Home Manager Options" = {
-                urls = [ { template = "https://home-manager-options.extranix.com/?query={searchTerms}"; } ];
+                urls = [
+                  { template = "https://home-manager-options.extranix.com/?query={searchTerms}&release=master"; }
+                ];
                 icon = searchNixIcon;
                 definedAliases = [ "@hmo" ];
               };

@@ -1,6 +1,5 @@
 {
   config,
-  pkgs,
   lib,
   ...
 }:
@@ -20,7 +19,7 @@ in
       }
     ];
 
-    home.packages = with pkgs; [
+    home.packages = [
 
     ];
   };

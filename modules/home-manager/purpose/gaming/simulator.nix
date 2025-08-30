@@ -16,15 +16,6 @@ in
   config = lib.mkIf (cfg.enable && cfg.enableRacing) {
     home.packages = with pkgs; [ boxflat ];
 
-    xdg.desktopEntries = {
-      "boxflat" = {
-        name = "Boxflat";
-        exec = "${pkgs.boxflat}/bin/boxflat";
-        icon = "boxflat";
-        categories = [ "Game" ];
-      };
-    };
-
     user.persistence.directories = [ ".config/boxflat" ];
   };
 }

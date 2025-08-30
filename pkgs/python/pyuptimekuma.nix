@@ -46,6 +46,6 @@ buildPythonPackage rec {
     description = "Simple Python wrapper for Uptime Kuma";
     homepage = "https://github.com/jayakornk/pyuptimekuma";
     license = lib.licenses.mit;
-    maintainers = with lib.maintainers; [ ];
+    maintainers = [ ];
   };
 }

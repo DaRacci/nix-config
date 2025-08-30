@@ -18,16 +18,20 @@ in
     ./nix.nix
     ./sops.nix
     ./xdg.nix
-  ] ++ builtins.attrValues (import "${self}/modules/home-manager");
+  ]
+  ++ builtins.attrValues (import "${self}/modules/home-manager");
 
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";
 
-  home.activation.report-changes = config.lib.dag.entryAnywhere ''
-    if [ ! -z "''${oldGenPath:-}" ]; then
-      ${pkgs.nvd}/bin/nvd diff "$oldGenPath" "$newGenPath"
-    fi
-  '';
+  home = {
+    preferXdgDirectories = true;
+    activation.report-changes = config.lib.dag.entryAnywhere ''
+      if [ ! -z "''${oldGenPath:-}" ]; then
+        ${pkgs.nvd}/bin/nvd diff "$oldGenPath" "$newGenPath"
+      fi
+    '';
+  };
 
   dconf.enable = dconfEnabled;
   user.persistence.directories = [ ".config/dconf" ];

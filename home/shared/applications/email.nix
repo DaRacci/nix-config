@@ -1,6 +1,9 @@
 { pkgs, ... }:
 {
-  home.packages = with pkgs; [ protonmail-bridge ];
+  home.packages = with pkgs; [
+    protonmail-bridge
+    protonmail-desktop
+  ];
 
   systemd.user.services.protonmail-bridge = {
     Unit = {
@@ -32,7 +35,12 @@
 
   user.persistence.directories = [
     ".thunderbird"
+
+    # Bridge
     ".local/share/protonmail"
     ".config/protonmail"
+
+    # Desktop App
+    ".config/Proton Mail"
   ];
 }

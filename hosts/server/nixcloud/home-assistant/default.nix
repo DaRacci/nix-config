@@ -7,6 +7,8 @@
   imports = [
     ./connections.nix
     ./connectivity.nix
+    ./dashboard.nix
+    ./music.nix
     ./postgresql.nix
     ./proxy.nix
     # ./weather.nix
@@ -22,6 +24,10 @@
   };
 
   services = {
+    avahi = {
+      enable = true;
+    };
+
     home-assistant = {
       enable = true;
       package = pkgs.home-assistant.override {
@@ -29,10 +35,10 @@
           ps: with ps; [
             aiogithubapi
             pynetgear
-            pyarlo
             google-nest-sdm
             pkgs.ssh-terminal-manager
             pkgs.pyuptimekuma
+            pkgs.pyarlo
             spotifyaio
 
             aiobotocore # For S3 Backup to Minio
@@ -45,27 +51,12 @@
         smartir
         sleep_as_android
       ];
-      customLovelaceModules = with pkgs.home-assistant-custom-lovelace-modules; [
-        weather-chart-card
-        versatile-thermostat-ui-card
-        vacuum-card
-        decluttering-card
-        universal-remote-card
-        plotly-chart-card
-        mushroom
-        mini-media-player
-        mini-graph-card
-        hourly-weather
-        clock-weather-card
-        bubble-card
-        auto-entities
-        card-mod
-      ];
 
       configWritable = true;
       config = {
         frontend = { };
         default_config = { };
+        zeroconf = { };
 
         isal = { };
 
@@ -73,8 +64,6 @@
         "automation ui" = "!include automations.yaml";
         "scene manual" = [ ];
         "scene ui" = "!include scenes.yaml";
-
-        lovelace.mode = "yaml";
       };
     };
   };

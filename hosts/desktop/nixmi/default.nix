@@ -15,7 +15,6 @@
     "${self}/hosts/shared/optional/virtualisation.nix"
 
     "${self}/hosts/desktop/shared/sessions/hyprland.nix"
-    "${self}/hosts/desktop/shared/sessions/plasma.nix"
 
     "${self}/hosts/shared/optional/gaming.nix"
     "${self}/hosts/shared/optional/tailscale.nix"
@@ -23,6 +22,22 @@
 
   services = {
     hardware.bolt.enable = true;
+    metrics = {
+      enable = true;
+      upgradeStatus.enable = true;
+      hacompanion = {
+        enable = true;
+        sensor = {
+          webcam.enable = true;
+          cpu_temp.enable = true;
+          cpu_usage.enable = true;
+          uptime.enable = true;
+          memory.enable = true;
+          power.enable = true;
+          audio_volume.enable = true;
+        };
+      };
+    };
   };
 
   custom.remote = {

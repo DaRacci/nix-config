@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }:
 
@@ -8,20 +9,31 @@ let
   inherit (config.sops) secrets;
 in
 {
-  sops.secrets = {
-    "MQTT_PASSWORDS/ROOT" = { };
-    "MQTT_PASSWORDS/HA" = { };
-    "MQTT_PASSWORDS/DEVICES" = { };
-    "MQTT_PASSWORDS/SLEEPASANDROID" = { };
-    # Must not be nested so that zigbee2mqtt can access it
-    "MQTT_PASSWORDS_ZIGBEE2MQTT" = { };
+  sops = {
+    secrets =
+      [
+        "ROOT"
+        "HA"
+        "DEVICES"
+        "SLEEPASANDROID"
+        "ZIGBEE2MQTT"
+      ]
+      |> map (
+        v:
+        lib.nameValuePair "MQTT_PASSWORDS/${v}" {
+          restartUnits = [ "mosquitto.service" ];
+        }
+      )
+      |> builtins.listToAttrs;
 
-    "ZIGBEE2MQTT_SECRETS" = {
+    templates.zigbee2mqtt = {
       owner = config.users.users.zigbee2mqtt.name;
       inherit (config.users.users.zigbee2mqtt) group;
-      key = "";
       path = "/var/lib/zigbee2mqtt/secrets.yaml";
       restartUnits = [ "zigbee2mqtt.service" ];
+      content = ''
+        mqtt_password: ${config.sops.placeholder."MQTT_PASSWORDS/ZIGBEE2MQTT"}
+      '';
     };
   };
 
@@ -73,7 +85,7 @@ in
             };
 
             zigbee2mqtt = {
-              passwordFile = secrets."MQTT_PASSWORDS_ZIGBEE2MQTT".path;
+              passwordFile = secrets."MQTT_PASSWORDS/ZIGBEE2MQTT".path;
               acl = [
                 "readwrite homeassistant/#"
                 "readwrite zigbee2mqtt/#"
@@ -93,11 +105,10 @@ in
       enable = true;
       package = pkgs.zigbee2mqtt_2;
       settings = {
-        homeassistant = true;
         mqtt = {
           server = "mqtt://localhost:1883";
           user = "zigbee2mqtt";
-          password = "!secrets.yaml MQTT_PASSWORDS_ZIGBEE2MQTT";
+          password = "!secrets.yaml mqtt_password";
         };
         serial = {
           port = "tcp://SLZB-06M:6638";

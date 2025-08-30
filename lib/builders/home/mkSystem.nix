@@ -67,6 +67,11 @@ in
       inherit (self) inputs outputs;
     };
 
+    # Still want to have the attributes there so I don't have to work around them maybe being not there
+    sharedModules = lib.mkIf (!config.stylix.enable) [
+      config.stylix.homeManagerIntegration.module
+    ];
+
     users.${name} = import ./userConf.nix {
       inherit
         self

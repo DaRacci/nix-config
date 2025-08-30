@@ -49,7 +49,6 @@ in
       expand: false;
       orientation: horizontal;
       background-color: transparent;
-      background-image: url("~/.local/share/wallpaper.sqre", width);
       children: [ "wallframe" , "inputbar" ];
     }
     wallframe {
@@ -57,7 +56,6 @@ in
       spacing: 0em;
       padding: 0em;
       expand: false;
-      background-image: url("~/.local/share/wallpaper.quad", width);
     }
 
     // Inputs //
@@ -208,16 +206,16 @@ in
                   local item="''${deleted_items[$i]}"
                   local colour
                   if [ "$(("$i" % 2))" = "0" ]; then
-                    colour=${config.stylix.generated.palette.base05}
+                    colour=${config.lib.stylix.colors.base05}
                   else
-                    colour=${config.stylix.generated.palette.base04}
+                    colour=${config.lib.stylix.colors.base04}
                   fi
 
                   body="$body\n<span foreground=\"#$colour\">$item</span>"
                 done
               else
                 summary="Deleted"
-                body="<span foreground=\"#${config.stylix.generated.palette.base05}\">''${deleted_items[0]}</span>"
+                body="<span foreground=\"#${config.lib.stylix.colors.base05}\">''${deleted_items[0]}</span>"
               fi
 
               notify "$summary" "$body" "edit-delete"
@@ -260,7 +258,7 @@ in
           ) | run_rofi " 📜 History..." \
             -multi-select -i -display-columns 2 -selected-row 1 \
             -ballot-selected-str " " -ballot-unselected-str " " \
-            -kb-custom-1 "Control+Delete" -kb-custom-2 "Control+Return" -kb-accept-custom "" 
+            -kb-custom-1 "Control+Delete" -kb-custom-2 "Control+Return" -kb-accept-custom ""
           )
           LASTEXITCODE=$?
 

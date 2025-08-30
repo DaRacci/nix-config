@@ -34,6 +34,6 @@ buildPythonPackage rec {
     description = "Control and monitor devices with terminal commands";
     homepage = "https://github.com/zhbjsh/terminal-manager";
     license = lib.licenses.mit;
-    maintainers = with lib.maintainers; [ ];
+    maintainers = [ ];
   };
 }

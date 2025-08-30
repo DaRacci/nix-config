@@ -5,7 +5,14 @@
 }:
 {
   stylix = {
-    base16Scheme = "${inputs.tinted-theming}/base16/tokyo-night-dark.yaml";
+    base16Scheme = "${inputs.stylix.inputs.tinted-schemes}/base16/tokyo-night-dark.yaml";
+
+    icons = {
+      enable = true;
+      package = pkgs.kdePackages.breeze-icons;
+      dark = "breeze-dark";
+      light = "breeze";
+    };
 
     opacity = {
       popups = 0.9;
@@ -45,5 +52,6 @@
         terminal = 18;
       };
     };
+
   };
 }

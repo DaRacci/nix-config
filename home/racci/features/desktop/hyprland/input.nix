@@ -27,94 +27,93 @@ let
   programShortcuts = {
     "SUPER+T" = lib.getExe config.programs.alacritty.package;
     "SUPER+F" = lib.getExe config.programs.firefox.package;
-    "SUPER+SHIFT+E" = lib.getExe pkgs.nautilus;
+    "SUPER+SHIFT+E" = "${lib.getExe pkgs.nautilus} --new-window";
   };
 in
 {
   wayland.windowManager.hyprland = {
     custom-settings = {
-      bind =
-        {
-          "SUPER+ALT+RIGHT" = [
-            "movecurrentworkspacetomonitor"
-            "+1"
-          ];
-          "SUPER+ALT+LEFT" = [
-            "movecurrentworkspacetomonitor"
-            "-1"
-          ];
+      bind = {
+        "SUPER+ALT+RIGHT" = [
+          "movecurrentworkspacetomonitor"
+          "+1"
+        ];
+        "SUPER+ALT+LEFT" = [
+          "movecurrentworkspacetomonitor"
+          "-1"
+        ];
 
-          #region Graveyard
-          "SUPER+SHIFT+S" = [
-            "movetoworkspace"
-            "special"
-          ];
-          "SUPER+S" = [ "togglespecialworkspace" ];
-          #endregion
-
-          "CTRL+ALT+DELETE" = [
-            "exec"
-            "uwsm stop"
-          ];
-
-          #region Media
-          XF86AudioRaiseVolume = [
-            "exec"
-            "${lib.getExe' pkgs.wireplumber "wpctl"} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"
-          ];
-          XF86AudioLowerVolume = [
-            "exec"
-            "${lib.getExe' pkgs.wireplumber "wpctl"} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-"
-          ];
-          XF86AudioMute = [
-            "exec"
-            "${lib.getExe' pkgs.wireplumber "wpctl"} set-mute @DEFAULT_AUDIO_SINK@ toggle"
-          ];
-          XF86AudioMicMute = [
-            "exec"
-            "${lib.getExe' pkgs.wireplumber "wpctl"} set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
-          ];
-          #endregion
-        }
-        #region Focus & Movement
-        // (lib.pipe lib.mine.keys.directionalKeys [
-          (builtins.map (key: [
-            (lib.nameValuePair "SUPER+SHIFT+${key}" [
-              "hy3:movewindow"
-              (lib.toLower (getDirectionChar key))
-            ])
-            (lib.nameValuePair "SUPER+${key}" [
-              "hy3:movefocus"
-              (lib.toLower (getDirectionChar key))
-            ])
-          ]))
-          builtins.concatLists
-          lib.listToAttrs
-        ])
+        #region Graveyard
+        "SUPER+SHIFT+S" = [
+          "movetoworkspace"
+          "special"
+        ];
+        "SUPER+S" = [ "togglespecialworkspace" ];
         #endregion
-        #region Program Shortcuts
-        // (builtins.mapAttrs (_: uwsmExec) programShortcuts)
+
+        "CTRL+ALT+DELETE" = [
+          "exec"
+          "uwsm stop"
+        ];
+
+        #region Media
+        XF86AudioRaiseVolume = [
+          "exec"
+          "${lib.getExe' pkgs.wireplumber "wpctl"} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"
+        ];
+        XF86AudioLowerVolume = [
+          "exec"
+          "${lib.getExe' pkgs.wireplumber "wpctl"} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-"
+        ];
+        XF86AudioMute = [
+          "exec"
+          "${lib.getExe' pkgs.wireplumber "wpctl"} set-mute @DEFAULT_AUDIO_SINK@ toggle"
+        ];
+        XF86AudioMicMute = [
+          "exec"
+          "${lib.getExe' pkgs.wireplumber "wpctl"} set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
+        ];
         #endregion
-        #region Workspaces
-        // (lib.pipe 10 [
-          (builtins.genList (
-            x:
-            let
-              workspaceId = builtins.toString (x + 1 - ((x + 1) / 10) * 10);
-            in
-            {
-              "SUPER+${workspaceId}" = [
-                "workspace"
-                (builtins.toString (x + 1))
-              ];
-              "SUPER+SHIFT+${workspaceId}" = [
-                "movetoworkspace"
-                (builtins.toString (x + 1))
-              ];
-            }
-          ))
-          lib.mergeAttrsList
-        ])
+      }
+      #region Focus & Movement
+      // (lib.pipe lib.mine.keys.directionalKeys [
+        (builtins.map (key: [
+          (lib.nameValuePair "SUPER+SHIFT+${key}" [
+            "hy3:movewindow"
+            (lib.toLower (getDirectionChar key))
+          ])
+          (lib.nameValuePair "SUPER+${key}" [
+            "hy3:movefocus"
+            (lib.toLower (getDirectionChar key))
+          ])
+        ]))
+        builtins.concatLists
+        lib.listToAttrs
+      ])
+      #endregion
+      #region Program Shortcuts
+      // (builtins.mapAttrs (_: uwsmExec) programShortcuts)
+      #endregion
+      #region Workspaces
+      // (lib.pipe 10 [
+        (builtins.genList (
+          x:
+          let
+            workspaceId = builtins.toString (x + 1 - ((x + 1) / 10) * 10);
+          in
+          {
+            "SUPER+${workspaceId}" = [
+              "workspace"
+              (builtins.toString (x + 1))
+            ];
+            "SUPER+SHIFT+${workspaceId}" = [
+              "movetoworkspace"
+              (builtins.toString (x + 1))
+            ];
+          }
+        ))
+        lib.mergeAttrsList
+      ])
       #endregion
       #region Media
 

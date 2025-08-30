@@ -40,6 +40,6 @@ buildPythonPackage rec {
     description = "Control and monitor devices with SSH terminal commands";
     homepage = "https://github.com/zhbjsh/ssh-terminal-manager";
     license = lib.licenses.mit;
-    maintainers = with lib.maintainers; [ ];
+    maintainers = [ ];
   };
 }

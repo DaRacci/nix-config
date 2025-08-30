@@ -9,14 +9,33 @@
   imports = [
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
 
-    "${self}/hosts/shared/optional/tailscale.nix"
     "${self}/modules/nixos/server"
-    ./metrics.nix
   ];
 
   services = {
     getty.autologinUser = "root";
-    resolved.enable = lib.mkForce false;
+
+    metrics = {
+      enable = true;
+      upgradeStatus.enable = true;
+      hacompanion = {
+        enable = true;
+        sensor = {
+          cpu_usage.enable = true;
+          uptime.enable = true;
+          memory.enable = true;
+          load_avg.enable = true;
+        };
+      };
+    };
+  };
+
+  proxmoxLXC = {
+    manageNetwork = true;
+    manageHostName = true;
+  };
+  networking = {
+    domain = "localdomain";
   };
 
   nix = {

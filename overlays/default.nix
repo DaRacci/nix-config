@@ -10,9 +10,7 @@ let
   # If given a string, assumes the input and package name are the same.
   # Otherwise should be defined as an attr with the input and the package name(s).
   packagesFromOtherInstances = [
-    "nixd"
     "nil"
-    "quickshell"
   ];
 in
 {
@@ -64,11 +62,10 @@ in
       removeWarningPopup = true;
     };
 
-    quickshell = prev.quickshell.overrideAttrs (oldAttrs: {
-      buildInputs = oldAttrs.buildInputs or [ ] ++ [
-        final.qt6.full
-        final.kdePackages.kirigami
-      ];
+    hacompanion = prev.hacompanion.overrideAttrs (oldAttrs: {
+      meta = oldAttrs.meta // {
+        mainProgram = "hacompanion";
+      };
     });
 
     inherit lib;

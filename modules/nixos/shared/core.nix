@@ -36,7 +36,7 @@ in
 
   config = mkIf cfg.enable (mkMerge [
     (mkIf cfg.audio.enable {
-      security.rtkit.enable = mkForce true;
+      security.rtkit.enable = mkForce false;
 
       services = {
         pulseaudio.enable = mkForce false;

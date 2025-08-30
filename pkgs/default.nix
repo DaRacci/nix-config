@@ -10,29 +10,25 @@
   monocoque = pkgs.callPackage ./monocoque { };
 
   # MCP Servers
-  github-actions-mcp-server = pkgs.callPackage ./github-actions-mcp-server { };
+  mcpo = pkgs.python3Packages.callPackage inputs.mcpo { };
+  mcp-sequential-thinking = pkgs.python3Packages.callPackage ./mcp-sequential-thinking { };
 
   # Misc
   orca-slicer-zink = pkgs.callPackage ./orca-slicer-zink { };
-  caelestia-shell = pkgs.callPackage ./caelestia/shell.nix { };
-  caelestia-cli = pkgs.callPackage ./caelestia/cli.nix { };
+  huntress = pkgs.callPackage ./huntress { };
 
   # Home Assistant Python Packages
   terminal-manager = pkgs.python3Packages.callPackage ./python/terminal-manager.nix { };
   ssh-terminal-manager = pkgs.python3Packages.callPackage ./python/ssh-terminal-manager.nix { };
   pyuptimekuma = pkgs.python3Packages.callPackage ./python/pyuptimekuma.nix { };
+  pyarlo = pkgs.python3Packages.callPackage ./python/pyarlo.nix { };
 
   # Helper Stuff
   new-host = pkgs.callPackage ./helpers/new-host.nix { };
   list-ephemeral = pkgs.callPackage ./list-ephemeral { };
 
-  # PR Packages
-  protonup-rs = (pkgs.callPackage "${inputs.protonup-rs}" { }).overrideAttrs (oldAttrs: {
-    cargoHash = "sha256-02uOVJtU52EWQn+Z2rHCum9+jodByYTDcLyMkgfpjwc=";
-    cargoDeps = oldAttrs.cargoDeps.overrideAttrs (oldAttrs: {
-      vendorStaging = oldAttrs.vendorStaging.overrideAttrs (_old: {
-        outputHash = "sha256-02uOVJtU52EWQn+Z2rHCum9+jodByYTDcLyMkgfpjwc=";
-      });
-    });
-  });
+  # Wine Apps
+  take-control-viewer = pkgs.callPackage ./take-control-viewer {
+    inherit (inputs.erosanix.lib.x86_64-linux) mkWindowsAppNoCC;
+  };
 }

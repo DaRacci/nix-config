@@ -11,30 +11,28 @@ let
   mkMesa =
     pkg:
     (pkg.override {
-      galliumDrivers =
-        [
-          "llvmpipe"
-        ]
-        ++ (lib.optionals hasAmd [
-          "radeonsi"
-        ])
-        ++ (lib.optionals hasNvidia [
-          "zink"
-        ])
-        ++ (lib.optionals (config ? wsl) [
-          "d3d12"
-        ]);
+      galliumDrivers = [
+        "llvmpipe"
+      ]
+      ++ (lib.optionals hasAmd [
+        "radeonsi"
+      ])
+      ++ (lib.optionals hasNvidia [
+        "zink"
+      ])
+      ++ (lib.optionals (config ? wsl) [
+        "d3d12"
+      ]);
 
-      vulkanDrivers =
-        [
-          "swrast"
-        ]
-        ++ (lib.optionals hasAmd [
-          "amd"
-        ])
-        ++ (lib.optionals (config ? wsl) [
-          "microsoft-experimental"
-        ]);
+      vulkanDrivers = [
+        "swrast"
+      ]
+      ++ (lib.optionals hasAmd [
+        "amd"
+      ])
+      ++ (lib.optionals (config ? wsl) [
+        "microsoft-experimental"
+      ]);
 
       eglPlatforms = lib.optionals (!config.host.device.isHeadless) [
         "x11"
@@ -135,10 +133,10 @@ in
 
       nvidia-container-toolkit.enable = hasNvidia;
       nvidia = mkIf hasNvidia {
-        package = config.boot.kernelPackages.nvidiaPackages.beta;
+        package = config.boot.kernelPackages.nvidiaPackages.latest;
         open = true;
         nvidiaSettings = true;
-        nvidiaPersistenced = true;
+        nvidiaPersistenced = false;
         modesetting.enable = true;
         powerManagement = {
           enable = true;
@@ -152,6 +150,7 @@ in
       ]
       ++ optionals hasAmd [
         "amdgpu.dcdebugmask=0x400" # Fix stuttering under wayland on Kernel 6.11+
+        "amdgpu.dc=1" # Use modern DC Engine
       ];
 
     # https://wiki.nixos.org/wiki/AMD_GPU#HIP

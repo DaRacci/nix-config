@@ -116,7 +116,7 @@
                   ${nuSelectHost}
                   let top_level = $".#nixosConfigurations.($selected).config.system.build.toplevel"
                   nix build --no-link --accept-flake-config $top_level
-                  ${lib.getExe inputs'.nix-tree.packages.default} $top_level
+                  ${lib.getExe pkgs.nix-tree} $top_level
                 }
               '';
             };

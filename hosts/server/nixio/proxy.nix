@@ -17,18 +17,6 @@ _:
   server.proxy = {
     domain = "racci.dev";
     virtualHosts = {
-      minio.extraConfig = ''
-        redir /console /console/
-
-        handle_path /console* {
-          reverse_proxy http://localhost${config.services.minio.consoleAddress}
-        }
-
-        reverse_proxy {
-          to http://localhost${config.services.minio.listenAddress}
-        }
-      '';
-
       pve.extraConfig = ''
         reverse_proxy {
           to https://192.168.2.210:8006
@@ -36,11 +24,6 @@ _:
             tls_insecure_skip_verify
           }
         }
-      '';
-
-      # TODO - move out of dockge
-      finance.extraConfig = ''
-        reverse_proxy http://dockge:3000
       '';
 
       # TODO - replace with komodo & run off a nix machine
@@ -57,14 +40,23 @@ _:
   services.caddy = {
     enable = true;
     package = pkgs.caddy.withPlugins {
-      plugins = [ "github.com/mholt/caddy-l4@v0.0.0-20250530154005-4d3c80e89c5f" ];
-      hash = "sha256-O2shDuAA4OjUx44uOxMbd5iQUQVl6GUuFKqv+P/PXNM=";
+      plugins = [
+        "github.com/mholt/caddy-l4@v0.0.0-20250530154005-4d3c80e89c5f"
+        "github.com/WeidiDeng/caddy-cloudflare-ip@v0.0.0-20231130002422-f53b62aa13cb"
+      ];
+      hash = "sha256-ai0XqbVkh4avyyggOQD00OXLUd6A7yN68dXf0eqzK3Y=";
     };
     email = "admin@racci.dev";
 
     # Certs are handled by acme
     globalConfig = ''
       auto_https "disable_certs"
+
+      servers {
+        trusted_proxies cloudflare
+        trusted_proxies static private_ranges 110.174.120.26
+        client_ip_headers X-Forwarded-For Cf-Connecting-Ip
+      }
     '';
 
     logFormat = ''
@@ -72,13 +64,19 @@ _:
     '';
 
     extraConfig = ''
-      (cors) {
-        @cors_preflight{args.0} method OPTIONS
-        @cors{args.0} header Origin {args.0}
+      # Automatic Import for all Virtual Hosts
+      (default) { }
 
-        handle @cors_preflight{args.0} {
+      # Automatic Import for all Virtual Hosts with `server.proxy.virtualHosts.<name>.public = true`
+      (public) { }
+
+      (cors) {
+        @cors_preflight{args[0]} method OPTIONS
+        @cors{args[0]} header Origin {args[0]}
+
+        handle @cors_preflight{args[0]} {
           header {
-            Access-Control-Allow-Origin "{args.0}"
+            Access-Control-Allow-Origin "{args[0]}"
             Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
             Access-Control-Allow-Headers *
             Access-Control-Max-Age "3600"
@@ -87,9 +85,9 @@ _:
           respond "" 204
         }
 
-        handle @cors{args.0} {
+        handle @cors{args[0]} {
           header {
-            Access-Control-Allow-Origin "{args.0}"
+            Access-Control-Allow-Origin "{args[0]}"
             Access-Control-Expose-Headers *
             defer
           }

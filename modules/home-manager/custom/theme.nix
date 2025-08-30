@@ -12,48 +12,18 @@ in
 {
   options.custom.theme = {
     enable = mkEnableOption "Theming" // {
-      default =
-        osConfig != null && hasAttr "stylix" osConfig && osConfig.stylix.enable && hasAttr "stylix" config;
+      default = osConfig != null && hasAttr "stylix" osConfig && osConfig.stylix.enable;
     };
   };
 
-  config = mkIf cfg.enable rec {
-    gtk = {
-      iconTheme = {
-        name = "Adwaita";
-        package = pkgs.adwaita-icon-theme;
-      };
-    };
-
-    services.xsettingsd = {
-      enable = true;
-      settings = {
-        "Net/IconThemeName" = "${gtk.iconTheme.name}";
-      };
-    };
-
-    fonts.fontconfig = {
-      defaultFonts = {
-        sansSerif = [ config.stylix.fonts.sansSerif.name ];
-        serif = [ config.stylix.fonts.serif.name ];
-        monospace = [ config.stylix.fonts.monospace.name ];
-        emoji = [ config.stylix.fonts.emoji.name ];
-      };
-    };
-
-    # qt = {
-    #   enable = true;
-    #   platformTheme.name = "gtk3";
-    #   style.name = "adwaita-qt6";
-    # };
-
+  config = mkIf cfg.enable {
     wayland.windowManager.hyprland.settings.exec-once =
       mkIf config.wayland.windowManager.hyprland.enable
         [
           "hyprctl setcursor ${config.stylix.cursor.name} ${toString config.stylix.cursor.size}"
         ];
 
-    xdg.dataFile =
+    xdg.dataFile = lib.mkIf (config.stylix.image != null) (
       let
         magick = lib.getExe' pkgs.imagemagick "magick";
         wallpaperManipulations = pkgs.runCommandNoCC "wallpaperManipulations" { } ''
@@ -70,9 +40,7 @@ in
         "wallpaper.sqre".source = "${wallpaperManipulations}/wallpaper.sqre";
         "wallpaper.blur".source = "${wallpaperManipulations}/wallpaper.blur";
         "wallpaper.quad".source = "${wallpaperManipulations}/wallpaper.quad";
-      };
-
-    custom.uwsm.sliceAllocation.background = [ "xsettingsd" ];
-    systemd.user.services.xsettingsd.Unit.After = [ "graphical-session.target" ];
+      }
+    );
   };
 }

@@ -45,6 +45,8 @@
           bind_hosts = [ "0.0.0.0" ];
           port = 53;
 
+          hostsfile_enabled = false;
+
           #region Cache Settings
           cache_size = 4194304;
           cache_ttl_min = 0;
@@ -79,8 +81,8 @@
           ];
 
           fallback_dns = [
-            "tls://doh.mullvad.net"
-            "tls://dns.google"
+            #   "tls://doh.mullvad.net"
+            #   "tls://dns.google"
           ];
 
           trusted_proxies = [
@@ -139,6 +141,7 @@
             "@@||nextcloud.racci.dev^$dnsrewrite" # Nextcloud isn't hosted internally yet.
             "@@||cloud.racci.dev^$dnsrewrite" # Digital Ocean DNS
             "@@||s.youtube.com^$important" # Fix YouTube history for IOS App
+            "@@||ipinfo.io^$important" # Blocked by HaGeZi's Ultimate Blocklist but needed.
           ];
 
         tls = {

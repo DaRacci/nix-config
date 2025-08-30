@@ -6,40 +6,40 @@
     extraPackages = with pkgs; [
       # LSPs & other tools for zed
       autocorrect
+      docker-compose-language-service
       dockerfile-language-server-nodejs
-      nixfmt-rfc-style
-      nixd
       nil
-      shellcheck
-      shfmt
+      nixd
+      nixfmt
       powershell
       powershell-editor-services
+      shellcheck
+      shfmt
 
       libz
     ];
 
     extensions = [
-      "toml"
+      "autocorrect"
+      "cargo-appraiser"
+      "cargo-tom"
+      "colored-zed-icons-theme"
+      "docker-compose"
       "dockerfile"
       "git-firefly"
-      "tokyo-night"
-      "terraform"
       "log"
-      "docker-compose"
       "nix"
       "nu"
+      "terraform"
+      "tokyo-night"
+      "toml"
       "typos"
-      "autocorrect"
-      "cargo-tom"
-      "cargo-appraiser"
-      "colored-zed-icons-theme"
     ];
 
     # https://zed.dev/docs/configuring-zed
     userSettings = {
       theme = lib.mkForce "Tokyo Night";
       ui_font_size = lib.mkForce 24;
-      hour_format = "hour24";
       load_direnv = "direct";
       autosave = "on_focus_change";
       auto_update = false;
@@ -53,14 +53,12 @@
 
       agent = {
         enabled = true;
-        version = "2";
 
         button = true;
         dock = "right";
         default_width = 640;
         default_height = 320;
 
-        enable_experimental_live_diffs = true;
         default_model = {
           provider = "copilot_chat";
           model = "o4-mini";
@@ -109,7 +107,6 @@
       };
 
       language_models = {
-        copilot_chat = { };
         ollama = {
           api_url = "http://localhost:11434";
           available_models = [
@@ -194,6 +191,7 @@
 
       lsp = {
         nil = {
+          binary.path = lib.getExe pkgs.nil;
           initialization_options = {
             formatting = {
               command = [ "nixfmt" ];
@@ -202,6 +200,7 @@
         };
         # TODO - Figure out how to do this without hard-coded paths.
         nixd.settings = {
+          binary.path = lib.getExe pkgs.nixd;
           nixpkgs.expr = "import (builtins.getFlake \"/persist/nix-config\").inputs.nixpkgs { }";
           options = rec {
             nixos.expr = "(builtins.getFlake \"/persist/nix-config\").nixosConfigurations.(builtins.replaceStrings [\"\\n\"] [\"\"] (builtins.readFile /etc/hostname)).options";
@@ -213,6 +212,20 @@
 
         powershell-es = {
           binary.path = lib.getExe pkgs.powershell-editor-services;
+        };
+
+        docker-compose = {
+          binary = {
+            path = lib.getExe pkgs.docker-compose-language-service;
+            arguments = [ "--stdio" ];
+          };
+        };
+
+        autocorrect = {
+          binary = {
+            path = lib.getExe pkgs.autocorrect;
+            arguments = [ "server" ];
+          };
         };
       };
 
@@ -254,7 +267,7 @@
       };
 
       inlay_hints = {
-        enabled = false;
+        enabled = true;
         show_type_hints = true;
         show_parameter_hints = true;
         show_other_hints = true;
@@ -288,15 +301,6 @@
         };
       };
 
-      # collaboration_panel.button = true;
-      # chat_panel.button = "never";
-
-      task = {
-        show_status_indicator = true;
-      };
-
-      unstable.ui_density = "comfortable";
-
       ui_font_family = lib.mkForce "Zed Plex Sans";
 
       terminal = {
@@ -309,6 +313,10 @@
       telemetry = {
         diagnostics = false;
         metrics = false;
+      };
+
+      journal = {
+        hour_format = "hour24";
       };
     };
   };

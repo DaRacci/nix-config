@@ -204,6 +204,17 @@ let
         default = null;
         description = "set window group properties.";
       };
+      content = mkOption {
+        type = nullOr str;
+        default = null;
+        description = "Sets content type.";
+      };
+      noCloseFor = mkOption {
+        type = nullOr (either int str);
+        default = null;
+        description = "Makes the window uncloseable with the killactive dispatcher for a given amount of ms on open.";
+        apply = v: toString v;
+      };
       #endregion
 
       #region Dynamic Rules
@@ -212,6 +223,11 @@ let
         type = nullOr (listOf str);
         default = null;
         description = "sets the animations for the window. Can be a single animation or a comma separated list of animations. See the Animations page for more information.";
+      };
+      allowsInput = mkOption {
+        type = nullOr bool;
+        default = null;
+        description = "Forces an XWayland window to receive input, even if it requests not to do so. (Might fix issues like Game Launchers not receiving focus for some reason)";
       };
       idleinhibit = mkOption {
         type = nullOr (enum [
@@ -371,6 +387,11 @@ let
         default = null;
         description = "disallows the app from inhibiting your shortcuts";
       };
+      noScreenshare = mkOption {
+        type = nullOr bool;
+        default = null;
+        description = "Hides the window and its popups from screen sharing by drawing black rectangles in their place. The rectangles are drawn even if other windows are above.";
+      };
       opaque = mkOption {
         type = nullOr bool;
         default = null;
@@ -487,9 +508,10 @@ let
     obj:
     let
       inherit (obj) rule;
-      nonNullRules = lib.filterAttrs (_: v: v != null) rule;
 
       matchers = if builtins.typeOf obj.matcher == "list" then obj.matcher else [ obj.matcher ];
+
+      getRuleName = attr: if attr ? internalName then attr.internalName else lib.toLower attr;
 
       getMatcherValue =
         _name: value: if (builtins.typeOf value == "bool") then if value then "1" else "0" else value;
@@ -516,7 +538,11 @@ let
           );
 
       matcherStrings = builtins.map mkMatcherString matchers;
-      ruleStrings = lib.mapAttrsToList mkRuleString nonNullRules;
+
+      ruleStrings =
+        rule
+        |> lib.filterAttrs (_: v: v != null)
+        |> lib.mapAttrsToList (name: value: mkRuleString (getRuleName name) value);
     in
     lib.pipe matcherStrings [
       # Create a list of rule strings for each matcher.

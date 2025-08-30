@@ -14,7 +14,7 @@
 
   services.kanidm = {
     enableServer = true;
-    package = pkgs.kanidm_1_6;
+    package = pkgs.kanidm_1_7;
     serverSettings =
       let
         certDirectory = config.security.acme.certs."auth.racci.dev".directory;
@@ -56,18 +56,21 @@
   };
 
   server = {
-    proxy.virtualHosts.auth.extraConfig =
-      let
-        cfg = config.services.kanidm.serverSettings;
-      in
-      ''
-        reverse_proxy {
-          to https://${cfg.bindaddress}
-          transport http {
-            tls_insecure_skip_verify
+    proxy.virtualHosts.auth = {
+      public = true;
+      extraConfig =
+        let
+          cfg = config.services.kanidm.serverSettings;
+        in
+        ''
+          reverse_proxy {
+            to https://${cfg.bindaddress}
+            transport http {
+              tls_insecure_skip_verify
+            }
           }
-        }
-      '';
+        '';
+    };
   };
 
   systemd.services.kanidm = {

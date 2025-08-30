@@ -19,19 +19,17 @@ let
     collectModules
     ;
 in
-lib.pipe
-  (collectModules ./. home.options._module.args.value.moduleType.getSubModules (
-    {
-      inherit (home) options;
-      lib = lib.extend (_: _: { hm = home.options.lib.value; });
-      specialArgs = home.options._module.specialArgs.value;
-      config = home.config // {
-        inherit (home.options) _module;
-      };
-    }
-    // home.options._module.specialArgs.value
-  ))
-  [
-    (lib.map (lib.getAttr "_file"))
-    lib.unique
-  ]
+collectModules ./. home.options._module.args.value.moduleType.getSubModules (
+  {
+    inherit (home) options;
+    lib = lib.extend (_: _: { hm = home.options.lib.value; });
+    specialArgs = home.options._module.specialArgs.value;
+    config = home.config // {
+      inherit (home.options) _module;
+    };
+  }
+  // home.options._module.specialArgs.value
+)
+|> lib.getAttr "modules"
+|> lib.map (lib.getAttr "_file")
+|> lib.unique

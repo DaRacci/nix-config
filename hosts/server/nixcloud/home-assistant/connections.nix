@@ -12,20 +12,27 @@ _: {
       "unifi"
 
       # Devices
+      "alexa_devices"
       "androidtv"
       "androidtv_remote"
       "apple_tv"
+      "cast"
+      "govee_light_local"
+      "homekit"
+      "homekit_controller"
+      "mobile_app"
       "schlage"
       "sensibo"
       "tile"
       "tplink"
       "unifiprotect"
-      "mobile_app"
+      "zha"
 
       # Arr Suite
       "radarr"
       "sonarr"
       "jellyfin"
+      "transmission"
 
       # Assistant
       "ollama"

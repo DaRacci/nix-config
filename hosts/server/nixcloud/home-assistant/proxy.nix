@@ -1,15 +1,18 @@
 { config, ... }:
 {
   server.proxy.virtualHosts = {
-    hassio.extraConfig =
-      let
-        inherit (config.services.home-assistant.config) http;
-      in
-      ''
-        import cors https://ai.racci.dev # Required for MCP integration
+    hassio = {
+      public = true;
+      extraConfig =
+        let
+          inherit (config.services.home-assistant.config) http;
+        in
+        ''
+          import cors https://ai.racci.dev # Required for MCP integration
 
-        reverse_proxy http://${http.server_host}:${toString http.server_port}
-      '';
+          reverse_proxy http://${http.server_host}:${toString http.server_port}
+        '';
+    };
   };
 
   services.home-assistant = {

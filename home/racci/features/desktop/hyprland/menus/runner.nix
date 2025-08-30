@@ -58,7 +58,6 @@
       orientation:                 horizontal;
       children:                    [ "listview" ];
       background-color:            transparent;
-      background-image:            url("~/.local/share/wallpaper.quad", width);
     }
     listview {
       padding:                     2em;

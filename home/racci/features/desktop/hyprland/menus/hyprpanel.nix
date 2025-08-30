@@ -14,7 +14,6 @@
 
   programs.hyprpanel = {
     enable = true;
-    # dontAssertNotificationDaemons = true;
     settings = {
       layout = {
         "bar.layouts" = {

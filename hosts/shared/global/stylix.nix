@@ -9,6 +9,6 @@
   stylix = {
     enable = !config.host.device.isHeadless;
     polarity = "dark";
-    image = inputs.stylix-wallpaper;
+    base16Scheme = "${inputs.stylix.inputs.tinted-schemes}/base16/tokyo-night-dark.yaml";
   };
 }

@@ -1,6 +1,5 @@
 {
   inputs,
-  osConfig,
   config,
   pkgs,
   lib,
@@ -8,6 +7,14 @@
 }:
 let
   cfg = config.purpose.development;
+
+  profiles = [
+    "default"
+    "rust"
+    "jvm"
+    "dotnet"
+    "python"
+  ];
 in
 {
   options.purpose.development.editors.vscode = {
@@ -16,8 +23,8 @@ in
     };
   };
 
-  config =
-    lib.mkIf (cfg.enable && cfg.editors.vscode.enable) {
+  config = lib.mkMerge [
+    (lib.mkIf (cfg.enable && cfg.editors.vscode.enable) {
       programs.vscode = {
         enable = true;
         mutableExtensionsDir = false;
@@ -312,9 +319,10 @@ in
       };
 
       user.persistence.directories = [ ".config/Code/User/" ];
-    }
-    // lib.optionalAttrs (osConfig ? stylix && osConfig.stylix.enable) {
-      # Must use osConfig to avoid infinite recursion, not great but it works.
-      stylix.targets.vscode.profileNames = builtins.attrNames config.programs.vscode.profiles;
-    };
+    })
+
+    (lib.mkIf (config ? stylix && config.stylix.enable) {
+      stylix.targets.vscode.profileNames = profiles;
+    })
+  ];
 }
