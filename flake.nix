@@ -89,7 +89,6 @@
             accelerationHosts = {
               cuda = [
                 "nixmi"
-                "winix"
               ];
               rocm = [
                 # "nixai"
