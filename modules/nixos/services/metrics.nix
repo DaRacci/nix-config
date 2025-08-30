@@ -282,21 +282,22 @@ in
           path = lib.getExe (
             pkgs.writeShellApplication {
               name = "upgrade-status";
-              runtimeInputs = [
-                pkgs.gnugrep
-                pkgs.gawk
-                pkgs.systemd
+              runtimeInputs = with pkgs; [
+                gnugrep
+                gawk
+                systemd
+                toybox
               ];
               text = ''
                 ${getSystemNixPkgsDate}
-                LAST_PROFILE_DATE=$(nix profile history --profile /nix/var/nix/profiles/system | grep '^Version' | awk -F'[()]+' '{print $2}' | tail -n 1)
+                LAST_PROFILE_TIMESTAMP=$(date -d "$(stat /run/current-system/nixos-version --format "%z")" +"%Y-%m-%dT%H:%M:%S%z")
 
-                echo "$LAST_PROFILE_DATE"
+                echo "$LAST_PROFILE_TIMESTAMP"
                 echo "nixpkgs_date:$NIXPKGS_DATE"
-                echo "last_profile_date:$LAST_PROFILE_DATE"
+                echo "last_profile_timestamp:$LAST_PROFILE_TIMESTAMP"
 
                 # If we are on a dirty rev then don't bother with the service status.
-                HAS_SERVICE=$(systemctl list-units --type=service --all | grep -c 'nixos-upgrade.service')
+                HAS_SERVICE=$(systemctl list-units --type=service --all | grep -c 'nixos-upgrade.service' || true)
                 if [[ "$HAS_SERVICE" -ne 0 ]]; then
                   STATUS=$(systemctl is-failed nixos-upgrade.service || true)
                   IS_RUNNING=$(systemctl is-active nixos-upgrade.service || true)
@@ -313,6 +314,8 @@ in
                   else
                     echo "status:idle"
                   fi
+                else
+                  echo "status:dirty"
                 fi
               '';
             }
