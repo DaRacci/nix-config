@@ -10,8 +10,7 @@ let
 
   # Creates the variables ELAPSED_{HOURS, MINUTES, SECONDS} for the systemd unit running time
   systemdUnitRunningTimeFormatted = unitName: ''
-    RUNNING_TIME=$(systemctl show -p ActiveEnterTimestamp --value ${unitName})
-    RUNNING_TIME=$(date -d "$RUNNING_TIME" +%s)
+    RUNNING_TIME=$(date -d "$(systemctl show -p ExecMainStartTimestamp --value ${unitName})" +%s)
     CURRENT_TIME=$(date +%s)
     ELAPSED_TIME=$((CURRENT_TIME - RUNNING_TIME))
     ELAPSED_HOURS=$((ELAPSED_TIME / 3600))
