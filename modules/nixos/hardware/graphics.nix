@@ -136,7 +136,7 @@ in
         package = config.boot.kernelPackages.nvidiaPackages.latest;
         open = true;
         nvidiaSettings = true;
-        nvidiaPersistenced = true;
+        nvidiaPersistenced = false;
         modesetting.enable = true;
         powerManagement = {
           enable = true;
