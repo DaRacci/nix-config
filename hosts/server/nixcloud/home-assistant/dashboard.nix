@@ -75,6 +75,73 @@
                 {{ windows_on }}
               '';
             };
+            media_player_active = {
+              unique_id = "media_player_active";
+              friendly_name = "Media Player Active";
+              value_template = ''
+                {% set media_players_active = states.media_player
+                  | selectattr("state", "in", ["playing", "paused"])
+                  | list
+                  | count %}
+                {{ media_players_active > 0 }}
+              '';
+              icon_template = ''
+                {% if states.media_player
+                  | selectattr("state", "in", ["playing", "paused"])
+                  | list
+                  | count > 0 %}
+                  mdi:cast-connected
+                {% else %}
+                  mdi:cast-off
+                {% endif %}
+              '';
+            };
+            battery_level_attention = {
+              unique_id = "battery_level_attention";
+              friendly_name = "Battery Level Attention";
+              value_template = ''
+                {% set low_battery_devices = states.sensor
+                  | selectattr("attributes.device_class", "eq", "battery")
+                  | selectattr("state", "lt", 20)
+                  | list
+                  | count %}
+                {{ low_battery_devices > 0 }}
+              '';
+              icon_template = ''
+                {% if states.sensor
+                  | selectattr("attributes.device_class", "eq", "battery")
+                  | selectattr("state", "lt", 20)
+                  | list
+                  | count > 0 %}
+                  mdi:battery-alert
+                {% else %}
+                  mdi:battery
+                {% endif %}
+              '';
+            };
+            battery_health_attention = {
+              unique_id = "battery_health_attention";
+              friendly_name = "Battery Health Attention";
+              value_template = ''
+                {% set bad_health_devices = states.sensor
+                  | selectattr("entity_id", "search", "battery_health")
+                  | selectattr("state", "ne", "good")
+                  | list
+                  | count %}
+                {{ bad_health_devices > 0 }}
+              '';
+              icon_template = ''
+                {% if states.sensor
+                  | selectattr("entity_id", "search", "battery_health")
+                  | selectattr("state", "ne", "good")
+                  | list
+                  | count > 0 %}
+                  mdi:battery-alert
+                {% else %}
+                  mdi:battery
+                {% endif %}
+              '';
+            };
           };
         }
       ];
