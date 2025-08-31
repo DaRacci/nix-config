@@ -338,10 +338,7 @@ in
           description = "Hacompanion for monitor system metrics";
 
           wantedBy = [ "multi-user.target" ];
-          after = [
-            "network-online.target"
-          ]
-          ++ (lib.optionals (self ? rev) [ "nixos-rebuild-switch-to-configuration.service" ]);
+          after = [ "network-online.target" ];
           requires = [ "network-online.target" ];
 
           path = with pkgs; [
@@ -440,10 +437,7 @@ in
           services.upgrade-status = lib.mkIf (self ? rev) {
             wantedBy = [ "multi-user.target" ];
             requires = [ "network-online.target" ];
-            after = [
-              "network-online.target"
-              "nixos-rebuild-switch-to-configuration.service"
-            ];
+            after = [ "network-online.target" ];
 
             environment = {
               UPTIME_ENDPOINT = "https://uptime.racci.dev/api/push";
