@@ -52,8 +52,8 @@ This is my interpretation of the perfect nix flake, this powers my desktops, vms
 [nixai]: ./hosts/server/nixai/
 [nixcloud]: ./hosts/server/nixcloud/
 [nixdev]: ./hosts/server/nixdev/
-[nixmi]: ./hosts/desktop/nixmi/
 [nixio]: ./hosts/server/nixio/
+[nixmi]: ./hosts/desktop/nixmi/
 [nixmon]: ./hosts/server/nixmon/
 [nixos]: https://nixos.org/
 [nixserv]: ./hosts/server/nixserv/
