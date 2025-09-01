@@ -176,7 +176,10 @@ in
   options.services.metrics = {
     enable = lib.mkEnableOption "Metrics collection service";
 
-    upgradeStatus.enable = lib.mkEnableOption "Enable Upgrade Status service";
+    upgradeStatus = {
+      enable = lib.mkEnableOption "Enable Upgrade Status service";
+      uptimeKuma.enable = lib.mkEnableOption "Enable Uptime Kuma tracking for Upgrade Status";
+    };
 
     hacompanion = {
       enable = lib.mkEnableOption "Enable Home Assistant Companion service";
@@ -374,8 +377,6 @@ in
       })
 
       (lib.mkIf cfg.upgradeStatus.enable {
-        sops.secrets.UPGRADE_STATUS_ID = { };
-
         services.metrics.hacompanion.script.upgrade_status = {
           name = "NixOS Upgrade Status";
           icon = "mdi:update";
@@ -423,6 +424,9 @@ in
             }
           );
         };
+      })
+      (lib.mkIf cfg.upgradeStatus.uptimeKuma.enable {
+        sops.secrets.UPGRADE_STATUS_ID = { };
 
         systemd = {
           timers.upgrade-status = lib.mkIf (self ? rev) {
