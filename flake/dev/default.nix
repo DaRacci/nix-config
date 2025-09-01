@@ -50,6 +50,7 @@
           nixfmt-rfc-style
           nix-init
           nh
+          nix-update
 
           # Required Tools
           nix
