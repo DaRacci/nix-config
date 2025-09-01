@@ -67,6 +67,9 @@ in
               git = mkUvxServer "mcp-server-git";
               fetch = mkUvxServer "mcp-server-fetch";
               diff = mkNpxServer "diff-mcp";
+              playwright = {
+                command = lib.getExe pkgs.playwright;
+              };
               filesystem = mkNpxServerWithArgs "@modelcontextprotocol/server-filesystem" [
                 "/var/lib/mcpo/filesystem"
               ];
