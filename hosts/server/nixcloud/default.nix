@@ -3,7 +3,7 @@
   imports = [
     ./home-assistant
     ./homebox.nix
-    # ./immich.nix
+    ./immich.nix
     ./identity.nix
     ./nextcloud.nix
     ./search.nix
