@@ -353,6 +353,7 @@ in
             smartmontools
             util-linux
             zfs
+            toybox
           ];
 
           serviceConfig =
