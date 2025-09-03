@@ -81,7 +81,20 @@ in
     };
   };
 
-  config = mkIf (!isNixio) {
-    server.network.subnets = self.nixosConfigurations.nixio.config.server.network.subnets;
-  };
+  config = lib.mkMerge [
+    (mkIf (!isNixio) {
+      server.network.subnets = self.nixosConfigurations.nixio.config.server.network.subnets;
+    })
+    {
+      systemd.journald = {
+        storage = "persistent";
+        extraConfig = ''
+          SystemMaxUse=256M
+          SystemMaxFileSize=64M
+          SystemKeepFree=512M
+          MaxRetentionSec=14day
+        '';
+      };
+    }
+  ];
 }
