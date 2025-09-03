@@ -60,6 +60,7 @@ If the changes affect the flake or devShell, run `nix develop --command true` to
 ## Commit & Pull Request Guidelines
 
 Before submitting changes to the repository ensure that you have:
+
 - Run `nix fmt` to format the code.
 - Run `nix flake check` to ensure that all configurations evaluate correctly.
 - Tested at-least one host and one home configuration affected by your change.
