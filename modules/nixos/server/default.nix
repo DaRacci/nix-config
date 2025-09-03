@@ -109,7 +109,27 @@ in
         wantedBy = [ "network-online.target" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = "${pkgs.bash}/bin/bash -e -c 'for i in {1..150}; do if getent hosts nixio >/dev/null 2>&1 && ping -c1 -W1 nixio >/dev/null 2>&1; then exit 0; fi; sleep 2; done; echo \"WARNING: nixio not reachable after timeout, continuing boot without nixio\" >&2; exit 0'";
+          ExecStart = lib.getExe (
+            pkgs.writeShellApplication {
+              name = "wait-for-nixio";
+              runtimeInputs = [
+                pkgs.iputils
+                pkgs.toybox
+                pkgs.getent
+              ];
+              text = ''
+                #shellcheck disable=SC2034
+                for i in {1..150}; do
+                  if getent hosts nixio >/dev/null 2>&1 && ping -c1 -W1 nixio >/dev/null 2>&1; then
+                    exit 0;
+                  fi;
+                  sleep 2;
+                done;
+                echo "WARNING: nixio not reachable after timeout, continuing boot without nixio" >&2;
+                exit 0
+              '';
+            }
+          );
         };
       };
     })
