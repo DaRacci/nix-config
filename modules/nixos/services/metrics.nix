@@ -363,7 +363,10 @@ in
               Type = "simple";
               DynamicUser = true;
               ExecStart = "${lib.getExe pkgs.hacompanion} -quiet -config ${hacompanionToml}";
-              Restart = "on-failure";
+              Restart = "always";
+              RestartSec = 10;
+              StartLimitIntervalSec = 0;
+              StartLimitBurst = 0;
               EnvironmentFile = config.sops.secrets.HACOMPANION_ENV.path;
               StateDirectory = "hacompanion";
               WorkingDirectory = "/var/lib/hacompanion";
