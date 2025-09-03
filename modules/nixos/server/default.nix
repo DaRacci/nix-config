@@ -87,7 +87,7 @@ in
       server.network.subnets = self.nixosConfigurations.nixio.config.server.network.subnets;
     })
     {
-      systemd.journald = {
+      services.journald = {
         storage = "persistent";
         extraConfig = ''
           SystemMaxUse=256M
