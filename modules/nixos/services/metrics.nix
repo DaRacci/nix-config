@@ -42,6 +42,82 @@ let
     "audio_volume"
   ];
 
+  mkStorageScript =
+    deviceName: deviceCfg: sensor:
+    let
+      scriptName = "${deviceName}_${sensor}";
+      scriptPath = pkgs.writeShellScript "${scriptName}.sh" ''
+        exec ${lib.getExe pkgs.drive-stats} ${sensor} ${deviceName}
+      '';
+    in
+    {
+      name = scriptName;
+      value = {
+        name =
+          let
+            devicePretty = if deviceCfg != null && deviceCfg.name != null then deviceCfg.name else deviceName;
+            sensorPretty =
+              {
+                temperature = "Temperature";
+                used = "Used";
+                avail = "Available";
+                read = "Read Speed";
+                write = "Write Speed";
+              }
+              .${sensor};
+          in
+          "${devicePretty} — ${sensorPretty}";
+
+        icon =
+          {
+            temperature = "mdi:thermostat";
+            used = "mdi:harddisk";
+            avail = "mdi:harddisk-plus";
+            read = "mdi:download";
+            write = "mdi:upload";
+          }
+          .${sensor};
+
+        type = "sensor";
+        path = scriptPath;
+
+        device_class =
+          {
+            temperature = "temperature";
+            used = "data_size";
+            avail = "data_size";
+            read = "data_rate";
+            write = "data_rate";
+          }
+          .${sensor};
+
+        unit_of_measurement =
+          {
+            temperature = "°C";
+            used = "gigabyte";
+            avail = "gigabyte";
+            read = "mb/s";
+            write = "mb/s";
+          }
+          .${sensor};
+      };
+    };
+
+  storageScripts =
+    let
+      storageConfigs = lib.filterAttrs (_: config: config.sensors != { }) cfg.hacompanion.storage;
+    in
+    lib.listToAttrs (
+      lib.flatten (
+        lib.mapAttrsToList (
+          device: config:
+          lib.mapAttrsToList (sensor: _: mkStorageScript device config sensor) (
+            lib.filterAttrs (_: enabled: enabled) config.sensors
+          )
+        ) storageConfigs
+      )
+    );
+
   hacompanionConfig = {
     homeassistant = {
       device_name = config.host.name;
@@ -93,14 +169,17 @@ let
         inherit (script) unit_of_measurement;
       })
       // (lib.optionalAttrs (script.device_class != null) { inherit (script) device_class; })
-    ) cfg.hacompanion.script;
+    ) (cfg.hacompanion.script // storageScripts);
   };
 in
 {
   options.services.metrics = {
     enable = lib.mkEnableOption "Metrics collection service";
 
-    upgradeStatus.enable = lib.mkEnableOption "Enable Upgrade Status service";
+    upgradeStatus = {
+      enable = lib.mkEnableOption "Enable Upgrade Status service";
+      uptimeKuma.enable = lib.mkEnableOption "Enable Uptime Kuma tracking for Upgrade Status";
+    };
 
     hacompanion = {
       enable = lib.mkEnableOption "Enable Home Assistant Companion service";
@@ -224,6 +303,30 @@ in
           }
         );
       };
+
+      storage = lib.mkOption {
+        type = lib.types.attrsOf (
+          lib.types.submodule {
+            options = {
+              name = lib.mkOption {
+                type = lib.types.nullOr lib.types.str;
+                description = "The pretty display name for this storage device in Home Assistant.";
+                default = null;
+              };
+
+              sensors = {
+                temperature = lib.mkEnableOption "Enable temperature sensor";
+                used = lib.mkEnableOption "Enable used space sensor";
+                avail = lib.mkEnableOption "Enable available space sensor";
+                read = lib.mkEnableOption "Enable read speed sensor";
+                write = lib.mkEnableOption "Enable write speed sensor";
+              };
+            };
+          }
+        );
+        description = "Storage devices and ZFS pools to monitor";
+        default = { };
+      };
     };
   };
 
@@ -238,7 +341,7 @@ in
           description = "Hacompanion for monitor system metrics";
 
           wantedBy = [ "multi-user.target" ];
-          after = [ "network-online.target" ] ++ (lib.optionals (self ? rev) [ "nixos-upgrade.service" ]);
+          after = [ "network-online.target" ];
           requires = [ "network-online.target" ];
 
           path = with pkgs; [
@@ -247,6 +350,10 @@ in
             systemd
             nix
             gawk
+            smartmontools
+            util-linux
+            zfs
+            toybox
           ];
 
           serviceConfig =
@@ -256,8 +363,11 @@ in
             {
               Type = "simple";
               DynamicUser = true;
-              ExecStart = "${lib.getExe pkgs.hacompanion} -config ${hacompanionToml}";
-              Restart = "on-failure";
+              ExecStart = "${lib.getExe pkgs.hacompanion} -quiet -config ${hacompanionToml}";
+              Restart = "always";
+              RestartSec = 10;
+              StartLimitIntervalSec = 0;
+              StartLimitBurst = 0;
               EnvironmentFile = config.sops.secrets.HACOMPANION_ENV.path;
               StateDirectory = "hacompanion";
               WorkingDirectory = "/var/lib/hacompanion";
@@ -271,8 +381,6 @@ in
       })
 
       (lib.mkIf cfg.upgradeStatus.enable {
-        sops.secrets.UPGRADE_STATUS_ID = { };
-
         services.metrics.hacompanion.script.upgrade_status = {
           name = "NixOS Upgrade Status";
           icon = "mdi:update";
@@ -320,6 +428,9 @@ in
             }
           );
         };
+      })
+      (lib.mkIf cfg.upgradeStatus.uptimeKuma.enable {
+        sops.secrets.UPGRADE_STATUS_ID = { };
 
         systemd = {
           timers.upgrade-status = lib.mkIf (self ? rev) {
@@ -334,10 +445,7 @@ in
           services.upgrade-status = lib.mkIf (self ? rev) {
             wantedBy = [ "multi-user.target" ];
             requires = [ "network-online.target" ];
-            after = [
-              "network-online.target"
-              "nixos-upgrade.service"
-            ];
+            after = [ "network-online.target" ];
 
             environment = {
               UPTIME_ENDPOINT = "https://uptime.racci.dev/api/push";

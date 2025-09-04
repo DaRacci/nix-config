@@ -75,6 +75,77 @@
                 {{ windows_on }}
               '';
             };
+            media_player_active = {
+              unique_id = "media_player_active";
+              friendly_name = "Media Player Active";
+              value_template = ''
+                {% set media_players_active = states.media_player
+                  | selectattr("state", "in", ["playing", "paused"])
+                  | list
+                  | count %}
+                {{ media_players_active > 0 }}
+              '';
+              icon_template = ''
+                {% if states.media_player
+                  | selectattr("state", "in", ["playing", "paused"])
+                  | list
+                  | count > 0 %}
+                  mdi:cast-connected
+                {% else %}
+                  mdi:cast-off
+                {% endif %}
+              '';
+            };
+            battery_level_attention = {
+              unique_id = "battery_level_attention";
+              friendly_name = "Battery Level Attention";
+              value_template = ''
+                {% set low_battery_devices = states.sensor
+                  | selectattr("attributes.device_class", "eq", "battery")
+                  | map(attribute="state")
+                  | map('int')
+                  | select("lt", 20)
+                  | list
+                  | count %}
+                {{ low_battery_devices > 0 }}
+              '';
+              icon_template = ''
+                {% if states.sensor
+                  | selectattr("attributes.device_class", "eq", "battery")
+                  | selectattr("state", "lt", 20)
+                  | list
+                  | count > 0 %}
+                  mdi:battery-alert
+                {% else %}
+                  mdi:battery
+                {% endif %}
+              '';
+            };
+            battery_health_attention = rec {
+              unique_id = "battery_health_attention";
+              friendly_name = "Battery Health Attention";
+              value_template = ''
+                {% set bad_health_devices = states.sensor
+                  | selectattr("entity_id", "search", "battery_health")
+                  | selectattr("entity_id", "ne", "sensor.${unique_id}")
+                  | selectattr("state", "ne", "good")
+                  | list
+                  | count %}
+                {{ bad_health_devices > 0 }}
+              '';
+              icon_template = ''
+                {% if states.sensor
+                  | selectattr("entity_id", "search", "battery_health")
+                  | selectattr("entity_id", "ne", "sensor.${unique_id}")
+                  | selectattr("state", "ne", "good")
+                  | list
+                  | count > 0 %}
+                  mdi:battery-alert
+                {% else %}
+                  mdi:battery
+                {% endif %}
+              '';
+            };
           };
         }
       ];
@@ -88,11 +159,14 @@
           }
         ]
         ++ (
+          # These are installed via HACS normally, but we need to include them here to actually activate them.
           [
-            "Home-Assistant-Lovelace-Local-Conditional-card/local-conditional-card.js"
             "button-card/button-card.js"
             "config-template-card/config-template-card.js"
+            "custom-brand-icons/custom-brand-icons.js"
             "ha-floorplan/floorplan.js"
+            "hass-selfhst-icons/hass-selfhst-icons.js"
+            "Home-Assistant-Lovelace-Local-Conditional-card/local-conditional-card.js"
             "lovelace-hass-arlo/hass-arlo.js"
             "lovelace-layout-card/layout-card.js"
             "lovelace-navbar-card/navbar-card.js"

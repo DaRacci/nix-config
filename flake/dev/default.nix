@@ -50,6 +50,7 @@
           nixfmt-rfc-style
           nix-init
           nh
+          nix-update
 
           # Required Tools
           nix
@@ -82,7 +83,7 @@
         scripts =
           let
             nuSelectHost = ''
-              const HOSTS = [${builtins.attrNames self.nixosConfigurations |> builtins.concatStringsSep " "}]]
+              const HOSTS = [${builtins.attrNames self.nixosConfigurations |> builtins.concatStringsSep " "}]
               let selected = $HOSTS | input list -f
             '';
           in

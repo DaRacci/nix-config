@@ -17,7 +17,10 @@
 
     metrics = {
       enable = true;
-      upgradeStatus.enable = true;
+      upgradeStatus = {
+        enable = true;
+        uptimeKuma.enable = true;
+      };
       hacompanion = {
         enable = true;
         sensor = {

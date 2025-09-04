@@ -67,6 +67,9 @@ in
               git = mkUvxServer "mcp-server-git";
               fetch = mkUvxServer "mcp-server-fetch";
               diff = mkNpxServer "diff-mcp";
+              playwright = {
+                command = lib.getExe pkgs.playwright;
+              };
               filesystem = mkNpxServerWithArgs "@modelcontextprotocol/server-filesystem" [
                 "/var/lib/mcpo/filesystem"
               ];
@@ -97,9 +100,8 @@ in
     # acceleration = "rocm";
     rocmOverrideGfx = "10.3.0";
     loadModels = [
+      "gemma3:1b"
       "qwen3:1.7b"
-      "gemma3n:e2b"
-      "gemma3n:e4b"
     ];
     environmentVariables = {
       HCC_AMDGPU_TARGET = "gfx1031";

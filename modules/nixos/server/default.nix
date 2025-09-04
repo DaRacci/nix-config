@@ -2,6 +2,7 @@
   self,
   config,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -81,7 +82,56 @@ in
     };
   };
 
-  config = mkIf (!isNixio) {
-    server.network.subnets = self.nixosConfigurations.nixio.config.server.network.subnets;
-  };
+  config = lib.mkMerge [
+    (mkIf (!isNixio) {
+      server.network.subnets = self.nixosConfigurations.nixio.config.server.network.subnets;
+    })
+    {
+      services.journald = {
+        storage = "persistent";
+        extraConfig = ''
+          SystemMaxUse=256M
+          SystemMaxFileSize=64M
+          SystemKeepFree=512M
+          MaxRetentionSec=14day
+        '';
+      };
+    }
+    (mkIf (!isNixio) {
+      systemd.services.wait-for-nixio = {
+        description = "Wait for nixio host to become reachable";
+        after = [ "dhcpd.service" ];
+        wants = [
+          "network.target"
+          "dhcpd.service"
+        ];
+        before = [ "network-online.target" ];
+        wantedBy = [ "network-online.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = lib.getExe (
+            pkgs.writeShellApplication {
+              name = "wait-for-nixio";
+              runtimeInputs = [
+                pkgs.iputils
+                pkgs.toybox
+                pkgs.getent
+              ];
+              text = ''
+                #shellcheck disable=SC2034
+                for i in {1..150}; do
+                  if getent hosts nixio >/dev/null 2>&1 && ping -c1 -W1 nixio >/dev/null 2>&1; then
+                    exit 0;
+                  fi;
+                  sleep 2;
+                done;
+                echo "WARNING: nixio not reachable after timeout, continuing boot without nixio" >&2;
+                exit 0
+              '';
+            }
+          );
+        };
+      };
+    })
+  ];
 }

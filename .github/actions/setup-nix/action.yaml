@@ -42,6 +42,7 @@ runs:
         oauth-client-id: ${{ inputs.TS_OAUTH_CLIENT_ID }}
         oauth-secret: ${{ inputs.TS_OAUTH_SECRET }}
         tags: tag:ci
+        use-cache: true
 
     - name: Setup Attic cache
       uses: ryanccn/attic-action@v0
