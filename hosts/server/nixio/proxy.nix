@@ -25,17 +25,13 @@ _:
           }
         }
       '';
-
-      # TODO - replace with komodo & run off a nix machine
-      dockge.extraConfig = ''
-        reverse_proxy http://dockge:5001
-      '';
-
-      pgadmin.extraConfig = ''
-        reverse_proxy http://localhost:${toString config.services.pgadmin.port}
-      '';
     };
   };
+
+  systemd.services.caddy.after = [
+    "tailscaled.service"
+    "adguardhome.service"
+  ];
 
   services.caddy = {
     enable = true;
