@@ -462,8 +462,7 @@ in
 
               "NixOS Wiki" = {
                 urls = [ { template = "https://wiki.nixos.org/w/index.php?search={searchTerms}"; } ];
-                icon = "https://nixos.wiki/favicon.png";
-                updateInterval = 24 * 60 * 60 * 1000; # every day
+                icon = searchNixIcon;
                 definedAliases = [ "@nw" ];
               };
 
@@ -500,7 +499,7 @@ in
 
               "NixPkgsIssues" = {
                 urls = [ { template = "https://github.com/NixOS/nixpkgs/issues?q={searchTerms}"; } ];
-                icon = "https://nixos.org/logo/nixos-logo-only-hires.png";
+                icon = searchNixIcon;
                 definedAliases = [ "@npi" ];
               };
 
@@ -508,6 +507,12 @@ in
                 urls = [ { template = "https://web.archive.org/web/*/{searchTerms}"; } ];
                 icon = "https://archive.org/offshoot_assets/favicon.ico";
                 definedAliases = [ "@wbm" ];
+              };
+
+              "RacciSearch" = {
+                urls = [ { template = "https://search.racci.dev/search?q={searchTerms}"; } ];
+                icon = "https://search.racci.dev/favicon.ico";
+                definedAliases = [ "@rs" ];
               };
 
               "google".metaData.alias = "@g"; # builtin engines only support specifying one additional alias
