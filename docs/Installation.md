@@ -5,6 +5,7 @@ This guide covers various installation scenarios for the nix-config repository.
 ## Windows Subsystem for Linux (WSL)
 
 ### Prerequisites
+
 - Windows 10 version 2004 and higher (Build 19041 and higher) or Windows 11
 - WSL 2 enabled
 - Administrator access to Windows
@@ -12,6 +13,7 @@ This guide covers various installation scenarios for the nix-config repository.
 ### Installation Steps
 
 #### 1. Install WSL 2
+
 ```powershell
 # Run in PowerShell as Administrator
 wsl --install
@@ -21,6 +23,7 @@ wsl --set-default-version 2
 ```
 
 #### 2. Setup NixOS for WSL
+
 Download and install NixOS-WSL via [NixOS-WSL](https://github.com/nix-community/NixOS-WSL):
 
 ```powershell
@@ -33,6 +36,7 @@ wsl -d NixOS
 ```
 
 #### 3. Configure NixOS-WSL
+
 After starting your NixOS-WSL instance:
 
 ```bash
@@ -46,6 +50,7 @@ sudo nixos-rebuild switch --flake /etc/nixos#winix
 #### 4. WSL-Specific Features
 
 The WSL configuration includes:
+
 - SSH agent relay between Windows and WSL
 - Hardware acceleration support for development
 - Remote desktop capabilities
@@ -54,6 +59,7 @@ The WSL configuration includes:
 ## Native NixOS Installation
 
 ### Prerequisites
+
 - NixOS installation media
 - Target hardware
 - Network connectivity
@@ -62,11 +68,13 @@ The WSL configuration includes:
 ### Installation Process
 
 #### 1. Boot from NixOS Installation Media
+
 - Download NixOS ISO from [nixos.org](https://nixos.org/download.html)
 - Create bootable USB/DVD
 - Boot from installation media
 
 #### 2. Network Configuration
+
 ```bash
 # For WiFi connections
 sudo systemctl start wpa_supplicant
@@ -82,9 +90,11 @@ ping nixos.org
 ```
 
 #### 3. Disk Setup
+
 Follow standard NixOS installation procedures for disk partitioning and filesystem setup as described in the [NixOS manual](https://nixos.org/manual/nixos/stable/index.html#sec-installation).
 
 #### 4. Generate Hardware Configuration
+
 ```bash
 # Generate hardware configuration
 nixos-generate-config --root /mnt
@@ -99,9 +109,11 @@ git clone https://github.com/DaRacci/nix-config.git .
 ```
 
 #### 5. Customize Host Configuration
+
 Edit `hosts/{device-type}/{hostname}/default.nix` and `hardware.nix` according to your needs.
 
 #### 6. Install NixOS
+
 ```bash
 # Install with your specific host configuration
 nixos-install --flake .#{hostname}
@@ -110,6 +122,7 @@ nixos-install --flake .#{hostname}
 ```
 
 #### 7. Post-Installation
+
 ```bash
 # Reboot into new system
 reboot
@@ -123,12 +136,14 @@ sudo nixos-rebuild switch --flake /etc/nixos#{hostname}
 ### From Traditional NixOS Configuration
 
 #### 1. Backup Current Configuration
+
 ```bash
 # Backup current configuration (adjust path if using flakes)
 sudo cp -r /etc/nixos /etc/nixos.backup
 ```
 
 #### 2. Clone This Repository
+
 ```bash
 # Clone to a working directory
 git clone https://github.com/DaRacci/nix-config.git /tmp/nix-config
@@ -136,6 +151,7 @@ sudo cp -r /tmp/nix-config/* /etc/nixos/
 ```
 
 #### 3. Create Host Configuration
+
 ```bash
 # Create your host directory
 sudo mkdir -p /etc/nixos/hosts/{device-type}/{hostname}
@@ -148,6 +164,7 @@ sudo cp /etc/nixos.backup/hardware-configuration.nix /etc/nixos/hosts/{device-ty
 ```
 
 #### 4. Test and Apply
+
 ```bash
 # Test the new configuration
 sudo nixos-rebuild build --flake .#{hostname}
@@ -155,5 +172,3 @@ sudo nixos-rebuild build --flake .#{hostname}
 # Apply if build succeeds
 sudo nixos-rebuild switch --flake .#{hostname}
 ```
-
-

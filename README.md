@@ -51,6 +51,7 @@ The repository uses an **automatic discovery system** that scans the filesystem 
 ### Auto-Discovery Mechanism
 
 The flake automatically discovers:
+
 - **Hosts**: By scanning `hosts/{device-type}/` directories (excluding `shared/`)
 - **Users**: By scanning `home/` directories and matching with existing hosts
 - **Hardware Acceleration**: Support based on predefined host lists
@@ -72,6 +73,7 @@ The flake automatically discovers:
 ## Development
 
 This repository includes utilities for development and debugging:
+
 - `utils/get-os-imports.nix` - Debug NixOS module imports
 - `utils/get-hm-imports.nix` - Debug home-manager imports
 - `utils/get-imports.nu` - Nushell script for import analysis
