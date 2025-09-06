@@ -39,56 +39,54 @@ let
     // {
       args = base.args ++ args;
     };
+
+  inherit (config.sops) placeholder;
 in
 {
   sops = {
     secrets = {
+      "MCP/API_TOKEN" = { };
       "MCP/HASSIO_TOKEN" = { };
       "MCP/GITHUB_TOKEN" = { };
+      "MCP/ANILIST_TOKEN" = { };
     };
 
     templates = {
-      mcpoConfig = {
-        content =
-          let
-            inherit (config.sops) placeholder;
-          in
-          builtins.toJSON {
-            mcpServers = {
-              memory = mkNpxServer "@modelcontextprotocol/server-memory";
-              time = mkUvxServerWithArgs "mcp-server-time" [
-                "--local-timezone=${config.time.timeZone}"
-              ];
-              nixos = mkUvxServer "mcp-nixos";
-              context7 = mkNpxServer "@upstash/context7-mcp";
-              sequential-thinking = {
-                command = lib.getExe pkgs.mcp-sequential-thinking;
-              };
-              git = mkUvxServer "mcp-server-git";
-              fetch = mkUvxServer "mcp-server-fetch";
-              diff = mkNpxServer "diff-mcp";
-              playwright = {
-                command = lib.getExe pkgs.playwright;
-              };
-              filesystem = mkNpxServerWithArgs "@modelcontextprotocol/server-filesystem" [
-                "/var/lib/mcpo/filesystem"
-              ];
-              hassio = {
-                type = "sse";
-                url = "https://hassio.racci.dev/mcp_server/sse";
-                headers = {
-                  Authorization = "Bearer ${placeholder."MCP/HASSIO_TOKEN"}";
-                };
-              };
-              github = {
-                type = "streamable-http";
-                url = "https://api.githubcopilot.com/mcp";
-                headers = {
-                  Authorization = "Bearer ${placeholder."MCP/GITHUB_TOKEN"}";
-                };
-              };
-            };
+      mcpoEnvironment.content = lib.toShellVars {
+        API_TOKEN = placeholder."MCP/API_TOKEN";
+        ANILIST_TOKEN = placeholder."MCP/ANILIST_TOKEN";
+      };
+
+      mcpoConfig.content = builtins.toJSON {
+        mcpServers = {
+          memory = mkNpxServer "@modelcontextprotocol/server-memory";
+          time = mkUvxServerWithArgs "mcp-server-time" [ "--local-timezone=${config.time.timeZone}" ];
+          nixos = mkUvxServer "mcp-nixos";
+          context7 = mkNpxServer "@upstash/context7-mcp";
+          sequential-thinking.command = lib.getExe pkgs.mcp-sequential-thinking;
+          git = mkUvxServer "mcp-server-git";
+          fetch = mkUvxServerWithArgs "mcp-server-fetch" [ "--ignore-robots-txt" ];
+          diff = mkNpxServer "diff-mcp";
+          filesystem = mkNpxServerWithArgs "@modelcontextprotocol/server-filesystem" [
+            "/var/lib/mcpo/filesystem"
+          ];
+          hassio = {
+            type = "sse";
+            url = "https://hassio.racci.dev/mcp_server/sse";
+            headers.Authorization = "Bearer ${placeholder."MCP/HASSIO_TOKEN"}";
           };
+          github = {
+            type = "streamable-http";
+            url = "https://api.githubcopilot.com/mcp";
+            headers.Authorization = "Bearer ${placeholder."MCP/GITHUB_TOKEN"}";
+          };
+          browser = {
+            command = lib.getExe pkgs.playwright-mcp;
+            args = [ "--browser firefox --headless" ];
+          };
+          search = mkNpxServer "mcp-searxng";
+          anilist = mkNpxServer "anilist-mcp";
+        };
       };
     };
   };
@@ -118,6 +116,9 @@ in
 
     environment = {
       HOME = "/var/lib/mcpo";
+
+      # For mcp-searxng
+      SEARXNG_URL = "https://search.racci.dev";
     };
 
     path = with pkgs; [
@@ -130,7 +131,8 @@ in
     ];
 
     serviceConfig = {
-      ExecStart = "${lib.getExe mcpo} --config \${CREDENTIALS_DIRECTORY}/config.json --hot-reload";
+      EnvironmentFile = config.sops.templates.mcpoEnvironment.path;
+      ExecStart = "${lib.getExe mcpo} --api-token \${API_TOKEN} --config \${CREDENTIALS_DIRECTORY}/config.json --hot-reload";
       WorkingDirectory = "/var/lib/mcpo";
       StateDirectory = "mcpo";
       RuntimeDirectory = "mcpo";
