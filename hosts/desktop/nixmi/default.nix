@@ -135,7 +135,10 @@
       enable = true;
       directories = [
         "/var/lib/decky-loader"
-        "/var/lib/private/ollama"
+        {
+          directory = "/var/lib/private";
+          mode = "0700";
+        }
       ];
     };
   };
