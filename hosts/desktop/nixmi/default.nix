@@ -33,30 +33,19 @@
           cpu_usage.enable = true;
           uptime.enable = true;
           memory.enable = true;
-          power.enable = true;
-          audio_volume.enable = true;
-        };
-
-        storage = {
-          "/dev/nvme0" = {
-            name = "NVMe 0";
-            sensors = {
-              temperature = true;
-              read = true;
-              write = true;
-            };
-          };
-          "/dev/mapper/cryptroot" = {
-            name = "LUKS Root";
-            sensors = {
-              avail = true;
-              used = true;
-              read = true;
-              write = true;
-            };
-          };
         };
       };
+    };
+
+    mcpo = {
+      enable = true;
+      configuration =
+        let
+          mk = config.services.mcpo.helpers;
+        in
+        {
+          desktop-commander = mk.npxServer "@wonderwhy-er/desktop-commander@latest";
+        };
     };
   };
 
