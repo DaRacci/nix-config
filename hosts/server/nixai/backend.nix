@@ -5,69 +5,65 @@
   ...
 }:
 let
-  mcpo = with pkgs.python3Packages; toPythonApplication pkgs.mcpo;
-  npx = lib.getExe' pkgs.nodejs "npx";
-  uvx = lib.getExe' pkgs.uv "uvx";
-
-  mkNpxServer = package: {
-    command = npx;
-    args = [
-      "-y"
-      package
-    ];
-  };
-  mkNpxServerWithArgs =
-    package: args:
-    let
-      base = mkNpxServer package;
-    in
-    base
-    // {
-      args = base.args ++ args;
-    };
-
-  mkUvxServer = package: {
-    command = uvx;
-    args = [ package ];
-  };
-  mkUvxServerWithArgs =
-    package: args:
-    let
-      base = mkUvxServer package;
-    in
-    base
-    // {
-      args = base.args ++ args;
-    };
-
   inherit (config.sops) placeholder;
 in
 {
-  sops = {
-    secrets = {
-      "MCP/API_TOKEN" = { };
-      "MCP/HASSIO_TOKEN" = { };
-      "MCP/GITHUB_TOKEN" = { };
-      "MCP/ANILIST_TOKEN" = { };
+  sops.secrets = {
+    "MCP/API_TOKEN" = { };
+    "MCP/HASSIO_TOKEN" = { };
+    "MCP/GITHUB_TOKEN" = { };
+    "MCP/ANILIST_TOKEN" = { };
+  };
+
+  services = {
+
+    # Runs like shit because iGPU ROCM doesn't work
+    # Waiting for https://github.com/ollama/ollama/issues/2033 so it can run under vulkan
+    ollama = {
+      enable = true;
+      # acceleration = "rocm";
+      rocmOverrideGfx = "10.3.0";
+      loadModels = [
+        "gemma3:1b"
+        "qwen3:1.7b"
+      ];
+      environmentVariables = {
+        HCC_AMDGPU_TARGET = "gfx1031";
+        OLLAMA_KEEP_ALIVE = "-1";
+        OLLAMA_MAX_LOADED_MODELS = "2";
+        OLLAMA_KV_CACHE_TYPE = "q4_0";
+        OLLAMA_FLASH_ATTENTION = "1";
+      };
     };
 
-    templates = {
-      mcpoEnvironment.content = lib.toShellVars {
-        API_TOKEN = placeholder."MCP/API_TOKEN";
+    mcpo = {
+      enable = true;
+      extraPackages = with pkgs; [
+        git
+        diffutils
+        gh
+      ];
+
+      apiTokenFile = config.sops.secrets."MCP/API_TOKEN".path;
+      environment = {
+        SEARXNG_URL = "https://search.racci.dev";
         ANILIST_TOKEN = placeholder."MCP/ANILIST_TOKEN";
       };
 
-      mcpoConfig.content = builtins.toJSON {
-        mcpServers = {
-          memory = mkNpxServer "@modelcontextprotocol/server-memory";
-          time = mkUvxServerWithArgs "mcp-server-time" [ "--local-timezone=${config.time.timeZone}" ];
-          nixos = mkUvxServer "mcp-nixos";
-          context7 = mkNpxServer "@upstash/context7-mcp";
+      configuration =
+        let
+          mk = config.services.mcpo.helpers;
+        in
+        {
+          memory = mk.npxServer "@modelcontextprotocol/server-memory";
+          time = mk.uvxServerWithArgs "mcp-server-time" [ "--local-timezone=${config.time.timeZone}" ];
+          nixos = mk.uvxServer "mcp-nixos";
+          context7 = mk.npxServer "@upstash/context7-mcp";
           sequential-thinking.command = lib.getExe pkgs.mcp-sequential-thinking;
-          git = mkUvxServer "mcp-server-git";
-          fetch = mkUvxServerWithArgs "mcp-server-fetch" [ "--ignore-robots-txt" ];
-          diff = mkNpxServer "diff-mcp";
-          filesystem = mkNpxServerWithArgs "@modelcontextprotocol/server-filesystem" [
+          git = mk.uvxServer "mcp-server-git";
+          fetch = mk.uvxServerWithArgs "mcp-server-fetch" [ "--ignore-robots-txt" ];
+          diff = mk.npxServer "diff-mcp";
+          filesystem = mk.npxServerWithArgs "@modelcontextprotocol/server-filesystem" [
             "/var/lib/mcpo/filesystem"
           ];
           hassio = {
@@ -84,75 +80,9 @@ in
             command = lib.getExe pkgs.playwright-mcp;
             args = [ "--browser firefox --headless" ];
           };
-          search = mkNpxServer "mcp-searxng";
-          anilist = mkNpxServer "anilist-mcp";
+          search = mk.npxServer "mcp-searxng";
+          anilist = mk.npxServer "anilist-mcp";
         };
-      };
-    };
-  };
-
-  # Runs like shit because iGPU ROCM doesn't work
-  # Waiting for https://github.com/ollama/ollama/issues/2033 so it can run under vulkan
-  services.ollama = {
-    enable = true;
-    # acceleration = "rocm";
-    rocmOverrideGfx = "10.3.0";
-    loadModels = [
-      "gemma3:1b"
-      "qwen3:1.7b"
-    ];
-    environmentVariables = {
-      HCC_AMDGPU_TARGET = "gfx1031";
-      OLLAMA_KEEP_ALIVE = "-1";
-      OLLAMA_MAX_LOADED_MODELS = "2";
-      OLLAMA_KV_CACHE_TYPE = "q4_0";
-      OLLAMA_FLASH_ATTENTION = "1";
-    };
-  };
-
-  systemd.services.mcpo = {
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" ];
-
-    environment = {
-      HOME = "/var/lib/mcpo";
-
-      # For mcp-searxng
-      SEARXNG_URL = "https://search.racci.dev";
-    };
-
-    path = with pkgs; [
-      bash
-      nodejs
-      uv
-      git
-      diffutils
-      gh
-    ];
-
-    serviceConfig = {
-      EnvironmentFile = config.sops.templates.mcpoEnvironment.path;
-      ExecStart = "${lib.getExe mcpo} --api-token \${API_TOKEN} --config \${CREDENTIALS_DIRECTORY}/config.json --hot-reload";
-      WorkingDirectory = "/var/lib/mcpo";
-      StateDirectory = "mcpo";
-      RuntimeDirectory = "mcpo";
-      DynamicUser = true;
-
-      NoNewPrivileges = true;
-      ProtectClock = true;
-      PrivateDevices = true;
-      PrivateMounts = true;
-      PrivateTmp = true;
-      PrivateUsers = true;
-      ProtectHome = true;
-      ProtectHostname = true;
-      ProtectKernelLogs = true;
-      ProtectKernelModules = true;
-      ProtectKernelTunables = true;
-      RestrictNamespaces = true;
-      RestrictRealtime = true;
-      RestrictSUIDSGID = true;
-      LoadCredential = [ "config.json:${config.sops.templates.mcpoConfig.path}" ];
     };
   };
 
