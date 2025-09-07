@@ -121,7 +121,7 @@ in
 
   config = lib.mkIf cfg.enable {
     sops.templates = {
-      mcpoConfiguration.content = builtins.toJSON cfg.configuration;
+      mcpoConfiguration.content = builtins.toJSON { mcpServers = cfg.configuration; };
       mcpoEnvironment.content = lib.toShellVars cfg.environment;
     };
 
