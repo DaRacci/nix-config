@@ -33,7 +33,8 @@
     (builtins.map (config: config.sops.secrets))
     lib.mergeAttrsList
     (lib.filterAttrs (
-      name: secret: lib.strings.hasPrefix "POSTGRES/" secret.name && lib.hasSuffix "_PASSWORD" secret.name
+      _name: secret:
+      lib.strings.hasPrefix "POSTGRES/" secret.name && lib.hasSuffix "_PASSWORD" secret.name
     ))
     (builtins.mapAttrs (
       _: value:

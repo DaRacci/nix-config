@@ -138,7 +138,7 @@ let
       cfg.hacompanion.sensor
       |> lib.filterAttrs (_: s: s.enable)
       |> lib.mapAttrs (
-        n: s: {
+        n: _s: {
           enabled = true;
           name =
             lib.splitString "_" n
