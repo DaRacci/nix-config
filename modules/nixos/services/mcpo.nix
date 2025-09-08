@@ -174,7 +174,7 @@ in
           "--config \"\${CREDENTIALS_DIRECTORY}/config.json\""
           (lib.optionalString (
             cfg.apiTokenFile != null
-          ) "--api-token $(cat \"\${CREDENTIALS_DIRECTORY}/apiToken\")")
+          ) "--api-key $(cat \"\${CREDENTIALS_DIRECTORY}/apiToken\")")
         ]
         |> builtins.filter (v: v != "")
         |> lib.concatStringsSep " ";
