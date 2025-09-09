@@ -78,7 +78,11 @@ in
           };
           browser = {
             command = lib.getExe pkgs.playwright-mcp;
-            args = [ "--browser firefox --headless" ];
+            args = [
+              "--browser"
+              "firefox"
+              "--headless"
+            ];
           };
           search = mk.npxServer "mcp-searxng";
           anilist = mk.npxServer "anilist-mcp";
