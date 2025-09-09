@@ -167,10 +167,13 @@ in
         ++ lib.optional (cfg.apiTokenFile != null) "apiToken:${cfg.apiTokenFile}";
       };
 
+      restartTriggers = [
+        config.sops.templates.mcpoConfiguration.path
+      ];
+
       script =
         [
           (lib.getExe cfg.package)
-          "--hot-reload"
           "--config \"\${CREDENTIALS_DIRECTORY}/config.json\""
           (lib.optionalString (
             cfg.apiTokenFile != null
