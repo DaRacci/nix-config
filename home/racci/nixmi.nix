@@ -6,6 +6,7 @@
   imports = [
     ./features/desktop/hyprland
     ./features/desktop/plasma
+    ./features/ai.nix
 
     "${self}/home/shared/features/games"
     "${self}/home/shared/applications"

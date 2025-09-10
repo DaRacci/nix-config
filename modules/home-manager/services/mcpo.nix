@@ -29,8 +29,6 @@ in
       mcpoEnvironment.content = lib.toShellVars cfg.environment;
     };
 
-    xdg.configFile."mcpo/config.json".source = config.sops.templates.mcpoConfiguration.path;
-
     systemd.user.services.mcpo = {
       Unit = {
         After = [ "network.target" ];
@@ -39,11 +37,13 @@ in
       Service = {
         EnvironmentFile = config.sops.templates.mcpoEnvironment.path;
         Environment = [
+          "HOME=${config.home.homeDirectory}"
           "PATH=${
             lib.makeBinPath (
               with pkgs;
               [
                 bash
+                toybox
                 nodejs
                 uv
               ]
@@ -62,7 +62,9 @@ in
                 [
                   (lib.getExe cfg.package)
                   "--hot-reload"
-                  "--config \"\$HOME/.config/mcpo/config.json\""
+                  "--port"
+                  "8182"
+                  "--config \"${config.sops.templates.mcpoConfiguration.path}\""
                   (lib.optionalString (cfg.apiTokenFile != null)
                     "--api-key $(cat \"${config.sops.secrets."MCP/API_TOKEN".path}\")"
                   )

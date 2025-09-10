@@ -36,17 +36,6 @@
         };
       };
     };
-
-    mcpo = {
-      enable = true;
-      configuration =
-        let
-          mk = config.services.mcpo.helpers;
-        in
-        {
-          desktop-commander = mk.npxServer "@wonderwhy-er/desktop-commander@latest";
-        };
-    };
   };
 
   custom.remote = {
