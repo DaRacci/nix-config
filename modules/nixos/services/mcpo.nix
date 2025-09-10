@@ -54,6 +54,7 @@ in
     };
 
     configuration = lib.mkOption {
+      default = { };
       type = attrsOf (submodule {
         options = {
           command = lib.mkOption {

@@ -1,0 +1,80 @@
+{
+  self,
+  inputs,
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+let
+  inherit
+    (import "${self}/modules/nixos/services/mcpo.nix" {
+      inherit
+        inputs
+        config
+        pkgs
+        lib
+        ;
+    })
+    options
+    ;
+  cfg = config.services.mcpo;
+in
+{
+  options.services.mcpo = options.services.mcpo;
+
+  config = lib.mkIf cfg.enable {
+    sops.templates = {
+      mcpoConfiguration.content = builtins.toJSON { mcpServers = cfg.configuration; };
+      mcpoEnvironment.content = lib.toShellVars cfg.environment;
+    };
+
+    xdg.configFile."mcpo/config.json".source = config.sops.templates.mcpoConfiguration.path;
+
+    systemd.user.services.mcpo = {
+      Unit = {
+        After = [ "network.target" ];
+      };
+
+      Service = {
+        EnvironmentFile = config.sops.templates.mcpoEnvironment.path;
+        Environment = [
+          "PATH=${
+            lib.makeBinPath (
+              with pkgs;
+              [
+                bash
+                nodejs
+                uv
+              ]
+              ++ cfg.extraPackages
+            )
+          }"
+        ];
+
+        ExecStart =
+          (import "${inputs.nixpkgs}/nixos/lib/utils.nix" { inherit lib config pkgs; })
+          .systemdUtils.lib.makeJobScript
+            {
+              enableStrictShellChecks = false;
+              name = "mcpo-start";
+              text =
+                [
+                  (lib.getExe cfg.package)
+                  "--hot-reload"
+                  "--config \"\$HOME/.config/mcpo/config.json\""
+                  (lib.optionalString (cfg.apiTokenFile != null)
+                    "--api-key $(cat \"${config.sops.secrets."MCP/API_TOKEN".path}\")"
+                  )
+                ]
+                |> builtins.filter (v: v != "")
+                |> lib.concatStringsSep " ";
+            };
+      };
+
+      Install = {
+        WantedBy = [ "default.target" ];
+      };
+    };
+  };
+}
