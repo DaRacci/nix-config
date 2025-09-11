@@ -8,14 +8,14 @@ on:
       base:
         description: "Base branch to open PRs against"
         required: false
-        default: "main"
+        default: "master"
 
 permissions:
   contents: write
   pull-requests: write
 
 env:
-  BASE_BRANCH: ${{ github.event_name == 'workflow_dispatch' && inputs.base || 'main' }}
+  BASE_BRANCH: ${{ github.event_name == 'workflow_dispatch' && inputs.base || 'master' }}
 
 jobs:
   discover:
