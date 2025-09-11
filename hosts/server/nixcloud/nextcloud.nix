@@ -125,6 +125,7 @@ in
           "OC\\Preview\\TXT"
         ];
 
+        allow_local_remote_servers = true;
         trusted_proxies = [
           "::1" # For notify_push
         ]
