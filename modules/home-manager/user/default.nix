@@ -37,6 +37,9 @@ in
           extraOptions = {
             IdentityAgent = cfg.sshSocket;
           };
+          setEnv = {
+            TERM = "xterm-256color";
+          };
         };
 
         other = {
