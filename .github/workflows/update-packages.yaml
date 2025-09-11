@@ -96,7 +96,7 @@ jobs:
           set -euo pipefail
 
           echo "Updating ${PACKAGE}"
-          nix develop --no-pure-eval --accept-flake-config --command "nix-update --flake \"${PACKAGE}\" --use-update-script --commit" || {
+          nix develop --no-pure-eval --accept-flake-config --command nix-update --flake "${PACKAGE}" --use-update-script --commit || {
             echo "nix-update failed for ${PACKAGE}"
             exit 1
           }
