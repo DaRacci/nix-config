@@ -7,6 +7,7 @@ _: {
       "sun"
       "caldav"
       "speedtestdotnet"
+      "openai_conversation"
 
       # Network Stuff
       "adguard"
