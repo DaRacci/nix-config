@@ -48,6 +48,7 @@ in
       environment = {
         SEARXNG_URL = "https://search.racci.dev";
         ANILIST_TOKEN = placeholder."MCP/ANILIST_TOKEN";
+        MEMORY_FILE_PATH = "/var/lib/mcpo/memory.json";
       };
 
       configuration =
