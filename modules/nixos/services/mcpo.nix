@@ -170,6 +170,7 @@ in
 
       restartTriggers = [
         config.sops.templates.mcpoConfiguration.path
+        config.sops.templates.mcpoEnvironment.path
       ];
 
       script =
