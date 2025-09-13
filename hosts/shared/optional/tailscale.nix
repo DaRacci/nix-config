@@ -2,6 +2,7 @@
   self,
   config,
   pkgs,
+  lib,
   ...
 }:
 {
@@ -23,6 +24,13 @@
       "--accept-dns=true"
       "--accept-routes"
     ];
+    tags = [
+      "nixos"
+      config.host.device.role
+    ]
+    ++ config.host.device.purpose
+    ++ (lib.optional config.host.device.isVirtual "virtual")
+    ++ (lib.optional config.host.device.isHeadless "headless");
   };
 
   systemd.services.tailscale-check = {
