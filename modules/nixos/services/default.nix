@@ -3,5 +3,6 @@ _: {
     ./huntress.nix
     ./mcpo.nix
     ./metrics.nix
+    ./tailscale.nix
   ];
 }
