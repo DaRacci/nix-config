@@ -15,6 +15,7 @@
   services.kanidm = {
     enableServer = true;
     package = pkgs.kanidm_1_7;
+
     serverSettings =
       let
         certDirectory = config.security.acme.certs."auth.racci.dev".directory;
@@ -35,23 +36,60 @@
           # "192.168.2.1/24"
           # "100.0.0.1/8"
         ];
+
+        online_backup = {
+          versions = 7;
+          path = "/var/lib/kanidm/backup";
+          schedule = "0 3 * * *"; # daily at 3am
+        };
       };
 
     provision = {
-      enable = false;
+      enable = true;
       adminPasswordFile = "/run/credentials/kanidm.service/ADMIN_PASSWORD";
       idmAdminPasswordFile = "/run/credentials/kanidm.service/IDM_ADMIN_PASSWORD";
 
-      # persons = [ ];
-      # groups = {
-      #   admin = {
+      # Used for providing information about users that I'd rather not be public.
+      extraJsonFile = config.sops.secrets."KANIDM/PROVISIONING_JSON".path;
+      groups = {
+        admin.members = [ "james" ];
+        family.members = [
+          "james"
+          "savannah"
+          "barbara"
+        ];
+        cloud.members = [
+          "family"
+          "simon"
+        ];
+      };
 
-      #   };
+      systems.oauth2 = {
+        nextcloud = {
+          displayName = "Nextcloud";
+          originUrl = "https://nc.racci.dev/apps/user_oidc/code";
+          originLanding = "https://nc.racci.dev";
 
-      #   family = {
+          scopeMaps.cloud = [
+            "openid"
+            "profile"
+            "email"
+            "groups"
+          ];
+        };
 
-      #   };
-      # };
+        hassio = {
+          displayName = "Home Assistant";
+          originUrl = "https://hassio.racci.dev/auth/external/callback";
+          originLanding = "https://hassio.racci.dev";
+
+          scopeMaps.family = [
+            "openid"
+            "profile"
+            "email"
+          ];
+        };
+      };
     };
   };
 
