@@ -8,6 +8,7 @@ _: {
       "caldav"
       "speedtestdotnet"
       "openai_conversation"
+      "uptime_kuma"
 
       # Network Stuff
       "adguard"
