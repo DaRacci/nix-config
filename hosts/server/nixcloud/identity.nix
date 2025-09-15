@@ -15,6 +15,9 @@
       sopsFile = ./provisioning.json;
       restartUnits = [ "kanidm.service" ];
       format = "json";
+      key = "";
+      owner = "kanidm";
+      group = "kanidm";
     };
   };
 
@@ -58,12 +61,14 @@
       # Used for providing information about users that I'd rather not be public.
       extraJsonFile = config.sops.secrets."KANIDM/PROVISIONING_JSON".path;
       groups = {
-        admin.members = [ "james" ];
+        sysadmin.members = [ "james" ];
+
         family.members = [
           "james"
           "savannah"
           "barbara"
         ];
+
         cloud.members = [
           "family"
           "simon"
