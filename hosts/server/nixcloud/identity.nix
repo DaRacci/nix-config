@@ -8,8 +8,14 @@
     "CLOUDFLARE/EMAIL" = { };
     "CLOUDFLARE/ZONE_API_TOKEN" = { };
     "CLOUDFLARE/DNS_API_TOKEN" = { };
+
     "KANIDM/ADMIN_PASSWORD" = { };
     "KANIDM/IDM_ADMIN_PASSWORD" = { };
+    "KANIDM/PROVISIONING_JSON" = {
+      sopsFile = ./provisioning.json;
+      restartUnits = [ "kanidm.service" ];
+      format = "json";
+    };
   };
 
   services.kanidm = {
