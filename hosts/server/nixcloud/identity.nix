@@ -20,7 +20,7 @@
 
   services.kanidm = {
     enableServer = true;
-    package = pkgs.kanidm_1_7;
+    package = pkgs.kanidmWithSecretProvisioning_1_7;
 
     serverSettings =
       let
