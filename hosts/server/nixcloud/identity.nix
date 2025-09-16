@@ -4,22 +4,30 @@
   ...
 }:
 {
-  sops.secrets = {
-    "CLOUDFLARE/EMAIL" = { };
-    "CLOUDFLARE/ZONE_API_TOKEN" = { };
-    "CLOUDFLARE/DNS_API_TOKEN" = { };
+  sops.secrets =
+    let
+      kanidmPermissions = {
+        owner = "kanidm";
+        group = "kanidm";
+      };
+    in
+    {
+      "CLOUDFLARE/EMAIL" = { };
+      "CLOUDFLARE/ZONE_API_TOKEN" = { };
+      "CLOUDFLARE/DNS_API_TOKEN" = { };
 
-    "KANIDM/ADMIN_PASSWORD" = { };
-    "KANIDM/IDM_ADMIN_PASSWORD" = { };
-    "KANIDM/PROVISIONING_JSON" = {
-      sopsFile = ./provisioning.json;
-      restartUnits = [ "kanidm.service" ];
-      format = "json";
-      key = "";
-      owner = "kanidm";
-      group = "kanidm";
+      "KANIDM/ADMIN_PASSWORD" = { };
+      "KANIDM/IDM_ADMIN_PASSWORD" = { };
+
+      "KANIDM/OAUTH2/NEXTCLOUD_SECRET" = kanidmPermissions;
+      "KANIDM/OAUTH2/HASSIO_SECRET" = kanidmPermissions;
+      "KANIDM/PROVISIONING_JSON" = kanidmPermissions // {
+        sopsFile = ./provisioning.json;
+        restartUnits = [ "kanidm.service" ];
+        format = "json";
+        key = "";
+      };
     };
-  };
 
   services.kanidm = {
     enableServer = true;
@@ -75,11 +83,13 @@
         ];
       };
 
+      # Generate OAuth2 Basic Secrets using `cat /dev/urandom | tr --complement --delete 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkpqrstuvwxyz0123456789' | head --bytes 48`
       systems.oauth2 = {
         nextcloud = {
           displayName = "Nextcloud";
           originUrl = "https://nc.racci.dev/apps/user_oidc/code";
           originLanding = "https://nc.racci.dev";
+          basicSecretFile = config.sops.secrets."KANIDM/OAUTH2/NEXTCLOUD_SECRET".path;
 
           scopeMaps.cloud = [
             "openid"
@@ -90,14 +100,17 @@
         };
 
         hassio = {
+          public = true;
           displayName = "Home Assistant";
-          originUrl = "https://hassio.racci.dev/auth/external/callback";
-          originLanding = "https://hassio.racci.dev";
+          originUrl = "https://hassio.racci.dev/auth/oidc/callback";
+          originLanding = "https://hassio.racci.dev/auth/oidc/welcome";
+          basicSecretFile = config.sops.secrets."KANIDM/OAUTH2/HASSIO_SECRET".path;
 
           scopeMaps.family = [
             "openid"
             "profile"
             "email"
+            "groups"
           ];
         };
       };

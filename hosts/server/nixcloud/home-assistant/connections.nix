@@ -1,5 +1,13 @@
-_: {
+{
+  pkgs,
+  ...
+}:
+{
   services.home-assistant = {
+    customComponents = with pkgs.home-assistant-custom-components; [
+      auth_oidc
+    ];
+
     extraComponents = [
       # Service Connections
       "openweathermap"
@@ -44,5 +52,21 @@ _: {
       "mcp"
       "mcp_server"
     ];
+
+    config.auth_oidc = {
+      client_id = "hassio";
+      client_secret = "!secret OIDC_SECRET";
+      discovery_url = "https://auth.racci.dev/oauth2/openid/hassio/.well-known/openid-configuration";
+      features.automatic_user_linking = true;
+      id_token_signing_alg = "ES256";
+      roles = {
+        admin = "sysadmin@auth.racci.dev";
+        user = "family@auth.racci.dev";
+      };
+      claims = {
+        display_name = "displayname";
+        username = "name";
+      };
+    };
   };
 }
