@@ -112,7 +112,9 @@
               icon_template = ''
                 {% if states.sensor
                   | selectattr("attributes.device_class", "eq", "battery")
-                  | selectattr("state", "lt", 20)
+                  | map(attribute="state")
+                  | map('int')
+                  | select("lt", 20)
                   | list
                   | count > 0 %}
                   mdi:battery-alert
