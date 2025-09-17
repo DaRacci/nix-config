@@ -54,7 +54,7 @@ in
         disabledDevices = filter (name: getType name == "device") cfg.disabledDevices;
       in
       {
-        "${updatedDevicesPath}" = mkIf ((length cfg.updateDevices) > 0) {
+        "${updatedDevicesPath}" = mkIf ((length (builtins.attrValues cfg.updateDevices)) > 0) {
           text = ''
             monitor.alsa.rules = [
               ${lib.pipe cfg.updateDevices [
