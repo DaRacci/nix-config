@@ -31,7 +31,7 @@ in
 
     updateDevices = mkOption {
       type = with types; attrsOf (attrsOf str);
-      default = [ ];
+      default = { };
       description = ''
         A list of ALSA device names or node names to update.
         To find the names use the guide at https://wiki.archlinux.org/title/WirePlumber#Obtain_interface_name_for_rules_matching
