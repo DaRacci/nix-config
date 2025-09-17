@@ -28,10 +28,14 @@ _:
     };
   };
 
-  systemd.services.caddy.after = [
-    "tailscaled.service"
-    "adguardhome.service"
-  ];
+  systemd.services.caddy = {
+    after = [
+      "tailscaled.service"
+      "adguardhome.service"
+    ];
+    Restart = "always";
+    RestartSec = "5s";
+  };
 
   services.caddy = {
     enable = true;
