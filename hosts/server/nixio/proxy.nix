@@ -33,8 +33,10 @@ _:
       "tailscaled.service"
       "adguardhome.service"
     ];
-    Restart = "always";
-    RestartSec = "5s";
+    serviceConfig = {
+      Restart = "always";
+      RestartSec = "5s";
+    };
   };
 
   services.caddy = {
