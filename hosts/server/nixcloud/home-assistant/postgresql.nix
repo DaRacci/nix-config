@@ -1,5 +1,7 @@
 {
   config,
+  pkgs,
+  lib,
   ...
 }:
 {
@@ -23,12 +25,16 @@
     postgresql.extensions = ps: with ps; [ pgvector ];
   };
 
-  systemd.services.postgresql-setup.serviceConfig.ExecStartPost = [
-    ''
-      psql -d "${config.server.database.postgres.hassio-agent.database}" -tA <<'EOF'
+  systemd.services.postgresql-setup.serviceConfig.ExecStartPost =
+    let
+      sqlFile = pkgs.writeText "create-vector-extension.sql" ''
         CREATE EXTENSION IF NOT EXISTS vector;
         ALTER EXTENSION vector UPDATE;
-      EOF
-    ''
-  ];
+      '';
+    in
+    [
+      ''
+        ${lib.getExe' config.services.postgresql.finalPackage "psql"} -d "${config.server.database.postgres.hassio-agent.database}" -f ${sqlFile}
+      ''
+    ];
 }
