@@ -2,6 +2,7 @@ _:
 {
   config,
   pkgs,
+  lib,
   ...
 }:
 {
@@ -34,7 +35,7 @@ _:
       "adguardhome.service"
     ];
     serviceConfig = {
-      Restart = "always";
+      Restart = lib.mkForce "always";
       RestartSec = "5s";
     };
   };
