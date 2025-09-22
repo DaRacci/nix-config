@@ -47,6 +47,8 @@ in
         "libvirtd"
         "kvm"
         "adbusers"
+        "pipewire"
+        "rtkit"
       ]
       ++ groups;
 
