@@ -30,7 +30,15 @@ in
     };
 
     updateDevices = mkOption {
-      type = with types; attrsOf (attrsOf str);
+      type =
+        with types;
+        attrsOf (
+          attrsOf (oneOf [
+            str
+            int
+            bool
+          ])
+        );
       default = { };
       description = ''
         A list of ALSA device names or node names to update.
@@ -57,8 +65,9 @@ in
         "${updatedDevicesPath}" = mkIf ((length (builtins.attrValues cfg.updateDevices)) > 0) {
           text = ''
             monitor.alsa.rules = [
-              ${lib.pipe cfg.updateDevices [
-                (lib.mapAttrs (
+              ${
+                cfg.updateDevices
+                |> lib.mapAttrsToList (
                   name: props: ''
                     {
                       matches = [
@@ -77,9 +86,9 @@ in
                       }
                     }
                   ''
-                ))
-                (concatStringsSep "\n")
-              ]}
+                )
+                |> concatStringsSep "\n"
+              }
             ]
           '';
         };
