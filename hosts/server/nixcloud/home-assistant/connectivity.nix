@@ -43,8 +43,11 @@ in
         "matter"
         "mqtt"
         "smlight"
+        "esphome"
       ];
     };
+
+    esphome.enable = true;
 
     matter-server.enable = true;
 
