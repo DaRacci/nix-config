@@ -44,7 +44,7 @@ lib.mkIf (osConfig == null || osConfig.users.users.${config.home.username}.shell
 
         let external_completer = {|spans|
           # Workaround for https://github.com/nushell/nushell/issues/8483
-          let expanded_alias = (scope aliases | where name == $spans.0 | get -i 0 | get -i expansion)
+          let expanded_alias = (scope aliases | where name == $spans.0 | get -o 0 | get -o expansion)
 
           let spans = (if $expanded_alias != null {
             $spans | skip 1 | prepend ($expanded_alias | split row " " | take 1)
