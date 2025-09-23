@@ -134,6 +134,9 @@
                     "os"
                     "switch"
                     $".#nixosConfigurations.($selected)"
+                  ]
+
+                  let passthrough_args = [
                     "--"
                     "--accept-flake-config"
                     ...($args)
@@ -145,10 +148,10 @@
                   let current_host = cat /etc/hostname | str trim
                   if $selected == $current_host {
                     log info "Rebuilding current host"
-                    nh ...$command_args
+                    nh ...$command_args ...$passthrough_args
                   } else {
                     log info $"Rebuilding selected host: ($selected)"
-                    nh ...$command_args --target-host $"root@($selected)"
+                    nh ...$command_args --target-host $"root@($selected)" ...$passthrough_args
                   }
                 }
               '';
