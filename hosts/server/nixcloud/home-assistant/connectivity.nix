@@ -47,7 +47,10 @@ in
       ];
     };
 
-    esphome.enable = true;
+    esphome = {
+      enable = true;
+      openFirewall = true;
+    };
 
     matter-server.enable = true;
 
@@ -139,6 +142,10 @@ in
         '';
       };
     };
+
+    esphome.extraConfig = ''
+      reverse_proxy http://localhost:${config.services.esphome.port}
+    '';
 
     zigbee2mqtt.extraConfig = ''
       reverse_proxy http://localhost:8080
