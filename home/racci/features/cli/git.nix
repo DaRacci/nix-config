@@ -79,6 +79,14 @@
 
     gh-dash = {
       enable = true;
+      settings = {
+        repoPaths = {
+          "DaRacci/nix-config" = "/persist/nix-config";
+          "DaRacci/*" = "~/Projects/Coding/*";
+          "AMTSupport/*" = "~/Projects/Coding/AMT/*";
+          "NixOS/*" = "~/Projects/Coding/nix/*";
+        };
+      };
     };
 
     gitui = {
