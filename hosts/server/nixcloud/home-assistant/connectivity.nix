@@ -144,7 +144,7 @@ in
     };
 
     esphome.extraConfig = ''
-      reverse_proxy http://localhost:${config.services.esphome.port}
+      reverse_proxy http://localhost:${builtins.toString config.services.esphome.port}
     '';
 
     zigbee2mqtt.extraConfig = ''
