@@ -19,12 +19,12 @@ If something has been labeled as a "MUST" you are required to follow its instruc
 - **pkgs/** - custom packages and package sets.
 - **hosts/** – per‑machine configurations split into sub groups.
   - **shared/** – shared declarations across all machines.
-  - **\<group\>/** - group of similar machines (e.g., `desktop`, `laptop`, `server`).
-    - **\<machine\>/** – machine‑specific NixOS declarations.
+  - **\<group>/** - group of similar machines (e.g., `desktop`, `laptop`, `server`).
+    - **\<machine>/** – machine‑specific NixOS declarations.
     - **shared/** - group‑wide shared declarations.
 - **home/** – user‑specific Home‑Manager declarations.
   - **shared/** – shared declarations across all users.
-  - **\<user\>/** – user‑specific Home‑Manager declarations.
+  - **\<user>/** – user‑specific Home‑Manager declarations.
     - **\<machine>.nix** - machine-specific overrides for the user.
     - **os-config.nix** - Additional OS Configuration for the user applied to all machines it is used on.
   - **shared/** – shared declarations across all users.

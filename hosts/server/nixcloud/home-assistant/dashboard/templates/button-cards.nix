@@ -37,7 +37,7 @@ with (import ../lib.nix { inherit lib; });
       color_off = "var(--black)";
     };
     type = "custom:button-card";
-    icon = entity.icon;
+    inherit (entity) icon;
     show_label = true;
     tap_action = {
       action = "navigate";
@@ -130,7 +130,7 @@ with (import ../lib.nix { inherit lib; });
       color_off = "var(--black)";
     };
     type = "custom:button-card";
-    icon = entity.icon;
+    inherit (entity) icon;
     show_label = false;
     show_state = true;
 

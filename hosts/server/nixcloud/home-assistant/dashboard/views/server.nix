@@ -58,29 +58,27 @@ mkView {
               state = "printing";
             })
           ];
-          card = (
-            mkVerticalStack {
-              cards = [
-                {
-                  type = "gauge";
-                  entity = "sensor.k1c_276e_progress";
-                  name = "Print Progress";
-                  min = 0;
-                  max = 100;
-                  severity = {
-                    green = 50;
-                    yellow = 80;
-                    red = 95;
-                  };
-                }
-                {
-                  type = "entity";
-                  entity = "sensor.k1c_276e_current_print_state";
-                  name = "State";
-                }
-              ];
-            }
-          );
+          card = mkVerticalStack {
+            cards = [
+              {
+                type = "gauge";
+                entity = "sensor.k1c_276e_progress";
+                name = "Print Progress";
+                min = 0;
+                max = 100;
+                severity = {
+                  green = 50;
+                  yellow = 80;
+                  red = 95;
+                };
+              }
+              {
+                type = "entity";
+                entity = "sensor.k1c_276e_current_print_state";
+                name = "State";
+              }
+            ];
+          };
         }
         {
           type = "conditional";

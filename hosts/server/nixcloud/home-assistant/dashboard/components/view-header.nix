@@ -24,22 +24,20 @@
   cardOverrides ? { },
 }:
 {
-  card = (
-    {
-      type = "markdown";
-      text_only = text_only;
-      content = content;
-      visibility = [
-        {
-          condition = "screen";
-          media_query = media_query;
-        }
-      ];
-    }
-    // cardOverrides
-  );
+  card = {
+    type = "markdown";
+    inherit text_only;
+    inherit content;
+    visibility = [
+      {
+        condition = "screen";
+        inherit media_query;
+      }
+    ];
+  }
+  // cardOverrides;
 
-  layout = layout;
-  badges_position = badges_position;
-  badges_wrap = badges_wrap;
+  inherit layout;
+  inherit badges_position;
+  inherit badges_wrap;
 }
