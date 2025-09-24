@@ -230,7 +230,7 @@ in
       PartOf = [ config.wayland.systemd.target ];
       After = [ config.wayland.systemd.target ];
       ConditionEnvironment = "WAYLAND_DISPLAY";
-      X-Restart-Triggers = config.xdg.configFile.caelestia-shell-config.source;
+      X-Restart-Triggers = [ config.xdg.configFile.caelestia-shell-config.source ];
     };
 
     Service = {
