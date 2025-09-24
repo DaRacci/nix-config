@@ -7,7 +7,7 @@
 {
   programs.rofi = {
     enable = true;
-    package = pkgs.rofi-wayland;
+    package = pkgs.rofi;
     plugins = with pkgs; [
       rofi-games
       rofi-emoji-wayland
