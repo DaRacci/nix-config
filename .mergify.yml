@@ -58,21 +58,4 @@ pull_request_rules:
     conditions: []
     actions:
       queue:
-priority_rules:
-  - name: priority for queue `duplicated default from merge on approval`
-    conditions:
-      - "#approved-reviews-by>=1"
-    priority: 2750
-merge_protections:
-  - name: Enforce conventional commit
-    description: Make sure that we follow https://www.conventionalcommits.org/en/v1.0.0/
-    if: []
-    success_conditions:
-      - "title ~=
-        ^(fix|feat|docs|style|refactor|perf|test|build|ci|chore|revert)(?:\\(.+\
-        \\))?:"
-  - name: Do not merge outdated PRs
-    description: Make sure PRs are almost up to date before merging
-    if: []
-    success_conditions:
-      - "#commits-behind <= 10"
+priority_rules: []
