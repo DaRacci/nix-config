@@ -7,7 +7,7 @@
       # LSPs & other tools for zed
       autocorrect
       docker-compose-language-service
-      dockerfile-language-server-nodejs
+      dockerfile-language-server
       nil
       nixd
       nixfmt
