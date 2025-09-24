@@ -1,25 +1,16 @@
 queue_rules:
-  - name: duplicated default from merge on approval
-    queue_conditions:
-      - base=master
-      - label~=merge-queue|dependencies
-      - "#approved-reviews-by>=1"
-      - base=master
-      - label~=merge-queue|dependencies
-    merge_conditions: []
-    merge_method: rebase
-    update_method: rebase
   - name: default
     queue_conditions:
       - base=master
       - label~=merge-queue|dependencies
     merge_conditions:
-      - "#commits-behind==0"
+      - "#commits-behind <= 10"
       - "#approved-reviews-by>=1"
       - "#check-failure==0"
-      - check-success=GitGuardian Security Checks
     merge_method: rebase
     update_method: rebase
+    autoqueue: true
+    branch_protection_injection_mode: merge
 pull_request_rules:
   - name: Make sure PR are almost up to date before merging
     description: This automatically updates PRs when they are out-of-date with the
@@ -58,4 +49,8 @@ pull_request_rules:
     conditions: []
     actions:
       queue:
-priority_rules: []
+priority_rules:
+  - name: priority for queue `duplicated default from merge on approval`
+    conditions:
+      - "#approved-reviews-by>=1"
+    priority: 2750
