@@ -1,0 +1,116 @@
+name: Update Packages
+
+on:
+  schedule:
+    - cron: "0 17 * * */3"
+  workflow_dispatch:
+    inputs:
+      base:
+        description: "Base branch to open PRs against"
+        required: false
+        default: "master"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  BASE_BRANCH: ${{ github.event_name == 'workflow_dispatch' && inputs.base || 'master' }}
+
+jobs:
+  discover:
+    name: Discover packages
+    runs-on: self-hosted
+    outputs:
+      matrix: ${{ steps.build-matrix.outputs.matrix }}
+      count: ${{ steps.build-matrix.outputs.count }}
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ env.BASE_BRANCH }}
+
+      - name: Build matrix
+        id: build-matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "::group::Collect package names from flake"
+          FLAKE_JSON=$(nix flake show --no-pure-eval --json)
+          UNIQUE_PKGS=$(echo "$FLAKE_JSON" \
+            | jq -r '.packages | to_entries[] | .value | keys[]' \
+            | grep -v '^devenv-' \
+            | sort -u)
+
+          if [ -z "$UNIQUE_PKGS" ]; then
+            echo "No packages found."
+            echo "matrix=[]" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "::endgroup::"
+
+          INCLUDE_JSON='[]'
+
+          echo "::group::Filter for passthru.updateScript"
+          for PKG in $UNIQUE_PKGS; do
+            UPDATE_SCRIPT=$(nix eval --json --no-pure-eval ".#${PKG}.passthru.updateScript" 2>/dev/null || echo "null")
+            if [ "$UPDATE_SCRIPT" != "null" ]; then
+              INCLUDE_JSON=$(echo "$INCLUDE_JSON" | jq --arg pkg "$PKG" '. + [{package:$pkg}]')
+              echo "Include: $PKG"
+            else
+              echo "Skip (no updateScript): $PKG"
+            fi
+          done
+          echo "::endgroup::"
+
+          MATRIX=$(jq -c -n --argjson include "$INCLUDE_JSON" '{include:$include}')
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+
+  update:
+    name: Update ${{ matrix.package }}
+    needs: discover
+    if: needs.discover.outputs.matrix != '[]'
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+    concurrency:
+      group: pkg-update-${{ matrix.package }}
+      cancel-in-progress: true
+    env:
+      PACKAGE: ${{ matrix.package }}
+      BRANCH: chore/update-pkg-${{ matrix.package }}
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ env.BASE_BRANCH }}
+
+      - name: Run nix-update
+        id: update
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Updating ${PACKAGE}"
+          nix develop --no-pure-eval --accept-flake-config --command nix-update --flake "${PACKAGE}" --use-update-script --commit || {
+            echo "nix-update failed for ${PACKAGE}"
+            exit 1
+          }
+
+          PR_TITLE=$(git log -1 --pretty=%s)
+          echo "PR_TITLE=${PR_TITLE}" >> "$GITHUB_OUTPUT"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ env.BRANCH }}
+          base: ${{ env.BASE_BRANCH }}
+          labels: dependencies, automated, merge-queue
+          reviewers: DaRacci
+          title: ${{ steps.update.outputs.PR_TITLE }}
+          body: This PR was created automatically by the [Update Packages](./.github/workflows/update-packages.yaml) workflow.

@@ -18,18 +18,16 @@ let
     collectModules
     ;
 in
-lib.pipe
-  (collectModules ./. system.type.getSubModules (
-    {
-      inherit (system) lib options;
-      inherit (system._module) specialArgs;
-      config = system.config // {
-        inherit (system) _module;
-      };
-    }
-    // system._module.specialArgs
-  ))
-  [
-    (lib.map (lib.getAttr "_file"))
-    lib.unique
-  ]
+collectModules ./. system.type.getSubModules (
+  {
+    inherit (system) lib options;
+    inherit (system._module) specialArgs;
+    config = system.config // {
+      inherit (system) _module;
+    };
+  }
+  // system._module.specialArgs
+)
+|> lib.getAttr "modules"
+|> lib.map (lib.getAttr "_file")
+|> lib.unique

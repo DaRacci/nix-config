@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   ...
 }:
 {
@@ -26,17 +25,7 @@
       "8d42e9b2-3814-45ea-bbb5-9056c8f017e2" = {
         credentialsFile = config.sops.secrets.CF_CREDS.path;
         default = "http_status:404";
-        ingress = {
-          "test.racci.dev" = "https://nc.racci.dev";
-        };
       };
     };
   };
-
-  # TODO - Remove once https://github.com/NixOS/nixpkgs/pull/403277 is merged
-  systemd.services.cloudflared-tunnel-8d42e9b2-3814-45ea-bbb5-9056c8f017e2.serviceConfig.LoadCredential =
-    lib.mkForce [
-      "credentials.json:${config.sops.secrets.CF_CREDS.path}"
-      "cert.pem:${config.sops.secrets.CF_CERT.path}"
-    ];
 }

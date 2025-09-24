@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   cfg = config.custom.remote;
 in
@@ -31,28 +36,93 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    services = {
-      xrdp = lib.mkIf cfg.remoteDesktop.enable {
-        enable = true;
-        defaultWindowManager = cfg.remoteDesktop.startCommand;
-        openFirewall = true;
-      };
+  config = lib.mkIf cfg.enable (
+    lib.mkMerge [
+      (lib.mkIf cfg.remoteDesktop.enable {
+        services.xrdp = lib.mkIf cfg.remoteDesktop.enable {
+          enable = true;
+          defaultWindowManager = cfg.remoteDesktop.startCommand;
+          openFirewall = true;
+        };
+      })
 
-      sunshine = lib.mkIf cfg.streaming.enable {
-        enable = true;
-        autoStart = true;
-        capSysAdmin = true;
-        openFirewall = true;
-      };
-    };
+      (lib.mkIf cfg.streaming.enable {
+        services.sunshine = lib.mkIf cfg.streaming.enable {
+          enable = true;
+          autoStart = false;
+          openFirewall = true;
+          capSysAdmin = true;
+          settings.port = 47889;
+        };
 
-    home-manager.sharedModules = [
-      {
-        user.persistence.directories = [ ".config/sunshine" ];
-      }
-    ];
+        systemd.user =
+          let
+            # Loosly based off https://github.com/NixOS/nixpkgs/blob/ad7196ae55c295f53a7d1ec39e4a06d922f3b899/nixos/modules/services/networking/sunshine.nix
+            basePort = config.services.sunshine.settings.port;
+            generatePorts = port: offsets: map (offset: port + offset) offsets;
+            # https://web.archive.org/web/20240303183334/https://docs.lizardbyte.dev/projects/sunshine/en/latest/about/advanced_usage.html#port
+            offsets = {
+              tcp = [
+                (-5)
+                0
+                1
+                21
+              ];
+              udp = [
+                9
+                10
+                11
+                13
+              ];
+            };
+          in
+          {
+            sockets.sunshine-proxy = {
+              wantedBy = [ "sockets.target" ];
+              socketConfig = {
+                ListenStream = generatePorts (basePort + 100) offsets.tcp;
+                # ListenDatagram = generatePorts (basePort + 100) offsets.udp;
+              };
+            };
 
-    networking.firewall.allowedTCPPorts = [ 47990 ];
-  };
+            services = {
+              sunshine-proxy = {
+                bindsTo = [
+                  "sunshine-proxy.socket"
+                  "sunshine.service"
+                ];
+                after = [
+                  "sunshine-proxy.socket"
+                  "sunshine.service"
+                ];
+                serviceConfig = {
+                  Type = "notify";
+                  RemainAfterExit = "yes";
+                  # https://web.archive.org/web/20240303183334/https://docs.lizardbyte.dev/projects/sunshine/en/latest/about/advanced_usage.html#port
+                  ExecStart =
+                    (offsets.tcp)
+                    |> generatePorts basePort
+                    |> map (
+                      port:
+                      "${pkgs.systemd}/lib/systemd/systemd-socket-proxyd --exit-idle-time=300s 127.0.0.1:${toString port}"
+                    );
+                  Restart = "no";
+                };
+              };
+              sunshine = {
+                serviceConfig = {
+                  Restart = lib.mkForce "no";
+                  ExecStartPost = "${lib.getExe' pkgs.toybox "sleep"} 3"; # Allow sunshine to startup fully
+                };
+                unitConfig = {
+                  StopWhenUnneeded = "yes";
+                };
+              };
+            };
+          };
+
+        home-manager.sharedModules = [ { user.persistence.directories = [ ".config/sunshine" ]; } ];
+      })
+    ]
+  );
 }

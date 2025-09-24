@@ -8,7 +8,6 @@ in
     lockKernelModules = false;
     protectKernelImage = true;
 
-    rtkit.enable = true;
     polkit.enable = true;
 
     sudo.enable = false;

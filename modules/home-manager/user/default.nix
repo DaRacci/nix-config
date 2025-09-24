@@ -28,22 +28,21 @@ in
 
     programs.ssh = {
       enable = true;
+      enableDefaultConfig = false;
 
       matchBlocks = {
         hosts = {
           host = builtins.concatStringsSep " " hostnames;
           forwardAgent = true;
           identitiesOnly = true;
-          extraOptions = {
-            IdentityAgent = cfg.sshSocket;
+          setEnv = {
+            TERM = "xterm-256color";
           };
         };
 
-        other = {
+        "*" = {
           host = "*";
-          extraOptions = {
-            IdentityAgent = cfg.sshSocket;
-          };
+          identityAgent = cfg.sshSocket;
         };
       };
     };

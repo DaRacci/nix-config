@@ -22,6 +22,20 @@
 
   services = {
     hardware.bolt.enable = true;
+    metrics = {
+      enable = true;
+      upgradeStatus.enable = true;
+      hacompanion = {
+        enable = true;
+        sensor = {
+          webcam.enable = true;
+          cpu_temp.enable = true;
+          cpu_usage.enable = true;
+          uptime.enable = true;
+          memory.enable = true;
+        };
+      };
+    };
   };
 
   custom.remote = {
@@ -110,7 +124,10 @@
       enable = true;
       directories = [
         "/var/lib/decky-loader"
-        "/var/lib/private/ollama"
+        {
+          directory = "/var/lib/private";
+          mode = "0700";
+        }
       ];
     };
   };

@@ -133,10 +133,10 @@ in
 
       nvidia-container-toolkit.enable = hasNvidia;
       nvidia = mkIf hasNvidia {
-        package = config.boot.kernelPackages.nvidiaPackages.beta;
+        package = config.boot.kernelPackages.nvidiaPackages.latest;
         open = true;
         nvidiaSettings = true;
-        nvidiaPersistenced = true;
+        nvidiaPersistenced = false;
         modesetting.enable = true;
         powerManagement = {
           enable = true;
@@ -150,6 +150,7 @@ in
       ]
       ++ optionals hasAmd [
         "amdgpu.dcdebugmask=0x400" # Fix stuttering under wayland on Kernel 6.11+
+        "amdgpu.dc=1" # Use modern DC Engine
       ];
 
     # https://wiki.nixos.org/wiki/AMD_GPU#HIP

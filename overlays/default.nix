@@ -62,39 +62,11 @@ in
       removeWarningPopup = true;
     };
 
-    mcpo = prev.mcpo.overridePythonAttrs (oldAttrs: rec {
-      version = "0.0.17";
-      src = oldAttrs.src.override {
-        tag = "v${version}";
-        hash = "sha256-oubMRHiG6JbfMI5MYmRt4yNDI8Moi4h7iBZPgkdPGd4=";
+    hacompanion = prev.hacompanion.overrideAttrs (oldAttrs: {
+      meta = oldAttrs.meta // {
+        mainProgram = "hacompanion";
       };
-      dependencies = oldAttrs.dependencies ++ [
-        final.python3Packages.watchdog
-      ];
     });
-
-    python3Packages = prev.python3Packages.overrideScope (
-      final: prev: {
-        mcp = prev.mcp.overridePythonAttrs (oldAttrs: rec {
-          version = "1.12.2";
-          src = oldAttrs.src.override {
-            tag = "v${version}";
-            hash = "sha256-K3S+2Z4yuo8eAOo8gDhrI8OOfV6ADH4dAb1h8PqYntc=";
-          };
-          postPatch = oldAttrs.postPatch |> builtins.replaceStrings [ "1.9.4" ] [ version ];
-          dependencies = oldAttrs.dependencies ++ [
-            final.jsonschema
-          ];
-          nativeCheckInputs = oldAttrs.nativeCheckInputs ++ [
-            final.dirty-equals
-          ];
-          disabledTests = oldAttrs.disabledTests ++ [
-            "test_func_metadata"
-            "test_lifespan_cleanup_executed"
-          ];
-        });
-      }
-    );
 
     inherit lib;
   };

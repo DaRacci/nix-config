@@ -32,31 +32,20 @@ in
     updateDevices = mkOption {
       type =
         with types;
-        listOf (submodule {
-          options = {
-            name = mkOption {
-              type = str;
-              description = ''
-                The node or device name.
-                To find the name use the guide at https://wiki.archlinux.org/title/WirePlumber#Obtain_interface_name_for_rules_matching
-              '';
-            };
-
-            props = mkOption {
-              type = with types; attrsOf str;
-              default = { };
-              description = ''
-                Properties to update.
-
-                To find the name use the guide at https://wiki.archlinux.org/title/WirePlumber#Obtain_interface_name_for_rules_matching
-              '';
-            };
-          };
-        });
-      default = [ ];
+        attrsOf (
+          attrsOf (oneOf [
+            str
+            int
+            bool
+          ])
+        );
+      default = { };
       description = ''
         A list of ALSA device names or node names to update.
         To find the names use the guide at https://wiki.archlinux.org/title/WirePlumber#Obtain_interface_name_for_rules_matching
+
+        For available properties see these pages:
+        https://pipewire.pages.freedesktop.org/wireplumber/daemon/configuration/alsa.html#properties
       '';
     };
   };
@@ -73,30 +62,33 @@ in
         disabledDevices = filter (name: getType name == "device") cfg.disabledDevices;
       in
       {
-        "${updatedDevicesPath}" = mkIf ((length cfg.updateDevices) > 0) {
+        "${updatedDevicesPath}" = mkIf ((length (builtins.attrValues cfg.updateDevices)) > 0) {
           text = ''
             monitor.alsa.rules = [
-              ${lib.pipe cfg.updateDevices [
-                (map (target: ''
-                  {
-                    matches = [
-                      {
-                        ${getType target.name}.name = "${target.name}"
-                      }
-                    ]
+              ${
+                cfg.updateDevices
+                |> lib.mapAttrsToList (
+                  name: props: ''
+                    {
+                      matches = [
+                        {
+                          ${getType name}.name = "${name}"
+                        }
+                      ]
 
-                    actions = {
-                      update-props = {
-                        ${lib.pipe target.props [
-                          (mapAttrsToList (name: value: "${name} = ${builtins.toJSON value}"))
-                          (concatStringsSep "\n")
-                        ]}
+                      actions = {
+                        update-props = {
+                          ${lib.pipe props [
+                            (mapAttrsToList (name: value: "${name} = ${builtins.toJSON value}"))
+                            (concatStringsSep "\n")
+                          ]}
+                        }
                       }
                     }
-                  }
-                ''))
-                (concatStringsSep "\n")
-              ]}
+                  ''
+                )
+                |> concatStringsSep "\n"
+              }
             ]
           '';
         };

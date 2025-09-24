@@ -2,8 +2,12 @@ name: Build packages
 
 on:
   push:
+    paths:
+      - "pkgs/**"
+      - "flake.nix"
+      - "flake.lock"
+      - ".github/workflows/packages.yaml"
   workflow_dispatch:
-  workflow_call:
 
 permissions:
   contents: read
@@ -13,23 +17,126 @@ jobs:
     name: Discover Packages
     runs-on: self-hosted
     outputs:
-      matrix: ${{ steps.get-packages.outputs.matrix }}
+      matrix: ${{ steps.filtered-packages.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Get packages from flake
         id: get-packages
         run: |
-          PACKAGES_WITH_ARCH=$(nix flake show --no-pure-eval --json | jq '
-            .packages | {
-              package: [ to_entries[].value | keys[] | select(startswith("devenv-") | not) ] | unique,
-              arch: [ keys[] ]
-            }
-          ')
-          echo "All architectures with packages: $PACKAGES_WITH_ARCH"
+          FLAKE_JSON=$(nix flake show --no-pure-eval --json)
+          ARCHS=$(echo "$FLAKE_JSON" | jq -r '.packages | keys[]')
+          INCLUDE_JSON='[]'
+          for ARCH in $ARCHS; do
+            PKGS=$(echo "$FLAKE_JSON" | jq -r --arg arch "$ARCH" '.packages[$arch] | keys[] | select(startswith("devenv-") | not)')
+            for PKG in $PKGS; do
+              BROKEN=$(nix eval --json --system "$ARCH" ".#${PKG}.meta.broken" 2>/dev/null)
+              if [ "$BROKEN" != "true" ]; then
+                INCLUDE_JSON=$(echo "$INCLUDE_JSON" | jq --arg pkg "$PKG" --arg arch "$ARCH" '. + [{package:$pkg, arch:$arch}]')
+              else
+                echo "Skipping broken package $PKG on $ARCH"
+              fi
+            done
+          done
+          if [ "$(echo "$INCLUDE_JSON" | jq 'length')" -eq 0 ]; then
+            MATRIX_JSON='[]'
+          else
+            MATRIX_JSON=$(jq -n --argjson include "$INCLUDE_JSON" '{include:$include}')
+          fi
+          echo "Calculated matrix: $MATRIX_JSON"
           {
             echo 'matrix<<EOF'
-            echo "$PACKAGES_WITH_ARCH"
+            echo "$MATRIX_JSON"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Filter to changed packages
+        id: filtered-packages
+        run: |
+          set -euo pipefail
+
+          git fetch origin ${{ github.event.before }} --depth=1
+
+          if [ "${{ github.event_name }}" != "push" ]; then
+            echo "Not a push event (${{ github.event_name }}); keeping full matrix."
+            {
+              echo 'matrix<<EOF'
+              echo "${{ steps.get-packages.outputs.matrix }}"
+              echo EOF
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # If flake.lock changed, check if the nixpkgs input changed; if so, keep full matrix
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- flake.lock | grep -q 'flake.lock'; then
+            echo "flake.lock changed, checking nixpkgs input change..."
+            # Try to obtain previous flake.lock; if unavailable, assume nixpkgs changed
+            if git show ${{ github.event.before }}:flake.lock > /tmp/old.lock 2>/dev/null; then
+              :
+            else
+              echo "Previous flake.lock not available; assuming nixpkgs changed. Keeping full matrix."
+              {
+                echo 'matrix<<EOF'
+                echo "${{ steps.get-packages.outputs.matrix }}"
+                echo EOF
+              } >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            OLD_NIXPKGS=$(jq -r '
+              (.root) as $r
+              | (.nodes[$r].inputs.nixpkgs // "nixpkgs") as $n0
+              | ($n0 | if type=="string" then . else (.[0] // "nixpkgs") end) as $n
+              | (.nodes[$n].locked // {})
+              | [(.rev // "none"), (.narHash // "none")] | join("|")
+            ' /tmp/old.lock 2>/dev/null || echo "none|none")
+
+            NEW_NIXPKGS=$(jq -r '
+              (.root) as $r
+              | (.nodes[$r].inputs.nixpkgs // "nixpkgs") as $n0
+              | ($n0 | if type=="string" then . else (.[0] // "nixpkgs") end) as $n
+              | (.nodes[$n].locked // {})
+              | [(.rev // "none"), (.narHash // "none")] | join("|")
+            ' flake.lock 2>/dev/null || echo "none|none")
+
+            if [ "$OLD_NIXPKGS" != "$NEW_NIXPKGS" ]; then
+              echo "nixpkgs input changed ($OLD_NIXPKGS -> $NEW_NIXPKGS). Keeping full matrix."
+              {
+                echo 'matrix<<EOF'
+                echo "${{ steps.get-packages.outputs.matrix }}"
+                echo EOF
+              } >> "$GITHUB_OUTPUT"
+              exit 0
+            else
+              echo "nixpkgs input did not change."
+            fi
+          fi
+
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- pkgs/)
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No changes in pkgs, skipping all builds."
+            echo "matrix=[]" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          CHANGED_PKGS=$(echo "$CHANGED_FILES" | sed -E 's|^pkgs/([^/]+)/.*$|\1|' | sort -u)
+          echo "Changed packages:"
+          echo "$CHANGED_PKGS"
+          FILTERED_JSON='[]'
+          for PKG in $CHANGED_PKGS; do
+            MATCHING_ENTRIES=$(echo "${{ steps.get-packages.outputs.matrix }}" | jq --arg pkg "$PKG" '.include[] | select(.package == $pkg)')
+            if [ -n "$MATCHING_ENTRIES" ]; then
+              FILTERED_JSON=$(echo "$FILTERED_JSON" | jq --argjson entries "$MATCHING_ENTRIES" '. + $entries')
+            fi
+          done
+          if [ "$(echo "$FILTERED_JSON" | jq 'length')" -eq 0 ]; then
+            MATRIX_JSON='[]'
+          else
+            MATRIX_JSON=$(jq -n --argjson include "$FILTERED_JSON" '{include:$include}')
+          fi
+          echo "Filtered matrix: $MATRIX_JSON"
+          {
+            echo 'matrix<<EOF'
+            echo "$MATRIX_JSON"
             echo EOF
           } >> "$GITHUB_OUTPUT"
 

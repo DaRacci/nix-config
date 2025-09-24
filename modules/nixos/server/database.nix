@@ -115,7 +115,7 @@ in
       default = { };
       type = attrsOf (
         submodule (
-          { name, ... }:
+          { ... }:
           {
             options = {
               host = mkOption {

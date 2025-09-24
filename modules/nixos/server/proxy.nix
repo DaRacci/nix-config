@@ -62,6 +62,15 @@ in
           { name, ... }:
           {
             options = {
+              public = mkOption {
+                type = bool;
+                default = false;
+                description = ''
+                  When enabled this service will be accessible to the public via Cloudflared Tunnels.
+                  Traffic will still be routed through caddy.
+                '';
+              };
+
               baseUrl = mkOption {
                 type = str;
                 default = "${name}.${getNixioConfig "server.proxy.domain"}";
@@ -170,13 +179,33 @@ in
               hostName = value.baseUrl;
               useACMEHost = value.baseUrl;
               extraConfig =
-                if value.extraConfig == null then "" else replaceLocalHost config.host.name value.extraConfig;
+                [
+                  "import default"
+                  (lib.optionalString (value.public) "import public")
+                  (lib.optionalString (value.extraConfig != null) (
+                    replaceLocalHost config.host.name value.extraConfig
+                  ))
+                ]
+                |> builtins.concatStringsSep "\n";
             }
           ) config.server.proxy.virtualHosts)
         ))
         lib.mergeAttrsList
       ];
     };
+
+    services.cloudflared.tunnels."8d42e9b2-3814-45ea-bbb5-9056c8f017e2" =
+      let
+        publicHosts =
+          serverConfigurations
+          |> builtins.map (config: config.server.proxy.virtualHosts)
+          |> lib.mergeAttrsList
+          |> lib.filterAttrs (_: vh: vh.public)
+          |> lib.mapAttrs' (_: vh: lib.nameValuePair vh.baseUrl "https://${vh.baseUrl}");
+      in
+      lib.mkIf ((builtins.attrValues publicHosts |> builtins.length) > 0) {
+        ingress = publicHosts;
+      };
 
     security.acme.certs = lib.mkIf isNixio (
       lib.pipe config.services.caddy.virtualHosts [

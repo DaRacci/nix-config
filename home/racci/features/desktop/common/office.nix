@@ -1,6 +1,7 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
+    libreoffice
     gnome-calendar
     raider
     # errands # To-do
@@ -9,7 +10,7 @@
     papers # PDF viewer
     decoder # QR codes
     dialect # Translation
-    # planify
+    planify
     gnome-clocks
     gnome-calculator
     gnome-graphs

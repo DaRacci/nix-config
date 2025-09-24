@@ -21,10 +21,17 @@ def main [
     log critical "Imports are empty, probably had a nix failure"
     exit 1
   }
-
   let our_imports = $all_imports
     | where { $in | str starts-with $thisSource }
+    # If the import is a directory, we assume it has a default.nix as the entry point
+    | each { if not ($in | str ends-with ".nix") {
+        $"($in)/default.nix"
+      } else {
+        $in
+      }
+    }
     | each { $in | str substring (($thisSource | str length) + 1)..  }
+    | uniq
 
   echo $our_imports | to json
 }

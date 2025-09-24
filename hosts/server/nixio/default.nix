@@ -36,14 +36,14 @@ in
     (importFile ./storage.nix)
   ];
 
-  #region Site2Site VPN
   boot.kernel.sysctl = {
     "net.ipv4.ip_forward" = 1;
     "net.ipv6.conf.all.forwarding" = 1;
   };
 
-  services.tailscale = { };
-  #endregion
+  services.tailscale = {
+    tags = [ "ingress" ];
+  };
 
   server.network.subnets = [
     {

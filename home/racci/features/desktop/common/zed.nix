@@ -6,33 +6,34 @@
     extraPackages = with pkgs; [
       # LSPs & other tools for zed
       autocorrect
+      docker-compose-language-service
       dockerfile-language-server-nodejs
-      nixfmt-rfc-style
-      nixd
       nil
-      shellcheck
-      shfmt
+      nixd
+      nixfmt
       powershell
       powershell-editor-services
+      shellcheck
+      shfmt
 
       libz
     ];
 
     extensions = [
-      "toml"
+      "autocorrect"
+      "cargo-appraiser"
+      "cargo-tom"
+      "colored-zed-icons-theme"
+      "docker-compose"
       "dockerfile"
       "git-firefly"
-      "tokyo-night"
-      "terraform"
       "log"
-      "docker-compose"
       "nix"
       "nu"
+      "terraform"
+      "tokyo-night"
+      "toml"
       "typos"
-      "autocorrect"
-      "cargo-tom"
-      "cargo-appraiser"
-      "colored-zed-icons-theme"
     ];
 
     # https://zed.dev/docs/configuring-zed
@@ -211,6 +212,20 @@
 
         powershell-es = {
           binary.path = lib.getExe pkgs.powershell-editor-services;
+        };
+
+        docker-compose = {
+          binary = {
+            path = lib.getExe pkgs.docker-compose-language-service;
+            arguments = [ "--stdio" ];
+          };
+        };
+
+        autocorrect = {
+          binary = {
+            path = lib.getExe pkgs.autocorrect;
+            arguments = [ "server" ];
+          };
         };
       };
 

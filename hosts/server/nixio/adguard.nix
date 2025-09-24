@@ -16,7 +16,7 @@
   };
 
   systemd.services.adguardhome = {
-    requires = [ "acme-finished-adguard.racci.dev.target" ];
+    requires = [ "acme-adguard.racci.dev.service" ];
     serviceConfig.LoadCredential =
       let
         certDir = config.security.acme.certs."adguard.racci.dev".directory;
@@ -81,8 +81,8 @@
           ];
 
           fallback_dns = [
-            "tls://doh.mullvad.net"
-            "tls://dns.google"
+            #   "tls://doh.mullvad.net"
+            #   "tls://dns.google"
           ];
 
           trusted_proxies = [

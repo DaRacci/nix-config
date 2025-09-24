@@ -413,7 +413,7 @@ in
                 "ultima.tabs.vertical.hide.in.screenedge" = false;
 
                 "ultima.navbar.hidebuttons" = false;
-                "ultima.urlbar.hidebuttons" = true;
+                "ultima.urlbar.hide.buttons" = true;
                 "ultima.urlbar.centered" = true;
                 "ultima.theme.extensions" = true;
                 "ultima.theme.menubar" = true;
@@ -447,26 +447,29 @@ in
             in
             {
               "Nix Packages" = {
-                urls = [ { template = "${searchNixURL}packages?type=packages&query={searchTerms}"; } ];
+                urls = [
+                  { template = "${searchNixURL}packages?type=packages&query={searchTerms}&channel=unstable"; }
+                ];
                 icon = searchNixIcon;
                 definedAliases = [ "@np" ];
               };
 
               "Nix Options" = {
-                urls = [ { template = "${searchNixURL}options?query={searchTerms}"; } ];
+                urls = [ { template = "${searchNixURL}options?query={searchTerms}&channel=unstable"; } ];
                 icon = searchNixIcon;
                 definedAliases = [ "@no" ];
               };
 
               "NixOS Wiki" = {
-                urls = [ { template = "https://nixos.wiki/index.php?search={searchTerms}"; } ];
-                icon = "https://nixos.wiki/favicon.png";
-                updateInterval = 24 * 60 * 60 * 1000; # every day
+                urls = [ { template = "https://wiki.nixos.org/w/index.php?search={searchTerms}"; } ];
+                icon = searchNixIcon;
                 definedAliases = [ "@nw" ];
               };
 
               "Home Manager Options" = {
-                urls = [ { template = "https://home-manager-options.extranix.com/?query={searchTerms}"; } ];
+                urls = [
+                  { template = "https://home-manager-options.extranix.com/?query={searchTerms}&release=master"; }
+                ];
                 icon = searchNixIcon;
                 definedAliases = [ "@hmo" ];
               };
@@ -496,7 +499,7 @@ in
 
               "NixPkgsIssues" = {
                 urls = [ { template = "https://github.com/NixOS/nixpkgs/issues?q={searchTerms}"; } ];
-                icon = "https://nixos.org/logo/nixos-logo-only-hires.png";
+                icon = searchNixIcon;
                 definedAliases = [ "@npi" ];
               };
 
@@ -504,6 +507,12 @@ in
                 urls = [ { template = "https://web.archive.org/web/*/{searchTerms}"; } ];
                 icon = "https://archive.org/offshoot_assets/favicon.ico";
                 definedAliases = [ "@wbm" ];
+              };
+
+              "RacciSearch" = {
+                urls = [ { template = "https://search.racci.dev/search?q={searchTerms}"; } ];
+                icon = "https://search.racci.dev/favicon.ico";
+                definedAliases = [ "@rs" ];
               };
 
               "google".metaData.alias = "@g"; # builtin engines only support specifying one additional alias

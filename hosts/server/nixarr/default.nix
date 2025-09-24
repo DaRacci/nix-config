@@ -7,6 +7,8 @@
 {
   imports = [ inputs.nixarr.nixosModules.default ];
 
+  users.users.jellyfin.extraGroups = [ "video" ];
+
   sops.secrets.wireguard = {
     format = "binary";
     sopsFile = ./wg.conf;
@@ -17,6 +19,10 @@
     "100.100.0.0/16"
     "127.0.0.1"
   ];
+
+  hardware.graphics = {
+    enable = true;
+  };
 
   nixarr = {
     enable = true;
@@ -244,12 +250,18 @@
   services.flaresolverr.enable = true;
 
   server.proxy.virtualHosts = {
-    jellyfin.extraConfig = ''
-      reverse_proxy localhost:8096
-    '';
-    jellyseerr.extraConfig = ''
-      reverse_proxy localhost:${toString config.nixarr.jellyseerr.port}
-    '';
+    jellyfin = {
+      public = true;
+      extraConfig = ''
+        reverse_proxy localhost:8096
+      '';
+    };
+    jellyseerr = {
+      public = true;
+      extraConfig = ''
+        reverse_proxy localhost:${toString config.nixarr.jellyseerr.port}
+      '';
+    };
     transmission.extraConfig = ''
       reverse_proxy localhost:${toString config.nixarr.transmission.uiPort}
     '';

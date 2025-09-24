@@ -8,6 +8,8 @@
     ./connections.nix
     ./connectivity.nix
     ./dashboard.nix
+    ./dashboard
+    ./music.nix
     ./postgresql.nix
     ./proxy.nix
     # ./weather.nix
@@ -34,13 +36,27 @@
           ps: with ps; [
             aiogithubapi
             pynetgear
-            pyarlo
             google-nest-sdm
             pkgs.ssh-terminal-manager
             pkgs.pyuptimekuma
+            pkgs.pyarlo
             spotifyaio
 
             aiobotocore # For S3 Backup to Minio
+
+            # Required for home-generative-agent integration
+            # Source: https://github.com/goruck/home-generative-agent/blob/main/custom_components/home_generative_agent/manifest.json
+            grpcio
+            openai
+            ollama
+            transformers
+            langgraph
+            langgraph-checkpoint-postgres
+            langchain
+            langchain-core
+            langchain-ollama
+            langchain-openai
+            langchain-google-genai
           ];
       };
       customComponents = with pkgs.home-assistant-custom-components; [
@@ -48,7 +64,6 @@
         waste_collection_schedule
         philips_airpurifier_coap
         smartir
-        sleep_as_android
       ];
 
       configWritable = true;

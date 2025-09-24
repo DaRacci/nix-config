@@ -89,7 +89,6 @@
             accelerationHosts = {
               cuda = [
                 "nixmi"
-                "winix"
               ];
               rocm = [
                 # "nixai"
@@ -141,9 +140,9 @@
           };
 
         perSystem =
-          { pkgs, ... }:
+          { pkgs, system, ... }:
           {
-            _module.args.pkgs = mkPkgs { };
+            _module.args.pkgs = mkPkgs { inherit system; };
 
             packages = import ./pkgs { inherit inputs pkgs; };
           };
@@ -310,9 +309,16 @@
       inputs = {
         nixpkgs.follows = "nixpkgs";
         home-manager.follows = "home-manager";
+        jovian.follows = "jovian";
       };
     };
-    jovian.follows = "chaotic-nyx/jovian";
+    jovian = {
+      url = "github:Jovian-Experiments/Jovian-NixOS";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        nix-github-actions.follows = "";
+      };
+    };
     nixarr = {
       url = "github:rasmus-kirk/nixarr";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -374,7 +380,7 @@
 
     # Resources
     firefox-ultima = {
-      url = "github:soulhotel/FF-ULTIMA/3.0";
+      url = "github:soulhotel/FF-ULTIMA";
       flake = false;
     };
   };

@@ -2,6 +2,10 @@ name: "Setup Nix with Lix & Caches"
 description: "Setup Nix with Lix & Caches"
 
 inputs:
+  root:
+    description: "Path to the root of the nix project (where flake.nix is)"
+    required: false
+    default: ${{ github.workspace }}
   arch:
     description: "What architecture to install for"
     required: true
@@ -31,6 +35,8 @@ runs:
         extra-conf: |
           accept-flake-config = true
           experimental-features = nix-command flakes pipe-operator
+          substituters = https://cache.nixos.org https://cache.racci.dev/global https://nix-community.cachix.org https://chaotic-nyx.cachix.org/
+          trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= global:OKNSxDYKp8Q8Tr5/5Bc7CYVSfvdFQV0dMhpG0fOAG0k= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8=
 
     # Setup TS so we can access the cache
     - name: Tailscale
@@ -40,11 +46,31 @@ runs:
         oauth-client-id: ${{ inputs.TS_OAUTH_CLIENT_ID }}
         oauth-secret: ${{ inputs.TS_OAUTH_SECRET }}
         tags: tag:ci
+        use-cache: true
 
+    # Taken from https://github.com/ryanccn/attic-action/issues/28#issuecomment-2743233082
+    - name: Restore attic-client binary
+      uses: actions/cache@v4
+      id: attic-cache
+      with:
+        path: /tmp/attic-client
+        key: attic-client-${{runner.os}}-${{ hashFiles(format('{0}/flake.lock', inputs.root)) }}
+    - name: Make attic-client binary cacheable
+      if: steps.attic-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: nix copy --to file:///tmp/attic-client --inputs-from ${{inputs.root}} nixpkgs#attic-client
+    - name: Install attic-client binary
+      shell: bash
+      run: |
+        # https://git.lix.systems/lix-project/lix/issues/751:
+        find /tmp/attic-client -type f -print0 | xargs -0 touch -d '@0'
+
+        nix copy --inputs-from ${{inputs.root}} --from file:///tmp/attic-client nixpkgs#attic-client
     - name: Setup Attic cache
       uses: ryanccn/attic-action@v0
       if: ${{ !env.ACT && inputs.ATTIC_ENDPOINT && inputs.ATTIC_CACHE && inputs.ATTIC_TOKEN }}
       with:
+        inputs-from: ${{ inputs.root }}
         endpoint: ${{ inputs.ATTIC_ENDPOINT }}
         cache: ${{ inputs.ATTIC_CACHE }}
         token: ${{ inputs.ATTIC_TOKEN }}

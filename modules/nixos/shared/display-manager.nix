@@ -25,7 +25,7 @@ in
       enable = true;
       settings = {
         default_session = {
-          command = "${lib.getExe pkgs.greetd.tuigreet} --time --remember --remember-session --sessions '${waylandSessionPaths}' --xsessions '${xSessionPaths}'";
+          command = "${lib.getExe pkgs.tuigreet} --time --remember --remember-session --sessions '${waylandSessionPaths}' --xsessions '${xSessionPaths}'";
           user = "greeter";
         };
       };

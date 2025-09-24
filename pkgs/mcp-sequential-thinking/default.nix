@@ -73,7 +73,7 @@ buildPythonApplication rec {
     homepage = "https://github.com/arben-adm/mcp-sequential-thinking";
     changelog = "https://github.com/arben-adm/mcp-sequential-thinking/blob/${src.rev}/CHANGELOG.md";
     license = lib.licenses.mit;
-    maintainers = with lib.maintainers; [ ];
+    maintainers = [ ];
     mainProgram = "mcp-sequential-thinking";
   };
 }

@@ -19,14 +19,6 @@ in
     };
 
     groups.nextcloud.gid = 997;
-
-    users.protonmail-bridge = {
-      home = "/var/lib/protonmail-bridge";
-      group = "protonmail-bridge";
-      createHome = true;
-      uid = 385;
-    };
-    groups.protonmail-bridge.members = [ "protonmail-bridge" ];
   };
 
   sops.secrets = {
@@ -42,9 +34,12 @@ in
     };
 
     proxy.virtualHosts = {
-      "nc".extraConfig = ''
-        reverse_proxy http://localhost:80
-      '';
+      nc = {
+        public = true;
+        extraConfig = ''
+          reverse_proxy http://localhost:80
+        '';
+      };
     };
   };
 
@@ -106,10 +101,19 @@ in
         maintenance_window_start = 15; # 2 AM Sydney time
         log_type = "file";
 
-        mail_from_address = "no-reply";
         mail_domain = "racci.dev";
-        mail_smtpmode = "sendmail";
-        mail_sendmailmode = "pipe";
+        mail_from_address = "no-reply";
+        mail_smtpmode = "smtp";
+        mail_smtphost = "mail.protonmail.ch";
+        mail_smtpport = 25;
+
+        mail_smtpstreamoptions = {
+          ssl = {
+            allow_self_signed = true;
+            verify_peer = false;
+            verify_peer_name = false;
+          };
+        };
 
         preview_imaginary_url = "http://127.0.0.1:${toString imaginary.port}";
         enabledPreviewProviders = [
@@ -121,6 +125,7 @@ in
           "OC\\Preview\\TXT"
         ];
 
+        allow_local_remote_servers = true;
         trusted_proxies = [
           "::1" # For notify_push
         ]
@@ -198,26 +203,9 @@ in
       port = 9200;
       plugins = [ pkgs.elasticsearchPlugins.ingest-attachment ];
     };
-
-    passSecretService.enable = true;
   };
 
   virtualisation.docker.enable = true;
-
-  systemd.services = {
-    protonmail-bridge = {
-      after = lib.mkForce [ "network.target" ];
-      wantedBy = lib.mkForce [ "default.target" ];
-      script = "${pkgs.protonmail-bridge}/bin/protonmail-bridge --no-window --noninteractive --log-level info";
-      path = [ pkgs.pass ];
-
-      serviceConfig = {
-        Restart = "always";
-        RestartSec = "5";
-        User = config.users.users.protonmail-bridge.name;
-      };
-    };
-  };
 
   networking = {
     firewall = {

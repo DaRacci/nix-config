@@ -141,7 +141,7 @@ in
     yazi = {
       enable = true;
       settings = {
-        manager = {
+        mgr = {
           ratio = "0, 4, 0";
         };
         opener = {
