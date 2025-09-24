@@ -131,10 +131,14 @@
                   ${nuSelectHost}
 
                   let command_args = [
+                    "os"
                     "switch"
+                    $".#nixosConfigurations.($selected)"
+                  ]
+
+                  let passthrough_args = [
+                    "--"
                     "--accept-flake-config"
-                    "--flake"
-                    $".#($selected)"
                     ...($args)
                   ]
 
@@ -144,10 +148,10 @@
                   let current_host = cat /etc/hostname | str trim
                   if $selected == $current_host {
                     log info "Rebuilding current host"
-                    sudo nixos-rebuild ...$command_args
+                    nh ...$command_args ...$passthrough_args
                   } else {
                     log info $"Rebuilding selected host: ($selected)"
-                    nixos-rebuild ...$command_args --target-host $"root@($selected)"
+                    nh ...$command_args --target-host $"root@($selected)" ...$passthrough_args
                   }
                 }
               '';

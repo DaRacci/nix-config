@@ -2,6 +2,7 @@ _:
 {
   config,
   pkgs,
+  lib,
   ...
 }:
 {
@@ -28,10 +29,16 @@ _:
     };
   };
 
-  systemd.services.caddy.after = [
-    "tailscaled.service"
-    "adguardhome.service"
-  ];
+  systemd.services.caddy = {
+    after = [
+      "tailscaled.service"
+      "adguardhome.service"
+    ];
+    serviceConfig = {
+      Restart = lib.mkForce "always";
+      RestartSec = "5s";
+    };
+  };
 
   services.caddy = {
     enable = true;

@@ -16,7 +16,7 @@ in
         DECLARE password TEXT;
         BEGIN
           password := trim(both from replace(pg_read_file('${passPath}'), E'\n', '''));
-          EXECUTE format('ALTER USER ${role} WITH PASSWORD '''%s''';', password);
+          EXECUTE format('ALTER USER "${role}" WITH PASSWORD '''%s''';', password);
         END $$;
       EOF
     '';

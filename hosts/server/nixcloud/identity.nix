@@ -4,17 +4,35 @@
   ...
 }:
 {
-  sops.secrets = {
-    "CLOUDFLARE/EMAIL" = { };
-    "CLOUDFLARE/ZONE_API_TOKEN" = { };
-    "CLOUDFLARE/DNS_API_TOKEN" = { };
-    "KANIDM/ADMIN_PASSWORD" = { };
-    "KANIDM/IDM_ADMIN_PASSWORD" = { };
-  };
+  sops.secrets =
+    let
+      kanidmPermissions = {
+        owner = "kanidm";
+        group = "kanidm";
+      };
+    in
+    {
+      "CLOUDFLARE/EMAIL" = { };
+      "CLOUDFLARE/ZONE_API_TOKEN" = { };
+      "CLOUDFLARE/DNS_API_TOKEN" = { };
+
+      "KANIDM/ADMIN_PASSWORD" = { };
+      "KANIDM/IDM_ADMIN_PASSWORD" = { };
+
+      "KANIDM/OAUTH2/NEXTCLOUD_SECRET" = kanidmPermissions;
+      "KANIDM/OAUTH2/HASSIO_SECRET" = kanidmPermissions;
+      "KANIDM/PROVISIONING_JSON" = kanidmPermissions // {
+        sopsFile = ./provisioning.json;
+        restartUnits = [ "kanidm.service" ];
+        format = "json";
+        key = "";
+      };
+    };
 
   services.kanidm = {
     enableServer = true;
-    package = pkgs.kanidm_1_7;
+    package = pkgs.kanidmWithSecretProvisioning_1_7;
+
     serverSettings =
       let
         certDirectory = config.security.acme.certs."auth.racci.dev".directory;
@@ -35,23 +53,67 @@
           # "192.168.2.1/24"
           # "100.0.0.1/8"
         ];
+
+        online_backup = {
+          versions = 7;
+          path = "/var/lib/kanidm/backup";
+          schedule = "0 3 * * *"; # daily at 3am
+        };
       };
 
     provision = {
-      enable = false;
+      enable = true;
       adminPasswordFile = "/run/credentials/kanidm.service/ADMIN_PASSWORD";
       idmAdminPasswordFile = "/run/credentials/kanidm.service/IDM_ADMIN_PASSWORD";
 
-      # persons = [ ];
-      # groups = {
-      #   admin = {
+      # Used for providing information about users that I'd rather not be public.
+      extraJsonFile = config.sops.secrets."KANIDM/PROVISIONING_JSON".path;
+      groups = {
+        sysadmin.members = [ "james" ];
 
-      #   };
+        family.members = [
+          "james"
+          "savannah"
+          "barbara"
+        ];
 
-      #   family = {
+        cloud.members = [
+          "family"
+          "simon"
+        ];
+      };
 
-      #   };
-      # };
+      # Generate OAuth2 Basic Secrets using `cat /dev/urandom | tr --complement --delete 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkpqrstuvwxyz0123456789' | head --bytes 48`
+      systems.oauth2 = {
+        nextcloud = {
+          displayName = "Nextcloud";
+          originUrl = "https://nc.racci.dev/apps/user_oidc/code";
+          originLanding = "https://nc.racci.dev";
+          basicSecretFile = config.sops.secrets."KANIDM/OAUTH2/NEXTCLOUD_SECRET".path;
+
+          scopeMaps.cloud = [
+            "openid"
+            "profile"
+            "email"
+            "groups"
+          ];
+        };
+
+        hassio = {
+          public = true;
+          displayName = "Home Assistant";
+          originUrl = "https://hassio.racci.dev/auth/oidc/callback";
+          originLanding = "https://hassio.racci.dev/auth/oidc/welcome";
+          basicSecretFile = config.sops.secrets."KANIDM/OAUTH2/HASSIO_SECRET".path;
+
+          scopeMaps.family = [
+            "openid"
+            "profile"
+            "email"
+            "groups"
+          ];
+        };
+      };
     };
   };
 

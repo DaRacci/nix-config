@@ -44,14 +44,21 @@
       vrr = false
     }
   '';
+  custom.audio = {
+    disabledDevices = [
+      "alsa_card.pci-0000_01_00.1" # Dedicated GPU
+      "alsa_card.pci-0000_74_00.1" # HDMI Audio
 
-  custom.audio.disabledDevices = [
-    "alsa_card.pci-0000_01_00.1" # Dedicated GPU
-    "alsa_card.pci-0000_74_00.1" # HDMI Audio
+      "alsa_input.usb-C-Media_Electronics_Inc._USB_Advanced_Audio_Device-00.*" # Acasis Dock
+      "alsa_output.usb-C-Media_Electronics_Inc._USB_Advanced_Audio_Device-00.*" # Acasis Dock
+    ];
 
-    "alsa_input.usb-C-Media_Electronics_Inc._USB_Advanced_Audio_Device-00.analog-stereo" # Acasis Dock
-    "alsa_output.usb-C-Media_Electronics_Inc._USB_Advanced_Audio_Device-00.analog-stereo" # Acasis Dock
-  ];
+    updateDevices = {
+      "alsa_output.usb-SMSL_SMSL_SU8_USB2.0-00.*" = {
+        "session.suspend-timeout-seconds" = 0;
+      };
+    };
+  };
 
   programs.ssh.matchBlocks = {
     "windows-work" = {

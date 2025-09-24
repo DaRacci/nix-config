@@ -2,6 +2,10 @@ name: "Setup Nix with Lix & Caches"
 description: "Setup Nix with Lix & Caches"
 
 inputs:
+  root:
+    description: "Path to the root of the nix project (where flake.nix is)"
+    required: false
+    default: ${{ github.workspace }}
   arch:
     description: "What architecture to install for"
     required: true
@@ -44,10 +48,29 @@ runs:
         tags: tag:ci
         use-cache: true
 
+    # Taken from https://github.com/ryanccn/attic-action/issues/28#issuecomment-2743233082
+    - name: Restore attic-client binary
+      uses: actions/cache@v4
+      id: attic-cache
+      with:
+        path: /tmp/attic-client
+        key: attic-client-${{runner.os}}-${{ hashFiles(format('{0}/flake.lock', inputs.root)) }}
+    - name: Make attic-client binary cacheable
+      if: steps.attic-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: nix copy --to file:///tmp/attic-client --inputs-from ${{inputs.root}} nixpkgs#attic-client
+    - name: Install attic-client binary
+      shell: bash
+      run: |
+        # https://git.lix.systems/lix-project/lix/issues/751:
+        find /tmp/attic-client -type f -print0 | xargs -0 touch -d '@0'
+
+        nix copy --inputs-from ${{inputs.root}} --from file:///tmp/attic-client nixpkgs#attic-client
     - name: Setup Attic cache
       uses: ryanccn/attic-action@v0
       if: ${{ !env.ACT && inputs.ATTIC_ENDPOINT && inputs.ATTIC_CACHE && inputs.ATTIC_TOKEN }}
       with:
+        inputs-from: ${{ inputs.root }}
         endpoint: ${{ inputs.ATTIC_ENDPOINT }}
         cache: ${{ inputs.ATTIC_CACHE }}
         token: ${{ inputs.ATTIC_TOKEN }}
