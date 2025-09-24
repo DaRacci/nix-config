@@ -49,8 +49,4 @@ pull_request_rules:
     conditions: []
     actions:
       queue:
-priority_rules:
-  - name: priority for queue `duplicated default from merge on approval`
-    conditions:
-      - "#approved-reviews-by>=1"
-    priority: 2750
+priority_rules: []
