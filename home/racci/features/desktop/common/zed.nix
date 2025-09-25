@@ -321,6 +321,10 @@
     };
   };
 
+  xdg.mimeApps.defaultApplicationPackages = [
+    pkgs.zed-editor
+  ];
+
   user.persistence.directories = [
     ".config/zed"
     ".local/share/zed"
