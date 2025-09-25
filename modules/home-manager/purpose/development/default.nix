@@ -52,6 +52,19 @@ in
       d-spy
     ];
 
+    programs = {
+      direnv = {
+        enable = true;
+        nix-direnv.enable = true;
+
+        enableBashIntegration = config.programs.bash.enable;
+        enableNushellIntegration = config.programs.nushell.enable;
+        enableZshIntegration = config.programs.zsh.enable;
+      };
+
+      git = lib.mkIf config.programs.git.enable { ignores = [ ".direnv" ]; };
+    };
+
     xdg.configFile."act/actrc".text = ''
       -P ubuntu-latest=catthehacker/ubuntu:act-latest
       -P ubuntu-24.04=catthehacker/ubuntu:act-24.04
@@ -66,6 +79,8 @@ in
 
     user.persistence.directories = [
       "Projects"
+
+      ".local/share/direnv"
 
       # JetBrains IDEs
       ".local/share/JetBrains"

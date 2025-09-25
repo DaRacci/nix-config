@@ -10,9 +10,7 @@ in
 {
   options.purpose.development.rust = {
     enable = lib.mkEnableOption "Enable Rust Development";
-    rust-rover.enable = lib.mkEnableOption "Add the rust-rover package." // {
-      default = false;
-    };
+    rust-rover.enable = lib.mkEnableOption "Add the rust-rover package.";
   };
 
   config = lib.mkIf cfg.enable {
