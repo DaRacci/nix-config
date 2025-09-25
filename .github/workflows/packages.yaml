@@ -118,7 +118,22 @@ jobs:
             echo "matrix=[]" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          CHANGED_PKGS=$(echo "$CHANGED_FILES" | sed -E 's|^pkgs/([^/]+)/.*$|\1|' | sort -u)
+
+          CHANGED_PKGS=$(
+            echo "$CHANGED_FILES" \
+            | tr ' ' '\n' \
+            | grep -E '^pkgs/' \
+            | sed 's|^pkgs/||' \
+            | awk -F'/' '{
+                n=split($0,a,"/");
+                if (a[n]=="default.nix") {
+                  if (n>1) print a[n-1]
+                } else {
+                  fname=a[n]; sub(/\.nix$/,"",fname); print fname
+                }
+              }' \
+            | sort -u
+          )
           echo "Changed packages:"
           echo "$CHANGED_PKGS"
           FILTERED_JSON='[]'
