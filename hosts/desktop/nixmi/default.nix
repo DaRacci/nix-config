@@ -114,6 +114,7 @@
     ];
     alvr = {
       enable = true;
+      package = pkgs.alvr-bin;
       openFirewall = true;
     };
     adb.enable = true;

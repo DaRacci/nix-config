@@ -3,17 +3,20 @@
   stdenv,
   fetchzip,
   fetchFromGitHub,
-  alsa-lib,
+
   autoPatchelfHook,
+  nix-update-script,
+
+  alsa-lib,
   brotli,
   ffmpeg,
   libdrm,
+  gmp,
   libGL,
   libunwind,
   libva,
   libvdpau,
   libxkbcommon,
-  nix-update-script,
   openssl,
   pipewire,
   pulseaudio,
@@ -24,7 +27,7 @@
   SDL2,
 }:
 stdenv.mkDerivation (finalAttrs: rec {
-  pname = "alvr";
+  pname = "alvr-bin";
   version = "20.12.1";
 
   src = fetchzip {
@@ -54,6 +57,7 @@ stdenv.mkDerivation (finalAttrs: rec {
   runtimeDependencies = [
     brotli
     ffmpeg
+    gmp
     libdrm
     libGL
     libxkbcommon
@@ -74,20 +78,20 @@ stdenv.mkDerivation (finalAttrs: rec {
     mkdir -p $out/share/applications
     cp -r $src/* $out
     install -Dm755 ${alvrSrc}/alvr/xtask/resources/alvr.desktop $out/share/applications/alvr.desktop
-    install -Dm644 ${alvrSrc}/resources/ALVR-Icon.svg $out/share/icons/hicolor/256x256/apps/alvr.svg
+    install -Dm644 ${alvrSrc}/resources/ALVR-Icon.svg $out/share/icons/hicolor/scalable/apps/alvr.svg
 
     runHook postInstall
   '';
 
   passthru.updateScript = nix-update-script { };
 
-  meta = with lib; {
+  meta = {
     description = "Stream VR games from your PC to your headset via Wi-Fi";
     homepage = "https://github.com/alvr-org/ALVR/";
     changelog = "https://github.com/alvr-org/ALVR/releases/tag/v${finalAttrs.version}";
-    license = licenses.mit;
-    maintainers = with maintainers; [ Racci ];
-    platforms = platforms.linux;
+    license = lib.licenses.mit;
+    maintainers = with lib.maintainers; [ racci ];
+    platforms = lib.platforms.linux;
     mainProgram = "alvr_dashboard";
   };
 })

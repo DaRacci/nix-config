@@ -1,16 +1,16 @@
 {
   inputs,
   pkgs,
+  ...
 }:
 {
   # VR Stuff
-  alvr = pkgs.callPackage ./alvr { };
+  alvr-bin = pkgs.callPackage ./alvr-bin { };
 
   # Racing Games
   monocoque = pkgs.callPackage ./monocoque { };
 
   # MCP Servers
-  mcpo = pkgs.python3Packages.callPackage inputs.mcpo { };
   mcp-sequential-thinking = pkgs.python3Packages.callPackage ./mcp-sequential-thinking { };
   proton-mcp = pkgs.python3Packages.callPackage ./proton-mcp { };
   mcp-server-amazon = pkgs.callPackage ./mcp-server-amazon { };

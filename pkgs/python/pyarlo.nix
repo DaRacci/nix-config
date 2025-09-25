@@ -2,8 +2,11 @@
   lib,
   buildPythonPackage,
   fetchFromGitHub,
+  nix-update-script,
+
   setuptools,
   wheel,
+
   click,
   cloudscraper,
   cryptography,
@@ -46,11 +49,15 @@ buildPythonPackage rec {
     "pyaarlo"
   ];
 
+  passthru.updateScript = nix-update-script {
+    extraArgs = [ "--flake" ];
+  };
+
   meta = {
     description = "Asynchronous Arlo Component for Python";
     homepage = "https://github.com/twrecked/pyaarlo";
     changelog = "https://github.com/twrecked/pyaarlo/blob/${src.rev}/changelog";
-    license = lib.licenses.unfree; # FIXME: nix-init did not find a license
-    maintainers = with lib.maintainers; [ ];
+    license = lib.licenses.gpl3;
+    maintainers = with lib.maintainers; [ racci ];
   };
 }

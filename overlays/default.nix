@@ -36,12 +36,15 @@ in
 
   additions =
     final: prev:
-    prev.lib.foldl' prev.lib.recursiveUpdate { } [
+    (prev.lib.foldl' prev.lib.recursiveUpdate { } [
       (import ../pkgs {
-        inherit inputs;
+        inherit inputs lib;
         pkgs = final;
       })
-    ];
+    ])
+    // {
+      mcpo = prev.python3Packages.callPackage inputs.mcpo { };
+    };
 
   modifications = final: prev: {
     nautilus = prev.nautilus.overrideAttrs (oldAttrs: {

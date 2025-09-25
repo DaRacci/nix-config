@@ -2,8 +2,11 @@
   lib,
   buildPythonPackage,
   fetchFromGitHub,
+  nix-update-script,
+
   setuptools,
   wheel,
+
   aiodns,
   aiohttp,
   black,
@@ -42,10 +45,14 @@ buildPythonPackage rec {
     "pyuptimekuma"
   ];
 
+  passthru.updateScript = nix-update-script {
+    extraArgs = [ "--flake" ];
+  };
+
   meta = {
     description = "Simple Python wrapper for Uptime Kuma";
     homepage = "https://github.com/jayakornk/pyuptimekuma";
     license = lib.licenses.mit;
-    maintainers = [ ];
+    maintainers = with lib.maintainers; [ racci ];
   };
 }

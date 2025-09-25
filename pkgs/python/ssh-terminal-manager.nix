@@ -2,7 +2,10 @@
   lib,
   buildPythonPackage,
   fetchFromGitHub,
+  nix-update-script,
+
   setuptools,
+
   icmplib,
   paramiko,
   terminal-manager,
@@ -36,10 +39,14 @@ buildPythonPackage rec {
     "ssh_terminal_manager"
   ];
 
+  passthru.updateScript = nix-update-script {
+    extraArgs = [ "--flake" ];
+  };
+
   meta = {
     description = "Control and monitor devices with SSH terminal commands";
     homepage = "https://github.com/zhbjsh/ssh-terminal-manager";
     license = lib.licenses.mit;
-    maintainers = [ ];
+    maintainers = with lib.maintainers; [ racci ];
   };
 }

@@ -36,7 +36,10 @@ buildNpmPackage (_: {
   '';
 
   passthru.updateScript = nix-update-script {
-    extraArgs = [ "--flake" ];
+    extraArgs = [
+      "--flake"
+      "--version=branch"
+    ];
   };
 
   meta = {

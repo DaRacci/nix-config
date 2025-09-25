@@ -1,6 +1,7 @@
 {
   lib,
   fetchFromGitHub,
+  nix-update-script,
 
   buildPythonApplication,
   hatchling,
@@ -24,7 +25,7 @@
 
 buildPythonApplication rec {
   pname = "mcp-sequential-thinking";
-  version = "unstable-2025-07-15";
+  version = "0-unstable-2025-07-15";
   pyproject = true;
 
   src = fetchFromGitHub {
@@ -67,6 +68,13 @@ buildPythonApplication rec {
   pythonImportsCheck = [
     "mcp_sequential_thinking"
   ];
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=branch"
+    ];
+  };
 
   meta = {
     description = "";

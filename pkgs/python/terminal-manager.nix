@@ -2,7 +2,10 @@
   lib,
   buildPythonPackage,
   fetchFromGitHub,
+  nix-update-script,
+
   setuptools,
+
   python-slugify,
 }:
 
@@ -30,10 +33,14 @@ buildPythonPackage rec {
     "terminal_manager"
   ];
 
+  passthru.updateScript = nix-update-script {
+    extraArgs = [ "--flake" ];
+  };
+
   meta = {
     description = "Control and monitor devices with terminal commands";
     homepage = "https://github.com/zhbjsh/terminal-manager";
     license = lib.licenses.mit;
-    maintainers = [ ];
+    maintainers = with lib.maintainers; [ racci ];
   };
 }
