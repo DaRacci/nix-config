@@ -9,7 +9,7 @@
 }:
 buildNpmPackage (_: {
   pname = "mcp-server-amazon";
-  version = "unstable-2025-07-25";
+  version = "0-unstable-2025-07-25";
 
   src = fetchFromGitHub {
     owner = "rigwild";
