@@ -1,6 +1,12 @@
 name: Build packages
 
 on:
+  pull_request:
+    paths:
+      - "pkgs/**"
+      - "flake.nix"
+      - "flake.lock"
+      - ".github/workflows/packages.yaml"
   push:
     paths:
       - "pkgs/**"
