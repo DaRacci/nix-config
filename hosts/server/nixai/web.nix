@@ -1,5 +1,6 @@
 {
   config,
+  pkgs,
   lib,
   ...
 }:
@@ -22,6 +23,9 @@
       enable = true;
       host = "0.0.0.0";
       openFirewall = true;
+      package = pkgs.open-webui.overridePythonAttrs (old: {
+        dependencies = old.dependencies ++ old.optional-dependencies.postgres;
+      });
 
       environmentFile = config.sops.templates.openweb-ui-env.path;
       environment = {
