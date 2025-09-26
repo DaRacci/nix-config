@@ -176,11 +176,6 @@ in
         accel_profile = "flat";
       };
 
-      gestures = {
-        workspace_swipe = true;
-        workspace_swipe_fingers = 3;
-      };
-
       misc = {
         key_press_enables_dpms = false;
         mouse_move_enables_dpms = true;
