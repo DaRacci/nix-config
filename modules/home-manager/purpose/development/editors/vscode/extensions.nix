@@ -49,8 +49,8 @@ merge
         "eamodio"."gitlens" = vscode-utils.extensionFromVscodeMarketplace {
           name = "gitlens";
           publisher = "eamodio";
-          version = "17.5.0";
-          sha256 = "01a08yzbcqbbklyk3cnkj42sm3qih4nvjgwfhjqli7n6hpd9z84z";
+          version = "17.5.1";
+          sha256 = "17cx2r6qmaw9cazvadl27n6yzjb4s35vy22kiz57arx60mfkinv7";
 
         };
         "editorconfig"."editorconfig" = vscode-utils.extensionFromVscodeMarketplace {
@@ -91,8 +91,8 @@ merge
         "github"."copilot-chat" = vscode-utils.extensionFromVscodeMarketplace {
           name = "copilot-chat";
           publisher = "github";
-          version = "0.30.3";
-          sha256 = "09g6mjciqh14kg4a63vdm7ll5a0vj810qihiyszz5iwhdj91ds1j";
+          version = "0.31.3";
+          sha256 = "0j1kffj0nm17saq2z06i0dc88jly1mmcv0b5xa53ywy0df13ky1a";
 
         };
         "github"."vscode-github-actions" = vscode-utils.extensionFromVscodeMarketplace {
@@ -105,8 +105,8 @@ merge
         "github"."vscode-pull-request-github" = vscode-utils.extensionFromVscodeMarketplace {
           name = "vscode-pull-request-github";
           publisher = "github";
-          version = "0.116.2";
-          sha256 = "0my62p7dnp7lgd5i59hzm4qcg3p5rxrpxzrs0wpn7wxjk5dgfd9w";
+          version = "0.118.2";
+          sha256 = "1xg598dc81244izv4f2k3jkhxskc8m0qjq6pq5gmb8vh3bllw78c";
 
         };
         "gruntfuggly"."todo-tree" = vscode-utils.extensionFromVscodeMarketplace {
@@ -303,8 +303,8 @@ merge
           "hashicorp"."terraform" = vscode-utils.extensionFromVscodeMarketplace {
             name = "terraform";
             publisher = "hashicorp";
-            version = "2.37.1";
-            sha256 = "0fp11rz9qizc60c69frnn1pm4f41200q20lhziq59wri88i0fcma";
+            version = "2.37.2";
+            sha256 = "0brbfxjslcvy2phqp68r60q6q5n0scdzb99mzdg8a5wzqx4v8czr";
             arch = "linux-x64";
 
           };
@@ -361,8 +361,8 @@ merge
         "hashicorp"."terraform" = vscode-utils.extensionFromVscodeMarketplace {
           name = "terraform";
           publisher = "hashicorp";
-          version = "2.37.1";
-          sha256 = "18ff8k290bagbb1aq6nps3jym5q710hc7kkqh3fxx0l13v0lfy24";
+          version = "2.37.2";
+          sha256 = "0k3mwfcmqw29v4jjnd7rvhwy43nn65a53kkphg0mbrw4vrdvbpfh";
           arch = "linux-arm64";
 
         };
@@ -411,8 +411,8 @@ merge
       "hashicorp"."terraform" = vscode-utils.extensionFromVscodeMarketplace {
         name = "terraform";
         publisher = "hashicorp";
-        version = "2.37.1";
-        sha256 = "01f1qhrqfs2qnninr6r8d39d3qfk7y2bi3zjm8ddmp8sfpdw8023";
+        version = "2.37.2";
+        sha256 = "13hw6mrn9r157vmpmiiyiamfqi59b22l7n5rp1prbiqy9v5jps3w";
         arch = "darwin-x64";
 
       };
@@ -469,8 +469,8 @@ merge
     "hashicorp"."terraform" = vscode-utils.extensionFromVscodeMarketplace {
       name = "terraform";
       publisher = "hashicorp";
-      version = "2.37.1";
-      sha256 = "152zwmhj1qhgrcamrlqv9vwmb0nzg736bnk61zi2wbvz8252hb7z";
+      version = "2.37.2";
+      sha256 = "0bsh76r8chy2k3zyvlhy4qhfi4g3vw61zy1zkdg49k0c5z8afgad";
       arch = "darwin-arm64";
 
     };
