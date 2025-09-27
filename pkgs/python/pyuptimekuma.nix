@@ -17,14 +17,14 @@
 
 buildPythonPackage rec {
   pname = "pyuptimekuma";
-  version = "0.0.4";
+  version = "0.0.6";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "jayakornk";
     repo = "pyuptimekuma";
     rev = "v${version}";
-    hash = "sha256-JvgcL6ZkLJKpR3gRmv2WtrQrnT0beFSbyTfmsh2AZRE=";
+    hash = "sha256-DUr3UGNfHIbY0psuSBUV2o70VNkLwAdTG93SINwulpU=";
   };
 
   build-system = [
