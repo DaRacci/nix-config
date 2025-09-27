@@ -8,13 +8,13 @@
 }:
 buildPythonApplication rec {
   pname = "proton-mcp";
-  version = "unstable-2025-09-01";
+  version = "0-unstable-2025-09-01";
 
   src = fetchFromGitHub {
     owner = "daracci";
     repo = "proton-mcp";
-    rev = "8ccabf467b530bd8ec485863a03682f2470f8433";
-    hash = "sha256-Pn9gF1wUubvNjZmLn4/qucjNb5PTEOGcbYhPWSYFCJ0=";
+    rev = "85bd355bd082e786af7abf81952aa47d278a293f";
+    hash = "sha256-qNXEzpMYpXAerlgh2ctigIsGJORswRyAgNR+Gh7HQj0=";
   };
 
   pyproject = true;
