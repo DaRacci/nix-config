@@ -65,10 +65,10 @@ in
       removeWarningPopup = true;
     };
 
-    hacompanion = prev.hacompanion.overrideAttrs (oldAttrs: {
-      meta = oldAttrs.meta // {
-        mainProgram = "hacompanion";
-      };
+    open-webui = prev.open-webui.overridePythonAttrs (oldAttrs: {
+      dependencies = oldAttrs.dependencies ++ [
+        prev.python3Packages.itsdangerous
+      ];
     });
 
     inherit lib;
