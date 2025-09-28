@@ -56,27 +56,33 @@ in
           mk = config.services.mcpo.helpers;
         in
         {
-          memory = mk.npxServer "@modelcontextprotocol/server-memory";
-          time = mk.uvxServerWithArgs "mcp-server-time" [ "--local-timezone=${config.time.timeZone}" ];
-          nixos = mk.uvxServer "mcp-nixos";
-          context7 = mk.npxServer "@upstash/context7-mcp";
+          # General Tools
           sequential-thinking.command = lib.getExe pkgs.mcp-sequential-thinking;
-          git = mk.uvxServer "mcp-server-git";
-          fetch = mk.uvxServerWithArgs "mcp-server-fetch" [ "--ignore-robots-txt" ];
-          diff = mk.npxServer "diff-mcp";
+          time = mk.uvxServerWithArgs "mcp-server-time" [ "--local-timezone=${config.time.timeZone}" ];
           filesystem = mk.npxServerWithArgs "@modelcontextprotocol/server-filesystem" [
             "/var/lib/mcpo/filesystem"
           ];
-          hassio = {
-            type = "sse";
-            url = "https://hassio.racci.dev/mcp_server/sse";
-            headers.Authorization = "Bearer ${placeholder."MCP/HASSIO_TOKEN"}";
-          };
+
+          # Developer Tools
+          git = mk.uvxServer "mcp-server-git";
+          nixos = mk.uvxServer "mcp-nixos";
           github = {
             type = "streamable-http";
             url = "https://api.githubcopilot.com/mcp";
             headers.Authorization = "Bearer ${placeholder."MCP/GITHUB_TOKEN"}";
           };
+
+          # Information & Knowledge
+          anilist = mk.npxServer "anilist-mcp";
+          context7 = mk.npxServer "@upstash/context7-mcp";
+          memory = mk.npxServer "@modelcontextprotocol/server-memory";
+          whois = mk.npxServer "@bharathvaj/whois-mcp@latest";
+          wikipedia = mk.uvxServerWithArgs "wikipedia-mcp" [ "--enable-cache" ];
+
+          # Search, Web
+          search = mk.npxServer "mcp-searxng";
+          fetch = mk.uvxServerWithArgs "mcp-server-fetch" [ "--ignore-robots-txt" ];
+          travel-planner = mk.npxServer "@gongrzhe/server-travelplanner-mcp";
           browser = {
             command = lib.getExe pkgs.playwright-mcp;
             args = [
@@ -85,8 +91,13 @@ in
               "--headless"
             ];
           };
-          search = mk.npxServer "mcp-searxng";
-          anilist = mk.npxServer "anilist-mcp";
+
+          # Misc Tools
+          hassio = {
+            type = "sse";
+            url = "https://hassio.racci.dev/mcp_server/sse";
+            headers.Authorization = "Bearer ${placeholder."MCP/HASSIO_TOKEN"}";
+          };
         };
     };
   };
