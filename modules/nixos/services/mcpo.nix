@@ -122,8 +122,14 @@ in
 
   config = lib.mkIf cfg.enable {
     sops.templates = {
-      mcpoConfiguration.content = builtins.toJSON { mcpServers = cfg.configuration; };
-      mcpoEnvironment.content = lib.toShellVars cfg.environment;
+      mcpoConfiguration = {
+        content = builtins.toJSON { mcpServers = cfg.configuration; };
+        restartUnits = [ "mcpo.service" ];
+      };
+      mcpoEnvironment = {
+        content = lib.toShellVars cfg.environment;
+        restartUnits = [ "mcpo.service" ];
+      };
     };
 
     systemd.services.mcpo = {
@@ -167,11 +173,6 @@ in
         ]
         ++ lib.optional (cfg.apiTokenFile != null) "apiToken:${cfg.apiTokenFile}";
       };
-
-      restartTriggers = [
-        config.sops.templates.mcpoConfiguration.path
-        config.sops.templates.mcpoEnvironment.path
-      ];
 
       script =
         [
