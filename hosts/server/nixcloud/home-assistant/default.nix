@@ -78,6 +78,8 @@
         "automation ui" = "!include automations.yaml";
         "scene manual" = [ ];
         "scene ui" = "!include scenes.yaml";
+        "script manual" = [ ];
+        "script ui" = "!include scripts.yaml";
       };
     };
   };
