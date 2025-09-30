@@ -28,10 +28,7 @@
   user.autorun.services = {
     "1password" = {
       package = pkgs._1password-gui;
-      extraArgs = [
-        "--silent"
-        "--ozone-platform-hint=x11" # Rich Auth Prompts don't work on Wayland currently.
-      ];
+      extraArgs = [ "--silent" ];
     };
   };
 
