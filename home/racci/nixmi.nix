@@ -82,6 +82,7 @@
       osu.enable = true;
       steam.enable = true;
       vr.enable = true;
+      minecraft.enable = true;
 
       modding = {
         enable = true;
