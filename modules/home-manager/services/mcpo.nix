@@ -25,19 +25,17 @@ in
 
   config = lib.mkIf cfg.enable {
     sops.templates = {
-      mcpoConfiguration = {
-        content = builtins.toJSON { mcpServers = cfg.configuration; };
-        restartUnits = [ "mcpo.service" ];
-      };
-      mcpoEnvironment = {
-        content = lib.toShellVars cfg.environment;
-        restartUnits = [ "mcpo.service" ];
-      };
+      mcpoConfiguration.content = builtins.toJSON { mcpServers = cfg.configuration; };
+      mcpoEnvironment.content = lib.toShellVars cfg.environment;
     };
 
     systemd.user.services.mcpo = {
       Unit = {
         After = [ "network.target" ];
+        X-Restart-Triggers = [
+          config.sops.templates.mcpoConfiguration.path
+          config.sops.templates.mcpoEnvironment.path
+        ];
       };
 
       Service = {
