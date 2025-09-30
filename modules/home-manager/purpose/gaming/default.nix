@@ -10,6 +10,7 @@ let
 in
 {
   imports = [
+    ./minecraft.nix
     ./modding.nix
     ./osu.nix
     ./roblox.nix
@@ -26,9 +27,7 @@ in
 
   config = mkIf cfg.enable {
     xdg.userDirs.extraConfig.XDG_GAME_DIR = "${config.home.homeDirectory}/Games";
-    user.persistence.directories = [
-      "Games"
-    ];
+    user.persistence.directories = [ "Games" ];
 
     home.packages = optionals cfg.controllerSupport (
       with pkgs;
