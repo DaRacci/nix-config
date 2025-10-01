@@ -126,8 +126,8 @@ merge
         "jnoortheen"."nix-ide" = vscode-utils.extensionFromVscodeMarketplace {
           name = "nix-ide";
           publisher = "jnoortheen";
-          version = "0.4.23";
-          sha256 = "0gfq9mp6n8s2q2pzhg5p4jlfh3x9jbidi7rwclb2gn7rncr8ayrj";
+          version = "0.4.24";
+          sha256 = "0z50i1lkkxx7c2l664bg55fig5i3lq3gjmzgywjjh7wmq5vigly6";
 
         };
         "jscearcy"."rust-doc-viewer" = vscode-utils.extensionFromVscodeMarketplace {
@@ -217,8 +217,8 @@ merge
         "ms-python"."vscode-pylance" = vscode-utils.extensionFromVscodeMarketplace {
           name = "vscode-pylance";
           publisher = "ms-python";
-          version = "2025.8.2";
-          sha256 = "080wkb6i2yxd395zzxip64bsavnzq5vzz5vj5yi2vmbh8s0pnr37";
+          version = "2025.8.3";
+          sha256 = "1allwf08w6zb9k34czmah98d5zfalb9wjwnzrjck4nl1s3b8337q";
 
         };
         "ms-vscode"."powershell" = vscode-utils.extensionFromVscodeMarketplace {
