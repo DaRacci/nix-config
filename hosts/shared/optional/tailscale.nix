@@ -37,15 +37,23 @@
     description = "Check Tailscale login status";
     after = [ "tailscaled.service" ];
     wants = [ "tailscaled.service" ];
-    script = ''
-      set -e
-      if ! ${pkgs.tailscale}/bin/tailscale status >/dev/null 2>&1; then
-        echo "Tailscale is not logged in. Running tailscaled-autoconnect service."
-        systemctl start tailscaled-autoconnect.service
-      else
-        echo "Tailscale is logged in."
-      fi
-    '';
+    script = pkgs.writeShellApplication {
+      name = "tailscale-check";
+      runtimeInputs = [
+        pkgs.tailscale
+        pkgs.systemd
+        pkgs.jq
+      ];
+      text = ''
+        STATE=$(tailscale status --json --peers=false | jq -r .BackendState)
+        if [ "$STATE" == "NeedsLogin" ]; then
+          echo "Tailscale is not logged in. Running tailscaled-autoconnect service."
+          systemctl start tailscaled-autoconnect.service
+        else
+          echo "Tailscale is logged in."
+        fi
+      '';
+    };
     serviceConfig = {
       Type = "oneshot";
       User = "root";
