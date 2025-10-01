@@ -172,6 +172,14 @@
       externalInterface = "eth0";
       enableIPv6 = true;
     };
+
+    interfaces."eth0".wakeOnLan = {
+      enable = true;
+      policy = [
+        "magic"
+        "phy"
+      ];
+    };
   };
 
   services = {
