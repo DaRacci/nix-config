@@ -7,8 +7,8 @@ const NOT_HOME_FILES = [
 ]
 
 def main [
-  $symbol: string,
-  $file: string
+  symbol: string,
+  file: string
 ] {
   let git_root = git rev-parse --show-toplevel
   let file_path = $file | str trim
