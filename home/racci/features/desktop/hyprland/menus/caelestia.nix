@@ -242,4 +242,6 @@ in
       WantedBy = [ config.wayland.systemd.target ];
     };
   };
+
+  user.persistence.files = [ ".face" ];
 }
