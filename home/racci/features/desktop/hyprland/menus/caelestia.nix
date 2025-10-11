@@ -243,5 +243,7 @@ in
     };
   };
 
+  # This doesn't work very well, needs a file manually moving to the persist dir first
+  # Caelestia doesn't respect an existing symlink and will just overwrite it.
   user.persistence.files = [ ".face" ];
 }
