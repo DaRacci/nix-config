@@ -153,9 +153,9 @@ in
                     text = ''
                       OUTPUT_FILE="$XDG_STATE_HOME/hyprland-disabled-monitors-pre-sunshine.json"
                       ENABLED_MONITORS=$(hyprctl -j monitors | jq '. - map(select((.name | contains("headless")) or .disabled == true))')
-                      echo $ENABLED_MONITORS > $OUTPUT_FILE
+                      echo "$ENABLED_MONITORS" > "$OUTPUT_FILE"
 
-                      for monitor in $(echo $ENABLED_MONITORS | jq -r '.[].name'); do
+                      for monitor in $(echo "$ENABLED_MONITORS" | jq -r '.[].name'); do
                         hyprctl keyword monitor "$monitor,disable"
                       done
                     '';
@@ -169,10 +169,10 @@ in
                     text = ''
                       INPUT_FILE="$XDG_STATE_HOME/hyprland-disabled-monitors-pre-sunshine.json"
                       if [ -f "$INPUT_FILE" ]; then
-                        for monitor in $(cat $INPUT_FILE | jq -r '.[].name'); do
+                        for monitor in $(jq -r '.[].name' < "$INPUT_FILE"); do
                           hyprctl keyword monitor "$monitor,enable"
                         done
-                        rm $INPUT_FILE
+                        rm "$INPUT_FILE"
                       fi
                     '';
                   };
