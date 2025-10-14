@@ -49,7 +49,7 @@ in
       (lib.mkIf cfg.streaming.enable {
         services.sunshine = lib.mkIf cfg.streaming.enable {
           enable = true;
-          autoStart = false;
+          autoStart = true;
           openFirewall = true;
           capSysAdmin = true;
           # settings.port = 47889;
