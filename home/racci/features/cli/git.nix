@@ -42,6 +42,7 @@
 
       extraConfig = {
         init.defaultBranch = "master";
+        pull.rebase = true;
 
         gpg = {
           format = "ssh";
