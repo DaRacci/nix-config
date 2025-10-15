@@ -49,8 +49,8 @@ merge
         "eamodio"."gitlens" = vscode-utils.extensionFromVscodeMarketplace {
           name = "gitlens";
           publisher = "eamodio";
-          version = "17.5.1";
-          sha256 = "17cx2r6qmaw9cazvadl27n6yzjb4s35vy22kiz57arx60mfkinv7";
+          version = "17.6.1";
+          sha256 = "1kdbblys2r27sizdbl9nq20q1ivrc6jxzmszgwbfc812ym5d3v7p";
 
         };
         "editorconfig"."editorconfig" = vscode-utils.extensionFromVscodeMarketplace {
@@ -91,22 +91,22 @@ merge
         "github"."copilot-chat" = vscode-utils.extensionFromVscodeMarketplace {
           name = "copilot-chat";
           publisher = "github";
-          version = "0.31.3";
-          sha256 = "0j1kffj0nm17saq2z06i0dc88jly1mmcv0b5xa53ywy0df13ky1a";
+          version = "0.32.1";
+          sha256 = "0d8v34jbv9shpflk33ann26kjfvgzacfni33bad9n4a99bv680ay";
 
         };
         "github"."vscode-github-actions" = vscode-utils.extensionFromVscodeMarketplace {
           name = "vscode-github-actions";
           publisher = "github";
-          version = "0.27.2";
-          sha256 = "06afix94nxb9vbkgmygg02pyczb09cmvr1l8d2b9alsxhk2i0r69";
+          version = "0.28.0";
+          sha256 = "0702z76rq4dqpfp356b1iy3gpd27pkjsh27lqg0qnaqy0pbi4dgl";
 
         };
         "github"."vscode-pull-request-github" = vscode-utils.extensionFromVscodeMarketplace {
           name = "vscode-pull-request-github";
           publisher = "github";
-          version = "0.118.2";
-          sha256 = "1xg598dc81244izv4f2k3jkhxskc8m0qjq6pq5gmb8vh3bllw78c";
+          version = "0.120.0";
+          sha256 = "1pj5giv83rs60z2656flpf8vnwahzzb6g8qchvxy9f8anp23l5yc";
 
         };
         "gruntfuggly"."todo-tree" = vscode-utils.extensionFromVscodeMarketplace {
@@ -126,8 +126,8 @@ merge
         "jnoortheen"."nix-ide" = vscode-utils.extensionFromVscodeMarketplace {
           name = "nix-ide";
           publisher = "jnoortheen";
-          version = "0.4.24";
-          sha256 = "0z50i1lkkxx7c2l664bg55fig5i3lq3gjmzgywjjh7wmq5vigly6";
+          version = "0.5.0";
+          sha256 = "1nx25y6pzcn25yy836kpg55rms4sbzz6kglaillb799c6d1qcnwd";
 
         };
         "jscearcy"."rust-doc-viewer" = vscode-utils.extensionFromVscodeMarketplace {
@@ -224,8 +224,8 @@ merge
         "ms-vscode"."powershell" = vscode-utils.extensionFromVscodeMarketplace {
           name = "powershell";
           publisher = "ms-vscode";
-          version = "2025.2.0";
-          sha256 = "0nmm368zmjs4xlh1g8gpcv9i91i2qakwv81bp438266gxcm9dykz";
+          version = "2025.4.0";
+          sha256 = "10xjyrwc2sqmmnsjsryijq6rsjna8fw46ffjcyc3s3hinr2yz3j5";
 
         };
         "ms-vscode-remote"."remote-ssh" = vscode-utils.extensionFromVscodeMarketplace {
@@ -303,40 +303,40 @@ merge
           "hashicorp"."terraform" = vscode-utils.extensionFromVscodeMarketplace {
             name = "terraform";
             publisher = "hashicorp";
-            version = "2.37.2";
-            sha256 = "0brbfxjslcvy2phqp68r60q6q5n0scdzb99mzdg8a5wzqx4v8czr";
+            version = "2.37.5";
+            sha256 = "0jr6msaj1swcv1qxyvg5wpavx8h3yh2fprv3zn0n8w5wybfdpinh";
             arch = "linux-x64";
 
           };
           "ms-dotnettools"."csdevkit" = vscode-utils.extensionFromVscodeMarketplace {
             name = "csdevkit";
             publisher = "ms-dotnettools";
-            version = "1.50.51";
-            sha256 = "0kcrz9a9fs8r608z6ydymv7fgf7crd4pn0m82jdivcs8587n6ag3";
+            version = "1.70.3";
+            sha256 = "09xwf7659qkj3mnsfbx2yyhyx0yyq6vwq42wy72pzc36wagky334";
             arch = "linux-x64";
 
           };
           "ms-dotnettools"."csharp" = vscode-utils.extensionFromVscodeMarketplace {
             name = "csharp";
             publisher = "ms-dotnettools";
-            version = "2.90.60";
-            sha256 = "0ra6w9q35rn9a0lhc8n1i6zcan3k9aa9gl7bgvx12jqcq7nis8yi";
+            version = "2.93.22";
+            sha256 = "0j3rfx8m8ck5s7zd0r2jjsc7hfwajh2c7ir0fddr2n7bwhbvdv41";
             arch = "linux-x64";
 
           };
           "ms-python"."debugpy" = vscode-utils.extensionFromVscodeMarketplace {
             name = "debugpy";
             publisher = "ms-python";
-            version = "2025.10.0";
-            sha256 = "0x0a5xpy3lzkqgddy7fmsqwv1ar1i1hb92mx6359mqabzcdbm5yh";
+            version = "2025.14.1";
+            sha256 = "0ys3g0wfprwjxd633hxdbch3w6rx5js51jvy9rlicax1w19mk1na";
             arch = "linux-x64";
 
           };
           "ms-python"."python" = vscode-utils.extensionFromVscodeMarketplace {
             name = "python";
             publisher = "ms-python";
-            version = "2025.14.0";
-            sha256 = "1vh51cmxwrgilqy5qk8fxxwqsxp9wvl4af8fj11csgqbwxchrwbk";
+            version = "2025.16.0";
+            sha256 = "06xs6ldc91hp839r2ffsig41zkpybn5404hqp3hlkghvaqilb7ih";
             arch = "linux-x64";
 
           };
@@ -361,40 +361,40 @@ merge
         "hashicorp"."terraform" = vscode-utils.extensionFromVscodeMarketplace {
           name = "terraform";
           publisher = "hashicorp";
-          version = "2.37.2";
-          sha256 = "0k3mwfcmqw29v4jjnd7rvhwy43nn65a53kkphg0mbrw4vrdvbpfh";
+          version = "2.37.5";
+          sha256 = "1dgnkcbasf8pm93wqapj3m2g7iw1nv6bxgbpmiw99gzcj1d7apid";
           arch = "linux-arm64";
 
         };
         "ms-dotnettools"."csdevkit" = vscode-utils.extensionFromVscodeMarketplace {
           name = "csdevkit";
           publisher = "ms-dotnettools";
-          version = "1.50.51";
-          sha256 = "1hl2wm0kmbwmdsjsccxdnfyiy53hdzs394g8rhhrav5frfnrxs45";
+          version = "1.70.3";
+          sha256 = "0sy0xw77bjixpjwj2dpa3xp4m0wwxfis9i5qslf73943k5bas75b";
           arch = "linux-arm64";
 
         };
         "ms-dotnettools"."csharp" = vscode-utils.extensionFromVscodeMarketplace {
           name = "csharp";
           publisher = "ms-dotnettools";
-          version = "2.90.60";
-          sha256 = "0m3k725d3644ijykm4w4knp6h7371s3jzm4bb8czwy5bll3sk8k3";
+          version = "2.93.22";
+          sha256 = "1vliw87436bcnbfh3bs86dsl05ickjpk2w07g9czcd7qcp6h85a7";
           arch = "linux-arm64";
 
         };
         "ms-python"."debugpy" = vscode-utils.extensionFromVscodeMarketplace {
           name = "debugpy";
           publisher = "ms-python";
-          version = "2025.10.0";
-          sha256 = "1vrxwcdcn7c3rfvz2hy9s4rz6xxpl8hwszdinlxrygr1h58gjsar";
+          version = "2025.14.1";
+          sha256 = "1vwy5nknlxbk19cpfg8vvd0c67g3y23ixh65qsdlj1zhkhvsqqiz";
           arch = "linux-arm64";
 
         };
         "ms-python"."python" = vscode-utils.extensionFromVscodeMarketplace {
           name = "python";
           publisher = "ms-python";
-          version = "2025.14.0";
-          sha256 = "0ql9yvfhy1zr8hzzkwhmwr4vhrr7fid59rc32sc2crw05nnh3hfd";
+          version = "2025.16.0";
+          sha256 = "0ppvlaik82qj8zsh4lzkqqlja5dx7n5wi0wzzrry15anvzggpq65";
           arch = "linux-arm64";
 
         };
@@ -411,40 +411,40 @@ merge
       "hashicorp"."terraform" = vscode-utils.extensionFromVscodeMarketplace {
         name = "terraform";
         publisher = "hashicorp";
-        version = "2.37.2";
-        sha256 = "13hw6mrn9r157vmpmiiyiamfqi59b22l7n5rp1prbiqy9v5jps3w";
+        version = "2.37.5";
+        sha256 = "0qj4fn2l3x2n1r8jfjxbb3kx5pxp9azc9gb6swkkq32857fkja52";
         arch = "darwin-x64";
 
       };
       "ms-dotnettools"."csdevkit" = vscode-utils.extensionFromVscodeMarketplace {
         name = "csdevkit";
         publisher = "ms-dotnettools";
-        version = "1.50.51";
-        sha256 = "0w1dqhwciha3ibkdb6jndqayddqc9rkxx7cqhldlsgzjd3s40xak";
+        version = "1.70.3";
+        sha256 = "0rfak72rbazparinys5b5dndqi3zmqmbzrynfc29i2dpxplbalpw";
         arch = "darwin-x64";
 
       };
       "ms-dotnettools"."csharp" = vscode-utils.extensionFromVscodeMarketplace {
         name = "csharp";
         publisher = "ms-dotnettools";
-        version = "2.90.60";
-        sha256 = "0pfby3ksvd3z7prcw6nm6z5qbd08j9q68bjildlqw0yxvl0gywmr";
+        version = "2.93.22";
+        sha256 = "0ns7p3ql98p5dxjv2a50xn5k6lrzlcbdv1hnx497k7flw32hwqx3";
         arch = "darwin-x64";
 
       };
       "ms-python"."debugpy" = vscode-utils.extensionFromVscodeMarketplace {
         name = "debugpy";
         publisher = "ms-python";
-        version = "2025.10.0";
-        sha256 = "10sa442d1rjhy753jb16rpggh6p16gp3q7hrjia9yi1xl6m2jgay";
+        version = "2025.14.1";
+        sha256 = "0rgmv3sm03pdn93n50n0hzdacflqydzrvhadcfn9rsihf3rbv5vp";
         arch = "darwin-x64";
 
       };
       "ms-python"."python" = vscode-utils.extensionFromVscodeMarketplace {
         name = "python";
         publisher = "ms-python";
-        version = "2025.14.0";
-        sha256 = "1kdqdlljzg7rym5b4qfm88r7s4n4818ffw3jz54blca0przwbyjf";
+        version = "2025.16.0";
+        sha256 = "0596ivd4gya3jq92q8l8z87svqsh7x8rfm4wjjl3z59fqhpkaki6";
         arch = "darwin-x64";
 
       };
@@ -469,40 +469,40 @@ merge
     "hashicorp"."terraform" = vscode-utils.extensionFromVscodeMarketplace {
       name = "terraform";
       publisher = "hashicorp";
-      version = "2.37.2";
-      sha256 = "0bsh76r8chy2k3zyvlhy4qhfi4g3vw61zy1zkdg49k0c5z8afgad";
+      version = "2.37.5";
+      sha256 = "17gqz2xj4wk06q1gmpsfvz2mi2glmkkhdy7d53qbyhdk2bnqwrqn";
       arch = "darwin-arm64";
 
     };
     "ms-dotnettools"."csdevkit" = vscode-utils.extensionFromVscodeMarketplace {
       name = "csdevkit";
       publisher = "ms-dotnettools";
-      version = "1.50.51";
-      sha256 = "1glw20qwdibj82764jrkcxnxsqyp34qgcxzxjy7y3r1i1yfr08xq";
+      version = "1.70.3";
+      sha256 = "144489zrd68037r1ra8d0sdmx5kxdjy38fhh3fiwqxqdfihk856l";
       arch = "darwin-arm64";
 
     };
     "ms-dotnettools"."csharp" = vscode-utils.extensionFromVscodeMarketplace {
       name = "csharp";
       publisher = "ms-dotnettools";
-      version = "2.90.60";
-      sha256 = "1bxrfsd1vd2pp2w48ych1y519jzfpb6gpilm9xzd6c65089jwgaf";
+      version = "2.93.22";
+      sha256 = "0n8czs8iafvapx5vj1wkb3gmgzi406q7hbjl1n8v7821mv93w0sy";
       arch = "darwin-arm64";
 
     };
     "ms-python"."debugpy" = vscode-utils.extensionFromVscodeMarketplace {
       name = "debugpy";
       publisher = "ms-python";
-      version = "2025.10.0";
-      sha256 = "1ylcf6q5y8qqki5g2xmgwa66zawbimp34m1hvbav6s7m3zp018lw";
+      version = "2025.14.1";
+      sha256 = "0331f4c2b1mallbxavfh3ikbd9wxf7227ps6hrwhizfr62wm4nb5";
       arch = "darwin-arm64";
 
     };
     "ms-python"."python" = vscode-utils.extensionFromVscodeMarketplace {
       name = "python";
       publisher = "ms-python";
-      version = "2025.14.0";
-      sha256 = "0iy4fmwkbvvm696jz0c4655g1ysq6lpsd8jcajxhv3rrrav8661d";
+      version = "2025.16.0";
+      sha256 = "0mxd2g5pk81dyvh4graangi8mlng7b57z9cyfw46baij2am645c1";
       arch = "darwin-arm64";
 
     };
