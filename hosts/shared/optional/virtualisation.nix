@@ -62,16 +62,16 @@ in
       qemu = {
         runAsRoot = false;
         swtpm.enable = true;
-        ovmf = {
-          enable = true;
-          packages = [
-            (pkgs.OVMFFull.override {
-              secureBoot = true;
-              tpmSupport = true;
-              msVarsTemplate = true;
-            }).fd
-          ];
-        };
+        #ovmf = {
+        #  enable = true;
+        #  packages = [
+        #    (pkgs.OVMFFull.override {
+        #      secureBoot = true;
+        #      tpmSupport = true;
+        #      msVarsTemplate = true;
+        #    }).fd
+        #  ];
+        #        };
 
         verbatimConfig = ''
           cgroup_device_acl = [
@@ -92,12 +92,31 @@ in
   };
 
   systemd = {
-    services."libvirt-nosleep@" = {
-      description = ''Preventing sleep while libvirt domain "%i" is running'';
-      serviceConfig = {
-        Type = "simple";
-        ExecStart = ''${pkgs.systemd}/bin/systemd-inhibit --what=sleep --why="Libvirt domain "%i" is running" --who=%U --mode=block sleep infinity'';
+    services = {
+      "libvirt-nosleep@" = {
+        description = ''Preventing sleep while libvirt domain "%i" is running'';
+        serviceConfig = {
+          Type = "simple";
+          ExecStart = ''${pkgs.systemd}/bin/systemd-inhibit --what=sleep --why="Libvirt domain "%i" is running" --who=%U --mode=block sleep infinity'';
+        };
       };
+
+      libvirtd-config.script =
+        let
+          ovmfPackage = pkgs.OVMFFull.override {
+            secureBoot = true;
+            tpmSupport = true;
+            msVarsTemplate = true;
+          };
+        in
+        config.systemd.services.libvirtd.script
+        + ''
+          ln -s --force ${ovmfPackage}/FV/AAVMF_CODE{,.ms}.fd /run/libvirt/nix-ovmf/
+          ln -s --force ${ovmfPackage}/FV/OVMF_CODE{,.ms}.fd /run/libvirt/nix-ovmf/
+          ln -s --force ${ovmfPackage}/FV/AAVMF_VARS{,.ms}.fd /run/libvirt/nix-ovmf/
+          ln -s --force ${ovmfPackage}/FV/OVMF_VARS{,.ms}.fd /run/libvirt/nix-ovmf/
+        '';
+
     };
 
     tmpfiles.rules =
