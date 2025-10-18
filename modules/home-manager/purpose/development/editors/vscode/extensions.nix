@@ -49,8 +49,8 @@ merge
         "eamodio"."gitlens" = vscode-utils.extensionFromVscodeMarketplace {
           name = "gitlens";
           publisher = "eamodio";
-          version = "17.6.1";
-          sha256 = "1kdbblys2r27sizdbl9nq20q1ivrc6jxzmszgwbfc812ym5d3v7p";
+          version = "17.6.2";
+          sha256 = "1k5f57x968bni6xp99iqnqcb9lj3fp5qn5pg3l26fsl1rwy9i0lz";
 
         };
         "editorconfig"."editorconfig" = vscode-utils.extensionFromVscodeMarketplace {
@@ -105,8 +105,8 @@ merge
         "github"."vscode-pull-request-github" = vscode-utils.extensionFromVscodeMarketplace {
           name = "vscode-pull-request-github";
           publisher = "github";
-          version = "0.120.0";
-          sha256 = "1pj5giv83rs60z2656flpf8vnwahzzb6g8qchvxy9f8anp23l5yc";
+          version = "0.120.1";
+          sha256 = "1bkabqm19bi1x2z34njc2xljfzbb37163qk91fjarrpv1436gdsp";
 
         };
         "gruntfuggly"."todo-tree" = vscode-utils.extensionFromVscodeMarketplace {
