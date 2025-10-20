@@ -14,6 +14,15 @@ in
     caelestia-cli
     caelestia-shell
   ];
+
+  wayland.windowManager.hyprland.custom-settings.permission.screenCopy = [
+    (lib.getExe (
+      caelestia-shell.buildInputs
+      |> builtins.filter (p: p ? pname && p.pname == "quickshell-wrapped")
+      |> builtins.head
+    ))
+  ];
+
   xdg.configFile = {
     caelestia-cli-config = {
       target = "caelestia/cli.json";

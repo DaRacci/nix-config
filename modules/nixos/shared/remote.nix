@@ -49,7 +49,7 @@ in
       (lib.mkIf cfg.streaming.enable {
         services.sunshine = lib.mkIf cfg.streaming.enable {
           enable = true;
-          autoStart = false;
+          autoStart = true;
           openFirewall = true;
           capSysAdmin = true;
           # settings.port = 47889;
@@ -125,66 +125,69 @@ in
       })
 
       (lib.mkIf (cfg.streaming.enable && config.programs.hyprland.enable) {
-        services.sunshine.applications.apps = [
-          {
-            name = "Shared Desktop";
-            pre-cmd = [
-              {
-                do = ''sh -c "hyprctl keyword monitor HEADLESS-2,''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS},auto,1"'';
-                undo = "hyprctl keyword monitor HEADLESS-2,disable";
-              }
-            ];
-          }
-          {
-            name = "Exclusive Desktop";
-            pre-cmd = [
-              {
-                do = ''sh -c "hyprctl keyword monitor HEADLESS-2,''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS},auto,1 && hyprctl keyword monitor *-2,disable"'';
-                undo = "hyprctl keyword monitor HEADLESS-2,disable";
-              }
-              (
-                let
-                  doScript = pkgs.writeShellApplication {
-                    name = "hyprland-disable-other-monitors-pre-sunshine";
-                    runtimeInputs = [
-                      pkgs.hyprland
-                      pkgs.jq
-                    ];
-                    text = ''
-                      OUTPUT_FILE="$XDG_STATE_HOME/hyprland-disabled-monitors-pre-sunshine.json"
-                      ENABLED_MONITORS=$(hyprctl -j monitors | jq '. - map(select((.name | contains("headless")) or .disabled == true))')
-                      echo "$ENABLED_MONITORS" > "$OUTPUT_FILE"
-
-                      for monitor in $(echo "$ENABLED_MONITORS" | jq -r '.[].name'); do
-                        hyprctl keyword monitor "$monitor,disable"
-                      done
-                    '';
-                  };
-                  undoScript = pkgs.writeShellApplication {
-                    name = "hyprland-restore-disabled-monitors-post-sunshine";
-                    runtimeInputs = [
-                      pkgs.hyprland
-                      pkgs.jq
-                    ];
-                    text = ''
-                      INPUT_FILE="$XDG_STATE_HOME/hyprland-disabled-monitors-pre-sunshine.json"
-                      if [ -f "$INPUT_FILE" ]; then
-                        for monitor in $(jq -r '.[].name' < "$INPUT_FILE"); do
-                          hyprctl keyword monitor "$monitor,enable"
-                        done
-                        rm "$INPUT_FILE"
-                      fi
-                    '';
-                  };
-                in
+        services.sunshine = {
+          settings.output_name = "3";
+          applications.apps = [
+            {
+              name = "Shared Desktop";
+              prep-cmd = [
                 {
-                  do = "sh -c '${lib.getExe doScript}'";
-                  undo = "sh -c '${lib.getExe undoScript}'";
+                  do = ''sh -c "hyprctl keyword monitor HEADLESS-2,''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS},auto,1"'';
+                  undo = "hyprctl keyword monitor HEADLESS-2,disable";
                 }
-              )
-            ];
-          }
-        ];
+              ];
+            }
+            {
+              name = "Exclusive Desktop";
+              prep-cmd = [
+                {
+                  do = ''sh -c "hyprctl keyword monitor HEADLESS-2,''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS},auto,1" && sleep 5'';
+                  undo = "hyprctl keyword monitor HEADLESS-2,disable";
+                }
+                (
+                  let
+                    doScript = pkgs.writeShellApplication {
+                      name = "hyprland-disable-other-monitors-pre-sunshine";
+                      runtimeInputs = [
+                        pkgs.hyprland
+                        pkgs.jq
+                      ];
+                      text = ''
+                        OUTPUT_FILE="$XDG_STATE_HOME/hyprland-disabled-monitors-pre-sunshine.json"
+                        ENABLED_MONITORS=$(hyprctl -j monitors | jq '. - map(select((.name | contains("HEADLESS")) or .disabled == true))')
+                        echo "$ENABLED_MONITORS" > "$OUTPUT_FILE"
+
+                        for monitor in $(echo "$ENABLED_MONITORS" | jq -r '.[].name'); do
+                          hyprctl keyword monitor "$monitor,disable"
+                        done
+                      '';
+                    };
+                    undoScript = pkgs.writeShellApplication {
+                      name = "hyprland-restore-disabled-monitors-post-sunshine";
+                      runtimeInputs = [
+                        pkgs.hyprland
+                        pkgs.jq
+                      ];
+                      text = ''
+                        INPUT_FILE="$XDG_STATE_HOME/hyprland-disabled-monitors-pre-sunshine.json"
+                        if [ -f "$INPUT_FILE" ]; then
+                          for monitor in $(jq -r '.[].name' < "$INPUT_FILE"); do
+                            hyprctl keyword monitor "$monitor,enable"
+                          done
+                          rm "$INPUT_FILE"
+                        fi
+                      '';
+                    };
+                  in
+                  {
+                    do = "sh -c '${lib.getExe doScript}'";
+                    undo = "sh -c '${lib.getExe undoScript}'";
+                  }
+                )
+              ];
+            }
+          ];
+        };
 
         home-manager.sharedModules = [
           {

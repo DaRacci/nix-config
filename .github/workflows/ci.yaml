@@ -121,8 +121,7 @@ jobs:
 
             user_imports_file="$user-user-imports/imports.json"
             if [[ -f "$user_imports_file" ]]; then
-              user_imports=$(jq -c . "$user_imports_file" || echo "[]")
-              IMPORTS=$(jq -s '.[0] + .[1]' <(echo "$IMPORTS") <(echo "$user_imports"))
+              IMPORTS=$(jq -s "$IMPORTS" "$user_imports" '.[0].imports + .[1]')
             else
               echo "No imports found for user $user"
             fi
