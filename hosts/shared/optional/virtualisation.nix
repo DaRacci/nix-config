@@ -103,11 +103,12 @@ in
 
       libvirtd-config.script =
         let
-          ovmfPackage = pkgs.OVMFFull.override {
-            secureBoot = true;
-            tpmSupport = true;
-            msVarsTemplate = true;
-          };
+          ovmfPackage =
+            (pkgs.OVMFFull.override {
+              secureBoot = true;
+              tpmSupport = true;
+              msVarsTemplate = true;
+            }).fd;
         in
         config.systemd.services.libvirtd.script
         + ''
@@ -116,7 +117,6 @@ in
           ln -s --force ${ovmfPackage}/FV/AAVMF_VARS{,.ms}.fd /run/libvirt/nix-ovmf/
           ln -s --force ${ovmfPackage}/FV/OVMF_VARS{,.ms}.fd /run/libvirt/nix-ovmf/
         '';
-
     };
 
     tmpfiles.rules =
