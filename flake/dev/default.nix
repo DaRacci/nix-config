@@ -127,7 +127,7 @@
               exec = ''
                 use std/log
 
-                def main [...args: string] {
+                def --wrapped main [...args: string] {
                   ${nuSelectHost}
 
                   let command_args = [
@@ -143,7 +143,7 @@
                   ]
 
                   log info $"Selected host: ($selected)"
-                  log info $"Command: ($command_args)"
+                  log info $"Command: ($command_args) with passthrough ($passthrough_args)"
 
                   let current_host = cat /etc/hostname | str trim
                   if $selected == $current_host {
