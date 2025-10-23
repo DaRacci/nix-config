@@ -416,8 +416,8 @@ in
                   elif [ "$STATUS" = "failed" ]; then
                     echo "status:failed"
                     echo "icon:mdi:alert"
-                    LOG=$(journalctl -u nixos-upgrade --lines=10 --no-pager --output cat)
-                    echo "log:$LOG"
+                    LOG=$(journalctl -u nixos-upgrade --lines=10 --no-pager --output cat | tr '\n' ' ')
+                    echo "log:\"$LOG\""
                   else
                     echo "status:idle"
                   fi
