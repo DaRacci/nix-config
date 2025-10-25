@@ -84,8 +84,8 @@ merge
         "github"."copilot" = vscode-utils.extensionFromVscodeMarketplace {
           name = "copilot";
           publisher = "github";
-          version = "1.387.0";
-          sha256 = "0wyv1ix0lqnhn756bqbkm94561wan0jnrnxbr5knz0201mm8hj0i";
+          version = "1.388.0";
+          sha256 = "06dyyp5qb63a7c8sfxbmvz7j405kdw50n7qlp74fl8ydwgrwl67d";
 
         };
         "github"."copilot-chat" = vscode-utils.extensionFromVscodeMarketplace {
@@ -217,8 +217,8 @@ merge
         "ms-python"."vscode-pylance" = vscode-utils.extensionFromVscodeMarketplace {
           name = "vscode-pylance";
           publisher = "ms-python";
-          version = "2025.8.3";
-          sha256 = "1allwf08w6zb9k34czmah98d5zfalb9wjwnzrjck4nl1s3b8337q";
+          version = "2025.9.1";
+          sha256 = "0ksbihmhy8svpdy9lxafgqaljn4i74bc90ifqchh2j3rfzk4y9pj";
 
         };
         "ms-vscode"."powershell" = vscode-utils.extensionFromVscodeMarketplace {
@@ -245,8 +245,8 @@ merge
         "pkief"."material-icon-theme" = vscode-utils.extensionFromVscodeMarketplace {
           name = "material-icon-theme";
           publisher = "pkief";
-          version = "5.27.0";
-          sha256 = "0gr18wrcckwpzn91w2flvkfrkvhhkrzlv6plkbaa286c50r67zmw";
+          version = "5.28.0";
+          sha256 = "16338074kc3mnrnrj6w5wlb0050z5yzfp283g989dr4yll8mx4am";
 
         };
         "pspester"."pester-test" = vscode-utils.extensionFromVscodeMarketplace {
