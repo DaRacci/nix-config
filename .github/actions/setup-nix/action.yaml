@@ -29,7 +29,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: DeterminateSystems/nix-installer-action@main
+    - uses: DeterminateSystems/nix-installer-action@v20
       with:
         source-url: "${{ format('https://install.lix.systems/lix/lix-installer-{0}', inputs.arch) }}"
         extra-conf: |
