@@ -63,7 +63,7 @@ jobs:
           USER_IMPORTS=$(./utils/get-imports.nu "HOME" "${{ matrix.user }}" | jq -c .)
           echo "$USER_IMPORTS" > imports.json
       - name: Upload Imports Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.user }}-user-imports
           path: imports.json
@@ -103,7 +103,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Download User Imports Artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           pattern: "*-user-imports"
 
@@ -135,7 +135,7 @@ jobs:
             '{host: $host, system: $system, imports: $imports}' > "details.json"
 
       - name: Upload Host Details Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: "${{ matrix.host }}-host-details"
           path: "details.json"
@@ -152,7 +152,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download Host Details Artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           pattern: "*-host-details"
       - name: Aggregate Host Details
