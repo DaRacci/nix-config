@@ -26,7 +26,7 @@ in
     (lib.mkIf (cfg.enable && cfg.editors.vscode.enable) {
       programs.vscode = {
         enable = true;
-        mutableExtensionsDir = true;
+        mutableExtensionsDir = false;
 
         profiles =
           let

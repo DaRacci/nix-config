@@ -6,7 +6,7 @@
 {
   imports = [ ./features/cli ];
 
-  home.packages = [ inputs.nix-alien.packages.${pkgs.system}.nix-alien ];
+  home.packages = [ inputs.nix-alien.packages.${pkgs.stdenv.hostPlatform.system}.nix-alien ];
 
   # nixput = {
   #   enable = false;

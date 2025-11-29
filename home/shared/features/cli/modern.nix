@@ -5,7 +5,7 @@
 {
   home = {
     packages = with pkgs; [
-      du-dust
+      dust
       duf
       gping
       sd

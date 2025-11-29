@@ -26,7 +26,7 @@ in
     xdg.dataFile = lib.mkIf (config.stylix.image != null) (
       let
         magick = lib.getExe' pkgs.imagemagick "magick";
-        wallpaperManipulations = pkgs.runCommandNoCC "wallpaperManipulations" { } ''
+        wallpaperManipulations = pkgs.runCommand "wallpaperManipulations" { } ''
           mkdir -p $out
 
           ${magick} "${config.stylix.image}" -strip -resize 1000 -gravity center -extent 1000 -quality 90 "$out/wallpaper.thmb"
