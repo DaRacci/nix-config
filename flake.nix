@@ -173,6 +173,10 @@
         flake-compat.follows = "flake-compat";
       };
     };
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Utils & Helpers for usage inside the flake
     devenv-root = {
@@ -233,6 +237,7 @@
       url = "github:nix-community/lanzaboote/v0.4.3";
       inputs = {
         nixpkgs.follows = "nixpkgs";
+        rust-overlay.follows = "rust-overlay";
         flake-parts.follows = "flake-parts";
         flake-compat.follows = "flake-compat";
         pre-commit-hooks-nix.follows = "git-hooks";
