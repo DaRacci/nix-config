@@ -363,6 +363,7 @@ in
             {
               Type = "simple";
               DynamicUser = true;
+              SupplementaryGroups = [ "systemd-journal" ];
               ExecStart = "${lib.getExe pkgs.hacompanion} -quiet -config ${hacompanionToml}";
               Restart = "always";
               RestartSec = 10;
