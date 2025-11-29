@@ -47,6 +47,7 @@
           overlays = [
             inputs.lix-module.overlays.default
             inputs.angrr.overlays.default
+            inputs.nix4vscode.overlays.default
           ]
           ++ (builtins.attrValues (import ./overlays { inherit self inputs lib; }));
         };
@@ -202,7 +203,7 @@
       };
     };
     nix4vscode = {
-      url = "github:nix-community/nix4vscode/nix4vscode-v0.0.8";
+      url = "github:nix-community/nix4vscode";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         systems.follows = "systems";
@@ -365,15 +366,6 @@
       inputs = {
         nixpkgs.follows = "nixpkgs";
         bash-env-json.follows = "bash-env-json";
-        flake-utils.follows = "flake-utils";
-      };
-    };
-
-    # Other misc modules
-    vscode-extensions = {
-      url = "github:nix-community/nix-vscode-extensions";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
         flake-utils.follows = "flake-utils";
       };
     };

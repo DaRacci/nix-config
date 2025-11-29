@@ -5,7 +5,6 @@
 {
   perSystem =
     {
-      inputs',
       pkgs,
       lib,
       ...
@@ -56,7 +55,6 @@
           nix
           git
           home-manager
-          inputs'.nix4vscode.packages.nix4vscode
 
           # Converting to Nix
           dconf2nix
@@ -88,28 +86,6 @@
             '';
           in
           {
-            update-vscode.exec = ''
-              DIR="modules/home-manager/purpose/development/editors/vscode"
-              CONFIG="$DIR/config.toml"
-              NIX_FILE="$DIR/extensions.nix"
-              VSCODE_VERSION=${pkgs.vscode.version}
-
-              sed -i "s/vscode_version = \".*\"/vscode_version = \"$VSCODE_VERSION\"/" "$CONFIG"
-              nix4vscode "$CONFIG" -o "$NIX_FILE"
-            '';
-            dump-vscode.exec = ''
-              echo 'vscode_version = "'${pkgs.vscode.version}'"'
-              echo
-              echo 'extensions = ['
-              (code --list-extensions 2>/dev/null) | while read extension; do
-                publisher_name=$(echo "$extension" | cut -d '.' -f 1)
-                extension_name=$(echo "$extension" | cut -d '.' -f 2-)
-                echo "  \"$publisher_name.$extension_name\""
-              done
-              echo ']'
-              echo
-            '';
-
             nix-tree-host = {
               package = pkgs.nushell;
               exec = ''
