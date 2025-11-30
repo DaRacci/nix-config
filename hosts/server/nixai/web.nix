@@ -29,6 +29,7 @@
 
       environmentFile = config.sops.templates.openweb-ui-env.path;
       environment = {
+        HOME = "/var/lib/open-webui";
         WEBUI_URL = "https://ai.racci.dev";
 
         # User Settings
