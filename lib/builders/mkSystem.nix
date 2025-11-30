@@ -40,7 +40,7 @@ lib.nixosSystem rec {
           };
 
           system.stateVersion = "25.05";
-          nixpkgs.hostPlatform = pkgs.system;
+          nixpkgs.hostPlatform = pkgs.stdenv.hostPlatform.system;
         }
       )
     ]

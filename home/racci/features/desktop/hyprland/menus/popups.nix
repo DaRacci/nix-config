@@ -10,7 +10,7 @@ in
   wayland.windowManager.hyprland.custom-settings.slideIn = [
     {
       bind = "SUPER+b";
-      exec = getExe pkgs.bitwarden;
+      exec = getExe pkgs.bitwarden-desktop;
       class = "Bitwarden";
       position = "edge";
     }

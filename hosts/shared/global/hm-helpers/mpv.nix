@@ -9,6 +9,6 @@
 }:
 {
   programs.firefox.nativeMessagingHosts = lib.mkIf (anyoneHasPackage pkgs.ff2mpv-rust) {
-    ff2mpv = true;
+    packages = [ pkgs.ff2mpv-rust ];
   };
 }
