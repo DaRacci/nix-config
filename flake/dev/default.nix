@@ -84,8 +84,9 @@
               const HOSTS = [${builtins.attrNames self.nixosConfigurations |> builtins.concatStringsSep " "}]
               let selected = $HOSTS | input list -f
             '';
+
           in
-          {
+          rec {
             nix-tree-host = {
               package = pkgs.nushell;
               exec = ''
@@ -103,12 +104,15 @@
               exec = ''
                 use std/log
 
-                def --wrapped main [...args: string] {
+                def perform-action [
+                  action: string # "switch" | "boot" | "test" | "build-vm"
+                  args: list<string>
+                ] {
                   ${nuSelectHost}
 
                   let command_args = [
                     "os"
-                    "switch"
+                    $action
                     $".#nixosConfigurations.($selected)"
                   ]
 
@@ -122,13 +126,38 @@
                   log info $"Command: ($command_args) with passthrough ($passthrough_args)"
 
                   let current_host = cat /etc/hostname | str trim
-                  if $selected == $current_host {
-                    log info "Rebuilding current host"
-                    nh ...$command_args ...$passthrough_args
+                  if $action != "build-vm" {
+                    if $selected == $current_host {
+                      log info $"Performing ($action) on current host"
+                      nh ...$command_args ...($passthrough_args)
+                    } else {
+                      log info $"Performing ($action) on selected host: ($selected)"
+                      nh ...$command_args --target-host $"root@($selected)" ...($passthrough_args)
+                    }
                   } else {
-                    log info $"Rebuilding selected host: ($selected)"
-                    nh ...$command_args --target-host $"root@($selected)" ...$passthrough_args
+                    log info $"Building VM for selected host: ($selected)"
+                    nh ...$command_args ...($passthrough_args)
                   }
+                }
+
+                def --wrapped main [...args: string] {
+                  perform-action "switch" $args
+                }
+
+                def --wrapped "main build-vm" [...args: string] {
+                  perform-action "build-vm" $args
+                }
+
+                def --wrapped "main test" [...args: string] {
+                  perform-action "test" $args
+                }
+
+                def --wrapped "main build" [...args: string] {
+                  perform-action "build" $args
+                }
+
+                def --wrapped "main boot" [...args: string] {
+                  perform-action "boot" $args
                 }
               '';
             };
