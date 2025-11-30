@@ -456,7 +456,7 @@ in
               ]
           );
 
-        qemuFirmware = pkgs.runCommandNoCC "qemu-firmware" { } ''
+        qemuFirmware = pkgs.runCommand "qemu-firmware" { } ''
           mkdir -p $out/share/firmware
 
           cat <<EOF > $out/share/firmware/30-edk2-ovmf-x64-sb-enrolled.json
@@ -542,7 +542,7 @@ in
     systemPackages = with pkgs; [
       virt-manager
       virtiofsd
-      win-virtio
+      virtio-win
       win-spice
       virtio-win
     ];

@@ -7,7 +7,6 @@
   imports = [
     ./appimage.nix
     ./power.nix
-    ./scheduler.nix
 
     inputs.chaotic-nyx.nixosModules.default
   ];

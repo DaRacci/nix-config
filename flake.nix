@@ -47,6 +47,7 @@
           overlays = [
             inputs.lix-module.overlays.default
             inputs.angrr.overlays.default
+            inputs.nix4vscode.overlays.default
           ]
           ++ (builtins.attrValues (import ./overlays { inherit self inputs lib; }));
         };
@@ -172,6 +173,10 @@
         flake-compat.follows = "flake-compat";
       };
     };
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Utils & Helpers for usage inside the flake
     devenv-root = {
@@ -202,7 +207,7 @@
       };
     };
     nix4vscode = {
-      url = "github:nix-community/nix4vscode/nix4vscode-v0.0.8";
+      url = "github:nix-community/nix4vscode";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         systems.follows = "systems";
@@ -229,9 +234,10 @@
     };
     impermanence.url = "github:nix-community/impermanence";
     lanzaboote = {
-      url = "github:nix-community/lanzaboote/v0.4.2";
+      url = "github:nix-community/lanzaboote/v0.4.3";
       inputs = {
         nixpkgs.follows = "nixpkgs";
+        rust-overlay.follows = "rust-overlay";
         flake-parts.follows = "flake-parts";
         flake-compat.follows = "flake-compat";
         pre-commit-hooks-nix.follows = "git-hooks";
@@ -365,15 +371,6 @@
       inputs = {
         nixpkgs.follows = "nixpkgs";
         bash-env-json.follows = "bash-env-json";
-        flake-utils.follows = "flake-utils";
-      };
-    };
-
-    # Other misc modules
-    vscode-extensions = {
-      url = "github:nix-community/nix-vscode-extensions";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
         flake-utils.follows = "flake-utils";
       };
     };

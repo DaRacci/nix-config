@@ -1,5 +1,4 @@
 {
-  inputs,
   config,
   pkgs,
   lib,
@@ -31,66 +30,64 @@ in
 
         profiles =
           let
-            extensions = inputs.vscode-extensions.extensions.${pkgs.stdenv.system};
-            versionExtensions = extensions.forVSCodeVersion config.programs.vscode.package.version;
-            plugins = (import ./extensions.nix) { inherit pkgs lib; };
+            versionExtensions = pkgs.nix4vscode.forVscodeVersion config.programs.vscode.package.version;
 
             commonProfile = {
-              extensions = with plugins; [
+              extensions = versionExtensions [
                 # Theme & Looks
-                pkief.material-icon-theme
-                aaron-bond.better-comments
-                wayou.vscode-todo-highlight
+                "pkief.material-icon-theme"
+                "aaron-bond.better-comments"
+                "wayou.vscode-todo-highlight"
 
                 # Workspaces & Projects
-                mkhl.direnv
-                editorconfig.editorconfig
-                alefragnani.project-manager
-                ms-vscode-remote.remote-ssh
+                "mkhl.direnv"
+                "editorconfig.editorconfig"
+                "alefragnani.project-manager"
+                "ms-vscode-remote.remote-ssh"
 
                 # Sidebar Additions
-                gruntfuggly.todo-tree
-                eamodio.gitlens
+                "gruntfuggly.todo-tree"
+                "eamodio.gitlens"
 
                 # Language Support
-                redhat.vscode-xml
-                versionExtensions.vscode-marketplace.redhat.vscode-yaml
-                tamasfe.even-better-toml
-                matthewpi.caddyfile-support
-                coolbear.systemd-unit-file
-                hashicorp.terraform
-                bierner.markdown-preview-github-styles
-                ruschaaf.extended-embedded-languages
-                versionExtensions.vscode-marketplace.jamief.vscode-ssh-config-enhanced
-                keesschollaart.vscode-home-assistant
-                owensimon.combinatorc
+                "redhat.vscode-xml"
+                "redhat.vscode-yaml"
+                "tamasfe.even-better-toml"
+                "matthewpi.caddyfile-support"
+                "coolbear.systemd-unit-file"
+                "hashicorp.terraform"
+                "bierner.markdown-preview-github-styles"
+                "ruschaaf.extended-embedded-languages"
+                "jamief.vscode-ssh-config-enhanced"
+                "keesschollaart.vscode-home-assistant"
+                "owensimon.combinatorc"
 
                 # LSP Servers
-                jnoortheen.nix-ide
+                "jnoortheen.nix-ide"
 
                 # Formatters
-                esbenp.prettier-vscode
+                "esbenp.prettier-vscode"
 
                 # Containers
-                ms-azuretools.vscode-docker
+                "ms-azuretools.vscode-docker"
 
                 # AI
-                github.copilot
-                github.copilot-chat
+                "github.copilot"
+                "github.copilot-chat"
 
                 # Other
-                formulahendry.code-runner
-                markis.code-coverage
-                # versionExtensions.vscode-marketplace.vadimcn.vscode-lldb
-                # platformio.platformio-ide
+                "formulahendry.code-runner"
+                "markis.code-coverage"
+                "vadimcn.vscode-lldb"
+                "platformio.platformio-ide"
 
                 # Bash Extensions
-                rogalmic.bash-debug
-                foxundermoon.shell-format
+                "rogalmic.bash-debug"
+                "foxundermoon.shell-format"
 
                 # Integrations
-                github.vscode-github-actions
-                github.vscode-pull-request-github
+                "github.vscode-github-actions"
+                "github.vscode-pull-request-github"
               ];
 
               userSettings = {
@@ -269,23 +266,23 @@ in
             });
 
             rust = lib.mkIf cfg.rust.enable (mkProfile {
-              extensions = with plugins; [
-                jscearcy.rust-doc-viewer
-                dustypomerleau.rust-syntax
-                rust-lang.rust-analyzer
+              extensions = versionExtensions [
+                "jscearcy.rust-doc-viewer"
+                "dustypomerleau.rust-syntax"
+                "rust-lang.rust-analyzer"
               ];
             });
 
             dotnet = lib.mkIf cfg.dotnet.enable (mkProfile {
-              extensions = with plugins; [
-                ms-dotnettools.csharp
-                ms-dotnettools.csdevkit
-                ms-dotnettools.vscode-dotnet-runtime
+              extensions = versionExtensions [
+                "ms-dotnettools.csharp"
+                "ms-dotnettools.csdevkit"
+                "ms-dotnettools.vscode-dotnet-runtime"
 
-                ms-vscode.powershell
-                pspester.pester-test
-                ironmansoftware.powershellprotools
-                tylerleonhardt.vscode-inline-values-powershell
+                "ms-vscode.powershell"
+                "pspester.pester-test"
+                "ironmansoftware.powershellprotools"
+                "tylerleonhardt.vscode-inline-values-powershell"
               ];
 
               userSettings = {
@@ -295,15 +292,15 @@ in
             });
 
             python = lib.mkIf cfg.python.enable (mkProfile {
-              extensions = with plugins.ms-python; [
-                python
-                vscode-pylance
-                debugpy
-                black-formatter
-                isort
-                pylint
-                mypy-type-checker
-                gather
+              extensions = versionExtensions [
+                "ms-python.python"
+                "ms-python.vscode-pylance"
+                "ms-python.debugpy"
+                "ms-python.black-formatter"
+                "ms-python.isort"
+                "ms-python.pylint"
+                "ms-python.mypy-type-checker"
+                "ms-python.gather"
               ];
             });
           };

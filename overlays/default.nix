@@ -30,7 +30,7 @@ in
         else
           throw "Invalid input format."
       ))
-      (map ({ input, packages }: takePackages final.system input packages))
+      (map ({ input, packages }: takePackages final.stdenv.hostPlatform.system input packages))
       (lib.foldl' lib.recursiveUpdate { })
     ];
 

@@ -6,8 +6,8 @@
   ...
 }:
 let
-  inherit (inputs.caelestia-cli.packages.${pkgs.system}) caelestia-cli;
-  inherit (inputs.caelestia-shell.packages.${pkgs.system}) caelestia-shell;
+  inherit (inputs.caelestia-cli.packages.${pkgs.stdenv.hostPlatform.system}) caelestia-cli;
+  inherit (inputs.caelestia-shell.packages.${pkgs.stdenv.hostPlatform.system}) caelestia-shell;
 in
 {
   home.packages = [

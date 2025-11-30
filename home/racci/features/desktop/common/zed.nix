@@ -27,9 +27,11 @@
       "docker-compose"
       "dockerfile"
       "git-firefly"
+      "ini"
       "log"
       "nix"
       "nu"
+      "qml"
       "terraform"
       "tokyo-night"
       "toml"
@@ -227,6 +229,13 @@
           binary = {
             path = lib.getExe pkgs.autocorrect;
             arguments = [ "server" ];
+          };
+        };
+
+        qml = {
+          binary = {
+            path = lib.getExe' pkgs.kdePackages.qtdeclarative "qmlls";
+            arguments = [ "-E" ];
           };
         };
       };
