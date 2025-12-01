@@ -10,25 +10,22 @@
   services = {
     n8n = {
       enable = true;
-      webhookUrl = "n8n.racci.dev";
+      openFirewall = true;
       # https://github.com/n8n-io/n8n/blob/master/packages/%40n8n/config/src/index.ts
       environment = {
-        host = "0.0.0.0";
-        port = 5678;
-
         N8N_EDITOR_BASE_URL = "n8n.racci.dev";
         N8N_DEPLOYMENT_TYPE = "default";
-        N8N_MFA_ENABLED = true;
+        N8N_MFA_ENABLED = "true";
 
-        N8N_HIRING_BANNER_ENABLED = false;
+        N8N_HIRING_BANNER_ENABLED = "false";
 
         N8N_REDIS_KEY_PREFIX = "n8n";
-        N8N_AI_ENABLED = true;
+        N8N_AI_ENABLED = "true";
 
         EXECUTIONS_MODE = "queue";
-        EXECUTIONS_TIMEOUT = 60 * 60 * 3;
-        EXECUTIONS_TIMEOUT_MAX = 60 * 60 * 12;
-        EXECUTIONS_DATA_SAVE_ON_PROGRESS = true;
+        EXECUTIONS_TIMEOUT = toString (60 * 60 * 3);
+        EXECUTIONS_TIMEOUT_MAX = toString (60 * 60 * 12);
+        EXECUTIONS_DATA_SAVE_ON_PROGRESS = "true";
       };
     };
   };
@@ -60,7 +57,7 @@
       n8n = {
         public = true;
         extraConfig = ''
-          reverse_proxy http://0.0.0.0:5678
+          reverse_proxy http://0.0.0.0:${toString config.services.n8n.environment.N8N_PORT}
         '';
       };
     };
@@ -73,7 +70,6 @@
 
   networking.firewall = {
     allowedTCPPorts = [
-      config.services.n8n.settings.port
       8080
       2525
     ];

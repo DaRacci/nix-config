@@ -79,7 +79,9 @@
       {
         ports = [ cfg.port ];
         extraConfig = ''
-          reverse_proxy http://${cfg.host}:${toString cfg.port}
+          reverse_proxy http://${cfg.host}:${toString cfg.port} {
+            flush_interval -1
+          }
         '';
       };
 
