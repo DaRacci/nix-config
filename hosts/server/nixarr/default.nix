@@ -247,7 +247,21 @@
     vpnNamespace = "wg";
   };
 
-  services.flaresolverr.enable = true;
+  services = {
+    flaresolverr.enable = true;
+    samba = {
+      enable = true;
+      settings = {
+        public = {
+          browseable = "yes";
+          comment = "Public Music Share";
+          "guest ok" = "yes";
+          path = "/data/media/library/music";
+          "read only" = "yes";
+        };
+      };
+    };
+  };
 
   server.proxy.virtualHosts = {
     jellyfin = {
