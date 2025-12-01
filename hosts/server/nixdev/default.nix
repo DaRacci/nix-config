@@ -11,46 +11,24 @@
     n8n = {
       enable = true;
       webhookUrl = "n8n.racci.dev";
-      # Schema Reference https://github.com/n8n-io/n8n/blob/master/packages/cli/src/config/schema.ts
       # https://github.com/n8n-io/n8n/blob/master/packages/%40n8n/config/src/index.ts
-      settings = {
+      environment = {
         host = "0.0.0.0";
         port = 5678;
-        editorBaseUrl = "n8n.racci.dev";
 
-        deployment.type = "default";
-        mfa.enabled = true;
-        hiringBanner.enabled = false;
-        redis.prefix = "n8n";
-        ai.enabled = true;
+        N8N_EDITOR_BASE_URL = "n8n.racci.dev";
+        N8N_DEPLOYMENT_TYPE = "default";
+        N8N_MFA_ENABLED = true;
 
-        executions = {
-          mode = "queue";
-          concurrency = {
-            productionLimit = -1;
-            evaluationLimit = -1;
-          };
+        N8N_HIRING_BANNER_ENABLED = false;
 
-          timeout = 60 * 60 * 3;
-          maxTimeut = 60 * 60 * 12;
+        N8N_REDIS_KEY_PREFIX = "n8n";
+        N8N_AI_ENABLED = true;
 
-          saveDataOnError = "all";
-          saveDataOnSuccess = "all";
-          saveExecutionProgress = true;
-          saveDataManualExecutions = true;
-
-          queueRecovery = {
-            interval = 180;
-            batchSize = 100;
-          };
-        };
-
-        userManagement = {
-          jwtSessionDurationHours = 168;
-          jwtRefreshTimeoutHours = 0;
-
-          authenticationMethod = "email";
-        };
+        EXECUTIONS_MODE = "queue";
+        EXECUTIONS_TIMEOUT = 60 * 60 * 3;
+        EXECUTIONS_TIMEOUT_MAX = 60 * 60 * 12;
+        EXECUTIONS_DATA_SAVE_ON_PROGRESS = true;
       };
     };
   };
@@ -79,9 +57,12 @@
     };
 
     proxy.virtualHosts = {
-      n8n.extraConfig = ''
-        reverse_proxy http://${config.services.n8n.settings.host}:${toString config.services.n8n.settings.port}
-      '';
+      n8n = {
+        public = true;
+        extraConfig = ''
+          reverse_proxy http://0.0.0.0:5678
+        '';
+      };
     };
   };
 
