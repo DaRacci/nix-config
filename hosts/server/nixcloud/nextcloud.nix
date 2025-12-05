@@ -57,7 +57,6 @@ in
           groupfolders
           impersonate
           notes
-          notify_push
           spreed
           tasks
           twofactor_webauthn

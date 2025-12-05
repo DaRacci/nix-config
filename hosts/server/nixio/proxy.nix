@@ -44,10 +44,10 @@ _:
     enable = true;
     package = pkgs.caddy.withPlugins {
       plugins = [
-        "github.com/mholt/caddy-l4@v0.0.0-20250829174953-ad3e83c51edb"
+        "github.com/mholt/caddy-l4@v0.0.0-20251124224044-66170bec9f4d"
         "github.com/WeidiDeng/caddy-cloudflare-ip@v0.0.0-20231130002422-f53b62aa13cb"
       ];
-      hash = "sha256-gRfRmYLD3lQSgfRoPRz9qLIubiJoR30oQakZOGwozP8=";
+      hash = "sha256-gBb/qS0qfqfEOeQpgILibzPLL6K5bouh0J7hcqJwSRQ=";
     };
     email = "admin@racci.dev";
 

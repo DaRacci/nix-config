@@ -44,6 +44,7 @@
           # Nix tools
           nvd
           nix-tree
+          nix-diff
           nil
           nixd
           nixfmt-rfc-style
@@ -86,7 +87,7 @@
             '';
 
           in
-          rec {
+          {
             nix-tree-host = {
               package = pkgs.nushell;
               exec = ''

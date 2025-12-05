@@ -29,6 +29,7 @@
 
       environmentFile = config.sops.templates.openweb-ui-env.path;
       environment = {
+        HOME = "/var/lib/open-webui";
         WEBUI_URL = "https://ai.racci.dev";
 
         # User Settings
@@ -78,7 +79,9 @@
       {
         ports = [ cfg.port ];
         extraConfig = ''
-          reverse_proxy http://${cfg.host}:${toString cfg.port}
+          reverse_proxy http://${cfg.host}:${toString cfg.port} {
+            flush_interval -1
+          }
         '';
       };
 
