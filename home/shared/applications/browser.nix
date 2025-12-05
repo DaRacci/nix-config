@@ -409,8 +409,7 @@ in
                 "ultima.sidebery.autohide" = true;
 
                 # Completely disable built-in vertical bar
-                "ultima.tabs.vertical.hide" = true;
-                "ultima.tabs.vertical.hide.in.screenedge" = false;
+                "ultima.tabs.tabbar.disabled" = true;
 
                 "ultima.urlbar.hide.buttons" = true;
                 "ultima.urlbar.centered" = true;
