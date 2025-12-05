@@ -10,47 +10,22 @@
   services = {
     n8n = {
       enable = true;
-      webhookUrl = "n8n.racci.dev";
-      # Schema Reference https://github.com/n8n-io/n8n/blob/master/packages/cli/src/config/schema.ts
+      openFirewall = true;
       # https://github.com/n8n-io/n8n/blob/master/packages/%40n8n/config/src/index.ts
-      settings = {
-        host = "0.0.0.0";
-        port = 5678;
-        editorBaseUrl = "n8n.racci.dev";
+      environment = {
+        N8N_EDITOR_BASE_URL = "n8n.racci.dev";
+        N8N_DEPLOYMENT_TYPE = "default";
+        N8N_MFA_ENABLED = "true";
 
-        deployment.type = "default";
-        mfa.enabled = true;
-        hiringBanner.enabled = false;
-        redis.prefix = "n8n";
-        ai.enabled = true;
+        N8N_HIRING_BANNER_ENABLED = "false";
 
-        executions = {
-          mode = "queue";
-          concurrency = {
-            productionLimit = -1;
-            evaluationLimit = -1;
-          };
+        N8N_REDIS_KEY_PREFIX = "n8n";
+        N8N_AI_ENABLED = "true";
 
-          timeout = 60 * 60 * 3;
-          maxTimeut = 60 * 60 * 12;
-
-          saveDataOnError = "all";
-          saveDataOnSuccess = "all";
-          saveExecutionProgress = true;
-          saveDataManualExecutions = true;
-
-          queueRecovery = {
-            interval = 180;
-            batchSize = 100;
-          };
-        };
-
-        userManagement = {
-          jwtSessionDurationHours = 168;
-          jwtRefreshTimeoutHours = 0;
-
-          authenticationMethod = "email";
-        };
+        EXECUTIONS_MODE = "queue";
+        EXECUTIONS_TIMEOUT = toString (60 * 60 * 3);
+        EXECUTIONS_TIMEOUT_MAX = toString (60 * 60 * 12);
+        EXECUTIONS_DATA_SAVE_ON_PROGRESS = "true";
       };
     };
   };
@@ -79,9 +54,12 @@
     };
 
     proxy.virtualHosts = {
-      n8n.extraConfig = ''
-        reverse_proxy http://${config.services.n8n.settings.host}:${toString config.services.n8n.settings.port}
-      '';
+      n8n = {
+        public = true;
+        extraConfig = ''
+          reverse_proxy http://0.0.0.0:${toString config.services.n8n.environment.N8N_PORT}
+        '';
+      };
     };
   };
 
@@ -92,7 +70,6 @@
 
   networking.firewall = {
     allowedTCPPorts = [
-      config.services.n8n.settings.port
       8080
       2525
     ];

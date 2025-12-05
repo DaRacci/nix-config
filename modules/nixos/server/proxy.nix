@@ -132,7 +132,7 @@ in
         name: cfg: {
           title = mkDefault name;
           url = mkDefault "https://${cfg.baseUrl}/";
-          icon = mkDefault "auto-fetched";
+          icon = mkDefault "sh-${name}"; # Guess an icon name, should work for most common services
         }
       ))
     ];
