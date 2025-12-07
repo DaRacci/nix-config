@@ -67,7 +67,7 @@ in
     restartUnits = [ "attic-watch-store.service" ];
   };
 
-  services.angrr = {
+  services.angrr = lib.mkIf (config.host.device.role != "server") {
     enable = true;
     period = "7days";
   };

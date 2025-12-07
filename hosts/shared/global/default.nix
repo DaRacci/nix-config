@@ -1,4 +1,9 @@
-{ pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 {
   imports = [
     ./hm-helpers
@@ -26,7 +31,7 @@
 
   services.dbus.implementation = "broker";
 
-  system.activationScripts.report-changes = ''
+  system.activationScripts.report-changes = lib.mkIf (!config.host.device.isHeadless) ''
     LINKS=($(ls -dv /nix/var/nix/profiles/system-*-link))
     if [ $(echo $LINKS | wc -w) -gt 1 ]; then
       NEW=$(readlink -f ''${LINKS[-1]})
