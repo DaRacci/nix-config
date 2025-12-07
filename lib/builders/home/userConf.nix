@@ -23,7 +23,7 @@
 
   imports = [
     "${self}/home/shared/global"
-    "${userDirectory}/global.nix"
+    "${userDirectory}/hm-config.nix"
   ]
   ++ (
     let
