@@ -12,6 +12,16 @@ permissions:
 jobs:
   update-flake-lock:
     runs-on: ubuntu-latest
+    name: Update {{ matrix.flake }} flake.lock
+    strategy:
+      fail-fast: false
+      matrix:
+        flake:
+          - ./
+          - flake/ci
+          - flake/dev
+          - flake/nixos
+          - flake/home-manager
 
     steps:
       - name: Checkout repository
@@ -20,16 +30,12 @@ jobs:
       - uses: ./.github/actions/setup-nix
         with:
           arch: x86_64-linux
-          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
-          ATTIC_ENDPOINT: ${{ secrets.ATTIC_ENDPOINT }}
-          ATTIC_CACHE: ${{ secrets.ATTIC_CACHE }}
-          ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
 
       - name: Update flake.lock
         uses: DeterminateSystems/update-flake-lock@main
         with:
-          commit-msg: "chore(deps): update flake.lock"
+          path-to-flake-dir: "${{ matrix.flake }}"
+          commit-msg: "chore(deps): update ${{ matrix.flake}}/flake.lock"
           pr-title: "Update flake.lock"
           pr-labels: |
             dependencies

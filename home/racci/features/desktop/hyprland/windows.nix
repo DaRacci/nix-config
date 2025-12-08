@@ -1,4 +1,9 @@
-_: {
+{
+  pkgs,
+  lib,
+  ...
+}:
+{
   wayland.windowManager.hyprland = {
     custom-settings = {
       windowrule = [
@@ -43,8 +48,18 @@ _: {
             { title = "^(File Operation Progress)$"; }
             { class = "^(org.pulseaudio.pavucontrol)$"; }
             { title = "^(About)$"; }
+            { class = "^(takecontrolrdviewer.exe)$"; } # Take Control Viewer
           ];
           rule.float = true;
+        }
+        # Sending shit to the shadow realm
+        {
+          matcher = [
+            {
+              initialTitle = "(${lib.strings.escapeRegex " - Connecting [v. ${pkgs.take-control-viewer.version}] [0:00:00]"})$";
+            }
+          ];
+          rule.workspace.special = "special";
         }
         {
           matcher = [

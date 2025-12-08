@@ -143,7 +143,7 @@ in
 
   config = mkIf (cfg != [ ]) {
     wayland.windowManager.hyprland = {
-      settings.exec-once = map (app: mkExec app) cfg;
+      settings.exec-once = map mkExec cfg;
 
       custom-settings = {
         bind =

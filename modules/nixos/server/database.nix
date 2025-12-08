@@ -14,8 +14,9 @@ let
   inherit (lib) mkOption types;
   cfg = config.server.database;
 
-  postgresHost = if isNixio then "localhost" else "nixio";
+  databaseHost = if isNixio then "localhost" else "nixio";
   postgresPort = getNixioConfig "services.postgresql.settings.port";
+  redisPort = getNixioConfig "services.redis.servers.\"\".port";
 
   serverConfigurations = lib.trivial.pipe self.nixosConfigurations [
     builtins.attrValues
@@ -44,8 +45,27 @@ let
     (builtins.map (cfg: builtins.attrNames cfg.server.database.postgres))
     builtins.concatLists
   ];
+  # allRedisPrefixNames = lib.pipe serverConfigurations [
+  #   (builtins.map (cfg: builtins.attrNames cfg.server.database.redis))
+  #   builtins.concatLists
+  #   builtins.attrNames
+  # ];
+
   hasPostgresDatabases = builtins.length (builtins.attrNames cfg.postgres) > 0;
   hasRedisInstances = builtins.length (builtins.attrNames cfg.redis) > 0;
+
+  anyConfiguredPostgresAnywhere =
+    builtins.length (
+      gatherAllInstances "server.database.postgres"
+      |> builtins.map (dbs: builtins.attrNames dbs)
+      |> builtins.concatLists
+    ) > 0;
+  anyConfiguredRedisAnywhere =
+    builtins.length (
+      gatherAllInstances "server.database.redis"
+      |> builtins.map (dbs: builtins.attrNames dbs)
+      |> builtins.concatLists
+    ) > 0;
 in
 {
   options.server.database = with types; {
@@ -64,7 +84,7 @@ in
 
               host = mkOption {
                 type = str;
-                default = postgresHost;
+                default = databaseHost;
                 readOnly = true;
               };
 
@@ -115,24 +135,19 @@ in
       default = { };
       type = attrsOf (
         submodule (
-          { ... }:
+          _:
           {
             options = {
               host = mkOption {
                 type = str;
-                default = "localhost";
+                default = databaseHost;
                 readOnly = true;
               };
 
               port = mkOption {
                 type = int;
-                default = 6379;
+                default = redisPort;
                 readOnly = true;
-              };
-
-              password = mkOption {
-                type = nullOr str;
-                default = null;
               };
             };
           }
@@ -142,7 +157,7 @@ in
   };
 
   config = lib.mkMerge [
-    (lib.mkIf (isNixio && hasPostgresDatabases) {
+    (lib.mkIf (isNixio && anyConfiguredPostgresAnywhere) {
       assertions = [
         (
           let
@@ -243,16 +258,18 @@ in
       services.postgresql.package = lib.mkDefault pkgs.postgresql_17;
     })
 
-    (lib.mkIf (isNixio && hasRedisInstances) {
-      services.redis.servers = {
-
+    (lib.mkIf (isNixio && anyConfiguredRedisAnywhere) {
+      services.redis.servers."" = {
+        enable = true;
+        openFirewall = true;
+        bind = null;
       };
     })
 
     (lib.mkIf (!isNixio && hasRedisInstances) {
       assertions = [
         {
-          assertion = !config.services.redis.enable;
+          assertion = !config.services.redis.servers."".enable;
           message = ''
             Redis is enabled & has instances, but you have configured databases for management with NixIO.
             If this is on purpose and you want NixIO to manage these, set `services.redis.enable` to `false`.

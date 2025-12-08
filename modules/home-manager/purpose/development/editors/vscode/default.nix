@@ -1,4 +1,5 @@
 {
+  inputs,
   config,
   pkgs,
   lib,
@@ -24,6 +25,10 @@ in
 
   config = lib.mkMerge [
     (lib.mkIf (cfg.enable && cfg.editors.vscode.enable) {
+      nixpkgs.overlays = [
+        inputs.nix4vscode.overlays.default
+      ];
+
       programs.vscode = {
         enable = true;
         mutableExtensionsDir = false;
