@@ -1,8 +1,9 @@
 {
   self,
+  inputs,
+  config,
   pkgs,
   lib,
-  config,
   ...
 }:
 let
@@ -24,6 +25,11 @@ let
   };
 in
 {
+  nixpkgs.overlays = [
+    inputs.angrr.overlays.default
+    inputs.nix4vscode.overlays.default
+  ];
+
   nix = {
     settings = rec {
       trusted-users = [
@@ -53,13 +59,7 @@ in
       options = "--delete-older-than 14d";
     };
 
-    # This will add each flake input as a registry
-    # To make nix3 commands consistent with your flake
-    # registry = lib.mapAttrs (_: value: { flake = value; }) inputs;
-
-    # This will additionally add your inputs to the system's legacy channels
-    # Making legacy nix commands consistent as well, awesome!
-    # nixPath = lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
+    nixPath = lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
   };
 
   sops.secrets.CACHE_PUSH_KEY = {
