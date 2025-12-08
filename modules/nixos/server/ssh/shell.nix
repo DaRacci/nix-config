@@ -1,10 +1,12 @@
-{ pkgs ? import <nixpkgs> {} }:
+{
+  pkgs ? import <nixpkgs> { },
+}:
 let
   fishInit = pkgs.writeText "fish-init.fish" ''
     zoxide init fish | source
     starship init fish | source
     carapace _carapace fish | source
-    
+
     alias grep='rg'
     alias cat='bat'
     alias ps='procs'
