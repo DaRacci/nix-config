@@ -8,7 +8,14 @@
     inputs.nixos-hardware.nixosModules.common-cpu-amd
     inputs.nixos-hardware.nixosModules.common-cpu-amd-pstate
     inputs.nixos-hardware.nixosModules.common-pc-ssd
+
+    inputs.ucodenix.nixosModules.default
   ];
+
+  services.ucodenix = {
+    enable = true;
+    cpuModelId = "00B40F40";
+  };
 
   hardware = {
     cooling.enable = false;
@@ -62,6 +69,9 @@
     extraModulePackages = [
       kernelPackages.v4l2loopback
       kernelPackages.universal-pidff
+    ];
+    kernelParams = [
+      "microcode.amd_sha_check=off"
     ];
 
     initrd = {
