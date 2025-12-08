@@ -1,6 +1,15 @@
-{ config, lib, ... }:
-with lib;
+{
+  config,
+  lib,
+  ...
+}:
 let
+  inherit (lib)
+    mkEnableOption
+    mkOption
+    mkIf
+    types
+    ;
   cfg = config.host.device;
 in
 {

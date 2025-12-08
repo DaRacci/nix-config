@@ -1,4 +1,9 @@
 {
+  config,
+  lib,
+  ...
+}:
+lib.mkIf (!config.host.device.isVirtual) {
   zramSwap = {
     enable = true;
     priority = 100;

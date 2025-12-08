@@ -1,7 +1,12 @@
-{ config, pkgs, ... }:
+{
+  osConfig,
+  config,
+  pkgs,
+  ...
+}:
 {
   programs.carapace = {
-    enable = true;
+    enable = osConfig == null || osConfig.host.device.role != "server";
     package = pkgs.carapace;
 
     enableBashIntegration = config.programs.bash.enable;

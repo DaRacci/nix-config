@@ -181,7 +181,7 @@ in
               extraConfig =
                 [
                   "import default"
-                  (lib.optionalString (value.public) "import public")
+                  (lib.optionalString value.public "import public")
                   (lib.optionalString (value.extraConfig != null) (
                     replaceLocalHost config.host.name value.extraConfig
                   ))

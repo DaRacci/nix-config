@@ -13,19 +13,27 @@
       openFirewall = true;
       # https://github.com/n8n-io/n8n/blob/master/packages/%40n8n/config/src/index.ts
       environment = {
-        N8N_EDITOR_BASE_URL = "n8n.racci.dev";
+        WEBHOOK_URL = "https://n8n.racci.dev/";
+        N8N_PROXY_HOPS = "1";
+
+        N8N_EDITOR_BASE_URL = "https://n8n.racci.dev";
         N8N_DEPLOYMENT_TYPE = "default";
         N8N_MFA_ENABLED = "true";
+        N8N_RUNNERS_ENABLED = "true";
 
         N8N_HIRING_BANNER_ENABLED = "false";
 
-        N8N_REDIS_KEY_PREFIX = "n8n";
+        N8N_CACHE_BACKEND = "memory";
         N8N_AI_ENABLED = "true";
 
         EXECUTIONS_MODE = "queue";
         EXECUTIONS_TIMEOUT = toString (60 * 60 * 3);
         EXECUTIONS_TIMEOUT_MAX = toString (60 * 60 * 12);
         EXECUTIONS_DATA_SAVE_ON_PROGRESS = "true";
+        OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS = "true";
+
+        N8N_VERSION_NOTIFICATIONS_ENABLED = "false";
+        N8N_DIAGNOSTICS_ENABLED = "false";
       };
     };
   };
@@ -48,9 +56,8 @@
 
   server = {
     database = {
-      postgres = {
-        n8n = { };
-      };
+      postgres.n8n = { };
+      # redis.n8n = { };
     };
 
     proxy.virtualHosts = {
