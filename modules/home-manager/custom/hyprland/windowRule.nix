@@ -213,7 +213,7 @@ let
         type = nullOr (either int str);
         default = null;
         description = "Makes the window uncloseable with the killactive dispatcher for a given amount of ms on open.";
-        apply = v: toString v;
+        apply = toString;
       };
       #endregion
 
@@ -511,7 +511,7 @@ let
 
       matchers = if builtins.typeOf obj.matcher == "list" then obj.matcher else [ obj.matcher ];
 
-      getRuleName = attr: if attr ? internalName then attr.internalName else lib.toLower attr;
+      getRuleName = attr: attr.internalName or (lib.toLower attr);
 
       getMatcherValue =
         _name: value: if (builtins.typeOf value == "bool") then if value then "1" else "0" else value;

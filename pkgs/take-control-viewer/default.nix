@@ -35,21 +35,140 @@ mkWindowsAppNoCC rec {
     "$HOME/.local/share/take-control-viewer" = "drive_c/users/$USER/AppData/Local/Take Control Viewer";
   };
 
-  # enableMonoBootPrompt = true;
-  # persistRegistry = true;
-  # persistRuntimeLayer = true;
-  enableInstallNotification = false;
-  # inhibitIdle = true;
   graphicsDriver = "wayland";
-  # enableVulkan = true;
+  enableVulkan = true;
 
+  # Helper shell function:
+  # is_descendant <child-pid> <ancestor-pid>
+  # returns 0 if <child-pid> is the same as or a descendant of <ancestor-pid>, 1 otherwise.
+  #
+  # Implementation notes:
+  # - Walks the parent chain via /proc/<pid>/status extracting PPid.
+  # - Treats missing /proc entries as non-descendant.
+  # - Stops at PID 1.
+  #
+  # We embed the helper in both install and run scripts to keep them self-contained.
   winAppInstall = ''
     # The executable has a date in the name, so we glob the end.
-    wine ${src}/TakeControlViewerInstall-${version}*
+    wine ${src}/TakeControlViewerInstall-${version}* &
+    installer_pid=$!
+
+    is_descendant() {
+      child=$1
+      ancestor=$2
+
+      # quick false for empty args
+      if [ -z "$child" ] || [ -z "$ancestor" ]; then
+        return 1
+      fi
+
+      # Walk up the parent chain
+      while [ -n "$child" ] && [ "$child" != "1" ]; do
+        if [ "$child" = "$ancestor" ]; then
+          return 0
+        fi
+
+        if [ -r "/proc/$child/status" ]; then
+          # PPid: <num>
+          child=$(awk '/^PPid:/ {print $2}' /proc/$child/status 2>/dev/null)
+        else
+          # If we can't read the process info, assume it's not a descendant.
+          return 1
+        fi
+      done
+
+      # final check (in case ancestor == 1)
+      [ "$child" = "$ancestor" ] && return 0 || return 1
+    }
+
+    # wait for the installer to emit the installcomplete window
+    while ! pgrep -f "TakeControlRDViewer.exe -integrated -installcomplete" > /dev/null; do
+      sleep 1
+    done
+
+    # Only terminate processes that are descendants of the installer we started.
+    # This avoids killing other instances from other users or sessions.
+    for p in $(pgrep -f "TakeControlRDViewer.exe" || true); do
+      if is_descendant "$p" "$installer_pid"; then
+        kill "$p" 2>/dev/null || true
+      fi
+    done
+
+    for p in $(pgrep -f "TakeControlRDLdr.exe" || true); do
+      if is_descendant "$p" "$installer_pid"; then
+        kill "$p" 2>/dev/null || true
+      fi
+    done
+
+    for p in $(pgrep -f "tkcuploader.exe" || true); do
+      if is_descendant "$p" "$installer_pid"; then
+        kill "$p" 2>/dev/null || true
+      fi
+    done
   '';
 
   winAppRun = ''
-    wine "$WINEPREFIX/drive_c/users/$USER/AppData/Local/Take Control Viewer/TakeControlRDLdr.exe" "$ARGS"
+    wine "$WINEPREFIX/drive_c/users/$USER/AppData/Local/Take Control Viewer/TakeControlRDLdr.exe" -- "$ARGS" &
+    wine_pid=$!
+
+    is_descendant() {
+      child=$1
+      ancestor=$2
+
+      if [ -z "$child" ] || [ -z "$ancestor" ]; then
+        return 1
+      fi
+
+      while [ -n "$child" ] && [ "$child" != "1" ]; do
+        if [ "$child" = "$ancestor" ]; then
+          return 0
+        fi
+
+        if [ -r "/proc/$child/status" ]; then
+          child=$(awk '/^PPid:/ {print $2}' /proc/$child/status 2>/dev/null)
+        else
+          return 1
+        fi
+      done
+
+      [ "$child" = "$ancestor" ] && return 0 || return 1
+    }
+
+    # Wait for any BASupClpHlp.exe processes that belong to our wine instance to finish.
+    # If there are no BASupClpHlp.exe processes that are descendants of our wine process, proceed.
+    while :; do
+      found=
+      for p in $(pgrep -f "BASupClpHlp.exe" || true); do
+        if is_descendant "$p" "$wine_pid"; then
+          found=1
+          break
+        fi
+      done
+
+      if [ -z "$found" ]; then
+        break
+      fi
+      sleep 1
+    done
+
+    # When the helper is gone, only terminate processes that belong to this wine instance.
+    for p in $(pgrep -f "TakeControlRDLdr.exe" || true); do
+      if is_descendant "$p" "$wine_pid"; then
+        kill "$p" 2>/dev/null || true
+      fi
+    done
+
+    for p in $(pgrep -f "TakeControlRDViewer.exe" || true); do
+      if is_descendant "$p" "$wine_pid"; then
+        kill "$p" 2>/dev/null || true
+      fi
+    done
+
+    for p in $(pgrep -f "tkcuploader.exe" || true); do
+      if is_descendant "$p" "$wine_pid"; then
+        kill "$p" 2>/dev/null || true
+      fi
+    done
   '';
 
   installPhase = ''
@@ -57,9 +176,9 @@ mkWindowsAppNoCC rec {
 
     ln -s "$out/bin/.launcher" "$out/bin/${pname}"
 
-    mkdir -p "$out/share/icons/hicolor/256x256/apps"
+    mkdir -p "$out/share/icons/hicolor/64x64/apps"
     icoextract ${src}/TakeControlViewerInstall-${version}* "/tmp/icon.ico"
-    magick "/tmp/icon.ico" "$out/share/icons/hicolor/256x256/apps/${pname}.png"
+    magick "/tmp/icon.ico[4]" "$out/share/icons/hicolor/64x64/apps/${pname}.png"
 
     runHook postInstall
   '';

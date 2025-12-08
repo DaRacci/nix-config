@@ -8,8 +8,10 @@
 {
   imports = [
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
-
+    "${modulesPath}/profiles/headless.nix"
     "${self}/modules/nixos/server"
+
+    ./reduce.nix
   ];
 
   services = {

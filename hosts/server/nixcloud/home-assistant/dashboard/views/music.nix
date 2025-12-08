@@ -36,13 +36,15 @@ mkView {
                       padding = "5px 0px";
                       background = "none";
                     };
-                    custom_fields.item1.justify-self = "center";
-                    custom_fields.item2.justify-self = "center";
-                    custom_fields.item3.justify-self = "center";
-                    custom_fields.item4.justify-self = "center";
-                    custom_fields.item5.justify-self = "center";
-                    custom_fields.item6.justify-self = "center";
-                    custom_fields.item7.justify-self = "center";
+                    custom_fields = {
+                      item1.justify-self = "center";
+                      item2.justify-self = "center";
+                      item3.justify-self = "center";
+                      item4.justify-self = "center";
+                      item5.justify-self = "center";
+                      item6.justify-self = "center";
+                      item7.justify-self = "center";
+                    };
                   };
                   custom_fields = {
                     item1.card = {

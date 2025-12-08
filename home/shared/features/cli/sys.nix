@@ -1,5 +1,5 @@
 {
-  osConfig,
+  osConfig ? null,
   pkgs,
   lib,
   ...
@@ -12,7 +12,7 @@
       iotop-c
       sysstat
     ]
-    ++ lib.optionals osConfig.hardware.graphics.hasAcceleration [
+    ++ lib.optionals (osConfig != null && osConfig.hardware.graphics.hasAcceleration) [
       nvtopPackages.full
     ];
 

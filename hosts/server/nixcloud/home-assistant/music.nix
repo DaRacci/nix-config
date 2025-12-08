@@ -18,7 +18,7 @@ _: {
     };
   };
 
-  server.proxy.virtualHosts.music = {
+  server.proxy.virtualHosts.music-assistant = {
     ports = [
       8095 # UI
       8097 # Seems to be used for auth callbacks.

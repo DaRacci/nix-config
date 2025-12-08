@@ -188,7 +188,7 @@ in
         |> map (
           name:
           lib.nameValuePair name {
-            enable = (lib.mkEnableOption "Enable the ${name} sensor");
+            enable = lib.mkEnableOption "Enable the ${name} sensor";
           }
         )
         |> lib.listToAttrs;
@@ -346,7 +346,6 @@ in
 
           path = with pkgs; [
             hacompanion
-            lm_sensors
             systemd
             nix
             gawk
