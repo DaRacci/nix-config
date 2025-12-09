@@ -19,7 +19,7 @@ let
       text = ''
         #!${lib.getExe pkgs.nushell}
 
-        $env.PATH = $"${
+        $env.PATH = ($env.PATH | split row (char esep) | (prepend $"${
           lib.makeBinPath (
             runtimeInputs
             ++ [
@@ -28,7 +28,7 @@ let
               pkgs.busybox
             ]
           )
-        }"
+        }" | split row (char esep)))
       ''
       + ''
         ${builtins.readFile source}
