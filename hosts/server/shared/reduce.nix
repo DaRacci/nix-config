@@ -7,13 +7,12 @@
 }:
 {
   imports = [
-    (modulesPath + "/profiles/perlless.nix")
+    # (modulesPath + "/profiles/perlless.nix")
     (modulesPath + "/profiles/minimal.nix")
   ];
 
   programs = {
     nano.enable = false;
-    bash.enable = false;
   };
 
   services.fstrim.enable = false;
