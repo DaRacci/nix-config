@@ -50,7 +50,7 @@ runs:
 
     # Taken from https://github.com/ryanccn/attic-action/issues/28#issuecomment-2743233082
     - name: Restore attic-client binary
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       id: attic-cache
       with:
         path: /tmp/attic-client
