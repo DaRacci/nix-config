@@ -57,4 +57,10 @@ in
     runtimeInputs = [ pkgs.nh ];
     source = ./rebuild-target.nu;
   };
+
+  update-redis-mappings = writeNuApplicationWithLibs {
+    name = "update-redis-mappings";
+    runtimeInputs = [ pkgs.nix ];
+    source = ./update-redis-mappings.nu;
+  };
 }
