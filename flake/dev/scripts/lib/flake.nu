@@ -5,7 +5,7 @@ export-env {
 }
 
 export def select_host [] {
-  let hosts = flake-eval r#'builtins.attrNames flake.nixosConfigurations |> builtins.concatStringsSep " "'#
+  let hosts = flake-eval r#'builtins.attrNames flake.nixosConfigurations |> builtins.concatStringsSep " "'#  --raw
     | split words
     | where $it != $env.CURRENT_HOST
 
@@ -18,7 +18,7 @@ export def select_host [] {
 }
 
 export def select_user [] {
-  let users = flake-eval r#'builtins.attrNames flake.homeConfigurations |> builtins.concatStringsSep " "'#
+  let users = flake-eval r#'builtins.attrNames flake.homeConfigurations |> builtins.concatStringsSep " "'#  --raw
     | split words
     | where $it != $env.CURRENT_USER
 
@@ -31,13 +31,13 @@ export def select_user [] {
 }
 
 export def --wrapped flake-eval [
-  expr: string,
-  ...nix_args: string
+  expr: string
+  ...nix_args: string,
 ] {
 
-  nix eval --quiet --raw --no-pure-eval --expr $'
+  nix eval --quiet --no-pure-eval ...$nix_args --expr $'
     let
       flake = builtins.getFlake "($env.GIT_ROOT)";
     in ($expr)
-  ' ...$nix_args
+  '
 }

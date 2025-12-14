@@ -19,7 +19,7 @@ let
       text = ''
         #!${lib.getExe pkgs.nushell}
 
-        $env.PATH = $"${
+        $env.PATH = ($env.PATH | split row (char esep) | (prepend $"${
           lib.makeBinPath (
             runtimeInputs
             ++ [
@@ -28,7 +28,7 @@ let
               pkgs.busybox
             ]
           )
-        }"
+        }" | split row (char esep)))
       ''
       + ''
         ${builtins.readFile source}
@@ -56,5 +56,11 @@ in
     name = "rebuild-target";
     runtimeInputs = [ pkgs.nh ];
     source = ./rebuild-target.nu;
+  };
+
+  update-redis-mappings = writeNuApplicationWithLibs {
+    name = "update-redis-mappings";
+    runtimeInputs = [ pkgs.nix ];
+    source = ./update-redis-mappings.nu;
   };
 }

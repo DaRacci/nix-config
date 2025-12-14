@@ -1,6 +1,11 @@
 {
+  pkgs,
+  ...
+}:
+{
   nixarr.lidarr = {
     enable = true;
+    package = pkgs.lidarr-plugins;
     vpn.enable = true;
   };
 

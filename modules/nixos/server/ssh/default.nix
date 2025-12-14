@@ -38,7 +38,7 @@ in
          && [ -z "''${SSH_NIX_SHELL:-}" ]; then
         export SSH_NIX_SHELL=1
 
-        exec nix-shell "${cfg.devShellFile}"
+        exec nix-shell "${cfg.shellFile}"
       fi
     '';
   };

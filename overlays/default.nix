@@ -45,6 +45,10 @@ in
     ])
     // {
       mcpo = prev.python3Packages.callPackage inputs.mcpo { };
+
+      lm_sensors-perlless = prev.lm_sensors.overrideAttrs (oldAttrs: {
+        buildInputs = oldAttrs.buildInputs |> (lib.remove prev.perl);
+      });
     };
 
   modifications = final: prev: {
