@@ -4,6 +4,7 @@
   osConfig ? null,
   config,
   pkgs,
+  lib,
   ...
 }:
 let
@@ -28,7 +29,7 @@ in
     preferXdgDirectories = true;
     activation.report-changes = config.lib.dag.entryAnywhere ''
       if [ ! -z "''${oldGenPath:-}" ]; then
-        ${pkgs.nvd}/bin/nvd diff "$oldGenPath" "$newGenPath"
+        ${lib.getExe pkgs.dix} "$oldGenPath" "$newGenPath"
       fi
     '';
   };

@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   ...
 }:
 {
@@ -44,7 +45,7 @@
     };
   };
 
-  services.transmission.openPeerPorts = true;
+  services.transmission.openPeerPorts = lib.mkForce true;
 
   server.proxy.virtualHosts.transmission.extraConfig = ''
     reverse_proxy localhost:${toString config.nixarr.transmission.uiPort}

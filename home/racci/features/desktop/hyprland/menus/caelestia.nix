@@ -16,11 +16,11 @@ in
   ];
 
   wayland.windowManager.hyprland.custom-settings.permission.screenCopy = [
-    (lib.getExe (
+    (lib.getExe' (
       caelestia-shell.buildInputs
       |> builtins.filter (p: p ? pname && p.pname == "quickshell-wrapped")
       |> builtins.head
-    ))
+    ) ".quickshell-wrapped")
   ];
 
   xdg.configFile = {

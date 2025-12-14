@@ -41,6 +41,7 @@
       url = "github:thiagokokada/nix-alien";
       inputs = {
         nixpkgs.follows = "nixpkgs";
+        nix-index-database.follows = "nix-index-database";
         flake-compat.follows = "";
       };
     };
@@ -84,6 +85,10 @@
         nixpkgs.follows = "nixpkgs";
         systems.follows = "systems";
       };
+    };
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Resources
