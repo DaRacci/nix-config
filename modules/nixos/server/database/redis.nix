@@ -81,36 +81,7 @@ in
 
   config = mkMerge [
     (mkIf (isNixio && anyConfiguredRedisAnywhere) {
-      sops.secrets."REDIS/PASSWORD" =
-        let
-          cfg = config.services.redis.servers."";
-        in
-        {
-          owner = cfg.user;
-          inherit (cfg) group;
-        };
-
-      services.redis.servers."" = {
-        enable = true;
-        openFirewall = true;
-        bind = null;
-        requirePassFile = config.sops.secrets."REDIS/PASSWORD".path;
-      };
-    })
-
-    (mkIf (!isNixio && hasRedisInstances) {
       assertions = [
-        {
-          assertion = !config.services.redis.servers."".enable;
-          message = ''
-            Redis is enabled & has instances, but you have configured databases for management with NixIO.
-            If this is on purpose and you want NixIO to manage these, set `services.redis.enable` to `false`.
-
-            Configured redis instances: ${
-              builtins.attrNames config.services.redis.servers |> builtins.concatStringsSep ", "
-            }
-          '';
-        }
         {
           assertion = builtins.length allRedisPrefixNames <= 16;
           message = ''
@@ -136,11 +107,43 @@ in
             }
           '';
         }
+      ];
+
+      sops.secrets."REDIS/PASSWORD" =
+        let
+          cfg = config.services.redis.servers."";
+        in
+        {
+          owner = cfg.user;
+          inherit (cfg) group;
+        };
+
+      services.redis.servers."" = {
+        enable = true;
+        openFirewall = true;
+        bind = null;
+        requirePassFile = config.sops.secrets."REDIS/PASSWORD".path;
+      };
+    })
+
+    (mkIf (!isNixio && hasRedisInstances) {
+      assertions = [
+        {
+          assertion = !(config.services.redis.servers ? "" && config.services.redis.servers."".enable);
+          message = ''
+            Redis is enabled & has instances, but you have configured databases for management with NixIO.
+            If this is on purpose and you want NixIO to manage these, set `services.redis.enable` to `false`.
+
+            Configured redis instances: ${
+              builtins.attrNames config.services.redis.servers |> builtins.concatStringsSep ", "
+            }
+          '';
+        }
       ]
       ++ (
         builtins.attrNames cfg
         |> builtins.map (name: {
-          assertion = !(staticDbIdMappings ? ${name});
+          assertion = staticDbIdMappings ? ${name};
           message = ''
             Redis instance "${name}" does not have a static database_id mapping configured in
             hosts/server/nixio/reddis-mappings.json.
@@ -148,7 +151,8 @@ in
             Run `update-redis-mappings` to automatically generate and insert the required mappings.
 
             Configured static mappings: ${
-              builtins.mapAttrs (prefix: id: "${prefix} -> ${id}") staticDbIdMappings
+              staticDbIdMappings
+              |> lib.mapAttrsToList (prefix: id: "${prefix} -> ${toString id}")
               |> builtins.concatStringsSep ", "
             }
           '';

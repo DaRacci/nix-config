@@ -3,6 +3,8 @@
   ...
 }:
 {
+  sops.secrets."N8N/ENV" = { };
+
   services.n8n = {
     enable = true;
     openFirewall = true;
