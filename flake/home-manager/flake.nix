@@ -12,7 +12,8 @@
 
     # Configuration Libraries
     home-manager = {
-      url = "github:nix-community/home-manager";
+      # url = "github:nix-community/home-manager";
+      url = "github:DaRacci/home-manager"; # TODO - Remove fork when #8341 is merged upstream.
       inputs.nixpkgs.follows = "nixpkgs";
     };
     sops-nix = {
