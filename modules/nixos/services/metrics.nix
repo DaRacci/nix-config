@@ -347,6 +347,7 @@ in
           path = with pkgs; [
             hacompanion
             systemd
+            lm_sensors-perlless
             nix
             gawk
             smartmontools

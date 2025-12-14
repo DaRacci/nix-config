@@ -25,7 +25,7 @@
             cocogitto # Conventional Commits
 
             # Nix tools
-            nvd
+            dix
             nix-tree
             nix-diff
             nil
