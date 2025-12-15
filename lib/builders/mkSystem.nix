@@ -58,5 +58,6 @@ lib.nixosSystem rec {
   specialArgs = {
     inherit self hostDirectory;
     inherit (self) inputs outputs;
+    inherit users;
   };
 }
