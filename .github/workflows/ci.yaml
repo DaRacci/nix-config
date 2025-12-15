@@ -19,15 +19,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: ./.github/actions/setup-nix
-        with:
-          arch: x86_64-linux
-          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
-          ATTIC_ENDPOINT: ${{ secrets.ATTIC_ENDPOINT }}
-          ATTIC_CACHE: ${{ secrets.ATTIC_CACHE }}
-          ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
-
       - name: Generate Matrix
         id: set-matrix
         # Do not update until https://github.com/workflow/nix-shell-action/issues/364 is fixed.
