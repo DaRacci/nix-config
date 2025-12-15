@@ -37,7 +37,7 @@ let
     |> builtins.head;
   hasRedisInstances = builtins.length (builtins.attrNames cfg) > 0;
   allRedisInstances = gatherAllInstances "server.database.redis";
-  allRedisPrefixNames = allRedisInstances |> builtins.concatLists |> builtins.attrNames;
+  allRedisPrefixNames = allRedisInstances |> lib.mergeAttrsList |> builtins.attrNames;
   anyConfiguredRedisAnywhere =
     (allRedisInstances |> builtins.map builtins.attrNames |> builtins.concatLists |> builtins.length)
     > 0;
@@ -95,7 +95,7 @@ in
         {
           assertion =
             (builtins.attrNames staticDbIdMappings |> builtins.length)
-            == (builtins.attrValues staticDbIdMappings |> builtins.lib.unique |> builtins.length);
+            == (builtins.attrValues staticDbIdMappings |> lib.unique |> builtins.length);
           message = ''
             You have configured duplicate static database_id mappings for Redis instances.
             Each Redis client must have a unique database_id mapping to avoid conflicts.
