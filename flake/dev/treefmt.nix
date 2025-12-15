@@ -35,7 +35,9 @@
         global.excludes = [
           "**/secrets.yaml"
           "**/ssh_host_ed25519_key.pub"
-          "modules/home-manager/purpose/development/editors/vscode/extensions.nix"
+          "hosts/server/nixcloud/provisioning.json"
+          "hosts/server/nixio/reddis-mapping.json"
+          "hosts/server/nixio/tunnel/credentials.json"
         ];
       };
     };
