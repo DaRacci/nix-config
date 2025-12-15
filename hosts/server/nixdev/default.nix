@@ -5,6 +5,7 @@
   imports = [
     ./automation.nix
     ./ci.nix
+    ./coder.nix
   ];
 
   virtualisation.docker = {
