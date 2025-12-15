@@ -28,15 +28,22 @@ _:
       '';
     };
   };
-
-  systemd.services.caddy = {
-    after = [
-      "tailscaled.service"
-      "adguardhome.service"
-    ];
-    serviceConfig = {
-      Restart = lib.mkForce "always";
-      RestartSec = "5s";
+  systemd.services = {
+    caddy = rec {
+      after = [
+        "tailscaled.service"
+        "adguardhome.service"
+      ];
+      wants = after;
+      serviceConfig = {
+        Restart = lib.mkForce "always";
+        RestartSec = "5s";
+        RestartPreventExitStatus = lib.mkForce null;
+      };
+    };
+    upgrade-status = rec {
+      after = [ "caddy.service" ];
+      wants = after;
     };
   };
 

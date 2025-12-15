@@ -4,13 +4,13 @@
   ...
 }:
 let
+  inherit (lib) nameValuePair;
   inherit (lib.builders) readDirNoCommons;
 in
 {
   flake.homeConfigurations =
     readDirNoCommons "${self}/home"
-    |> builtins.map (
-      user: lib.nameValuePair user (lib.builders.home.mkHomeManager user { inherit self; })
-    )
+    |> builtins.filter (user: builtins.pathExists "${self}/home/${user}/hm-config.nix")
+    |> builtins.map (user: nameValuePair user (lib.builders.home.mkHomeManager user { inherit self; }))
     |> builtins.listToAttrs;
 }

@@ -31,13 +31,14 @@ pkgs.mkShellNoCC {
     doggo
 
     # Core tooling typically expected
-    coreutils
-    findutils
-    gnugrep
+    uutils-coreutils
+    uutils-findutils
     gawk
     less
     openssh
     git
+    curl
+    lsof
 
     # System Info
     inxi
