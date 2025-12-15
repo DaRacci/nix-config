@@ -90,7 +90,7 @@ rec {
         valueOff ? false,
       }:
       template.stateIfElse {
-        entity = entity;
+        inherit entity;
         states = [ "on" ];
         ifTrue = valueOn;
         ifFalse = valueOff;
@@ -198,19 +198,17 @@ rec {
       cardOverrides ? { },
     }:
     {
-      card = (
-        {
-          type = "markdown";
-          inherit text_only content;
-          visibility = [
-            {
-              condition = "screen";
-              media_query = media_query;
-            }
-          ];
-        }
-        // cardOverrides
-      );
+      card = {
+        type = "markdown";
+        inherit text_only content;
+        visibility = [
+          {
+            condition = "screen";
+            inherit media_query;
+          }
+        ];
+      }
+      // cardOverrides;
       inherit layout badges_position badges_wrap;
     };
 

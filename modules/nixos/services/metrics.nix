@@ -188,7 +188,7 @@ in
         |> map (
           name:
           lib.nameValuePair name {
-            enable = (lib.mkEnableOption "Enable the ${name} sensor");
+            enable = lib.mkEnableOption "Enable the ${name} sensor";
           }
         )
         |> lib.listToAttrs;
@@ -346,8 +346,8 @@ in
 
           path = with pkgs; [
             hacompanion
-            lm_sensors
             systemd
+            lm_sensors-perlless
             nix
             gawk
             smartmontools
@@ -363,6 +363,7 @@ in
             {
               Type = "simple";
               DynamicUser = true;
+              SupplementaryGroups = [ "systemd-journal" ];
               ExecStart = "${lib.getExe pkgs.hacompanion} -quiet -config ${hacompanionToml}";
               Restart = "always";
               RestartSec = 10;
@@ -416,8 +417,8 @@ in
                   elif [ "$STATUS" = "failed" ]; then
                     echo "status:failed"
                     echo "icon:mdi:alert"
-                    LOG=$(journalctl -u nixos-upgrade --lines=10 --no-pager --output cat)
-                    echo "log:$LOG"
+                    LOG=$(journalctl -u nixos-upgrade --lines=10 --no-pager --output cat | tr '\n' ' ')
+                    echo "log:\"$LOG\""
                   else
                     echo "status:idle"
                   fi

@@ -50,6 +50,7 @@ in
     esphome = {
       enable = true;
       openFirewall = true;
+      address = "0.0.0.0";
     };
 
     matter-server.enable = true;

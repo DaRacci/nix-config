@@ -25,6 +25,7 @@ let
   skipSSHKey = !(builtins.pathExists sourceSSHKey);
 
   osConfigPath = "${userDirectory}/os-config.nix";
+  hmConfigPath = "${userDirectory}/hm-config.nix";
 in
 {
   imports = optional (builtins.pathExists osConfigPath) osConfigPath;
@@ -74,15 +75,17 @@ in
       config.stylix.homeManagerIntegration.module
     ];
 
-    users.${name} = import ./userConf.nix {
-      inherit
-        self
-        lib
-        name
-        user
-        hostName
-        userDirectory
-        ;
-    };
+    users.${name} = lib.mkIf (builtins.pathExists hmConfigPath) (
+      import ./userConf.nix {
+        inherit
+          self
+          lib
+          name
+          user
+          hostName
+          userDirectory
+          ;
+      }
+    );
   };
 }

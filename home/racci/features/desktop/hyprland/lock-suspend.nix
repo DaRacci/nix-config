@@ -10,6 +10,10 @@ in
 {
   custom.uwsm.sliceAllocation.background = [ "hypridle" ];
 
+  wayland.windowManager.hyprland.custom-settings.permission.screenCopy = [
+    (lib.getExe config.programs.hyprlock.package)
+  ];
+
   programs.hyprlock = {
     enable = true;
     settings =

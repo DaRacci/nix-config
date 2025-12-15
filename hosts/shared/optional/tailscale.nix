@@ -32,45 +32,68 @@
     ++ (lib.optional config.host.device.isVirtual "virtual")
     ++ (lib.optional config.host.device.isHeadless "headless");
   };
+  systemd = {
+    services = {
+      tailscaled-autoconnect = {
+        serviceConfig.ExecCondition = lib.getExe (
+          pkgs.writeShellApplication {
+            name = "tailscale-check-condition";
+            runtimeInputs = [
+              pkgs.tailscale
+              pkgs.jq
+            ];
+            text = ''
+              STATE=$(tailscale status --json --peers=false | jq -r .BackendState)
+              if [ "$STATE" == "NeedsLogin" ]; then
+                exit 0
+              else
+                exit 1
+              fi
+            '';
+          }
+        );
+      };
 
-  systemd.services.tailscale-check = {
-    description = "Check Tailscale login status";
-    after = [ "tailscaled.service" ];
-    wants = [ "tailscaled.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-      User = "root";
-      ExecStart = lib.getExe (
-        pkgs.writeShellApplication {
-          name = "tailscale-check";
-          runtimeInputs = [
-            pkgs.tailscale
-            pkgs.systemd
-            pkgs.jq
-          ];
-          text = ''
-            STATE=$(tailscale status --json --peers=false | jq -r .BackendState)
-            if [ "$STATE" == "NeedsLogin" ]; then
-              echo "Tailscale is not logged in. Running tailscaled-autoconnect service."
-              systemctl start tailscaled-autoconnect.service
-            else
-              echo "Tailscale is logged in."
-            fi
-          '';
-        }
-      );
+      tailscale-check = {
+        description = "Check Tailscale login status";
+        after = [ "tailscaled.service" ];
+        wants = [ "tailscaled.service" ];
+        serviceConfig = {
+          Type = "oneshot";
+          User = "root";
+          ExecStart = lib.getExe (
+            pkgs.writeShellApplication {
+              name = "tailscale-check";
+              runtimeInputs = [
+                pkgs.tailscale
+                pkgs.systemd
+                pkgs.jq
+              ];
+              text = ''
+                STATE=$(tailscale status --json --peers=false | jq -r .BackendState)
+                if [ "$STATE" == "NeedsLogin" ]; then
+                  echo "Tailscale is not logged in. Running tailscaled-autoconnect service."
+                  systemctl start tailscaled-autoconnect.service
+                else
+                  echo "Tailscale is logged in."
+                fi
+              '';
+            }
+          );
+        };
+      };
     };
-  };
 
-  systemd.timers.tailscale-check = {
-    description = "Periodically check Tailscale login status";
-    wantedBy = [ "timers.target" ];
-    after = [ "tailscaled.service" ];
-    requires = [ "tailscaled.service" ];
-    timerConfig = {
-      OnStartupSec = "30s";
-      OnUnitActiveSec = "20m";
-      Persistent = true;
+    timers.tailscale-check = {
+      description = "Periodically check Tailscale login status";
+      wantedBy = [ "timers.target" ];
+      after = [ "tailscaled.service" ];
+      requires = [ "tailscaled.service" ];
+      timerConfig = {
+        OnStartupSec = "30s";
+        OnUnitActiveSec = "20m";
+        Persistent = true;
+      };
     };
   };
 

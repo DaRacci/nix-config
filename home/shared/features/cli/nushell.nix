@@ -9,8 +9,8 @@
 lib.mkIf (osConfig == null || osConfig.users.users.${config.home.username}.shell.pname == "nushell")
   {
     home.packages = [
-      inputs.bash-env-nushell.packages.${pkgs.system}.default
-      inputs.bash-env-json.packages.${pkgs.system}.default
+      inputs.bash-env-nushell.packages.${pkgs.stdenv.hostPlatform.system}.default
+      inputs.bash-env-json.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
 
     programs.nushell = {

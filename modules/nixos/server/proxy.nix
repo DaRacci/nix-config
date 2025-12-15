@@ -132,7 +132,7 @@ in
         name: cfg: {
           title = mkDefault name;
           url = mkDefault "https://${cfg.baseUrl}/";
-          icon = mkDefault "auto-fetched";
+          icon = mkDefault "sh-${name}"; # Guess an icon name, should work for most common services
         }
       ))
     ];
@@ -181,7 +181,7 @@ in
               extraConfig =
                 [
                   "import default"
-                  (lib.optionalString (value.public) "import public")
+                  (lib.optionalString value.public "import public")
                   (lib.optionalString (value.extraConfig != null) (
                     replaceLocalHost config.host.name value.extraConfig
                   ))

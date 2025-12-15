@@ -5,5 +5,7 @@ result
 .devenv
 .pre-commit-config.yaml
 
+.cache/
+
 @girs
 node_modules

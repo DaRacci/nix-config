@@ -27,9 +27,11 @@
       "docker-compose"
       "dockerfile"
       "git-firefly"
+      "ini"
       "log"
       "nix"
       "nu"
+      "qml"
       "terraform"
       "tokyo-night"
       "toml"
@@ -199,14 +201,16 @@
           };
         };
         # TODO - Figure out how to do this without hard-coded paths.
-        nixd.settings = {
+        nixd = {
           binary.path = lib.getExe pkgs.nixd;
-          nixpkgs.expr = "import (builtins.getFlake \"/persist/nix-config\").inputs.nixpkgs { }";
-          options = rec {
-            nixos.expr = "(builtins.getFlake \"/persist/nix-config\").nixosConfigurations.(builtins.replaceStrings [\"\\n\"] [\"\"] (builtins.readFile /etc/hostname)).options";
-            home-manager.expr = "${nixos.expr}.home-manager.users.type.getSubOptions []";
-            flake-parts.expr = "(builtins.getFlake \"/persist/nix-config\").debug.options";
-            flake-parts2.expr = "(builtins.getFlake \"/persist/nix-config\").currentSystem.options";
+          settings = {
+            nixpkgs.expr = "import (builtins.getFlake \"/persist/nix-config\").inputs.nixpkgs { }";
+            options = rec {
+              nixos.expr = "(builtins.getFlake \"/persist/nix-config\").nixosConfigurations.(builtins.replaceStrings [\"\\n\"] [\"\"] (builtins.readFile /etc/hostname)).options";
+              home-manager.expr = "${nixos.expr}.home-manager.users.type.getSubOptions []";
+              flake-parts.expr = "(builtins.getFlake \"/persist/nix-config\").debug.options";
+              flake-parts2.expr = "(builtins.getFlake \"/persist/nix-config\").currentSystem.options";
+            };
           };
         };
 
@@ -225,6 +229,13 @@
           binary = {
             path = lib.getExe pkgs.autocorrect;
             arguments = [ "server" ];
+          };
+        };
+
+        qml = {
+          binary = {
+            path = lib.getExe' pkgs.kdePackages.qtdeclarative "qmlls";
+            arguments = [ "-E" ];
           };
         };
       };

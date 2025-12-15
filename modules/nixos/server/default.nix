@@ -24,7 +24,19 @@ let
     in
     lib.lists.foldl' (acc: attr: acc.${attr}) configuration attrs;
 
-  importModule = path: import path { inherit isNixio nixioConfig getNixioConfig; };
+  importModule =
+    path: inherits:
+    import path (
+      {
+        inherit
+          isNixio
+          nixioConfig
+          getNixioConfig
+          importModule
+          ;
+      }
+      // inherits
+    );
 
   ipOptions = submodule {
     options = {
@@ -44,9 +56,11 @@ let
 in
 {
   imports = [
-    (importModule ./dashboard.nix)
-    (importModule ./database.nix)
-    (importModule ./proxy.nix)
+    (importModule ./database { })
+    (importModule ./dashboard.nix { })
+    (importModule ./proxy.nix { })
+
+    ./ssh
   ];
 
   options = {

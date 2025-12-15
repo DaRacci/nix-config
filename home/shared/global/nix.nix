@@ -1,4 +1,9 @@
-{ lib, pkgs, ... }:
+{
+  inputs,
+  pkgs,
+  lib,
+  ...
+}:
 {
   nix = {
     package = lib.mkDefault pkgs.nix;
@@ -11,4 +16,8 @@
       warn-dirty = false;
     };
   };
+
+  nixpkgs.overlays = [
+    inputs.nix4vscode.overlays.default
+  ];
 }

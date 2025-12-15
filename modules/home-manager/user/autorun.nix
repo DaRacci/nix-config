@@ -102,7 +102,8 @@ in
         Service = {
           PassEnvironment = [ "DISPLAY" ];
           ExecStart = "${service.executablePath} ${concatStringsSep " " service.extraArgs}";
-          Slice = service.slice;
+          Slice =
+            if lib.strings.hasSuffix ".slice" service.slice then service.slice else "${service.slice}.slice";
         };
 
         Install.WantedBy = [ config.wayland.systemd.target ];

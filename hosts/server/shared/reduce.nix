@@ -1,9 +1,47 @@
-# Just disable and reduce as much as possible, not sense in keeping stuff around that is not used.
+# Just disable and reduce as much as possible, no sense in keeping stuff around that is not used.
 {
-  documentation = {
-    enable = false;
-    man.enable = false;
-    nixos.enable = false;
+  modulesPath,
+  pkgs,
+  lib,
+  ...
+}:
+{
+  imports = [
+    # (modulesPath + "/profiles/perlless.nix")
+    (modulesPath + "/profiles/minimal.nix")
+  ];
+
+  programs = {
+    nano.enable = false;
   };
-  programs.command-not-found.enable = false;
+
+  services.fstrim.enable = false;
+
+  system = {
+    tools = {
+      nixos-enter.enable = false;
+      nixos-option.enable = false;
+      nixos-version.enable = false;
+      nixos-install.enable = false;
+      nixos-build-vms.enable = false;
+      nixos-generate-config.enable = false;
+    };
+
+    # Want the perlless profile but some machines still need perl.
+    forbiddenDependenciesRegexes = lib.mkForce [ ];
+  };
+
+  environment = {
+    defaultPackages = lib.mkDefault [ ];
+    corePackages = lib.mkForce (
+      with pkgs;
+      [
+        bashInteractive
+        openssh
+        toybox
+      ]
+    );
+  };
+
+  fonts.fontconfig.enable = false;
 }

@@ -25,7 +25,6 @@ lib.nixosSystem rec {
         {
           imports = [
             inputs.home-manager.nixosModules.default
-            inputs.angrr.nixosModules.angrr
             inputs.disko.nixosModules.disko
           ];
 
@@ -40,7 +39,7 @@ lib.nixosSystem rec {
           };
 
           system.stateVersion = "25.05";
-          nixpkgs.hostPlatform = pkgs.system;
+          nixpkgs.hostPlatform = pkgs.stdenv.hostPlatform.system;
         }
       )
     ]
@@ -59,5 +58,6 @@ lib.nixosSystem rec {
   specialArgs = {
     inherit self hostDirectory;
     inherit (self) inputs outputs;
+    inherit users;
   };
 }

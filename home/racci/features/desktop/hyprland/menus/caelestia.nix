@@ -6,14 +6,23 @@
   ...
 }:
 let
-  inherit (inputs.caelestia-cli.packages.${pkgs.system}) caelestia-cli;
-  inherit (inputs.caelestia-shell.packages.${pkgs.system}) caelestia-shell;
+  inherit (inputs.caelestia-cli.packages.${pkgs.stdenv.hostPlatform.system}) caelestia-cli;
+  inherit (inputs.caelestia-shell.packages.${pkgs.stdenv.hostPlatform.system}) caelestia-shell;
 in
 {
   home.packages = [
     caelestia-cli
     caelestia-shell
   ];
+
+  wayland.windowManager.hyprland.custom-settings.permission.screenCopy = [
+    (lib.getExe' (
+      caelestia-shell.buildInputs
+      |> builtins.filter (p: p ? pname && p.pname == "quickshell-wrapped")
+      |> builtins.head
+    ) ".quickshell-wrapped")
+  ];
+
   xdg.configFile = {
     caelestia-cli-config = {
       target = "caelestia/cli.json";
@@ -242,4 +251,8 @@ in
       WantedBy = [ config.wayland.systemd.target ];
     };
   };
+
+  # This doesn't work very well, needs a file manually moving to the persist dir first
+  # Caelestia doesn't respect an existing symlink and will just overwrite it.
+  user.persistence.files = [ ".face" ];
 }

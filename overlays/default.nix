@@ -1,4 +1,7 @@
-{ inputs, lib, ... }:
+{
+  inputs,
+  lib,
+}:
 let
   takePackages =
     system: input: names:
@@ -9,9 +12,7 @@ let
 
   # If given a string, assumes the input and package name are the same.
   # Otherwise should be defined as an attr with the input and the package name(s).
-  packagesFromOtherInstances = [
-    "nil"
-  ];
+  packagesFromOtherInstances = [ ];
 in
 {
   # Packages taken from other instances of nixpkgs inputs, (i.e) pr branches and the like.
@@ -30,7 +31,7 @@ in
         else
           throw "Invalid input format."
       ))
-      (map ({ input, packages }: takePackages final.system input packages))
+      (map ({ input, packages }: takePackages final.stdenv.hostPlatform.system input packages))
       (lib.foldl' lib.recursiveUpdate { })
     ];
 
@@ -44,6 +45,10 @@ in
     ])
     // {
       mcpo = prev.python3Packages.callPackage inputs.mcpo { };
+
+      lm_sensors-perlless = prev.lm_sensors.overrideAttrs (oldAttrs: {
+        buildInputs = oldAttrs.buildInputs |> (lib.remove prev.perl);
+      });
     };
 
   modifications = final: prev: {
@@ -69,6 +74,20 @@ in
       dependencies = oldAttrs.dependencies ++ [
         prev.python3Packages.itsdangerous
       ];
+    });
+
+    statix = prev.statix.overrideAttrs (_: rec {
+      src = prev.fetchFromGitHub {
+        owner = "oppiliappan";
+        repo = "statix";
+        rev = "43681f0da4bf1cc6ecd487ef0a5c6ad72e3397c7";
+        hash = "sha256-LXvbkO/H+xscQsyHIo/QbNPw2EKqheuNjphdLfIZUv4=";
+      };
+
+      cargoDeps = prev.rustPlatform.importCargoLock {
+        lockFile = src + "/Cargo.lock";
+        allowBuiltinFetchGit = true;
+      };
     });
 
     inherit lib;

@@ -21,4 +21,6 @@ in
       EOF
     '';
   };
+
+  builders = import ./builders { inherit inputs lib; };
 }
