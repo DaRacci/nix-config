@@ -299,15 +299,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1765710153,
-        "narHash": "sha256-JG1QbkEzf3teeqn64Pov/btcbDqhBxAYiHRDZ4l2lQ0=",
-        "owner": "DaRacci",
+        "lastModified": 1765860045,
+        "narHash": "sha256-7Lxp/PfOy4h3QIDtmWG/EgycaswqRSkDX4DGtet14NE=",
+        "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "4fb1929c0b7958d3613c597cdcadbdff5e473d28",
+        "rev": "09de9577d47d8bffb11c449b6a3d24e32ac16c99",
         "type": "github"
       },
       "original": {
-        "owner": "DaRacci",
+        "owner": "nix-community",
         "repo": "home-manager",
         "type": "github"
       }
