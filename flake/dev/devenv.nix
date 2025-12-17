@@ -76,13 +76,9 @@
             trim-trailing-whitespace.enable = true;
 
             nil.enable = true;
-            actionlint.enable = true;
-            deadnix.enable = true;
-            nixfmt-rfc-style.enable = true;
-            shellcheck.enable = true;
-            statix = {
+            treefmt = {
               enable = true;
-              settings.ignore = config.treefmt.settings.global.excludes;
+              packageOverrides.treefmt = config.treefmt.build.wrapper;
             };
           };
         };
