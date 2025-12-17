@@ -13,6 +13,10 @@
   ];
 
   partitions = {
+    ci = {
+      extraInputsFlake = ./ci;
+      module = ./ci/flake-module.nix;
+    };
     dev = {
       extraInputsFlake = ./dev;
       module = ./dev/flake-module.nix;
@@ -36,6 +40,7 @@
   partitionedAttrs = {
     nixosConfigurations = "nixos";
     homeConfigurations = "home-manager";
+    githubActions = "ci";
   }
   // (lib.genAttrs [
     "checks"

@@ -202,7 +202,7 @@ mkWindowsAppNoCC rec {
     license = licenses.unfreeRedistributable;
     maintainers = with maintainers; [ racci ];
     platforms = platforms.linux;
-    broken = stdenv.hostPlatform.isAarch64;
+    broken = !stdenv.hostPlatform.isx86;
     mainProgram = pname;
   };
 }
