@@ -130,7 +130,7 @@ in
     server.dashboard.items = lib.pipe cfg.virtualHosts [
       (builtins.mapAttrs (
         name: cfg: {
-          title = mkDefault name;
+          title = mkDefault (lib.mine.strings.capitalise name);
           url = mkDefault "https://${cfg.baseUrl}/";
           icon = mkDefault "sh-${name}"; # Guess an icon name, should work for most common services
         }

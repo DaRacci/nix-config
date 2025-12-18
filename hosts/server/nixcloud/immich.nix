@@ -16,10 +16,13 @@ in
   };
 
   server = {
-    database.postgres = {
-      immich = {
-        password = immichOwned;
-      };
+    database.postgres.immich = {
+      password = immichOwned;
+    };
+
+    dashboard.items.photos = {
+      title = "Immich";
+      icon = "sh-immich";
     };
 
     proxy.virtualHosts = {

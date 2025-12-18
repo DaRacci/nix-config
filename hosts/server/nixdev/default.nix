@@ -9,6 +9,8 @@
     ./woodpecker.nix
   ];
 
+  server.dashboard.icon = "mdi-code-braces";
+
   virtualisation.docker = {
     enable = true;
     autoPrune.enable = true;

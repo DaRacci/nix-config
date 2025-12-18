@@ -118,6 +118,11 @@
   };
 
   server = {
+    dashboard.items.auth = {
+      title = "Kanidm Identity";
+      icon = "sh-kanidm";
+    };
+
     proxy.virtualHosts.auth = {
       public = true;
       extraConfig =

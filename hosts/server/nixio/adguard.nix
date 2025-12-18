@@ -1,17 +1,16 @@
 { config, lib, ... }:
 {
   server = {
+    dashboard.items.adguard = {
+      title = "AdGuard Home";
+      icon = "sh-adguard-home";
+    };
+
     proxy.virtualHosts = {
       # TODO - DNS over HTTPS
       adguard.extraConfig = ''
         reverse_proxy http://${config.services.adguardhome.host}:${toString config.services.adguardhome.port}
       '';
-    };
-
-    dashboard.items = {
-      adguard = {
-        title = "AdGuard Home";
-      };
     };
   };
 

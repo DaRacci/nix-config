@@ -27,10 +27,13 @@ in
   };
 
   server = {
-    database.postgres = {
-      nextcloud = {
-        password = ncOwned;
-      };
+    database.postgres.nextcloud = {
+      password = ncOwned;
+    };
+
+    dashboard.items.nc = {
+      title = "Nextcloud";
+      icon = "sh-nextcloud";
     };
 
     proxy.virtualHosts = {

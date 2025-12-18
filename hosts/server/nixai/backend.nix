@@ -102,13 +102,20 @@ in
     };
   };
 
-  server.proxy.virtualHosts.mcpo = {
-    ports = [ 8000 ];
-    extraConfig = ''
-      redir / /docs
+  server = {
+    dashboard.items.mcpo = {
+      title = "MCPO";
+      icon = "sh-basic-memory";
+    };
 
-      reverse_proxy http://localhost:8000
-    '';
+    proxy.virtualHosts.mcpo = {
+      ports = [ 8000 ];
+      extraConfig = ''
+        redir / /docs
+
+        reverse_proxy http://localhost:8000
+      '';
+    };
   };
 
   systemd.tmpfiles.rules = [
