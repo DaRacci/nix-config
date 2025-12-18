@@ -44,7 +44,6 @@
   }
   // (lib.genAttrs [
     "checks"
-    "ci"
     "devShells"
     "formatter"
   ] (_: "dev"));
