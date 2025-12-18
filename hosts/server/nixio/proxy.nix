@@ -15,19 +15,27 @@ _:
     "CLOUDFLARE/ZONE_API_TOKEN" = { };
   };
 
-  server.proxy = {
-    domain = "racci.dev";
-    virtualHosts = {
-      pve.extraConfig = ''
-        reverse_proxy {
-          to https://192.168.2.210:8006
-          transport http {
-            tls_insecure_skip_verify
+  server = {
+    dashboard.items.pve = {
+      title = "Proxmox VE";
+      icon = "sh-proxmox";
+    };
+
+    proxy = {
+      domain = "racci.dev";
+      virtualHosts = {
+        pve.extraConfig = ''
+          reverse_proxy {
+            to https://192.168.2.210:8006
+            transport http {
+              tls_insecure_skip_verify
+            }
           }
-        }
-      '';
+        '';
+      };
     };
   };
+
   systemd.services = {
     caddy = rec {
       after = [

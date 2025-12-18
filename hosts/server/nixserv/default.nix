@@ -17,9 +17,15 @@ in
   };
 
   server = {
-    database.postgres = {
-      attic = {
-        password = atticOwned;
+    database.postgres.attic = {
+      password = atticOwned;
+    };
+
+    dashboard = {
+      icon = "mdi-cached";
+      items.cache = {
+        title = "Attic Cache";
+        icon = "sh-nixos";
       };
     };
 

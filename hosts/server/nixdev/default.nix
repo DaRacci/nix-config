@@ -6,7 +6,10 @@
     ./automation.nix
     ./ci.nix
     ./coder.nix
+    ./woodpecker.nix
   ];
+
+  server.dashboard.icon = "mdi-code-braces";
 
   virtualisation.docker = {
     enable = true;

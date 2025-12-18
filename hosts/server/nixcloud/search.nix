@@ -131,7 +131,7 @@
             value
             // {
               inherit name;
-              inherit (value) disabled;
+              disabled = value.disabled or false;
             }
           )
           (
@@ -620,8 +620,10 @@
     environmentFile = config.sops.secrets.SEARXNG_ENVIRONMENT.path;
   };
 
-  server.proxy.virtualHosts = {
-    search = {
+  server = {
+    dashboard.items.search.icon = "sh-searxng";
+
+    proxy.virtualHosts.search = {
       public = true;
       extraConfig = ''
         reverse_proxy http://${config.services.searx.settings.server.bind_address}:${toString config.services.searx.settings.server.port}

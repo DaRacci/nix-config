@@ -27,10 +27,13 @@ in
   };
 
   server = {
-    database.postgres = {
-      nextcloud = {
-        password = ncOwned;
-      };
+    database.postgres.nextcloud = {
+      password = ncOwned;
+    };
+
+    dashboard.items.nc = {
+      title = "Nextcloud";
+      icon = "sh-nextcloud";
     };
 
     proxy.virtualHosts = {
@@ -47,7 +50,7 @@ in
     nextcloud = {
       enable = true;
       configureRedis = true;
-      package = pkgs.nextcloud31;
+      package = pkgs.nextcloud32;
       appstoreEnable = true;
       extraAppsEnable = true;
       extraApps = {

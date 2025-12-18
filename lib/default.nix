@@ -9,6 +9,7 @@ in
     hardware = simpleImport ./hardware.nix;
     keys = simpleImport ./keys.nix;
     hypr = simpleImport ./hypr.nix;
+    strings = simpleImport ./strings.nix;
 
     mkPostgresRolePass = role: passPath: ''
       psql -tA <<'EOF'

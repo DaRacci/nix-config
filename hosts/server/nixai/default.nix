@@ -4,4 +4,9 @@ _: {
     ./voice.nix
     ./web.nix
   ];
+
+  server.dashboard = {
+    name = "NixAI";
+    icon = "sh-ollama";
+  };
 }

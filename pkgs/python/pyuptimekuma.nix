@@ -10,7 +10,7 @@
   aiodns,
   aiohttp,
   black,
-  cchardet,
+  faust-cchardet,
   isort,
   prometheus-client,
 }:
@@ -36,7 +36,7 @@ buildPythonPackage rec {
     aiodns
     aiohttp
     black
-    cchardet
+    faust-cchardet
     isort
     prometheus-client
   ];

@@ -12,7 +12,7 @@ permissions:
 jobs:
   update-flake-lock:
     runs-on: ubuntu-latest
-    name: Update {{ matrix.flake }} flake.lock
+    name: Update ${{ matrix.flake }}/flake.lock
     strategy:
       fail-fast: false
       matrix:
@@ -22,21 +22,29 @@ jobs:
           - flake/dev
           - flake/nixos
           - flake/home-manager
+    env:
+      FLAKE_PATH: "${{ matrix.flake != './' && format('{0}/flake.lock', matrix.flake) || 'flake.lock' }}"
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
 
       - uses: ./.github/actions/setup-nix
-        with:
-          arch: x86_64-linux
+
+      - id: set-flake-branch
+        run: |
+          FLAKE_PATH="${{ env.FLAKE_PATH }}"
+          formatted="${FLAKE_PATH//\//_}"
+          formatted="${formatted//.lock/}"
+          echo "flake=update_${formatted}" >> "$GITHUB_OUTPUT"
 
       - name: Update flake.lock
         uses: DeterminateSystems/update-flake-lock@main
         with:
           path-to-flake-dir: "${{ matrix.flake }}"
-          commit-msg: "chore(deps): update ${{ matrix.flake}}/flake.lock"
-          pr-title: "Update flake.lock"
+          branch: ${{ steps.set-flake-branch.outputs.flake }}
+          commit-msg: "chore(deps): update ${{ env.FLAKE_PATH }}"
+          pr-title: "Update ${{ env.FLAKE_PATH }}"
           pr-labels: |
             dependencies
             merge-queue
@@ -47,9 +55,3 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-fingerprint: ${{ secrets.GPG_FINGERPRINT }}
           gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
-
-  build-and-test:
-    name: Build and test
-    uses: ./.github/workflows/ci.yaml
-    needs: update-flake-lock
-    secrets: inherit

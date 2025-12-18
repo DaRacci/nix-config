@@ -8,7 +8,7 @@ inputs:
     default: ${{ github.workspace }}
   arch:
     description: "What architecture to install for"
-    required: true
+    required: false
     default: "x86_64-linux"
   TS_OAUTH_CLIENT_ID:
     description: "Tailscale OAuth Client ID"
@@ -29,10 +29,9 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: DeterminateSystems/nix-installer-action@v20
+    - uses: samueldr/lix-gha-installer-action@latest
       with:
-        source-url: "${{ format('https://install.lix.systems/lix/lix-installer-{0}', inputs.arch) }}"
-        extra-conf: |
+        extra_nix_config: |
           accept-flake-config = true
           experimental-features = nix-command flakes pipe-operator
           substituters = https://cache.nixos.org https://cache.racci.dev/global https://nix-community.cachix.org https://chaotic-nyx.cachix.org/
