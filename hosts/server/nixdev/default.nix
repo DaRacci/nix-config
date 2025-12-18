@@ -6,6 +6,7 @@
     ./automation.nix
     ./ci.nix
     ./coder.nix
+    ./woodpecker.nix
   ];
 
   virtualisation.docker = {
