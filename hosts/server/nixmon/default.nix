@@ -1,8 +1,16 @@
 _: {
   sops.secrets = { };
 
-  server.proxy.virtualHosts = {
-    uptime.extraConfig = ''
+  server = {
+    dashboard = {
+      icon = "mdi-monitor-dashboard";
+      items.uptime = {
+        title = "Uptime Kuma";
+        icon = "sh-uptime-kuma";
+      };
+    };
+
+    proxy.virtualHosts.uptime.extraConfig = ''
       reverse_proxy http://localhost:3001
     '';
   };
@@ -15,13 +23,6 @@ _: {
         HOST = "::";
       };
     };
-
-    # netdata = {
-    #   enable = true;
-    #   config = {
-    #     bind = "";
-    #   };
-    # };
   };
 
   networking.firewall.allowedTCPPorts = [ 3001 ];

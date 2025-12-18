@@ -141,17 +141,7 @@ let
         n: _s: {
           enabled = true;
           name =
-            lib.splitString "_" n
-            |> lib.map (
-              n:
-              let
-                chars = lib.strings.stringToCharacters n;
-                firstChar = lib.head chars;
-                remainingChars = lib.tail chars;
-              in
-              builtins.concatStringsSep "" ([ (lib.toUpper firstChar) ] ++ remainingChars)
-            )
-            |> lib.concatStringsSep " ";
+            lib.splitString "_" n |> builtins.map lib.mine.strings.capitalise |> lib.concatStringsSep " ";
         }
       );
 

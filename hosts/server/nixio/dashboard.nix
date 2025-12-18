@@ -10,25 +10,27 @@
       settings = {
         appConfig = {
           language = "en-AU";
-          defaultOpeningMethod = "newtab";
+          theme = "adventure";
+          defaultOpeningMethod = "workspace";
           faviconApi = "local";
           enableMultiTasking = true;
           preventWriteToDisk = true;
           disableUpdateChecks = true;
 
-          auth = {
-
-          };
-
-          # TODO - Maybe replace with the ai searx instance?
           webSearch = {
-            searchEngine = "duckduckgo";
+            searchEngine = "custom";
+            customSearchEngine = "https://search.racci.dev/search?q=";
             openingMethod = "sametab";
             searchBangs = {
               np = "https://search.nixos.org/packages?type=packages&query=";
               no = "https://search.nixos.org/options?query=";
               nw = "https://nixos.wiki/index.php?search=";
             };
+          };
+
+          hideComponents = {
+            hideHeading = true;
+            hideFooter = true;
           };
         };
 
@@ -41,15 +43,19 @@
     };
   };
 
-  server.proxy.virtualHosts = {
-    dashboard.extraConfig = ''
-      header {
-        X-Frame-Options SAMEORIGIN
-        X-Robots-Tag "none"
-      }
+  server = {
+    dashboard.items.dashboard.icon = "sh-dashy";
 
-      root * ${config.services.dashy.finalDrv}
-      file_server
-    '';
+    proxy.virtualHosts = {
+      dashboard.extraConfig = ''
+        header {
+          X-Frame-Options SAMEORIGIN
+          X-Robots-Tag "none"
+        }
+
+        root * ${config.services.dashy.finalDrv}
+        file_server
+      '';
+    };
   };
 }

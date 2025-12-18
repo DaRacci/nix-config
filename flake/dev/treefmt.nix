@@ -11,7 +11,11 @@
         deadnix.enable = true;
         nixfmt.enable = true;
         shellcheck.enable = true;
-        statix.enable = true;
+        statix = {
+          enable = true;
+          # TODO Remove once https://github.com/oppiliappan/statix/pull/152 is merged
+          disabled-lints = [ "manual_inherit_from" ];
+        };
         mdformat.enable = true;
         mdsh.enable = true;
         keep-sorted.enable = true;
@@ -35,7 +39,9 @@
         global.excludes = [
           "**/secrets.yaml"
           "**/ssh_host_ed25519_key.pub"
-          "modules/home-manager/purpose/development/editors/vscode/extensions.nix"
+          "hosts/server/nixcloud/provisioning.json"
+          "hosts/server/nixio/redis-mappings.json"
+          "hosts/server/nixio/tunnel/credentials.json"
         ];
       };
     };

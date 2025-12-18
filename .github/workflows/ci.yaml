@@ -10,6 +10,13 @@ permissions:
   contents: read
 
 jobs:
+  flake-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check Nix flake Nixpkgs inputs
+        uses: DeterminateSystems/flake-checker-action@main
+
   generate-matrix:
     runs-on: self-hosted
     outputs:
@@ -52,15 +59,7 @@ jobs:
               echo EOF
             } >> "$GITHUB_OUTPUT"
 
-  checks:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Check Nix flake Nixpkgs inputs
-        uses: DeterminateSystems/flake-checker-action@main
-
-  build:
+  build-outputs:
     needs: generate-matrix
     if: needs.generate-matrix.outputs.matrix != '[]'
     runs-on: ubuntu-latest
@@ -126,26 +125,35 @@ jobs:
           _system: ${{ matrix.system }}
         run: nix build --accept-flake-config .#${{ matrix.attr }}
 
-  test:
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.command }}-${{ matrix.system }}
-      cancel-in-progress: true
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - command: fmt -L -- --ci
-            system: x86_64-linux
-          - command: flake check --no-pure-eval --allow-import-from-derivation
-            system: x86_64-linux
-          - command: develop --no-pure-eval --command true
-            system: x86_64-linux
-
+  nix-matrix:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-nix
+        with:
+          arch: x86_64-linux
+          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
+          ATTIC_ENDPOINT: ${{ secrets.ATTIC_ENDPOINT }}
+          ATTIC_CACHE: ${{ secrets.ATTIC_CACHE }}
+          ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
+      - id: set-matrix
+        name: Generate Nix Matrix
+        run: |
+          set -Eeu
+          matrix="$(nix eval --json '.#githubActions.matrix')"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
 
+  nix-build:
+    name: ${{ matrix.name }} (${{ matrix.system }})
+    needs: nix-matrix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix: ${{fromJSON(needs.nix-matrix.outputs.matrix)}}
+    steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-nix
         with:
           arch: ${{ matrix.system }}
@@ -154,8 +162,4 @@ jobs:
           ATTIC_ENDPOINT: ${{ secrets.ATTIC_ENDPOINT }}
           ATTIC_CACHE: ${{ secrets.ATTIC_CACHE }}
           ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
-
-      - name: Run ${{ matrix.command }} on ${{ matrix.system }}
-        env:
-          _system: ${{ matrix.system }}
-        run: nix --accept-flake-config ${{ matrix.command }}
+      - run: nix build -L '.#${{ matrix.attr }}'

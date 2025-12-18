@@ -45,7 +45,7 @@
       load_direnv = "direct";
       autosave = "on_focus_change";
       auto_update = false;
-      relative_line_numbers = false;
+      relative_line_numbers = "disabled";
       restore_on_startup = "last_workspace";
       show_signature_help_after_edits = true;
 
@@ -54,18 +54,6 @@
       };
 
       agent = {
-        enabled = true;
-
-        button = true;
-        dock = "right";
-        default_width = 640;
-        default_height = 320;
-
-        default_model = {
-          provider = "copilot_chat";
-          model = "o4-mini";
-        };
-
         default_profile = "write";
         profiles = {
           write = {
@@ -312,7 +300,7 @@
         };
       };
 
-      ui_font_family = lib.mkForce "Zed Plex Sans";
+      ui_font_family = lib.mkForce ".ZedSans";
 
       terminal = {
         env = {

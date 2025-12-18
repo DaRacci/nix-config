@@ -16,7 +16,6 @@ in
   };
 
   services = {
-
     # Runs like shit because iGPU ROCM doesn't work
     # Waiting for https://github.com/ollama/ollama/issues/2033 so it can run under vulkan
     ollama = {
@@ -33,6 +32,7 @@ in
         OLLAMA_MAX_LOADED_MODELS = "2";
         OLLAMA_KV_CACHE_TYPE = "q4_0";
         OLLAMA_FLASH_ATTENTION = "1";
+        OLLAMA_VULKAN = "1";
       };
     };
 
@@ -102,13 +102,20 @@ in
     };
   };
 
-  server.proxy.virtualHosts.mcpo = {
-    ports = [ 8000 ];
-    extraConfig = ''
-      redir / /docs
+  server = {
+    dashboard.items.mcpo = {
+      title = "MCPO";
+      icon = "sh-basic-memory";
+    };
 
-      reverse_proxy http://localhost:8000
-    '';
+    proxy.virtualHosts.mcpo = {
+      ports = [ 8000 ];
+      extraConfig = ''
+        redir / /docs
+
+        reverse_proxy http://localhost:8000
+      '';
+    };
   };
 
   systemd.tmpfiles.rules = [

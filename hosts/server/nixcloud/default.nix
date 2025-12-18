@@ -10,6 +10,8 @@
     ./search.nix
   ];
 
+  server.dashboard.icon = "sh-icloud";
+
   proxmoxLXC = {
     privileged = false;
   };

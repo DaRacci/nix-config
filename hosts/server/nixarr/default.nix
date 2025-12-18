@@ -40,18 +40,22 @@
     jellyseerr.enable = true;
   };
 
-  server.proxy.virtualHosts = {
-    jellyfin = {
-      public = true;
-      extraConfig = ''
-        reverse_proxy localhost:8096
-      '';
-    };
-    jellyseerr = {
-      public = true;
-      extraConfig = ''
-        reverse_proxy localhost:${toString config.nixarr.jellyseerr.port}
-      '';
+  server = {
+    dashboard.icon = "sh-mediamanager";
+
+    proxy.virtualHosts = {
+      jellyfin = {
+        public = true;
+        extraConfig = ''
+          reverse_proxy localhost:8096
+        '';
+      };
+      jellyseerr = {
+        public = true;
+        extraConfig = ''
+          reverse_proxy localhost:${toString config.nixarr.jellyseerr.port}
+        '';
+      };
     };
   };
 }

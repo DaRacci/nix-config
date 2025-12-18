@@ -51,14 +51,12 @@
   ];
 
   server = {
-    database.postgres = {
-      postgres = { };
-    };
-    proxy.virtualHosts.pgadmin = {
-      extraConfig = ''
-        reverse_proxy http://localhost:${toString config.services.pgadmin.port}
-      '';
-    };
+    database.postgres.postgres = { };
+    dashboard.items.pgadmin.title = "pgAdmin";
+
+    proxy.virtualHosts.pgadmin.extraConfig = ''
+      reverse_proxy http://localhost:${toString config.services.pgadmin.port}
+    '';
   };
 
   services = {

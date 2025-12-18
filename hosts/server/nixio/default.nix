@@ -36,6 +36,11 @@ in
     (importFile ./storage.nix)
   ];
 
+  server.dashboard = {
+    name = "NixIO";
+    icon = "hl-networking-toolbox";
+  };
+
   boot.kernel.sysctl = {
     "net.ipv4.ip_forward" = 1;
     "net.ipv6.conf.all.forwarding" = 1;

@@ -131,26 +131,34 @@ in
     };
   };
 
-  server.proxy.virtualHosts = {
-    mqtt = rec {
-      ports = [ l4.listenPort ];
-      l4 = {
-        listenPort = 1883;
-        config = ''
-          route {
-            proxy localhost:${toString l4.listenPort}
-          }
-        '';
-      };
+  server = {
+    dashboard.items = {
+      esphome.title = "ESPHome";
+      mqtt.title = "MQTT Broker";
+      zigbee2mqtt.title = "Zigbee2MQTT";
     };
 
-    esphome.extraConfig = ''
-      reverse_proxy http://localhost:${builtins.toString config.services.esphome.port}
-    '';
+    proxy.virtualHosts = {
+      mqtt = rec {
+        ports = [ l4.listenPort ];
+        l4 = {
+          listenPort = 1883;
+          config = ''
+            route {
+              proxy localhost:${toString l4.listenPort}
+            }
+          '';
+        };
+      };
 
-    zigbee2mqtt.extraConfig = ''
-      reverse_proxy http://localhost:8080
-    '';
+      esphome.extraConfig = ''
+        reverse_proxy http://localhost:${builtins.toString config.services.esphome.port}
+      '';
+
+      zigbee2mqtt.extraConfig = ''
+        reverse_proxy http://localhost:8080
+      '';
+    };
   };
 
   networking.firewall = {

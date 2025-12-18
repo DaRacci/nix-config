@@ -31,7 +31,7 @@
 
   services.kanidm = {
     enableServer = true;
-    package = pkgs.kanidmWithSecretProvisioning_1_7;
+    package = pkgs.kanidmWithSecretProvisioning_1_8;
 
     serverSettings =
       let
@@ -118,6 +118,11 @@
   };
 
   server = {
+    dashboard.items.auth = {
+      title = "Kanidm Identity";
+      icon = "sh-kanidm";
+    };
+
     proxy.virtualHosts.auth = {
       public = true;
       extraConfig =

@@ -15,29 +15,35 @@
       };
     };
   };
-
-  server.proxy.virtualHosts = {
-    whisper = rec {
-      ports = [ l4.listenPort ];
-      l4 = {
-        listenPort = 10300;
-        config = ''
-          route {
-            proxy localhost:${toString l4.listenPort}
-          }
-        '';
-      };
+  server = {
+    dashboard.items = {
+      piper.icon = "sh-piper-tts";
+      whisper.icon = "sh-openai";
     };
 
-    piper = rec {
-      ports = [ l4.listenPort ];
-      l4 = {
-        listenPort = 10200;
-        config = ''
-          route {
-            proxy localhost:${toString l4.listenPort}
-          }
-        '';
+    proxy.virtualHosts = {
+      whisper = rec {
+        ports = [ l4.listenPort ];
+        l4 = {
+          listenPort = 10300;
+          config = ''
+            route {
+              proxy localhost:${toString l4.listenPort}
+            }
+          '';
+        };
+      };
+
+      piper = rec {
+        ports = [ l4.listenPort ];
+        l4 = {
+          listenPort = 10200;
+          config = ''
+            route {
+              proxy localhost:${toString l4.listenPort}
+            }
+          '';
+        };
       };
     };
   };

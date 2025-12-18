@@ -18,6 +18,27 @@
       };
     };
 
+  server = {
+    database.postgres.open_webui = { };
+    dashboard.items.ai = {
+      title = "Open WebUI";
+      icon = "sh-open-webui";
+    };
+
+    proxy.virtualHosts.ai =
+      let
+        cfg = config.services.open-webui;
+      in
+      {
+        ports = [ cfg.port ];
+        extraConfig = ''
+          reverse_proxy http://${cfg.host}:${toString cfg.port} {
+            flush_interval -1
+          }
+        '';
+      };
+  };
+
   services = {
     open-webui = {
       enable = true;
@@ -69,22 +90,5 @@
         WHISPER_MODEL_AUTO_UPDATE = "true";
       };
     };
-  };
-
-  server = {
-    proxy.virtualHosts.ai =
-      let
-        cfg = config.services.open-webui;
-      in
-      {
-        ports = [ cfg.port ];
-        extraConfig = ''
-          reverse_proxy http://${cfg.host}:${toString cfg.port} {
-            flush_interval -1
-          }
-        '';
-      };
-
-    database.postgres.open_webui = { };
   };
 }
