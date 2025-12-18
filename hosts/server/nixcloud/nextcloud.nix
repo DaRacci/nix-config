@@ -51,18 +51,24 @@ in
       enable = true;
       configureRedis = true;
       package = pkgs.nextcloud32;
-      appstoreEnable = true;
+      appstoreEnable = false;
       extraAppsEnable = true;
       extraApps = {
+        # TODO files_antivirus,checksum,assistant,files_fulltextsearch
         inherit (config.services.nextcloud.package.packages.apps)
-          contacts
           calendar
+          contacts
+          deck
+          files_automatedtagging
+          forms
           groupfolders
           impersonate
           notes
+          previewgenerator
           spreed
           tasks
           twofactor_webauthn
+          user_oidc
           ;
       };
 
