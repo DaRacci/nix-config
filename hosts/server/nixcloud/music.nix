@@ -17,6 +17,7 @@
   server.proxy.virtualHosts = {
     music = {
       public = true;
+      ports = [ config.services.navidrome.settings.Port ];
       extraConfig = ''
         reverse_proxy http://${config.services.navidrome.settings.Address}:${toString config.services.navidrome.settings.Port}
       '';
