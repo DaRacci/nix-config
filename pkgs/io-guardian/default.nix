@@ -2,7 +2,7 @@
   python3Packages,
 }:
 let
-  inherit (python3Packages) buildPythonApplication websockets;
+  inherit (python3Packages) buildPythonApplication websockets pystemd;
 in
 {
   io-guardian-server = buildPythonApplication {
@@ -12,7 +12,10 @@ in
 
     src = ./.;
 
-    propagatedBuildInputs = [ websockets ];
+    propagatedBuildInputs = [
+      websockets
+      pystemd
+    ];
 
     dontBuild = true;
 

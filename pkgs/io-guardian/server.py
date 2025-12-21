@@ -19,11 +19,15 @@ import asyncio
 import json
 import logging
 import os
-import subprocess
 import sys
 from pathlib import Path
+from posixpath import curdir
+from socket import timeout
+from time import monotonic, sleep
 
 import websockets
+from pystemd.dbuslib import DBusError
+from pystemd.systemd1 import Unit
 from websockets.server import serve
 
 logging.basicConfig(
@@ -51,23 +55,110 @@ def load_psk(psk_file: str) -> str:
     return psk
 
 
-def run_systemctl(action: str, unit: str) -> tuple[bool, str]:
-    """Run a systemctl command and return success status and message."""
-    try:
-        result = subprocess.run(
-            ["systemctl", "--wait", action, unit],
-            capture_output=True,
-            text=True,
-            timeout=30,
+def _decode_state(state) -> str:
+    if isinstance(state, bytes):
+        return state.decode()
+    return state or "unknown"
+
+
+def _wait_for_state(
+    unit_obj: Unit,
+    unit_name: str,
+    dependencies: dict[str, Unit],
+    target_state: str,
+    timeout: float = 45,
+) -> tuple[bool, str]:
+    deadline = monotonic() + timeout
+    last_state = _decode_state(unit_obj.Unit.ActiveState)
+
+    dependency_objs: dict[str, tuple[Unit, str]] = {}
+    for dep_unit, dep_obj in dependencies.items():
+        dep_obj.load()
+        current_dep_state = _decode_state(dep_obj.Unit.ActiveState)
+        dependency_objs[dep_unit] = (dep_obj, current_dep_state)
+
+    logger.info(
+        f"Waiting for {unit_name} to reach state {target_state} (unit: {last_state})"
+        + (
+            f"\n\tdependency states: {', '.join(f'{k}={v[1]}' for k, v in dependency_objs.items())}"
+            if dependencies
+            else ""
         )
-        if result.returncode == 0:
-            return True, f"Successfully ran: systemctl {action} {unit}"
-        else:
-            return False, f"Failed: {result.stderr.strip() or result.stdout.strip()}"
-    except subprocess.TimeoutExpired:
-        return False, f"Timeout running: systemctl {action} {unit}"
+    )
+
+    while monotonic() < deadline:
+        unit_obj.load()
+        current_state = _decode_state(unit_obj.Unit.ActiveState)
+        last_state = current_state
+
+        for dep_unit in dependencies.keys():
+            dep_obj, _ = dependency_objs[dep_unit]
+            dep_obj.load()
+            current_dep_state = _decode_state(dep_obj.Unit.ActiveState)
+            dependency_objs[dep_unit] = (dep_obj, current_dep_state)
+
+        unit_finished = current_state in ("failed", target_state)
+        deps_finished = all(
+            dep[1] in ("failed", target_state) for dep in dependency_objs.values()
+        )
+
+        if unit_finished and deps_finished:
+            if current_state == target_state and all(
+                dep[1] == target_state for dep in dependency_objs.values()
+            ):
+                return (
+                    True,
+                    f"{unit_name} and dependencies reached state {current_state}",
+                )
+            else:
+                return (
+                    False,
+                    f"{unit_name} or dependencies reached failed state (unit: {current_state}, dependencies: {', '.join(f'{k}={v[1]}' for k, v in dependency_objs.items())})",
+                )
+
+        sleep(0.5)
+
+    return (
+        False,
+        f"Timeout waiting for {unit_name} to reach state {target_state} (unit: {last_state}, dependencies: {', '.join(f'{k}={v[1]}' for k, v in dependency_objs.items())})",
+    )
+
+
+def run_systemctl(action: str, unit: str) -> tuple[bool, str]:
+    """Control a systemd unit using pystemd and report the final state."""
+    action_map = {
+        "start": ("Start", "active"),
+        "stop": ("Stop", "inactive"),
+        "restart": ("Restart", "active"),
+        "reload": ("Reload", "active"),
+    }
+
+    action_key = action.lower()
+
+    if action_key not in action_map:
+        return False, f"Unsupported systemctl action: {action}"
+
+    method_name, target_state = action_map[action_key]
+
+    dependency_objs: dict[str, Unit] = {}
+
+    try:
+        unit_obj = Unit(unit.encode())
+        unit_obj.load()
+
+        for dep in unit_obj.Unit.Upholds:
+            dep_name = dep.decode()
+            dep_obj = Unit(dep)
+            dependency_objs[dep_name] = dep_obj
     except Exception as e:
-        return False, f"Error running systemctl: {e}"
+        return False, f"Error loading unit {unit}: {e}"
+
+    try:
+        getattr(unit_obj.Unit, method_name)(b"replace")
+    except DBusError as e:
+        return False, f"systemd error while running {action} on {unit}: {e}"
+
+    return _wait_for_state(unit_obj, unit, dependency_objs, target_state)
 
 
 def handle_drain() -> tuple[bool, str]:

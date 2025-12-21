@@ -143,7 +143,9 @@ in
           "wait-for-io-databases.service"
         ];
         wants = [ "network-online.target" ];
-        requires = [ "wait-for-io-databases.service" ];
+        wantedBy = [ "multi-user.target" ]; # Start at boot
+        bindsTo = [ "wait-for-io-databases.service" ];
+        partOf = [ "multi-user.target" ];
         requiredBy = cfg.dependentServices;
         upholds = cfg.dependentServices;
       };
@@ -254,15 +256,12 @@ in
           partOf = bindsTo;
           wantedBy = [ "multi-user.target" ];
 
-          environment = {
-            GUARDIAN_PORT = toString guardianPort;
-            GUARDIAN_TIMEOUT = "10";
-          };
+          environment.GUARDIAN_PORT = toString guardianPort;
 
           serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = true;
-            TimeoutStopSec = "60s";
+            TimeoutStopSec = "90s";
             LoadCredential = [ "psk:${config.sops.secrets."IO_GUARDIAN_PSK".path}" ];
 
             ExecStart = ''

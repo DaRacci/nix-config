@@ -139,8 +139,8 @@ async def main():
     parser.add_argument(
         "--timeout",
         type=float,
-        default=float(os.environ.get("GUARDIAN_TIMEOUT", "10")),
-        help="Connection timeout in seconds (default: 10)",
+        default=float(os.environ.get("GUARDIAN_TIMEOUT", "60")),
+        help="Connection timeout in seconds (default: 60)",
     )
     parser.add_argument(
         "--fail-fast",
