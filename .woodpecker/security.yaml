@@ -1,0 +1,11 @@
+when:
+  branch: master
+  event: [push]
+
+steps:
+  - name: GitGuardian Secret Scan
+    image: ghcr.io/lix-project/lix
+    environment:
+      GITGUARDIAN_API_KEY:
+        from_secret: GITGUARDIAN_API_KEY
+    commands: nix run nixpkgs#ggshield -- secret scan repo . --format text --with-incident-details
