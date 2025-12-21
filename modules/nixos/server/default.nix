@@ -1,6 +1,7 @@
 {
   self,
   config,
+  pkgs,
   lib,
   ...
 }:
@@ -185,5 +186,15 @@ in
         MaxRetentionSec=14day
       '';
     };
+
+    system.preSwitchChecks.reportChanges = ''
+      if [ "$2" == "test" ]; then
+        newGenPath="$1"
+        oldGenPath=$(readlink /run/current-system)
+        if [ ! -z "''${oldGenPath:-}" ]; then
+          ${lib.getExe pkgs.dix} "$oldGenPath" "$newGenPath"
+        fi
+      fi;
+    '';
   };
 }
