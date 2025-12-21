@@ -11,6 +11,7 @@
 
   services.samba = {
     enable = true;
+    openFirewall = true;
     settings = {
       public = {
         browseable = "yes";

@@ -30,20 +30,20 @@ in
     database.postgres.nextcloud = {
       password = ncOwned;
     };
+    database.dependentServices = [ "phpfpm-nextcloud" ];
 
     dashboard.items.nc = {
       title = "Nextcloud";
       icon = "sh-nextcloud";
     };
 
-    proxy.virtualHosts = {
-      nc = {
-        public = true;
-        extraConfig = ''
-          reverse_proxy http://localhost:80
-        '';
-      };
+    proxy.virtualHosts.nc = {
+      public = true;
+      extraConfig = ''
+        reverse_proxy http://localhost:80
+      '';
     };
+
   };
 
   services = rec {
@@ -51,18 +51,24 @@ in
       enable = true;
       configureRedis = true;
       package = pkgs.nextcloud32;
-      appstoreEnable = true;
+      appstoreEnable = false;
       extraAppsEnable = true;
       extraApps = {
+        # TODO files_antivirus,checksum,assistant,files_fulltextsearch
         inherit (config.services.nextcloud.package.packages.apps)
-          contacts
           calendar
+          contacts
+          deck
+          files_automatedtagging
+          forms
           groupfolders
           impersonate
           notes
+          previewgenerator
           spreed
           tasks
           twofactor_webauthn
+          user_oidc
           ;
       };
 

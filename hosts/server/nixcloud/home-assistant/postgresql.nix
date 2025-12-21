@@ -5,9 +5,12 @@
   ...
 }:
 {
-  server.database.postgres = {
-    hassio = { };
-    hassio-agent = { };
+  server.database = {
+    postgres = {
+      hassio = { };
+      hassio-agent = { };
+    };
+    dependentServices = [ "home-assistant" ];
   };
 
   services = {

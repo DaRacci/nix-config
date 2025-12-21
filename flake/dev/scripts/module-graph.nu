@@ -1,16 +1,17 @@
 #!/usr/bin/env -S nix shell nixpkgs#nushell --command nu
 
 use std/log
+use lib/flake.nu
 
 def main [] {
   log info "Getting flake information..."
   let flake_info = get_flake_info
 
   log info "Getting host configurations..."
-  let hosts = if ($flake_info.hosts != null) { get_hosts $flake_info.hosts } else { get_hosts [] }
+  let hosts = get_hosts $flake_info.hosts $flake_info.source
 
   log info "Getting home configurations..."
-  let homes = if ($flake_info.homes != null) { get_homes $flake_info.homes } else { get_homes [] }
+  let homes = get_homes $flake_info.homes $flake_info.source
 
   log info "Building module graph..."
   let all_modules = build_module_graph $hosts $homes
@@ -19,11 +20,9 @@ def main [] {
 }
 
 def get_flake_info [] {
-  let current_dir = $env.PWD
-
   let hosts = try {
     log debug "Evaluating nixosConfigurations (attr names)"
-    nix eval --json .#nixosConfigurations --apply 'builtins.attrNames' --override-input devenv-root $"file+file://($current_dir)/.devenv/root" | from json
+    nix eval --json .#nixosConfigurations --apply 'builtins.attrNames' | from json
   } catch { |err|
     log warning $"Failed to get nixosConfigurations primary method: ($err)"
     []
@@ -31,7 +30,7 @@ def get_flake_info [] {
 
   let homes = try {
     log debug "Evaluating homeConfigurations (attr names)"
-    nix eval --json .#homeConfigurations --apply 'builtins.attrNames' --override-input devenv-root $"file+file://($current_dir)/.devenv/root" | from json
+    nix eval --json .#homeConfigurations --apply 'builtins.attrNames' | from json
   } catch { |err|
     log warning $"Failed to get homeConfigurations primary method: ($err)"
     []
@@ -39,31 +38,21 @@ def get_flake_info [] {
 
   if ($hosts | is-empty) { log warning "Host list came back empty" }
   if ($homes | is-empty) { log warning "Home list came back empty" }
-  let flake_info = { hosts: $hosts, homes: $homes }
+
+  let flake_source = (flake get_flake_info).source_path
+  let flake_info = { hosts: $hosts, homes: $homes, source: $flake_source }
   $flake_info
 }
 
-def get_hosts [host_names: list<string>] {
-  let current_dir = $env.PWD
-  let this_source = nix flake archive --json | from json | get path
-
+def get_hosts [
+  host_names: list<string>,
+  flake_source: string
+] {
   let host_configs = $host_names | reduce -f {} { |host, acc|
     log debug $"Getting imports for host: ($host)"
     try {
-      let raw_imports = nix eval --json $".#nixosConfigurations.($host)" --apply $"(cat ./utils/get-os-imports.nix)" --show-trace --override-input devenv-root $"file+file://($current_dir)/.devenv/root" | from json
-      let our_imports = $raw_imports
-        | where { $in | str starts-with $this_source }
-        | each { |import|
-            if not ($import | str ends-with ".nix") {
-              $"($import)/default.nix"
-            } else {
-              $import
-            }
-          }
-        | each { |import| $import | str substring (($this_source | str length) + 1).. }
-        | uniq
-
-      $acc | insert $host $our_imports
+      let imports = flake get_output_graph_files $"nixosConfigurations.($host)" $flake_source
+      $acc | insert $host $imports
     } catch { |err|
       log warning $"Failed to get imports for host: ($host) - ($err)"
       $acc | insert $host []
@@ -73,27 +62,15 @@ def get_hosts [host_names: list<string>] {
   $host_configs
 }
 
-def get_homes [home_names: list<string>] {
-  let current_dir = $env.PWD
-  let this_source = nix flake archive --json | from json | get path
-
+def get_homes [
+  home_names: list<string>,
+  flake_source: string
+] {
   let home_configs = $home_names | reduce -f {} { |home, acc|
     log debug $"Getting imports for home: ($home)"
     try {
-      let raw_imports = nix eval --json $".#homeConfigurations.($home)" --apply $"(cat ./utils/get-hm-imports.nix)" --show-trace --override-input devenv-root $"file+file://($current_dir)/.devenv/root" | from json
-      let our_imports = $raw_imports
-        | where { $in | str starts-with $this_source }
-        | each { |import|
-            if not ($import | str ends-with ".nix") {
-              $"($import)/default.nix"
-            } else {
-              $import
-            }
-          }
-        | each { |import| $import | str substring (($this_source | str length) + 1).. }
-        | uniq
-
-      $acc | insert $home $our_imports
+      let imports = flake get_output_graph_files $"homeConfigurations.($home)" $flake_source
+      $acc | insert $home $imports
     } catch { |err|
       log warning $"Failed to get imports for home: ($home) - ($err)"
       $acc | insert $home []

@@ -1,29 +1,22 @@
 {
-  isNixio,
+  isThisIOPrimaryHost,
+  getAllAttrsFunc,
   ...
 }:
 {
-  self,
   config,
   pkgs,
   lib,
   ...
 }:
 let
-  inherit (lib) mkOption types;
+  inherit (lib) mkOption mkIf types;
   inherit (types)
     submodule
     attrsOf
     nullOr
     str
     ;
-
-  serverConfigurations = lib.trivial.pipe self.nixosConfigurations [
-    builtins.attrValues
-    (builtins.map (host: host.config))
-    (builtins.filter (config: config.host.device.role == "server"))
-    (builtins.filter (config: config.server.dashboard.items != { }))
-  ];
 in
 {
   options.server.dashboard = {
@@ -77,18 +70,17 @@ in
         };
       });
       description = ''
-        Additional configuration for items managed by NixIO's dashy instance.
+        Additional configuration for items managed by the IO Hosts dashy instance.
         This will be merged with the automatically generated configuration that is nested in a section with the name of the machine.
       '';
     };
   };
 
-  config = lib.mkIf isNixio {
+  config = mkIf isThisIOPrimaryHost {
     services.dashy.settings = {
-      sections = lib.pipe serverConfigurations [
-        (builtins.map (config: config.server.dashboard))
-        (builtins.map (config: lib.mergeAttrs config { items = builtins.attrValues config.items; }))
-      ];
+      sections = getAllAttrsFunc "server.dashboard" (
+        dashboard: _: dashboard // { items = builtins.attrValues dashboard.items; }
+      );
     };
   };
 }

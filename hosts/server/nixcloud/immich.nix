@@ -25,15 +25,14 @@ in
       icon = "sh-immich";
     };
 
-    proxy.virtualHosts = {
-      "photos".extraConfig =
-        let
-          cfg = config.services.immich;
-        in
-        ''
-          reverse_proxy http://${cfg.host}:${toString cfg.port}
-        '';
-    };
+    proxy.virtualHosts.photos.extraConfig =
+      let
+        cfg = config.services.immich;
+      in
+      ''
+        reverse_proxy http://${cfg.host}:${toString cfg.port}
+      '';
+
   };
 
   services = {

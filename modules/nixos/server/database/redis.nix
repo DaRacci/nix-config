@@ -1,7 +1,7 @@
 {
-  isNixio,
-  getNixioConfig,
-  gatherAllInstances,
+  isThisIOPrimaryHost,
+  getIOPrimaryHostAttr,
+  collectAllAttrs,
   ...
 }:
 {
@@ -16,6 +16,7 @@ let
     mkMerge
     mkIf
     types
+    mapAttrsToList
     ;
   inherit (types)
     attrsOf
@@ -24,23 +25,17 @@ let
     int
     ;
 
-  file = "${self}/hosts/server/nixio/redis-mappings.json";
+  cfg = config.server.database.redis;
+
+  file = "${self}/hosts/server/${config.server.ioPrimaryHost}/redis-mappings.json";
   staticDbIdMappings =
     (if builtins.pathExists file then builtins.readFile file else "{}") |> builtins.fromJSON;
 
-  cfg = config.server.database.redis;
-  redisPort =
-    (getNixioConfig "services.redis.servers")
-    |> lib.filterAttrs (n: _: n == "")
-    |> builtins.mapAttrs (_: s: s.port)
-    |> builtins.attrValues
-    |> builtins.head;
+  redisPort = (getIOPrimaryHostAttr "services.redis.servers")."".port;
   hasRedisInstances = builtins.length (builtins.attrNames cfg) > 0;
-  allRedisInstances = gatherAllInstances "server.database.redis";
-  allRedisPrefixNames = allRedisInstances |> lib.mergeAttrsList |> builtins.attrNames;
-  anyConfiguredRedisAnywhere =
-    (allRedisInstances |> builtins.map builtins.attrNames |> builtins.concatLists |> builtins.length)
-    > 0;
+  allRedisInstances = collectAllAttrs "server.database.redis";
+  allRedisPrefixNames = allRedisInstances |> builtins.attrNames;
+  anyConfiguredRedisAnywhere = (allRedisInstances |> builtins.attrNames |> builtins.length) > 0;
 in
 {
   options.server.database.redis = mkOption {
@@ -80,7 +75,7 @@ in
   };
 
   config = mkMerge [
-    (mkIf (isNixio && anyConfiguredRedisAnywhere) {
+    (mkIf (isThisIOPrimaryHost && anyConfiguredRedisAnywhere) {
       assertions = [
         {
           assertion = builtins.length allRedisPrefixNames <= 16;
@@ -126,13 +121,13 @@ in
       };
     })
 
-    (mkIf (!isNixio && hasRedisInstances) {
+    (mkIf (!isThisIOPrimaryHost && hasRedisInstances) {
       assertions = [
         {
           assertion = !(config.services.redis.servers ? "" && config.services.redis.servers."".enable);
           message = ''
-            Redis is enabled & has instances, but you have configured databases for management with NixIO.
-            If this is on purpose and you want NixIO to manage these, set `services.redis.enable` to `false`.
+            Redis is enabled & has instances, but you have configured databases for management with an IO Host.
+            If this is on purpose and you want IO Hosts to manage these, set `services.redis.enable` to `false`.
 
             Configured redis instances: ${
               builtins.attrNames config.services.redis.servers |> builtins.concatStringsSep ", "
@@ -146,13 +141,13 @@ in
           assertion = staticDbIdMappings ? ${name};
           message = ''
             Redis instance "${name}" does not have a static database_id mapping configured in
-            hosts/server/nixio/reddis-mappings.json.
+            hosts/server/${config.server.ioPrimaryHost}/reddis-mappings.json.
 
             Run `update-redis-mappings` to automatically generate and insert the required mappings.
 
             Configured static mappings: ${
               staticDbIdMappings
-              |> lib.mapAttrsToList (prefix: id: "${prefix} -> ${toString id}")
+              |> mapAttrsToList (prefix: id: "${prefix} -> ${toString id}")
               |> builtins.concatStringsSep ", "
             }
           '';

@@ -23,15 +23,17 @@ pkgs.mkShellNoCC {
     carapace
     fish
 
-    # Useful modern CLI utilities
+    # CLI utilities
     ripgrep
     fd
     bat
     procs
     doggo
+    helix
+    btop
 
     # Core tooling typically expected
-    uutils-coreutils
+    uutils-coreutils-noprefix
     uutils-findutils
     gawk
     less

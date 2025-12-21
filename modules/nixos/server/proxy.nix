@@ -1,30 +1,35 @@
 {
-  isNixio,
-  getNixioConfig,
+  isIOPrimaryHost,
+  isThisIOPrimaryHost,
+  getIOPrimaryHostAttr,
+
+  collectAllAttrsFunc,
   ...
 }:
 {
-  self,
   config,
   lib,
   ...
 }:
 let
-  inherit (lib) mkOption mkDefault types;
+  inherit (lib)
+    flatten
+    hasSuffix
+    mapAttrs'
+    mkDefault
+    mkIf
+    mkMerge
+    mkOption
+    nameValuePair
+    optionalString
+    types
+    unique
+    ;
   cfg = config.server.proxy;
-
-  serverConfigurations = lib.trivial.pipe self.nixosConfigurations [
-    builtins.attrValues
-    (builtins.map (host: host.config))
-    (builtins.filter (config: config.host.device.role == "server"))
-    (builtins.filter (
-      config: config.server.proxy ? virtualHosts && config.server.proxy.virtualHosts != { }
-    ))
-  ];
 
   replaceLocalHost =
     host: str:
-    if host == "nixio" then
+    if isIOPrimaryHost host then
       str
     else
       builtins.replaceStrings [
@@ -47,14 +52,14 @@ in
 
     virtualHosts = mkOption {
       description = ''
-        Virtual hosts to be handled by the NixIO server and forwarded to the respective backend.
+        Virtual hosts to be handled by the IO server and forwarded to the respective backend.
 
         All virtual hosts are also added to acme for automatic certificate management.
 
         Each virtual host will have the value configured in <server.proxy.domain> added as the basedomain,
         with this attributes name as the subdomain.
 
-        Defining virtualHosts on any machine except NixIO will do nothing on that machine but are instead aggregated on NixIO.
+        Defining virtualHosts on any machine except an IO Host will do nothing on that machine but are instead aggregated to the IO Hosts.
       '';
       default = { };
       type = attrsOf (
@@ -73,7 +78,7 @@ in
 
               baseUrl = mkOption {
                 type = str;
-                default = "${name}.${getNixioConfig "server.proxy.domain"}";
+                default = "${name}.${getIOPrimaryHostAttr "server.proxy.domain"}";
                 description = ''
                   The base url including the configured base domain name.
                 '';
@@ -84,7 +89,7 @@ in
                 type = types.listOf types.port;
                 default = [ ];
                 description = ''
-                  Ports to be opened from the host for NixIO to forward traffic to.
+                  Ports to be opened from the host for IO Hosts to forward traffic to.
 
                   These ports will only accept traffic from the defined subnets for security.
                 '';
@@ -126,152 +131,87 @@ in
     };
   };
 
-  config = {
-    server.dashboard.items = lib.pipe cfg.virtualHosts [
-      (builtins.mapAttrs (
-        name: cfg: {
-          title = mkDefault (lib.mine.strings.capitalise name);
-          url = mkDefault "https://${cfg.baseUrl}/";
-          icon = mkDefault "sh-${name}"; # Guess an icon name, should work for most common services
-        }
-      ))
-    ];
+  config = mkMerge [
+    {
+      server.dashboard.items = builtins.mapAttrs (name: cfg: {
+        title = mkDefault (lib.mine.strings.capitalise name);
+        url = mkDefault "https://${cfg.baseUrl}/";
+        icon = mkDefault "sh-${name}"; # Guess an icon name, should work for most common services
+      }) cfg.virtualHosts;
+    }
 
-    services.caddy = lib.mkIf isNixio {
-      globalConfig = ''
+    (mkIf (!isThisIOPrimaryHost) {
+      server.network.openPortsForSubnet.tcp =
+        cfg.virtualHosts |> builtins.attrValues |> map (vh: vh.ports) |> flatten |> unique;
+    })
+
+    (mkIf isThisIOPrimaryHost {
+      services.caddy = {
+        globalConfig = ''
           layer4 {
-            ${lib.pipe serverConfigurations [
-              (builtins.filter (cfg: cfg.server.proxy ? virtualHosts && cfg.server.proxy.virtualHosts != { }))
-              (builtins.map (
-                cfg:
-                lib.pipe cfg.server.proxy.virtualHosts [
-                  builtins.attrValues
-                  (builtins.filter (vh: vh.l4 != null))
-                  (builtins.map (
-                    vh:
-                    lib.mine.attrsets.recursiveMergeAttrs [
-                      vh
-                      {
-                        l4.config = replaceLocalHost cfg.host.name vh.l4.config;
-                      }
-                    ]
-                  ))
-                ]
-              ))
-              lib.flatten
-              (builtins.map (cfg: ''
-                ${cfg.baseUrl}:${toString cfg.l4.listenPort} {
-                  ${cfg.l4.config}
-                }
-              ''))
-              lib.flatten
-              (builtins.concatStringsSep "\n")
-            ]}
-        }
-      '';
-
-      virtualHosts = lib.pipe serverConfigurations [
-        (builtins.map (
-          config:
-          (lib.mapAttrs' (
-            _: value:
-            lib.nameValuePair value.baseUrl {
-              hostName = value.baseUrl;
-              useACMEHost = value.baseUrl;
-              extraConfig =
-                [
-                  "import default"
-                  (lib.optionalString value.public "import public")
-                  (lib.optionalString (value.extraConfig != null) (
-                    replaceLocalHost config.host.name value.extraConfig
-                  ))
-                ]
-                |> builtins.concatStringsSep "\n";
+            ${
+              collectAllAttrsFunc "server.proxy.virtualHosts" (
+                virtualHosts: cfg:
+                virtualHosts
+                |> builtins.attrValues
+                |> builtins.filter (vh: vh.l4 != null)
+                |> builtins.map (vh: ''
+                  ${vh.baseUrl}:${toString vh.l4.listenPort} {
+                    ${replaceLocalHost cfg.host.name vh.l4.config}
+                  }
+                '')
+              )
+              |> builtins.concatStringsSep "\n"
             }
-          ) config.server.proxy.virtualHosts)
-        ))
-        lib.mergeAttrsList
-      ];
-    };
+          }
+        '';
 
-    services.cloudflared.tunnels."8d42e9b2-3814-45ea-bbb5-9056c8f017e2" =
-      let
-        publicHosts =
-          serverConfigurations
-          |> builtins.map (config: config.server.proxy.virtualHosts)
-          |> lib.mergeAttrsList
-          |> lib.filterAttrs (_: vh: vh.public)
-          |> lib.mapAttrs' (_: vh: lib.nameValuePair vh.baseUrl "https://${vh.baseUrl}");
-      in
-      lib.mkIf ((builtins.attrValues publicHosts |> builtins.length) > 0) {
-        ingress = publicHosts;
-      };
-
-    security.acme.certs = lib.mkIf isNixio (
-      lib.pipe config.services.caddy.virtualHosts [
-        builtins.attrNames
-        (builtins.filter (name: lib.strings.hasSuffix ".${cfg.domain}" name))
-        (map (name: lib.nameValuePair name { }))
-        builtins.listToAttrs
-      ]
-    );
-
-    networking.firewall =
-      let
-        allCombinations =
-          cfg.virtualHosts
-          |> builtins.attrValues
-          |> builtins.map (vh: vh.ports)
-          |> lib.flatten
-          |> builtins.map (
-            port:
-            builtins.map (
-              subnet:
-              subnet
-              // {
-                inherit port;
-              }
-            ) config.server.network.subnets
-          )
-          |> lib.flatten;
-
-        allPorts = allCombinations |> builtins.map (v: v.port) |> lib.unique;
-      in
-      {
-        allowedTCPPorts = lib.mkIf isNixio allPorts;
-        allowedUDPPorts = lib.mkIf isNixio allPorts;
-
-        extraCommands = lib.mkIf (!isNixio) (
-          allCombinations
-          |> builtins.map (
-            v:
-            ''
-              iptables -A nixos-fw -p tcp --source ${v.ipv4.cidr} --dport ${toString v.port} -j nixos-fw-accept
-              iptables -A nixos-fw -p udp --source ${v.ipv4.cidr} --dport ${toString v.port} -j nixos-fw-accept
-            ''
-            + (lib.optionalString (v.ipv6.cidr != null) ''
-              ip6tables -A nixos-fw -p tcp --source ${v.ipv6.cidr} --dport ${toString v.port} -j nixos-fw-accept
-              ip6tables -A nixos-fw -p udp --source ${v.ipv6.cidr} --dport ${toString v.port} -j nixos-fw-accept
-            '')
-          )
-          |> builtins.concatStringsSep "\n"
-        );
-
-        extraStopCommands = lib.mkIf (!isNixio) (
-          allCombinations
-          |> builtins.map (
-            v:
-            ''
-              iptables -D nixos-fw -p tcp --source ${v.ipv4.cidr} --dport ${toString v.port} -j nixos-fw-accept || true
-              iptables -D nixos-fw -p udp --source ${v.ipv4.cidr} --dport ${toString v.port} -j nixos-fw-accept || true
-            ''
-            + (lib.optionalString (v.ipv6.cidr != null) ''
-              ip6tables -D nixos-fw -p tcp --source ${v.ipv6.cidr} --dport ${toString v.port} -j nixos-fw-accept || true
-              ip6tables -D nixos-fw -p udp --source ${v.ipv6.cidr} --dport ${toString v.port} -j nixos-fw-accept || true
-            '')
-          )
-          |> builtins.concatStringsSep "\n"
+        virtualHosts = collectAllAttrsFunc "server.proxy.virtualHosts" (
+          virtualHosts: cfg:
+          mapAttrs' (
+            _: vh:
+            lib.nameValuePair vh.baseUrl {
+              hostName = vh.baseUrl;
+              useACMEHost = vh.baseUrl;
+              extraConfig = ''
+                import default
+                ${optionalString vh.public "import public"}
+                ${optionalString (vh.extraConfig != null) (replaceLocalHost cfg.host.name vh.extraConfig)}
+              '';
+            }
+          ) virtualHosts
         );
       };
-  };
+
+      services.cloudflared.tunnels."8d42e9b2-3814-45ea-bbb5-9056c8f017e2" =
+        let
+          publicHosts = collectAllAttrsFunc "server.proxy.virtualHosts" (
+            vh: _:
+            builtins.attrValues vh
+            |> builtins.filter (vh: vh.public)
+            |> builtins.map (vh: nameValuePair vh.baseUrl "https://${vh.baseUrl}")
+            |> builtins.listToAttrs
+          );
+        in
+        mkIf ((builtins.attrValues publicHosts |> builtins.length) > 0) {
+          ingress = publicHosts;
+        };
+
+      security.acme.certs =
+        builtins.attrNames config.services.caddy.virtualHosts
+        |> builtins.filter (name: hasSuffix ".${cfg.domain}" name)
+        |> map (name: lib.nameValuePair name { })
+        |> builtins.listToAttrs;
+
+      networking.firewall = rec {
+        allowedTCPPorts = collectAllAttrsFunc "server.proxy.virtualHosts" (
+          virtualHosts: _:
+          builtins.attrValues virtualHosts
+          |> builtins.filter (vh: vh.l4 != null)
+          |> map (vh: vh.l4.listenPort)
+        );
+        allowedUDPPorts = allowedTCPPorts;
+      };
+    })
+  ];
 }

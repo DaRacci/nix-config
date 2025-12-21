@@ -9,23 +9,20 @@
 
   server = {
     database.postgres = {
-      homebox = {
-        password = {
-          owner = config.users.users.homebox.name;
-          inherit (config.users.users.homebox) group;
-        };
+      homebox.password = {
+        owner = config.users.users.homebox.name;
+        inherit (config.users.users.homebox) group;
       };
     };
 
-    proxy.virtualHosts = {
-      homebox.extraConfig =
-        let
-          cfg = config.services.homebox.settings;
-        in
-        ''
-          reverse_proxy http://${cfg.HBOX_WEB_HOST}:${toString cfg.HBOX_WEB_PORT}
-        '';
-    };
+    proxy.virtualHosts.homebox.extraConfig =
+      let
+        cfg = config.services.homebox.settings;
+      in
+      ''
+        reverse_proxy http://${cfg.HBOX_WEB_HOST}:${toString cfg.HBOX_WEB_PORT}
+      '';
+
   };
 
   services = {

@@ -1,7 +1,7 @@
 #!/usr/bin/env -S nix shell nixpkgs#nushell --command nu
 
 use std/log
-use ../dev/scripts/lib/flake.nu
+use ../dev/scripts/lib/flake.nu *
 
 # Detect which outputs are affected based on changed files in the git repo.
 def main [
@@ -59,29 +59,6 @@ def init_cache [
   return $cache_key
 }
 
-def get_flake_info [] {
-  let archive_info = try {
-    nix flake archive --json | from json
-  } catch { |err|
-    log error $"Failed to get flake archive info: ($err)"
-    exit 1
-  }
-
-  let source_path = $archive_info.path
-  if ($source_path | is-empty) or ($source_path == "null") {
-    log error "Failed to resolve flake source path."
-    exit 1
-  }
-
-  let hash = $source_path | path basename | str substring 0..11
-  if ($hash | is-empty) {
-    log error "Failed to extract flake hash."
-    exit 1
-  }
-
-  { source_path: $source_path, hash: $hash }
-}
-
 def collect_files [
   files: list<string>
   range?: string
@@ -115,26 +92,6 @@ def get_outputs [
     log error $"Failed to get graphs: ($err)"
     exit 1
   }
-}
-
-# Recursively extract all objects with file fields from nested graph structure
-def flatten_graph_recursively [] {
-  def extract_objects [input] {
-    let type = ($input | describe)
-    if ($type | str starts-with "list") or ($type | str starts-with "table") {
-      $input | each { |item| extract_objects $item } | flatten
-    } else if ($type | str starts-with "record") {
-      let result = if ($input | get -o file | default null) != null { [$input] } else { [] }
-      let imports_result = if ($input | get -o imports | default null) != null {
-        extract_objects ($input.imports)
-      } else { [] }
-      $result ++ $imports_result
-    } else {
-      []
-    }
-  }
-
-  extract_objects $in
 }
 
 def get_dirty_files_from_git [] {
@@ -193,38 +150,7 @@ def compute_graphs [
     }
 
     log info $"  Computing graph for ($output)..."
-    let files: list<string> = collect_files_from_graph $type $output $".#($type).($output).graph" $flake_source
-    $files | to json | save $cache_file
-    $output_files = ($output_files | insert $output $files)
-    log info $"    Computed and cached ($files | length) files"
-  }
-
-  $output_files
-}
-
-def collect_files_from_graph [
-  type: string
-  identifier: string
-  eval_str: string
-  flake_source: string
-] {
-  let raw_files = try {
-    # Write graph to temp file to avoid nix eval piping issues in nushell
-    let graph_file = $"/tmp/graph-($identifier).json"
-    try {
-      run-external "nix" "eval" "--json" $eval_str o> $graph_file
-    } catch { |err|
-      log error $"Failed to evaluate graph for ($identifier): ($err)"
-      exit 1
-    }
-
-    mut files = open $graph_file
-      | flatten_graph_recursively
-      | where ($it | get -o file | default "" | str starts-with $"($flake_source)/")
-      | get file
-      | each { |file| $file | str replace $"($flake_source)/" "" }
-
-    $files = $files | append (match $type {
+    let files = get_output_graph_files $"($type).($output)" $flake_source | append (match $type {
       "nixosConfigurations" => [
         "flake.lock"
         "flake/nixos/flake.lock"
@@ -238,27 +164,12 @@ def collect_files_from_graph [
         []
       }
     })
-
-    rm $graph_file
-    $files | sort | uniq
-  } catch { |err|
-    log error $"Failed to get graph for ($identifier): ($err)"
-    exit 1
+    $files | to json | save $cache_file
+    $output_files = ($output_files | insert $output $files)
+    log info $"    Computed and cached ($files | length) files"
   }
 
-  # Handle directory imports with default.nix
-  let flattened_files = $raw_files | each { |file_path|
-    if ($file_path | path type) != "dir" {
-      $file_path
-    } else {
-      let default_nix_path = $"($file_path | path)/default.nix"
-      if ($default_nix_path | path exists) {
-        ($file_path | append $default_nix_path)
-      }
-    }
-  } | sort | uniq
-
-  $flattened_files
+  $output_files
 }
 
 def check_affected_outputs [

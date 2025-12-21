@@ -3,6 +3,7 @@
   server.proxy.virtualHosts = {
     hassio = {
       public = true;
+      ports = [ 8123 ];
       extraConfig =
         let
           inherit (config.services.home-assistant.config) http;
@@ -10,15 +11,13 @@
         ''
           import cors https://ai.racci.dev # Required for MCP integration
 
-          reverse_proxy http://${http.server_host}:${toString http.server_port}
+          reverse_proxy http://localhost:${toString http.server_port}
         '';
     };
   };
 
   services.home-assistant = {
-    openFirewall = true;
     config.http = {
-      server_host = "0.0.0.0";
       server_port = 8123;
       use_x_forwarded_for = true;
       trusted_proxies = [
