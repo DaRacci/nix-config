@@ -20,6 +20,7 @@
 
   server = {
     database.postgres.open_webui = { };
+    database.dependentServices = [ "open-webui" ];
     dashboard.items.ai = {
       title = "Open WebUI";
       icon = "sh-open-webui";

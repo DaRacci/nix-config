@@ -2,150 +2,188 @@
   self,
   config,
   lib,
-  pkgs,
   ...
 }:
 let
-  inherit (lib) mkOption mkIf;
-  inherit (lib.types)
-    submodule
+  inherit (lib)
+    types
+    splitString
+    attrByPath
+    isAttrs
+    filterEmpty
+    joinItems
+    ;
+  inherit (types)
     str
-    listOf
-    nullOr
     ;
 
-  isNixio = config.host.name == "nixio";
-  nixioConfig = self.nixosConfigurations.nixio.config;
-  getNixioConfig =
-    attrPath:
+  #region Helper functions for working with the server cluster
+  isIOPrimaryHost =
+    value:
     let
-      configuration = if isNixio then config else nixioConfig;
-      attrs = lib.splitString "." attrPath;
+      cmp = if isAttrs value then value.host.name else value;
     in
-    lib.lists.foldl' (acc: attr: acc.${attr}) configuration attrs;
+    config.server.ioPrimaryHost == cmp;
+
+  isThisIOPrimaryHost = isIOPrimaryHost config;
+
+  primaryIOHostConfig =
+    if isThisIOPrimaryHost then
+      config
+    else
+      self.nixosConfigurations.${config.server.ioPrimaryHost}.config;
+
+  getIOPrimaryHostAttr = attrPath: attrByPath (splitString "." attrPath) null primaryIOHostConfig;
+
+  serverConfigurations =
+    builtins.attrValues self.nixosConfigurations
+    |> builtins.map (host: host.config)
+    |> builtins.filter (cfg: cfg.host.device.role == "server");
+
+  /*
+    Get attributes from all server configurations.
+    All empty values (null, empty lists, empty attrsets) are filtered out.
+  */
+  getAllAttrs =
+    attrPath:
+    serverConfigurations
+    |> builtins.map (cfg: attrByPath (splitString "." attrPath) null cfg)
+    |> filterEmpty;
+
+  /*
+    Same as `getAllAttrs` but with a function that is applied to each value before returning.
+
+    This function takes two arguments: the attribute value and the server configuration it was taken from.
+    If the function returns null, an empty list or an empty attrset, the value will be filtered out.
+  */
+  getAllAttrsFunc =
+    attrPath: func:
+    serverConfigurations
+    |> builtins.map (cfg: func (attrByPath (splitString "." attrPath) null cfg) cfg)
+    |> filterEmpty;
+
+  /*
+    Get attributes from all servers except the current one.
+    See `getAllAttrs` for details.
+  */
+  getOtherAttrs =
+    attrPath:
+    serverConfigurations
+    |> builtins.filter (cfg: cfg.host.name != config.host.name)
+    |> builtins.map (cfg: attrByPath (splitString "." attrPath) null cfg)
+    |> filterEmpty;
+
+  /*
+    Same as `getOtherAttrs` but with a function that is applied to each value before returning.
+    See `getAllAttrsFunc` for details.
+  */
+  getOtherAttrsFunc =
+    attrPath: func:
+    serverConfigurations
+    |> builtins.filter (cfg: cfg.host.name != config.host.name)
+    |> builtins.map (cfg: func (attrByPath (splitString "." attrPath) null cfg) cfg)
+    |> filterEmpty;
+
+  /*
+    Collect attributes from all server configurations.
+    All empty values (null, empty lists, empty attrsets) are filtered out.
+
+    If the result is an attribute set it will be merged into a single attribute set,
+    however if there are conflicting keys in the attribute sets an error will be thrown.
+  */
+  collectAllAttrs = attrPath: getAllAttrs attrPath |> joinItems;
+
+  /*
+    Same as `collectAllAttrs` but with a function that is applied to each value before collecting.
+
+    This function takes two arguments: the attribute value and the server configuration it was taken from.
+    If the function returns null, an empty list or an empty attrset, the value is filtered out.
+  */
+  collectAllAttrsFunc = attrPath: func: getAllAttrsFunc attrPath func |> joinItems;
+
+  /*
+    Collect attributes from all servers except the current one.
+    See `collectAllAttrs` for details.
+  */
+  collectOtherAttrs = attrPath: getOtherAttrs attrPath |> joinItems;
+
+  /*
+    Same as `collectOtherAttrs` but with a function that is applied to each value before collecting.
+    See `collectAllAttrsFunc` for details.
+  */
+  collectOtherAttrsFunc = attrPath: func: getOtherAttrsFunc attrPath func |> joinItems;
+
+  # Returns a list of server hostnames where the function returns true.
+  getOthersWhere =
+    func:
+    serverConfigurations
+    |> builtins.filter (cfg: !(isIOPrimaryHost cfg))
+    |> builtins.filter func
+    |> builtins.map (cfg: cfg.host.name);
+  #endregion
 
   importModule =
     path: inherits:
     import path (
       {
         inherit
-          isNixio
-          nixioConfig
-          getNixioConfig
+          isIOPrimaryHost
+          isThisIOPrimaryHost
+          primaryIOHostConfig
+          getIOPrimaryHostAttr
+
+          getAllAttrs
+          getAllAttrsFunc
+          getOtherAttrs
+          getOtherAttrsFunc
+          collectAllAttrs
+          collectAllAttrsFunc
+          collectOtherAttrs
+          collectOtherAttrsFunc
+          getOthersWhere
+
+          serverConfigurations
+
           importModule
           ;
       }
       // inherits
     );
-
-  ipOptions = submodule {
-    options = {
-      cidr = mkOption {
-        default = null;
-        type = nullOr str;
-        description = "CIDR notation for the IP range.";
-      };
-
-      arpa = mkOption {
-        default = null;
-        type = nullOr str;
-        description = "ARPA notation for reverse DNS lookups.";
-      };
-    };
-  };
 in
 {
   imports = [
     (importModule ./database { })
     (importModule ./dashboard.nix { })
+    (importModule ./network.nix { })
     (importModule ./proxy.nix { })
 
     ./ssh
   ];
 
-  options = {
-    server.network = {
-      subnets = mkOption {
-        default = { };
-        type = listOf (submodule {
-          options = {
-            dns = mkOption {
-              type = str;
-              description = "DNS server for the subnet.";
-            };
+  options.server = {
+    ioPrimaryHost = lib.mkOption {
+      type = str;
+      readOnly = true;
+      default = "nixio"; # TODO Make this configurable from the flake level.
+      description = ''
+        Which host is the primary coordinator for IO in the cluster.
 
-            domain = mkOption {
-              type = str;
-              description = "Domain name for the subnet.";
-            };
-
-            ipv4 = mkOption {
-              default = { };
-              type = ipOptions;
-              description = "IPv4 configuration for the subnet.";
-            };
-
-            ipv6 = mkOption {
-              default = { };
-              type = ipOptions;
-              description = "IPv6 configuration for the subnet.";
-            };
-          };
-        });
-      };
+        This host will run the primary instances of databases,
+        Operate the reverse proxy for handling incoming traffic,
+        and will run the MinIO distributed storage cluster's master node.
+      '';
     };
   };
 
-  config = lib.mkMerge [
-    (mkIf (!isNixio) {
-      server.network.subnets = self.nixosConfigurations.nixio.config.server.network.subnets;
-    })
-    {
-      services.journald = {
-        storage = "persistent";
-        extraConfig = ''
-          SystemMaxUse=256M
-          SystemMaxFileSize=64M
-          SystemKeepFree=512M
-          MaxRetentionSec=14day
-        '';
-      };
-    }
-    (mkIf (!isNixio) {
-      systemd.services.wait-for-nixio = {
-        description = "Wait for nixio host to become reachable";
-        after = [ "dhcpd.service" ];
-        wants = [
-          "network.target"
-          "dhcpd.service"
-        ];
-        before = [ "network-online.target" ];
-        wantedBy = [ "network-online.target" ];
-        serviceConfig = {
-          Type = "oneshot";
-          ExecStart = lib.getExe (
-            pkgs.writeShellApplication {
-              name = "wait-for-nixio";
-              runtimeInputs = [
-                pkgs.iputils
-                pkgs.toybox
-                pkgs.getent
-              ];
-              text = ''
-                #shellcheck disable=SC2034
-                for i in {1..150}; do
-                  if getent hosts nixio >/dev/null 2>&1 && ping -c1 -W1 nixio >/dev/null 2>&1; then
-                    exit 0;
-                  fi;
-                  sleep 2;
-                done;
-                echo "WARNING: nixio not reachable after timeout, continuing boot without nixio" >&2;
-                exit 0
-              '';
-            }
-          );
-        };
-      };
-    })
-  ];
+  config = {
+    services.journald = {
+      storage = "persistent";
+      extraConfig = ''
+        SystemMaxUse=256M
+        SystemMaxFileSize=64M
+        SystemKeepFree=512M
+        MaxRetentionSec=14day
+      '';
+    };
+  };
 }

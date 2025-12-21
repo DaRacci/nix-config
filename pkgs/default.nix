@@ -31,6 +31,9 @@
   new-host = pkgs.callPackage ./helpers/new-host.nix { };
   list-ephemeral = pkgs.callPackage ./list-ephemeral { };
 
+  # NixIO Guardian
+  inherit (pkgs.callPackage ./io-guardian { }) io-guardian-server io-guardian-client;
+
   # Wine Apps
   take-control-viewer = pkgs.callPackage ./take-control-viewer {
     inherit (inputs.erosanix.lib.x86_64-linux) mkWindowsAppNoCC;

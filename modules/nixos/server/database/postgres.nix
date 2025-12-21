@@ -1,10 +1,11 @@
 {
-  isNixio,
-  getNixioConfig,
-  gatherAllInstances,
-  gatherOtherInstances,
-  serverConfigurations,
+  isThisIOPrimaryHost,
+  getIOPrimaryHostAttr,
 
+  getOtherAttrs,
+  collectAllAttrs,
+  collectOtherAttrs,
+  collectOtherAttrsFunc,
   ...
 }:
 {
@@ -15,33 +16,35 @@
 }:
 let
   inherit (lib)
-    types
-    mkOption
+    filterAttrs
+    isString
+    listToAttrs
+    mkAfter
     mkIf
     mkMerge
+    mkOption
+    nameValuePair
+    toUpper
+    types
+    unique
     ;
   inherit (types)
-    str
-    int
     attrsOf
-    submodule
+    int
     nullOr
+    path
+    str
+    submodule
     ;
+
   cfg = config.server.database.postgres;
 
-  postgresPort = getNixioConfig "services.postgresql.settings.port";
-  allDatabaseNames = lib.pipe serverConfigurations [
-    (builtins.map (cfg: builtins.attrNames cfg.server.database.postgres))
-    builtins.concatLists
-  ];
+  postgresPort = getIOPrimaryHostAttr "services.postgresql.settings.port";
+  allDatabaseNames = collectAllAttrs "server.database.postgres" |> builtins.attrNames;
 
   hasPostgresDatabases = builtins.length (builtins.attrNames cfg) > 0;
   anyConfiguredPostgresAnywhere =
-    builtins.length (
-      gatherAllInstances "server.database.postgres"
-      |> builtins.map builtins.attrNames
-      |> builtins.concatLists
-    ) > 0;
+    (collectAllAttrs "server.database.postgres" |> builtins.attrNames |> builtins.length) > 0;
 in
 {
   options.server.database.postgres = mkOption {
@@ -80,11 +83,10 @@ in
               type = submodule {
                 options = {
                   path = mkOption {
-                    type = types.path;
+                    type = path;
                     default =
                       config.sops.secrets."POSTGRES/${
-                        lib.toUpper config.server.database.postgres.${name}.database
-                        |> builtins.replaceStrings [ "-" ] [ "_" ]
+                        toUpper config.server.database.postgres.${name}.database |> builtins.replaceStrings [ "-" ] [ "_" ]
                       }_PASSWORD".path;
                     readOnly = true;
                   };
@@ -108,98 +110,93 @@ in
   };
 
   config = mkMerge [
-    (mkIf (isNixio && anyConfiguredPostgresAnywhere) {
+    (mkIf (isThisIOPrimaryHost && anyConfiguredPostgresAnywhere) {
       assertions = [
         (
           let
             duplicateDatabaseNames =
               allDatabaseNames
               |> builtins.groupBy (v: v)
-              |> lib.filterAttrs (_: names: (builtins.length names) > 1)
+              |> filterAttrs (_: names: (builtins.length names) > 1)
               |> builtins.attrNames;
           in
           {
             assertion = builtins.length duplicateDatabaseNames == 0;
-            message = "Duplicate database names found: ${builtins.toString duplicateDatabaseNames}";
+            message = "Duplicate database names found: ${toString duplicateDatabaseNames}";
           }
         )
       ];
 
       services.postgresql = rec {
-        ensureDatabases =
-          serverConfigurations
-          |> builtins.map (cfg: builtins.attrNames cfg.server.database.postgres)
-          |> lib.flatten;
+        ensureDatabases = allDatabaseNames;
 
-        ensureUsers = builtins.map (database: {
+        ensureUsers = map (database: {
           name = database;
           ensureDBOwnership = true;
         }) ensureDatabases;
 
         # Some modules configure initialScripts for postgres so we should ensure they are executed
         initialScript =
-          gatherOtherInstances "services.postgresql.initialScript"
-          |> builtins.map (path: builtins.readFile path)
+          getOtherAttrs "services.postgresql.initialScript"
+          |> map (path: builtins.readFile path)
           |> builtins.concatStringsSep "\n"
           |> pkgs.writeText "init-postgresql-script";
 
         settings = {
           shared_preload_libraries =
-            gatherOtherInstances "services.postgresql.settings.shared_preload_libraries"
-            |> builtins.map (preload: if lib.isString preload then [ preload ] else preload)
-            |> builtins.concatLists
-            |> lib.unique;
+            collectOtherAttrsFunc "services.postgresql.settings.shared_preload_libraries" (
+              preload: _: if isString preload then [ preload ] else preload
+            )
+            |> unique;
         };
 
         extensions =
           ps:
-          serverConfigurations
-          |> builtins.filter (cfg: cfg.host.name != "nixio")
-          |> builtins.map (cfg: cfg.services.postgresql.extensions ps)
+          getOtherAttrs "services.postgresql.extensions"
+          |> map (ext: ext ps)
           |> builtins.concatLists
-          |> lib.unique;
+          |> unique;
       };
 
       systemd.services.postgresql-setup = {
-        postStart = lib.mkAfter (
-          builtins.concatStringsSep "\n" (
-            (gatherOtherInstances "systemd.services.postgresql-setup.postStart")
-            ++ (lib.pipe serverConfigurations [
-              (builtins.map (cfg: builtins.attrValues cfg.server.database.postgres))
-              builtins.concatLists
-              (builtins.map (database: lib.mine.mkPostgresRolePass database.user database.password.path))
-            ])
-          )
+        postStart = mkAfter (
+          [
+            (getOtherAttrs "systemd.services.postgresql-setup.postStart")
+            (
+              collectAllAttrs "server.database.postgres"
+              |> builtins.attrValues
+              |> builtins.map (database: lib.mine.mkPostgresRolePass database.user database.password.path)
+            )
+          ]
+          |> builtins.concatLists
+          |> builtins.concatStringsSep "\n"
         );
 
-        serviceConfig.ExecStartPost =
-          gatherOtherInstances "systemd.services.postgresql-setup.serviceConfig.ExecStartPost"
-          |> builtins.concatLists;
+        serviceConfig.ExecStartPost = collectOtherAttrs "systemd.services.postgresql-setup.serviceConfig.ExecStartPost";
       };
     })
 
-    (mkIf (isNixio || hasPostgresDatabases) {
+    (mkIf (isThisIOPrimaryHost || hasPostgresDatabases) {
       sops.secrets =
         builtins.attrValues cfg
         |> map (
           db:
-          lib.nameValuePair
-            "POSTGRES/${lib.toUpper db.database |> builtins.replaceStrings [ "-" ] [ "_" ]}_PASSWORD"
+          nameValuePair "POSTGRES/${toUpper db.database |> builtins.replaceStrings [ "-" ] [ "_" ]}_PASSWORD"
             {
-              owner = lib.mkIf (db.password.owner != null) db.password.owner;
-              group = lib.mkIf (db.password.group != null) db.password.group;
+              owner = mkIf (db.password.owner != null) db.password.owner;
+              group = mkIf (db.password.group != null) db.password.group;
             }
         )
-        |> lib.listToAttrs;
+        |> listToAttrs;
     })
 
-    (mkIf (!isNixio && hasPostgresDatabases) {
+    (mkIf (!isThisIOPrimaryHost && hasPostgresDatabases) {
       assertions = [
         {
           assertion = !config.services.postgresql.enable;
           message = ''
-            PostgreSQL is enabled & has databases configured, but you have configured databases for management with NixIO.
-            If this is on purpose and you want NixIO to manage these, set `services.postgresl.enable` to `false`.
+            PostgreSQL is enabled & has databases configured, but you have configured databases for management with IO Hosts.
+            If this is on purpose and you want IO Hosts to manage these, set `services.postgresl.enable` to `false`.
 
             Configured databases: ${builtins.toString config.services.postgresql.ensureDatabases}
           '';

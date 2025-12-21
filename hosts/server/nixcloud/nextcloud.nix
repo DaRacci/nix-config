@@ -30,20 +30,20 @@ in
     database.postgres.nextcloud = {
       password = ncOwned;
     };
+    database.dependentServices = [ "phpfpm-nextcloud" ];
 
     dashboard.items.nc = {
       title = "Nextcloud";
       icon = "sh-nextcloud";
     };
 
-    proxy.virtualHosts = {
-      nc = {
-        public = true;
-        extraConfig = ''
-          reverse_proxy http://localhost:80
-        '';
-      };
+    proxy.virtualHosts.nc = {
+      public = true;
+      extraConfig = ''
+        reverse_proxy http://localhost:80
+      '';
     };
+
   };
 
   services = rec {
