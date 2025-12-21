@@ -625,11 +625,10 @@
 
     proxy.virtualHosts.search = {
       public = true;
+      ports = [ config.services.searx.settings.server.port ];
       extraConfig = ''
         reverse_proxy http://${config.services.searx.settings.server.bind_address}:${toString config.services.searx.settings.server.port}
       '';
     };
   };
-
-  networking.firewall.allowedTCPPorts = [ config.services.searx.settings.server.port ];
 }

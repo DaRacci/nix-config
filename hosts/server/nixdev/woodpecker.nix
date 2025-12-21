@@ -78,7 +78,7 @@
     environment = {
       WOODPECKER_SERVER = "localhost:9000";
       WOODPECKER_BACKEND = "docker";
-      WOODPECKER_MAX_WORKFLOWS = "4";
+      WOODPECKER_MAX_WORKFLOWS = "8";
     };
   };
 }
