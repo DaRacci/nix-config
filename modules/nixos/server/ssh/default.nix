@@ -38,7 +38,12 @@ in
          && [ -z "''${SSH_NIX_SHELL:-}" ]; then
         export SSH_NIX_SHELL=1
 
-        exec nix-shell "${cfg.shellFile}"
+        if nix-shell "${cfg.shellFile}"; then
+          exit $?
+        else
+          echo "SSH devShell failed to start; continuing with default shell." >&2
+          unset SSH_NIX_SHELL
+        fi
       fi
     '';
   };

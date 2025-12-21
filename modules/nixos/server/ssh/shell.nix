@@ -34,7 +34,7 @@ pkgs.mkShellNoCC {
 
     # Core tooling typically expected
     uutils-coreutils-noprefix
-    uutils-findutils-noprefix
+    uutils-findutils
     gawk
     less
     openssh
