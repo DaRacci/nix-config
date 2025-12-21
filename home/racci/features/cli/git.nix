@@ -1,6 +1,14 @@
-{ pkgs, ... }:
 {
-  programs = {
+  pkgs,
+  ...
+}:
+{
+  home.packages = [
+    pkgs.meld
+    pkgs.watchman
+  ];
+
+  programs = rec {
     git = {
       enable = true;
       package = pkgs.gitFull;
@@ -48,9 +56,24 @@
       };
     };
 
+    jujutsu = {
+      enable = true;
+      settings = {
+        inherit (git.settings) user;
+
+        ui = {
+          show-cryptographic-signatures = true;
+          diff-editor = "meld-3";
+        };
+      };
+    };
+
+    jjui.enable = true;
+
     delta = {
       enable = true;
       enableGitIntegration = true;
+      enableJujutsuIntegration = true;
       options = {
         features = "decorations";
         whitespace-error-style = "22 reverse";
