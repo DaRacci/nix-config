@@ -23,6 +23,7 @@
             act # Github Action testing
             hyperfine # Benchmarking
             cocogitto # Conventional Commits
+            dive
 
             # Nix tools
             dix

@@ -38,4 +38,8 @@
   take-control-viewer = pkgs.callPackage ./take-control-viewer {
     inherit (inputs.erosanix.lib.x86_64-linux) mkWindowsAppNoCC;
   };
+
+  lix-woodpecker = pkgs.callPackage ./lix-woodpecker {
+    inherit inputs;
+  };
 }
