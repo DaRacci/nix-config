@@ -1,4 +1,8 @@
-{ config, ... }:
+{
+  config,
+  lib,
+  ...
+}:
 {
   server.proxy.virtualHosts = {
     hassio = {
@@ -20,11 +24,14 @@
     config.http = {
       server_port = 8123;
       use_x_forwarded_for = true;
-      trusted_proxies = [
-        "192.168.1.0/24"
-        "192.168.2.0/24"
-        "100.64.0.0/10"
-      ];
+      trusted_proxies =
+        config.server.network.subnets
+        |> map (subnet: [
+          subnet.ipv4.cidr
+          subnet.ipv6.cidr
+        ])
+        |> lib.flatten
+        |> lib.filterEmpty;
     };
   };
 }
