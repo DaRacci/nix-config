@@ -80,7 +80,7 @@ in
         arpa = "2.168.192.in-addr.arpa";
       };
       ipv6 = {
-        cidr = "fc01::/48";
+        cidr = "fc01::/64";
         arpa = "0.0.0.0.0.0.1.0.c.f.ip6.arpa";
       };
     }
