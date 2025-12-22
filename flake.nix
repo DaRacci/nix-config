@@ -51,7 +51,7 @@
     # Unpin from rev once https://github.com/nlewo/nix2container/issues/186 is fixed
     nix2container.url = "github:nlewo/nix2container?rev=e5496ab66e9de9e3f67dc06f692dfbc471b6316e";
     lix = {
-      url = "git+https://git.lix.systems/lix-project/lix.git?ref=release-2.93";
+      url = "git+https://git.lix.systems/lix-project/lix.git?ref=release-2.94";
       flake = false; # Prevents adding too many additional inputs since the lix-module also does it this way.
     };
     lix-module = {
