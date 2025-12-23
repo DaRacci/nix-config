@@ -1,5 +1,5 @@
 {
-  basePath ? "/dashboard-next",
+  basePath ? "/lovelace",
 }:
 {
   type = "custom:navbar-card";
