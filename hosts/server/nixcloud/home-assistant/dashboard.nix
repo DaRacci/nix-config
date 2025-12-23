@@ -34,6 +34,7 @@
               event_type = "bubble_card_update_modules";
             }
           ];
+
           sensor = [
             {
               name = "Bubble Card Modules";
@@ -44,29 +45,24 @@
                 last_updated = "{{ trigger.event.data.last_updated }}";
               };
             }
-          ];
-        }
-      ];
 
-      sensor = [
-        {
-          platform = "template";
-          sensors = {
-            lights_on_count = {
-              unique_id = "lightsoncount";
-              friendly_name = "Lights on count";
-              value_template = ''
+            {
+              name = "Lights on count";
+              unique_id = "lights_on_count";
+              default_entity_id = "sensor.lights_on_count";
+              state = ''
                 {% set lights_on = states.light
                   | selectattr("state", "eq", "on")
                   | list
                   | count %}
                 {{ lights_on }}
               '';
-            };
-            window_open_count = {
-              unique_id = "windowopencount";
-              friendly_name = "Window open count";
-              value_template = ''
+            }
+
+            {
+              name = "Window open count";
+              unique_id = "window_open_count";
+              state = ''
                 {% set windows_on = states.binary_sensor
                   | selectattr("attributes.device_class", "eq", "window")
                   | selectattr("state", "eq", "on")
@@ -74,18 +70,19 @@
                   | count %}
                 {{ windows_on }}
               '';
-            };
-            media_player_active = {
+            }
+
+            {
+              name = "Media Player Active";
               unique_id = "media_player_active";
-              friendly_name = "Media Player Active";
-              value_template = ''
+              state = ''
                 {% set media_players_active = states.media_player
                   | selectattr("state", "in", ["playing", "paused"])
                   | list
                   | count %}
                 {{ media_players_active > 0 }}
               '';
-              icon_template = ''
+              icon = ''
                 {% if states.media_player
                   | selectattr("state", "in", ["playing", "paused"])
                   | list
@@ -95,11 +92,11 @@
                   mdi:cast-off
                 {% endif %}
               '';
-            };
-            battery_level_attention = {
+            }
+            {
+              name = "Battery Level Attention";
               unique_id = "battery_level_attention";
-              friendly_name = "Battery Level Attention";
-              value_template = ''
+              state = ''
                 {% set low_battery_devices = states.sensor
                   | selectattr("attributes.device_class", "eq", "battery")
                   | map(attribute="state")
@@ -109,7 +106,7 @@
                   | count %}
                 {{ low_battery_devices > 0 }}
               '';
-              icon_template = ''
+              icon = ''
                 {% if states.sensor
                   | selectattr("attributes.device_class", "eq", "battery")
                   | map(attribute="state")
@@ -122,11 +119,11 @@
                   mdi:battery
                 {% endif %}
               '';
-            };
-            battery_health_attention = rec {
+            }
+            rec {
+              name = "Battery Health Attention";
               unique_id = "battery_health_attention";
-              friendly_name = "Battery Health Attention";
-              value_template = ''
+              state = ''
                 {% set bad_health_devices = states.sensor
                   | selectattr("entity_id", "search", "battery_health")
                   | selectattr("entity_id", "ne", "sensor.${unique_id}")
@@ -135,7 +132,7 @@
                   | count %}
                 {{ bad_health_devices > 0 }}
               '';
-              icon_template = ''
+              icon = ''
                 {% if states.sensor
                   | selectattr("entity_id", "search", "battery_health")
                   | selectattr("entity_id", "ne", "sensor.${unique_id}")
@@ -147,8 +144,8 @@
                   mdi:battery
                 {% endif %}
               '';
-            };
-          };
+            }
+          ];
         }
       ];
 
