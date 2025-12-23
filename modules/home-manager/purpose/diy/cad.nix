@@ -1,5 +1,6 @@
 {
   config,
+  pkgs,
   lib,
   ...
 }:
@@ -20,7 +21,14 @@ in
     ];
 
     home.packages = [
+      pkgs.freecad
+      pkgs.meshlab
+      pkgs.kicad
+    ];
 
+    user.persistence.directories = [
+      ".config/FreeCAD"
+      ".local/share/FreeCAD"
     ];
   };
 }
