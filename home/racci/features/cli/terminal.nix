@@ -119,6 +119,9 @@ in
         session_serialization = true;
         pane_viewport_serialization = true;
         scrollback_lines_to_serialize = 1000;
+      };
+
+      layouts = {
 
       };
     };
