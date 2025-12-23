@@ -70,8 +70,8 @@
               icon = "󰈹";
             };
             shortcut2 = {
-              tooltip = "Spotify";
-              command = lib.getExe pkgs.spotify;
+              tooltip = "Music";
+              command = lib.getExe pkgs.feishin;
             };
           };
         };
