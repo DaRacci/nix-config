@@ -5,6 +5,10 @@
   ...
 }:
 {
+  custom.defaultGroups = [
+    "adbusers" # For Oculus Quest ADB access
+  ];
+
   hardware = {
     steam-hardware.enable = true;
     graphics = {
