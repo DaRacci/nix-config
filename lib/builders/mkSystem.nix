@@ -15,6 +15,7 @@ let
   inherit (builtins) pathExists attrValues filter;
   inherit (lib)
     mkDefault
+    mkBefore
     nixosSystem
     optional
     optionals
@@ -76,7 +77,7 @@ nixosSystem rec {
         users.users = genAttrs deviceUsers (username: {
           isNormalUser = mkDefault true;
           hashedPasswordFile = config.sops.secrets."USER_PASSWORD/${username}".path;
-          openssh.authorizedKeys.keyFiles = [ "${userDirectory username}/id_ed25519.pub" ];
+          openssh.authorizedKeys.keyFiles = mkBefore [ "${userDirectory username}/id_ed25519.pub" ];
         });
 
         home-manager = {

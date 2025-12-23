@@ -159,6 +159,7 @@ in
     (importModule ./proxy.nix { })
 
     ./ssh
+    ./distributed-builds.nix
   ];
 
   options.server = {
