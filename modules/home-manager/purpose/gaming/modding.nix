@@ -23,7 +23,7 @@ in
       (optional cfg.enableSatisfactory ficsit-cli)
       ++ (optional cfg.enableBeatSaber bs-manager)
       ++ (optionals cfg.enableThunderstore [
-        gale
+        # gale
         r2modman
       ])
       ++ (optional cfg.enableNexus (nexusmods-app.override { _7zz = _7zz-rar; }));

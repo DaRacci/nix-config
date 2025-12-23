@@ -52,11 +52,6 @@ in
       automatic = true;
       dates = "daily";
       persistent = true;
-
-      # Delete older generations too
-      # TODO :: Is there a way to keep the last 2 generations?
-      # maybe also clean generations not only if 14 days old but if unused for 14 days
-      options = "--delete-older-than 14d";
     };
 
     nixPath = lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
@@ -69,7 +64,15 @@ in
 
   services.angrr = lib.mkIf (config.host.device.role != "server") {
     enable = true;
-    period = "7days";
+    settings = {
+      system = {
+        profile-paths = [ "/nix/var/nix/profiles/system" ];
+        keep-since = "14d";
+        keep-latest-n = 3;
+        keep-booted-system = true;
+        keep-current-system = true;
+      };
+    };
   };
 
   systemd.services.attic-watch-store = {
