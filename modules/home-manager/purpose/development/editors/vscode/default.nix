@@ -91,6 +91,7 @@ in
                 "foxundermoon.shell-format"
 
                 # Integrations
+                "jjk.jjk"
                 "github.vscode-github-actions"
                 "github.vscode-pull-request-github"
               ];
