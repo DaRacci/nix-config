@@ -31,6 +31,7 @@ pkgs.mkShellNoCC {
     doggo
     helix
     btop
+    gping
 
     # Core tooling typically expected
     uutils-coreutils-noprefix
