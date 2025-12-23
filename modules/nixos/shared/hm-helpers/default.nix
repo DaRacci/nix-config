@@ -1,8 +1,11 @@
 {
   config,
+  lib,
   ...
 }:
 let
+  inherit (lib) mkEnableOption;
+
   hmUserAttrs = builtins.attrValues config.home-manager.users;
   hmUsers = builtins.filter (user: (builtins.hasAttr user config.home-manager.users)) (
     builtins.attrNames config.users.users
@@ -30,4 +33,10 @@ in
     (importWithExtras ./mpv.nix)
     (importWithExtras ./nautilus.nix)
   ];
+
+  options.custom.hm-helpers = {
+    enable = mkEnableOption "Enable Home Manager helper functions." // {
+      default = config ? home-manager;
+    };
+  };
 }
