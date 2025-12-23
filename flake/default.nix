@@ -1,7 +1,7 @@
 {
   inputs,
-  lib,
   config,
+  lib,
   ...
 }:
 {
@@ -10,6 +10,8 @@
 
     ./modules.nix
     ./packages.nix
+
+    ../modules/flake
   ];
 
   partitions = {

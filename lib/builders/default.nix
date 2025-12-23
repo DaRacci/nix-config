@@ -3,6 +3,8 @@
   lib,
 }:
 let
+  inherit (lib) listToAttrs nameValuePair;
+
   mkPkgs =
     {
       system ? "x86_64-linux",
@@ -37,7 +39,7 @@ let
   wrapper =
     builder: name:
     args@{
-      accelerators ? [ ],
+      allocations,
       system ? "x86_64-linux",
       ...
     }:
@@ -49,15 +51,17 @@ let
           lib
           ;
 
-        pkgs = mkPkgs { inherit system accelerators; };
+        pkgs = mkPkgs {
+          inherit system;
+          accelerators = allocations.accelerators.${name} or [ ];
+        };
       }
       // (removeAttrs args [
-        "accelerators"
         "system"
       ])
     );
 in
-{
+rec {
   inherit mkPkgs;
 
   readDirNoCommons =
@@ -73,4 +77,10 @@ in
   };
 
   mkSystem = name: args: wrapper ./mkSystem.nix name args;
+
+  getHostsByType =
+    self:
+    readDirNoCommons "${self}/hosts"
+    |> map (deviceType: nameValuePair deviceType (readDirNoCommons "${self}/hosts/${deviceType}"))
+    |> listToAttrs;
 }

@@ -1,0 +1,5 @@
+{
+  imports = [
+    ./allocations.nix
+  ];
+}
