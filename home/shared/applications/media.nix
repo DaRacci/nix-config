@@ -8,6 +8,7 @@
     # Audio
     spotify
     decibels
+    jellyfin-tui
 
     # Image
     gimp3 # Editor
@@ -231,5 +232,7 @@
 
   user.persistence.directories = [
     ".config/spotify"
+    ".config/jellyfin-tui"
+    ".local/share/jellyfin-tui"
   ];
 }

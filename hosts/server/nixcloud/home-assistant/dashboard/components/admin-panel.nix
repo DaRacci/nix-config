@@ -8,7 +8,7 @@
       icon = "mdi:account";
       tap_action = {
         action = "navigate";
-        navigation_path = "/dashboard-next/server";
+        navigation_path = "/lovelace/server";
       };
       badges = [
         {

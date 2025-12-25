@@ -1,0 +1,24 @@
+# Manual pipeline to build and publish the lix-woodpecker image to GHCR.
+# Required secrets:
+#   - GHCR_USERNAME: GitHub username or service account
+#   - GHCR_TOKEN:   Fine-grained PAT with `write:packages` scope
+#
+# Trigger this pipeline manually from the Woodpecker UI when you want to publish.
+
+when:
+  event:
+    - manual
+
+steps:
+  - name: Publish image
+    image: ghcr.io/lix-project/lix
+    environment:
+      NIX_CONFIG: extra-experimental-features = nix-command flakes pipe-operator
+      GHCR_USERNAME:
+        from_secret: GHCR_USERNAME
+      GHCR_TOKEN:
+        from_secret: GHCR_TOKEN
+    commands:
+      - set -euxo pipefail
+      - nix run ".#lix-woodpecker.copyToRegistry" -- --dest-creds "${GHCR_USERNAME}:${GHCR_TOKEN}"
+      - printf "Published %s\n" "ghcr.io/daracci/lix-woodpecker:latest"
