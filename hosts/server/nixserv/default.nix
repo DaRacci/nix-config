@@ -1,8 +1,6 @@
 {
-  self,
   config,
   pkgs,
-  lib,
   ...
 }:
 let
@@ -44,25 +42,13 @@ in
   };
 
   environment.systemPackages = with pkgs; [ attic-client ];
-  nix.settings.trusted-users = [ "builder" ];
 
   users = {
-    users = {
-      builder = {
-        isNormalUser = true;
-        extraGroups = [ "trusted" ];
-        home = "/var/lib/builder";
-        openssh.authorizedKeys.keyFiles = builtins.map (
-          system: builtins.elemAt system.config.users.users.root.openssh.authorizedKeys.keyFiles 0
-        ) (lib.attrValues self.nixosConfigurations);
-      };
-
-      atticd = {
-        uid = 949;
-        group = "atticd";
-        home = "/var/lib/atticd";
-        useDefaultShell = true;
-      };
+    users.atticd = {
+      uid = 949;
+      group = "atticd";
+      home = "/var/lib/atticd";
+      useDefaultShell = true;
     };
 
     groups.atticd = {

@@ -25,17 +25,22 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    services.openssh.settings = {
+      AcceptEnv = [ "NIX_SKIP_SHELL" ];
+    };
+
     environment.etc."bashrc".text = ''
-      # Root SSH devShell autostart (session-only)
       # Conditions:
       # - EUID == 0 (root)
       # - SSH_CONNECTION is set (SSH session)
       # - stdin is a tty (interactive)
       # - Not already inside the devShell (guard by SSH_NIX_SHELL)
+      # - NIX_SKIP_SHELL is not set (allows opt-out)
       if [ "''${EUID:-}" = "0" ] \
          && [ -n "''${SSH_CONNECTION:-}" ] \
          && [ -t 0 ] \
-         && [ -z "''${SSH_NIX_SHELL:-}" ]; then
+         && [ -z "''${SSH_NIX_SHELL:-}" ]
+         && [ -z "''${NIX_SKIP_SHELL:-}" ]; then
         export SSH_NIX_SHELL=1
 
         if nix-shell "${cfg.shellFile}"; then

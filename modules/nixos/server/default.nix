@@ -159,13 +159,12 @@ in
     (importModule ./proxy.nix { })
 
     ./ssh
+    ./distributed-builds.nix
   ];
 
   options.server = {
     ioPrimaryHost = lib.mkOption {
       type = str;
-      readOnly = true;
-      default = "nixio"; # TODO Make this configurable from the flake level.
       description = ''
         Which host is the primary coordinator for IO in the cluster.
 

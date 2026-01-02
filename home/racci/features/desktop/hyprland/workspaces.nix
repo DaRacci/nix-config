@@ -57,7 +57,7 @@ let
     "9" = {
       name = "Miscellaneous";
       monitor = monitors.left;
-      startup = [ (lib.getExe pkgs.spotify) ];
+      startup = [ (lib.getExe pkgs.feishin) ];
     };
     "10" = {
       name = "Miscellaneous";

@@ -36,6 +36,12 @@ in
 
   config = mkIf cfg.enable (mkMerge [
     (mkIf cfg.audio.enable {
+      custom.defaultGroups = [
+        "audio"
+        "pipewire"
+        "rtkit"
+      ];
+
       security.rtkit.enable = mkForce true;
 
       services = {
@@ -100,8 +106,18 @@ in
 
       host.persistence.directories = [ "/var/lib/bluetooth" ];
     })
-    (mkIf cfg.network.enable { networking.networkmanager.enable = true; })
+
+    (mkIf cfg.network.enable {
+      custom.defaultGroups = [ "network" ];
+      networking.networkmanager.enable = true;
+    })
+
     (mkIf (!config.host.device.isHeadless) {
+      custom.defaultGroups = [
+        "video"
+        "i2c"
+      ];
+
       services = {
         dleyna.enable = true;
 

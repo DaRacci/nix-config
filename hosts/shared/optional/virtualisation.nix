@@ -22,6 +22,11 @@ in
     crtified.modules.virtualisation.nix
   ];
 
+  custom.defaultGroups = [
+    "kvm"
+    "libvirtd"
+  ];
+
   boot = {
     extraModulePackages = [ config.boot.kernelPackages.kvmfr ];
     extraModprobeConfig = ''
