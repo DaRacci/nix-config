@@ -161,14 +161,14 @@ with lib;
       };
 
       plugins = {
-        hy3 = {
-          no_gaps_when_only = 1;
-          tab_first_window = false;
+        # hy3 = {
+        #   no_gaps_when_only = 1;
+        #   tab_first_window = false;
 
-          autotile = {
-            enable = true;
-          };
-        };
+        #   autotile = {
+        #     enable = true;
+        #   };
+        # };
       };
     };
 

@@ -106,6 +106,7 @@
     diy = {
       enable = true;
       printing.enable = true;
+      cad.enable = true;
     };
   };
 

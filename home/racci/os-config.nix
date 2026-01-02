@@ -12,6 +12,7 @@ in
   users.users.racci = {
     uid = 1000;
     shell = if useFish then pkgs.fish else pkgs.nushell;
+    extraGroups = [ "wheel" ];
   };
 
   programs.fish.enable = useFish;

@@ -144,14 +144,25 @@ in
       };
     };
 
-    boot.kernelParams =
-      optionals hasNvidia [
-        "nvidia.NVreg_EnableResizableBar=1"
-      ]
-      ++ optionals hasAmd [
-        "amdgpu.dcdebugmask=0x400" # Fix stuttering under wayland on Kernel 6.11+
-        "amdgpu.dc=1" # Use modern DC Engine
-      ];
+    boot = {
+      blacklistedKernelModules = lib.optionals hasNvidia [ "nova_core" ];
+      kernelModules =
+        lib.optionals hasAmd [ "amdgpu" ]
+        ++ lib.optionals hasNvidia [
+          "nvidia"
+          "nvidia-drm"
+          "nvidia-uvm"
+        ];
+
+      kernelParams =
+        optionals hasNvidia [
+          "nvidia.NVreg_EnableResizableBar=1"
+        ]
+        ++ optionals hasAmd [
+          "amdgpu.dcdebugmask=0x400" # Fix stuttering under wayland on Kernel 6.11+
+          "amdgpu.dc=1" # Use modern DC Engine
+        ];
+    };
 
     # https://wiki.nixos.org/wiki/AMD_GPU#HIP
     systemd.tmpfiles.rules = mkIf hasAmd (

@@ -64,6 +64,22 @@
         ui = {
           show-cryptographic-signatures = true;
           diff-editor = "meld-3";
+          merge-editor = "meld";
+        };
+
+        signing = {
+          behavior = "own";
+          backend = "ssh";
+          key = git.signing.key;
+        };
+
+        git = {
+          private-commits = "description('wip:*') | description('private:*')";
+        };
+
+        fsmonitor = {
+          backend = "watchman";
+          watchman.register-snapshot-trigger = true;
         };
       };
     };

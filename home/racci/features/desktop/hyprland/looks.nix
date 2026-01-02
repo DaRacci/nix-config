@@ -1,5 +1,4 @@
-{ config, ... }:
-{
+_: {
   wayland.windowManager.hyprland.settings = {
     general = {
       gaps_in = 4;
@@ -86,65 +85,65 @@
     ];
 
     plugins = {
-      hyprbars = {
-        bar_color = "rgb(2a2a2a)";
-        bar_height = 28;
-        col_text = "rgba(ffffffdd)";
-        bar_text_size = 12;
-        bar_text_font = "JetBrainsMono Nerd Font";
+      # hyprbars = {
+      #   bar_color = "rgb(2a2a2a)";
+      #   bar_height = 28;
+      #   col_text = "rgba(ffffffdd)";
+      #   bar_text_size = 12;
+      #   bar_text_font = "JetBrainsMono Nerd Font";
 
-        buttons = {
-          button_size = 0;
-          "col.maximize" = "rgba(ffffff11)";
-          "col.close" = "rgba(ff111133)";
-        };
-      };
+      #   buttons = {
+      #     button_size = 0;
+      #     "col.maximize" = "rgba(ffffff11)";
+      #     "col.close" = "rgba(ff111133)";
+      #   };
+      # };
 
-      hyprfocus = {
-        enabled = true;
-        animate_floating = true;
-        animate_workspacechange = true;
-        focus_animation = "shrink";
-        shrink = {
-          shrink_percentage = 0.9;
-          in_bezier = "realsmooth";
-          in_speed = 1;
-          out_bezier = "realsmooth";
-          out_speed = 2;
-        };
-      };
+      # hyprfocus = {
+      #   enabled = true;
+      #   animate_floating = true;
+      #   animate_workspacechange = true;
+      #   focus_animation = "shrink";
+      #   shrink = {
+      #     shrink_percentage = 0.9;
+      #     in_bezier = "realsmooth";
+      #     in_speed = 1;
+      #     out_bezier = "realsmooth";
+      #     out_speed = 2;
+      #   };
+      # };
 
-      dynamic-cursors = {
-        enabled = true;
-        mode = "tilt";
-        threshold = 2;
+      # dynamic-cursors = {
+      #   enabled = true;
+      #   mode = "tilt";
+      #   threshold = 2;
 
-        rotate = {
-          length = config.stylix.cursor.size;
-          offset = 0.0;
-        };
+      #   rotate = {
+      #     length = config.stylix.cursor.size;
+      #     offset = 0.0;
+      #   };
 
-        shake = {
-          enabled = true;
-          nearest = true;
-          threshold = 6.0;
-          base = 4.0;
-          speed = 4.0;
-          influence = 0.0;
-          limit = 0.0;
-          timeout = 2000;
-          effects = true;
-          ipc = false;
-        };
+      #   shake = {
+      #     enabled = true;
+      #     nearest = true;
+      #     threshold = 6.0;
+      #     base = 4.0;
+      #     speed = 4.0;
+      #     influence = 0.0;
+      #     limit = 0.0;
+      #     timeout = 2000;
+      #     effects = true;
+      #     ipc = false;
+      #   };
 
-        hyprcursor = {
-          enabled = true;
-          nearest = true;
+      #   hyprcursor = {
+      #     enabled = true;
+      #     nearest = true;
 
-          resolution = -1;
-          fallback = "clientside";
-        };
-      };
+      #     resolution = -1;
+      #     fallback = "clientside";
+      #   };
+      # };
     };
   };
 }

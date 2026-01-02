@@ -1,4 +1,5 @@
 {
+  self,
   config,
   pkgs,
   lib,
@@ -6,8 +7,6 @@
 }:
 {
   imports = [
-    ./hm-helpers
-
     ./generators.nix
     ./locale.nix
     ./networking.nix
@@ -31,13 +30,16 @@
 
   services.dbus.implementation = "broker";
 
-  system.activationScripts.report-changes = lib.mkIf (!config.host.device.isHeadless) ''
-    LINKS=($(ls -dv /nix/var/nix/profiles/system-*-link))
-    if [ $(echo $LINKS | wc -w) -gt 1 ]; then
-      NEW=$(readlink -f ''${LINKS[-1]})
-      CURRENT=$(readlink -f ''${LINKS[-2]})
+  system = {
+    stateVersion = builtins.readFile "${self}/state.version";
+    activationScripts.report-changes = lib.mkIf (!config.host.device.isHeadless) ''
+      LINKS=($(ls -dv /nix/var/nix/profiles/system-*-link))
+      if [ $(echo $LINKS | wc -w) -gt 1 ]; then
+        NEW=$(readlink -f ''${LINKS[-1]})
+        CURRENT=$(readlink -f ''${LINKS[-2]})
 
-      ${lib.getExe pkgs.nvd} diff $PREVIOUS $NEW
-    fi
-  '';
+        ${lib.getExe pkgs.nvd} diff $PREVIOUS $NEW
+      fi
+    '';
+  };
 }
