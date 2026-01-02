@@ -1,6 +1,11 @@
 { pkgs, lib, ... }:
 with lib;
 {
+  custom.defaultGroups = [
+    "docker"
+    "podman"
+  ];
+
   environment.systemPackages = with pkgs; [ podman-tui ];
 
   virtualisation = {

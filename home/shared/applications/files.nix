@@ -15,7 +15,7 @@
     nufraw-thumbnailer
     # stl-thumb
 
-    collision
+    # collision
     baobab # Disk usage analyzer
     gnome-disk-utility
     file-roller # Archive manager

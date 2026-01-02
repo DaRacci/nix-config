@@ -6,7 +6,7 @@
   ...
 }:
 let
-  inherit (lib) mkForce;
+  inherit (lib) mkForce mkAfter;
   # WSL is fucky with nu so we use fish instead, same with proxmox LXC.
   useFish = builtins.hasAttr "wsl" config;
   useNu = config.host.device.role != "server";
@@ -22,7 +22,7 @@ in
         pkgs.bash;
     isNormalUser = mkForce false;
 
-    openssh.authorizedKeys.keyFiles = [ "${self}/home/racci/id_ed25519.pub" ];
+    openssh.authorizedKeys.keyFiles = mkAfter [ "${self}/home/racci/id_ed25519.pub" ];
   };
 
   programs.fish.enable = useFish;

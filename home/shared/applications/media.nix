@@ -6,9 +6,8 @@
 {
   home.packages = with pkgs; [
     # Audio
-    spotify
     decibels
-    jellyfin-tui
+    feishin
 
     # Image
     gimp3 # Editor
