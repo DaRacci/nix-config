@@ -1,62 +1,67 @@
 {
   self,
+  config,
   inputs,
   lib,
   ...
 }:
 let
-  inherit (lib.builders) readDirNoCommons;
+  inherit (lib)
+    filterAttrs
+    flatten
+    genAttrs
+    nameValuePair
+    removeSuffix
+    ;
+  inherit (builtins)
+    map
+    elem
+    head
+    filter
+    attrNames
+    attrValues
+    listToAttrs
+    ;
+  inherit (lib.builders) readDirNoCommons mkSystem getHostsByType;
 
-  accelerationHosts = {
-    cuda = [
-      "nixmi"
-    ];
-    rocm = [
-      # "nixai"
-    ];
-  };
-
-  hosts =
-    readDirNoCommons "${self}/hosts"
-    |> builtins.map (
-      deviceType: lib.nameValuePair deviceType (readDirNoCommons "${self}/hosts/${deviceType}")
-    )
-    |> builtins.listToAttrs;
-  hostNames = hosts |> builtins.attrValues |> lib.flatten;
+  hostsByType = getHostsByType self;
+  hostNames = hostsByType |> attrValues |> flatten;
 
   userHosts =
     readDirNoCommons "${self}/home"
-    |> builtins.map (
+    |> map (
       user:
-      lib.nameValuePair user (
+      nameValuePair user (
         readDirNoCommons "${self}/home/${user}"
-        |> builtins.map (file: lib.removeSuffix ".nix" file)
-        |> builtins.filter (rootFile: builtins.elem rootFile hostNames)
+        |> map (file: removeSuffix ".nix" file)
+        |> filter (rootFile: elem rootFile hostNames)
       )
     )
-    |> lib.flatten
-    |> builtins.listToAttrs;
+    |> flatten
+    |> listToAttrs;
 in
 {
+  allocations = {
+    accelerators = {
+      nixmi = [ "cuda" ];
+      nixai = [ ];
+    };
+
+    server = {
+      ioPrimaryCoordinator = "nixio";
+      distributedBuilders = [ "nixserv" ];
+    };
+  };
+
   flake = {
-    nixosConfigurations =
-      hosts
-      |> lib.mapAttrsToList (
-        deviceType: hostNames:
-        builtins.map (
-          hostName:
-          lib.nameValuePair hostName {
-            inherit deviceType;
-            users = userHosts |> lib.filterAttrs (_: v: builtins.elem hostName v) |> builtins.attrNames;
-            accelerators =
-              accelerationHosts |> lib.filterAttrs (_: v: builtins.elem hostName v) |> builtins.attrNames;
-          }
-        ) hostNames
-      )
-      |> lib.flatten
-      |> builtins.listToAttrs
-      |> builtins.mapAttrs (
-        hostName: hostAttrs: lib.builders.mkSystem hostName (hostAttrs // { inherit self inputs; })
-      );
+    nixosConfigurations = genAttrs hostNames (
+      hostName:
+      mkSystem hostName {
+        inherit self inputs;
+        inherit (config) allocations;
+        deviceType = hostsByType |> filterAttrs (_: v: elem hostName v) |> attrNames |> head;
+        deviceUsers = userHosts |> filterAttrs (_: v: elem hostName v) |> attrNames;
+      }
+    );
   };
 }

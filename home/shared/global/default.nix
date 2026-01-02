@@ -32,10 +32,9 @@ in
         ${lib.getExe pkgs.dix} "$oldGenPath" "$newGenPath"
       fi
     '';
+    stateVersion = builtins.readFile "${self}/state.version";
   };
 
   dconf.enable = dconfEnabled;
   user.persistence.directories = [ ".config/dconf" ];
-
-  home.stateVersion = "25.05";
 }

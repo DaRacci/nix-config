@@ -65,6 +65,7 @@
         };
 
         git-hooks = {
+          package = pkgs.prek;
           hooks = {
             check-added-large-files.enable = true;
             check-case-conflicts.enable = true;
