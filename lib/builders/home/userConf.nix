@@ -1,22 +1,27 @@
 {
   self,
   lib,
+
   name,
   userDirectory,
   user ? null,
   hostName ? null,
+  allocations ? null,
   ...
 }:
+let
+  inherit (lib) mkIf mkDefault optional;
+  inherit (builtins) pathExists;
+in
 {
   home = {
     username = name;
-    homeDirectory = lib.mkDefault "/home/${name}";
+    homeDirectory = mkDefault "/home/${name}";
 
     sessionPath = [ "$HOME/.local/bin" ];
-    stateVersion = "25.05";
   };
 
-  sops = lib.mkIf (user != null) {
+  sops = mkIf (user != null) {
     defaultSymlinkPath = "/run/user/${toString user.uid}/secrets";
     defaultSecretsMountPoint = "/run/user/${toString user.uid}/secrets.d";
   };
@@ -24,11 +29,14 @@
   imports = [
     "${self}/home/shared/global"
     "${userDirectory}/hm-config.nix"
+    (import "${self}/modules/flake/apply/home-manager.nix" {
+      inherit allocations hostName name;
+    })
   ]
   ++ (
     let
       hostPath = "${userDirectory}/${hostName}.nix";
     in
-    lib.optional (hostName != null && builtins.pathExists hostPath) hostPath
+    optional (hostName != null && pathExists hostPath) hostPath
   );
 }

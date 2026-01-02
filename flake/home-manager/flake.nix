@@ -90,6 +90,13 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    zjstatus = {
+      url = "github:dj95/zjstatus";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+    };
 
     # Resources
     firefox-ultima = {
