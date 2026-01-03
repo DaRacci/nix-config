@@ -29,10 +29,12 @@ in
   imports = [
     "${self}/home/shared/global"
     "${userDirectory}/hm-config.nix"
-    (import "${self}/modules/flake/apply/home-manager.nix" {
-      inherit allocations hostName name;
-    })
   ]
+  ++ (optional (allocations != null) (
+    import "${self}/modules/flake/apply/home-manager.nix" {
+      inherit allocations hostName name;
+    }
+  ))
   ++ (
     let
       hostPath = "${userDirectory}/${hostName}.nix";
