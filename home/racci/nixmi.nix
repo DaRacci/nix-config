@@ -75,6 +75,11 @@
       enable = true;
       rust.enable = true;
       dotnet.enable = true;
+
+      editors = {
+        ai.enable = true;
+        vscode.enable = true;
+      };
     };
 
     gaming = {
