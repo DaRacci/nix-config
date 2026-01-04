@@ -230,8 +230,6 @@
   };
 
   user.persistence.directories = [
-    ".config/spotify"
-    ".config/jellyfin-tui"
-    ".local/share/jellyfin-tui"
+    ".config/feishin"
   ];
 }
