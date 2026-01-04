@@ -27,6 +27,11 @@
           27
           29
         ];
+
+        extraSettings = {
+          excludeRecentSearch = "90 days";
+          excludeOlder = "270 days";
+        };
       };
 
       extraSettings = {
