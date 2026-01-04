@@ -24,11 +24,9 @@
   };
 
   home.packages = with pkgs; [
-    health
     fragments
-    transmission_4-gtk
-    kooha
     gnome-online-accounts-gtk
+    picard
   ];
 
   custom = {
@@ -44,4 +42,8 @@
       ];
     };
   };
+
+  user.persistence.directories = [
+    ".config/MusicBrainz"
+  ];
 }
