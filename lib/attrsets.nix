@@ -99,7 +99,7 @@
           else if builtins.all builtins.isAttrs values then
             f (attrPath ++ [ n ]) values
           else
-            builtins.last values
+            lib.last values
         );
     in
     f [ ] attrList;
