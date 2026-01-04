@@ -1,8 +1,12 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }:
+let
+  inherit (lib) flatten filterEmpty;
+in
 {
   sops.secrets =
     let
@@ -47,12 +51,13 @@
         tls_key = "${certDirectory}/key.pem";
         tls_chain = "${certDirectory}/fullchain.pem";
 
-        http_client_address_info.x-forward-for = [
-          "100.97.163.21"
-          # "192.168.1.1/24"
-          # "192.168.2.1/24"
-          # "100.0.0.1/8"
-        ];
+        http_client_address_info.x-forward-for = config.server.network.subnets
+        |> map (subnet: [
+          subnet.ipv4.cidr
+          subnet.ipv6.cidr
+        ])
+        |> flatten
+        |> filterEmpty;
 
         online_backup = {
           versions = 7;
