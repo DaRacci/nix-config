@@ -68,13 +68,14 @@
         };
 
         signing = {
-          behavior = "own";
+          behavior = "drop"; # Lazyily sign commits at push time only
           backend = "ssh";
           key = git.signing.key;
         };
 
         git = {
           private-commits = "description('wip:*') | description('private:*')";
+          sign-on-push = true;
         };
 
         fsmonitor = {
