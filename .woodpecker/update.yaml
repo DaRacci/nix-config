@@ -26,66 +26,21 @@ steps:
         from_secret: GPG_FINGERPRINT
       GPG_PASSPHRASE:
         from_secret: GPG_PASSPHRASE
-    commands:
-      - |
-        nix profile install nixpkgs#nushell nixpkgs#git nixpkgs#gh nixpkgs#gnupg
+    commands: |
+      nix run nixpkgs#update-flake-locks -- \
+        --flake-dirs ("." "flake/ci" "flake/dev" "flake/nixos" "flake/home-manager") \
+        --commit-message "chore(deps): Update <flake>"
 
-        nu -c '
-          use std/log
+      # If there are no changes, exit early
+      STATUS=$(git status --porcelain)
+      if [ ! -n "$STATUS" ]; then
+        echo "No changes to commit."
+        exit 0
+      fi
 
-          let flake_dirs = ["./" "flake/ci" "flake/dev" "flake/nixos" "flake/home-manager"]
-          let branch_name = "update/flake-lock-all"
-
-          # Setup git with user config, GPG signing, and credentials
-          ./.woodpecker/scripts/setup-git.nu
-
-          # Create and checkout update branch
-          git checkout -B $branch_name
-
-          # Update each flake.lock and collect changes
-          let updated_flakes = $flake_dirs | each { |flake_dir|
-            log info $"Updating ($flake_dir)/flake.lock..."
-            let result = try {
-              nix flake update --flake $flake_dir
-              true
-            } catch {
-              log warning $"Failed to update ($flake_dir), continuing..."
-              false
-            }
-
-            if $result {
-              let flake_path = if $flake_dir == "./" { "flake.lock" } else { $"($flake_dir)/flake.lock" }
-              let has_changes = (git diff --quiet $flake_path | complete | get exit_code) != 0
-
-              if $has_changes {
-                git add $flake_path
-                log info $"Updated ($flake_path)"
-                $flake_path
-              } else {
-                log info $"No changes in ($flake_path)"
-                null
-              }
-            } else {
-              null
-            }
-          } | where { $in != null }
-
-          # Check if there are any changes to commit
-          if ($updated_flakes | is-empty) {
-            log info "No flake.lock files were updated, nothing to do."
-            exit 0
-          }
-
-          # Create commit with all updates
-          let updated_list = $updated_flakes | str join " "
-          let commit_msg = $"chore\(deps\): update flake.lock files\n\nUpdated: ($updated_list)"
-          git commit -m $commit_msg
-
-          # Push branch
-          git push -f origin $branch_name
-
-          # Create or update PR
-          let pr_body = $"This PR updates the following flake.lock files:\n\n($updated_list)\n\n---\n*Automated by Woodpecker CI*"
-
-          ./.woodpecker/scripts/create-pr.nu --branch $branch_name --title "Update all flake.lock files" --body $pr_body --labels "dependencies,automated" --assignees "DaRacci"
-        '
+      nix run nixpkgs#setup-git
+      nix run nixpkgs#create-pr -- \
+        --title "chore(deps): Update flake inputs" \
+        --body "This PR updates the flake inputs to their latest versions, see individual commits for changes." \
+        --branch "update/flake-inputs-all" \
+        --base "master"

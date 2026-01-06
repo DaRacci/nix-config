@@ -4,10 +4,6 @@
     enable = true;
     package = pkgs.alacritty;
     settings = {
-      terminal.shell = {
-
-      };
-
       window = {
         decorations = "None";
         padding = {

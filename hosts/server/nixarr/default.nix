@@ -10,6 +10,15 @@
     ./arr
   ];
 
+  # wg service fails to start on boot due to network not being ready
+  # The upstream VPN-Confinement module only retries 5 times with 1s delays,
+  # which is too short during early boot. Adding restart settings ensures
+  # the service will eventually succeed once networking is available.
+  systemd.services.wg.serviceConfig = {
+    Restart = "on-failure";
+    RestartSec = "10s";
+  };
+
   users.users.jellyfin.extraGroups = [ "video" ];
 
   sops.secrets.wireguard = {

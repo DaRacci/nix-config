@@ -29,7 +29,6 @@ self.inputs.home-manager.lib.homeManagerConfiguration {
           lib
           name
           userDirectory
-          allocations
           ;
       }
     )

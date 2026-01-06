@@ -105,7 +105,7 @@ export def setup-git [
 #   GPG_PASSPHRASE   - The GPG key passphrase (if key is protected)
 #
 # Optional environment variables (for authentication):
-#   GITHUB_TOKEN     - GitHub token for HTTPS authentication
+#   GITHUB_TOKEN     - GitHub token for HTTPS authentication with scopes: contents:write
 def main [
   --name: string
   --email: string

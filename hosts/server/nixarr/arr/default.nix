@@ -11,7 +11,7 @@
 
   services.flaresolverr.enable = true;
   systemd.services.flaresolverr = {
-    serviceConfig = {
+    unitConfig = {
       StartLimitIntervalSec = "60m";
       StartLimitBurst = 5;
     };

@@ -21,6 +21,7 @@ in
     keys = simpleImport ./keys.nix;
     hypr = simpleImport ./hypr.nix;
     strings = simpleImport ./strings.nix;
+    packages = simpleImport ./package.nix;
 
     mkPostgresRolePass = role: passPath: ''
       psql -tA <<'EOF'

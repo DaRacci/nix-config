@@ -39,7 +39,7 @@ in
       if [ "''${EUID:-}" = "0" ] \
          && [ -n "''${SSH_CONNECTION:-}" ] \
          && [ -t 0 ] \
-         && [ -z "''${SSH_NIX_SHELL:-}" ]
+         && [ -z "''${SSH_NIX_SHELL:-}" ] \
          && [ -z "''${NIX_SKIP_SHELL:-}" ]; then
         export SSH_NIX_SHELL=1
 
