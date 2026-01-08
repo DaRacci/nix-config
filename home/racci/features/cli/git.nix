@@ -28,32 +28,18 @@
 
         init.defaultBranch = "master";
         pull.rebase = true;
+        signing.signByDefault = true;
 
         gpg = {
           format = "ssh";
-          ssh = {
-            program = "${pkgs._1password-gui}/bin/op-ssh-sign";
-            allowedSignersFile =
-              let
-                file = pkgs.writeTextFile {
-                  name = "allowed-signers";
-                  text = pkgs.lib.concatStringsSep "\n" [
-                    "me@racci.dev ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPVVzqHYt34dMsaFkX3K8m2vtam/RcUHiS00CBtLpolh"
-                  ];
-                };
-              in
-              file.outPath;
-          };
+          ssh.program = "${pkgs._1password-gui}/bin/op-ssh-sign";
         };
       };
 
-      ignores = [ ".idea" ];
-
-      signing = {
-        signByDefault = true;
-        # TODO dynamic
-        key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPVVzqHYt34dMsaFkX3K8m2vtam/RcUHiS00CBtLpolh";
-      };
+      ignores = [
+        ".idea"
+        ".jj"
+      ];
     };
 
     jujutsu = {
@@ -62,6 +48,7 @@
         inherit (git.settings) user;
 
         ui = {
+          default-branch = "master";
           show-cryptographic-signatures = true;
           diff-editor = "meld-3";
           merge-editor = "meld";
@@ -76,6 +63,10 @@
         git = {
           private-commits = "description('wip:*') | description('private:*')";
           sign-on-push = true;
+        };
+
+        revsets = {
+          immutable = "description('wip:*') | description('private:*')";
         };
 
         fsmonitor = {
