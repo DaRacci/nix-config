@@ -418,6 +418,7 @@ in
           );
         };
       })
+
       (lib.mkIf cfg.upgradeStatus.uptimeKuma.enable {
         sops.secrets.UPGRADE_STATUS_ID = { };
 
@@ -426,7 +427,7 @@ in
             wantedBy = [ "timers.target" ];
             timerConfig = {
               Persistent = true;
-              OnUnitInactiveSec = "15min";
+              OnActiveSec = "15min";
               Unit = "upgrade-status.service";
             };
           };
