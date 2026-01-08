@@ -20,6 +20,7 @@ let
     submodule
     str
     int
+    nullOr
     ;
 in
 {
@@ -48,13 +49,13 @@ in
             };
 
             uid = mkOption {
-              type = int;
+              type = nullOr int;
               description = "User ID to own the mounted bucket.";
               default = null;
             };
 
             gid = mkOption {
-              type = int;
+              type = nullOr int;
               description = "Group ID to own the mounted bucket.";
               default = null;
             };
@@ -68,7 +69,7 @@ in
         }
       )
     );
-    default = [ ];
+    default = { };
     description = ''
       A list of S3 bucket names to mount via s3fs-fuse.
 
@@ -81,9 +82,11 @@ in
       cfg
       |> mapAttrs' (
         name: value:
-        nameValuePair "S3FS_AUTH/${toUpper name}" {
-          inherit (value) uid gid;
-        }
+        nameValuePair "S3FS_AUTH/${toUpper name}" (
+          lib.filterAttrs (_: v: v != null) {
+            inherit (value) uid gid;
+          }
+        )
       );
 
     environment.systemPackages = [ pkgs.s3fs ];
@@ -107,9 +110,9 @@ in
             "umask=${toString bucketCfg.umask}"
             "mp_umask=${toString bucketCfg.umask}"
             "nonempty"
-            (lib.optionalString (bucketCfg.uid != null) "uid=${toString bucketCfg.uid}")
-            (lib.optionalString (bucketCfg.gid != null) "gid=${toString bucketCfg.gid}")
-          ];
+          ]
+          ++ lib.optional (bucketCfg.uid != null) "uid=${toString bucketCfg.uid}"
+          ++ lib.optional (bucketCfg.gid != null) "gid=${toString bucketCfg.gid}";
         }
       );
   };
