@@ -11,7 +11,7 @@ let
 in
 buildLixImage {
   inherit pkgs nix2container;
-  name = "lix-woodpecker";
+  name = "registry.racci.dev/lix-woodpecker";
 
   extraPkgs = with pkgs; [
     gawk

@@ -9,7 +9,8 @@ let
 
   cfg = config.purpose.development.tools.docker;
   rootCfg = config.purpose.development;
-in {
+in
+{
   options.purpose.development.tools.docker = {
     enable = mkEnableOption "Enable Docker Development Tools";
   };
@@ -25,6 +26,10 @@ in {
 
     programs.docker-cli = {
       enable = true;
+      settings = {
+        credsStore = "secretservice";
+        auths."registry.racci.dev" = { };
+      };
     };
   };
 }
