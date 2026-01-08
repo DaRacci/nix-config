@@ -24,7 +24,7 @@ in
         agent_servers = {
           OpenCode = {
             command = lib.getExe pkgs.opencode;
-            args = ["acp"];
+            args = [ "acp" ];
           };
         };
       };
@@ -35,7 +35,10 @@ in
           "$schema" = "https://opencode.ai/config.json";
           share = "disabled";
 
-          plugin = [ "oh-my-opencode" ];
+          plugin = [
+            "oh-my-opencode"
+            "@tarquinen/opencode-dcp@latest"
+          ];
 
           formatter = {
             nixfmt = {
@@ -93,13 +96,19 @@ in
       };
     };
 
-    xdg.configFile.".opencode/oh-my-opencode.json".text = builtins.toJSON {
-      "$schema" = "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json";
+    xdg.configFile."opencode/oh-my-opencode.json".text = builtins.toJSON {
+      "$schema" =
+        "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json";
       auto_update = false;
 
       agents = {
         Sisyphus.model = "github-copilot/claude-opus-4.5";
       };
     };
+
+    user.persistence.directories = [
+      ".local/share/opencode"
+      ".local/state/opencode"
+    ];
   };
 }
