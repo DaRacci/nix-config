@@ -10,10 +10,7 @@ _: {
         "chromecast"
         "hass"
         "hass_players"
-        "jellyfin"
-        "spotify"
-        "spotify_connect"
-        "ytmusic"
+        "opensubsonic"
       ];
     };
   };

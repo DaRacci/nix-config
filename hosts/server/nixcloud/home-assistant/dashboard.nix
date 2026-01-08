@@ -150,7 +150,7 @@
       ];
 
       lovelace = {
-        mode = "yaml";
+        resource_mode = "yaml";
         resources = [
           {
             url = "/local/nixos-lovelace-modules/bubble-pop-up-fix.js";

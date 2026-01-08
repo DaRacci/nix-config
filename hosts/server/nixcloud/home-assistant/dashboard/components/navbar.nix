@@ -1,6 +1,11 @@
 {
+  lib,
   basePath ? "/lovelace",
 }:
+let
+  dashLib = import ../lib.nix { inherit lib; };
+  inherit (dashLib) entities mediaPlayers;
+in
 {
   type = "custom:navbar-card";
 
@@ -69,13 +74,14 @@
       url = "${basePath}/music";
       label = "Music";
       badge = {
-        show = "[[[ return states['media_player.music'].state === 'playing' ]]]";
+        show = "[[[ return states['${mediaPlayers.special.music}'].state === 'playing' ]]]";
         color = "var(--green-color)";
       };
       hidden = ''
         [[[
-          if (states['media_player.music'].state == "playing") return false;
-          else return false;
+          if (states['${mediaPlayers.special.music}'].state == "playing") return true;
+          else if (states['remote.apple_tv'].state == "on") return false;
+          else return true;
         ]]]
       '';
       hold_action.action = "open-popup";
@@ -97,12 +103,12 @@
       url = "${basePath}/home#remote";
       label = "TV";
       badge = {
-        show = "[[[ return states['media_player.apple_tv'].state === 'playing' ]]]";
+        show = "[[[ return states['${mediaPlayers.special.apple_tv}'].state === 'playing' ]]]";
         color = "var(--green-color)";
       };
       hidden = ''
         [[[
-          if (states['media_player.music'].state == "playing") return true;
+          if (states['${mediaPlayers.special.music}'].state == "playing") return true;
           else if (states['remote.apple_tv'].state == "on") return false;
           else return true;
         ]]]
@@ -136,7 +142,7 @@
       selected = "[[[ return location.hash == '#james'; ]]]";
       hidden = ''[[[ return user.name != "James" ]]]'';
       badge = {
-        show = "[[[ return states['input_boolean.debug_rounded'].state === 'on' ]]]";
+        show = "[[[ return states['${entities.inputBooleans.debugRounded}'].state === 'on' ]]]";
         color = "var(--red-color)";
       };
     }
@@ -153,9 +159,9 @@
       badge = {
         show = ''
           [[[
-            if (states['binary_sensor.monitored_entities'].state == "on") return true;
-            else if (states['binary_sensor.home_assistant_update'].state == "on") return true;
-            else if (states['binary_sensor.battery_health_attention'].state == "on") return true;
+            if (states['${entities.binarySensors.monitoredEntities}'].state == "on") return true;
+            else if (states['${entities.binarySensors.homeAssistantUpdate}'].state == "on") return true;
+            else if (states['${entities.binarySensors.batteryHealthAttention}'].state == "on") return true;
             else return false;
           ]]]
         '';
@@ -172,8 +178,8 @@
             color = "var(--red-color)";
             show = ''
               [[[
-                if (states['binary_sensor.monitored_entities'].state == "on") return true;
-                else if (states['binary_sensor.battery_health_attention'].state == "on") return true;
+                if (states['${entities.binarySensors.monitoredEntities}'].state == "on") return true;
+                else if (states['${entities.binarySensors.batteryHealthAttention}'].state == "on") return true;
                 else return false;
               ]]]
             '';

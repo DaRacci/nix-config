@@ -1,3 +1,8 @@
+{ lib }:
+let
+  dashLib = import ../lib.nix { inherit lib; };
+  inherit (dashLib) entities ids;
+in
 {
   type = "vertical-stack";
   cards = [
@@ -13,11 +18,11 @@
       badges = [
         {
           type = "entity";
-          entity = "switch.adguard_home_protection";
+          entity = entities.adguardProtection;
         }
         {
           type = "entity";
-          entity = "sensor.adguard_home_average_processing_speed";
+          entity = entities.adguardSpeed;
         }
       ];
     }
@@ -30,10 +35,10 @@
           conditions = [ ];
           card = {
             type = "custom:button-card";
-            entity = "sensor.uptimekuma_uptime_racci_dev";
+            entity = entities.sensors.uptimekuma;
             icon = "mdi:devices";
             name = "Monitored";
-            label = "[[[return states[\"sensor.uptimekuma_uptime_racci_dev\"].attributes.monitored]]]";
+            label = "[[[return states[\"${entities.sensors.uptimekuma}\"].attributes.monitored]]]";
             template = "nav_button_state_small";
             variables = {
               navigation_path = "server#monitored";
@@ -49,10 +54,10 @@
           conditions = [ ];
           card = {
             type = "custom:button-card";
-            entity = "sensor.uptimekuma_uptime_racci_dev";
+            entity = entities.sensors.uptimekuma;
             icon = "mdi:sort-clock-descending-outline";
             name = "Uptime Kuma";
-            label = "[[[return states[\"sensor.uptimekuma_uptime_racci_dev\"].attributes.monitors]]]";
+            label = "[[[return states[\"${entities.sensors.uptimekuma}\"].attributes.monitors]]]";
             template = "nav_button_small";
             variables = {
               navigation_path = "#uptime";
@@ -71,7 +76,7 @@
     {
       condition = "user";
       users = [
-        "3eea636aa3de4c7f9c662ad29c6e92e0"
+        ids.james
         "c82f30a396fb42a9a10514fd63d5aac7"
       ];
     }
