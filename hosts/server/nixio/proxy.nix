@@ -66,8 +66,8 @@ _:
     };
     email = "admin@racci.dev";
 
-    # Certs are handled by acme
     globalConfig = ''
+      # Certs are handled by acme
       auto_https "disable_certs"
 
       servers {
@@ -83,10 +83,24 @@ _:
 
     extraConfig = ''
       # Automatic Import for all Virtual Hosts
-      (default) { }
+      (default) {
+        # Allow embedding in iframes for specific hosts
+        header {
+          X-Frame-Options "ALLOW-FROM https://dashboard.racci.dev"
+          Content-Security-Policy "frame-ancestors 'self' https://dashboard.racci.dev"
+        }
+      }
 
       # Automatic Import for all Virtual Hosts with `server.proxy.virtualHosts.<name>.public = true`
-      (public) { }
+      (public) {
+        header {
+          Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+          X-Content-Type-Options "nosniff"
+          X-Frame-Options "DENY"
+          X-XSS-Protection "1; mode=block"
+          -Server
+        }
+      }
 
       (cors) {
         @cors_preflight{args[0]} method OPTIONS
