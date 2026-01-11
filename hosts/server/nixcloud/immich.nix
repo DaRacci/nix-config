@@ -1,5 +1,7 @@
 { config, lib, ... }:
 let
+  inherit (lib) filterEmpty flatten;
+
   immichOwned = {
     owner = config.users.users.immich.name;
     inherit (config.users.users.immich) group;
@@ -42,13 +44,17 @@ in
 
       secretsFile = config.sops.secrets."IMMICH/ENV".path;
       environment = {
-        IMMICH_TRUSTED_PROXIES = "100.64.0.0/10,192.168.1.0/24,192.168.2.0/24";
+        IMMICH_TRUSTED_PROXIES =
+          config.server.network.subnets
+          |> map (subnet: [
+            subnet.ipv4.cidr
+            subnet.ipv6.cidr
+          ])
+          |> flatten
+          |> filterEmpty;
       };
 
-      machine-learning = {
-        enable = true;
-        environment = { };
-      };
+      machine-learning.enable = true;
 
       database =
         let
@@ -68,8 +74,52 @@ in
       redis = {
         enable = true;
       };
+
+      settings = {
+        machineLearning = {
+          clip.modelName = "ViT-B-16-SigLIP__webli";
+          facialRecognition.modelName = "buffalo_l";
+          ocr.modelName = "PP-OCRv5_server";
+        };
+
+        oauth = {
+          enabled = true;
+          buttonText = "Sign in with Kanidm";
+          clientId = "immich";
+          clientSecret._secret = config.sops.secrets."KANIDM/OAUTH2/IMMICH_SECRET".path;
+          issuerUrl = "https://auth.racci.dev/oauth2/openid/immich";
+        };
+
+        server = {
+          externalDomain = "https://photos.racci.dev";
+          publicUsers = false;
+        };
+
+        storageTemplate = {
+          enabled = true;
+          hashVerificationEnabled = true;
+          template = "{{#if album}}{{album-startDate-y}}/{{album}}{{else}}{{y}}/Other/{{MMM}}/{{dd}}/{{/if}}/{{hh}}_{{mm}}_{{ss}}-{{filename}}";
+        };
+
+        trash = {
+          enabled = true;
+          days = 30;
+        };
+      };
     };
     postgresql.enable = lib.mkForce false;
+  };
+
+  systemd.services = {
+    immich-server = {
+      requires = lib.mkForce [ ];
+      after = lib.mkForce [ "network.target" ];
+    };
+
+    immich-machine-learning = {
+      requires = lib.mkForce [ ];
+      after = lib.mkForce [ "network.target" ];
+    };
   };
 
   networking = {
