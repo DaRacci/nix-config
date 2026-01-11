@@ -58,7 +58,8 @@ in
             subnet.ipv6.cidr
           ])
           |> flatten
-          |> filterEmpty;
+          |> filterEmpty
+          |> lib.concatStringsSep ",";
       };
 
       machine-learning.enable = true;
