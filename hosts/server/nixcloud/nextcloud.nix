@@ -1,7 +1,6 @@
 {
   config,
   pkgs,
-  lib,
   ...
 }:
 let
@@ -23,14 +22,13 @@ in
 
   sops.secrets = {
     "NEXTCLOUD/admin-password" = ncOwned;
-    "NEXTCLOUD/S3FS_AUTH" = ncOwned;
   };
 
   server = {
-    database.postgres.nextcloud = {
-      password = ncOwned;
+    database = {
+      postgres.nextcloud.password = ncOwned;
+      dependentServices = [ "phpfpm-nextcloud" ];
     };
-    database.dependentServices = [ "phpfpm-nextcloud" ];
 
     dashboard.items.nc = {
       title = "Nextcloud";
@@ -44,6 +42,13 @@ in
       '';
     };
 
+    storage.bucketMounts = {
+      nextcloud = {
+        mountLocation = "/var/lib/nextcloud/data";
+        inherit (config.users.users.nextcloud) uid;
+        inherit (config.users.groups.nextcloud) gid;
+      };
+    };
   };
 
   services = rec {
@@ -224,26 +229,5 @@ in
         3478
       ];
     };
-  };
-
-  environment.systemPackages = [ pkgs.s3fs ];
-
-  fileSystems."nextcloud" = {
-    device = "${lib.getExe' pkgs.s3fs "s3fs"}#nextcloud";
-    mountPoint = "/var/lib/nextcloud/data";
-    fsType = "fuse";
-    noCheck = true;
-    options = [
-      "_netdev"
-      "allow_other"
-      "use_path_request_style"
-      "url=https://minio.racci.dev"
-      "passwd_file=${config.sops.secrets."NEXTCLOUD/S3FS_AUTH".path}"
-      "umask=0007"
-      "mp_umask=0007"
-      "nonempty"
-      "uid=${toString config.users.users.nextcloud.uid}"
-      "gid=${toString config.users.groups.nextcloud.gid}"
-    ];
   };
 }

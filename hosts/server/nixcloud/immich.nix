@@ -35,6 +35,13 @@ in
         reverse_proxy http://${cfg.host}:${toString cfg.port}
       '';
 
+    storage.bucketMounts = {
+      immich = {
+        mountLocation = "/var/lib/immich";
+        inherit (config.users.users.immich) uid;
+        inherit (config.users.groups.immich) gid;
+      };
+    };
   };
 
   services = {
