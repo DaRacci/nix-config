@@ -39,7 +39,7 @@ let
   wrapper =
     builder: name:
     args@{
-      allocations,
+      allocations ? null,
       system ? "x86_64-linux",
       ...
     }:
@@ -51,10 +51,11 @@ let
           lib
           ;
 
-        pkgs = mkPkgs {
+        pkgs = mkPkgs ({
           inherit system;
+        } // (lib.optionalAttrs (allocations != null) {
           accelerators = allocations.accelerators.${name} or [ ];
-        };
+        }));
       }
       // (removeAttrs args [
         "system"

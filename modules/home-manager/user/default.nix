@@ -1,12 +1,16 @@
 {
+  self,
   outputs,
   config,
+  pkgs,
   lib,
   ...
 }:
 let
   cfg = config.user;
   hostnames = builtins.attrNames outputs.nixosConfigurations;
+
+  userPublicKey = builtins.readFile "${self}/home/${config.home.username}/id_ed25519.pub";
 in
 {
   imports = [
@@ -26,24 +30,38 @@ in
       SSH_AUTH_SOCK = cfg.sshSocket;
     };
 
-    programs.ssh = {
-      enable = true;
-      enableDefaultConfig = false;
+    programs = {
+      ssh = {
+        enable = true;
+        enableDefaultConfig = false;
 
-      matchBlocks = {
-        hosts = {
-          host = builtins.concatStringsSep " " hostnames;
-          forwardAgent = true;
-          identitiesOnly = true;
-          setEnv = {
-            TERM = "xterm-256color";
+        matchBlocks = {
+          hosts = {
+            host = builtins.concatStringsSep " " hostnames;
+            forwardAgent = true;
+            identitiesOnly = true;
+            setEnv = {
+              TERM = "xterm-256color";
+            };
+          };
+
+          "*" = {
+            host = "*";
+            identityAgent = cfg.sshSocket;
           };
         };
+      };
 
-        "*" = {
-          host = "*";
-          identityAgent = cfg.sshSocket;
-        };
+      git.settings = {
+        gpg.ssh.allowedSignersFile =
+          (pkgs.writeTextFile {
+            name = "allowed-signers";
+            text = pkgs.lib.concatStringsSep "\n" [
+              "${config.git.settings.user.email} ${userPublicKey}"
+            ];
+          }).outPath;
+
+        signing.key = userPublicKey;
       };
     };
 
