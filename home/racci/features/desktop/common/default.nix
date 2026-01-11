@@ -37,7 +37,8 @@
 
         # Disable things that really shouldn't have built-in audio devices
         "alsa_card.usb-046d_HD_Pro_Webcam_C920_AC8BDE4F-02"
-        "alsa_input.usb-Insta360_Insta360_Link_2-02.mono-fallback"
+        "alsa_card.usb-Insta360_Insta360_Link_2-02"
+        "alsa_card.usb-C-Media_Electronics_Inc._USB_Advanced_Audio_Device-00"
         "alsa_card.usb-Sony_Interactive_Entertainment_Wireless_Controller-00"
       ];
     };

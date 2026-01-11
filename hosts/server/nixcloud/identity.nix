@@ -1,8 +1,18 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }:
+let
+  inherit (lib)
+    flatten
+    filterEmpty
+    nameValuePair
+    mapAttrs'
+    toUpper
+    ;
+in
 {
   sops.secrets =
     let
@@ -18,16 +28,19 @@
 
       "KANIDM/ADMIN_PASSWORD" = { };
       "KANIDM/IDM_ADMIN_PASSWORD" = { };
-
-      "KANIDM/OAUTH2/NEXTCLOUD_SECRET" = kanidmPermissions;
-      "KANIDM/OAUTH2/HASSIO_SECRET" = kanidmPermissions;
       "KANIDM/PROVISIONING_JSON" = kanidmPermissions // {
         sopsFile = ./provisioning.json;
         restartUnits = [ "kanidm.service" ];
         format = "json";
         key = "";
       };
-    };
+    }
+    // (
+      config.services.kanidm.provision.systems.oauth2
+      |> mapAttrs' (
+        clientId: _: nameValuePair "KANIDM/OAUTH2/${toUpper clientId}_SECRET" kanidmPermissions
+      )
+    );
 
   services.kanidm = {
     enableServer = true;
@@ -47,12 +60,14 @@
         tls_key = "${certDirectory}/key.pem";
         tls_chain = "${certDirectory}/fullchain.pem";
 
-        http_client_address_info.x-forward-for = [
-          "100.97.163.21"
-          # "192.168.1.1/24"
-          # "192.168.2.1/24"
-          # "100.0.0.1/8"
-        ];
+        http_client_address_info.x-forward-for =
+          config.server.network.subnets
+          |> map (subnet: [
+            subnet.ipv4.cidr
+            subnet.ipv6.cidr
+          ])
+          |> flatten
+          |> filterEmpty;
 
         online_backup = {
           versions = 7;
@@ -100,7 +115,6 @@
         };
 
         hassio = {
-          public = true;
           displayName = "Home Assistant";
           originUrl = "https://hassio.racci.dev/auth/oidc/callback";
           originLanding = "https://hassio.racci.dev/auth/oidc/welcome";
@@ -112,6 +126,30 @@
             "email"
             "groups"
           ];
+        };
+
+        immich = {
+          displayName = "Immich";
+          originUrl = [
+            "https://photos.racci.dev/auth/login"
+            "https://photos.racci.dev/user-settings"
+            "app.immich:///oauth-callback"
+          ];
+          originLanding = "https://photos.racci.dev";
+          basicSecretFile = config.sops.secrets."KANIDM/OAUTH2/IMMICH_SECRET".path;
+
+          scopeMaps.cloud = [
+            "openid"
+            "profile"
+            "email"
+          ];
+          claimMaps.immich_role = {
+            joinType = "csv";
+            valuesByGroup = {
+              sysadmin = [ "admin" ];
+              cloud = [ "user" ];
+            };
+          };
         };
       };
     };
