@@ -357,8 +357,6 @@ in
               ExecStart = "${lib.getExe pkgs.hacompanion} -quiet -config ${hacompanionToml}";
               Restart = "always";
               RestartSec = 10;
-              StartLimitIntervalSec = 0;
-              StartLimitBurst = 0;
               EnvironmentFile = config.sops.secrets.HACOMPANION_ENV.path;
               StateDirectory = "hacompanion";
               WorkingDirectory = "/var/lib/hacompanion";
@@ -420,6 +418,7 @@ in
           );
         };
       })
+
       (lib.mkIf cfg.upgradeStatus.uptimeKuma.enable {
         sops.secrets.UPGRADE_STATUS_ID = { };
 
@@ -428,7 +427,7 @@ in
             wantedBy = [ "timers.target" ];
             timerConfig = {
               Persistent = true;
-              OnUnitInactiveSec = "15min";
+              OnActiveSec = "15min";
               Unit = "upgrade-status.service";
             };
           };

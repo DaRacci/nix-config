@@ -48,6 +48,7 @@ export def --wrapped flake-eval [
 export def flatten_graph_recursively [] {
   def extract_objects [input] {
     let type = ($input | describe)
+
     if ($type | str starts-with "list") or ($type | str starts-with "table") {
       $input | each { |item| extract_objects $item } | flatten
     } else if ($type | str starts-with "record") {
@@ -68,7 +69,7 @@ export def get_output_graph_files [
   identifier: string
   flake_source: string
 ] {
-  let graph_file = (mktemp --suffix "-graph.json")
+  let graph_file = (mktemp -t "module-graph.XXXX")
 
   try {
     run-external "nix" "eval" "--json" $".#($identifier).graph" o> $graph_file
@@ -78,6 +79,7 @@ export def get_output_graph_files [
   }
 
   let files = open $graph_file
+    | from json
     | flatten_graph_recursively
     | where ($it | get -o file | default "" | str starts-with $"($flake_source)/")
     | get file
