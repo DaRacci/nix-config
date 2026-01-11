@@ -3,6 +3,23 @@
   ...
 }:
 {
+  server = {
+    dashboard.items.music = {
+      title = "Navidrome";
+      icon = "sh-navidrome";
+    };
+
+    proxy.virtualHosts = {
+      music = {
+        public = true;
+        ports = [ config.services.navidrome.settings.Port ];
+        extraConfig = ''
+          reverse_proxy http://${config.services.navidrome.settings.Address}:${toString config.services.navidrome.settings.Port}
+        '';
+      };
+    };
+  };
+
   services = {
     navidrome = {
       enable = true;
@@ -11,16 +28,6 @@
         BaseUrl = "https://music.racci.dev";
         MusicFolder = "/mnt/media/library/music";
       };
-    };
-  };
-
-  server.proxy.virtualHosts = {
-    music = {
-      public = true;
-      ports = [ config.services.navidrome.settings.Port ];
-      extraConfig = ''
-        reverse_proxy http://${config.services.navidrome.settings.Address}:${toString config.services.navidrome.settings.Port}
-      '';
     };
   };
 }
