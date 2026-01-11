@@ -96,6 +96,9 @@ in
           clientId = "immich";
           clientSecret._secret = config.sops.secrets."KANIDM/OAUTH2/IMMICH_SECRET".path;
           issuerUrl = "https://auth.racci.dev/oauth2/openid/immich";
+          signingAlgorithm = "ES256";
+          scope = "openid email profile";
+          tokenEndpointAuthMethod = "client_secret_post";
         };
 
         server = {
