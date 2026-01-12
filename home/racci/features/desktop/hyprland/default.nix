@@ -1,4 +1,3 @@
-# TODO - Game mode that disables fancy animations and pauses swww-random-wallpaper
 # TODO Show me the key integration for placement size & quick launching
 {
   self,

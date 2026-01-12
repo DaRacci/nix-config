@@ -10,6 +10,7 @@ let
 in
 {
   imports = [
+    ./gamemode.nix
     ./minecraft.nix
     ./modding.nix
     ./osu.nix

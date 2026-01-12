@@ -20,6 +20,7 @@
   huntress = pkgs.callPackage ./huntress { };
   drive-stats = pkgs.callPackage ./drive-stats { };
   lidarr-plugins = pkgs.callPackage ./lidarr-plugins { };
+  hypr-gamemode = pkgs.callPackage ./hypr-gamemode { };
 
   # Home Assistant Python Packages
   terminal-manager = pkgs.python3Packages.callPackage ./python/terminal-manager.nix { };
