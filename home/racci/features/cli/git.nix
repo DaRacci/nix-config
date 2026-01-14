@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   ...
 }:
@@ -8,7 +9,7 @@
     pkgs.watchman
   ];
 
-  programs = rec {
+  programs = {
     git = {
       enable = true;
       package = pkgs.gitFull;
@@ -45,7 +46,7 @@
     jujutsu = {
       enable = true;
       settings = {
-        inherit (git.settings) user;
+        inherit (config.programs.git.settings) user;
 
         ui = {
           default-branch = "master";
@@ -57,7 +58,7 @@
         signing = {
           behavior = "drop"; # Lazyily sign commits at push time only
           backend = "ssh";
-          key = git.signing.key;
+          key = config.programs.git.settings.signing.key;
         };
 
         git = {
