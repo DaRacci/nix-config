@@ -39,7 +39,7 @@ runs:
 
     # Setup TS so we can access the cache
     - name: Tailscale
-      uses: tailscale/github-action@v3
+      uses: tailscale/github-action@v4
       if: ${{ !env.ACT && inputs.TS_OAUTH_CLIENT_ID && inputs.TS_OAUTH_SECRET }}
       with:
         oauth-client-id: ${{ inputs.TS_OAUTH_CLIENT_ID }}
