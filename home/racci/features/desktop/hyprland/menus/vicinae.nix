@@ -17,6 +17,7 @@
     ];
     bind = [
       "CTRL_ALT, SPACE, exec, vicinae toggle"
+      "SUPER, V, exec, vicinae vicinae://extensions/vicinae/clipboard/history"
     ];
   };
 

@@ -57,7 +57,7 @@ in
           (pkgs.writeTextFile {
             name = "allowed-signers";
             text = pkgs.lib.concatStringsSep "\n" [
-              "${config.git.settings.user.email} ${userPublicKey}"
+              "${config.programs.git.settings.user.email} ${userPublicKey}"
             ];
           }).outPath;
 
