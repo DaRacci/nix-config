@@ -13,7 +13,7 @@ jobs:
   flake-checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Check Nix flake Nixpkgs inputs
         uses: DeterminateSystems/flake-checker-action@main
 
@@ -22,7 +22,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -74,7 +74,7 @@ jobs:
     name: Build ${{ matrix.attr }} on ${{ matrix.system }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Free Disk Space
         if: ${{ matrix.extraSpace && !env.ACT }}
@@ -130,7 +130,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-nix
         with:
           arch: x86_64-linux
@@ -153,7 +153,7 @@ jobs:
     strategy:
       matrix: ${{fromJSON(needs.nix-matrix.outputs.matrix)}}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-nix
         with:
           arch: ${{ matrix.system }}
