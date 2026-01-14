@@ -1,6 +1,5 @@
 {
   imports = [
-    ./clipboard.nix
     ./caelestia.nix
     ./popups.nix
     ./rofi.nix

@@ -35,6 +35,13 @@ in
         reverse_proxy http://${cfg.host}:${toString cfg.port}
       '';
 
+    storage.bucketMounts = {
+      immich = {
+        mountLocation = "/var/lib/immich";
+        inherit (config.users.users.immich) uid;
+        inherit (config.users.groups.immich) gid;
+      };
+    };
   };
 
   services = {
@@ -51,7 +58,8 @@ in
             subnet.ipv6.cidr
           ])
           |> flatten
-          |> filterEmpty;
+          |> filterEmpty
+          |> lib.concatStringsSep ",";
       };
 
       machine-learning.enable = true;
@@ -88,6 +96,9 @@ in
           clientId = "immich";
           clientSecret._secret = config.sops.secrets."KANIDM/OAUTH2/IMMICH_SECRET".path;
           issuerUrl = "https://auth.racci.dev/oauth2/openid/immich";
+          signingAlgorithm = "ES256";
+          scope = "openid email profile";
+          tokenEndpointAuthMethod = "client_secret_post";
         };
 
         server = {
