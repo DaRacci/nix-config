@@ -51,11 +51,14 @@ let
           lib
           ;
 
-        pkgs = mkPkgs ({
-          inherit system;
-        } // (lib.optionalAttrs (allocations != null) {
-          accelerators = allocations.accelerators.${name} or [ ];
-        }));
+        pkgs = mkPkgs (
+          {
+            inherit system;
+          }
+          // (lib.optionalAttrs (allocations != null) {
+            accelerators = allocations.accelerators.${name} or [ ];
+          })
+        );
       }
       // (removeAttrs args [
         "system"

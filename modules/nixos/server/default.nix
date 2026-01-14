@@ -159,6 +159,7 @@ in
     (importModule ./proxy.nix { })
 
     ./ssh
+    ./storage
     ./distributed-builds.nix
   ];
 
