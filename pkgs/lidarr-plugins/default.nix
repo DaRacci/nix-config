@@ -25,7 +25,7 @@ let
     src = fetchFromGitHub {
       owner = "Lidarr";
       repo = "Lidarr";
-      rev = "f46acd61c8c9aca25690c64c43ab4f6be6863cec";
+      rev = "7277458721256b36ab6c248f5f3b34da94e4faf9";
       hash = "sha256-YyiSzIc707ozCsO/KM7S4cg82cCk3Vo8Rz3UCDBiv10=";
     };
     postPatch = ''
