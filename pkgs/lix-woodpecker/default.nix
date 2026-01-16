@@ -17,6 +17,7 @@ buildLixImage {
   extraPkgs = with pkgs; [
     gawk
     jq
+    yq-go
     gnupg
     attic-client
   ];
