@@ -156,7 +156,7 @@ in
     (importModule ./database { })
     (importModule ./dashboard.nix { })
     (importModule ./network.nix { })
-    (importModule ./proxy.nix { })
+    (importModule ./proxy { })
 
     ./ssh
     ./storage

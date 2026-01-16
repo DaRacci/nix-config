@@ -10,22 +10,13 @@ let
 in
 {
   imports = [
-    ./jvm.nix
-    ./nix.nix
-    ./rust.nix
     ./editors
+    ./languages
+    ./tools
   ];
 
   options.purpose.development = {
-    enable = mkEnableOption "development";
-
-    python = {
-      enable = mkEnableOption "Enable Python Development";
-    };
-
-    dotnet = {
-      enable = mkEnableOption "Enable .NET Development, this includes PowerShell";
-    };
+    enable = mkEnableOption "Enable General Development Tools & Utilities";
   };
 
   config = mkIf cfg.development.enable {

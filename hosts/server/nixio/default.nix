@@ -1,4 +1,3 @@
-# TODO - Authentik to unify login across services
 {
   self,
   config,
