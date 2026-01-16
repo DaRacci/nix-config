@@ -68,7 +68,7 @@ _:
         "github.com/WeidiDeng/caddy-cloudflare-ip@v0.0.0-20231130002422-f53b62aa13cb"
         "github.com/greenpau/caddy-security@v1.1.31"
       ];
-      hash = "sha256-Vlywy5gMRY91S3BzBw2nSapFQ0/n3L9arKcqAeKxtmA=";
+      hash = "sha256-BUn7yOl/srGSGWjFqSlWa93O3rKt7XNU0W0eiO5USAY=";
     };
     email = "admin@racci.dev";
 
