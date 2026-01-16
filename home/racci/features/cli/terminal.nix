@@ -105,7 +105,7 @@ in
         show_startup_tips = false;
         scroll_buffer_size = 25000;
 
-        copy_command = "wl-copy";
+        copy_command = "${lib.getExe' pkgs.wl-clipboard "wl-copy"}";
         copy_clipboard = "primary";
 
         ui = {
