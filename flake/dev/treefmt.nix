@@ -37,6 +37,7 @@
       settings = {
         formatter.shellcheck.excludes = [ ".envrc" ];
         global.excludes = [
+          ".opencode/**"
           "**/secrets.yaml"
           "**/ssh_host_ed25519_key.pub"
           "hosts/server/nixcloud/provisioning.json"

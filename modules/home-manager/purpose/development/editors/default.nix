@@ -4,10 +4,7 @@ _: {
     ./vscode
   ];
 
-  options.purpose.development.editors = {
-  };
+  options.purpose.development.editors = { };
 
-  config = {
-
-  };
+  config = { };
 }
