@@ -39,6 +39,7 @@ in
             "jj-opencode"
             "oh-my-opencode@latest"
             "@tarquinen/opencode-dcp@latest"
+            "@simonwjackson/opencode-direnv"
           ];
 
           formatter = {

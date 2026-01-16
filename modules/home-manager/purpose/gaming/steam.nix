@@ -43,7 +43,6 @@ in
       '';
 
       packages = with pkgs; [
-        protonup-rs
         adwsteamgtk
       ];
     };

@@ -63,7 +63,7 @@
   programs.gpg.enable = true;
   services.gpg-agent = {
     enable = true;
-    pinentry.package = pkgs.pinentry-rofi;
+    pinentry.package = pkgs.pinentry-tty;
   };
 
   custom.uwsm.sliceAllocation.background = [ "gpg-agent" ];

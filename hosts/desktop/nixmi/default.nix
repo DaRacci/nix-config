@@ -58,10 +58,7 @@
     steam = {
       enable = true;
       updater.splash = "steamos";
-
-      autoStart = false;
       user = "racci";
-      desktopSession = "hyprland";
     };
 
     decky-loader = {
