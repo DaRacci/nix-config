@@ -101,6 +101,13 @@ export def get_output_graph_files [
   $files
 }
 
+# Gets some basic flake info
+#
+# Returns a record like:
+# {
+#   source_path
+#   hash
+# }
 export def get_flake_info [] {
   let archive_info = try {
     nix flake archive --json | from json
@@ -122,4 +129,84 @@ export def get_flake_info [] {
   }
 
   { source_path: $source_path, hash: $hash }
+}
+
+# Gets the revision and hash of a flake input
+#
+# Returns a record like:
+# {
+#   rev
+#   hash
+# }
+export def get_flake_input [
+  lock_file: string   # The lock file to read from
+  input_name: string  # The name of the input to check for changes.
+] {
+  jq -r '
+    (.root) as $r
+    | (.nodes[$r].inputs.nixpkgs // "nixpkgs") as $n0
+    | ($n0 | if type=="string" then . else (.[0] // "nixpkgs") end) as $n
+    | (.nodes[$n].locked // {})
+    | { rev: (.rev // "none"), hash: (.narHash // "none") }
+  ' $lock_file e> /dev/null | from json
+}
+
+export def has_flake_inputs_changed [
+  git_range: string
+  input_name: string
+] {
+  let split_range = $git_range | split row ".."
+  let head_commit = $split_range | last
+  let prev_commit = $split_range | first
+
+  let root_flake_changed = not (git diff --name-only $git_range -- flake.lock | str trim | is-empty)
+  if $root_flake_changed {
+    let prev_lock_file = mktemp -t "old-lock.XXXX"
+    git show $"($prev_commit):flake.lock" | save -f $prev_lock_file
+    let prev_input = get_flake_input $prev_lock_file $input_name
+    let curr_input = get_flake_input flake.lock $input_name
+    log info $"Previous ($input_name): ($prev_input), Current ($input_name): ($curr_input)"
+    if $prev_input.rev != $curr_input.rev {
+      log info $"Root flake.nix ($input_name) version changed from [($prev_input.rev)] to [($curr_input.rev)]"
+      return true
+    }
+  }
+
+  return false
+}
+
+# Check if a file has changed between git range
+export def check_file_changed [
+  git_range: string # The git range to check for changes.
+  ...files: string
+] {
+  log info $"Checking files for changes: ($files)"
+  let split_range = $git_range | split row ".."
+  let head_commit = $split_range | last
+  let prev_commit = $split_range | first
+
+  let git_file_diffs = git diff --name-only $git_range -- ...$files | str trim | split row "\n" | where {|f| not ($f | is-empty) }
+  if ($git_file_diffs | is-empty) {
+    log info "No changes detected in the specified files"
+    return false;
+  }
+
+  log info $"Git file diffs: ($git_file_diffs)"
+  mut changed_files = [ ];
+  for file in $git_file_diffs {
+    let has_changed = $git_file_diffs | any {|f| $f == $file }
+    let old_file = mktemp -t "old-file.XXXX"
+    git show $"($prev_commit):($file)" | save -f $old_file
+
+    log info $"Checking differences between ($file) and ($old_file)"
+    let old_hash = nix hash file $old_file
+    let cur_hash = nix hash file $file
+
+    if $old_hash != $cur_hash {
+      log info $"File [($file)] has changed."
+      $changed_files = $changed_files | append $file
+    }
+  }
+
+  return (($changed_files | length) > 0)
 }

@@ -1,6 +1,5 @@
 name: "Setup Nix with Lix & Caches"
 description: "Setup Nix with Lix & Caches"
-
 inputs:
   root:
     description: "Path to the root of the nix project (where flake.nix is)"
@@ -25,7 +24,6 @@ inputs:
   ATTIC_TOKEN:
     description: "Attic token"
     required: false
-
 runs:
   using: composite
   steps:
@@ -36,7 +34,6 @@ runs:
           experimental-features = nix-command flakes pipe-operator
           substituters = https://cache.nixos.org https://cache.racci.dev/global https://nix-community.cachix.org https://chaotic-nyx.cachix.org/
           trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= global:OKNSxDYKp8Q8Tr5/5Bc7CYVSfvdFQV0dMhpG0fOAG0k= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8=
-
     # Setup TS so we can access the cache
     - name: Tailscale
       uses: tailscale/github-action@v4
@@ -46,7 +43,6 @@ runs:
         oauth-secret: ${{ inputs.TS_OAUTH_SECRET }}
         tags: tag:ci
         use-cache: true
-
     # Taken from https://github.com/ryanccn/attic-action/issues/28#issuecomment-2743233082
     - name: Restore attic-client binary
       uses: actions/cache@v5
