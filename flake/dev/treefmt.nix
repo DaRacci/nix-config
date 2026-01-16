@@ -13,7 +13,7 @@
         shellcheck.enable = true;
         statix = {
           enable = true;
-          # TODO Remove once https://github.com/oppiliappan/statix/pull/152 is merged
+          # TODO:https://github.com/oppiliappan/statix/pull/152
           disabled-lints = [ "manual_inherit_from" ];
         };
         mdformat.enable = true;

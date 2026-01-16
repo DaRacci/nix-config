@@ -21,6 +21,6 @@ buildLixImage {
   ];
 
   nixConf = {
-    extra-experimental-features = "nix-command flakes pipe-operator";
+    extra-experimental-features = "nix-command flakes pipe-operator pipe-operators";
   };
 }

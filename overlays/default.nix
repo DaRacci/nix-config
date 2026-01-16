@@ -90,7 +90,7 @@ in
       };
     });
 
-    # TODO Remove once #480983 lands in nixos-unstable
+    # TODO:https://github.com/NixOS/nixpkgs/pull/480983
     hyprland = prev.hyprland.overrideAttrs (_: {
       postPatch = ''
         # Fix hardcoded paths to /usr installation

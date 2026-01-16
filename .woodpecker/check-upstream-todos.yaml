@@ -1,0 +1,15 @@
+labels:
+  platform: linux/amd64
+
+when:
+  - event: manual
+  - event: [push, pull_request]
+    branch: master
+  - event: cron
+    cron: weekly
+
+steps:
+  - name: Check upstream TODOs
+    image: registry.racci.dev/lix-woodpecker:latest
+    pull: true
+    commands: nix run .#check-upstream-todos

@@ -29,7 +29,7 @@ def main [
       nix flake update --commit-lock-file --commit-lockfile-summary $commit_msg
     } catch { |err|
       log error $"Failed to update flake in ($flake_dir), continuing..."
-      log debug $"Error details: ($err.msg)"
+      log error $"Error details: ($err.msg)"
     }
     cd $ROOT_DIR
   }
