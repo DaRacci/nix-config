@@ -69,7 +69,7 @@
       url = "${basePath}/music";
       label = "Music";
       badge = {
-        show = ''[[[ return states['media_player.music'].state === 'playing' ]]]'';
+        show = "[[[ return states['media_player.music'].state === 'playing' ]]]";
         color = "var(--green-color)";
       };
       hidden = ''
@@ -97,7 +97,7 @@
       url = "${basePath}/home#remote";
       label = "TV";
       badge = {
-        show = ''[[[ return states['media_player.apple_tv'].state === 'playing' ]]]'';
+        show = "[[[ return states['media_player.apple_tv'].state === 'playing' ]]]";
         color = "var(--green-color)";
       };
       hidden = ''
@@ -107,7 +107,7 @@
           else return true;
         ]]]
       '';
-      selected = ''[[[ return location.hash == '#remote'; ]]]'';
+      selected = "[[[ return location.hash == '#remote'; ]]]";
       hold_action.action = "open-popup";
       popup = [
         {
@@ -133,10 +133,10 @@
       icon = "mdi:face-agent";
       url = "${basePath}/home#james";
       label = "James";
-      selected = ''[[[ return location.hash == '#james'; ]]]'';
+      selected = "[[[ return location.hash == '#james'; ]]]";
       hidden = ''[[[ return user.name != "James" ]]]'';
       badge = {
-        show = ''[[[ return states['input_boolean.debug_rounded'].state === 'on' ]]]'';
+        show = "[[[ return states['input_boolean.debug_rounded'].state === 'on' ]]]";
         color = "var(--red-color)";
       };
     }
@@ -144,7 +144,7 @@
       icon = "mdi:face-woman";
       url = "${basePath}/home#savannah";
       label = "Savannah";
-      selected = ''[[[ return location.hash == '#savannah'; ]]]'';
+      selected = "[[[ return location.hash == '#savannah'; ]]]";
       hidden = ''[[[ return user.name != "Savannah" ]]]'';
     }
     {
@@ -184,9 +184,9 @@
           url = "${basePath}/home";
           label = "Shopping List";
           badge = {
-            show = ''[[[ return states['todo.shopping_list'].state > 0 ]]]'';
+            show = "[[[ return states['todo.shopping_list'].state > 0 ]]]";
             color = "var(--red-color)";
-            count = ''[[[ return states['todo.shopping_list'].state ]]]'';
+            count = "[[[ return states['todo.shopping_list'].state ]]]";
           };
         }
         {

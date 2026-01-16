@@ -398,7 +398,7 @@ with (import ../lib.nix { inherit lib; });
         }
       ]]]
     '';
-    label = ''[[[ return states[ entity.entity_id ].attributes.media_title ]]]'';
+    label = "[[[ return states[ entity.entity_id ].attributes.media_title ]]]";
     show_state = false;
     show_entity_picture = true;
     entity_picture = ''
@@ -564,12 +564,12 @@ with (import ../lib.nix { inherit lib; });
       button.card = {
         type = "custom:button-card";
         icon = "mdi:play";
-        entity = ''[[[ return entity.entity_id ]]]'';
+        entity = "[[[ return entity.entity_id ]]]";
         show_name = false;
         tap_action = {
           action = "call-service";
           service = "media_player.media_play_pause";
-          target.entity_id = ''[[[ return entity.entity_id ]]]'';
+          target.entity_id = "[[[ return entity.entity_id ]]]";
         };
         styles = {
           card = {

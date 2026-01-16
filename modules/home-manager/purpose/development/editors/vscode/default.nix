@@ -192,12 +192,12 @@ in
                       ignored = [ ];
                     };
                     formatting = {
-                      command = [ "${lib.getExe pkgs.nixfmt-rfc-style}" ];
+                      command = [ "${lib.getExe pkgs.nixfmt}" ];
                     };
                   };
 
                   nixd = {
-                    formatting.command = "${lib.getExe pkgs.nixfmt-rfc-style}";
+                    formatting.command = "${lib.getExe pkgs.nixfmt}";
                     eval = {
                       enable = true;
                       targets = {
