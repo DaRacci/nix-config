@@ -6,6 +6,8 @@
 let
   inherit (lib.mine.packages) writeNuApplicationWithLibs;
 
+  sourceRoot = ./.;
+
   pki2kdbx = pkgs.writeShellApplication {
     name = "pki2kdbx";
     runtimeInputs = [
@@ -21,8 +23,7 @@ in
   inherit pki2kdbx;
 
   install-vale-dictionaries = writeNuApplicationWithLibs {
-    inherit pkgs;
-    sourceRoot = ./.;
+    inherit pkgs sourceRoot;
     name = "install-vale-dictionaries";
     runtimeInputs = [ pkgs.ripgrep ];
   };
@@ -41,29 +42,25 @@ in
       '';
 
   nix-tree-host = writeNuApplicationWithLibs {
-    inherit pkgs;
-    sourceRoot = ./.;
+    inherit pkgs sourceRoot;
     name = "nix-tree-host";
     runtimeInputs = [ pkgs.nix-tree ];
   };
 
   rebuild-target = writeNuApplicationWithLibs {
-    inherit pkgs;
-    sourceRoot = ./.;
+    inherit pkgs sourceRoot;
     name = "rebuild-target";
     runtimeInputs = [ pkgs.nh ];
   };
 
   update-redis-mappings = writeNuApplicationWithLibs {
-    inherit pkgs;
-    sourceRoot = ./.;
+    inherit pkgs sourceRoot;
     name = "update-redis-mappings";
     runtimeInputs = [ pkgs.lix ];
   };
 
   update-sops = writeNuApplicationWithLibs {
-    inherit pkgs;
-    sourceRoot = ./.;
+    inherit pkgs sourceRoot;
     name = "update-sops";
     runtimeInputs = [
       pkgs.sops
@@ -72,8 +69,7 @@ in
   };
 
   provision-alloy-certs = writeNuApplicationWithLibs {
-    inherit pkgs;
-    sourceRoot = ./.;
+    inherit pkgs sourceRoot;
     name = "provision-alloy-certs";
     runtimeInputs = [
       pkgs.coreutils
@@ -87,8 +83,7 @@ in
   };
 
   provision-intermediate-ca = writeNuApplicationWithLibs {
-    inherit pkgs;
-    sourceRoot = ./.;
+    inherit pkgs sourceRoot;
     name = "provision-intermediate-ca";
     runtimeInputs = [
       pkgs.coreutils
@@ -99,8 +94,7 @@ in
   };
 
   provision-db-guardian-certs = writeNuApplicationWithLibs {
-    inherit pkgs;
-    sourceRoot = ./.;
+    inherit pkgs sourceRoot;
     name = "provision-db-guardian-certs";
     runtimeInputs = [
       pkgs.coreutils
@@ -111,5 +105,21 @@ in
       pkgs.sops
       pki2kdbx
     ];
+  };
+
+  build-changed = writeNuApplicationWithLibs {
+    inherit pkgs sourceRoot;
+    name = "build-changed";
+    runtimeInputs = [ pkgs.git ];
+  };
+
+  get-symbol-value = writeNuApplicationWithLibs {
+    inherit pkgs sourceRoot;
+    name = "get-symbol-value";
+  };
+
+  module-graph = writeNuApplicationWithLibs {
+    inherit pkgs sourceRoot;
+    name = "module-graph";
   };
 }

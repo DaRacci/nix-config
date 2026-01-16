@@ -16,6 +16,7 @@
 # and are built with nix when those are unset.
 
 use std/log
+use lib/common.nu
 use lib/flake.nu *
 
 # Nix writes host names without capitals, so the documentation form is derived here:

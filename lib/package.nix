@@ -7,14 +7,17 @@ let
     getExe
     makeBinPath
     filter
-    hasSuffix
+    filterAttrs
     ;
   inherit (builtins)
     readFile
     readDir
     attrNames
     concatStringsSep
+    pathExists
     ;
+
+  nuLib = ./nu-lib;
 in
 rec {
   writeNuApplication =
@@ -50,6 +53,9 @@ rec {
         + ''
           ${readFile "${sourceRoot}/${name}.nu"}
         '';
+
+        passthru.discovery = false;
+        passthru.ci = false;
       }
       // extraDrv
     );
@@ -71,21 +77,22 @@ rec {
 
       extraDrv.checkPhase =
         let
-          libDir = "${sourceRoot}/lib";
+          libDirs = filter pathExists [
+            "${sourceRoot}/lib"
+            nuLib
+          ];
+          copyLibDir = libDir: ''
+            ${concatStringsSep "\n" (
+              map (libFile: "cp ${libDir}/${libFile} $out/bin/lib/${libFile}") (
+                attrNames (filterAttrs (_: type: type == "regular") (readDir libDir))
+              )
+            )}
+          '';
         in
         ''
           mkdir -p $out/bin/lib
 
-          ${
-            if builtins.pathExists libDir then
-              readDir "${sourceRoot}/lib"
-              |> attrNames
-              |> filter (libFile: hasSuffix "nu" libFile)
-              |> map (libFile: "cp ${"${sourceRoot}/lib/${libFile}"} $out/bin/lib/${libFile}")
-              |> concatStringsSep "\n"
-            else
-              ""
-          }
+          ${concatStringsSep "\n" (map copyLibDir libDirs)}
         '';
 
     };

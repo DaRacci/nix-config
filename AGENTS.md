@@ -71,8 +71,10 @@ You must provide the override for `nix flake check` and `nix develop`:
 Before testing, determine what your changes affect:
 
 ```bash
-./flake/dev/scripts/module-graph.nu
+nix run .#module-graph
 ```
+
+Recommend setting `SILENT=true` when sending output to LLMs or remote analysis tools to reduce logging verbosity and token usage.
 
 ### Project Structure Overview
 

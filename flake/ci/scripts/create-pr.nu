@@ -1,6 +1,7 @@
 #!/usr/bin/env nu
 
 use std/log
+use lib/common.nu
 
 # Create or update a GitHub Pull Request
 #

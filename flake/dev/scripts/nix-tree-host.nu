@@ -1,5 +1,6 @@
 #!/usr/bin/env nu
 
+use lib/common.nu
 use lib/flake.nu *
 
 def main [] {

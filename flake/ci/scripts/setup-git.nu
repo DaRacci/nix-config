@@ -1,6 +1,7 @@
 #!/usr/bin/env nu
 
 use std/log
+use lib/common.nu
 
 const GIT_DEFAULT_NAME = "Woodpecker CI"
 const GIT_DEFAULT_EMAIL = "woodpecker@racci.dev"

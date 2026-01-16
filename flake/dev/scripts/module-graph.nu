@@ -1,6 +1,7 @@
 #!/usr/bin/env -S nix shell nixpkgs#nushell --command nu
 
 use std/log
+use lib/common.nu
 use lib/flake.nu
 
 def main [] {

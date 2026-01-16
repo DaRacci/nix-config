@@ -1,6 +1,7 @@
 #!/usr/bin/env nu
 
 use std/log
+use lib/common.nu
 use lib/flake.nu *
 
 const ACTIONS = ["switch" "build" "boot" "test" "build-vm"]

@@ -1,6 +1,7 @@
 #!/usr/bin/env nu
 
 use std/log
+use lib/common.nu
 
 def main [
   ...flake_dirs: string  # List of flake directories to archive; relative to the repository root.

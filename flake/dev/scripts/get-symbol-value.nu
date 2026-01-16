@@ -1,5 +1,6 @@
 #!/usr/bin/env -S nix shell nixpkgs#nushell --command nu
 
+use lib/common.nu
 use lib/flake.nu *
 
 const NOT_HOME_FILES = [

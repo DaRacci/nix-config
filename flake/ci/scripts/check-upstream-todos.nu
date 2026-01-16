@@ -2,6 +2,7 @@
 # This is heavily based off https://github.com/pinpox/nixos/blob/main/.github/workflows/check-upstream-todos.yml
 
 use std/log
+use lib/common.nu
 
 const TODO_PATTERN = "TODO:?\\s*https://github\\.com/[^/]+/[^/]+/(pull|issues)/[0-9]+"
 const URL_PATTERN = "https://github\\.com/[^/]+/[^/]+/(pull|issues)/[0-9]+"

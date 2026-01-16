@@ -1,6 +1,7 @@
 #!/usr/bin/env nu
 
 use std/log
+use lib/common.nu
 
 def main [
   --commit-message: string, # Commit message template; <flake> will be replaced with the relative path of the flake.lock file.
