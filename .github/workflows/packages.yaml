@@ -60,7 +60,7 @@ jobs:
         id: filtered-packages
         uses: workflow/nix-shell-action@v3
         with:
-          packages: awk
+          packages: gawk
           script: |
             set -euo pipefail
 

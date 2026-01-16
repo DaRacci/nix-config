@@ -23,4 +23,11 @@ in
       pkgs.gnupg
     ];
   };
+
+  update-locks = writeNuApplicationWithLibs {
+    inherit pkgs;
+    sourceRoot = ./.;
+    name = "update-locks";
+    runtimeInputs = [ pkgs.nix ];
+  };
 }
