@@ -47,6 +47,7 @@ in
         mountLocation = "/var/lib/nextcloud/data";
         inherit (config.users.users.nextcloud) uid;
         inherit (config.users.groups.nextcloud) gid;
+        umask = 007;
       };
     };
   };

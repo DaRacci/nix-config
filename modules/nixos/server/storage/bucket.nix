@@ -62,8 +62,27 @@ in
 
             umask = mkOption {
               type = int;
-              description = "Umask for the mounted bucket.";
               default = 022;
+              description = ''
+                Umask for the mounted bucket.
+
+                Files default to 666 and directories to 777, so a umask of 022 results
+                in files being created with permissions 644 and directories with 755.
+
+                See the umask bits table below for details:
+                | Umask Bit | File Permissions | Directory Permissions |
+                |-----------|------------------|-----------------------|
+                | 0         | rw-              | rwx                   |
+                | 1         | rw-              | rw-                   |
+                | 2         | r--              | r-x                   |
+                | 3         | r--              | r--                   |
+                | 4         | -w-              | -wx                   |
+                | 5         | -w-              | -w-                   |
+                | 6         | ---              | -x-                   |
+                | 7         | ---              | ---                   |
+
+                A online calculator can be found at https://www.howtouselinux.com/linux-umask-calculator
+              '';
             };
           };
         }

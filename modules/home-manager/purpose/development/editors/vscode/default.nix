@@ -267,11 +267,11 @@ in
               enableExtensionUpdateCheck = false;
             };
 
-            jvm = lib.mkIf cfg.jvm.enable (mkProfile {
+            jvm = lib.mkIf cfg.languages.jvm.enable (mkProfile {
 
             });
 
-            rust = lib.mkIf cfg.rust.enable (mkProfile {
+            rust = lib.mkIf cfg.languages.rust.enable (mkProfile {
               extensions = versionExtensions [
                 "jscearcy.rust-doc-viewer"
                 "dustypomerleau.rust-syntax"
@@ -279,7 +279,7 @@ in
               ];
             });
 
-            dotnet = lib.mkIf cfg.dotnet.enable (mkProfile {
+            dotnet = lib.mkIf cfg.languages.dotnet.enable (mkProfile {
               extensions = versionExtensions [
                 "ms-dotnettools.csharp"
                 "ms-dotnettools.csdevkit"
@@ -297,7 +297,7 @@ in
               };
             });
 
-            python = lib.mkIf cfg.python.enable (mkProfile {
+            python = lib.mkIf cfg.languages.python.enable (mkProfile {
               extensions = versionExtensions [
                 "ms-python.python"
                 "ms-python.vscode-pylance"

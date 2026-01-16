@@ -53,16 +53,22 @@ _:
       after = [ "caddy.service" ];
       wants = after;
     };
+    hacompanion = rec {
+      after = [ "caddy.service" ];
+      wants = after;
+    };
   };
 
   services.caddy = {
     enable = true;
+    # TODO - Implement auto update for plugins
     package = pkgs.caddy.withPlugins {
       plugins = [
         "github.com/mholt/caddy-l4@v0.0.0-20251124224044-66170bec9f4d"
         "github.com/WeidiDeng/caddy-cloudflare-ip@v0.0.0-20231130002422-f53b62aa13cb"
+        "github.com/greenpau/caddy-security@v1.1.31"
       ];
-      hash = "sha256-gBb/qS0qfqfEOeQpgILibzPLL6K5bouh0J7hcqJwSRQ=";
+      hash = "sha256-Vlywy5gMRY91S3BzBw2nSapFQ0/n3L9arKcqAeKxtmA=";
     };
     email = "admin@racci.dev";
 

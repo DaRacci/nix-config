@@ -27,8 +27,8 @@ steps:
       GPG_PASSPHRASE:
         from_secret: GPG_PASSPHRASE
     commands: |
-      nix run nixpkgs#update-flake-locks -- \
-        --flake-dirs ("." "flake/ci" "flake/dev" "flake/nixos" "flake/home-manager") \
+      nix run .#update-locks -- \
+        --flake-dirs ["." "flake/ci" "flake/dev" "flake/nixos" "flake/home-manager"] \
         --commit-message "chore(deps): Update <flake>"
 
       # If there are no changes, exit early
@@ -38,8 +38,8 @@ steps:
         exit 0
       fi
 
-      nix run nixpkgs#setup-git
-      nix run nixpkgs#create-pr -- \
+      nix run .#setup-git
+      nix run .#create-pr -- \
         --title "chore(deps): Update flake inputs" \
         --body "This PR updates the flake inputs to their latest versions, see individual commits for changes." \
         --branch "update/flake-inputs-all" \

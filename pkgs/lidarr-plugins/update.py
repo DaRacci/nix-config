@@ -61,6 +61,7 @@ package_attrs = json.loads(
           dir = dirOf p.meta.position;
           version = p.version;
           sourceHash = p.src.src.outputHash;
+          sourceRev = p.src.rev;
           yarnHash = p.yarnOfflineCache.outputHash;
         }""",
         ],
@@ -113,6 +114,10 @@ source_nix_hash, source_store_path = (
     .split("\n")
 )
 
+old_source_rev = package_attrs["sourceRev"]
+new_source_rev = latest_commit
+print(f"Revision update: {old_source_rev} → {new_source_rev}")
+
 old_source_hash = package_attrs["sourceHash"]
 new_source_hash = nix_hash_to_sri(source_nix_hash)
 print(f"Hash prefetch: {source_nix_hash} → {new_source_hash}")
@@ -137,6 +142,7 @@ with tempfile.TemporaryDirectory() as work_dir:
             # Try to be more specific to avoid false positive matches.
             f'version = "{old_version}"': f'version = "{new_version}"',
             old_source_hash: new_source_hash,
+            old_source_rev: new_source_rev,
         },
     )
 
