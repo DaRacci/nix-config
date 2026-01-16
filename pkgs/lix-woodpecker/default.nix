@@ -10,6 +10,7 @@ let
     gawk
     gnupg
     jq
+    yq-go
     ;
   inherit (pkgs.stdenv.hostPlatform) system;
   inherit (inputs.nix2container.packages.${system}) nix2container;
@@ -23,6 +24,7 @@ buildLixImage {
   extraPkgs = [
     gawk
     jq
+    yq-go
     gnupg
     attic-client
   ];

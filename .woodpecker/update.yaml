@@ -1,9 +1,9 @@
 # Pipeline to update all flake.lock files and create a single PR with all changes.
 # Required secrets:
-#   - GITHUB_TOKEN: Fine-grained PAT with `contents:write` and `pull-requests:write` scopes
-#   - GPG_PRIVATE_KEY: GPG private key for signing commits (optional)
-#   - GPG_FINGERPRINT: GPG key fingerprint (optional)
-#   - GPG_PASSPHRASE: GPG key passphrase (optional)
+#   - GITHUB_TOKEN: token used to fetch GitHub-hosted flake inputs
+#   - FORGE_TOKEN: Codeberg token with repository and pull-request write access
+#   - FORGE_AUTH_KEY: SSH key allowed to push branches to Codeberg
+#   - GPG_PRIVATE_KEY, GPG_FINGERPRINT, GPG_PASSPHRASE: optional commit signing
 #
 # Trigger this pipeline via cron job or manually from the Woodpecker UI.
 # You must create a cron job named "update-flake-inputs" in the Woodpecker UI.
@@ -13,9 +13,18 @@ when:
   - event: cron
     cron: update-flake-inputs
 
+clone:
+  - name: git
+    image: woodpeckerci/plugin-git@sha256:b49127ebd592cde07fb7a08c68025b1ea2f44f21cd4bd1440dbfe042a02c1581
+    settings:
+      partial: false
+      depth: 0
+
+concurrency: 1
+
 steps:
   - name: Update all flake.lock files
-    image: registry.racci.dev/lix-woodpecker:latest
+    image: registry.racci.dev/lix-woodpecker
     pull: true
     environment:
       GITHUB_TOKEN:
@@ -31,25 +40,27 @@ steps:
 
       export NIX_CONFIG="access-tokens = github.com=$${GITHUB_TOKEN}"
       nix run .#update-locks -- \
-        --commit-message "chore(deps): Update <flake>"
+        --commit-message "chore(deps): Update <flake>" \
         "." "flake/ci" "flake/dev" "flake/nixos" "flake/home-manager"
 
   - name: Push to Branch
-    image: appleboy/drone-git-push
+    image: appleboy/drone-git-push@sha256:6869b61d74d0fe403267e048ec419ca93a8249f83d90ececa04534d5282c432f
     pull: true
     settings:
-      remote: git@github.com:DaRacci/nix-config.git
+      remote: ${CI_REPO_CLONE_SSH_URL}
       branch: update/flake-inputs-all
       force: true
+      commit: false
+      empty_commit: false
       ssh_key:
-        from_secret: GITHUB_AUTH_KEY
+        from_secret: FORGE_AUTH_KEY
 
   - name: Create/Update PR
     image: registry.racci.dev/lix-woodpecker
     environment:
-      GITHUB_TOKEN:
-        from_secret: GITHUB_TOKEN
-    commands: |
+      FORGE_TOKEN:
+        from_secret: FORGE_TOKEN
+    commands: |-
       nix run .#create-pr -- \
         --title "chore(deps): Update flake inputs" \
         --body "This PR updates the flake inputs to their latest versions, see individual commits for changes." \
