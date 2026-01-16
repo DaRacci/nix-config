@@ -33,6 +33,10 @@
     })
   ];
 
+  environment.systemPackages = with pkgs; [
+    android-tools
+  ];
+
   programs = {
     steam = {
       enable = true;
