@@ -20,4 +20,10 @@
       vpnNamespace = "wg";
     };
   };
+
+  server.proxy.kanidmContexts = {
+    arr-services = {
+      allowGroups = [ "sysadmin@auth.racci.dev" ];
+    };
+  };
 }
