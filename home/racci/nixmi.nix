@@ -74,8 +74,15 @@
 
     development = {
       enable = true;
-      rust.enable = true;
-      dotnet.enable = true;
+
+      languages = {
+        rust.enable = true;
+        dotnet.enable = true;
+      };
+
+      tools = {
+        docker.enable = true;
+      };
 
       editors = {
         ai.enable = true;

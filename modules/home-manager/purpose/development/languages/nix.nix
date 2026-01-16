@@ -7,18 +7,20 @@
 }:
 let
   inherit (lib) mkEnableOption mkIf;
-  cfg = config.purpose.development.nix;
+
+  cfg = config.purpose.development.languages.nix;
+  rootCfg = config.purpose.development;
 in
 {
   imports = [
     inputs.nix-index-database.homeModules.default
   ];
 
-  options.purpose.development.nix = {
+  options.purpose.development.languages.nix = {
     enable = mkEnableOption "nix development";
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf (rootCfg.enable && cfg.enable) {
     programs.nix-index.enable = true;
 
     home.packages = with pkgs; [
