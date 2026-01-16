@@ -1,8 +1,8 @@
 name: Update Packages
 
 on:
-  schedule:
-    - cron: "0 17 * * */3"
+  # schedule:
+  #   - cron: "0 17 * * */3"
   workflow_dispatch:
     inputs:
       base:
