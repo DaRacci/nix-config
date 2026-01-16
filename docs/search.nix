@@ -29,6 +29,6 @@ let
 in
 mkMultiSearch {
   title = "RacciDev Search";
-  baseHref = "/search/";
+  baseHref = "/nix-config/search/";
   scopes = rootModules |> map (path: mkRacciDevModule path "${self}/modules/nixos/${path}");
 }
