@@ -24,6 +24,7 @@ _:
   };
 
   server.proxy.virtualHosts.minio = {
+    aliases = [ "*.minio" ];
     ports = [
       9000
       9001

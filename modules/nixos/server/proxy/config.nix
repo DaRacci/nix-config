@@ -73,6 +73,7 @@ in
             nameValuePair vh.baseUrl {
               hostName = vh.baseUrl;
               useACMEHost = vh.baseUrl;
+              serverAliases = vh.aliases;
               extraConfig = ''
                 import default
                 ${optionalString vh.public "import public"}
@@ -100,11 +101,11 @@ in
         );
       };
 
-      security.acme.certs =
-        builtins.attrNames config.services.caddy.virtualHosts
-        |> builtins.filter (name: hasSuffix ".${cfg.domain}" name)
-        |> map (name: nameValuePair name { })
-        |> builtins.listToAttrs;
+      security.acme.certs = config.services.caddy.virtualHosts
+        |> lib.filterAttrs (name: _: hasSuffix ".${cfg.domain}" name)
+        |> lib.mapAttrs (name: vh: {
+          extraDomainNames = vh.serverAliases;
+        });
 
       networking.firewall =
         let

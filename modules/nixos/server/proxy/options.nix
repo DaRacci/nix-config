@@ -8,6 +8,7 @@
 }:
 let
   inherit (lib)
+    mkBefore
     mkOption
     types
     ;
@@ -95,6 +96,16 @@ in
           { name, ... }:
           {
             options = {
+              aliases = mkOption {
+                type = listOf str;
+                default = [ ];
+                description = ''
+                  A list of virtual host names that should be routed using this configuration.
+                  Options added here will inherit the base domain specificed in <server.proxy.domain>.
+                '';
+                apply = list: map (alias: "${alias}.${getIOPrimaryHostAttr "server.proxy.domain"}") list;
+              };
+
               public = mkOption {
                 type = bool;
                 default = false;
