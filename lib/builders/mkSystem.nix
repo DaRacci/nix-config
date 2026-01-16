@@ -64,7 +64,10 @@ nixosSystem rec {
     ++ (optional (deviceUsers != [ ]) (
       { config, ... }:
       {
-        imports = [ inputs.home-manager.nixosModules.default ];
+        imports = [
+          inputs.home-manager.nixosModules.default
+          "${self}/modules/nixos/hm-helper"
+        ];
 
         sops.secrets = genAttrs' deviceUsers (
           username:

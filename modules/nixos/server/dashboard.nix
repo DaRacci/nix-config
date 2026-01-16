@@ -15,8 +15,8 @@ let
     mkIf
     mkMerge
     mkOption
-    mkEnableOption
     removePrefix
+    literalExpression
     ;
   inherit (types)
     submodule
@@ -29,6 +29,25 @@ in
   options.server.dashboard = {
     name = mkOption {
       type = str;
+      default =
+        let
+          withoutPrefix = removePrefix "nix" config.host.name;
+          nixPrefixed = builtins.stringLength withoutPrefix < builtins.stringLength config.host.name;
+        in
+        if nixPrefixed then
+          "Nix${lib.mine.strings.capitalise withoutPrefix}"
+        else
+          lib.capitalize config.host.name;
+      defaultText = literalExpression ''
+        let
+          withoutPrefix = removePrefix "nix" config.host.name;
+          nixPrefixed = builtins.stringLength withoutPrefix < builtins.stringLength config.host.name;
+        in
+        if nixPrefixed then
+          "Nix''${lib.mine.strings.capitalise withoutPrefix}"
+        else
+          lib.capitalize config.host.name;
+      '';
       description = "Name of the section in the dashboard.";
     };
 
@@ -72,20 +91,6 @@ in
   };
 
   config = mkMerge [
-    {
-      server.dashboard = {
-        name =
-          let
-            withoutPrefix = removePrefix "nix" config.host.name;
-            nixPrefixed = builtins.stringLength withoutPrefix < builtins.stringLength config.host.name;
-          in
-          if nixPrefixed then
-            "Nix${lib.mine.strings.capitalise withoutPrefix}"
-          else
-            lib.capitalize config.host.name;
-      };
-    }
-
     (mkIf isThisIOPrimaryHost {
       services.dashy.settings = {
         sections = getAllAttrsFunc "server.dashboard" (
