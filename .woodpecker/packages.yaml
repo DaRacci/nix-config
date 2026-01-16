@@ -1,0 +1,107 @@
+labels:
+  platform: linux/amd64
+
+when:
+  - event: manual
+  - event: [push, pull_request]
+    path:
+      - pkgs/**
+      - flake.nix
+      - flake.lock
+      - .woodpecker/packages.yaml
+
+clone:
+  - name: git
+    image: woodpeckerci/plugin-git
+    settings:
+      partial: false
+      depth: 0
+
+matrix:
+  include:
+    - package: alvr-bin
+      arch: x86_64-linux
+    - package: drive-stats
+      arch: x86_64-linux
+    - package: huntress
+      arch: x86_64-linux
+    - package: io-guardian-client
+      arch: x86_64-linux
+    - package: io-guardian-server
+      arch: x86_64-linux
+    - package: lidarr-plugins
+      arch: x86_64-linux
+    - package: list-ephemeral
+      arch: x86_64-linux
+    - package: lix-woodpecker
+      arch: x86_64-linux
+    - package: mcp-sequential-thinking
+      arch: x86_64-linux
+    - package: mcp-server-amazon
+      arch: x86_64-linux
+    - package: monocoque
+      arch: x86_64-linux
+    - package: orca-slicer-zink
+      arch: x86_64-linux
+    - package: proton-mcp
+      arch: x86_64-linux
+    - package: pyarlo
+      arch: x86_64-linux
+    - package: pyuptimekuma
+      arch: x86_64-linux
+    - package: ssh-terminal-manager
+      arch: x86_64-linux
+    - package: take-control-viewer
+      arch: x86_64-linux
+    - package: terminal-manager
+      arch: x86_64-linux
+    # ARM64 packages disabled until agents available
+    # - package: alvr-bin
+    #   arch: aarch64-linux
+    # ...
+
+steps:
+  - name: build-package
+    image: registry.racci.dev/lix-woodpecker:latest
+    commands:
+      - set -euo pipefail
+      - |
+        BROKEN=$(nix eval --no-pure-eval --json --system "${arch}" ".#${package}.meta.broken" 2>/dev/null || echo "false")
+        if [ "$BROKEN" = "true" ]; then
+          echo "Package ${package} is marked as broken on ${arch}, skipping"
+          exit 0
+        fi
+      - |
+        if [ "${CI_PIPELINE_EVENT}" = "push" ] && [ -n "${CI_PIPELINE_FILES:-}" ]; then
+          PKG_DIR="pkgs/${package}"
+          FLAKE_CHANGED=false
+          PKG_CHANGED=false
+          NIXPKGS_CHANGED=false
+
+          for f in ${CI_PIPELINE_FILES}; do
+            case "$f" in
+              flake.lock) FLAKE_CHANGED=true ;;
+              pkgs/${package}/*|pkgs/${package}) PKG_CHANGED=true ;;
+            esac
+          done
+
+          if [ "$FLAKE_CHANGED" = "true" ]; then
+            if [ -f flake.lock ] && git show "${CI_PREV_COMMIT_SHA}:flake.lock" > /tmp/old.lock 2>/dev/null; then
+              OLD_NIXPKGS=$(jq -r '.nodes.nixpkgs.locked.rev // "none"' /tmp/old.lock 2>/dev/null || echo "none")
+              NEW_NIXPKGS=$(jq -r '.nodes.nixpkgs.locked.rev // "none"' flake.lock 2>/dev/null || echo "none")
+              if [ "$OLD_NIXPKGS" != "$NEW_NIXPKGS" ]; then
+                NIXPKGS_CHANGED=true
+              fi
+            else
+              NIXPKGS_CHANGED=true
+            fi
+          fi
+
+          if [ "$NIXPKGS_CHANGED" = "false" ] && [ "$PKG_CHANGED" = "false" ]; then
+            echo "Package ${package} not affected by changes and nixpkgs unchanged, skipping"
+            exit 0
+          fi
+        fi
+      - |
+        echo "==> Building ${package} for ${arch}"
+        nix build -L --show-trace --no-link --print-out-paths --accept-flake-config --system "${arch}" ".#${package}"
