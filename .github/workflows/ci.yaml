@@ -34,8 +34,8 @@ jobs:
               SCRIPT_ARGS+=" $(find . -type f | sed 's|^\./||' | grep -v '^\.git/' | tr '\n' ' ')"
             fi
 
-            CHANGED_HOSTS=$(./flake/ci/detect-affected-outputs.nu nixosConfigurations $SCRIPT_ARGS | jq 'to_entries | map("nixosConfigurations." + .key + ".config.system.build.toplevel")' )
-            CHANGED_USERS=$(./flake/ci/detect-affected-outputs.nu homeConfigurations $SCRIPT_ARGS | jq 'to_entries | map("homeConfigurations." + .key + ".activationPackage")' )
+            CHANGED_USERS=$(nix run .#detect-affected-outputs -- homeConfigurations $SCRIPT_ARGS | jq 'to_entries | map("homeConfigurations." + .key + ".activationPackage")' )
+            CHANGED_HOSTS=$(nix run .#detect-affected-outputs -- nixosConfigurations $SCRIPT_ARGS | jq 'to_entries | map("nixosConfigurations." + .key + ".config.system.build.toplevel")' )
 
             EXTRA_SPACE='["nixmi"]'
             NO_BUILD='["nixmi"]'
