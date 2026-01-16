@@ -1,7 +1,7 @@
 #!/usr/bin/env -S nix shell nixpkgs#nushell --command nu
 
 use std/log
-use ../dev/scripts/lib/flake.nu *
+use lib/flake.nu *
 
 # Detect which outputs are affected based on changed files in the git repo.
 def main [
@@ -9,6 +9,7 @@ def main [
   --verbose (-v)  # Enable verbose logging
   --range: string # Git range to check
   --json (-j) # Output JSON format
+  --outputs: list<string> # Specific outputs to check
   ...files: string # Specific files to check
 ] {
   init_logging $verbose $json
@@ -18,12 +19,15 @@ def main [
   let cache_key = init_cache $flake_info $cache_dir
   let dirty_files = collect_files $files $range
 
-  let outputs = get_outputs $type
-  if ($outputs | is-empty) {
-    log error $"No outputs found for identifier ($type) in flake."
-    exit 1
+  if $outputs | is-empty {
+    log info "No specific outputs provided, checking all outputs for type ($type)..."
+    $outputs = get_outputs $type
+    if ($outputs | is-empty) {
+      log error $"No outputs found for identifier ($type) in flake."
+      exit 1
+    }
+    log info $"Found outputs: ($outputs | str join ', ')"
   }
-  log info $"Found outputs: ($outputs | str join ', ')"
 
   let output_imports: record = compute_graphs $type $outputs $cache_key $cache_dir $flake_info.source_path
   let results = check_affected_outputs $dirty_files $output_imports

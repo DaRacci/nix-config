@@ -12,7 +12,7 @@ when:
 
 steps:
   - name: Check for input changes
-    image: registry.racci.dev/lix-woodpecker:latest
+    image: registry.racci.dev/lix-woodpecker
     pull: true
     commands: |
       # Check if pkgs/lix-woodpecker changed
@@ -68,7 +68,7 @@ steps:
       fi
 
   - name: Publish to Registry
-    image: registry.racci.dev/lix-woodpecker:latest
+    image: registry.racci.dev/lix-woodpecker
     when:
       evaluate: 'BUILD_PUBLISH == "true"'
     environment:

@@ -14,7 +14,7 @@ After making changes you **must always** evaluate and test them.
 Use module-graph script to find which hosts and homes are affected by changed files:
 
 ```bash
-./flake/dev/scripts/module-graph.nu
+nix run .#module-graph
 ```
 
 This outputs JSON showing which configs use each file:
@@ -64,7 +64,7 @@ nix flake check --override-input devenv-root "file+file://$PWD/.devenv/root"
 2. Run module-graph to find affected configs:
 
    ```bash
-   ./flake/dev/scripts/module-graph.nu | jq '.[] | select(.file | contains("tailscale"))'
+   nix run .#module-graph | jq '.[] | select(.file | contains("tailscale"))'
    ```
 
 3. Pick one affected host and build it:
