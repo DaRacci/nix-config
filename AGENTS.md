@@ -71,7 +71,7 @@ You must provide the override for `nix flake check` and `nix develop`:
 Before testing, determine what your changes affect:
 
 ```bash
-./flake/dev/scripts/module-graph.nu
+nix run .#module-graph
 ```
 
 ### Project Structure Overview

@@ -6,80 +6,17 @@ export-env {
   $env.CURRENT_USER = (whoami | str trim)
 }
 
-# Get a list of all hosts.
-# Use the --fast switch to estimate the hosts based on fs instead of nix for quicker scans.
-# The current host is left out unless --include-current is passed.
-export def list_hosts [--fast, --include-current] {
-  mut hosts = []
+export def select_host [] {
+  let hosts = flake-eval r#'builtins.attrNames flake.nixosConfigurations |> builtins.concatStringsSep " "'#  --raw
+    | split words
+    | where $it != $env.CURRENT_HOST
 
-  if $fast {
-    let hosts_dir = ($env.GIT_ROOT | path join "hosts")
-    let host_types = ^find $hosts_dir -mindepth 1 -maxdepth 1 -type d -print | lines;
-    for $host_type in $host_types {
-      let host_type_dir = ($hosts_dir | path join $host_type)
-      let raw_dirs = ^find $host_type_dir -mindepth 1 -maxdepth 1 -type d -print | lines | each { $in | path basename };
-      let host_names = $raw_dirs | where { $in != "shared" } | sort | uniq
-      $hosts = $hosts ++ $host_names
-    }
-  } else {
-    $hosts = flake-eval r#'builtins.attrNames flake.nixosConfigurations |> builtins.concatStringsSep " "'#  --raw
-      | split words
-  }
-
-  if $include_current {
-    $hosts
-  } else {
-    $hosts | where $it != $env.CURRENT_HOST
-  }
-}
-
-# List server hosts from hosts/server, excluding shared.
-export def list-server-hosts [] {
-  let dir = ($env.GIT_ROOT | path join "hosts" "server")
-  ^find $dir -mindepth 1 -maxdepth 1 -type d -print
-    | lines
-    | each {|path| $path | path basename }
-    | where {|name| $name != "shared" }
-    | sort
-}
-
-export def select_host [--fast] {
-  let hosts = list_hosts --fast=$fast
-  let all_hosts = ["current", ...($hosts)]
-  let selected = $all_hosts | input list -f
+  let selected = ["current", ...($hosts)] | input list -f
   if $selected == "current" {
     $env.CURRENT_HOST
   } else {
     $selected
   }
-}
-
-# Parse flexible args where action and hostname can be in different orders
-# Returns {action: string, hostname: string|null, rest: list<string>}
-# Examples with actions=["build" "switch"] and default_action="switch":
-#   parse-flexible-args [] => {action: "switch", hostname: null, rest: []}
-#   parse-flexible-args ["host1"] => {action: "switch", hostname: "host1", rest: []}
-#   parse-flexible-args ["build" "host1"] => {action: "build", hostname: "host1", rest: []}
-#   parse-flexible-args ["host1" "--flag"] => {action: "switch", hostname: "host1", rest: ["--flag"]}
-export def parse-flexible-args [
-  args: list<string>
-  --valid-actions: list<string> = []
-  --default-action: string = "switch"
-] {
-  if ($args | is-empty) {
-    return {action: $default_action, hostname: null, rest: []}
-  }
-
-  let first = ($args | get 0)
-
-  if ($first in $valid_actions) {
-    let hostname = if ($args | length) > 1 { $args | get 1 } else { null }
-    let rest = if ($args | length) > 2 { $args | skip 2 } else { [] }
-    return {action: $first, hostname: $hostname, rest: $rest}
-  }
-
-  let rest = if ($args | length) > 1 { $args | skip 1 } else { [] }
-  return {action: $default_action, hostname: $first, rest: $rest}
 }
 
 export def select_user [] {
@@ -164,6 +101,13 @@ export def get_output_graph_files [
   $files
 }
 
+# Gets some basic flake info
+#
+# Returns a record like:
+# {
+#   source_path
+#   hash
+# }
 export def get_flake_info [] {
   let archive_info = try {
     nix flake archive --json | from json
@@ -185,4 +129,84 @@ export def get_flake_info [] {
   }
 
   { source_path: $source_path, hash: $hash }
+}
+
+# Gets the revision and hash of a flake input
+#
+# Returns a record like:
+# {
+#   rev
+#   hash
+# }
+export def get_flake_input [
+  lock_file: string   # The lock file to read from
+  input_name: string  # The name of the input to check for changes.
+] {
+  jq -r '
+    (.root) as $r
+    | (.nodes[$r].inputs.nixpkgs // "nixpkgs") as $n0
+    | ($n0 | if type=="string" then . else (.[0] // "nixpkgs") end) as $n
+    | (.nodes[$n].locked // {})
+    | { rev: (.rev // "none"), hash: (.narHash // "none") }
+  ' $lock_file e> /dev/null | from json
+}
+
+export def has_flake_inputs_changed [
+  git_range: string
+  input_name: string
+] {
+  let split_range = $git_range | split row ".."
+  let head_commit = $split_range | last
+  let prev_commit = $split_range | first
+
+  let root_flake_changed = not (git diff --name-only $git_range -- flake.lock | str trim | is-empty)
+  if $root_flake_changed {
+    let prev_lock_file = mktemp -t "old-lock.XXXX"
+    git show $"($prev_commit):flake.lock" | save -f $prev_lock_file
+    let prev_input = get_flake_input $prev_lock_file $input_name
+    let curr_input = get_flake_input flake.lock $input_name
+    log info $"Previous ($input_name): ($prev_input), Current ($input_name): ($curr_input)"
+    if $prev_input.rev != $curr_input.rev {
+      log info $"Root flake.nix ($input_name) version changed from [($prev_input.rev)] to [($curr_input.rev)]"
+      return true
+    }
+  }
+
+  return false
+}
+
+# Check if a file has changed between git range
+export def check_file_changed [
+  git_range: string # The git range to check for changes.
+  ...files: string
+] {
+  log info $"Checking files for changes: ($files)"
+  let split_range = $git_range | split row ".."
+  let head_commit = $split_range | last
+  let prev_commit = $split_range | first
+
+  let git_file_diffs = git diff --name-only $git_range -- ...$files | str trim | split row "\n" | where {|f| not ($f | is-empty) }
+  if ($git_file_diffs | is-empty) {
+    log info "No changes detected in the specified files"
+    return false;
+  }
+
+  log info $"Git file diffs: ($git_file_diffs)"
+  mut changed_files = [ ];
+  for file in $git_file_diffs {
+    let has_changed = $git_file_diffs | any {|f| $f == $file }
+    let old_file = mktemp -t "old-file.XXXX"
+    git show $"($prev_commit):($file)" | save -f $old_file
+
+    log info $"Checking differences between ($file) and ($old_file)"
+    let old_hash = nix hash file $old_file
+    let cur_hash = nix hash file $file
+
+    if $old_hash != $cur_hash {
+      log info $"File [($file)] has changed."
+      $changed_files = $changed_files | append $file
+    }
+  }
+
+  return (($changed_files | length) > 0)
 }

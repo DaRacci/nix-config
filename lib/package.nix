@@ -14,6 +14,7 @@ let
     readDir
     attrNames
     concatStringsSep
+    path
     ;
 in
 rec {
@@ -59,8 +60,23 @@ rec {
       name,
       runtimeInputs ? [ ],
       sourceRoot,
+      libSource ? null,
       pkgs,
     }:
+    let
+      sourceStore = path {
+        path = sourceRoot;
+        name = "${name}-source";
+      };
+      libStore =
+        if libSource == null then
+          sourceStore + "/lib"
+        else
+          path {
+            path = libSource;
+            name = "${name}-lib";
+          };
+    in
     writeNuApplication {
       inherit
         name
@@ -88,5 +104,6 @@ rec {
           }
         '';
 
+      passthru.discovery = false;
     };
 }

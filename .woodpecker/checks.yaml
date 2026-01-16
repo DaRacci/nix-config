@@ -1,0 +1,176 @@
+variables:
+  - &when_change
+    event: [push, pull_request]
+    branch: master
+  - &when_cron
+    event: cron
+    cron: weekly
+  - &when_manual
+    event: manual
+  - &when_all
+    - *when_manual
+    - *when_change
+    - *when_cron
+  - &when_ci
+    - *when_manual
+    - *when_change
+
+labels:
+  platform: linux/amd64
+
+steps:
+  - name: Build flake checks
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    failure: ignore
+    environment:
+      BINARY_CACHE_TOKEN:
+        from_secret: binary_cache_token
+    when: *when_ci
+    depends_on: [] # enable parallel steps
+    commands: |
+      nix run .#setup-attic -- --watch
+      nix run .#archive-flakes -- "." "flake/ci" "flake/dev"
+      nix run nixpkgs#nix-fast-build -- --skip-cached --no-nom --flake ".#checks.$(nix eval --raw --impure --expr builtins.currentSystem)"
+
+  - name: Run flake checks
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    failure: ignore
+    when: *when_ci
+    depends_on: ["Build flake checks"]
+    commands: nix flake check
+
+  - name: Check upstream TODOs
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    failure: ignore
+    when: *when_all
+    commands: nix run .#check-upstream-todos
+
+  - name: Run flake checker
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    failure: ignore
+    when: *when_all
+    commands: nix run nixpkgs#flake-checker
+
+  - name: GitGuardian Secret Scan
+    image: gitguardian/ggshield
+    pull: true
+    failure: ignore
+    environment:
+      GITGUARDIAN_API_KEY:
+        from_secret: GITGUARDIAN_API_KEY
+    when: *when_ci
+    commands: ggshield secret scan commit-range $${CI_PREV_COMMIT_SHA}..
+
+  - name: matrix-ci-hosts.yaml
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    failure: ignore
+    when: *when_ci
+    commands: |
+      MATRIX_HOSTS=($(cat .woodpecker/ci-hosts.yaml | yq e '.matrix.HOST[]'))
+      ALL_HOSTS=($(nix eval --json ".#nixosConfigurations" --apply "builtins.attrNames" | jq -r '.[]'))
+
+      MISSING_HOSTS=()
+      for host in "$${ALL_HOSTS[@]}"; do
+        if [[ ! " $${MATRIX_HOSTS[@]} " =~ " $${host} " ]]; then
+          MISSING_HOSTS+=("$host")
+        fi
+      done
+
+      if [ $${#MISSING_HOSTS[@]} -ne 0 ]; then
+        echo "Missing hosts in ci.yaml: $${MISSING_HOSTS[@]}"
+        for host in "$${MISSING_HOSTS[@]}"; do
+          yq e -i ".matrix.HOST += [\"$host\"]" .woodpecker/ci-hosts.yaml
+        done
+      fi
+
+  - name: matrix-ci-homes.yaml
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    failure: ignore
+    when: *when_ci
+    commands: |
+      MATRIX_USERS=($(cat .woodpecker/ci-homes.yaml | yq e '.matrix.HOME[]'))
+      ALL_USERS=($(nix eval --json ".#homeConfigurations" --apply "builtins.attrNames" | jq -r '.[]'))
+
+      MISSING_USERS=()
+      for user in "$${ALL_USERS[@]}"; do
+        if [[ ! " $${MATRIX_USERS[@]} " =~ " $${user} " ]]; then
+          MISSING_USERS+=("$user")
+        fi
+      done
+
+      if [ $${#MISSING_USERS[@]} -ne 0 ]; then
+        echo "Missing users in ci-homes.yaml: $${MISSING_USERS[@]}"
+        exit 1
+      fi
+
+  - name: matrix-packages.yaml
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    failure: ignore
+    when: *when_ci
+    commands: |
+      MATRIX_PACKAGES=($(cat .woodpecker/packages.yaml | yq e '.matrix.PACKAGE[]'))
+      ALL_PACKAGES=($(nix eval --json ".#package.x86_64-linux" --apply "builtins.attrNames" | jq -r '.[]'))
+
+      MISSING_PACKAGES=()
+      for package in "$${ALL_PACKAGES[@]}"; do
+        if [[ ! " $${MATRIX_PACKAGES[@]} " =~ " $${package} " ]]; then
+          INCLUDE=$(nix eval --no-pure-eval --json ".#packages.x86_64-linux.$${package}.passthru.discovery" 2>/dev/null || echo "false")
+          if [ "$${INCLUDE}" != "true" ]; then
+            MISSING_PACKAGES+=("$package")
+          fi
+        fi
+      done
+      if [ $${#MISSING_PACKAGES[@]} -ne 0 ]; then
+        echo "Missing packages in packages.yaml: $${MISSING_PACKAGES[@]}"
+        exit 1
+      fi
+
+  - name: matrix-update-packages.yaml
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    failure: ignore
+    when: *when_ci
+    commands: |
+      MATRIX_PACKAGES=($(cat .woodpecker/update-packages.yaml | yq e '.matrix.PACKAGE[]'))
+      ALL_PACKAGES=($(nix eval --json ".#package.x86_64-linux" --apply "filter (p: p.passthru ? update-script)" | jq -r '.[]'))
+
+      MISSING_PACKAGES=()
+      for package in "$${ALL_PACKAGES}[@]}"; do
+        if [[ ! " $${MATRIX_PACKAGES[@]} " =~ " $${package} " ]]; then
+          MISSING_PACKAGES+=("$package")
+        fi
+      done
+
+      if [ $${#MISSING_PACKAGES[@]} -ne 0 ]; then
+        echo "Missing packages in update-packages.yaml: $${MISSING_PACKAGES[@]}"
+
+      fi
+
+  - name: Make PR for matrix entries
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    when: *when_ci
+    depends_on: ["matrix-ci-hosts.yaml", "matrix-ci-homes.yaml", "matrix-packages.yaml", "matrix-update-packages.yaml"]
+    environment:
+      GITHUB_AUTH_KEY:
+        from_secret: GITHUB_AUTH_KEY
+      BASE_BRANCH: master
+      BRANCH: chore/update-ci-matrix
+    commands: |-
+      nix run .#setup-git
+      CHANGED_FILES=$(git diff --name-only HEAD~1)
+      if echo "$CHANGED_FILES" | grep -E 'ci-(hosts|homes|packages|update-packages)\.yaml' > /dev/null; then
+        git checkout -b $BRANCH
+        git add .woodpecker/ci-hosts.yaml .woodpecker/ci-homes.yaml .woodpecker/packages.yaml .woodpecker/update-packages.yaml
+        git commit -m "chore(ci): update CI matrix entries"
+        touch .push
+      else
+        echo "No changes to matrix files, skipping PR"
+      fi
