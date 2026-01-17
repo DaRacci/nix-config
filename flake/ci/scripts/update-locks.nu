@@ -26,7 +26,7 @@ def main [
     cd $subdir
     let commit_msg = $commit_message | str replace "<flake>" $flake_dir
     try {
-      nix flake update --commit-lock-file --commit-lock-file-summary -m $commit_msg
+      nix flake update --commit-lock-file -m $commit_msg
     } catch { |err|
       log error $"Failed to update flake in ($flake_dir), continuing..."
       log debug $"Error details: ($err.msg)"
