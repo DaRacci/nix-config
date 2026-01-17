@@ -4,7 +4,7 @@ when:
 
 steps:
   - name: GitGuardian Secret Scan
-    image: ghcr.io/lix-project/lix
+    image: registry.racci.dev/lix-woodpecker:latest
     environment:
       GITGUARDIAN_API_KEY:
         from_secret: GITGUARDIAN_API_KEY
