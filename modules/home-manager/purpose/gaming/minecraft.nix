@@ -14,12 +14,10 @@ in
 
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [
-      gdlauncher-carbon
-      prism
+      prismlauncher
     ];
 
     user.persistence.directories = [
-      ".local/share/gdlauncher_carbon"
       ".local/share/PrismLauncher"
     ];
   };
