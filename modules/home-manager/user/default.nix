@@ -15,6 +15,7 @@ in
 {
   imports = [
     ./autorun.nix
+    ./backup.nix
     ./persistence.nix
   ];
 

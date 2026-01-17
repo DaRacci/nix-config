@@ -26,4 +26,6 @@
   };
 
   user.persistence.directories = [ ".config/goa-1.0" ];
+
+  user.backup.enable = true;
 }
