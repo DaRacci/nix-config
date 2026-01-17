@@ -65,15 +65,14 @@ with lib;
 
     plugins = with pkgs.hyprlandPlugins; [
       hy3
-      # hyprfocus
-      # hypr-dynamic-cursors
+      hypr-dynamic-cursors
     ];
 
     custom-settings.permission.plugin =
       with pkgs.hyprlandPlugins;
       [
         hy3
-        # hypr-dynamic-cursors
+        hypr-dynamic-cursors
       ]
       |> lib.map (plugin: "${plugin}/lib/lib${plugin.pname}.so");
 
@@ -95,11 +94,9 @@ with lib;
         snap.enabled = true;
       };
 
-      layerrule = [
-        "xray 1, .*"
+      layerrule =
         #region No Animations
-      ]
-      ++ (trivial.pipe
+      (trivial.pipe
         [
           "walker"
           "selection"
@@ -112,15 +109,15 @@ with lib;
           "noanim"
         ]
         [
-          (map (layer: "noanim, ${layer}"))
+          (map (layer: "no_anim on, match:namespace ${layer}"))
           #endregion
           #region Ags
         ]
       )
       ++ [
-        "animation slide top, sideleft.*"
-        "animation slide top, sideright.*"
-        "blur, session"
+        "animation slide top, match:namespace sideleft.*"
+        "animation slide top, match:namespace sideright.*"
+        "blur on, match:namespace session"
       ]
       ++ (trivial.pipe
         [
@@ -137,8 +134,8 @@ with lib;
         ]
         [
           (map (layer: [
-            "blur, ${layer}"
-            "ignorealpha 0.6, ${layer}"
+            "blur on, match:namespace ${layer}"
+            "ignore_alpha 0.6, match:namespace ${layer}"
           ]))
           flatten
           #endregion
@@ -152,23 +149,11 @@ with lib;
         focus_on_activate = true;
         disable_hyprland_logo = true;
         force_default_wallpaper = 0;
-        new_window_takes_over_fullscreen = 2;
         allow_session_lock_restore = true;
 
         initial_workspace_tracking = 1;
 
         middle_click_paste = false;
-      };
-
-      plugins = {
-        # hy3 = {
-        #   no_gaps_when_only = 1;
-        #   tab_first_window = false;
-
-        #   autotile = {
-        #     enable = true;
-        #   };
-        # };
       };
     };
 

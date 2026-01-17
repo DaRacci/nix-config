@@ -6,22 +6,22 @@
 {
   wayland.windowManager.hyprland = {
     custom-settings = {
-      windowrule = [
-        {
-          matcher.title = "^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$";
+      windowrule = {
+        pictureInPicture = {
+          matcher = [ { title = "^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$"; } ];
           rule = {
-            keepaspectratio = true;
+            keepAspectRatio = true;
             float = true;
             pin = true;
             opacity = 1.0;
-            # size = "25%";
             move = {
               x = "73%";
               y = "72%";
             };
           };
-        }
-        {
+        };
+
+        trippleMonitor = {
           matcher = [
             { title = "^(Assetto Corsa)$"; }
             { title = "^(AC2)$"; }
@@ -29,12 +29,13 @@
           rule = {
             float = true;
             center = true;
-            norounding = true;
+            rounding = 0;
             opacity = 1.0;
             size = "7680x1440";
           };
-        }
-        {
+        };
+
+        popupModal = {
           matcher = [
             { class = "^(file_progress)$"; }
             { class = "^(confirm)$"; }
@@ -51,17 +52,19 @@
             { class = "^(takecontrolrdviewer.exe)$"; } # Take Control Viewer
           ];
           rule.float = true;
-        }
+        };
+
         # Sending shit to the shadow realm
-        {
+        stupidWindows = {
           matcher = [
             {
               initialTitle = "(${lib.strings.escapeRegex " - Connecting [v. ${pkgs.take-control-viewer.version}] [0:00:00]"})$";
             }
           ];
           rule.workspace.special = "special";
-        }
-        {
+        };
+
+        centeredPopupModal = {
           matcher = [
             { title = "^(Steam Settings)(.*)$"; }
             { title = "^(Open File)(.*)$"; }
@@ -78,22 +81,22 @@
             center = true;
             float = true;
           };
-        }
-        # Steam Client
-        {
+        };
+
+        steamClient = {
           matcher = [
             { class = "^((?i)steam)$"; }
             { class = "^(steamwebhelper)$"; }
           ];
           rule = {
             float = true;
-            noborder = true;
-            noshadow = true;
-            noblur = true;
+            borderSize = 0;
+            noShadow = true;
+            noBlur = true;
           };
-        }
-        # Games
-        {
+        };
+
+        games = {
           matcher = [
             { class = "^(gamescope)$"; }
             { class = "^(steam_app_.*)$"; }
@@ -101,22 +104,22 @@
           ];
           rule = {
             content = "game";
-            idleinhibit = "always";
+            idleInhibit = "always";
             immediate = true;
             allowsInput = true;
-            renderunfocused = true;
+            renderUnfocused = true;
           };
-        }
-        # Hidden from screenshare
-        {
+        };
+
+        sensitiveWindows = {
           matcher = [
             { class = "^(1Password)$"; }
             { class = "^(Bitwarden)$"; }
           ];
-          rule.noScreenshare = true;
-        }
-        # Panel Dropdown Menus
-        {
+          rule.noScreenShare = true;
+        };
+
+        dropdownMenus = {
           matcher = [
             { class = "^(org.pulseaudio.pavucontrol)$"; }
             { class = "^(\.blueman-manager-wrapped)$"; }
@@ -129,8 +132,8 @@
               y = 67; # This is the exact position top of the window below the floating panel.
             };
           };
-        }
-      ];
+        };
+      };
     };
   };
 }

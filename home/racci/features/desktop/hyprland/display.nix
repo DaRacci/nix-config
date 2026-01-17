@@ -16,8 +16,6 @@
       create_abstract_socket = false;
     };
 
-    experimental.xx_color_management_v4 = true;
-
     render = {
       direct_scanout = 2;
 

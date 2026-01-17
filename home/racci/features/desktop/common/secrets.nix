@@ -42,17 +42,17 @@
 
   wayland.windowManager.hyprland = {
     custom-settings = {
-      windowrule = [
-        {
-          matcher.title = "^(Quick Access — 1Password)$";
+      windowrule = {
+        centeredPopupModal = {
+          matcher = [ { title = "^(Quick Access — 1Password)$"; } ];
           rule = {
             pin = true;
             center = true;
-            stayfocused = true;
+            stayFocused = true;
             noCloseFor = 250; # Sometimes the window closes immediately, this should help.
           };
-        }
-      ];
+        };
+      };
     };
 
     settings.bind = [

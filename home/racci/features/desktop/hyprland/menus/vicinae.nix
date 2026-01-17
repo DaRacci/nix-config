@@ -51,8 +51,8 @@
 
   wayland.windowManager.hyprland.settings = {
     layerrule = [
-      "blur, vicinae"
-      "ignorealpha 0, vicinae"
+      "blur on, match:namespace vicinae"
+      "ignore_alpha 0, match:namespace vicinae"
     ];
     bind = [
       "CTRL_ALT, SPACE, exec, vicinae toggle"
