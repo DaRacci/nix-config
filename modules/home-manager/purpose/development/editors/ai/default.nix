@@ -109,8 +109,8 @@ in
         librarian.model = "github-copilot/gpt-5-mini";
         explore.model = "github-copilot/gemini-3-flash";
         frontend-ui-ux-engineer.model = "github-copilot/gemini-3-pro-preview";
-        document-writer.model = "github-copilot/gemini-3-flash";
-        multimodal-looker.model = "github-copilot/gemini-3-flash";
+        document-writer.model = "github-copilot/gemini-3-flash-preview";
+        multimodal-looker.model = "github-copilot/gemini-3-flash-preview";
       };
     };
 
