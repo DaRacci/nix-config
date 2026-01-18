@@ -102,7 +102,6 @@
         enableSatisfactory = true;
         enableBeatSaber = true;
         enableThunderstore = true;
-        enableNexus = true;
       };
 
       simulator = {
