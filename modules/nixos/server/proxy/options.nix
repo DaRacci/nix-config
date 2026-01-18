@@ -8,7 +8,6 @@
 }:
 let
   inherit (lib)
-    mkBefore
     mkOption
     types
     ;
