@@ -66,14 +66,14 @@ with lib;
     plugins = with pkgs.hyprlandPlugins; [
       hy3
       # hyprfocus
-      hypr-dynamic-cursors
+      # hypr-dynamic-cursors
     ];
 
     custom-settings.permission.plugin =
       with pkgs.hyprlandPlugins;
       [
         hy3
-        hypr-dynamic-cursors
+        # hypr-dynamic-cursors
       ]
       |> lib.map (plugin: "${plugin}/lib/lib${plugin.pname}.so");
 
