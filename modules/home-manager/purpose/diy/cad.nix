@@ -21,7 +21,7 @@ in
     ];
 
     home.packages = [
-      pkgs.freecad
+      # pkgs.freecad
       pkgs.meshlab
       pkgs.kicad
     ];

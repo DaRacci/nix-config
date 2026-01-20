@@ -96,7 +96,7 @@
               group = 0;
             }
           ];
-          application = [ pkgs.wlx-overlay-s ];
+          application = [ pkgs.wayvr ];
         };
       };
     };

@@ -101,11 +101,14 @@ in
         );
       };
 
-      security.acme.certs = config.services.caddy.virtualHosts
+      security.acme.certs =
+        config.services.caddy.virtualHosts
         |> lib.filterAttrs (name: _: hasSuffix ".${cfg.domain}" name)
-        |> lib.mapAttrs (name: vh: {
-          extraDomainNames = vh.serverAliases;
-        });
+        |> lib.mapAttrs (
+          _name: vh: {
+            extraDomainNames = vh.serverAliases;
+          }
+        );
 
       networking.firewall =
         let

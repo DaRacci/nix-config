@@ -14,7 +14,6 @@ in
     enableSatisfactory = mkEnableOption "Enable satisfactory modding support";
     enableBeatSaber = mkEnableOption "Enable beatsaber modding support";
     enableThunderstore = mkEnableOption "Enable thunderstore support";
-    enableNexus = mkEnableOption "Enable nexus mod manager support";
   };
 
   config = mkIf cfg.enable {
@@ -25,8 +24,7 @@ in
       ++ (optionals cfg.enableThunderstore [
         # gale
         r2modman
-      ])
-      ++ (optional cfg.enableNexus (nexusmods-app.override { _7zz = _7zz-rar; }));
+      ]);
 
     user.persistence.directories =
       (optional cfg.enableSatisfactory ".local/share/ficsit")
@@ -39,7 +37,6 @@ in
         ".config/r2modmanPlus-local"
         ".config/com.kesomannen.gale"
         ".local/share/com.kesomannen.gale"
-      ])
-      ++ (optional cfg.enableNexus ".local/share/NexusMods.App");
+      ]);
   };
 }
