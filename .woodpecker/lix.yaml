@@ -1,24 +1,66 @@
-# Manual pipeline to build and publish the lix-woodpecker image to GHCR.
-# Required secrets:
-#   - GHCR_USERNAME: GitHub username or service account
-#   - GHCR_TOKEN:   Fine-grained PAT with `write:packages` scope
+# Pipeline to build and publish the lix-woodpecker image when nixpkgs or lix inputs change.
 #
-# Trigger this pipeline manually from the Woodpecker UI when you want to publish.
+# This pipeline runs on pushes to master that modify `flake.lock`. It compares the
+# locked revisions for the `nixpkgs` and `lix` inputs before deciding whether to
+# publish the image; the publish step runs only when at least one of those inputs changed.
 
 when:
-  event:
-    - manual
+  - event: manual
+  - event: push
+    branch: master
+    path: [flake.lock, .woodpecker/lix.yaml]
 
 steps:
-  - name: Publish image
-    image: ghcr.io/lix-project/lix
+  - name: Check for input changes
+    image: registry.racci.dev/lix-woodpecker:latest
+    commands: |
+      set -euxo pipefail
+
+      get_locked_rev() {
+        local lock_file="$1"
+        local input_name="$2"
+        local node
+        node=$(jq -r --arg input "$input_name" '.nodes.root.inputs[$input] // ""' "$lock_file")
+        if [ -z "$node" ]; then
+          printf ''
+          return
+        fi
+        jq -r --arg node "$node" '.nodes[$node].locked.rev // ""' "$lock_file"
+      }
+
+      current_nixpkgs_rev=$(get_locked_rev flake.lock nixpkgs)
+      current_lix_rev=$(get_locked_rev flake.lock lix)
+
+      prev_lock_path=$(mktemp)
+      trap 'rm -f "$prev_lock_path"' EXIT
+
+      if [ -n "${CI_PREV_COMMIT_SHA:-}" ]; then
+        if ! git show "${CI_PREV_COMMIT_SHA}:flake.lock" > "$prev_lock_path" 2>/dev/null; then
+          echo "Previous flake.lock not available; assuming inputs changed."
+        fi
+      else
+        echo "CI_PREV_COMMIT_SHA not set; assuming inputs changed."
+      fi
+
+      previous_nixpkgs_rev=$(get_locked_rev "$prev_lock_path" nixpkgs || true)
+      previous_lix_rev=$(get_locked_rev "$prev_lock_path" lix || true)
+
+      if [ -n "$previous_nixpkgs_rev" ] && [ -n "$previous_lix_rev" ] && \
+         [ "$current_nixpkgs_rev" = "$previous_nixpkgs_rev" ] && \
+         [ "$current_lix_rev" = "$previous_lix_rev" ]; then
+        echo "nixpkgs and lix inputs unchanged; skipping publish."
+        exit 0
+      fi
+
+      echo 'BUILD_PUBLISH=true' >> envvars
+
+  - name: Publish to Registry
+    image: registry.racci.dev/lix-woodpecker:latest
+    when:
+      evaluate: 'BUILD_PUBLISH == "true"'
     environment:
-      NIX_CONFIG: extra-experimental-features = nix-command flakes pipe-operator
-      GHCR_USERNAME:
-        from_secret: GHCR_USERNAME
-      GHCR_TOKEN:
-        from_secret: GHCR_TOKEN
-    commands:
-      - set -euxo pipefail
-      - nix run ".#lix-woodpecker.copyToRegistry" -- --dest-creds "${GHCR_USERNAME}:${GHCR_TOKEN}"
-      - printf "Published %s\n" "ghcr.io/daracci/lix-woodpecker:latest"
+      REGISTRY_USER:
+        from_secret: REGISTRY_USER
+      REGISTRY_TOKEN:
+        from_secret: REGISTRY_TOKEN
+    commands: nix run ".#lix-woodpecker.copyToRegistry" -- --dest-creds "$REGISTRY_USER:$REGISTRY_TOKEN"

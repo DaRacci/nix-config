@@ -27,6 +27,7 @@ steps:
       GPG_PASSPHRASE:
         from_secret: GPG_PASSPHRASE
     commands: |
+      nix run .#setup-git
       nix run .#update-locks -- \
         --flake-dirs ["." "flake/ci" "flake/dev" "flake/nixos" "flake/home-manager"] \
         --commit-message "chore(deps): Update <flake>"
@@ -38,7 +39,6 @@ steps:
         exit 0
       fi
 
-      nix run .#setup-git
       nix run .#create-pr -- \
         --title "chore(deps): Update flake inputs" \
         --body "This PR updates the flake inputs to their latest versions, see individual commits for changes." \
