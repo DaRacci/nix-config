@@ -25,7 +25,7 @@ jobs:
     outputs:
       matrix: ${{ steps.filtered-packages.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Get packages from flake
         id: get-packages
@@ -173,7 +173,7 @@ jobs:
     runs-on: ${{ matrix.arch == 'aarch64-linux' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     name: Build package ${{ matrix.package }} on ${{ matrix.arch }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-nix
         with:
           arch: ${{ matrix.arch }}
