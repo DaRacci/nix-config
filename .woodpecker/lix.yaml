@@ -1,11 +1,11 @@
-# Pipeline to build and publish the lix-woodpecker image when nixpkgs or lix inputs change.
+# Pipeline to build and publish the lix-woodpecker image when nixpkgs or lix inputs change,
+# or when the lix-woodpecker package definition changes.
 #
-# This pipeline runs on pushes to master that modify `flake.lock`. It compares the
-# locked revisions for the `nixpkgs` and `lix` inputs before deciding whether to
-# publish the image; the publish step runs only when at least one of those inputs changed.
+# This pipeline runs on pushes to master that modify `flake.lock` or `pkgs/lix-woodpecker/`.
+# It compares the locked revisions for the `nixpkgs` and `lix` inputs, and checks for changes
+# to the package definition, before deciding whether to publish the image.
 
 when:
-  - event: manual
   - event: push
     branch: master
     path: [flake.lock, pkgs/lix-woodpecker/**]
@@ -14,7 +14,20 @@ steps:
   - name: Check for input changes
     image: registry.racci.dev/lix-woodpecker:latest
     commands: |
-      set -euxo pipefail
+      # Check if pkgs/lix-woodpecker changed
+      if [ -n "${CI_PREV_COMMIT_SHA:-}" ]; then
+        if git diff --quiet "${CI_PREV_COMMIT_SHA}" HEAD -- pkgs/lix-woodpecker/; then
+          echo "No changes to pkgs/lix-woodpecker/."
+        else
+          echo "Detected changes to pkgs/lix-woodpecker/; will publish."
+          echo "SHOULD_PUBLISH=true" >> envvar
+          exit 0
+        fi
+      else
+        echo "CI_PREV_COMMIT_SHA not set; assuming changes occurred."
+        echo "SHOULD_PUBLISH=true" >> envvar
+        exit 0
+      fi
 
       get_locked_rev() {
         local lock_file="$1"
@@ -34,25 +47,24 @@ steps:
       prev_lock_path=$(mktemp)
       trap 'rm -f "$prev_lock_path"' EXIT
 
-      if [ -n "${CI_PREV_COMMIT_SHA:-}" ]; then
-        if ! git show "${CI_PREV_COMMIT_SHA}:flake.lock" > "$prev_lock_path" 2>/dev/null; then
-          echo "Previous flake.lock not available; assuming inputs changed."
-        fi
-      else
-        echo "CI_PREV_COMMIT_SHA not set; assuming inputs changed."
+      if ! git show "${CI_PREV_COMMIT_SHA}:flake.lock" > "$prev_lock_path" 2>/dev/null; then
+        echo "Previous flake.lock not available; assuming inputs changed."
+        echo "SHOULD_PUBLISH=true" >> envvar
+        exit 0
       fi
 
       previous_nixpkgs_rev=$(get_locked_rev "$prev_lock_path" nixpkgs || true)
       previous_lix_rev=$(get_locked_rev "$prev_lock_path" lix || true)
 
       if [ -n "$previous_nixpkgs_rev" ] && [ -n "$previous_lix_rev" ] && \
-         [ "$current_nixpkgs_rev" = "$previous_nixpkgs_rev" ] && \
-         [ "$current_lix_rev" = "$previous_lix_rev" ]; then
+          [ "$current_nixpkgs_rev" = "$previous_nixpkgs_rev" ] && \
+          [ "$current_lix_rev" = "$previous_lix_rev" ]; then
         echo "nixpkgs and lix inputs unchanged; skipping publish."
-        exit 0
+        echo "SHOULD_PUBLISH=false" >> envvar
+      else
+        echo "Detected changes to nixpkgs or lix inputs; will publish."
+        echo "SHOULD_PUBLISH=true" >> envvar
       fi
-
-      echo 'BUILD_PUBLISH=true' >> envvars
 
   - name: Publish to Registry
     image: registry.racci.dev/lix-woodpecker:latest
