@@ -12,6 +12,7 @@ in
 buildLixImage {
   inherit pkgs nix2container;
   name = "registry.racci.dev/lix-woodpecker";
+  maxLayers = 128;
 
   extraPkgs = with pkgs; [
     gawk
