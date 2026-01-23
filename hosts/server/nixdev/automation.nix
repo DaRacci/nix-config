@@ -3,7 +3,7 @@
   ...
 }:
 {
-  sops.secrets."N8N/ENV" = { };
+  sops.secrets."REDIS_PASSWORD" = { };
 
   services.n8n = {
     enable = true;
@@ -43,24 +43,13 @@
         DB_POSTGRESDB_HOST = postgres.host;
         DB_POSTGRESDB_PORT = toString postgres.port;
         DB_POSTGRESDB_USER = postgres.user;
-        DB_POSTGRESDB_PASSWORD_FILE = "%d/n8n-postgres-password";
+        DB_POSTGRESDB_PASSWORD_FILE = postgres.password.path;
         QUEUE_BULL_REDIS_DB = "3";
         QUEUE_BULL_REDIS_HOST = redis.host;
         QUEUE_BULL_REDIS_PORT = toString redis.port;
-
+        QUEUE_BULL_REDIS_PASSWORD_FILE = config.sops.secrets.REDIS_PASSWORD.path;
       };
   };
-
-  systemd.services.n8n =
-    let
-      db = config.server.database.postgres.n8n;
-    in
-    {
-      serviceConfig = {
-        EnvironmentFile = "${config.sops.secrets."N8N/ENV".path}";
-        LoadCredential = [ "n8n-postgres-password:${db.password.path}" ];
-      };
-    };
 
   server = {
     database = {
