@@ -8,7 +8,7 @@ when:
   - event: manual
   - event: push
     branch: master
-    path: [flake.lock, .woodpecker/lix.yaml]
+    path: [flake.lock]
 
 steps:
   - name: Check for input changes

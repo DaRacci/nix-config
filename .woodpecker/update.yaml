@@ -9,9 +9,9 @@
 # You must create a cron job named "update-flake-inputs" in the Woodpecker UI.
 
 when:
+  - event: manual
   - event: cron
     cron: update-flake-inputs
-  - event: manual
 
 steps:
   - name: Update all flake.lock files

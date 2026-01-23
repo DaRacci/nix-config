@@ -16,6 +16,7 @@ buildLixImage {
   extraPkgs = with pkgs; [
     gawk
     jq
+    gnupg
   ];
 
   nixConf = {
