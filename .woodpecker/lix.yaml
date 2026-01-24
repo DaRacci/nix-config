@@ -13,6 +13,7 @@ when:
 steps:
   - name: Check for input changes
     image: registry.racci.dev/lix-woodpecker:latest
+    pull: true
     commands: |
       # Check if pkgs/lix-woodpecker changed
       if [ -n "${CI_PREV_COMMIT_SHA:-}" ]; then

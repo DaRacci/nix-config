@@ -16,6 +16,7 @@ when:
 steps:
   - name: Update all flake.lock files
     image: registry.racci.dev/lix-woodpecker:latest
+    pull: true
     environment:
       NIX_CONFIG: extra-experimental-features = nix-command flakes pipe-operator
       GITHUB_TOKEN:
