@@ -34,7 +34,7 @@ steps:
         --commit-message "chore(deps): Update <flake>"
 
       # Check if we have commits ahead of origin
-      COMMITS_AHEAD=$(git rev-list --count origin/HEAD..HEAD 2>/dev/null || echo "0")
+      COMMITS_AHEAD=$(git rev-list --count origin/master..HEAD 2>/dev/null || echo "0")
       if [ "$COMMITS_AHEAD" -eq 0 ]; then
         echo "No new commits to push."
         exit 0
