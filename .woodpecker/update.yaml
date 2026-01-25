@@ -38,7 +38,7 @@ steps:
     image: appleboy/drone-git-push
     pull: true
     settings:
-      remote: git@github.com/DaRacci/nix-config.git
+      remote: git@github.com:DaRacci/nix-config.git
       branch: update/flake-inputs-all
       force: true
       ssh_key:
