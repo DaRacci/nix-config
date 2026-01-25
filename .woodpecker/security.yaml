@@ -9,4 +9,4 @@ steps:
     environment:
       GITGUARDIAN_API_KEY:
         from_secret: GITGUARDIAN_API_KEY
-    commands: ggshield secret scan ci
+    commands: ggshield secret scan commit-range ${CI_PREV_COMMIT_SHA}..
