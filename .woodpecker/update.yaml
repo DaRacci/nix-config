@@ -46,6 +46,9 @@ steps:
 
   - name: Create/Update PR
     image: registry.racci.dev/lix-woodpecker
+    environment:
+      GITHUB_TOKEN:
+        from_secret: GITHUB_TOKEN
     commands: |
       nix run .#create-pr -- \
         --title "chore(deps): Update flake inputs" \
