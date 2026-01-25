@@ -4,10 +4,9 @@ when:
 
 steps:
   - name: GitGuardian Secret Scan
-    image: registry.racci.dev/lix-woodpecker:latest
+    image: gitguardian/ggshield:latest
     pull: true
     environment:
       GITGUARDIAN_API_KEY:
         from_secret: GITGUARDIAN_API_KEY
-      NIX_CONFIG: "extra-experimental-features = nix-command flakes pipe-operator"
-    commands: nix run nixpkgs#ggshield -- secret scan repo . --format text --with-incident-details
+    commands: ggshield secret scan ci
