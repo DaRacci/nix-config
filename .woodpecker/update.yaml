@@ -29,7 +29,7 @@ steps:
     commands: |
       nix run .#setup-git
 
-      export NIX_CONFIG="access-tokens = github.com=${GITHUB_TOKEN}"
+      export NIX_CONFIG="access-tokens = github.com=$${GITHUB_TOKEN}"
       nix run .#update-locks -- \
         --flake-dirs ["." "flake/ci" "flake/dev" "flake/nixos" "flake/home-manager"] \
         --commit-message "chore(deps): Update <flake>"
