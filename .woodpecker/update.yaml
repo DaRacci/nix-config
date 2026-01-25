@@ -18,9 +18,6 @@ steps:
     image: registry.racci.dev/lix-woodpecker:latest
     pull: true
     environment:
-      NIX_CONFIG: |
-        extra-experimental-features = nix-command flakes pipe-operator
-        access-tokens = github.com=${GITHUB_TOKEN}
       GITHUB_TOKEN:
         from_secret: GITHUB_TOKEN
       GPG_PRIVATE_KEY:
@@ -31,6 +28,8 @@ steps:
         from_secret: GPG_PASSPHRASE
     commands: |
       nix run .#setup-git
+
+      export NIX_CONFIG="access-tokens = github.com=${GITHUB_TOKEN}"
       nix run .#update-locks -- \
         --flake-dirs ["." "flake/ci" "flake/dev" "flake/nixos" "flake/home-manager"] \
         --commit-message "chore(deps): Update <flake>"
