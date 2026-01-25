@@ -18,7 +18,9 @@ steps:
     image: registry.racci.dev/lix-woodpecker:latest
     pull: true
     environment:
-      NIX_CONFIG: extra-experimental-features = nix-command flakes pipe-operator
+      NIX_CONFIG: |
+        extra-experimental-features = nix-command flakes pipe-operator
+        access-tokens = github.com=${GITHUB_TOKEN}
       GITHUB_TOKEN:
         from_secret: GITHUB_TOKEN
       GPG_PRIVATE_KEY:
