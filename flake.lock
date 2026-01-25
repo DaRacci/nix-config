@@ -17,14 +17,15 @@
         "flake-compat": [],
         "nixpkgs": [
           "nixpkgs"
-        ]
+        ],
+        "tiny-audio-player": "tiny-audio-player"
       },
       "locked": {
-        "lastModified": 1768492184,
-        "narHash": "sha256-3q9gsulh7n7/Vg2/IzWczZ6SzqaRmp9FXrDY75rD06I=",
+        "lastModified": 1769297970,
+        "narHash": "sha256-3XyBnCTHXyfzBONyORGYwuBjybjg14Scsx0AxAadxms=",
         "owner": "emmanuelrosa",
         "repo": "erosanix",
-        "rev": "ce9b9a671ace6e1c446bcfd3e24a17a3674d04ca",
+        "rev": "4f53e43a062a42ceb09a5d21df2e577ce222d91a",
         "type": "github"
       },
       "original": {
@@ -181,11 +182,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1768564909,
-        "narHash": "sha256-Kell/SpJYVkHWMvnhqJz/8DqQg2b6PguxVWOuadbHCc=",
+        "lastModified": 1769018530,
+        "narHash": "sha256-MJ27Cy2NtBEV5tsK+YraYr2g851f3Fl1LpNHDzDX15c=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "e4bae1bd10c9c57b2cf517953ab70060a828ee6f",
+        "rev": "88d3861acdd3d2f0e361767018218e51810df8a1",
         "type": "github"
       },
       "original": {
@@ -221,6 +222,27 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "tiny-audio-player": {
+      "inputs": {
+        "nixpkgs": [
+          "erosanix",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1769297123,
+        "narHash": "sha256-WDGFsyLwNPe6gjyyumvNScgcF/uiwkoEix4/tk/whiA=",
+        "owner": "emmanuelrosa",
+        "repo": "tiny_audio_player",
+        "rev": "97ca983861eb6f122e80997bf2b06823e0b0dcf1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "emmanuelrosa",
+        "repo": "tiny_audio_player",
         "type": "github"
       }
     }
