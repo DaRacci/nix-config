@@ -34,12 +34,17 @@ steps:
         --flake-dirs ["." "flake/ci" "flake/dev" "flake/nixos" "flake/home-manager"] \
         --commit-message "chore(deps): Update <flake>"
 
+      echo "$(git log)"
+      echo "$(git status)"
+      echo "$(git remote -v)"
+      echo "$(git branch -v)"
+
       # Check if we have commits ahead of origin
-      COMMITS_AHEAD=$(git rev-list --count origin/master..HEAD 2>/dev/null || echo "0")
-      if [ "$COMMITS_AHEAD" -eq 0 ]; then
-        echo "No new commits to push."
-        exit 0
-      fi
+      # COMMITS_AHEAD=$(git rev-list --count origin/master..HEAD 2>/dev/null || echo "0")
+      # if [ "$COMMITS_AHEAD" -eq 0 ]; then
+      #   echo "No new commits to push."
+      #   exit 0
+      # fi
 
       nix run .#create-pr -- \
         --title "chore(deps): Update flake inputs" \
