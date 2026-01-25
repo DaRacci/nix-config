@@ -34,18 +34,19 @@ steps:
         --flake-dirs ["." "flake/ci" "flake/dev" "flake/nixos" "flake/home-manager"] \
         --commit-message "chore(deps): Update <flake>"
 
-      echo "$(git log)"
-      echo "$(git status)"
-      echo "$(git remote -v)"
-      echo "$(git branch -v)"
+  - name: Push to Branch
+    image: appleboy/drone-git-push
+    pull: true
+    settings:
+      remote: git@github.com/DaRacci/nix-config.git
+      branch: update/flake-inputs-all
+      force: true
+      ssh_key:
+        from_secret: GITHUB_AUTH_KEY
 
-      # Check if we have commits ahead of origin
-      # COMMITS_AHEAD=$(git rev-list --count origin/master..HEAD 2>/dev/null || echo "0")
-      # if [ "$COMMITS_AHEAD" -eq 0 ]; then
-      #   echo "No new commits to push."
-      #   exit 0
-      # fi
-
+  - name: Create/Update PR
+    image: registry.racci.dev/lix-woodpecker
+    commands: |
       nix run .#create-pr -- \
         --title "chore(deps): Update flake inputs" \
         --body "This PR updates the flake inputs to their latest versions, see individual commits for changes." \
