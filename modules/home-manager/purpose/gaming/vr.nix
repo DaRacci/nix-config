@@ -45,31 +45,29 @@ in
           killall oscavmgr
         '';
       };
-
-      activation.link-steamvr-openxr-runtime = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        RUNTIME_PATH="$HOME/.config/openxr/1/active_runtime.json"
-
-        run mkdir -p $VERBOSE_ARG \
-          "$HOME/.config/openxr/1/";
-
-        if [ -L "$RUNTIME_PATH" ]; then
-          run rm $VERBOSE_ARG \
-            "$RUNTIME_PATH";
-        fi
-
-        run ln -s $VERBOSE_ARG \
-          "$HOME/.local/share/Steam/steamapps/common/SteamVR/steamxr_linux64.json" "$RUNTIME_PATH";
-      '';
     };
-
-    xdg.mimeApps = {
-      defaultApplications = {
-        "x-scheme-handler/vrmonitor" = "valve-URI-vrmonitor.desktop";
-        "application/x-vrmonitor" = "valve-vrmonitor.desktop";
+    xdg = {
+      configFile."openxr/1/active_runtime.json".source = "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json";
+      configFile."openvr/openvrpaths.vrpath".text = let
+        steam = "${config.xdg.dataHome}/Steam";
+      in builtins.toJSON {
+        version = 1;
+        jsonid = "vrpathreg";
+        external_drivers = null;
+        config = [ "${steam}/config" ];
+        log = [ "${steam}/logs" ];
+        runtime = [ "${pkgs.xrizer}/lib/xrizer" ];
       };
-      associations.added = {
-        "x-scheme-handler/vrmonitor" = "valve-URI-vrmonitor.desktop";
-        "application/x-vrmonitor" = "valve-vrmonitor.desktop";
+
+      mimeApps = {
+        defaultApplications = {
+          "x-scheme-handler/vrmonitor" = "valve-URI-vrmonitor.desktop";
+          "application/x-vrmonitor" = "valve-vrmonitor.desktop";
+        };
+        associations.added = {
+          "x-scheme-handler/vrmonitor" = "valve-URI-vrmonitor.desktop";
+          "application/x-vrmonitor" = "valve-vrmonitor.desktop";
+        };
       };
     };
 

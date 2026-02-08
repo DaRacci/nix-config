@@ -42,6 +42,11 @@
       enable = true;
       package = pkgs.steam.override {
         extraArgs = "-steamos3 -steamdeck -steampal -gamepadui";
+        extraEnv = {
+          PRESSURE_VESSEL_SYSTEMD_SCOPE = 1;
+          PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES = 1;
+          PRESSURE_VESSEL_FILESYSTEMS_RW = "$XDG_RUNTIME_DIR/wivrn/comp_ipc";
+        };
       };
       extest.enable = true;
       extraPackages = with pkgs; [
@@ -49,7 +54,6 @@
 
         # Steam logs errors about missing these, not sure for what though.
         xorg.xwininfo
-        usbutils
       ];
       extraCompatPackages = [ pkgs.proton-ge-bin ];
 
@@ -65,6 +69,8 @@
       openFirewall = true;
       autoStart = true;
       defaultRuntime = true;
+      steam.importOXRRuntimes = true;
+      highPriority = true;
       monadoEnvironment = {
 
       };
@@ -99,12 +105,6 @@
           application = [ pkgs.wayvr ];
         };
       };
-    };
-
-    monado = {
-      enable = false;
-      highPriority = true;
-      package = pkgs.monado;
     };
 
     udev = {
