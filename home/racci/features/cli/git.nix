@@ -101,7 +101,6 @@
       extensions = with pkgs; [
         gh-markdown-preview
         gh-notify
-        gh-copilot
         gh-eco
       ];
       gitCredentialHelper.enable = true;
