@@ -11,11 +11,6 @@ in
 {
   options.purpose.gaming.steam = {
     enable = mkEnableOption "Steam";
-    enableNvidiaPatches = (mkEnableOption "Enable Nvidia patches") // {
-      description = ''
-        Enabled a script which applies a patch to the steam runtime shel file to allow gpu acceleration on nvidia cards.
-      '';
-    };
   };
 
   config = mkIf cfg.enable {
