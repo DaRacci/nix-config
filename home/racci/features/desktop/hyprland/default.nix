@@ -96,51 +96,51 @@ with lib;
 
       layerrule =
         #region No Animations
-      (trivial.pipe
-        [
-          "walker"
-          "selection"
-          "overview"
-          "anyrun"
-          "gauntlet"
-          "indicator.*"
-          "osk"
-          "hyprpicker"
-          "noanim"
+        (trivial.pipe
+          [
+            "walker"
+            "selection"
+            "overview"
+            "anyrun"
+            "gauntlet"
+            "indicator.*"
+            "osk"
+            "hyprpicker"
+            "noanim"
+          ]
+          [
+            (map (layer: "no_anim on, match:namespace ${layer}"))
+            #endregion
+            #region Ags
+          ]
+        )
+        ++ [
+          "animation slide top, match:namespace sideleft.*"
+          "animation slide top, match:namespace sideright.*"
+          "blur on, match:namespace session"
         ]
-        [
-          (map (layer: "no_anim on, match:namespace ${layer}"))
-          #endregion
-          #region Ags
-        ]
-      )
-      ++ [
-        "animation slide top, match:namespace sideleft.*"
-        "animation slide top, match:namespace sideright.*"
-        "blur on, match:namespace session"
-      ]
-      ++ (trivial.pipe
-        [
-          "bar"
-          "corner.*"
-          "dock"
-          "indicator.*"
-          "indicator*"
-          "overview"
-          "cheatsheet"
-          "sideright"
-          "sideleft"
-          "osk"
-        ]
-        [
-          (map (layer: [
-            "blur on, match:namespace ${layer}"
-            "ignore_alpha 0.6, match:namespace ${layer}"
-          ]))
-          flatten
-          #endregion
-        ]
-      );
+        ++ (trivial.pipe
+          [
+            "bar"
+            "corner.*"
+            "dock"
+            "indicator.*"
+            "indicator*"
+            "overview"
+            "cheatsheet"
+            "sideright"
+            "sideleft"
+            "osk"
+          ]
+          [
+            (map (layer: [
+              "blur on, match:namespace ${layer}"
+              "ignore_alpha 0.6, match:namespace ${layer}"
+            ]))
+            flatten
+            #endregion
+          ]
+        );
 
       misc = {
         animate_manual_resizes = false;

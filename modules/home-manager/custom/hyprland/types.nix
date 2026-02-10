@@ -4,7 +4,20 @@
 }:
 let
   inherit (lib) mkOption types;
-  inherit (types) nullOr float listOf enum ints either submodule percentString bool int str strMatching addCheck;
+  inherit (types)
+    nullOr
+    float
+    listOf
+    enum
+    ints
+    either
+    submodule
+    bool
+    int
+    str
+    strMatching
+    addCheck
+    ;
 in
 rec {
   percentString = addCheck (strMatching "^(-)?[0-9]{1,3}+(%)?$") (

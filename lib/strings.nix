@@ -10,7 +10,6 @@ let
     match
     length
     toSentenceCase
-    concatStrings
     addContextFrom
     toLower
     toUpper
@@ -55,7 +54,8 @@ rec {
 
       first = if length parts > 0 then toLower (head parts) else "";
       rest = if length parts > 1 then map toSentenceCase (tail parts) else [ ];
-    in (map (addContextFrom str) ([ first ] ++ rest));
+    in
+    map (addContextFrom str) ([ first ] ++ rest);
 
   toSnakeCase = str: concatStringsSep "_" (map toLower (splitFormattedString str));
 
