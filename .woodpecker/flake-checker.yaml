@@ -1,0 +1,14 @@
+labels:
+  platform: linux/amd64
+
+when:
+  - event: [push, pull_request]
+    branch: master
+  - event: cron
+    cron: daily
+  - event: manual
+
+steps:
+  - name: Run flake checker
+    image: registry.racci.dev/lix-woodpecker:latest
+    commands: nix run nixpkgs#flake-checker

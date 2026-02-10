@@ -10,13 +10,6 @@ permissions:
   contents: read
 
 jobs:
-  flake-checks:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Check Nix flake Nixpkgs inputs
-        uses: DeterminateSystems/flake-checker-action@main
-
   generate-matrix:
     runs-on: self-hosted
     outputs:
