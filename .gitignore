@@ -10,3 +10,5 @@ result
 
 @girs
 node_modules
+.workspaces/
+.sisyphus/*
