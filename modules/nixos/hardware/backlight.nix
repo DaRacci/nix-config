@@ -5,33 +5,39 @@
   ...
 }:
 let
+  inherit (lib) mkIf mkMerge mkEnableOption;
+
   cfg = config.hardware;
 in
 {
   options.hardware.backlight = {
-    enable = lib.mkEnableOption "enable backlight support" // {
-      default = !(config.host.device.isHeadless || config.host.device.isVirtual);
-    };
+    enable = mkEnableOption "enable backlight support";
   };
 
-  config = lib.mkIf cfg.backlight.enable {
-    programs.light.enable = true;
+  config = mkMerge [
+    {
+      hardware.backlight = !(config.host.device.isHeadless || config.host.device.isVirtual);
+    }
 
-    environment.systemPackages = with pkgs; [
-      ddcutil
-      luminance
-    ];
+    (mkIf cfg.backlight.enable {
+      programs.light.enable = true;
 
-    boot = {
-      extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
-      kernelModules = [
-        "i2c-dev"
-        "ddcci_backlight"
+      environment.systemPackages = with pkgs; [
+        ddcutil
+        luminance
       ];
-    };
 
-    services.udev.extraRules = ''
-      KERNEL=="i2c-[0-9]*", GROUP="users"
-    '';
-  };
+      boot = {
+        extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
+        kernelModules = [
+          "i2c-dev"
+          "ddcci_backlight"
+        ];
+      };
+
+      services.udev.extraRules = ''
+        KERNEL=="i2c-[0-9]*", GROUP="users"
+      '';
+    })
+  ];
 }

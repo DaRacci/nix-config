@@ -17,6 +17,7 @@ let
     mkIf
     types
     mapAttrsToList
+    literalExpression
     ;
   inherit (types)
     attrsOf
@@ -54,18 +55,27 @@ in
             database_id = mkOption {
               type = int;
               default = staticDbIdMappings.${name} or (-1);
+              defaultText = literalExpression ''
+                staticDbIdMappings.${name} or (-1)
+              '';
               readOnly = true;
             };
 
             host = mkOption {
               type = str;
               default = config.server.database.host;
+              defaultText = literalExpression ''
+                config.server.database.host
+              '';
               readOnly = true;
             };
 
             port = mkOption {
               type = int;
               default = redisPort;
+              defaultText = literalExpression ''
+                (getIOPrimaryHostAttr "services.redis.servers")."".port
+              '';
               readOnly = true;
             };
           };

@@ -1,4 +1,5 @@
 {
+  self,
   inputs,
   config,
   lib,
@@ -22,6 +23,11 @@
     dev = {
       extraInputsFlake = ./dev;
       module = ./dev/flake-module.nix;
+    };
+    docs = {
+      extraInputsFlake = ./docs;
+      module = ./docs/flake-module.nix;
+      extraInputs = config.partitions.home-manager.extraInputs // config.partitions.nixos.extraInputs;
     };
     home-manager = {
       extraInputsFlake = ./home-manager;

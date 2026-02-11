@@ -17,6 +17,9 @@ in
     hostName = mkOption {
       type = types.str;
       default = config.networking.hostName;
+      defaultText = literalExpression ''
+        config.networking.hostName
+      '';
       description = "The hostName to use for auto-upgrade";
     };
   };

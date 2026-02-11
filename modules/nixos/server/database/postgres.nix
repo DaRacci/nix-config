@@ -27,6 +27,7 @@ let
     toUpper
     types
     unique
+    literalExpression
     ;
   inherit (types)
     attrsOf
@@ -63,12 +64,18 @@ in
             host = mkOption {
               type = str;
               default = config.server.database.host;
+              defaultText = literalExpression ''
+                config.server.database.host
+              '';
               readOnly = true;
             };
 
             port = mkOption {
               type = int;
               default = postgresPort;
+              defaultText = literalExpression ''
+                config.server.database.postgres.${name}.port
+              '';
               readOnly = true;
             };
 
@@ -88,6 +95,11 @@ in
                       config.sops.secrets."POSTGRES/${
                         toUpper config.server.database.postgres.${name}.database |> builtins.replaceStrings [ "-" ] [ "_" ]
                       }_PASSWORD".path;
+                    defaultText = literalExpression ''
+                      config.sops.secrets."POSTGRES/''${
+                        toUpper config.server.database.postgres.''${name}.database |> builtins.replaceStrings [ "-" ] [ "_" ]
+                      }_PASSWORD".path;
+                    '';
                     readOnly = true;
                   };
 

@@ -1,10 +1,11 @@
 { config, lib, ... }:
 let
   inherit (lib)
+    literalExpression
     mkEnableOption
+    mkForce
     mkIf
     mkMerge
-    mkForce
     ;
 
   cfg = config.custom.core;
@@ -18,18 +19,21 @@ in
     audio = {
       enable = mkEnableOption "Enable audio support" // {
         default = !config.host.device.isHeadless;
+        defaultText = literalExpression "!config.host.device.isHeadless";
       };
     };
 
     bluetooth = {
       enable = mkEnableOption "Enable Bluetooth support" // {
         default = !config.host.device.isHeadless;
+        defaultText = literalExpression "!config.host.device.isHeadless";
       };
     };
 
     network = {
       enable = (mkEnableOption "Enable network support") // {
         default = !config.host.device.isVirtual;
+        defaultText = literalExpression "!config.host.device.isVirtual";
       };
     };
   };

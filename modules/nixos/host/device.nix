@@ -6,9 +6,16 @@
 let
   inherit (lib)
     mkEnableOption
+    mkDefault
     mkOption
+    mkMerge
     mkIf
-    types
+    ;
+  inherit (lib.types)
+    listOf
+    nullOr
+    bool
+    enum
     ;
   cfg = config.host.device;
 in
@@ -17,32 +24,29 @@ in
     enable = mkEnableOption "device specification";
 
     role = mkOption {
-      type = types.enum [
+      type = nullOr (enum [
         "desktop"
         "laptop"
         "server"
-      ];
-      default = throw "A role must be specified";
+      ]);
       description = "The role of the device";
     };
 
     purpose = mkOption {
-      type =
-        with types;
-        listOf (enum [
-          "development"
-          "gaming"
-          "media"
-          "office"
-          "server"
-          "virtualization"
-        ]);
+      type = listOf (enum [
+        "development"
+        "gaming"
+        "media"
+        "office"
+        "server"
+        "virtualization"
+      ]);
       default = [ ];
       description = "The purpose(s) of the device.";
     };
 
     isVirtual = mkOption {
-      type = types.bool;
+      type = bool;
       default = builtins.hasAttr "wsl" config || builtins.hasAttr "proxmoxLXC" config;
       description = ''
         Whether the device is a virtual machine, container, or other virtualized environment.
@@ -52,8 +56,8 @@ in
     };
 
     isHeadless = mkOption {
-      type = types.bool;
-      default = cfg.role == "server";
+      type = bool;
+      default = false;
       description = ''
         Whether the device is headless, i.e. does not have a display is only accessible via SSH.
 
@@ -62,18 +66,18 @@ in
     };
   };
 
-  config = mkIf cfg.enable {
-    programs = {
-      light = mkIf (!cfg.isHeadless) { enable = true; };
-    };
-
-    boot = {
-      extraModulePackages = lib.optionals (!cfg.isHeadless) [ config.boot.kernelPackages.ddcci-driver ];
-
-      kernelModules = lib.optionals (!cfg.isHeadless) [
-        "i2c-dev"
-        "ddcci_backlight"
+  config = mkMerge [
+    {
+      assertions = [
+        {
+          assertion = cfg.role != null;
+          message = "host.device.role is required to be set.";
+        }
       ];
-    };
-  };
+    }
+
+    (mkIf cfg.enable {
+      host.device.isHeadless = mkDefault (cfg.role == "server");
+    })
+  ];
 }

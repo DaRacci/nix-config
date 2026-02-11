@@ -4,7 +4,7 @@
   ...
 }:
 let
-  inherit (lib) mkEnableOption;
+  inherit (lib) mkEnableOption literalExpression;
 
   hmUserAttrs = builtins.attrValues config.home-manager.users;
   hmUsers = builtins.filter (user: (builtins.hasAttr user config.home-manager.users)) (
@@ -34,9 +34,10 @@ in
     (importWithExtras ./nautilus.nix)
   ];
 
-  options.custom.hm-helpers = {
+  options.custom.hm-helper = {
     enable = mkEnableOption "Enable Home Manager helper functions." // {
       default = config ? home-manager;
+      defaultText = literalExpression "config ? home-manager";
     };
   };
 }

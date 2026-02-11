@@ -1,22 +1,27 @@
 { config, lib, ... }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.hardware.cooling;
+  inherit (lib) mkIf mkMerge mkEnableOption;
   inherit (config.host) device;
+
+  cfg = config.hardware.cooling;
 in
 {
   options.hardware.cooling = {
-    enable = mkEnableOption "enable cooling support" // {
-      default = device.role == "desktop" && !device.isVirtual;
-    };
+    enable = mkEnableOption "enable cooling support";
   };
 
-  config = mkIf cfg.enable {
-    programs.coolercontrol = {
-      enable = true;
-      nvidiaSupport = config.hardware.graphics.hasNvidia;
-    };
+  config = mkMerge [
+    {
+      hardware.cooling = device.role == "desktop" && !device.isVirtual;
+    }
 
-    host.persistence.directories = [ "/etc/coolercontrol" ];
-  };
+    (mkIf cfg.enable {
+      programs.coolercontrol = {
+        enable = true;
+        nvidiaSupport = config.hardware.graphics.hasNvidia;
+      };
+
+      host.persistence.directories = [ "/etc/coolercontrol" ];
+    })
+  ];
 }

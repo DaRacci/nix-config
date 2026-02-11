@@ -1,6 +1,8 @@
 { config, lib, ... }:
-with lib;
 let
+  inherit (lib) mkOption;
+  inherit (lib.types) str nullOr;
+
   cfg = config.host;
 in
 {
@@ -11,19 +13,28 @@ in
 
   options.host = {
     name = mkOption {
-      type = types.str;
-      default = throw "host.name is required";
+      type = str;
       description = "The name of the host.";
     };
 
     system = mkOption {
-      type = types.str;
-      default = throw "host.system is required";
+      type = nullOr str;
       description = "The system architecture.";
     };
   };
 
   config = {
+    assertions = [
+      {
+        assertion = cfg.name != null;
+        message = "host.name is required.";
+      }
+      {
+        assertion = cfg.system != null;
+        message = "host.system is required.";
+      }
+    ];
+
     networking.hostName = cfg.name;
     system.name = cfg.name;
   };

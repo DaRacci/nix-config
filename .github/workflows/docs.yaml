@@ -1,0 +1,39 @@
+name: Documentation
+
+on:
+  push:
+    branches: [master]
+
+concurrency:
+  cancel-in-progress: true
+  group: pages
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  docs:
+    runs-on: self-hosted
+    name: Documentation
+    permissions:
+      contents: read
+      id-token: write
+      pages: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build Documentation
+        run: nix build .#doc
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: result
+
+      - name: Deploy Pages
+        uses: actions/deploy-pages@v4

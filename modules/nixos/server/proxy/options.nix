@@ -10,6 +10,7 @@ let
   inherit (lib)
     mkOption
     types
+    literalExpression
     ;
   inherit (types)
     str
@@ -20,7 +21,6 @@ let
     listOf
     attrsOf
     submodule
-    literalExpression
     ;
 
   kanidmContextOptions = _: {
@@ -114,6 +114,9 @@ in
               baseUrl = mkOption {
                 type = str;
                 default = "${name}.${getIOPrimaryHostAttr "server.proxy.domain"}";
+                defaultText = literalExpression ''
+                  ''${name}.''${getIOPrimaryHostAttr "server.proxy.domain"}
+                '';
                 description = "The base url including the configured base domain name.";
                 readOnly = true;
               };

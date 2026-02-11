@@ -1,6 +1,6 @@
 {
   imports = [
-    ../shared/hm-helpers
+    ../hm-helper
     ../shared/display-manager.nix
     ../shared/remote.nix
   ];

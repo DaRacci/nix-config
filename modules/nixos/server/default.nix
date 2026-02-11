@@ -13,9 +13,13 @@ let
     isAttrs
     filterEmpty
     joinItems
+    mkIf
+    mkOption
+    mkEnableOption
     ;
   inherit (types)
     str
+    nullOr
     ;
 
   #region Helper functions for working with the server cluster
@@ -164,8 +168,11 @@ in
   ];
 
   options.server = {
-    ioPrimaryHost = lib.mkOption {
-      type = str;
+    enable = mkEnableOption "enable the server module";
+
+    ioPrimaryHost = mkOption {
+      type = nullOr str;
+      default = null;
       description = ''
         Which host is the primary coordinator for IO in the cluster.
 
@@ -176,7 +183,7 @@ in
     };
   };
 
-  config = {
+  config = mkIf config.server.enable {
     services.journald = {
       storage = "persistent";
       extraConfig = ''

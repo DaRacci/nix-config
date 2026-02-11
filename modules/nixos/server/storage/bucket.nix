@@ -14,6 +14,7 @@ let
     mapAttrs
     mapAttrs'
     nameValuePair
+    literalExpression
     ;
   inherit (lib.types)
     attrsOf
@@ -38,7 +39,17 @@ in
 
             credentialsFile = mkOption {
               type = str;
-              default = config.sops.secrets."S3FS_AUTH/${toUpper name}".path;
+              default =
+                let
+                  secretName = "S3FS_AUTH/${toUpper name}";
+                in
+                if config.sops.secrets ? "${secretName}" then config.sops.secrets."${secretName}".path else "";
+              defaultText = literalExpression ''
+                let
+                  secretName = "S3FS_AUTH/''${toUpper name}";
+                in
+                if config.sops.secrets ? "''${secretName}" then config.sops.secrets."''${secretName}".path else "";
+              '';
               description = "Path to the file containing the minio credentials.";
             };
 
@@ -46,6 +57,9 @@ in
               type = str;
               description = "Path where the bucket should be mounted.";
               default = "/mnt/buckets/${bucketName}";
+              defaultText = literalExpression ''
+                "/mnt/buckets/''${bucketName}"
+              '';
             };
 
             uid = mkOption {

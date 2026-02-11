@@ -1,5 +1,5 @@
 {
-  self,
+  inputs,
   config,
   lib,
   ...
@@ -193,7 +193,7 @@ in
     };
   };
 
-  imports = [ self.inputs.impermanence.nixosModules.impermanence ];
+  imports = [ inputs.impermanence.nixosModules.impermanence ];
 
   config = mkIf cfg.enable {
     programs.fuse.userAllowOther = true;

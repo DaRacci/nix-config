@@ -1,3 +1,5 @@
+<!-- START DOCS -->
+
 # Nix Config
 
 This is my interpretation of the perfect nix flake, this powers my desktops, laptops, servers, vms, containers, and all aspects of my computers.
@@ -56,6 +58,8 @@ The flake automatically discovers:
 - **Users**: By scanning `home/` directories and matching with existing hosts
 - **Hardware Acceleration**: Support based on predefined host lists
 
+<!-- STOP DOCS -->
+
 ## Getting Started
 
 - **[Creating New Hosts](./docs/Creating-Hosts.md)** - Step-by-step guide to add new hosts to your configuration
@@ -69,14 +73,6 @@ The flake automatically discovers:
 - Cosmic Desktop once stabilized
 - Declarative disk management with disko for all hosts
 - Automated backup strategies for persistent data
-
-## Development
-
-This repository includes utilities for development and debugging:
-
-- `utils/get-os-imports.nix` - Debug NixOS module imports
-- `utils/get-hm-imports.nix` - Debug home-manager imports
-- `utils/get-imports.nu` - Nushell script for import analysis
 
 ## Resources ive used as inspiration or based components on
 Huge thanks to the people who worked on these repositories.

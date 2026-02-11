@@ -5,14 +5,16 @@
   ...
 }:
 let
+  inherit (lib) mkIf mkEnableOption;
+
   cfg = config.purpose.diy;
 in
 {
   options.purpose.diy.printing = {
-    enable = lib.mkEnableOption "Enable 3D printing support";
+    enable = mkEnableOption "Enable 3D printing support";
   };
 
-  config = lib.mkIf cfg.printing.enable {
+  config = mkIf cfg.printing.enable {
     assertions = [
       {
         assertion = cfg.enable;

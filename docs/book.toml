@@ -1,0 +1,15 @@
+[book]
+title = "RacciDev"
+language = "en"
+src = "src"
+
+[output.html]
+site-url = "/nix-config/"
+git-repository-url = "https://github.com/DaRacci/nix-config"
+edit-url-template = "https://github.com/DaRacci/nix-config/edit/master/docs/{path}"
+no-section-label = true
+# Ensure static file (css, js) have a unique filename, to avoid outdated cache.
+hash-files = true
+
+[output.html.fold]
+enable = true

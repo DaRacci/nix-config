@@ -328,6 +328,7 @@ in
 
             # Misc stuff
             "browser.toolbars.bookmarks.visibility" = mkLockedValue "never";
+            "signon.rememberSignons" = lock-false;
           };
         };
 

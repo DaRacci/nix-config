@@ -84,7 +84,7 @@ let
 
         storage = {
           disks = mkOption {
-            type = types.list types.str;
+            type = types.listOf types.str;
             default = [ ];
             description = "The disks to attach to the guest.";
           };
