@@ -78,7 +78,9 @@ This repository includes utilities for development and debugging:
 - `utils/get-hm-imports.nix` - Debug home-manager imports
 - `utils/get-imports.nu` - Nushell script for import analysis
 
-## Links
+## Resources ive used as inspiration or based components on
+Huge thanks to the people who worked on these repositories.
+* https://github.com/pinpox/nixos/tree/main
 
 [home-manager]: https://github.com/nix-community/home-manager
 [impermanence]: https://github.com/nix-community/impermanence
