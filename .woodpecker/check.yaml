@@ -9,6 +9,7 @@ when:
 steps:
   - name: Run flake checks
     image: registry.racci.dev/lix-woodpecker:latest
+    pull: true
     commands: |
       nix run .#archive-flakes -- "." "flake/ci" "flake/dev"
-      nix run nixpkgs#nix-fast-build
+      nix run nixpkgs#nix-fast-build -- --skip-cached --no-nom

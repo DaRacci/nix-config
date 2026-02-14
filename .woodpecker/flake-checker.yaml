@@ -11,4 +11,5 @@ when:
 steps:
   - name: Run flake checker
     image: registry.racci.dev/lix-woodpecker:latest
+    pull: true
     commands: nix run nixpkgs#flake-checker
