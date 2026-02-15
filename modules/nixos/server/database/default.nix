@@ -9,8 +9,8 @@
   ...
 }:
 let
-  inherit (lib) types mkIf mkOption;
-  inherit (types) str nullOr;
+  inherit (lib) types mkIf mkOption literalExpression;
+  inherit (types) str;
 
   cfg = config.server.database;
 in
@@ -23,8 +23,11 @@ in
 
   options.server.database = {
     host = mkOption {
-      type = nullOr str;
-      default = null;
+      type = str;
+      default = if isThisIOPrimaryHost then "localhost" else config.server.ioPrimaryHost;
+      defaultText = literalExpression ''
+        if isThisIOPrimaryHost then "localhost" else config.server.ioPrimaryHost
+      '';
       description = ''
         The hostname or IP address to use when connecting to managed databases.
 
@@ -35,13 +38,11 @@ in
   };
 
   config = mkIf config.server.enable {
-      assertions = [
-        {
-          assertion = cfg.host != null;
-          message = "The database host must be specified.";
-        }
-      ];
-
-      server.database.host = if isThisIOPrimaryHost then "localhost" else config.server.ioPrimaryHost;
-    };
+    assertions = [
+      {
+        assertion = cfg.host != null;
+        message = "The database host must be specified.";
+      }
+    ];
+  };
 }

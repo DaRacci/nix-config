@@ -5,20 +5,26 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkMerge mkEnableOption;
+  inherit (lib)
+    mkIf
+    mkMerge
+    mkEnableOption
+    literalExpression
+    ;
 
   cfg = config.hardware;
 in
 {
   options.hardware.backlight = {
-    enable = mkEnableOption "enable backlight support";
+    enable = mkEnableOption "enable backlight support" // {
+      default = !(config.host.device.isHeadless || config.host.device.isVirtual);
+      defaultText = literalExpression ''
+        !(config.host.device.isHeadless || config.host.device.isVirtual)
+      '';
+    };
   };
 
   config = mkMerge [
-    {
-      hardware.backlight = !(config.host.device.isHeadless || config.host.device.isVirtual);
-    }
-
     (mkIf cfg.backlight.enable {
       programs.light.enable = true;
 

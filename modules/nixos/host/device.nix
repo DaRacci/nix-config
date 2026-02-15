@@ -5,11 +5,10 @@
 }:
 let
   inherit (lib)
+    literalExpression
     mkEnableOption
-    mkDefault
     mkOption
     mkMerge
-    mkIf
     ;
   inherit (lib.types)
     listOf
@@ -48,6 +47,9 @@ in
     isVirtual = mkOption {
       type = bool;
       default = builtins.hasAttr "wsl" config || builtins.hasAttr "proxmoxLXC" config;
+      defaultText = literalExpression ''
+        builtins.hasAttr "wsl" config || builtins.hasAttr "proxmoxLXC" config
+      '';
       description = ''
         Whether the device is a virtual machine, container, or other virtualized environment.
 
@@ -57,7 +59,10 @@ in
 
     isHeadless = mkOption {
       type = bool;
-      default = false;
+      default = cfg.role == "server";
+      defaultText = literalExpression ''
+        cfg.role == "server"
+      '';
       description = ''
         Whether the device is headless, i.e. does not have a display is only accessible via SSH.
 
@@ -75,9 +80,5 @@ in
         }
       ];
     }
-
-    (mkIf cfg.enable {
-      host.device.isHeadless = mkDefault (cfg.role == "server");
-    })
   ];
 }

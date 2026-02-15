@@ -5,6 +5,7 @@ let
     mkMerge
     mkOption
     mkEnableOption
+    literalExpression
     ;
   inherit (lib.types) enum int str;
 
@@ -34,19 +35,24 @@ in
 
     paritionLabel = mkOption {
       type = str;
-    };
-  };
-
-  config = mkMerge [
-    {
-      hardware.storage.root.ephemeral =
+      readOnly = true;
+      default =
         let
           inherit (config.disko.devices.disk."${config.hardware.storage.root.name}".content) partitions;
           partition = if cfg.enableLuks then partitions.luks else partitions.root;
         in
         lib.stringAfter "/dev/disk/by-partlabel/" partition.label;
-    }
+      defaultText = literalExpression ''
+        let
+          inherit (config.disko.devices.disk."''${config.hardware.storage.root.name}".content) partitions;
+          partition = if cfg.enableLuks then partitions.luks else partitions.root;
+        in
+        lib.stringAfter "/dev/disk/by-partlabel/" partition.label;
+      '';
+    };
+  };
 
+  config = mkMerge [
     (mkIf cfg.ephemeral.enable {
       disko.devices = {
         nodev."/" = lib.mkIf (cfg.ephemeral.type == "tmpfs") (
