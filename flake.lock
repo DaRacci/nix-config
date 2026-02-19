@@ -21,11 +21,11 @@
         "tiny-audio-player": "tiny-audio-player"
       },
       "locked": {
-        "lastModified": 1770584961,
-        "narHash": "sha256-5/ZAb9j1ih+14Ma34iNOgotA3BjQpayqg1O9+e2d7jU=",
+        "lastModified": 1771347729,
+        "narHash": "sha256-FlmgIfxSdqWXmPxuLnOCL7NwqXsij56izpo31JZ3a2Y=",
         "owner": "emmanuelrosa",
         "repo": "erosanix",
-        "rev": "394debf46a32b883dc572472cbda18482eb2de92",
+        "rev": "5fbad454f9907299ac79a53ec0d2ff229d46f35a",
         "type": "github"
       },
       "original": {
@@ -182,11 +182,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1770562336,
-        "narHash": "sha256-ub1gpAONMFsT/GU2hV6ZWJjur8rJ6kKxdm9IlCT0j84=",
+        "lastModified": 1771369470,
+        "narHash": "sha256-0NBlEBKkN3lufyvFegY4TYv5mCNHbi5OmBDrzihbBMQ=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "d6c71932130818840fc8fe9509cf50be8c64634f",
+        "rev": "0182a361324364ae3f436a63005877674cf45efb",
         "type": "github"
       },
       "original": {
@@ -233,11 +233,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1770584247,
-        "narHash": "sha256-awRLWslBvfUSreLt0IMyFYHJkvlb3roCtyMtKA47wmk=",
+        "lastModified": 1771101510,
+        "narHash": "sha256-S5of51uyVJsU7QJ41S+HK4OhDhK1+e4mvHJbJAgMlf0=",
         "owner": "emmanuelrosa",
         "repo": "tiny_audio_player",
-        "rev": "1efef4ed191f4c9589ccd397b36feb9bc906c459",
+        "rev": "6b26f05b18c7db9137e9c0dea34f2a48ab2213ae",
         "type": "github"
       },
       "original": {
