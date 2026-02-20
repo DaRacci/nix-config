@@ -97,13 +97,13 @@ in
 
         homeAssistant = {
           enable = mkEnableOption "Home Assistant webhook alerting" // {
-            default = true;
+            default = false;
           };
         };
 
         nextcloudTalk = {
           enable = mkEnableOption "Nextcloud Talk webhook alerting" // {
-            default = true;
+            default = false;
           };
         };
       };

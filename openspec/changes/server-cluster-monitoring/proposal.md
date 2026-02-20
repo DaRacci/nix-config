@@ -26,7 +26,7 @@ Implement a comprehensive monitoring and observability stack for the NixOS serve
 
 ### Topology
 
-```
+```text
 nixmon (Collector Host)
 ├── Prometheus :9090 (LAN-only via Caddy)
 ├── Loki :3100 (LAN-only via Caddy)
@@ -61,7 +61,7 @@ Proxmox Host (External)
 
 ## Module Structure
 
-```
+```text
 modules/flake/
 ├── allocations.nix                    # [MODIFIED] Add monitoringPrimaryHost option
 └── apply/system.nix                   # [MODIFIED] Map to server.monitoringPrimaryHost

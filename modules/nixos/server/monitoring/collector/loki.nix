@@ -11,6 +11,17 @@ let
 in
 {
   config = mkIf (cfg.enable && cfg.collector.enable) {
+    server.proxy.virtualHosts.loki =
+      let
+        inherit (config.services.loki.configuration.server) http_listen_port http_listen_address;
+      in
+      {
+        ports = [ http_listen_port ];
+        extraConfig = ''
+          reverse_proxy http://${http_listen_address}:${toString http_listen_port}
+        '';
+      };
+
     services.loki = {
       enable = true;
 
@@ -64,7 +75,5 @@ in
         };
       };
     };
-
-    networking.firewall.allowedTCPPorts = [ 3100 ];
   };
 }

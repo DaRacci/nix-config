@@ -68,6 +68,11 @@ The system SHALL include a baseline set of alert rules for common failure condit
 - **WHEN** a server's memory usage exceeds 90% for more than 5 minutes
 - **THEN** a `HighMemoryUsage` alert SHALL fire in Prometheus
 
+#### Scenario: Service down alert fires
+
+- **WHEN** a monitored service target (non-node job) becomes unreachable for more than 2 minutes
+- **THEN** a `ServiceDown` alert SHALL fire in Prometheus with the job and instance labels identifying the affected service
+
 ### Requirement: Alert grouping and throttling
 
 Alertmanager SHALL group related alerts and enforce a minimum interval between repeated notifications to prevent alert storms.

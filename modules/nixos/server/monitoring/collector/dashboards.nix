@@ -31,7 +31,10 @@ let
         {
           title = "Hosts Up";
           type = "stat";
-          datasource.type = "prometheus";
+          datasource = {
+            type = "prometheus";
+            uid = "prometheus";
+          };
           targets = [
             {
               expr = "count(up{job=\"node\"} == 1)";
@@ -48,7 +51,10 @@ let
         {
           title = "Hosts Down";
           type = "stat";
-          datasource.type = "prometheus";
+          datasource = {
+            type = "prometheus";
+            uid = "prometheus";
+          };
           targets = [
             {
               expr = "count(up{job=\"node\"} == 0) or vector(0)";
@@ -65,7 +71,10 @@ let
         {
           title = "Active Alerts";
           type = "stat";
-          datasource.type = "prometheus";
+          datasource = {
+            type = "prometheus";
+            uid = "prometheus";
+          };
           targets = [
             {
               expr = "count(ALERTS{alertstate=\"firing\"}) or vector(0)";
@@ -82,7 +91,10 @@ let
         {
           title = "CPU Usage per Host";
           type = "timeseries";
-          datasource.type = "prometheus";
+          datasource = {
+            type = "prometheus";
+            uid = "prometheus";
+          };
           targets = [
             {
               expr = "100 - (avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)";
@@ -99,7 +111,10 @@ let
         {
           title = "Memory Usage per Host";
           type = "timeseries";
-          datasource.type = "prometheus";
+          datasource = {
+            type = "prometheus";
+            uid = "prometheus";
+          };
           targets = [
             {
               expr = "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100";
@@ -116,7 +131,10 @@ let
         {
           title = "Disk Usage per Host";
           type = "timeseries";
-          datasource.type = "prometheus";
+          datasource = {
+            type = "prometheus";
+            uid = "prometheus";
+          };
           targets = [
             {
               expr = "(1 - (node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"})) * 100";
@@ -133,7 +151,10 @@ let
         {
           title = "Network Traffic per Host";
           type = "timeseries";
-          datasource.type = "prometheus";
+          datasource = {
+            type = "prometheus";
+            uid = "prometheus";
+          };
           targets = [
             {
               expr = "rate(node_network_receive_bytes_total{device!~\"lo|veth.*|br.*\"}[5m]) * 8";
@@ -173,7 +194,10 @@ let
         {
           title = "Log Volume";
           type = "timeseries";
-          datasource.type = "loki";
+          datasource = {
+            type = "loki";
+            uid = "loki";
+          };
           targets = [
             {
               expr = "sum(count_over_time({job=~\".+\"}[5m])) by (host)";
@@ -190,7 +214,10 @@ let
         {
           title = "Logs";
           type = "logs";
-          datasource.type = "loki";
+          datasource = {
+            type = "loki";
+            uid = "loki";
+          };
           targets = [
             {
               expr = "{job=~\".+\"}";

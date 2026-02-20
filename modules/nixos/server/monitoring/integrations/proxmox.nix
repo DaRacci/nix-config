@@ -5,7 +5,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 let
@@ -18,10 +17,30 @@ in
     mkIf
       (cfg.enable && cfg.collector.enable && cfg.collector.proxmox.enable && isThisMonitoringPrimaryHost)
       {
+        sops = {
+          secrets = {
+            "PROXMOX/API_URL" = { };
+            "PROXMOX/USER" = { };
+            "PROXMOX/TOKEN_ID" = { };
+            "PROXMOX/TOKEN_SECRET" = { };
+          };
+
+          templates."pve-exporter.yml" = {
+            content = builtins.toJSON {
+              default = {
+                user = config.sops.placeholder."PROXMOX/USER";
+                token_name = config.sops.placeholder."PROXMOX/TOKEN_ID";
+                token_value = config.sops.placeholder."PROXMOX/TOKEN_SECRET";
+                verify_ssl = false;
+              };
+            };
+          };
+        };
+
         services.prometheus.exporters.pve = {
           enable = true;
           port = 9221;
-          listenAddress = "0.0.0.0";
+          listenAddress = "127.0.0.1";
 
           configFile = config.sops.templates."pve-exporter.yml".path;
         };
@@ -34,20 +53,5 @@ in
             ];
           }
         ];
-
-        sops.secrets."proxmox/api_url" = { };
-        sops.secrets."proxmox/token_id" = { };
-        sops.secrets."proxmox/token_secret" = { };
-
-        sops.templates."pve-exporter.yml" = {
-          content = builtins.toJSON {
-            default = {
-              user = config.sops.placeholder."proxmox/token_id";
-              token_name = config.sops.placeholder."proxmox/token_id";
-              token_value = config.sops.placeholder."proxmox/token_secret";
-              verify_ssl = false;
-            };
-          };
-        };
       };
 }

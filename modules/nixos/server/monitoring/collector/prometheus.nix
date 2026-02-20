@@ -10,6 +10,7 @@
 let
   inherit (lib)
     mkIf
+    optional
     ;
 
   cfg = config.server.monitoring;
@@ -18,25 +19,36 @@ let
   nodeTargets =
     serverConfigurations
     |> builtins.filter (c: c.server.monitoring.enable && c.server.monitoring.exporters.node.enable)
-    |> builtins.map (c: "${c.host.name}:9100");
+    |> map (c: "${c.host.name}:9100");
 
   caddyTargets =
     serverConfigurations
     |> builtins.filter (c: c.server.monitoring.enable && c.server.monitoring.exporters.caddy.enable)
-    |> builtins.map (c: "${c.host.name}:2019");
+    |> map (c: "${c.host.name}:2019");
 
   postgresTargets =
     serverConfigurations
     |> builtins.filter (c: c.server.monitoring.enable && c.server.monitoring.exporters.postgres.enable)
-    |> builtins.map (c: "${c.host.name}:9187");
+    |> map (c: "${c.host.name}:9187");
 
   redisTargets =
     serverConfigurations
     |> builtins.filter (c: c.server.monitoring.enable && c.server.monitoring.exporters.redis.enable)
-    |> builtins.map (c: "${c.host.name}:9121");
+    |> map (c: "${c.host.name}:9121");
 in
 {
   config = mkIf (cfg.enable && cfg.collector.enable) {
+    server.proxy.virtualHosts.prometheus =
+      let
+        inherit (config.services.prometheus) port listenAddress;
+      in
+      {
+        ports = [ port ];
+        extraConfig = ''
+          reverse_proxy http://${listenAddress}:${toString port}
+        '';
+      };
+
     services.prometheus = {
       enable = true;
       port = 9090;
@@ -49,34 +61,31 @@ in
         evaluation_interval = "15s";
       };
 
-      scrapeConfigs = [
-        {
+      scrapeConfigs =
+        (optional (nodeTargets != [ ]) {
           job_name = "node";
           static_configs = [
             { targets = nodeTargets; }
           ];
-        }
-      ]
-      ++ (lib.optional (caddyTargets != [ ]) {
-        job_name = "caddy";
-        static_configs = [
-          { targets = caddyTargets; }
-        ];
-      })
-      ++ (lib.optional (postgresTargets != [ ]) {
-        job_name = "postgres";
-        static_configs = [
-          { targets = postgresTargets; }
-        ];
-      })
-      ++ (lib.optional (redisTargets != [ ]) {
-        job_name = "redis";
-        static_configs = [
-          { targets = redisTargets; }
-        ];
-      });
+        })
+        ++ (optional (caddyTargets != [ ]) {
+          job_name = "caddy";
+          static_configs = [
+            { targets = caddyTargets; }
+          ];
+        })
+        ++ (optional (postgresTargets != [ ]) {
+          job_name = "postgres";
+          static_configs = [
+            { targets = postgresTargets; }
+          ];
+        })
+        ++ (optional (redisTargets != [ ]) {
+          job_name = "redis";
+          static_configs = [
+            { targets = redisTargets; }
+          ];
+        });
     };
-
-    networking.firewall.allowedTCPPorts = [ 9090 ];
   };
 }
