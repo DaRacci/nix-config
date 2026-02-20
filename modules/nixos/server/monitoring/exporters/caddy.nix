@@ -13,10 +13,12 @@ in
   config = mkIf (cfg.enable && cfg.exporters.caddy.enable) {
     services.caddy.globalConfig = lib.mkAfter ''
       servers {
-        metrics
+        metrics {
+          listen 0.0.0.0:2019
+        }
       }
     '';
 
-    networking.firewall.allowedTCPPorts = [ 2019 ];
+    server.network.openPortsForSubnet.tcp = [ 2019 ];
   };
 }

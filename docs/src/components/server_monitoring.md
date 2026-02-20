@@ -75,8 +75,8 @@ All options live under `server.monitoring`:
 | `collector.enable` | bool | auto | Enable collectors (auto on monitoring host) |
 | `collector.grafana.kanidm.enable` | bool | `true` | Enable Kanidm OAuth2 for Grafana |
 | `collector.alerting.enable` | bool | `true` | Enable Alertmanager |
-| `collector.alerting.homeAssistant.enable` | bool | `true` | Enable Home Assistant webhook alerting |
-| `collector.alerting.nextcloudTalk.enable` | bool | `true` | Enable Nextcloud Talk webhook alerting |
+| `collector.alerting.homeAssistant.enable` | bool | `false` | Enable Home Assistant webhook alerting |
+| `collector.alerting.nextcloudTalk.enable` | bool | `false` | Enable Nextcloud Talk webhook alerting |
 | `collector.proxmox.enable` | bool | `true` | Enable Proxmox VE metrics collection |
 
 ### Auto-Detection
@@ -93,17 +93,18 @@ The module automatically detects and enables exporters based on host role:
 The monitoring module requires the following secrets in `hosts/server/nixmon/secrets.yaml`:
 
 ```yaml
-GRAFANA_OAUTH_SECRET: <kanidm-oauth2-secret>
 MONITORING:
     GRAFANA:
         SECRET_KEY: <random-secret-key>
+        OAUTH_SECRET: <kanidm-oauth2-secret>
     HOME_ASSISTANT:
         WEBHOOK_URL: <ha-webhook-url>
     NEXTCLOUD_TALK:
         WEBHOOK_URL: <nc-talk-webhook-url>
 proxmox:
     api_url: <proxmox-api-url>
-    token_id: <proxmox-token-id>
+    user: <proxmox-user-at-realm>
+    token_id: <proxmox-token-name>
     token_secret: <proxmox-token-secret>
 ```
 
@@ -115,7 +116,7 @@ Generate the Grafana secret key:
 cat /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 48
 ```
 
-The `GRAFANA_OAUTH_SECRET` must match the value in `hosts/server/nixcloud/secrets.yaml`
+The `MONITORING/GRAFANA/OAUTH_SECRET` must match the value in `hosts/server/nixcloud/secrets.yaml`
 under `KANIDM/OAUTH2/GRAFANA_SECRET` (the Kanidm provisioning side).
 
 ## Caddy Virtual Hosts
@@ -141,11 +142,12 @@ The following alerts are configured by default:
 | `DiskSpaceCritical` | Root filesystem < 10% free for 5 minutes | Critical |
 | `HighCPUUsage` | CPU usage > 90% for 5 minutes | Warning |
 | `HighMemoryUsage` | Memory usage > 90% for 5 minutes | Warning |
+| `ServiceDown` | `up{job!="node"} == 0` for 2 minutes | Critical |
 
 Alerts are routed to:
 
-- **Home Assistant**: All critical and warning alerts via webhook
-- **Nextcloud Talk**: Critical alerts only via webhook
+- **Home Assistant**: All critical and warning alerts via webhook (requires `collector.alerting.homeAssistant.enable = true`)
+- **Nextcloud Talk**: Critical alerts only via webhook (requires `collector.alerting.nextcloudTalk.enable = true`)
 
 ## Module Structure
 

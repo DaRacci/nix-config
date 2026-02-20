@@ -18,25 +18,6 @@ _: {
       uptime.extraConfig = ''
         reverse_proxy http://localhost:3001
       '';
-
-      grafana = {
-        public = true;
-        extraConfig = ''
-          reverse_proxy http://localhost:3000
-        '';
-      };
-
-      prometheus = {
-        extraConfig = ''
-          reverse_proxy http://localhost:9090
-        '';
-      };
-
-      loki = {
-        extraConfig = ''
-          reverse_proxy http://localhost:3100
-        '';
-      };
     };
   };
 

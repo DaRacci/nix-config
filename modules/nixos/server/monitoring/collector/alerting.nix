@@ -60,6 +60,16 @@ let
                 description = "Memory usage on {{ $labels.instance }} has exceeded 90% for more than 5 minutes.";
               };
             }
+            {
+              alert = "ServiceDown";
+              expr = "up{job!=\"node\"} == 0";
+              "for" = "2m";
+              labels.severity = "critical";
+              annotations = {
+                summary = "Service {{ $labels.job }} on {{ $labels.instance }} is down";
+                description = "{{ $labels.job }} on {{ $labels.instance }} has been unreachable for more than 2 minutes.";
+              };
+            }
           ];
         }
       ];

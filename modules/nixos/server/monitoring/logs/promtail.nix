@@ -18,16 +18,15 @@ in
       configuration = {
         server = {
           http_listen_port = 9080;
+          http_listen_address = "127.0.0.1";
           grpc_listen_port = 0;
         };
 
         positions.filename = "/var/lib/promtail/positions.yaml";
 
-        clients = [
-          {
-            url = "http://${lokiHost}:3100/loki/api/v1/push";
-          }
-        ];
+        clients = lib.optional (lokiHost != null) {
+          url = "http://${lokiHost}:3100/loki/api/v1/push";
+        };
 
         scrape_configs = [
           {
@@ -58,6 +57,5 @@ in
       };
     };
 
-    networking.firewall.allowedTCPPorts = [ 9080 ];
   };
 }

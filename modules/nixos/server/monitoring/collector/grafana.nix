@@ -17,6 +17,18 @@ in
 {
   config = mkIf (cfg.enable && cfg.collector.enable) (mkMerge [
     {
+      server.proxy.virtualHosts.grafana =
+        let
+          inherit (config.services.grafana.settings.server) http_port http_addr;
+        in
+        {
+          public = true;
+          ports = [ http_port ];
+          extraConfig = ''
+            reverse_proxy http://${http_addr}:${toString http_port}
+          '';
+        };
+
       services.grafana = {
         enable = true;
 
@@ -39,6 +51,7 @@ in
             {
               name = "Prometheus";
               type = "prometheus";
+              uid = "prometheus";
               url = "http://localhost:9090";
               isDefault = true;
               access = "proxy";
@@ -46,14 +59,13 @@ in
             {
               name = "Loki";
               type = "loki";
+              uid = "loki";
               url = "http://localhost:3100";
               access = "proxy";
             }
           ];
         };
       };
-
-      networking.firewall.allowedTCPPorts = [ 3000 ];
 
       sops.secrets."MONITORING/GRAFANA/SECRET_KEY" = {
         owner = "grafana";
@@ -71,7 +83,7 @@ in
           auto_login = false;
 
           client_id = "grafana";
-          client_secret = "$__file{${config.sops.secrets."GRAFANA_OAUTH_SECRET".path}}";
+          client_secret = "$__file{${config.sops.secrets."MONITORING/GRAFANA/OAUTH_SECRET".path}}";
 
           scopes = "openid profile email groups";
           auth_url = "https://auth.${domain}/ui/oauth2";
@@ -92,7 +104,7 @@ in
         };
       };
 
-      sops.secrets."GRAFANA_OAUTH_SECRET" = {
+      sops.secrets."MONITORING/GRAFANA/OAUTH_SECRET" = {
         owner = "grafana";
         group = "grafana";
       };

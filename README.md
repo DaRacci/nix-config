@@ -79,7 +79,7 @@ The flake automatically discovers:
 Huge thanks to the people who worked on these repositories.
 
 - https://github.com/pinpox/nixos/tree/main
-- https://github.com/25ASAB015/nix-dotfiles - Referenced for crafting the AI agents, skills and opensec config
+- https://github.com/25ASAB015/nix-dotfiles - Referenced for crafting the AI agents, skills and openspec config
 
 [home-manager]: https://github.com/nix-community/home-manager
 [impermanence]: https://github.com/nix-community/impermanence
