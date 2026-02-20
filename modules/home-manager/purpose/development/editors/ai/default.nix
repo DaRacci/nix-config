@@ -74,7 +74,18 @@ in
 
           permission = {
             edit = "allow";
-            bash = "allow";
+            bash = {
+              "*" = "ask";
+              "grep *" = "allow";
+              "rm *" = "deny";
+              "git *" = "allow";
+              "sops encrypt" = "allow";
+              "sops -e" = "allow";
+              "sops --encrypt" = "allow";
+              "nix build *" = "allow";
+              "nix flake *" = "allow";
+              "nix fmt *" = "allow";
+            };
             webfetch = "allow";
           };
 
