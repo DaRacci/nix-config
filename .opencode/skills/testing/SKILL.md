@@ -75,8 +75,3 @@ nix flake check --override-input devenv-root "file+file://$PWD/.devenv/root"
    ```bash
    nix build .#homeConfigurations."racci@nixmi".activationPackage
    ```
-
-5. Format your changes:
-   ```bash
-   nix fmt modules/nixos/services/tailscale.nix
-   ```

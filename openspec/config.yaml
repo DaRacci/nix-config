@@ -1,0 +1,26 @@
+schema: spec-driven
+
+context: |
+  Tech Stack:
+    - Languages: Nix (Primary), Bash & Nushell (helper scripts)
+    - Frameworks: NixOS, home-manager, flake-parts, devenv
+    - Tools: Nix flakes, sops, lanzaboote, direnv
+
+  Key Constraints:
+    - File naming: Use kebab-case for all files and directories, camelCase for variables, functions & attributes
+    - Use pkgs.stdenv.hostPlatform not system
+    - All packages/configs MUST be inside lib.mkIf cfg.enable blocks
+    - Always use let in blocks at the top-level of the file to import lib/builtins/lib.types functions and variables
+    - Documentation MUST be updated with code changes
+
+rules:
+  proposal:
+    - Follow existing module patterns in modules/*
+    - Never add hardcoded paths or values; use variables and functions instead
+    - Always include a "Non-goals" section to clarify what the proposal does not address
+    - Never refactor existing code in a proposal without explicitly stating it in the proposal, and only if it is necessary to achieve the proposal's goals
+  tasks:
+    - Run `nix fmt .` after any Nix file modifications
+    - Documentation MUST NOT expose personal info (use placeholders like example-tailnet.ts.net)
+    - After making changes, ensure it builds successfully using the skill "building" before marking the task as complete
+    - For unique components e.g the IO Guardian, documentation MUST include a detailed explanation of its purpose, functionality, and how it integrates with the rest of the system

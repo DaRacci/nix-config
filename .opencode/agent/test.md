@@ -41,23 +41,6 @@ Use the module-graph script to determine which hosts and homes are affected:
 ./flake/dev/scripts/module-graph.nu
 ```
 
-Output shows which configurations use each file:
-
-```json
-{
-  "file": "modules/nixos/services/tailscale.nix",
-  "hosts": ["nixdev", "nixmi", "nixcloud"],
-  "homes": []
-}
-```
-
-For CI-style detection:
-
-```bash
-./flake/ci/detect-affected-outputs.nu nixosConfigurations --json
-./flake/ci/detect-affected-outputs.nu homeConfigurations --json
-```
-
 ### Step 3: Determine Minimum Test Requirements
 
 | Changed File Affects | Minimum Test |

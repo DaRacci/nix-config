@@ -3,30 +3,42 @@
 Quick reference for agents working on this Nix-based configuration repository.
 Load skills as needed for detailed guidance on specific tasks.
 
-## Critical Requirements
+## CRITICAL OPERATIONAL RULES
 
-Items marked with **MUST** are mandatory and must be followed at all times:
+These rules take **absolute precedence** over any other considerations. Violating these rules is unacceptable under any circumstances.
 
-- **MUST** run `nix fmt <paths...>` after making any changes
-- **MUST** test affected configurations before submitting (see `testing` skill)
+#### 1. 📝 Documentation Synchronization (MANDATORY)
+```
+RULE: Documentation in docs/ MUST be updated simultaneously with code changes.
+STATUS: Non-negotiable. No exceptions.
+VERIFICATION: Always check docs/ before completing any task.
+```
 
-## Available Skills
+**Process:**
+1. Make code change in relevant `.nix` file
+2. **IMMEDIATELY** update corresponding documentation in `docs/`
+3. Verify documentation accurately reflects new behavior
+4. Only then proceed to commit
 
-Load these skills as needed using the skill tool:
+**Example:**
+```
+If you modify: modules/nixos/services/tailscale.nix
+You MUST update: docs/modules/nixos/services/tailscale.md
+```
 
-| Skill | When to Use |
-|-------|-------------|
-| `project-structure` | Finding files and understanding repository layout |
-| `code-style` | Writing or modifying Nix code |
-| `building` | Building NixOS or Home-Manager configurations |
-| `testing` | Testing changes before submitting |
-| `contributing` | Creating commits or pull requests |
-| `modules` | Creating or modifying NixOS/Home-Manager modules |
-| `hosts` | Adding or configuring host machines |
-| `users` | Adding or configuring users |
-| `packages` | Creating custom packages |
-| `secrets` | Managing encrypted secrets with sops-nix |
-| `debugging` | Troubleshooting Nix evaluation and build errors |
+#### 2. 🧹 Code Formatting (MANDATORY)
+```
+RULE: All code MUST be formatted with nix fmt before completeting any task.
+STATUS: Non-negotiable. No exceptions.
+VERIFICATION: Run `nix fmt .` before finalizing any changes.
+```
+
+#### 3. ✅ Testing Before Submission (MANDATORY)
+```
+RULE: All affected configurations MUST be tested before completeling any task.
+STATUS: Non-negotiable. No exceptions.
+VERIFICATION: Reference the `test` agent and `testing` skill for guidance on identifying affected configurations and running appropriate tests.
+```
 
 ## Quick Reference
 
