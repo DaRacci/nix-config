@@ -78,6 +78,16 @@ in
         '';
       };
 
+      monitoringPrimaryHost = mkOption {
+        type = serverHostnamesEnum;
+        description = ''
+          Designate a server to act as the primary monitoring collector.
+
+          This host will run Prometheus, Loki, Grafana, and Alertmanager
+          for centralized observability of the entire server cluster.
+        '';
+      };
+
       distributedBuilders = mkOption {
         type = listOf serverHostnamesEnum;
         default = [ ];

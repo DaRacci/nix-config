@@ -49,6 +49,7 @@ in
 
     server = {
       ioPrimaryCoordinator = "nixio";
+      monitoringPrimaryHost = "nixmon";
       distributedBuilders = [ "nixserv" ];
     };
   };

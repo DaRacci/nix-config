@@ -18,6 +18,7 @@ mkMerge [
   (optionalAttrs (deviceType == "server") {
     server = {
       ioPrimaryHost = allocations.server.ioPrimaryCoordinator;
+      monitoringPrimaryHost = allocations.server.monitoringPrimaryHost;
       distributedBuilder.builders = allocations.server.distributedBuilders;
     };
   })

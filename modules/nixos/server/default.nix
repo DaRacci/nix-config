@@ -32,6 +32,15 @@ let
 
   isThisIOPrimaryHost = isIOPrimaryHost config;
 
+  isMonitoringPrimaryHost =
+    value:
+    let
+      cmp = if isAttrs value then value.host.name else value;
+    in
+    config.server.monitoringPrimaryHost == cmp;
+
+  isThisMonitoringPrimaryHost = isMonitoringPrimaryHost config;
+
   primaryIOHostConfig =
     if isThisIOPrimaryHost then
       config
@@ -134,6 +143,8 @@ let
         inherit
           isIOPrimaryHost
           isThisIOPrimaryHost
+          isMonitoringPrimaryHost
+          isThisMonitoringPrimaryHost
           primaryIOHostConfig
           getIOPrimaryHostAttr
 
@@ -159,6 +170,7 @@ in
   imports = [
     (importModule ./database { })
     (importModule ./dashboard.nix { })
+    (importModule ./monitoring { })
     (importModule ./network.nix { })
     (importModule ./proxy { })
 
@@ -179,6 +191,17 @@ in
         This host will run the primary instances of databases,
         Operate the reverse proxy for handling incoming traffic,
         and will run the MinIO distributed storage cluster's master node.
+      '';
+    };
+
+    monitoringPrimaryHost = mkOption {
+      type = nullOr str;
+      default = null;
+      description = ''
+        Which host is the primary collector for monitoring in the cluster.
+
+        This host will run Prometheus, Loki, Grafana, and Alertmanager
+        for centralized observability of the entire server cluster.
       '';
     };
   };

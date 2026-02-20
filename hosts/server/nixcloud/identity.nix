@@ -151,6 +151,20 @@ in
             };
           };
         };
+
+        grafana = {
+          displayName = "Grafana";
+          originUrl = "https://grafana.racci.dev/login/generic_oauth";
+          originLanding = "https://grafana.racci.dev";
+          basicSecretFile = config.sops.secrets."KANIDM/OAUTH2/GRAFANA_SECRET".path;
+
+          scopeMaps.sysadmin = [
+            "openid"
+            "profile"
+            "email"
+            "groups"
+          ];
+        };
       };
     };
   };
