@@ -9,6 +9,7 @@
     ./connectivity.nix
     ./dashboard.nix
     ./dashboard
+    ./monitoring.nix
     ./music.nix
     ./postgresql.nix
     ./proxy.nix

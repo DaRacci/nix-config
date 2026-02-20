@@ -7,6 +7,7 @@
 # Components
 
 - [IO Guardian](components/io_guardian.md)
+- [Server Monitoring](components/server_monitoring.md)
 
 # Development
 
