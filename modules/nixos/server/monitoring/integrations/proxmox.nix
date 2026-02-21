@@ -19,7 +19,6 @@ in
       {
         sops = {
           secrets = {
-            "PROXMOX/API_URL" = { };
             "PROXMOX/USER" = { };
             "PROXMOX/TOKEN_ID" = { };
             "PROXMOX/TOKEN_SECRET" = { };
@@ -31,7 +30,6 @@ in
                 user = config.sops.placeholder."PROXMOX/USER";
                 token_name = config.sops.placeholder."PROXMOX/TOKEN_ID";
                 token_value = config.sops.placeholder."PROXMOX/TOKEN_SECRET";
-                verify_ssl = false;
               };
             };
           };
@@ -49,7 +47,27 @@ in
           {
             job_name = "proxmox";
             static_configs = [
-              { targets = [ "localhost:9221" ]; }
+              { targets = [ "pve.racci.dev" ]; }
+            ];
+            metrics_path = "/pve";
+            params = {
+              module = [ "default" ];
+              cluster = ["1"];
+              node = ["1"];
+            };
+            relabel_configs = [
+              {
+                source_labels = [ "__address__" ];
+                target_label = "instance";
+              }
+              {
+                source_labels = ["__param_target"];
+                target_label = "instance";
+              }
+              {
+                target_label = "__address__";
+                replacement = "127.0.0.1:9221";
+              }
             ];
           }
         ];

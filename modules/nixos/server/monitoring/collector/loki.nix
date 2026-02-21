@@ -5,12 +5,22 @@ _:
   ...
 }:
 let
-  inherit (lib) mkIf;
+  inherit (lib) mkForce mkIf;
 
   cfg = config.server.monitoring;
 in
 {
   config = mkIf (cfg.enable && cfg.collector.enable) {
+    users.users.loki.uid = mkForce 951;
+    users.groups.loki.gid = mkForce 951;
+
+    server.storage.bucketMounts.loki = {
+      mountLocation = "/var/lib/loki";
+      uid = 951;
+      gid = 951;
+      umask = 007;
+    };
+
     server.proxy.virtualHosts.loki =
       let
         inherit (config.services.loki.configuration.server) http_listen_port http_listen_address;

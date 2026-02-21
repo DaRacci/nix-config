@@ -9,6 +9,7 @@
 }:
 let
   inherit (lib)
+    mkForce
     mkIf
     optional
     ;
@@ -38,6 +39,16 @@ let
 in
 {
   config = mkIf (cfg.enable && cfg.collector.enable) {
+    users.users.prometheus.uid = mkForce 950;
+    users.groups.prometheus.gid = mkForce 950;
+
+    server.storage.bucketMounts.prometheus = {
+      mountLocation = "/var/lib/prometheus2";
+      uid = 950;
+      gid = 950;
+      umask = 007;
+    };
+
     server.proxy.virtualHosts.prometheus =
       let
         inherit (config.services.prometheus) port listenAddress;

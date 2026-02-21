@@ -101,11 +101,10 @@ MONITORING:
         WEBHOOK_URL: <ha-webhook-url>
     NEXTCLOUD_TALK:
         WEBHOOK_URL: <nc-talk-webhook-url>
-proxmox:
-    api_url: <proxmox-api-url>
-    user: <proxmox-user-at-realm>
-    token_id: <proxmox-token-name>
-    token_secret: <proxmox-token-secret>
+PROXMOX:
+    USER: <proxmox-user-at-realm>
+    TOKEN_ID: <proxmox-token-name>
+    TOKEN_SECRET: <proxmox-token-secret>
 ```
 
 ### Generating Secrets
