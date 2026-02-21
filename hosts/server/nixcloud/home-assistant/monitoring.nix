@@ -12,7 +12,7 @@ _: {
             platform = "webhook";
             webhook_id = "alertmanager_critical";
             allowed_methods = [ "POST" ];
-            local_only = true;
+            local_only = false;
           }
         ];
 
@@ -49,7 +49,7 @@ _: {
             platform = "webhook";
             webhook_id = "alertmanager_critical";
             allowed_methods = [ "POST" ];
-            local_only = true;
+            local_only = false;
           }
         ];
 
