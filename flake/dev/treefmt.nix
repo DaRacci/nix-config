@@ -22,6 +22,8 @@
         };
         mdsh.enable = true;
         keep-sorted.enable = true;
+        ruff-check.enable = true;
+        ruff-format.enable = true;
         biome = {
           enable = true;
           settings.formatter = {

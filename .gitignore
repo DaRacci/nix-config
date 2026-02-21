@@ -12,3 +12,4 @@ result
 node_modules
 .workspaces/
 .sisyphus/*
+__pycache__/

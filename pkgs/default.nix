@@ -33,7 +33,7 @@
   # Scripts n stuff
   new-host = pkgs.callPackage ./helpers/new-host.nix { };
   list-ephemeral = pkgs.callPackage ./list-ephemeral { };
-  inherit (pkgs.callPackage ./scripts { inherit lib; }) folder-diff;
+  inherit (pkgs.callPackage ./scripts { inherit lib; }) folder-diff image-compressor;
 
   # NixIO Guardian
   inherit (pkgs.callPackage ./io-guardian { }) io-guardian-server io-guardian-client;

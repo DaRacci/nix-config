@@ -19,6 +19,7 @@ This section documents the custom packages defined in this repository. These are
   - `mcp-sequential-thinking`: MCP server for step-by-step reasoning.
   - `mcp-server-amazon`: MCP server for Amazon services interaction.
   - `proton-mcp`: MCP server for ProtonMail.
+  - `image-compressor`: Python tool that hashes images, detects image types from file headers, caches WebP conversions, keeps parallel workers, and prints aligned Rich tables.
   - `monocoque`: Sim-racing dashboard and telemetry tool.
   - `orca-slicer-zink`: Orca Slicer configured to use the Zink Vulkan driver to resolve nvidia rendering issues.
   - `python`: Packages for home assistant python components.

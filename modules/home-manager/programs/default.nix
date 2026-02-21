@@ -1,9 +1,18 @@
-_: {
+{
+  pkgs,
+  ...
+}:
+{
   imports = [
     ./list-ephemeral.nix
   ];
 
   options.programs = { };
 
-  config = { };
+  config = {
+    home.packages = [
+      pkgs.folder-diff
+      pkgs.image-compressor
+    ];
+  };
 }
