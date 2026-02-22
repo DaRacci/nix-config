@@ -52,6 +52,7 @@ in
         master = {
           enable = true;
           ip = "127.0.0.1";
+          peers = [ "none" ]; # Faster startup without waiting for peers to be available.
         };
 
         volume = {
@@ -233,7 +234,7 @@ in
             ${cfg.package}/bin/weed admin \
               -port=23646 \
               -dataDir=/var/lib/seaweedfs/admin \
-              -masters=master.seaweedfs.racci.dev:443
+              -masters=seaweedfs.racci.dev:443
           '';
           WorkingDirectory = "/var/lib/seaweedfs/admin";
         };
