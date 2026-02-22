@@ -12,6 +12,7 @@ let
   isIOPrimary = ioPrimaryHost == config.networking.hostName;
 
   baseDir = "/var/lib/seaweedfs";
+  master = [ "seaweedfs.racci.dev:443" ];
 
   mkCommonSystemdService =
     extraConfig:
@@ -42,40 +43,36 @@ in
   ];
 
   config = mkIf isIOPrimary {
-    services.seaweedfs =
-      let
-        master = [ "seaweedfs.racci.dev:443" ];
-      in
-      {
+    services.seaweedfs = {
+      enable = true;
+
+      master = {
         enable = true;
+        ip = "127.0.0.1";
+        peers = [ "none" ]; # Faster startup without waiting for peers to be available.
+      };
 
-        master = {
+      volume = {
+        enable = true;
+        ip = "127.0.0.1";
+        maxVolumes = 0; # Use all available disk space.
+        idxDir = "/var/lib/seaweedfs/idx";
+
+        inherit master;
+      };
+
+      filer = {
+        enable = true;
+        ip = "127.0.0.1";
+        inherit master;
+
+        s3 = {
           enable = true;
-          ip = "127.0.0.1";
-          peers = [ "none" ]; # Faster startup without waiting for peers to be available.
-        };
-
-        volume = {
-          enable = true;
-          ip = "127.0.0.1";
-          maxVolumes = 0; # Use all available disk space.
-          idxDir = "/var/lib/seaweedfs/idx";
-
-          inherit master;
-        };
-
-        filer = {
-          enable = true;
-          ip = "127.0.0.1";
-          inherit master;
-
-          s3 = {
-            enable = true;
-            allowDeleteBucketNotEmpty = false;
-            domainName = "s3.seaweedfs.racci.dev";
-          };
+          allowDeleteBucketNotEmpty = false;
+          domainName = "s3.seaweedfs.racci.dev";
         };
       };
+    };
     server.proxy.virtualHosts = {
       seaweedfs = {
         ports = [ cfg.master.port ];
@@ -234,7 +231,7 @@ in
             ${cfg.package}/bin/weed admin \
               -port=23646 \
               -dataDir=/var/lib/seaweedfs/admin \
-              -masters=seaweedfs.racci.dev:443
+              -masters=${lib.concatStringsSep "," master}
           '';
           WorkingDirectory = "/var/lib/seaweedfs/admin";
         };
