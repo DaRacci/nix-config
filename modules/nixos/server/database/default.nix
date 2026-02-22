@@ -9,7 +9,12 @@
   ...
 }:
 let
-  inherit (lib) types mkIf mkOption literalExpression;
+  inherit (lib)
+    types
+    mkIf
+    mkOption
+    literalExpression
+    ;
   inherit (types) str;
 
   cfg = config.server.database;

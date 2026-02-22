@@ -8,6 +8,7 @@ Load skills as needed for detailed guidance on specific tasks.
 These rules take **absolute precedence** over any other considerations. Violating these rules is unacceptable under any circumstances.
 
 #### 1. 📝 Documentation Synchronization (MANDATORY)
+
 ```
 RULE: Documentation in docs/ MUST be updated simultaneously with code changes.
 STATUS: Non-negotiable. No exceptions.
@@ -15,18 +16,21 @@ VERIFICATION: Always check docs/ before completing any task.
 ```
 
 **Process:**
+
 1. Make code change in relevant `.nix` file
-2. **IMMEDIATELY** update corresponding documentation in `docs/`
-3. Verify documentation accurately reflects new behavior
-4. Only then proceed to commit
+1. **IMMEDIATELY** update corresponding documentation in `docs/`
+1. Verify documentation accurately reflects new behavior
+1. Only then proceed to commit
 
 **Example:**
+
 ```
 If you modify: modules/nixos/services/tailscale.nix
 You MUST update: docs/modules/nixos/services/tailscale.md
 ```
 
 #### 2. 🧹 Code Formatting (MANDATORY)
+
 ```
 RULE: All code MUST be formatted with nix fmt before completeting any task.
 STATUS: Non-negotiable. No exceptions.
@@ -34,6 +38,7 @@ VERIFICATION: Run `nix fmt .` before finalizing any changes.
 ```
 
 #### 3. ✅ Testing Before Submission (MANDATORY)
+
 ```
 RULE: All affected configurations MUST be tested before completeling any task.
 STATUS: Non-negotiable. No exceptions.

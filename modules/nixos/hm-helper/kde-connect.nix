@@ -15,10 +15,12 @@ let
 in
 {
   options.custom.hm-helper.kde-connect = {
-    enable = lib.mkEnableOption "Enable KDE Connect firewall rules if any user has KDE Connect enabled." // {
-      default = anyoneHasOption (user: user.services.kdeconnect.enable);
-      defaultText = literalExpression "anyoneHasOption (user: user.services.kdeconnect.enable)";
-    };
+    enable =
+      lib.mkEnableOption "Enable KDE Connect firewall rules if any user has KDE Connect enabled."
+      // {
+        default = anyoneHasOption (user: user.services.kdeconnect.enable);
+        defaultText = literalExpression "anyoneHasOption (user: user.services.kdeconnect.enable)";
+      };
   };
 
   config = mkMerge [

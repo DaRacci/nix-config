@@ -1,7 +1,13 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   inherit (lib) mkIf getExe;
-in {
+in
+{
   config = mkIf (config.purpose.gaming.enable && config.wayland.windowManager.hyprland.enable) {
     systemd.user.services.gamemode-watcher = {
       Unit = {

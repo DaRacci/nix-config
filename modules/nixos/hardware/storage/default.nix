@@ -81,7 +81,8 @@ in
       hardware.storage = {
         root.name = config.networking.hostName;
 
-        withImpermanence = config.environment.persistence ? "/persist" && config.environment.persistence."/persist".enable;
+        withImpermanence =
+          config.environment.persistence ? "/persist" && config.environment.persistence."/persist".enable;
       };
     }
 
