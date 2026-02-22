@@ -90,21 +90,6 @@ in
       };
     });
 
-    # TODO:https://github.com/NixOS/nixpkgs/pull/480983
-    hyprland = prev.hyprland.overrideAttrs (_: {
-      postPatch = ''
-        # Fix hardcoded paths to /usr installation
-        substituteInPlace src/render/OpenGL.cpp \
-          --replace-fail /usr $out
-
-        # Remove extra @PREFIX@ to fix pkg-config paths
-        substituteInPlace hyprland.pc.in \
-          --replace-fail  "@PREFIX@/" ""
-        substituteInPlace example/hyprland.desktop.in \
-          --replace-fail  "@PREFIX@/" ""
-      '';
-    });
-
     inherit lib;
   };
 
