@@ -75,7 +75,6 @@ in
     };
     server.proxy.virtualHosts = {
       seaweedfs = {
-        ports = [ cfg.master.port ];
         extraConfig = ''
           reverse_proxy http://localhost:${toString cfg.master.port}
         '';
@@ -243,7 +242,7 @@ in
           ExecStart = ''
             ${cfg.package}/bin/weed worker \
               -admin=admin.seaweedfs.racci.dev:443 \
-              -capabilities=vacumm,ec,replication,balance
+              -capabilities=vacuum,ec,replication,balance
           '';
           WorkingDirectory = "/var/lib/seaweedfs/worker";
         };
