@@ -90,6 +90,20 @@ in
       };
     });
 
+    #TODO:https://github.com/NixOS/nixpkgs/pull/489118
+    seaweedfs = prev.seaweedfs.overrideAttrs (oldAttrs: {
+      version = "4.12";
+      src = prev.fetchFromGitHub {
+        owner = "seaweedfs";
+        repo = "seaweedfs";
+        tag = "4.12";
+        hash = "sha256-AiNtGepaNZ/1cGWp3SFQ7l4+mjpag9MNZb2IXKar9Qo=";
+      };
+
+      doCheck = false;
+      vendorHash = "sha256-P2wbXslmHF2dwNoXemuOscKUHrPrypRR+Ehv89tlVUM=";
+    });
+
     inherit lib;
   };
 
