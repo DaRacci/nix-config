@@ -87,6 +87,12 @@
       };
     };
 
+    seaweedfs = {
+      url = "https://raw.githubusercontent.com/liberodark/nixpkgs/refs/heads/seawedfs/nixos/modules/services/network-filesystems/seaweedfs.nix";
+      flake = false;
+      type = "file";
+    };
+
     # TODO:https://github.com/NixOS/nixpkgs/pull/500045
     services-zeroclaw = {
       url = "https://raw.githubusercontent.com/marijanp/nixpkgs/refs/heads/add-zeroclaw-module/nixos/modules/services/misc/zeroclaw.nix";

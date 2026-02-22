@@ -384,6 +384,7 @@
         "nixpkgs": "nixpkgs_2",
         "rust-overlay": "rust-overlay",
         "services-zeroclaw": "services-zeroclaw",
+        "seaweedfs": "seaweedfs",
         "ucodenix": "ucodenix"
       }
     },
@@ -405,6 +406,18 @@
         "owner": "oxalica",
         "repo": "rust-overlay",
         "type": "github"
+      }
+    },
+    "seaweedfs": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-HtrV8rmoyb/7nG3jslTK3NLxBERF1ZYNH/HgRIsB/kY=",
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/liberodark/nixpkgs/refs/heads/seawedfs/nixos/modules/services/network-filesystems/seaweedfs.nix"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/liberodark/nixpkgs/refs/heads/seawedfs/nixos/modules/services/network-filesystems/seaweedfs.nix"
       }
     },
     "services-zeroclaw": {
