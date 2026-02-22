@@ -79,13 +79,13 @@
       "f[1], gapsout:0, gapsin:0"
     ];
 
-    windowrulev2 = [
-      "bordersize 0, floating:0, onworkspace:w[tv1]"
-      "rounding 0, floating:0, onworkspace:w[tv1]"
-      "bordersize 0, floating:0, onworkspace:f[1]"
-      "rounding 0, floating:0, onworkspace:f[1]"
+    windowrule = [
+      "border_size 0, match:float 0, match:workspace w[tv1]"
+      "rounding 0, match:float 0, match:workspace w[tv1]"
+      "border_size 0, match:float 0, match:workspace f[1]"
+      "rounding 0, match:float 0, match:workspace f[1]"
       #endregion
-      "bordercolor rgba(ffabf1AA) rgba(ffabf177),pinned:1"
+      "match:pin bordercolor rgba(ffabf1AA) rgba(ffabf177)"
     ];
 
     plugin = {

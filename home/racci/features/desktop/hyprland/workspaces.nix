@@ -48,7 +48,6 @@ let
     "8" = {
       name = "Gaming";
       monitor = monitors.left;
-      startup = [ "steam.desktop" ];
       extraRules = {
         rounding = "false";
         shadow = "false";
