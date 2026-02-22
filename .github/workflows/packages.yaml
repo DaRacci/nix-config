@@ -8,6 +8,7 @@ on:
       - "flake.lock"
       - ".github/workflows/packages.yaml"
   push:
+    branches: [master]
     paths:
       - "pkgs/**"
       - "flake.nix"
