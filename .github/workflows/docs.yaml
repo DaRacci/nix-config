@@ -22,7 +22,7 @@ jobs:
       pages: write
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url }}
 
     steps:
       - uses: actions/checkout@v6
@@ -36,4 +36,5 @@ jobs:
           path: result
 
       - name: Deploy Pages
+        id: deploy
         uses: actions/deploy-pages@v4
