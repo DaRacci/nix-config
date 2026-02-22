@@ -25,14 +25,14 @@
 
 buildPythonApplication rec {
   pname = "mcp-sequential-thinking";
-  version = "0-unstable-2025-07-15";
+  version = "0-unstable-2026-02-06";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "arben-adm";
     repo = "mcp-sequential-thinking";
-    rev = "f8259ce852cffc97783a1737d7e1985ce385f440";
-    hash = "sha256-tAIUGHmdmowmyD4tw2WI8wRdE582NLGFmHEfgPXKxxs=";
+    rev = "0be8719972420a3fb0a830aa1c543dd23779a5a6";
+    hash = "sha256-52KPDkJpT7ClIffBH0+rfZApzFiRzGfw7cD2rjcexGA=";
   };
 
   build-system = [
