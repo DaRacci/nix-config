@@ -13,6 +13,7 @@ let
 
   baseDir = "/var/lib/seaweedfs";
   master = [ "seaweedfs.racci.dev:443" ];
+  gRPCListenPort = 10443;
 
   mkCommonSystemdService =
     extraConfig:
@@ -79,10 +80,24 @@ in
           reverse_proxy http://localhost:${toString cfg.master.port}
         '';
         l4 = {
-          listenPort = 10443;
+          listenPort = gRPCListenPort;
           config = ''
             route {
               proxy localhost:${toString cfg.master.grpcPort}
+            }
+          '';
+        };
+      };
+
+      "filer.seaweedfs" = {
+        extraConfig = ''
+          reverse_proxy http://localhost:${toString cfg.filer.port}
+        '';
+        l4 = {
+          listenPort = gRPCListenPort;
+          config = ''
+            route {
+              proxy localhost:${toString cfg.filer.grpcPort}
             }
           '';
         };
@@ -98,7 +113,7 @@ in
           }
         '';
         l4 = {
-          listenPort = 10443;
+          listenPort = gRPCListenPort;
           config = ''
             route {
               proxy localhost:${toString cfg.filer.s3.grpcPort}
@@ -112,7 +127,7 @@ in
           reverse_proxy http://localhost:${toString cfg.volume.port}
         '';
         l4 = {
-          listenPort = 10443;
+          listenPort = gRPCListenPort;
           config = ''
             route {
               proxy localhost:${toString cfg.volume.grpcPort}
@@ -127,7 +142,7 @@ in
         '';
 
         l4 = {
-          listenPort = 10443;
+          listenPort = gRPCListenPort;
           config = ''
             route {
               proxy localhost:33646
