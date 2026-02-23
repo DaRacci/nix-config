@@ -76,15 +76,23 @@ in
             edit = "allow";
             bash = {
               "*" = "ask";
-              "grep *" = "allow";
-              "rm *" = "deny";
+              "echo *" = "allow";
+              "find *" = "allow";
               "git *" = "allow";
-              "sops encrypt" = "allow";
-              "sops -e" = "allow";
-              "sops --encrypt" = "allow";
+              "grep *" = "allow";
+              "head *" = "allow";
+              "jj log *" = "allow";
+              "jj diff *" = "allow";
+              "jj status *" = "allow";
+              "ls *" = "allow";
               "nix build *" = "allow";
               "nix flake *" = "allow";
               "nix fmt *" = "allow";
+              "rm *" = "deny";
+              "sops --encrypt" = "allow";
+              "sops -e" = "allow";
+              "sops encrypt" = "allow";
+              "tail *" = "allow";
             };
             webfetch = "allow";
           };
