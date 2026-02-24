@@ -56,6 +56,7 @@ in
       volume = {
         enable = true;
         ip = "127.0.0.1";
+        disk = "nvme";
         maxVolumes = 0; # Use all available disk space.
         idxDir = "/var/lib/seaweedfs/idx";
 
