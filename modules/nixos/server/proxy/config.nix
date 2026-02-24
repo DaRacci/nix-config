@@ -107,10 +107,17 @@ in
           virtualHosts: hostCfg:
           mapAttrs' (
             name: vh:
+            let
+              additionalPortAliases =
+                map (
+                  port: map (listenDomain: "${listenDomain}:${toString port}") ([ vh.baseUrl ] ++ vh.aliases)
+                ) vh.additionalListenPorts
+                |> flatten;
+            in
             nameValuePair vh.baseUrl {
               hostName = vh.baseUrl;
               useACMEHost = vh.baseUrl;
-              serverAliases = vh.aliases;
+              serverAliases = vh.aliases ++ additionalPortAliases;
               extraConfig = ''
                 import default
                 ${optionalString vh.public "import public"}
