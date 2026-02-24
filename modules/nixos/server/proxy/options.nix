@@ -21,6 +21,7 @@ let
     listOf
     attrsOf
     submodule
+    nonEmptyListOf
     ;
 
   kanidmContextOptions = _: {
@@ -103,6 +104,12 @@ in
                   Options added here will inherit the base domain specificed in <server.proxy.domain>.
                 '';
                 apply = list: map (alias: "${alias}.${getIOPrimaryHostAttr "server.proxy.domain"}") list;
+              };
+
+              additionalListenPorts = mkOption {
+                type = listOf port;
+                default = [ ];
+                description = "Additional ports to listen on for this virtual host.";
               };
 
               public = mkOption {
