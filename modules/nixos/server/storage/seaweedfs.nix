@@ -5,7 +5,7 @@
   ...
 }:
 let
-  inherit (lib) mkIf;
+  inherit (lib) mkIf mapAttrs;
   inherit (config.server) ioPrimaryHost;
 
   cfg = config.services.seaweedfs;
@@ -13,7 +13,6 @@ let
 
   baseDir = "/var/lib/seaweedfs";
   master = [ "seaweedfs.racci.dev:443" ];
-  gRPCListenPort = 10443;
 
   mkCommonSystemdService =
     extraConfig:
@@ -37,6 +36,25 @@ let
       }
       extraConfig
     ];
+
+  mkVHostWithGrpc = domain: optionAttr: {
+    additionalListenPorts = [ 10443 ];
+    extraConfig = ''
+      #FIXME:Only allow connections from localhost for now
+      @notLocal not client_ip ::1 127.0.0.1
+      abort @denied
+
+      @grpc protocol grpc
+
+      reverse_proxy @grpc localhost:${toString optionAttr.grpcPort} {
+        transport http {
+          versions h2c
+        }
+      }
+
+      reverse_proxy http://localhost:${toString optionAttr.port}
+    '';
+  };
 in
 {
   imports = [
@@ -75,83 +93,19 @@ in
         };
       };
     };
-    server.proxy.virtualHosts = {
-      seaweedfs = {
-        extraConfig = ''
-          reverse_proxy http://localhost:${toString cfg.master.port}
-        '';
-        l4 = {
-          listenPort = gRPCListenPort;
-          config = ''
-            route {
-              proxy localhost:${toString cfg.master.grpcPort}
-            }
-          '';
-        };
-      };
 
-      "filer.seaweedfs" = {
-        extraConfig = ''
-          reverse_proxy http://localhost:${toString cfg.filer.port}
-        '';
-        l4 = {
-          listenPort = gRPCListenPort;
-          config = ''
-            route {
-              proxy localhost:${toString cfg.filer.grpcPort}
-            }
-          '';
+    server.proxy.virtualHosts =
+      {
+        seaweedfs = cfg.master;
+        "filer.seaweedfs" = cfg.filer;
+        "s3.seaweedfs" = cfg.filer.s3;
+        "volume.seaweedfs" = cfg.volume;
+        "admin.seaweedfs" = {
+          port = 23646;
+          grpcPort = 33646;
         };
-      };
-
-      "s3.seaweedfs" = {
-        extraConfig = ''
-          reverse_proxy http://localhost:${toString cfg.filer.s3.port} {
-            transport http {
-              read_timeout 15m
-              write_timeout 15m
-            }
-          }
-        '';
-        l4 = {
-          listenPort = gRPCListenPort;
-          config = ''
-            route {
-              proxy localhost:${toString cfg.filer.s3.grpcPort}
-            }
-          '';
-        };
-      };
-
-      "volume.seaweedfs" = {
-        extraConfig = ''
-          reverse_proxy http://localhost:${toString cfg.volume.port}
-        '';
-        l4 = {
-          listenPort = gRPCListenPort;
-          config = ''
-            route {
-              proxy localhost:${toString cfg.volume.grpcPort}
-            }
-          '';
-        };
-      };
-
-      "admin.seaweedfs" = {
-        extraConfig = ''
-          reverse_proxy http://localhost:23646
-        '';
-
-        l4 = {
-          listenPort = gRPCListenPort;
-          config = ''
-            route {
-              proxy localhost:33646
-            }
-          '';
-        };
-      };
-    };
+      }
+      |> mapAttrs mkVHostWithGrpc;
 
     # nixpkgs PR uses incorrect attribute options and syntax for tmpfiles.
     systemd.tmpfiles.settings = {
