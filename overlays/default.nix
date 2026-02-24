@@ -91,7 +91,7 @@ in
     });
 
     #TODO:https://github.com/NixOS/nixpkgs/pull/489118
-    seaweedfs = prev.seaweedfs.overrideAttrs (oldAttrs: {
+    seaweedfs = prev.seaweedfs.overrideAttrs (_oldAttrs: {
       version = "4.12";
       src = prev.fetchFromGitHub {
         owner = "seaweedfs";
