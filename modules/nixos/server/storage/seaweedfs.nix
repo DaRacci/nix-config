@@ -5,14 +5,27 @@
   ...
 }:
 let
-  inherit (lib) mkIf mapAttrs;
+  inherit (lib)
+    mkIf
+    toUpper
+    mapAttrs
+    mergeAttrsList
+    concatStringsSep
+    ;
   inherit (config.server) ioPrimaryHost;
 
   cfg = config.services.seaweedfs;
   isIOPrimary = ioPrimaryHost == config.networking.hostName;
+  sopsPh = config.sops.placeholder;
 
   baseDir = "/var/lib/seaweedfs";
   master = [ "seaweedfs.racci.dev:443" ];
+
+  sopsAccess = {
+    owner = "seaweedfs";
+    group = "seaweedfs";
+    mode = "0640";
+  };
 
   mkCommonSystemdService =
     extraConfig:
@@ -37,24 +50,72 @@ let
       extraConfig
     ];
 
-  mkVHostWithGrpc = domain: optionAttr: {
+  mkVHostWithGrpc = domain: attr: {
     additionalListenPorts = [ 10443 ];
     extraConfig = ''
+      tls ${config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_CRT".path} ${
+        config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_KEY".path
+      }
+
       #FIXME:Only allow connections from localhost for now
       @notLocal not client_ip ::1 127.0.0.1
-      abort @denied
+      abort @notLocal
 
       @grpc protocol grpc
-
-      reverse_proxy @grpc localhost:${toString optionAttr.grpcPort} {
-        transport http {
-          versions h2c
+      handle @grpc {
+        reverse_proxy localhost:${toString attr.grpcPort} {
+          transport http {
+            versions h2c
+          }
         }
       }
 
-      reverse_proxy http://localhost:${toString optionAttr.port}
+      reverse_proxy http://localhost:${toString attr.port}
     '';
   };
+
+  mkTmpfilesDirAndSecurity = attr: {
+    "${attr.dataDir}".d = {
+      mode = "0755";
+      user = "seaweedfs";
+      group = "seaweedfs";
+    };
+    "${attr.dataDir}/.seaweed".d = {
+      mode = "0700";
+      user = "seaweedfs";
+      group = "seaweedfs";
+    };
+    "${attr.dataDir}/.seaweed/security.toml"."L+" = {
+      mode = "0600";
+      user = "seaweedfs";
+      group = "seaweedfs";
+      argument = config.sops.templates."SEAWEEDFS/SECURITY/${toUpper attr.security}".path;
+    };
+  };
+
+  commonSecretToml = ''
+    [cors.allowed_origins]
+    values = "*"
+
+    [access]
+    ui = true
+
+    ${
+      map (service: ''
+        [grpc.${service}]
+        cert = ${sopsPh."SEAWEEDFS/TLS/${service}_CRT"};
+        key = ${sopsPh."SEAWEEDFS/TLS/${service}_KEY"};
+      '') grpcTLSServices
+      |> concatStringsSep "\n"
+    }
+  '';
+
+  grpcTLSServices = [
+    "MASTER"
+    "VOLUME"
+    "FILER"
+    "CLIENT"
+  ];
 in
 {
   imports = [
@@ -62,6 +123,55 @@ in
   ];
 
   config = mkIf isIOPrimary {
+    # Access to sops certs.
+    users.users.caddy.extraGroups = [ "seaweedfs" ];
+
+    sops = {
+      # Generate certs by running
+      # certstrap init --common-name "SeaweedFS CA"
+      # certstrap request-cert --common-name <SERVICE>
+      # certstrap sign --expires "2 years" --CA "SeaweedFS CA" <SERVICE>
+      secrets = {
+        "SEAWEEDFS/JWT/MASTER" = { };
+        "SEAWEEDFS/JWT/MASTER_READ" = { };
+        "SEAWEEDFS/JWT/FILER" = { };
+        "SEAWEEDFS/JWT/FILER_READ" = { };
+        "SEAWEEDFS/TLS/CA" = sopsAccess;
+      }
+      // (
+        map (service: {
+          "SEAWEEDFS/TLS/${toUpper service}_CRT" = sopsAccess;
+          "SEAWEEDFS/TLS/${toUpper service}_KEY" = sopsAccess;
+        }) grpcTLSServices
+        |> mergeAttrsList
+      );
+
+      templates = {
+        "SEAWEEDFS/SECURITY/FILER".content = commonSecretToml + ''
+          [jwt.filer_signing]
+          key = ${sopsPh."SEAWEEDFS/JWT/FILER"};
+          expires_after_seconds = 10
+
+          [jwt.filer_signing.read]
+          key = ${sopsPh."SEAWEEDFS/JWT/FILER_READ"};
+          expires_after_seconds.read = 10
+
+          [filer.expose_directory_metadata]
+          enabled = true
+        '';
+
+        "SEAWEEDFS/SECURITY/MASTER".content = commonSecretToml + ''
+          [jwt.signing]
+          key = ${sopsPh."SEAWEEDFS/JWT/MASTER"};
+          expires_after_seconds = 10
+
+          [jwt.signing.read]
+          key = ${sopsPh."SEAWEEDFS/JWT/MASTER_READ"};
+          expires_after_seconds.read = 10
+        '';
+      };
+    };
+
     services.seaweedfs = {
       enable = true;
 
@@ -96,11 +206,20 @@ in
 
     server.proxy.virtualHosts =
       {
-        seaweedfs = cfg.master;
-        "filer.seaweedfs" = cfg.filer;
-        "s3.seaweedfs" = cfg.filer.s3;
-        "volume.seaweedfs" = cfg.volume;
+        seaweedfs = cfg.master // {
+          service = "master";
+        };
+        "filer.seaweedfs" = cfg.filer // {
+          service = "filer";
+        };
+        "s3.seaweedfs" = cfg.filer.s3 // {
+          service = "filer";
+        };
+        "volume.seaweedfs" = cfg.volume // {
+          service = "volume";
+        };
         "admin.seaweedfs" = {
+          service = "client";
           port = 23646;
           grpcPort = 33646;
         };
@@ -119,40 +238,8 @@ in
         };
       };
 
-      seaweedfs-master = lib.mkForce {
-        "${cfg.master.dataDir}".d = {
-          mode = "0755";
-          user = "seaweedfs";
-          group = "seaweedfs";
-        };
-      };
-
-      seaweedfs-volume = lib.mkForce {
-        "${cfg.volume.dataDir}".d = {
-          mode = "0755";
-          user = "seaweedfs";
-          group = "seaweedfs";
-        };
-      };
-
-      seaweedfs-admin = {
-        "${baseDir}/admin".d = {
-          mode = "0755";
-          user = "seaweedfs";
-          group = "seaweedfs";
-        };
-      };
-
       seaweedfs-worker = {
         "${baseDir}/worker".d = {
-          mode = "0755";
-          user = "seaweedfs";
-          group = "seaweedfs";
-        };
-      };
-
-      seaweedfs-filer = lib.mkForce {
-        "${cfg.filer.dataDir}".d = {
           mode = "0755";
           user = "seaweedfs";
           group = "seaweedfs";
@@ -190,7 +277,21 @@ in
           group = "seaweedfs";
         };
       };
-    });
+    })
+    // (
+      {
+        seaweedfs-master = cfg.master // {
+          security = "master";
+        };
+        seaweedfs-volume = cfg.volume // {
+          security = "master";
+        };
+        seaweedfs-filer = cfg.filer // {
+          security = "filer";
+        };
+      }
+      |> mapAttrs (_: v: mkTmpfilesDirAndSecurity v)
+    );
 
     systemd.services = {
       seaweedfs-admin = mkCommonSystemdService {
