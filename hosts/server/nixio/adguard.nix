@@ -159,7 +159,17 @@
 
         statistics = {
           enabled = true;
-          interval = "168h"; # 1 week
+          interval = "2016h"; # 12 weeks - uses roughly 2MB per week of data.
+        };
+
+        querylog = {
+          enable = true;
+          file_enabled = false;
+        };
+
+        log = {
+          enable = true;
+          file = "syslog";
         };
 
         filters =
