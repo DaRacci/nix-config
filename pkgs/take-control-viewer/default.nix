@@ -38,137 +38,59 @@ mkWindowsAppNoCC rec {
   graphicsDriver = "wayland";
   enableVulkan = true;
 
-  # Helper shell function:
-  # is_descendant <child-pid> <ancestor-pid>
-  # returns 0 if <child-pid> is the same as or a descendant of <ancestor-pid>, 1 otherwise.
-  #
-  # Implementation notes:
-  # - Walks the parent chain via /proc/<pid>/status extracting PPid.
-  # - Treats missing /proc entries as non-descendant.
-  # - Stops at PID 1.
-  #
-  # We embed the helper in both install and run scripts to keep them self-contained.
   winAppInstall = ''
-    # The executable has a date in the name, so we glob the end.
-    wine ${src}/TakeControlViewerInstall-${version}* &
-    installer_pid=$!
+    # The installer exits in ~5 seconds after writing files, but spawns
+    # helper processes (TakeControlRDLdr, TakeControlRDViewer, tkcuploader)
+    # that never exit on their own.
+    #
+    # All Wine-managed processes are re-parented to the session leader
+    # (not to the wine command that launched them), so PID ancestry tracking
+    # is useless here. Instead, we wait for the install-complete signal and
+    # then use wineserver -k, which is scoped to $WINEPREFIX and safely kills
+    # only processes belonging to this prefix.
 
-    is_descendant() {
-      child=$1
-      ancestor=$2
+    wine ${src}/TakeControlViewerInstall-${version}*
 
-      # quick false for empty args
-      if [ -z "$child" ] || [ -z "$ancestor" ]; then
-        return 1
-      fi
-
-      # Walk up the parent chain
-      while [ -n "$child" ] && [ "$child" != "1" ]; do
-        if [ "$child" = "$ancestor" ]; then
-          return 0
-        fi
-
-        if [ -r "/proc/$child/status" ]; then
-          # PPid: <num>
-          child=$(awk '/^PPid:/ {print $2}' /proc/$child/status 2>/dev/null)
-        else
-          # If we can't read the process info, assume it's not a descendant.
-          return 1
-        fi
-      done
-
-      # final check (in case ancestor == 1)
-      [ "$child" = "$ancestor" ] && return 0 || return 1
-    }
-
-    # wait for the installer to emit the installcomplete window
-    while ! pgrep -f "TakeControlRDViewer.exe -integrated -installcomplete" > /dev/null; do
+    # The installer signals success by spawning TakeControlRDViewer.exe with
+    # the -installcomplete flag. Wait for it to appear before killing.
+    while ! pgrep -f "TakeControlRDViewer.exe.*installcomplete" > /dev/null 2>&1; do
       sleep 1
     done
 
-    # Only terminate processes that are descendants of the installer we started.
-    # This avoids killing other instances from other users or sessions.
-    for p in $(pgrep -f "TakeControlRDViewer.exe" || true); do
-      if is_descendant "$p" "$installer_pid"; then
-        kill "$p" 2>/dev/null || true
-      fi
-    done
-
-    for p in $(pgrep -f "TakeControlRDLdr.exe" || true); do
-      if is_descendant "$p" "$installer_pid"; then
-        kill "$p" 2>/dev/null || true
-      fi
-    done
-
-    for p in $(pgrep -f "tkcuploader.exe" || true); do
-      if is_descendant "$p" "$installer_pid"; then
-        kill "$p" 2>/dev/null || true
-      fi
-    done
+    # Installation confirmed. Kill all processes in this WINEPREFIX so the
+    # subsequent wineserver -w in mkWindowsApp returns promptly.
+    wineserver -k
   '';
 
   winAppRun = ''
+    # The app never exits on its own — all processes (TakeControlRDLdr,
+    # TakeControlRDViewer, tkcuploader) stay alive indefinitely after the
+    # remote session ends. We launch wine in the background, detect the
+    # session lifecycle via BASupClpHlp.exe (the clipboard/session helper
+    # that is present for exactly the duration of an active session), and
+    # kill everything in the WINEPREFIX once the session ends.
+
     wine "$WINEPREFIX/drive_c/users/$USER/AppData/Local/Take Control Viewer/TakeControlRDLdr.exe" -- "$ARGS" &
-    wine_pid=$!
 
-    is_descendant() {
-      child=$1
-      ancestor=$2
-
-      if [ -z "$child" ] || [ -z "$ancestor" ]; then
-        return 1
-      fi
-
-      while [ -n "$child" ] && [ "$child" != "1" ]; do
-        if [ "$child" = "$ancestor" ]; then
-          return 0
-        fi
-
-        if [ -r "/proc/$child/status" ]; then
-          child=$(awk '/^PPid:/ {print $2}' /proc/$child/status 2>/dev/null)
-        else
-          return 1
-        fi
-      done
-
-      [ "$child" = "$ancestor" ] && return 0 || return 1
-    }
-
-    # Wait for any BASupClpHlp.exe processes that belong to our wine instance to finish.
-    # If there are no BASupClpHlp.exe processes that are descendants of our wine process, proceed.
-    while :; do
-      found=
-      for p in $(pgrep -f "BASupClpHlp.exe" || true); do
-        if is_descendant "$p" "$wine_pid"; then
-          found=1
-          break
-        fi
-      done
-
-      if [ -z "$found" ]; then
+    # Wait for BASupClpHlp.exe to appear, confirming the session is active.
+    # Timeout after 5 minutes in case the connection is never established.
+    _timeout=300
+    while ! pgrep -x "BASupClpHlp.exe" > /dev/null 2>&1; do
+      sleep 1
+      _timeout=$((_timeout - 1))
+      if [ "$_timeout" -le 0 ]; then
         break
       fi
+    done
+
+    # Wait for BASupClpHlp.exe to exit, which signals the remote session has
+    # ended. All other processes remain alive forever without this explicit kill.
+    while pgrep -x "BASupClpHlp.exe" > /dev/null 2>&1; do
       sleep 1
     done
 
-    # When the helper is gone, only terminate processes that belong to this wine instance.
-    for p in $(pgrep -f "TakeControlRDLdr.exe" || true); do
-      if is_descendant "$p" "$wine_pid"; then
-        kill "$p" 2>/dev/null || true
-      fi
-    done
-
-    for p in $(pgrep -f "TakeControlRDViewer.exe" || true); do
-      if is_descendant "$p" "$wine_pid"; then
-        kill "$p" 2>/dev/null || true
-      fi
-    done
-
-    for p in $(pgrep -f "tkcuploader.exe" || true); do
-      if is_descendant "$p" "$wine_pid"; then
-        kill "$p" 2>/dev/null || true
-      fi
-    done
+    # Kill all processes in this WINEPREFIX cleanly.
+    wineserver -k
   '';
 
   installPhase = ''
