@@ -21,7 +21,6 @@ let
     listOf
     attrsOf
     submodule
-    nonEmptyListOf
     ;
 
   kanidmContextOptions = _: {
@@ -101,7 +100,7 @@ in
                 default = [ ];
                 description = ''
                   A list of virtual host names that should be routed using this configuration.
-                  Options added here will inherit the base domain specificed in <server.proxy.domain>.
+                  Options added here will inherit the base domain specified in <server.proxy.domain>.
                 '';
                 apply = list: map (alias: "${alias}.${getIOPrimaryHostAttr "server.proxy.domain"}") list;
               };
@@ -110,6 +109,15 @@ in
                 type = listOf port;
                 default = [ ];
                 description = "Additional ports to listen on for this virtual host.";
+              };
+
+              useAcmeCerts = mkOption {
+                type = bool;
+                default = true;
+                description = ''
+                  Whether to generate and use ACME certificates for this virtual host.
+                  If false, you must provide your own TLS configuration in extraConfig via the caddy tls directive.
+                '';
               };
 
               public = mkOption {
