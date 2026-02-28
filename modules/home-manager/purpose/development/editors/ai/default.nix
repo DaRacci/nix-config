@@ -77,22 +77,27 @@ in
             bash = {
               "*" = "ask";
               "echo *" = "allow";
+              "exit *" = "allow";
               "find *" = "allow";
               "git *" = "allow";
               "grep *" = "allow";
               "head *" = "allow";
-              "jj log *" = "allow";
               "jj diff *" = "allow";
+              "jj log *" = "allow";
               "jj status *" = "allow";
               "ls *" = "allow";
+              "mkdir *" = "allow";
               "nix build *" = "allow";
               "nix flake *" = "allow";
               "nix fmt *" = "allow";
+              "printf *" = "allow";
               "rm *" = "deny";
               "sops --encrypt" = "allow";
               "sops -e" = "allow";
               "sops encrypt" = "allow";
               "tail *" = "allow";
+              "touch *" = "allow";
+              "wc *" = "allow";
             };
             webfetch = "allow";
           };
@@ -107,15 +112,6 @@ in
               ];
               enabled = true;
             };
-            context7 = {
-              type = "local";
-              command = [
-                (lib.getExe' pkgs.nodejs "npx")
-                "-y"
-                "@upstash/context7-mcp"
-              ];
-              enabled = true;
-            };
           };
         };
       };
@@ -126,25 +122,64 @@ in
         "$schema" =
           "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json";
 
+        disabled_skills = [
+          "playwright"
+          "git-master"
+        ];
+
         agents = {
           sisyphus.model = "github-copilot/claude-opus-4.6";
           atlas.model = "github-copilot/gpt-5.2-codex";
           prometheus.model = "github-copilot/gpt-5.2-codex";
 
+          hephaestus.model = "github-copilot/gpt-5.2-codex";
           oracle.model = "github-copilot/gpt-5.2";
-          librarian.model = "opencode/glm-5-free";
+          momus.model = "github-copilot/gpt-5.2";
+          metis.model = "github-copilot/claude-opus-4.6";
+
           explore.model = "github-copilot/grok-code-fast-1";
-          frontend-ui-ux-engineer.model = "github-copilot/gemini-3.1-pro-preview";
-          document-writer.model = "github-copilot/gemini-3-flash-preview";
+          librarian.model = "github-copilot/gpt-5-mini";
           multimodal-looker.model = "github-copilot/gemini-3-flash-preview";
         };
+
+        categories = {
+          quick.model = "github-copilot/claude-haiku-4.5";
+          deep = {
+            model = "github-copilot/gpt-5.2-codex";
+            variant = "medium";
+          };
+          ultrabrain = {
+            model = "github-copilot/gpt-5.2-codex";
+            variant = "xhigh";
+          };
+          artistry.model = "github-copilot/gemini-3.1-pro-preview";
+
+          unspecified-low.model = "github-copilot/claude-sonnet-4.6";
+          unspecified-high = {
+            model = "github-copilot/claude-opus-4.6";
+            variant = "max";
+          };
+          writing.model = "github-copilot/gemini-3-flash-preview";
+          visual-engineering.model = "github-copilot/gemini-3.1-pro-preview";
+        };
+
+        background_task = {
+          modelConcurrency = {
+            "github-copilot/gpt-5.2-mini" = 20;
+            "github-copilot/claude-opus-4.6" = 2;
+          };
+        };
+
+        disabled_hooks = [
+          "prometheus-md-only" # Try to allow prometheus to use openspec instead.
+        ];
       };
 
       "opencode/opencode-notifier.json".text = builtins.toJSON {
         notification = true;
         showIcon = true;
         showProjectName = true;
-        showSessionTitle = true;
+        showSessionTitle = false;
         sound = false;
         timeout = 5;
       };
