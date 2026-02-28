@@ -169,7 +169,7 @@
 
         log = {
           enable = true;
-          file = "syslog";
+          verbose = false;
         };
 
         filters =
