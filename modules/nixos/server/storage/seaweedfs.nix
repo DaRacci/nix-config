@@ -8,9 +8,11 @@ let
   inherit (lib)
     mkIf
     toUpper
+    toLower
     mapAttrs
     mergeAttrsList
     concatStringsSep
+    optionalString
     ;
   inherit (config.server) ioPrimaryHost;
 
@@ -21,7 +23,7 @@ let
   baseDir = "/var/lib/seaweedfs";
   master = [ "seaweedfs.racci.dev:443" ];
 
-  sopsAccess = {
+  sopsCertAndKeys = {
     owner = "seaweedfs";
     group = "seaweedfs";
     mode = "0640";
@@ -52,25 +54,34 @@ let
 
   mkVHostWithGrpc = domain: attr: {
     additionalListenPorts = [ 10443 ];
+    useAcmeCerts = !attr.withGrpc;
     extraConfig = ''
-      tls ${config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_CRT".path} ${
-        config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_KEY".path
-      }
-
-      #FIXME:Only allow connections from localhost for now
-      @notLocal not client_ip ::1 127.0.0.1
-      abort @notLocal
-
-      @grpc protocol grpc
-      handle @grpc {
-        reverse_proxy localhost:${toString attr.grpcPort} {
-          transport http {
-            versions h2c
+      ${optionalString attr.withGrpc ''
+        tls ${config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_CRT".path} ${
+          config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_KEY".path
+        } {
+          protocols tls1.3
+          ca_root ${config.sops.secrets."SEAWEEDFS/TLS/CA".path}
+          client_auth {
+            mode require_and_verify
+            trusted_ca_cert_file ${config.sops.secrets."SEAWEEDFS/TLS/CA".path}
           }
         }
-      }
 
-      reverse_proxy http://localhost:${toString attr.port}
+        @grpc protocol grpc
+        handle @grpc {
+          reverse_proxy localhost:${toString attr.grpcPort} {
+            transport http {
+              tls_trust_pool file ${config.sops.secrets."SEAWEEDFS/TLS/CA".path}
+              tls_server_name "${domain}.racci.dev"
+              tls_client_auth ${config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_CRT".path} ${
+                config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_KEY".path
+              }
+            }
+          }
+        }
+      ''}
+      # reverse_proxy http://localhost:${toString attr.port}
     '';
   };
 
@@ -80,12 +91,7 @@ let
       user = "seaweedfs";
       group = "seaweedfs";
     };
-    "${attr.dataDir}/.seaweed".d = {
-      mode = "0700";
-      user = "seaweedfs";
-      group = "seaweedfs";
-    };
-    "${attr.dataDir}/.seaweed/security.toml"."L+" = {
+    "${attr.dataDir}/security.toml"."L+" = {
       mode = "0600";
       user = "seaweedfs";
       group = "seaweedfs";
@@ -100,11 +106,14 @@ let
     [access]
     ui = true
 
+    [grpc]
+    ca = "${config.sops.secrets."SEAWEEDFS/TLS/CA".path}"
+
     ${
       map (service: ''
-        [grpc.${service}]
-        cert = ${sopsPh."SEAWEEDFS/TLS/${service}_CRT"};
-        key = ${sopsPh."SEAWEEDFS/TLS/${service}_KEY"};
+        [grpc.${toLower service}]
+        cert = "${config.sops.secrets."SEAWEEDFS/TLS/${service}_CRT".path}"
+        key = "${config.sops.secrets."SEAWEEDFS/TLS/${service}_KEY".path}"
       '') grpcTLSServices
       |> concatStringsSep "\n"
     }
@@ -129,46 +138,50 @@ in
     sops = {
       # Generate certs by running
       # certstrap init --common-name "SeaweedFS CA"
-      # certstrap request-cert --common-name <SERVICE>
+      # certstrap request-cert --common-name <SERVICE> --domain <domain> --key-bits 4096
       # certstrap sign --expires "2 years" --CA "SeaweedFS CA" <SERVICE>
       secrets = {
         "SEAWEEDFS/JWT/MASTER" = { };
         "SEAWEEDFS/JWT/MASTER_READ" = { };
         "SEAWEEDFS/JWT/FILER" = { };
         "SEAWEEDFS/JWT/FILER_READ" = { };
-        "SEAWEEDFS/TLS/CA" = sopsAccess;
+        "SEAWEEDFS/TLS/CA" = sopsCertAndKeys;
       }
       // (
         map (service: {
-          "SEAWEEDFS/TLS/${toUpper service}_CRT" = sopsAccess;
-          "SEAWEEDFS/TLS/${toUpper service}_KEY" = sopsAccess;
+          "SEAWEEDFS/TLS/${toUpper service}_CRT" = sopsCertAndKeys;
+          "SEAWEEDFS/TLS/${toUpper service}_KEY" = sopsCertAndKeys;
         }) grpcTLSServices
         |> mergeAttrsList
       );
 
       templates = {
-        "SEAWEEDFS/SECURITY/FILER".content = commonSecretToml + ''
-          [jwt.filer_signing]
-          key = ${sopsPh."SEAWEEDFS/JWT/FILER"};
-          expires_after_seconds = 10
+        "SEAWEEDFS/SECURITY/FILER" = sopsCertAndKeys // {
+          content = commonSecretToml + ''
+            [jwt.filer_signing]
+            key = "${sopsPh."SEAWEEDFS/JWT/FILER"}"
+            expires_after_seconds = 10
 
-          [jwt.filer_signing.read]
-          key = ${sopsPh."SEAWEEDFS/JWT/FILER_READ"};
-          expires_after_seconds.read = 10
+            [jwt.filer_signing.read]
+            key = "${sopsPh."SEAWEEDFS/JWT/FILER_READ"}"
+            expires_after_seconds.read = 10
 
-          [filer.expose_directory_metadata]
-          enabled = true
-        '';
+            [filer.expose_directory_metadata]
+            enabled = true
+          '';
+        };
 
-        "SEAWEEDFS/SECURITY/MASTER".content = commonSecretToml + ''
-          [jwt.signing]
-          key = ${sopsPh."SEAWEEDFS/JWT/MASTER"};
-          expires_after_seconds = 10
+        "SEAWEEDFS/SECURITY/MASTER" = sopsCertAndKeys // {
+          content = commonSecretToml + ''
+            [jwt.signing]
+            key = "${sopsPh."SEAWEEDFS/JWT/MASTER"}"
+            expires_after_seconds = 10
 
-          [jwt.signing.read]
-          key = ${sopsPh."SEAWEEDFS/JWT/MASTER_READ"};
-          expires_after_seconds.read = 10
-        '';
+            [jwt.signing.read]
+            key = "${sopsPh."SEAWEEDFS/JWT/MASTER_READ"}"
+            expires_after_seconds.read = 10
+          '';
+        };
       };
     };
 
@@ -208,20 +221,25 @@ in
       {
         seaweedfs = cfg.master // {
           service = "master";
+          withGrpc = true;
         };
         "filer.seaweedfs" = cfg.filer // {
           service = "filer";
+          withGrpc = true;
         };
         "s3.seaweedfs" = cfg.filer.s3 // {
           service = "filer";
+          withGrpc = false;
         };
         "volume.seaweedfs" = cfg.volume // {
           service = "volume";
+          withGrpc = true;
         };
         "admin.seaweedfs" = {
           service = "client";
           port = 23646;
           grpcPort = 33646;
+          withGrpc = true;
         };
       }
       |> mapAttrs mkVHostWithGrpc;
@@ -288,6 +306,10 @@ in
         };
         seaweedfs-filer = cfg.filer // {
           security = "filer";
+        };
+        seaweedfs-admin = {
+          security = "master";
+          dataDir = "${baseDir}/admin";
         };
       }
       |> mapAttrs (_: v: mkTmpfilesDirAndSecurity v)

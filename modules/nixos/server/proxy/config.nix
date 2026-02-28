@@ -1,5 +1,6 @@
 {
   isThisIOPrimaryHost,
+  collectAllAttrs,
   collectAllAttrsFunc,
   proxyLib,
   ...
@@ -27,6 +28,13 @@ let
 
   # Sanitise a domain name into a valid Caddy matcher name (only alphanumeric and underscores)
   sanitiseMatcherName = name: builtins.replaceStrings [ "." "-" ] [ "_" "_" ] name;
+
+  noAcmeCertsDomains =
+    collectAllAttrs "server.proxy.virtualHosts"
+    |> builtins.attrValues
+    |> builtins.filter (vh: !vh.useAcmeCerts)
+    |> map (vh: [ vh.baseUrl ] ++ vh.aliases)
+    |> flatten;
 
   # Generate L4 config, grouping entries that share the same port into a single listener
   l4Config =
@@ -116,7 +124,7 @@ in
             in
             nameValuePair vh.baseUrl {
               hostName = vh.baseUrl;
-              useACMEHost = vh.baseUrl;
+              useACMEHost = if !vh.useAcmeCerts then null else vh.baseUrl;
               serverAliases = vh.aliases ++ additionalPortAliases;
               extraConfig = ''
                 import default
@@ -147,9 +155,11 @@ in
 
       security.acme.certs =
         config.services.caddy.virtualHosts
-        |> lib.filterAttrs (name: _: hasSuffix ".${cfg.domain}" name)
+        |> lib.filterAttrs (
+          name: _: hasSuffix ".${cfg.domain}" name && !builtins.elem name noAcmeCertsDomains
+        )
         |> lib.mapAttrs (
-          _name: vh: {
+          name: vh: {
             extraDomainNames = vh.serverAliases;
           }
         );
