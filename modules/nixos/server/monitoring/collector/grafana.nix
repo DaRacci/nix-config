@@ -85,22 +85,22 @@ in
           client_id = "grafana";
           client_secret = "$__file{${config.sops.secrets."MONITORING/GRAFANA/OAUTH_SECRET".path}}";
 
-          scopes = "openid profile email groups";
+          scopes = "openid,profile,email,groups";
           auth_url = "https://auth.${domain}/ui/oauth2";
           token_url = "https://auth.${domain}/oauth2/token";
           api_url = "https://auth.${domain}/oauth2/openid/grafana/userinfo";
           use_pkce = true;
+          use_refresh_token = true;
 
           login_attribute_path = "preferred_username";
-          name_attribute_path = "name";
-          role_attribute_path = "contains(groups[*], 'grafana_admins') && 'Admin' || contains(groups[*], 'grafana_editors') && 'Editor' || 'Viewer'";
-          role_attribute_strict = false;
+          groups_attribute_path = "groups";
+          role_attribute_path = "contains(grafana_role[*], 'admin') && 'GrafanaAdmin' || contains(grafana_role[*], 'editor') && 'Editor' || 'Viewer'";
+          role_attribute_strict = true;
           allow_assign_grafana_admin = true;
         };
 
         auth = {
-          disable_login_form = false;
-          signout_redirect_url = "https://auth.${domain}/ui/logout";
+          disable_login_form = true;
         };
       };
 

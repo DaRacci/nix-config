@@ -156,7 +156,7 @@ in
           displayName = "Grafana";
           originUrl = "https://grafana.racci.dev/login/generic_oauth";
           originLanding = "https://grafana.racci.dev";
-          basicSecretFile = config.sops.secrets."KANIDM/OAUTH2/GRAFANA_SECRET".path;
+          public = true;
 
           scopeMaps.sysadmin = [
             "openid"
@@ -164,6 +164,12 @@ in
             "email"
             "groups"
           ];
+          claimMaps.grafana_role = {
+            joinType = "array";
+            valuesByGroup = {
+              sysadmin = [ "admin" ];
+            };
+          };
         };
       };
     };
