@@ -12,10 +12,8 @@ in
 {
   config = mkIf (cfg.enable && cfg.exporters.caddy.enable) {
     services.caddy.globalConfig = lib.mkAfter ''
-      servers {
-        metrics {
-          listen 0.0.0.0:2019
-        }
+      metrics {
+        per_host
       }
     '';
 

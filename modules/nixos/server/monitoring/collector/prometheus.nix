@@ -46,7 +46,7 @@ in
       mountLocation = "/var/lib/prometheus2";
       uid = 950;
       gid = 950;
-      umask = 007;
+      umask = 077;
     };
 
     server.proxy.virtualHosts.prometheus =
