@@ -21,19 +21,7 @@ _:
       icon = "sh-proxmox";
     };
 
-    proxy = {
-      domain = "racci.dev";
-      virtualHosts = {
-        pve.extraConfig = ''
-          reverse_proxy {
-            to https://192.168.2.210:8006
-            transport http {
-              tls_insecure_skip_verify
-            }
-          }
-        '';
-      };
-    };
+    proxy.domain = "racci.dev";
   };
 
   systemd.services = {

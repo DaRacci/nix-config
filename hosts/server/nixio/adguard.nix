@@ -141,6 +141,10 @@
             "@@||cloud.racci.dev^$dnsrewrite" # Digital Ocean DNS
             "@@||s.youtube.com^$important" # Fix YouTube history for IOS App
             "@@||ipinfo.io^$important" # Blocked by HaGeZi's Ultimate Blocklist but needed.
+
+            # Proxmox serves its HTTPS itself, no proxy.
+            "@@||proxmox.racci.dev^$dnsrewrite"
+            "pve.racci.dev^$important,dnsrewrite=proxmox.localdomain"
           ];
 
         tls = {
