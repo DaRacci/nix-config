@@ -15,14 +15,7 @@ _:
     "CLOUDFLARE/ZONE_API_TOKEN" = { };
   };
 
-  server = {
-    dashboard.items.pve = {
-      title = "Proxmox VE";
-      icon = "sh-proxmox";
-    };
-
-    proxy.domain = "racci.dev";
-  };
+  server.proxy.domain = "racci.dev";
 
   systemd.services = {
     caddy = rec {
