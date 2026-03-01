@@ -22,8 +22,6 @@ in
           grpc_listen_port = 0;
         };
 
-        positions.filename = "/var/lib/promtail/positions.yaml";
-
         clients = lib.optional (lokiHost != null) {
           url = "http://${lokiHost}:3100/loki/api/v1/push";
         };
