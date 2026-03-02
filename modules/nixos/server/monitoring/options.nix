@@ -54,7 +54,7 @@ in
 
       caddy = {
         enable = mkEnableOption "Caddy metrics exporter" // {
-          default = cfg.enable && (config.server.proxy.virtualHosts != { });
+          default = cfg.enable && config.services.caddy.enable;
         };
       };
 

@@ -45,15 +45,16 @@ in
 
         services.prometheus.scrapeConfigs = [
           {
-            job_name = "proxmox";
+            job_name = "pve";
             static_configs = [
-              { targets = [ "pve.racci.dev" ]; }
+              { targets = [ "pve.racci.dev:443" ]; }
             ];
             metrics_path = "/pve";
             params = {
+              target = [ "pve.racci.dev:443" ];
               module = [ "default" ];
-              cluster = ["1"];
-              node = ["1"];
+              cluster = [ "1" ];
+              node = [ "1" ];
             };
             relabel_configs = [
               {
@@ -61,7 +62,7 @@ in
                 target_label = "instance";
               }
               {
-                source_labels = ["__param_target"];
+                source_labels = [ "__param_target" ];
                 target_label = "instance";
               }
               {

@@ -11,12 +11,20 @@ let
 in
 {
   config = mkIf (cfg.enable && cfg.exporters.caddy.enable) {
-    services.caddy.globalConfig = lib.mkAfter ''
-      metrics {
-        per_host
-      }
-    '';
+    services.caddy = {
+      globalConfig = lib.mkAfter ''
+        metrics {
+          per_host
+        }
+      '';
 
-    server.network.openPortsForSubnet.tcp = [ 2019 ];
+      # TODO:Restrict to only accessable from the prometheus server, mTLS?
+      virtualHosts.":3019".extraConfig = ''
+        metrics
+      '';
+
+    };
+
+    server.network.openPortsForSubnet.tcp = [ 3019 ];
   };
 }

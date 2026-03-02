@@ -25,7 +25,7 @@ let
   caddyTargets =
     serverConfigurations
     |> builtins.filter (c: c.server.monitoring.enable && c.server.monitoring.exporters.caddy.enable)
-    |> map (c: "${c.host.name}:2019");
+    |> map (c: "${c.host.name}:3019");
 
   postgresTargets =
     serverConfigurations
