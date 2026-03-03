@@ -23,7 +23,9 @@ in
         services.prometheus.exporters.redis = {
           enable = true;
           port = 9121;
-          listenAddress = "0.0.0.0";
+          extraFlags = [
+            "--redis.password-file ${config.sops.templates."REDIS/PASSWORD".path}"
+          ];
         };
 
         networking.firewall.allowedTCPPorts = [ 9121 ];
