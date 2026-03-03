@@ -20,6 +20,11 @@ in
     '';
 
     programs = {
+      git.ignores = [
+        ".workspace"
+        ".sisyphus"
+      ];
+
       zed-editor.userSettings = {
         agent_servers = {
           OpenCode = {
