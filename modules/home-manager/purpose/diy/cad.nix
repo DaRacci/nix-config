@@ -21,12 +21,14 @@ in
     ];
 
     home.packages = [
-      # pkgs.freecad
+      pkgs.freecad
       pkgs.meshlab
       pkgs.kicad
     ];
 
     user.persistence.directories = [
+      ".config/VCG"
+      ".config/kicad"
       ".config/FreeCAD"
       ".local/share/FreeCAD"
     ];

@@ -49,7 +49,7 @@ mkWindowsAppNoCC rec {
     # then use wineserver -k, which is scoped to $WINEPREFIX and safely kills
     # only processes belonging to this prefix.
 
-    wine ${src}/TakeControlViewerInstall-${version}*
+    wine ${src}/TakeControlViewerInstall-${version}* &
 
     # The installer signals success by spawning TakeControlRDViewer.exe with
     # the -installcomplete flag. Wait for it to appear before killing.
