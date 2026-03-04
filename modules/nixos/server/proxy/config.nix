@@ -1,5 +1,6 @@
 {
   isThisIOPrimaryHost,
+  collectAllAttrs,
   collectAllAttrsFunc,
   proxyLib,
   ...
@@ -25,6 +26,63 @@ let
 
   inherit (proxyLib) replaceLocalHost collectKanidmVirtualHosts resolveKanidmContext;
 
+  # Sanitise a domain name into a valid Caddy matcher name (only alphanumeric and underscores)
+  sanitiseMatcherName = name: builtins.replaceStrings [ "." "-" ] [ "_" "_" ] name;
+
+  noAcmeCertsDomains =
+    collectAllAttrs "server.proxy.virtualHosts"
+    |> builtins.attrValues
+    |> builtins.filter (vh: !vh.useAcmeCerts)
+    |> map (vh: [ vh.baseUrl ] ++ vh.aliases)
+    |> flatten;
+
+  # Generate L4 config, grouping entries that share the same port into a single listener
+  l4Config =
+    let
+      allL4Entries =
+        collectAllAttrsFunc "server.proxy.virtualHosts" (
+          virtualHosts: hostCfg:
+          virtualHosts
+          |> builtins.attrValues
+          |> builtins.filter (vh: vh.l4 != null)
+          |> map (vh: {
+            inherit (vh) baseUrl;
+            port = vh.l4.listenPort;
+            config = replaceLocalHost hostCfg.host.name vh.l4.config;
+          })
+        )
+        |> flatten;
+
+      groupedByPort = builtins.groupBy (entry: toString entry.port) allL4Entries;
+    in
+    builtins.attrValues (
+      builtins.mapAttrs (
+        port: entries:
+        if builtins.length entries == 1 then
+          let
+            entry = builtins.head entries;
+          in
+          ''
+            ${entry.baseUrl}:${port} {
+              ${entry.config}
+            }
+          ''
+        else
+          ''
+            :${port} {
+              ${builtins.concatStringsSep "\n" (
+                map (entry: ''
+                  @${sanitiseMatcherName entry.baseUrl} http host ${entry.baseUrl}
+                  route @${sanitiseMatcherName entry.baseUrl} {
+                    ${entry.config}
+                  }
+                '') entries
+              )}
+            }
+          ''
+      ) groupedByPort
+    );
+
   emptyAllowGroupsHosts =
     collectKanidmVirtualHosts
     |> lib.filterAttrs (name: vh: (resolveKanidmContext name vh).allowGroups == [ ]);
@@ -49,20 +107,7 @@ in
       services.caddy = {
         globalConfig = ''
           layer4 {
-            ${
-              collectAllAttrsFunc "server.proxy.virtualHosts" (
-                virtualHosts: hostCfg:
-                virtualHosts
-                |> builtins.attrValues
-                |> builtins.filter (vh: vh.l4 != null)
-                |> builtins.map (vh: ''
-                  ${vh.baseUrl}:${toString vh.l4.listenPort} {
-                    ${replaceLocalHost hostCfg.host.name vh.l4.config}
-                  }
-                '')
-              )
-              |> builtins.concatStringsSep "\n"
-            }
+            ${builtins.concatStringsSep "\n" l4Config}
           }
         '';
 
@@ -70,10 +115,18 @@ in
           virtualHosts: hostCfg:
           mapAttrs' (
             name: vh:
-            nameValuePair vh.baseUrl {
-              hostName = vh.baseUrl;
-              useACMEHost = vh.baseUrl;
-              serverAliases = vh.aliases;
+            let
+              additionalPortAliases =
+                vh.listenPorts
+                |> lib.lists.drop 1
+                |> map (port: map (listenDomain: "${listenDomain}:${toString port}") ([ vh.baseUrl ] ++ vh.aliases))
+                |> flatten;
+              hostName = "${vh.baseUrl}:${toString (builtins.head vh.listenPorts)}";
+            in
+            nameValuePair hostName {
+              inherit hostName;
+              useACMEHost = if !vh.useAcmeCerts then null else vh.baseUrl;
+              serverAliases = vh.aliases ++ additionalPortAliases;
               extraConfig = ''
                 import default
                 ${optionalString vh.public "import public"}
@@ -103,9 +156,11 @@ in
 
       security.acme.certs =
         config.services.caddy.virtualHosts
-        |> lib.filterAttrs (name: _: hasSuffix ".${cfg.domain}" name)
+        |> lib.filterAttrs (
+          name: _: hasSuffix ".${cfg.domain}" name && !builtins.elem name noAcmeCertsDomains
+        )
         |> lib.mapAttrs (
-          _name: vh: {
+          name: vh: {
             extraDomainNames = vh.serverAliases;
           }
         );

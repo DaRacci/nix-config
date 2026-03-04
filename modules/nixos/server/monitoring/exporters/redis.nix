@@ -24,7 +24,7 @@ in
           enable = true;
           port = 9121;
           extraFlags = [
-            "--redis.password-file ${config.sops.templates."REDIS/PASSWORD".path}"
+            "--redis.password-file ${config.sops.secrets."REDIS/PASSWORD".path}"
           ];
         };
 

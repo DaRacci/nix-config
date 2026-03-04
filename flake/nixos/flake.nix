@@ -86,6 +86,12 @@
         nixpkgs.follows = "nixpkgs";
       };
     };
+
+    seaweedfs = {
+      url = "https://raw.githubusercontent.com/liberodark/nixpkgs/refs/heads/seawedfs/nixos/modules/services/network-filesystems/seaweedfs.nix";
+      flake = false;
+      type = "file";
+    };
   };
 
   outputs = _: { };
