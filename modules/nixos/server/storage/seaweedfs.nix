@@ -12,7 +12,9 @@ let
     mapAttrs
     mergeAttrsList
     concatStringsSep
-    optionalString
+    nameValuePair
+    flatten
+    attrsToList
     ;
   inherit (config.server) ioPrimaryHost;
 
@@ -52,11 +54,20 @@ let
       extraConfig
     ];
 
-  mkVHostWithGrpc = domain: attr: {
-    additionalListenPorts = [ 10443 ];
-    useAcmeCerts = !attr.withGrpc;
-    extraConfig = ''
-      ${optionalString attr.withGrpc ''
+  mkVHost =
+    subdomain: attr:
+    nameValuePair subdomain {
+      # TODO:Secure behind kanidm
+      extraConfig = ''
+        reverse_proxy http://localhost:${toString attr.port}
+      '';
+    };
+
+  mkVHostGrpc =
+    domain: attr:
+    nameValuePair "${domain}:10443" {
+      useAcmeCerts = false;
+      extraConfig = ''
         tls ${config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_CRT".path} ${
           config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_KEY".path
         } {
@@ -68,22 +79,17 @@ let
           }
         }
 
-        @grpc protocol grpc
-        handle @grpc {
-          reverse_proxy localhost:${toString attr.grpcPort} {
-            transport http {
-              tls_trust_pool file ${config.sops.secrets."SEAWEEDFS/TLS/CA".path}
-              tls_server_name "${domain}.racci.dev"
-              tls_client_auth ${config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_CRT".path} ${
-                config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_KEY".path
-              }
+        reverse_proxy localhost:${toString attr.grpcPort} {
+          transport http {
+            tls_trust_pool file ${config.sops.secrets."SEAWEEDFS/TLS/CA".path}
+            tls_server_name "${domain}.racci.dev"
+            tls_client_auth ${config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_CRT".path} ${
+              config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_KEY".path
             }
           }
         }
-      ''}
-      # reverse_proxy http://localhost:${toString attr.port}
-    '';
-  };
+      '';
+    };
 
   mkTmpfilesDirAndSecurity = attr: {
     "${attr.dataDir}".d = {
@@ -124,6 +130,7 @@ let
     "VOLUME"
     "FILER"
     "CLIENT"
+    "ADMIN"
   ];
 in
 {
@@ -236,13 +243,19 @@ in
           withGrpc = true;
         };
         "admin.seaweedfs" = {
-          service = "client";
+          service = "admin";
           port = 23646;
           grpcPort = 33646;
           withGrpc = true;
         };
       }
-      |> mapAttrs mkVHostWithGrpc;
+      |> attrsToList
+      |> map (a: [
+        (mkVHost a.name a.value)
+        (mkVHostGrpc a.name a.value)
+      ])
+      |> flatten
+      |> builtins.listToAttrs;
 
     # nixpkgs PR uses incorrect attribute options and syntax for tmpfiles.
     systemd.tmpfiles.settings = {
@@ -335,7 +348,7 @@ in
           ExecStart = ''
             ${cfg.package}/bin/weed worker \
               -admin=admin.seaweedfs.racci.dev:443 \
-              -capabilities=vacuum,ec,replication,balance
+              -jobType=vacuum,volume_balance,erasure_coding,admin_script
           '';
           WorkingDirectory = "/var/lib/seaweedfs/worker";
         };
