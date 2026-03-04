@@ -117,13 +117,14 @@ in
             name: vh:
             let
               additionalPortAliases =
-                map (
-                  port: map (listenDomain: "${listenDomain}:${toString port}") ([ vh.baseUrl ] ++ vh.aliases)
-                ) vh.additionalListenPorts
+                vh.listenPorts
+                |> lib.lists.drop 1
+                |> map (port: map (listenDomain: "${listenDomain}:${toString port}") ([ vh.baseUrl ] ++ vh.aliases))
                 |> flatten;
+              hostName = "${vh.baseUrl}:${toString (builtins.head vh.listenPorts)}";
             in
-            nameValuePair vh.baseUrl {
-              hostName = vh.baseUrl;
+            nameValuePair hostName {
+              inherit hostName;
               useACMEHost = if !vh.useAcmeCerts then null else vh.baseUrl;
               serverAliases = vh.aliases ++ additionalPortAliases;
               extraConfig = ''

@@ -94,14 +94,16 @@ in
     seaweedfs = prev.seaweedfs.overrideAttrs (_oldAttrs: {
       version = "4.12";
       src = prev.fetchFromGitHub {
-        owner = "seaweedfs";
+        owner = "daracci";
         repo = "seaweedfs";
-        tag = "4.12";
-        hash = "sha256-AiNtGepaNZ/1cGWp3SFQ7l4+mjpag9MNZb2IXKar9Qo=";
+        # tag = "4.12";
+        rev = "7418b47fbde7e1b850f42773add29bcde7fb20ba";
+        hash = "sha256-QncTAymtzf56nABIc6WDIVVLRpHckE1P8xz8BvKPBfs=";
       };
 
       doCheck = false;
-      vendorHash = "sha256-P2wbXslmHF2dwNoXemuOscKUHrPrypRR+Ehv89tlVUM=";
+      vendorHash = "sha256-/Vs72QJAdhsBSM8rNarnU9zSslR/7jFVOhaAMIyE41c=";
+      # vendorHash = "sha256-P2wbXslmHF2dwNoXemuOscKUHrPrypRR+Ehv89tlVUM=";
     });
 
     inherit lib;
