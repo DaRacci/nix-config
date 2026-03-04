@@ -15,6 +15,7 @@ let
     nameValuePair
     flatten
     attrsToList
+    optionals
     ;
   inherit (config.server) ioPrimaryHost;
 
@@ -131,6 +132,7 @@ let
     "FILER"
     "CLIENT"
     "ADMIN"
+    "WORKER"
   ];
 in
 {
@@ -250,10 +252,15 @@ in
         };
       }
       |> attrsToList
-      |> map (a: [
-        (mkVHost a.name a.value)
-        (mkVHostGrpc a.name a.value)
-      ])
+      |> map (
+        a:
+        [
+          (mkVHost a.name a.value)
+        ]
+        ++ optionals (a.value.withGrpc) [
+          (mkVHostGrpc a.name a.value)
+        ]
+      )
       |> flatten
       |> builtins.listToAttrs;
 
@@ -324,6 +331,10 @@ in
           security = "master";
           dataDir = "${baseDir}/admin";
         };
+        seaweedfs-worker = {
+          security = "master";
+          dataDir = "${baseDir}/worker";
+        };
       }
       |> mapAttrs (_: v: mkTmpfilesDirAndSecurity v)
     );
@@ -344,10 +355,12 @@ in
 
       seaweedfs-worker = mkCommonSystemdService {
         description = "SeaweedFS Worker Server";
+        after = [ "seaweedfs-admin.service" ];
+        wants = [ "seaweedfs-admin.service" ];
         serviceConfig = {
           ExecStart = ''
             ${cfg.package}/bin/weed worker \
-              -admin=admin.seaweedfs.racci.dev:443 \
+              -admin=admin.seaweedfs.racci.dev:443.10443 \
               -jobType=vacuum,volume_balance,erasure_coding,admin_script
           '';
           WorkingDirectory = "/var/lib/seaweedfs/worker";
