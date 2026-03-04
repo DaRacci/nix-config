@@ -201,6 +201,7 @@ in
         enable = true;
         ip = "127.0.0.1";
         peers = [ "none" ]; # Faster startup without waiting for peers to be available.
+        volumeSizeLimitMB = 8192;
       };
 
       volume = {
