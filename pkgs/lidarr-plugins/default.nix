@@ -20,13 +20,13 @@
   fixup-yarn-lock,
 }:
 let
-  version = "3.1.1.4884";
+  version = "3.1.1.4901";
   src = applyPatches {
     src = fetchFromGitHub {
       owner = "Lidarr";
       repo = "Lidarr";
-      rev = "f46acd61c8c9aca25690c64c43ab4f6be6863cec";
-      hash = "sha256-0SytZKQDJuXk9IaFStehbAsF3tKX5Hki0PIMal8e8r4=";
+      rev = "7277458721256b36ab6c248f5f3b34da94e4faf9";
+      hash = "sha256-YyiSzIc707ozCsO/KM7S4cg82cCk3Vo8Rz3UCDBiv10=";
     };
     postPatch = ''
       mv src/NuGet.config NuGet.config
