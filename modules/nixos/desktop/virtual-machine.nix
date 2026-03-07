@@ -90,7 +90,7 @@ let
           };
 
           mounts = mkOption {
-            type = types;
+            type = types.attrsOf types.anything;
             default = { };
             description = "The mounts to attach to the guest.";
           };
