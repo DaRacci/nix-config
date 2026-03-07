@@ -21,11 +21,11 @@
         "tiny-audio-player": "tiny-audio-player"
       },
       "locked": {
-        "lastModified": 1771347729,
-        "narHash": "sha256-FlmgIfxSdqWXmPxuLnOCL7NwqXsij56izpo31JZ3a2Y=",
+        "lastModified": 1772739196,
+        "narHash": "sha256-ugF+5w/m38gdNFXzWkbChchiZQhKkd720ozV8aQzMlY=",
         "owner": "emmanuelrosa",
         "repo": "erosanix",
-        "rev": "5fbad454f9907299ac79a53ec0d2ff229d46f35a",
+        "rev": "4bd1cc11c17ea3f1490320e22f42e2b3983d1c48",
         "type": "github"
       },
       "original": {
@@ -41,11 +41,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1769996383,
-        "narHash": "sha256-AnYjnFWgS49RlqX7LrC4uA+sCCDBj0Ry/WOJ5XWAsa0=",
+        "lastModified": 1772408722,
+        "narHash": "sha256-rHuJtdcOjK7rAHpHphUb1iCvgkU3GpfvicLMwwnfMT0=",
         "owner": "hercules-ci",
         "repo": "flake-parts",
-        "rev": "57928607ea566b5db3ad13af0e57e921e6b12381",
+        "rev": "f20dc5d9b8027381c474144ecabc9034d6a839a3",
         "type": "github"
       },
       "original": {
@@ -92,11 +92,11 @@
     "lix": {
       "flake": false,
       "locked": {
-        "lastModified": 1768477706,
-        "narHash": "sha256-8BUrR3MXgpnWf6m68+D5viK0HKPWKTmobmtAkM/raKI=",
+        "lastModified": 1770824346,
+        "narHash": "sha256-nm19g8xpBBcAEDNWY53R28VlAdi5IXZuqWFtAvnoGak=",
         "ref": "release-2.94",
-        "rev": "6350f514582994ad92745732a173a0c474100937",
-        "revCount": 18534,
+        "rev": "b7be40c78591871e5982124d8ba7d5c1413e43ef",
+        "revCount": 18535,
         "type": "git",
         "url": "https://git.lix.systems/lix-project/lix.git"
       },
@@ -182,11 +182,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1771369470,
-        "narHash": "sha256-0NBlEBKkN3lufyvFegY4TYv5mCNHbi5OmBDrzihbBMQ=",
+        "lastModified": 1772624091,
+        "narHash": "sha256-QKyJ0QGWBn6r0invrMAK8dmJoBYWoOWy7lN+UHzW1jc=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "0182a361324364ae3f436a63005877674cf45efb",
+        "rev": "80bdc1e5ce51f56b19791b52b2901187931f5353",
         "type": "github"
       },
       "original": {
@@ -233,11 +233,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1771101510,
-        "narHash": "sha256-S5of51uyVJsU7QJ41S+HK4OhDhK1+e4mvHJbJAgMlf0=",
+        "lastModified": 1771529133,
+        "narHash": "sha256-nnd13UkxEGBNCJUpSinNyoDfB1BjhSGnWN8llDM9AW8=",
         "owner": "emmanuelrosa",
         "repo": "tiny_audio_player",
-        "rev": "6b26f05b18c7db9137e9c0dea34f2a48ab2213ae",
+        "rev": "21b191dce6be77dcf0f5baa69564b7e33905c653",
         "type": "github"
       },
       "original": {
