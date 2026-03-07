@@ -17,18 +17,7 @@ in
         systemd-boot.editor = false;
       };
 
-      kernelParams = [
-        "quiet"
-        "rd.systemd.show_status=false"
-        "rd.udev.log_level=3"
-        "udev.log_priority=3"
-      ];
-      consoleLogLevel = 0;
-
-      initrd = {
-        verbose = false;
-        systemd.enable = mkDefault true;
-      };
+      initrd.systemd.enable = mkDefault true;
     };
 
     systemd.settings.Manager.RebootWatchdogSec = "0";
