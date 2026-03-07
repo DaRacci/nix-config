@@ -27,11 +27,13 @@ in
 
     home.packages = [
       pkgs.orca-slicer-zink
+      pkgs.lycheeslicer
     ];
 
     user.persistence.directories = [
       ".config/OrcaSlicer"
       ".local/share/orca-slicer"
+      ".config/LycheeSlicer"
     ];
   };
 }
