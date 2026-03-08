@@ -42,7 +42,7 @@ let
     windowRule:
     let
       inherit (windowRule) name rule matcher;
-      matcherStrings = builtins.map mkMatcherString matcher;
+      matcherStrings = map mkMatcherString matcher;
 
       propStrings =
         rule

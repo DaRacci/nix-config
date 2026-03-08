@@ -143,7 +143,7 @@ in
         trusted_proxies = [
           "::1" # For notify_push
         ]
-        ++ (config.server.network.subnets |> builtins.map (v: v.ipv4.cidr));
+        ++ (config.server.network.subnets |> map (v: v.ipv4.cidr));
 
         twofactor_enforced = true;
         twofactor_enforced_groups = [ ];

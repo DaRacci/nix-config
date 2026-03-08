@@ -112,7 +112,7 @@ mkWindowsAppNoCC rec {
       icon = pname;
       desktopName = "Take Control Viewer";
 
-      mimeTypes = builtins.map (mt: "x-scheme-handler/${mt}") [
+      mimeTypes = map (mt: "x-scheme-handler/${mt}") [
         "takectrsxvp"
         "tcarmmvp"
       ];

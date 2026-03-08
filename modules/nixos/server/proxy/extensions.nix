@@ -33,13 +33,13 @@ let
       let
         vhsUsingContext = lib.filterAttrs (_: vh: vh.kanidm.context == contextName) virtualHosts;
         vhList = builtins.attrValues vhsUsingContext;
-        allGroups = vhList |> builtins.map (vh: vh.kanidm.allowGroups) |> flatten |> unique;
-        groupsWithoutDomain = allGroups |> builtins.map (g: builtins.head (lib.splitString "@" g));
+        allGroups = vhList |> map (vh: vh.kanidm.allowGroups) |> flatten |> unique;
+        groupsWithoutDomain = allGroups |> map (g: builtins.head (lib.splitString "@" g));
       in
       ctx
       // {
         virtualHosts = vhsUsingContext;
-        originUrls = builtins.map (
+        originUrls = map (
           vh: "https://${vh.baseUrl}/auth/oauth2/${contextName}/authorization-code-callback"
         ) vhList;
         originLanding = "https://${(builtins.head vhList).baseUrl}";
@@ -65,7 +65,7 @@ in
             vh: _:
             builtins.attrValues vh
             |> builtins.filter (v: v.public)
-            |> builtins.map (v: nameValuePair v.baseUrl "https://${v.baseUrl}")
+            |> map (v: nameValuePair v.baseUrl "https://${v.baseUrl}")
             |> builtins.listToAttrs
           );
         in
@@ -82,7 +82,7 @@ in
       )
       {
         sops.secrets = builtins.listToAttrs (
-          builtins.map (contextName: {
+          map (contextName: {
             name = "KANIDM/OAUTH2/${lib.toUpper contextName}_SECRET";
             value = {
               owner = "kanidm";
@@ -97,7 +97,7 @@ in
           originLanding = ctx.originLanding;
           basicSecretFile = config.sops.secrets."KANIDM/OAUTH2/${lib.toUpper contextName}_SECRET".path;
           scopeMaps = builtins.listToAttrs (
-            builtins.map (group: {
+            map (group: {
               name = group;
               value = ctx.scopes;
             }) ctx.groups

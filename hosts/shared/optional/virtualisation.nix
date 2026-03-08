@@ -445,7 +445,7 @@ in
             prefix = "L+ /var/lib/libvirt/hooks/guests/";
           in
           builtins.foldl' (existing: new: existing ++ new) [ ] (
-            builtins.map
+            map
               (guest: [
                 "${prefix}${guest}/prepare/begin/core-isolation - - - - ${pkgs.lib.getExe win-isolation-start}"
                 "${prefix}${guest}/release/end/core-isolation - - - - ${pkgs.lib.getExe win-isolation-release}"

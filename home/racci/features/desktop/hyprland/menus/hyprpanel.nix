@@ -7,7 +7,7 @@
 {
 
   wayland.windowManager.hyprland.settings = {
-    exec-once = builtins.map (exec: "${lib.getExe' pkgs.uwsm "uwsm-app"} -s b -- ${exec}") [
+    exec-once = map (exec: "${lib.getExe' pkgs.uwsm "uwsm-app"} -s b -- ${exec}") [
       "${lib.getExe' pkgs.blueman "blueman-tray"}"
     ];
   };

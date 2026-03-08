@@ -13,7 +13,7 @@ let
         (lib.filterAttrs (name: _: name != config.system.name))
         # Extract the config from each host
         builtins.attrValues
-        (builtins.map (host: host.config))
+        (map (host: host.config))
         # Filter to only servers
         (builtins.filter (config: config.host.device.role == "server"))
       ]

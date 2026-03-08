@@ -30,7 +30,7 @@
     };
   }
   // fromAllServers [
-    (builtins.map (config: config.sops.secrets))
+    (map (config: config.sops.secrets))
     lib.mergeAttrsList
     (lib.filterAttrs (
       _name: secret:
@@ -38,7 +38,7 @@
     ))
     (builtins.mapAttrs (
       _: value:
-      (builtins.removeAttrs value [ "sopsFileHash" ])
+      (removeAttrs value [ "sopsFileHash" ])
       // {
         sopsFile = config.sops.defaultSopsFile;
         # Update owner and groups because it will always be only postgres on this server.
@@ -84,7 +84,7 @@
         local   all       all             scram-sha-256
       ''
       + (lib.pipe config.server.network.subnets [
-        (builtins.map (
+        (map (
           subnet:
           [ "host  all  all  ${subnet.ipv4.cidr}  scram-sha-256" ]
           ++ lib.optionals (subnet.ipv6.cidr != null) [ "host  all  all  ${subnet.ipv6.cidr}  scram-sha-256" ]

@@ -175,12 +175,12 @@
             "vertical-stack-in-card/vertical-stack-in-card.js"
             "weather-card/weather-card.js"
           ]
-          |> builtins.map (resource: {
+          |> map (resource: {
             type = "module";
             url = "/local/community/${resource}";
           })
         )
-        ++ (builtins.map (card: {
+        ++ (map (card: {
           url = "/local/nixos-lovelace-modules/${card.entrypoint or (card.pname + ".js")}?${card.version}";
           type = "module";
         }) customLovelaceModules);

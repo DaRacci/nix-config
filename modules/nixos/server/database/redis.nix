@@ -107,7 +107,7 @@ in
 
             Configured static mappings: ${
               builtins.attrNames staticDbIdMappings
-              |> builtins.map (name: "${name} -> ${toString staticDbIdMappings.${name}}")
+              |> map (name: "${name} -> ${toString staticDbIdMappings.${name}}")
               |> builtins.concatStringsSep ", "
             }
           '';
@@ -147,7 +147,7 @@ in
       ]
       ++ (
         builtins.attrNames cfg
-        |> builtins.map (name: {
+        |> map (name: {
           assertion = staticDbIdMappings ? ${name};
           message = ''
             Redis instance "${name}" does not have a static database_id mapping configured in

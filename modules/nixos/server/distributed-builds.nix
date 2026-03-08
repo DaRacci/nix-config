@@ -13,7 +13,7 @@ let
     attrValues
     ;
   inherit (types) str listOf;
-  inherit (builtins) map elem elemAt;
+  inherit (builtins) elem elemAt;
 
   cfg = config.server.distributedBuilder;
   thisIsBuildServer = elem config.networking.hostName cfg.builders;

@@ -70,7 +70,7 @@ def get_services [] {
       inherit (flake.inputs.nixpkgs) lib;
       serverConfigurations = lib.trivial.pipe flake.nixosConfigurations [
         builtins.attrValues
-        (builtins.map (host: host.config))
+        (map (host: host.config))
         (builtins.filter (cfg: cfg.host.device.role == "server"))
         (builtins.filter (cfg: cfg.server.database ? postgres && cfg.server.database.postgres != { }))
       ];
@@ -79,7 +79,7 @@ def get_services [] {
         attrPath:
         lib.pipe serverConfigurations [
           (builtins.filter (cfg: cfg.host.name != "nixio"))
-          (builtins.map (cfg: lib.attrsets.attrByPath (lib.splitString "." attrPath) null cfg))
+          (map (cfg: lib.attrsets.attrByPath (lib.splitString "." attrPath) null cfg))
           (builtins.filter (
             item:
             if lib.isList item then

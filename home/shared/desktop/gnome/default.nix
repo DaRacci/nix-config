@@ -40,7 +40,7 @@ in
     let
       forAll =
         desktop: mimes:
-        lib.mine.attrsets.recursiveMergeAttrs (builtins.map (mime: { ${mime} = desktop; }) mimes);
+        lib.mine.attrsets.recursiveMergeAttrs (map (mime: { ${mime} = desktop; }) mimes);
     in
     {
       enable = true;

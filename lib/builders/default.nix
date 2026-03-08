@@ -28,7 +28,7 @@ let
         ]
         ++ (builtins.attrValues (import ../../overlays { inherit inputs lib; }));
       }
-      // (builtins.removeAttrs args [
+      // (removeAttrs args [
         "system"
         "accelerators"
         "overlays"

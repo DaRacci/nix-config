@@ -252,7 +252,7 @@ in
     #       TIMELINE_CREATE = true;
     #       TIMELINE_CLEANUP = true;
     #     };
-    #   }] ++ builtins.map
+    #   }] ++ map
     #     (user: {
     #       "${user.name}Home" = {
     #         SUBVOLUME = "${cfg.root}/home/${user.name}";

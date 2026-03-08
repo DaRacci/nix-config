@@ -177,7 +177,7 @@ in
             (
               collectAllAttrs "server.database.postgres"
               |> builtins.attrValues
-              |> builtins.map (database: lib.mine.mkPostgresRolePass database.user database.password.path)
+              |> map (database: lib.mine.mkPostgresRolePass database.user database.password.path)
             )
           ]
           |> builtins.concatLists

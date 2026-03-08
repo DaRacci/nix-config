@@ -35,7 +35,7 @@
     nixos = {
       extraInputsFlake = ./nixos;
       module = ./nixos/flake-module.nix;
-      extraInputs = builtins.removeAttrs config.partitions.home-manager.extraInputs [
+      extraInputs = removeAttrs config.partitions.home-manager.extraInputs [
         "nixpkgs"
         "systems"
         "flake-parts"

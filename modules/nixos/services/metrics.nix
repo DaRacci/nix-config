@@ -168,7 +168,7 @@ let
       |> mapAttrs (
         n: _s: {
           enabled = true;
-          name = splitString "_" n |> builtins.map lib.mine.strings.capitalise |> concatStringsSep " ";
+          name = splitString "_" n |> map lib.mine.strings.capitalise |> concatStringsSep " ";
         }
       );
 

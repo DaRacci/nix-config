@@ -23,7 +23,7 @@ in
   config = lib.mkIf cfg.enable {
     services.tailscale.extraUpFlags = lib.optional (lib.length cfg.tags > 0) (
       cfg.tags
-      |> builtins.map (t: "tag:${t}")
+      |> map (t: "tag:${t}")
       |> builtins.concatStringsSep ","
       |> (tags: "--advertise-tags=${tags}")
     );

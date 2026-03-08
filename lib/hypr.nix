@@ -41,7 +41,7 @@ rec {
             if value != null then m else throw "Invalid bind modifier: ${m}";
         in
         if lib.isList mods && builtins.all lib.isString mods then
-          builtins.map toEnum mods
+          map toEnum mods
         else if lib.isString mods then
           [ (toEnum mods) ]
         else if !lib.isList mods then

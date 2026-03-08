@@ -33,7 +33,7 @@ in
   config = (mkIf (cfg.defaultGroups != [ ])) {
     users.users =
       users
-      |> builtins.map (
+      |> map (
         user:
         nameValuePair user {
           extraGroups = cfg.defaultGroups;

@@ -102,7 +102,7 @@ in
         (lib.pipe cfg.bind [
           lib.attrsToList
           (builtins.groupBy (v: mkBindKeyword v.value.modifiers))
-          (builtins.mapAttrs (_: list: builtins.map (v: mkBind v.value.keybind v.value.action) list))
+          (builtins.mapAttrs (_: list: map (v: mkBind v.value.keybind v.value.action) list))
         ])
       ];
 

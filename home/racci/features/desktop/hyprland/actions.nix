@@ -11,7 +11,7 @@
         pkgs.grim
         pkgs.hyprpicker
       ]
-      |> builtins.map (exe: lib.getExe exe);
+      |> map (exe: lib.getExe exe);
 
     settings =
       let

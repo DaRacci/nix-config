@@ -28,7 +28,7 @@ in
     systemd.user.services = lib.pipe cfg.sliceAllocation [
       (lib.mapAttrsToList (
         sliceName: services:
-        builtins.map (
+        map (
           service:
           lib.nameValuePair service {
             Service.Slice = "${sliceName}.slice";

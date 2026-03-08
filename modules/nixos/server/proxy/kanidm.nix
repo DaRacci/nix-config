@@ -30,7 +30,7 @@ let
     contexts:
     contexts
     |> builtins.attrValues
-    |> builtins.map (
+    |> map (
       ctx:
       let
         envPrefix = contextToEnvPrefix ctx.context;
@@ -52,7 +52,7 @@ let
     kanidmVirtualHosts:
     kanidmVirtualHosts
     |> builtins.attrNames
-    |> builtins.map (
+    |> map (
       name:
       let
         vh = kanidmVirtualHosts.${name};
@@ -74,7 +74,7 @@ let
     kanidmVirtualHosts:
     kanidmVirtualHosts
     |> builtins.attrNames
-    |> builtins.map (
+    |> map (
       name:
       let
         vh = kanidmVirtualHosts.${name};
@@ -87,7 +87,7 @@ let
           crypto key sign-verify {env.${envPrefix}_SHARED_KEY}
           ${
             resolved.allowGroups
-            |> builtins.map (group: "allow groups ${group}")
+            |> map (group: "allow groups ${group}")
             |> builtins.concatStringsSep "\n    "
           }
         }

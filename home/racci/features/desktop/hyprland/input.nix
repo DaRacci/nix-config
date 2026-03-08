@@ -77,7 +77,7 @@ in
       }
       #region Focus & Movement
       // (lib.pipe lib.mine.keys.directionalKeys [
-        (builtins.map (key: [
+        (map (key: [
           (lib.nameValuePair "SUPER+SHIFT+${key}" [
             "hy3:movewindow"
             (lib.toLower (getDirectionChar key))
@@ -126,7 +126,7 @@ in
           reset = "ESCAPE";
 
           binds = lib.pipe lib.mine.keys.directionalKeys [
-            (builtins.map (
+            (map (
               key:
               (lib.nameValuePair key {
                 modifiers = lib.mine.hypr.types.bindModifier.repeat;

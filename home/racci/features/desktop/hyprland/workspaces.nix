@@ -89,7 +89,7 @@ in
             (assignNotNull "defaultName" value.name)
             (assignNotNull "monitor" value.monitor)
             (assignNotNull "on-created-empty" (
-              builtins.concatStringsSep "&&" (builtins.map executableToCommand value.startup or [ ])
+              builtins.concatStringsSep "&&" (map executableToCommand value.startup or [ ])
             ))
           ]
           ++ (lib.mapAttrsToList (k: v: "${k}:${v}") (value.extraRules or { }));

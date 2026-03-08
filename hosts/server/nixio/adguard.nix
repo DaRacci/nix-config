@@ -63,7 +63,7 @@
           upstream_mode = "parallel";
           upstream_dns =
             (lib.pipe config.server.network.subnets [
-              (builtins.map (subnet: "[/${subnet.domain}/]${subnet.dns}"))
+              (map (subnet: "[/${subnet.domain}/]${subnet.dns}"))
             ])
             ++ [
               #region public resolvers
@@ -90,7 +90,7 @@
           ];
 
           private_networks = lib.trivial.pipe config.server.network.subnets [
-            (builtins.map (subnet: [
+            (map (subnet: [
               subnet.ipv4.cidr
               subnet.ipv6.cidr
             ]))
@@ -105,7 +105,7 @@
           use_private_ptr_resolvers = true;
           local_ptr_upstreams =
             lib.trivial.pipe config.server.network.subnets [
-              (builtins.map (
+              (map (
                 subnet:
                 [
                   "[/${subnet.ipv4.arpa}/]${subnet.dns}"
@@ -125,7 +125,7 @@
 
         user_rules =
           lib.trivial.pipe config.server.network.subnets [
-            (builtins.map (
+            (map (
               subnet:
               [
                 "*.racci.dev^$client=${subnet.ipv4.cidr},dnsrewrite=${config.system.name}.${subnet.domain}"

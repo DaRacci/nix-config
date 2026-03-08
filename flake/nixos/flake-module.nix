@@ -14,7 +14,6 @@ let
     removeSuffix
     ;
   inherit (builtins)
-    map
     elem
     head
     filter

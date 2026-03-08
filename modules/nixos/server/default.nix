@@ -51,7 +51,7 @@ let
 
   serverConfigurations =
     builtins.attrValues self.nixosConfigurations
-    |> builtins.map (host: host.config)
+    |> map (host: host.config)
     |> builtins.filter (cfg: cfg.host.device.role == "server");
 
   /*
@@ -61,7 +61,7 @@ let
   getAllAttrs =
     attrPath:
     serverConfigurations
-    |> builtins.map (cfg: attrByPath (splitString "." attrPath) null cfg)
+    |> map (cfg: attrByPath (splitString "." attrPath) null cfg)
     |> filterEmpty;
 
   /*
@@ -73,7 +73,7 @@ let
   getAllAttrsFunc =
     attrPath: func:
     serverConfigurations
-    |> builtins.map (cfg: func (attrByPath (splitString "." attrPath) null cfg) cfg)
+    |> map (cfg: func (attrByPath (splitString "." attrPath) null cfg) cfg)
     |> filterEmpty;
 
   /*
@@ -84,7 +84,7 @@ let
     attrPath:
     serverConfigurations
     |> builtins.filter (cfg: cfg.host.name != config.host.name)
-    |> builtins.map (cfg: attrByPath (splitString "." attrPath) null cfg)
+    |> map (cfg: attrByPath (splitString "." attrPath) null cfg)
     |> filterEmpty;
 
   /*
@@ -95,7 +95,7 @@ let
     attrPath: func:
     serverConfigurations
     |> builtins.filter (cfg: cfg.host.name != config.host.name)
-    |> builtins.map (cfg: func (attrByPath (splitString "." attrPath) null cfg) cfg)
+    |> map (cfg: func (attrByPath (splitString "." attrPath) null cfg) cfg)
     |> filterEmpty;
 
   /*
@@ -133,7 +133,7 @@ let
     serverConfigurations
     |> builtins.filter (cfg: !(isIOPrimaryHost cfg))
     |> builtins.filter func
-    |> builtins.map (cfg: cfg.host.name);
+    |> map (cfg: cfg.host.name);
   #endregion
 
   importModule =

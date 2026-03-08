@@ -22,7 +22,7 @@ rec {
     dir: pathPattern:
     lib.trivial.pipe (files dir) [
       (lib.filter (file: lib.hasSuffix pathPattern file))
-      (builtins.map (file: dir + "/${file}"))
+      (map (file: dir + "/${file}"))
       (arr: builtins.elemAt arr 0)
     ];
 
@@ -38,6 +38,6 @@ rec {
     lib.trivial.pipe (files dir) [
       (lib.filter (file: lib.hasSuffix ".nix" file))
       (lib.filter (file: !lib.hasSuffix "default.nix" file))
-      (builtins.map (file: ./. + "/${file}"))
+      (map (file: ./. + "/${file}"))
     ];
 }

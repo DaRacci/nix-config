@@ -161,7 +161,7 @@ in
 
     #   ${lib.trivial.pipe virtualMachines [
     #     (builtins.attrValues)
-    #     (builtins.map (guest: ''
+    #     (map (guest: ''
     #       ln -s "${guest.storePath}" "/var/lib/libvirt/qemu/${guest.filePath}";
     #     ''))
     #     (builtins.concatStringsSep "\n")
