@@ -60,9 +60,7 @@ let
   */
   getAllAttrs =
     attrPath:
-    serverConfigurations
-    |> map (cfg: attrByPath (splitString "." attrPath) null cfg)
-    |> filterEmpty;
+    serverConfigurations |> map (cfg: attrByPath (splitString "." attrPath) null cfg) |> filterEmpty;
 
   /*
     Same as `getAllAttrs` but with a function that is applied to each value before returning.
