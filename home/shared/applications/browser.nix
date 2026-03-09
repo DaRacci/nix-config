@@ -316,6 +316,11 @@ in
               ---- TELEMETRY
               Disable telemetry and data collection.
             */
+            "toolkit.telemetry.hybridContent.enabled" = lock-false;
+            "toolkit.telemetry.prompted" = mkLockedValue 2; # 2 means the user has been prompted and declined.
+            "toolkit.telemetry.rejected" = lock-true;
+            "toolkit.telemetry.reportingpolicy.firstRun" = lock-false;
+            "toolkit.telemetry.unifiedIsOptIn" = lock-false;
             "toolkit.telemetry.unified" = lock-false;
             "toolkit.telemetry.enabled" = lock-false;
             "toolkit.telemetry.server" = lock-false;
@@ -328,7 +333,13 @@ in
 
             # Misc stuff
             "browser.toolbars.bookmarks.visibility" = mkLockedValue "never";
+
+            # Fuck off with the autofills and saving shit
             "signon.rememberSignons" = lock-false;
+            "services.sync.prefs.sync.signon.autofillForms" = lock-false;
+            "signon.autofillForms.autocompleteOff" = lock-true;
+            "signon.autofillForms" = lock-false;
+            "signon.generation.enabled" = lock-false;
           };
         };
 
