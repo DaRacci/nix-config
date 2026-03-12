@@ -76,7 +76,7 @@ in
 
     (mkIf
       (
-        config.services.kanidm.enableServer
+        config.services.kanidm.server.enable
         && config.services.kanidm.provision.enable
         && proxyLib.hasAnyKanidm
       )

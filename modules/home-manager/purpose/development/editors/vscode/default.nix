@@ -26,7 +26,7 @@ in
   };
 
   config = mkMerge [
-    (mkIf (cfg.editors.vscode.enable) {
+    (mkIf cfg.editors.vscode.enable {
       nixpkgs.overlays = [
         inputs.nix4vscode.overlays.default
       ];

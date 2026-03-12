@@ -53,7 +53,7 @@
         xwayland-run
 
         # Steam logs errors about missing these, not sure for what though.
-        xorg.xwininfo
+        xwininfo
       ];
       extraCompatPackages = [ pkgs.proton-ge-bin ];
 

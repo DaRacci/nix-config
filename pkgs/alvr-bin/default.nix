@@ -23,7 +23,10 @@
   vulkan-loader,
   wayland,
   x264,
-  xorg,
+  libX11,
+  libXcursor,
+  libxcb,
+  libXi,
   SDL2,
 }:
 stdenv.mkDerivation (finalAttrs: rec {
@@ -66,10 +69,11 @@ stdenv.mkDerivation (finalAttrs: rec {
     pulseaudio
     wayland
     x264
-    xorg.libX11
-    xorg.libXcursor
-    xorg.libxcb
-    xorg.libXi
+
+    libX11
+    libXcursor
+    libxcb
+    libXi
   ];
 
   installPhase = ''

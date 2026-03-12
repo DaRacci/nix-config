@@ -143,6 +143,7 @@ in
 
     yazi = {
       enable = true;
+      shellWrapperName = "yy";
       settings = {
         mgr = {
           ratio = "0, 4, 0";

@@ -39,8 +39,7 @@ in
   xdg.mimeApps =
     let
       forAll =
-        desktop: mimes:
-        lib.mine.attrsets.recursiveMergeAttrs (map (mime: { ${mime} = desktop; }) mimes);
+        desktop: mimes: lib.mine.attrsets.recursiveMergeAttrs (map (mime: { ${mime} = desktop; }) mimes);
     in
     {
       enable = true;

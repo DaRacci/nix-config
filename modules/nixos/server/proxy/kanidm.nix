@@ -86,9 +86,7 @@ let
           set auth url https://${resolved.cookieDomain}/auth/oauth2/${resolved.context}
           crypto key sign-verify {env.${envPrefix}_SHARED_KEY}
           ${
-            resolved.allowGroups
-            |> map (group: "allow groups ${group}")
-            |> builtins.concatStringsSep "\n    "
+            resolved.allowGroups |> map (group: "allow groups ${group}") |> builtins.concatStringsSep "\n    "
           }
         }
       ''

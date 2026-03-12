@@ -72,8 +72,7 @@
   xdg.mimeApps =
     let
       forAll =
-        desktop: mimes:
-        lib.mine.attrsets.recursiveMergeAttrs (map (mime: { ${mime} = desktop; }) mimes);
+        desktop: mimes: lib.mine.attrsets.recursiveMergeAttrs (map (mime: { ${mime} = desktop; }) mimes);
     in
     {
       # Krita and Switcheroo try to hijack a lot of file types

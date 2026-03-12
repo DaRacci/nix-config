@@ -43,38 +43,40 @@ in
     );
 
   services.kanidm = {
-    enableServer = true;
-    package = pkgs.kanidmWithSecretProvisioning_1_8;
+    package = pkgs.kanidmWithSecretProvisioning_1_9;
 
-    serverSettings =
-      let
-        certDirectory = config.security.acme.certs."auth.racci.dev".directory;
-      in
-      rec {
-        version = "2";
-        domain = "auth.racci.dev";
-        origin = "https://${domain}";
+    server = {
+      enable = true;
+      settings =
+        let
+          certDirectory = config.security.acme.certs."auth.racci.dev".directory;
+        in
+        rec {
+          version = "2";
+          domain = "auth.racci.dev";
+          origin = "https://${domain}";
 
-        bindaddress = "[::]:8443";
+          bindaddress = "[::]:8443";
 
-        tls_key = "${certDirectory}/key.pem";
-        tls_chain = "${certDirectory}/fullchain.pem";
+          tls_key = "${certDirectory}/key.pem";
+          tls_chain = "${certDirectory}/fullchain.pem";
 
-        http_client_address_info.x-forward-for =
-          config.server.network.subnets
-          |> map (subnet: [
-            subnet.ipv4.cidr
-            subnet.ipv6.cidr
-          ])
-          |> flatten
-          |> filterEmpty;
+          http_client_address_info.x-forward-for =
+            config.server.network.subnets
+            |> map (subnet: [
+              subnet.ipv4.cidr
+              subnet.ipv6.cidr
+            ])
+            |> flatten
+            |> filterEmpty;
 
-        online_backup = {
-          versions = 7;
-          path = "/var/lib/kanidm/backup";
-          schedule = "0 3 * * *"; # daily at 3am
+          online_backup = {
+            versions = 7;
+            path = "/var/lib/kanidm/backup";
+            schedule = "0 3 * * *"; # daily at 3am
+          };
         };
-      };
+    };
 
     provision = {
       enable = true;

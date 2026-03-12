@@ -12,7 +12,7 @@ lib.mkIf (osConfig == null || osConfig.host.device.role != "server") {
     # System Info
     inxi
     pciutils
-    xorg.xdpyinfo
+    xdpyinfo
     hyfetch
   ];
 }
