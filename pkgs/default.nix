@@ -38,6 +38,7 @@
   # Wine Apps
   take-control-viewer = pkgs.callPackage ./take-control-viewer {
     inherit (inputs.erosanix.lib.x86_64-linux) mkWindowsAppNoCC;
+    wine = pkgs.wineWow64Packages.full;
   };
 
   lix-woodpecker = pkgs.callPackage ./lix-woodpecker {

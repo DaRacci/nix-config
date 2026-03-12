@@ -23,6 +23,8 @@ mkWindowsAppNoCC rec {
     hash = "sha256-u/dcgl/9VP9ifhAmAhdbsrinDgDRBZ1NWVWeV3k3OYg=";
   };
 
+  enableMonoBootPrompt = false;
+
   nativeBuildInputs = [
     copyDesktopItems
 
@@ -30,13 +32,13 @@ mkWindowsAppNoCC rec {
     imagemagick
   ];
 
-  wineArch = "win32";
+  wineArch = "win64";
   fileMap = {
     "$HOME/.local/share/take-control-viewer" = "drive_c/users/$USER/AppData/Local/Take Control Viewer";
   };
 
-  graphicsDriver = "wayland";
-  enableVulkan = true;
+  graphicsDriver = "auto";
+  enableVulkan = false;
 
   winAppInstall = ''
     # The installer exits in ~5 seconds after writing files, but spawns
