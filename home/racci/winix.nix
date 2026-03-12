@@ -78,7 +78,10 @@ in
     development = {
       enable = true;
       rust.enable = true;
-      editors.vscode.enable = false;
+      editors = {
+        vscode.enable = false;
+        helix.enable = true;
+      };
     };
   };
 
