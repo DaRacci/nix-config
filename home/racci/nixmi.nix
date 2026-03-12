@@ -76,7 +76,8 @@
 
       languages = {
         rust.enable = true;
-        dotnet.enable = true;
+        csharp.enable = true;
+        powershell.enable = true;
       };
 
       tools = {

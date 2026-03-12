@@ -5,9 +5,16 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
+  inherit (builtins) filter;
+  inherit (lib)
+    concatLists
+    mkEnableOption
+    mkIf
+    mkMerge
+    ;
 
   cfg = config.purpose.development.editors.helix;
+  languageCfg = config.purpose.development.languages;
 in
 {
   options.purpose.development.editors.helix = {
@@ -18,10 +25,17 @@ in
     programs.helix = {
       enable = true;
       extraPackages = [
-        pkgs.powershell
-        pkgs.powershell-editor-services
-        pkgs.tree-sitter-grammars.tree-sitter-powershell
-      ];
+        pkgs.bash-language-server
+        pkgs.cmake-language-server
+        pkgs.clang-tools
+      ]
+      ++ (
+        builtins.attrValues languageCfg
+        |> filter (langCfg: builtins.isAttrs langCfg)
+        |> filter (langCfg: langCfg.enable)
+        |> map (langCfg: langCfg.allPackages)
+        |> concatLists
+      );
 
       settings = {
         editor = {
@@ -45,17 +59,17 @@ in
       };
       ignores = [ ];
 
-      languages = {
-        language = [
-          {
-            name = "powershell";
-            roots = [ ".git" ];
-            language-servers = [ "powershell-editor-services" ];
-          }
-        ];
+      languages = mkMerge [
+        (mkIf languageCfg.powershell.enable {
+          language = [
+            {
+              name = "powershell";
+              roots = [ ".git" ];
+              language-servers = [ "powershell-editor-services" ];
+            }
+          ];
 
-        language-server = {
-          powershell-editor-services = {
+          language-server.powershell-editor-services = {
             name = "powershell-editor-services";
             command = lib.getExe pkgs.powershell-editor-services;
             args = [
@@ -69,8 +83,33 @@ in
               "-LogPath ${config.xdg.stateHome}/powershell/editor.log"
             ];
           };
-        };
-      };
+        })
+
+        (mkIf languageCfg.nix.enable {
+          language = [
+            {
+              name = "nix";
+              roots = [ "flake.nix" ];
+              language-servers = [
+                "nixd"
+                "nil"
+              ];
+            }
+          ];
+
+          language-server.nixd = {
+            name = "nixd";
+            command = lib.getExe pkgs.nixd;
+            args = [
+              "--semantic-tokens"
+              "--inlay-hints"
+            ]
+            ++ (lib.optionals (config.system != null) [
+              "--nixos-options-expr (builtins.getFlake (builtins.toString ./.)).nixosConfigurations.(${config.system.host.name}).options"
+            ]);
+          };
+        })
+      ];
     };
   };
 }

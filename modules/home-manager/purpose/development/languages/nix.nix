@@ -5,28 +5,33 @@
   lib,
   ...
 }:
-let
-  inherit (lib) mkEnableOption mkIf;
+import ./mkLanguage.nix {
+  inherit config pkgs lib;
+  name = "nix";
 
-  cfg = config.purpose.development.languages.nix;
-  rootCfg = config.purpose.development;
-in
-{
+  lspPackages = [
+    pkgs.nixd
+    pkgs.nil
+  ];
+  formatterPackages = [ pkgs.nixfmt ];
+
+  extraPackages = [
+    pkgs.dix
+    pkgs.nix-init
+    pkgs.nixpkgs-review
+  ];
+
   imports = [
     inputs.nix-index-database.homeModules.default
   ];
 
-  options.purpose.development.languages.nix = {
-    enable = mkEnableOption "nix development";
-  };
-
-  config = mkIf (rootCfg.enable && cfg.enable) {
+  extraConfig = {
     programs.nix-index.enable = true;
 
-    home.packages = with pkgs; [
-      dix
-      nix-init
-      nixpkgs-review
+    home.packages = [
+      pkgs.dix
+      pkgs.nix-init
+      pkgs.nixpkgs-review
     ];
 
     xdg.configFile."nix-init/config.toml".text = pkgs.writers.writeTOML {

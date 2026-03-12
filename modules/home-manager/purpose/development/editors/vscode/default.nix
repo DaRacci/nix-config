@@ -6,7 +6,12 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkMerge mkEnableOption;
+  inherit (lib)
+    mkIf
+    mkMerge
+    mkEnableOption
+    optionals
+    ;
 
   cfg = config.purpose.development;
 
@@ -273,7 +278,7 @@ in
 
             });
 
-            rust = lib.mkIf cfg.languages.rust.enable (mkProfile {
+            rust = mkIf cfg.languages.rust.enable (mkProfile {
               extensions = versionExtensions [
                 "jscearcy.rust-doc-viewer"
                 "dustypomerleau.rust-syntax"
@@ -281,17 +286,20 @@ in
               ];
             });
 
-            dotnet = lib.mkIf cfg.languages.dotnet.enable (mkProfile {
-              extensions = versionExtensions [
-                "ms-dotnettools.csharp"
-                "ms-dotnettools.csdevkit"
-                "ms-dotnettools.vscode-dotnet-runtime"
-
-                "ms-vscode.powershell"
-                "pspester.pester-test"
-                "ironmansoftware.powershellprotools"
-                "tylerleonhardt.vscode-inline-values-powershell"
-              ];
+            dotnet = mkIf (cfg.languages.csharp.enable || cfg.languages.powershell.enable) (mkProfile {
+              extensions = versionExtensions (
+                (optionals cfg.languages.csharp.enable [
+                  "ms-dotnettools.csharp"
+                  "ms-dotnettools.csdevkit"
+                  "ms-dotnettools.vscode-dotnet-runtime"
+                ])
+                ++ (optionals cfg.languages.powershell.enable [
+                  "ms-vscode.powershell"
+                  "pspester.pester-test"
+                  "ironmansoftware.powershellprotools"
+                  "tylerleonhardt.vscode-inline-values-powershell"
+                ])
+              );
 
               userSettings = {
                 # Required by ironmansoftware.powershellprotools
@@ -299,7 +307,7 @@ in
               };
             });
 
-            python = lib.mkIf cfg.languages.python.enable (mkProfile {
+            python = mkIf cfg.languages.python.enable (mkProfile {
               extensions = versionExtensions [
                 "ms-python.python"
                 "ms-python.vscode-pylance"

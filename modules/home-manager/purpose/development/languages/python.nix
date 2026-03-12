@@ -1,18 +1,12 @@
 {
   config,
+  pkgs,
   lib,
   ...
 }:
-let
-  inherit (lib) mkIf mkEnableOption;
+import ./mkLanguage.nix {
+  inherit config pkgs lib;
+  name = "python";
 
-  cfg = config.purpose.development.languages.jvm;
-  rootCfg = config.purpose.development;
-in
-{
-  options.purpose.development.languages.python = {
-    enable = mkEnableOption "Enable Python Development";
-  };
-
-  config = mkIf (rootCfg.enable && cfg.enable) { };
+  formatterPackages = [ pkgs.black ];
 }

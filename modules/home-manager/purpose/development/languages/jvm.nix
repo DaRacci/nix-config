@@ -4,18 +4,11 @@
   lib,
   ...
 }:
-let
-  inherit (lib) mkIf mkEnableOption;
+import ./mkLanguage.nix {
+  inherit config pkgs lib;
+  name = "jvm";
 
-  cfg = config.purpose.development.languages.jvm;
-  rootCfg = config.purpose.development;
-in
-{
-  options.purpose.development.languages.jvm = {
-    enable = mkEnableOption "Enable JVM Development";
-  };
-
-  config = mkIf (rootCfg.enable && cfg.enable) {
-    home.packages = with pkgs; [ jetbrains.idea-community ];
+  extraConfig = {
+    home.packages = [ pkgs.jetbrains.idea-community ];
   };
 }
