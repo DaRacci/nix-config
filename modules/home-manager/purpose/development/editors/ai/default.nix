@@ -6,14 +6,16 @@
   ...
 }:
 let
+  inherit (lib) mkIf mkEnableOption;
+
   cfg = config.purpose.development.editors.ai;
 in
 {
   options.purpose.development.editors.ai = {
-    enable = lib.mkEnableOption "Enable AI Tools & Assistants";
+    enable = mkEnableOption "Enable AI Tools & Assistants";
   };
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
     home.activation.ensure-aifs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       run mkdir -p $VERBOSE_ARG \
         "${config.home.homeDirectory}/Projects/AIFS";

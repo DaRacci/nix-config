@@ -6,6 +6,8 @@
   ...
 }:
 let
+  inherit (lib) mkIf mkMerge mkEnableOption;
+
   cfg = config.purpose.development;
 
   profiles = [
@@ -18,13 +20,13 @@ let
 in
 {
   options.purpose.development.editors.vscode = {
-    enable = lib.mkEnableOption "Enable VSCode" // {
+    enable = mkEnableOption "Enable VSCode" // {
       default = cfg.enable;
     };
   };
 
-  config = lib.mkMerge [
-    (lib.mkIf (cfg.enable && cfg.editors.vscode.enable) {
+  config = mkMerge [
+    (mkIf (cfg.editors.vscode.enable) {
       nixpkgs.overlays = [
         inputs.nix4vscode.overlays.default
       ];
@@ -324,7 +326,7 @@ in
       user.persistence.directories = [ ".config/Code/User/" ];
     })
 
-    (lib.mkIf (config ? stylix && config.stylix.enable) {
+    (mkIf (config ? stylix && config.stylix.enable) {
       stylix.targets.vscode.profileNames = profiles;
     })
   ];
