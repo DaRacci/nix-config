@@ -21,6 +21,7 @@ let
     listOf
     attrsOf
     submodule
+    nonEmptyListOf
     ;
 
   kanidmContextOptions = _: {
@@ -93,6 +94,11 @@ in
       type = attrsOf (
         submodule (
           { name, ... }:
+          let
+            split = lib.splitString ":" name;
+            subdomain = builtins.head split;
+            maybePort = if (builtins.length split) > 1 then lib.toInt (builtins.elemAt split 1) else null;
+          in
           {
             options = {
               aliases = mkOption {
@@ -100,9 +106,27 @@ in
                 default = [ ];
                 description = ''
                   A list of virtual host names that should be routed using this configuration.
-                  Options added here will inherit the base domain specificed in <server.proxy.domain>.
+                  Options added here will inherit the base domain specified in <server.proxy.domain>.
                 '';
                 apply = list: map (alias: "${alias}.${getIOPrimaryHostAttr "server.proxy.domain"}") list;
+              };
+
+              listenPorts = mkOption {
+                type = nonEmptyListOf port;
+                default = if maybePort != null then [ maybePort ] else [ 443 ];
+                description = ''
+                  Port(s) to listen on for incoming traffic for this virtual host.
+                  If multiple ports are specified, the virtual host will be accessible on all of them.
+                '';
+              };
+
+              useAcmeCerts = mkOption {
+                type = bool;
+                default = true;
+                description = ''
+                  Whether to generate and use ACME certificates for this virtual host.
+                  If false, you must provide your own TLS configuration in extraConfig via the caddy tls directive.
+                '';
               };
 
               public = mkOption {
@@ -113,9 +137,9 @@ in
 
               baseUrl = mkOption {
                 type = str;
-                default = "${name}.${getIOPrimaryHostAttr "server.proxy.domain"}";
+                default = "${subdomain}.${getIOPrimaryHostAttr "server.proxy.domain"}";
                 defaultText = literalExpression ''
-                  ''${name}.''${getIOPrimaryHostAttr "server.proxy.domain"}
+                  ''${subdomain}.''${getIOPrimaryHostAttr "server.proxy.domain"}
                 '';
                 description = "The base url including the configured base domain name.";
                 readOnly = true;
@@ -158,7 +182,7 @@ in
                   options = {
                     context = mkOption {
                       type = str;
-                      default = name;
+                      default = subdomain;
                       description = "The OAuth context name for this virtual host.";
                     };
 
