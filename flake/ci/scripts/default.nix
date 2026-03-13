@@ -5,24 +5,25 @@
 }:
 let
   inherit (lib.mine.packages) writeNuApplicationWithLibs;
+  libSource = ../../../lib/nu-lib;
 in
 {
   archive-flakes = writeNuApplicationWithLibs {
-    inherit pkgs;
+    inherit pkgs libSource;
     sourceRoot = ./.;
     name = "archive-flakes";
     runtimeInputs = [ pkgs.nix ];
   };
 
   create-pr = writeNuApplicationWithLibs {
-    inherit pkgs;
+    inherit pkgs libSource;
     sourceRoot = ./.;
     name = "create-pr";
     runtimeInputs = [ pkgs.gh ];
   };
 
   check-upstream-todos = writeNuApplicationWithLibs {
-    inherit pkgs;
+    inherit pkgs libSource;
     sourceRoot = ./.;
     name = "check-upstream-todos";
     runtimeInputs = [
@@ -32,8 +33,22 @@ in
     ];
   };
 
+  discover-packages = writeNuApplicationWithLibs {
+    inherit pkgs libSource;
+    sourceRoot = ./.;
+    name = "discover-packages";
+    runtimeInputs = [ ];
+  };
+
+  setup-attic = writeNuApplicationWithLibs {
+    inherit pkgs libSource;
+    sourceRoot = ./.;
+    name = "setup-attic";
+    runtimeInputs = [ pkgs.attic-client ];
+  };
+
   setup-git = writeNuApplicationWithLibs {
-    inherit pkgs;
+    inherit pkgs libSource;
     sourceRoot = ./.;
     name = "setup-git";
     runtimeInputs = [
@@ -43,7 +58,7 @@ in
   };
 
   update-locks = writeNuApplicationWithLibs {
-    inherit pkgs;
+    inherit pkgs libSource;
     sourceRoot = ./.;
     name = "update-locks";
     runtimeInputs = [ pkgs.nix ];

@@ -1,0 +1,130 @@
+labels:
+  platform: linux/amd64
+
+when:
+  - event: [push, pull_request, manual]
+
+clone:
+  - name: git
+    image: woodpeckerci/plugin-git
+    settings:
+      partial: false
+      depth: 0
+
+matrix:
+  include:
+    - host: nixai
+    - host: nixarr
+    - host: nixcloud
+    - host: nixdev
+    - host: nixio
+    - host: nixmi
+    - host: nixmon
+    - host: nixserv
+
+steps:
+  - name: check-affected
+    image: registry.racci.dev/lix-woodpecker:latest
+    commands:
+      - set -euo pipefail
+      - |
+        if [ -n "${CI_PREV_COMMIT_SHA:-}" ]; then
+          RANGE="${CI_PREV_COMMIT_SHA}..${CI_COMMIT_SHA}"
+        else
+          echo "No previous commit SHA; building all outputs"
+          RANGE=""
+        fi
+      - |
+        if [ -n "$RANGE" ]; then
+          AFFECTED=$(./flake/ci/detect-affected-outputs.nu nixosConfigurations --json --range "$RANGE" 2>/dev/null || echo "{}")
+          if ! echo "$AFFECTED" | jq -e --arg host "${host}" 'has($host)' > /dev/null 2>&1; then
+            echo "Host ${host} not affected by changes, skipping build"
+            exit 0
+          fi
+          echo "Host ${host} is affected, proceeding with build"
+        fi
+      - |
+        ATTR="nixosConfigurations.${host}.config.system.build.toplevel"
+        echo "==> Evaluating $ATTR"
+        nix eval --accept-flake-config ".#$ATTR"
+        echo "==> Building $ATTR"
+        nix build --accept-flake-config ".#$ATTR"
+
+
+# Build affected Home-Manager configurations (parallel per user)
+---
+labels:
+  platform: linux/amd64
+
+when:
+  - event: [push, pull_request, manual]
+
+clone:
+  - name: git
+    image: woodpeckerci/plugin-git
+    settings:
+      partial: false
+      depth: 0
+
+matrix:
+  include:
+    - user: racci
+
+steps:
+  - name: check-affected
+    image: registry.racci.dev/lix-woodpecker:latest
+    commands:
+      - set -euo pipefail
+      - |
+        if [ -n "${CI_PREV_COMMIT_SHA:-}" ]; then
+          RANGE="${CI_PREV_COMMIT_SHA}..${CI_COMMIT_SHA}"
+        else
+          echo "No previous commit SHA; building all outputs"
+          RANGE=""
+        fi
+      - |
+        if [ -n "$RANGE" ]; then
+          AFFECTED=$(./flake/ci/detect-affected-outputs.nu homeConfigurations --json --range "$RANGE" 2>/dev/null || echo "{}")
+          if ! echo "$AFFECTED" | jq -e --arg user "${user}" 'has($user)' > /dev/null 2>&1; then
+            echo "User ${user} not affected by changes, skipping build"
+            exit 0
+          fi
+          echo "User ${user} is affected, proceeding with build"
+        fi
+      - |
+        ATTR="homeConfigurations.${user}.activationPackage"
+        echo "==> Evaluating $ATTR"
+        nix eval --accept-flake-config ".#$ATTR"
+        echo "==> Building $ATTR"
+        nix build --accept-flake-config ".#$ATTR"
+
+
+# Build treefmt checks (from githubActions.matrix)
+---
+labels:
+  platform: linux/amd64
+
+when:
+  - event: [push, pull_request, manual]
+
+clone:
+  - name: git
+    image: woodpeckerci/plugin-git
+    settings:
+      partial: false
+      depth: 0
+
+matrix:
+  include:
+    - system: x86_64-linux
+    # ARM64 disabled until agents available
+    # - system: aarch64-linux
+
+steps:
+  - name: treefmt
+    image: registry.racci.dev/lix-woodpecker:latest
+    commands:
+      - set -euo pipefail
+      - ATTR="githubActions.checks.${system}.treefmt"
+      - echo "==> Building $ATTR"
+      - nix build -L --accept-flake-config ".#$ATTR"

@@ -1,19 +1,19 @@
 name: Build packages
 
 on:
-  pull_request:
-    paths:
-      - "pkgs/**"
-      - "flake.nix"
-      - "flake.lock"
-      - ".github/workflows/packages.yaml"
-  push:
-    branches: [master]
-    paths:
-      - "pkgs/**"
-      - "flake.nix"
-      - "flake.lock"
-      - ".github/workflows/packages.yaml"
+  # pull_request:
+  #   paths:
+  #     - "pkgs/**"
+  #     - "flake.nix"
+  #     - "flake.lock"
+  #     - ".github/workflows/packages.yaml"
+  # push:
+  #   branches: [master]
+  #   paths:
+  #     - "pkgs/**"
+  #     - "flake.nix"
+  #     - "flake.lock"
+  #     - ".github/workflows/packages.yaml"
   workflow_dispatch:
 
 permissions:

@@ -1,0 +1,65 @@
+when:
+  - event: cron
+    cron: update-packages
+  - event: manual
+
+clone:
+  - name: git
+    image: woodpeckerci/plugin-git
+    settings:
+      partial: false
+      depth: 0
+
+matrix:
+  include:
+    - package: alvr-bin
+    - package: io-guardian-client
+    - package: io-guardian-server
+    - package: lidarr-plugins
+    - package: mcp-sequential-thinking
+    - package: mcp-server-amazon
+    - package: proton-mcp
+    - package: pyarlo
+    - package: pyuptimekuma
+    - package: ssh-terminal-manager
+    - package: terminal-manager
+
+steps:
+  - name: update-package
+    image: registry.racci.dev/lix-woodpecker:latest
+    environment:
+      BASE_BRANCH: master
+      GITHUB_TOKEN:
+        from_secret: GITHUB_TOKEN
+    commands: |
+      set -euo pipefail
+      git fetch --all --tags
+      git checkout -B "${BASE_BRANCH}" "origin/${BASE_BRANCH}"
+      nix run .#setup-git -- --name "Woodpecker CI" --email "woodpecker@racci.dev"
+
+      BRANCH="chore/update-pkg-${package}"
+      git checkout -B "$BRANCH" "origin/${BASE_BRANCH}"
+
+      export NIX_PATH=nixpkgs=channel:nixos-unstable
+      nix develop --no-pure-eval --accept-flake-config --command \
+        nix-update --flake "${package}" --use-update-script --commit || {
+        echo "nix-update failed or no update available for ${package}"
+        exit 0
+      }
+
+      if [ -z "$(git status --porcelain)" ]; then
+        echo "No changes for ${package}"
+        exit 0
+      fi
+
+      TITLE=$(git log -1 --pretty=%s)
+      BRANCH="chore/update-pkg-${package}"
+      git push -u origin "$BRANCH" --force-with-lease
+
+      nix run .#create-pr -- \
+        --title "$TITLE" \
+        --branch "$BRANCH" \
+        --base "${BASE_BRANCH}" \
+        --labels "dependencies,automated,merge-queue" \
+        --reviewers "DaRacci" \
+        --body "This PR was created automatically by the Woodpecker update-packages pipeline."
