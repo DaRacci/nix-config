@@ -90,6 +90,19 @@ in
       };
     });
 
+    #TODO:https://github.com/NixOS/nixpkgs/pull/495833
+    seaweedfs = prev.seaweedfs.overrideAttrs (oldAttrs: {
+      version = "4.15";
+      src = prev.fetchFromGitHub {
+        inherit (oldAttrs.src) owner repo;
+        tag = "4.15";
+        hash = "sha256-pPLTDPRNs38pUquiWJOtEAuGm1uKcQEdlEmy3Z32jZ8=";
+      };
+
+      doCheck = false; # Tests take a long time so fuck em
+      vendorHash = "sha256-/Vs72QJAdhsBSM8rNarnU9zSslR/7jFVOhaAMIyE41c=";
+    });
+
     inherit lib;
   };
 
