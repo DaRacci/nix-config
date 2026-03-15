@@ -11,6 +11,7 @@
 }:
 let
   inherit (lib)
+    literalExpression
     mkEnableOption
     mkOption
     ;
@@ -55,18 +56,21 @@ in
       caddy = {
         enable = mkEnableOption "Caddy metrics exporter" // {
           default = cfg.enable && config.services.caddy.enable;
+          defaultText = literalExpression "cfg.enable && config.services.caddy.enable";
         };
       };
 
       postgres = {
         enable = mkEnableOption "PostgreSQL exporter" // {
           default = cfg.enable && isThisIOPrimaryHost && hasPostgresDatabases;
+          defaultText = literalExpression "cfg.enable && thisIsIOPrimaryHost && hasPostgresDatabases";
         };
       };
 
       redis = {
         enable = mkEnableOption "Redis exporter" // {
           default = cfg.enable && isThisIOPrimaryHost && hasRedisInstances;
+          defaultText = literalExpression "cfg.enable && thisIsIOPrimaryHost && hasRedisInstances";
         };
       };
     };
@@ -80,6 +84,7 @@ in
     collector = {
       enable = mkEnableOption "monitoring collector services (Prometheus, Loki, Grafana)" // {
         default = isThisMonitoringPrimaryHost && cfg.enable;
+        defaultText = literalExpression "thisIsMonitoringPrimaryHost && cfg.enable";
       };
 
       grafana = {

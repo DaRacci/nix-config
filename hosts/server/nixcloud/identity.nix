@@ -187,7 +187,7 @@ in
       public = true;
       extraConfig =
         let
-          cfg = config.services.kanidm.serverSettings;
+          cfg = config.services.kanidm.server.settings;
         in
         ''
           reverse_proxy {
@@ -225,7 +225,7 @@ in
       };
     };
 
-    certs."${config.services.kanidm.serverSettings.domain}" = {
+    certs."${config.services.kanidm.server.settings.domain}" = {
       reloadServices = [ "kanidm.service" ];
       group = "kanidm";
     };

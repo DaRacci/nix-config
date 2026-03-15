@@ -1,6 +1,5 @@
 {
   isThisIOPrimaryHost,
-  collectAllAttrs,
   ...
 }:
 {
@@ -12,19 +11,22 @@ let
   inherit (lib) mkIf;
 
   cfg = config.server.monitoring;
-
-  hasRedisInstances =
-    (collectAllAttrs "server.database.redis" |> builtins.attrNames |> builtins.length) > 0;
 in
 {
   config =
-    mkIf (cfg.enable && cfg.exporters.redis.enable && isThisIOPrimaryHost && hasRedisInstances)
+    mkIf
+      (
+        cfg.enable
+        && cfg.exporters.redis.enable
+        && isThisIOPrimaryHost
+        && config.services.redis.servers."".enable
+      )
       {
         services.prometheus.exporters.redis = {
           enable = true;
           port = 9121;
           extraFlags = [
-            "--redis.password-file ${config.sops.templates."REDIS/PASSWORD".path}"
+            "--redis.password-file ${config.sops.secrets."REDIS/PASSWORD".path}"
           ];
         };
 
