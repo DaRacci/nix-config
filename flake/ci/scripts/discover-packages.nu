@@ -18,7 +18,7 @@ def filter_packages [
   mut valid_packages = []
 
   for package in $package_names {
-    let pkg_details = nix eval --json --system $arch $'.#($package)' --apply 'pkg: { discovery = pkg.passthru.discovery or true; inherit (pkg.meta) broken; }' | from json
+    let pkg_details = nix eval --json --system $arch $'.#($package)' --apply 'pkg: { discovery = pkg.passthru.discovery or true; broken = pkg.meta.broken or false; }' | from json
     log info $"Package ($package)\n\tisBroken: ($pkg_details.broken)\n\tisDiscoverable: ($pkg_details.discovery)"
 
     if ($pkg_details.discovery and (not $pkg_details.broken)) {
@@ -30,10 +30,12 @@ def filter_packages [
 }
 
 export def get_package_location [
-  package_name: string
+  package_name: string,
+  arch: string
 ] {
-  let eval_nix = "/persist/nix-config/flake/ci/scripts/eval.nix"
-  let attribute_json = ["packages", "x86_64-linux", $package_name] | to json
+  let eval_nix = $env.GIT_ROOT | path join "flake/ci/scripts/eval.nix"
+  log debug $"Evaluating package location for ($package_name) using eval script at ($eval_nix)"
+  let attribute_json = ["packages", $arch, $package_name] | to json
   let cmd = [
     "--eval",
     "--json",
@@ -41,7 +43,7 @@ export def get_package_location [
     $eval_nix,
     "--argstr",
     "importPath",
-    "/persist/nix-config"
+    $env.GIT_ROOT,
     "--argstr",
     "attribute",
     $attribute_json
@@ -61,7 +63,8 @@ export def get_package_location [
 }
 
 def get_changed [
-  git_range: string
+  arch: string,
+  git_range: string,
   ...packages: string
 ] {
   let nixpkgs_changed = has_flake_inputs_changed $git_range "nixpkgs"
@@ -71,13 +74,13 @@ def get_changed [
 
   mut changed_packages = [ ];
   for package in $packages {
-    let pkg_folder = get_package_location $package
+    let pkg_folder = get_package_location $package $arch
     if (not ($pkg_folder | path exists)) {
       log warning $"Package folder ($pkg_folder) does not exist, maybe it isn't a normal package and should be excluded from discovery."
       continue
     }
 
-    let all_related_files = ls $pkg_folder | get name
+    let all_related_files = fd --type f . $pkg_folder | lines
     log info $"Checking package ($package) for changes, files: ($all_related_files)"
 
     let changed = check_file_changed $git_range ...$all_related_files
@@ -102,7 +105,7 @@ def main [
     $packages = get_packages $arch
   }
   let valid_packages = filter_packages $arch ...$packages
-  let changed_packages = get_changed $git_range ...$valid_packages
+  let changed_packages = get_changed $arch $git_range ...$valid_packages
 
   if ($json) {
     return ($changed_packages | to json)

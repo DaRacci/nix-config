@@ -16,4 +16,6 @@ writeShellApplication {
     util-linux
     zfs
   ];
+
+  passthru.discovery = false;
 }

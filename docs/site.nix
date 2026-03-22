@@ -44,6 +44,7 @@ pkgs.stdenv.mkDerivation (finalAttrs: {
 
   passthru = {
     inherit search;
+    discovery = false;
     readme =
       pkgs.runCommand "readme"
         {
