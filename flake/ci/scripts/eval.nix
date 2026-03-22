@@ -79,5 +79,10 @@ let
       sanitizePosition (builtins.unsafeGetAttrPos "src" pkg)
     else
       sanitizePosition (positionFromMeta pkg);
+
+  eval = builtins.tryEval (position.file);
 in
-position.file
+if eval.success then
+  eval.value
+else
+  builtins.addErrorContext "Unable to evaluate file or extract position from meta, returning null" null

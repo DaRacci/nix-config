@@ -142,10 +142,10 @@ export def get_flake_input [
   lock_file: string   # The lock file to read from
   input_name: string  # The name of the input to check for changes.
 ] {
-  jq -r '
+  jq -r --arg input_name $input_name '
     (.root) as $r
-    | (.nodes[$r].inputs.nixpkgs // "nixpkgs") as $n0
-    | ($n0 | if type=="string" then . else (.[0] // "nixpkgs") end) as $n
+    | (.nodes[$r].inputs[$input_name] // $input_name) as $n0
+    | ($n0 | if type=="string" then . else (.[0] // $input_name) end) as $n
     | (.nodes[$n].locked // {})
     | { rev: (.rev // "none"), hash: (.narHash // "none") }
   ' $lock_file e> /dev/null | from json

@@ -11,6 +11,8 @@ export-env {
 #   VERBOSE
 export def --env setup_logging [] {
   log set-level (if $env.DEBUG? == true { 10 } else { 20 })
+  log info $"Logging initialized. Level: (log )"
+  log
   $env.NU_LOG_FORMAT = "%ANSI_START%%LEVEL%|%MSG%%ANSI_STOP%"
 }
 
@@ -22,7 +24,7 @@ export def check_required_vars [
   mut missing_vars = [ ];
   for var in $vars {
     let value = $env | get -o $var
-    log debug $"Receive value of [($value)] for variable [($var)]"
+    log debug $"Checking required variable of [($value)] - present: \(($var != null)\)"
     if $value == null {
       $missing_vars = $missing_vars | append $var
     }
@@ -32,7 +34,7 @@ export def check_required_vars [
 
   if $result and $exit {
     log debug $"Exiting early due to missing vars ($missing_vars | str join ",")"
-    exit 0
+    exit 1
   }
 
   return $result

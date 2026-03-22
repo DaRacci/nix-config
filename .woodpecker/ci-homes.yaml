@@ -54,12 +54,15 @@ steps:
     image: registry.racci.dev/lix-woodpecker
     pull: true
     depends_on: ["decide-${HOME}"]
-    when:
-      path: .do-build
     environment:
       BINARY_CACHE_TOKEN:
         from_secret: BINARY_CACHE_TOKEN
     commands: |-
+      if [ ! -f .do-build ]; then
+        echo "Skipping build for ${HOME} - not affected by changes"
+        exit 0
+      fi
+
       nix run .#setup-attic
       nix run .#archive-flakes -- "." "flake/nixos" "flake/home-manager"
       nix-fast-build --no-nom --no-link --attic-cache raccidev --skip-cached --flake ".#homeConfigurations.${HOME}.activationPackage"
