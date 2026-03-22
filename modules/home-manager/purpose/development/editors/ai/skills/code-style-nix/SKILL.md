@@ -12,11 +12,11 @@ description: Write Nix code using repo conventions
 
 ## Naming Conventions
 
-| Context | Convention | Example |
+| Context               | Convention | Example                          |
 | --------------------- | ---------- | -------------------------------- |
 | Files and directories | kebab-case | `my-module.nix`, `home-manager/` |
-| Nix attributes | camelCase | `myOption`, `enableFeature` |
-| Option paths | camelCase | `services.myService.enable` |
+| Nix attributes        | camelCase  | `myOption`, `enableFeature`      |
+| Option paths          | camelCase  | `services.myService.enable`      |
 
 ## Comments
 

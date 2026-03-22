@@ -16,4 +16,6 @@ writeShellApplication {
     ssh-to-age
     findutils
   ];
+
+  passthru.discovery = false;
 }

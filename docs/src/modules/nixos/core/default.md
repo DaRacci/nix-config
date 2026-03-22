@@ -8,43 +8,9 @@ Documents shared NixOS core modules used across hosts.
 
 It also defines top-level baseline options under `core.*` that control this shared behavior for most hosts.
 
-## Top-Level Options
+## Options
 
-### `core.enable`
-
-| | |
-|---|---|
-| Type | `bool` |
-| Default | `true` |
-
-Master switch for shared core baseline.
-
-### `core.audio.enable`
-
-| | |
-|---|---|
-| Type | `bool` |
-| Default | `!config.host.device.isHeadless` |
-
-Enable shared audio stack on non-headless hosts by default.
-
-### `core.bluetooth.enable`
-
-| | |
-|---|---|
-| Type | `bool` |
-| Default | `!config.host.device.isHeadless` |
-
-Enable Bluetooth support on non-headless hosts by default.
-
-### `core.network.enable`
-
-| | |
-|---|---|
-| Type | `bool` |
-| Default | `!config.host.device.isVirtual` |
-
-Enable shared network baseline on non-virtual hosts by default.
+{{#include ../../../../generated/core-options.md}}
 
 ## Baseline Behaviour
 

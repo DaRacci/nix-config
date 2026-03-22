@@ -13,6 +13,7 @@ self.inputs.home-manager.lib.homeManagerConfiguration {
   extraSpecialArgs = {
     inherit self;
     inherit (self) inputs outputs;
+    importExternals = true;
   };
 
   modules = [

@@ -2,28 +2,21 @@
 
 Reports system generation changes during NixOS activation.
 
-- **Entry point**: `modules/nixos/core/activation.nix`
+- **Entry point**: [activation.nix](../../../../../modules/nixos/core/activation.nix)
 
-______________________________________________________________________
+---
 
 ## Overview
 
 This module adds activation-time diff reporting with [`nvd`](https://github.com/vlinkz/nvd). During activation it compares previous and new system generations and prints package and closure changes.
 
-______________________________________________________________________
+---
 
 ## Options
 
-### `core.activation.enable`
+{{#include ../../../../generated/core-activation-options.md}}
 
-| | |
-|---|---|
-| Type | `bool` |
-| Default | `config.core.enable` |
-
-Enable activation diff reporting.
-
-______________________________________________________________________
+---
 
 ## Behaviour
 
@@ -35,7 +28,7 @@ When enabled, module installs `system.activationScripts.report-changes` that:
 
 If no previous generation exists yet, script does nothing.
 
-______________________________________________________________________
+---
 
 ## Usage Example
 
@@ -45,7 +38,7 @@ ______________________________________________________________________
 }
 ```
 
-______________________________________________________________________
+---
 
 ## Operational Notes
 

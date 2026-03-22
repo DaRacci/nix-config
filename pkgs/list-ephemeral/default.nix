@@ -21,6 +21,8 @@ writeShellApplication {
 
   text = builtins.readFile ./list-ephemeral.sh;
 
+  passthru.discovery = false;
+
   meta = {
     description = "List ephemeral paths that will be lost when restarting the system";
     longDescription = ''

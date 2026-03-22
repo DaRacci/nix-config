@@ -2,9 +2,9 @@
 
 Configures display manager for graphical sessions on desktop and laptop hosts.
 
-- **Entry point**: `modules/nixos/core/display-manager.nix`
+- **Entry point**: [display-manager.nix](../../../../../modules/nixos/core/display-manager.nix)
 
-______________________________________________________________________
+---
 
 ## Overview
 
@@ -12,20 +12,13 @@ This module sets up [greetd](https://sr.ht/~kennylevinsen/greetd/) with [tuigree
 
 When session packages are present in `services.displayManager.sessionPackages`, module also passes both Wayland and X session directories to `tuigreet`.
 
-______________________________________________________________________
+---
 
 ## Options
 
-### `core.display-manager.enable`
+{{#include ../../../../generated/core-display-manager-options.md}}
 
-| | |
-|---|---|
-| Type | `bool` |
-| Default | `!config.host.device.isHeadless` |
-
-Enable display manager configuration. Automatically disabled on headless hosts.
-
-______________________________________________________________________
+---
 
 ## Behaviour
 
@@ -38,7 +31,7 @@ When enabled, greetd starts with tuigreet providing terminal-based greeter that:
 
 Greeter cache is persisted to `/var/cache/tuigreet` through `host.persistence.directories`.
 
-______________________________________________________________________
+---
 
 ## Usage Example
 
@@ -52,7 +45,7 @@ ______________________________________________________________________
 }
 ```
 
-______________________________________________________________________
+---
 
 ## Operational Notes
 

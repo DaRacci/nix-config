@@ -10,12 +10,9 @@ The distributed builds module allows for distributed building of Nix derivations
 
 - `modules/nixos/server/distributed-builds.nix`
 
-## Special Options and Behaviors
+## Options
 
-The module provides options under `server.distributedBuilder`:
-
-- **`server.distributedBuilder.builderUser`**: The user to use when connecting to remote build daemons (default: `builder`).
-- **`server.distributedBuilder.builders`**: A list of hostnames of remote build daemons to connect to for distributed builds.
+{{#include ../../../../generated/server-distributed-builds-options.md}}
 
 ## Example Usage
 

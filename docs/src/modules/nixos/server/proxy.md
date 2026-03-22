@@ -6,32 +6,9 @@ The Proxy submodule provides a unified interface for exposing internal services 
 
 This module abstracts the complexity of reverse proxying by allowing services to define their proxy requirements within their own module configuration. It automatically coordinates between backend hosts and the primary IO host to ensure ports are open and traffic is correctly routed.
 
-## Entry Points
+## Options
 
-The primary configuration is managed through:
-
-- `server.proxy.domain`: The root domain for all services (e.g., `example.com`).
-- `server.proxy.virtualHosts`: An attribute set of service configurations.
-
-## Key Options and Behaviors
-
-### Global Options
-
-- **`server.proxy.domain`**: Defines the base domain. All virtual hosts default to `<name>.<domain>` unless overridden.
-- **`server.proxy.kanidmContexts`**: Defines shared OAuth2 configurations that can be reused across multiple virtual hosts.
-  - **`scopes`**: Default scopes are `["openid" "email" "profile" "groups"]`.
-  - **`tokenLifetime`**: Default lifetime is `3600` seconds.
-
-### Virtual Host Options
-
-- **`aliases`**: A list of additional hostnames (relative to `server.proxy.domain`) that route to this service.
-- **`public`**: If true, the service is added to the Cloudflared tunnel ingress for public access.
-- **`ports`**: List of ports to open on the backend host to allow traffic from the IO primary host.
-- **`kanidm`**: Configures OAuth2 protection. If enabled, the module generates Caddy security blocks and handles Kanidm client provisioning.
-  - **`bypassPaths`**: List of path patterns (e.g., `/api/*`) that should bypass authentication.
-  - **`allowGroups`**: List of groups allowed access. **Note**: This cannot be empty if Kanidm is enabled.
-- **`l4`**: Configures Layer 4 forwarding using the Caddy L4 plugin. This opens both TCP and UDP ports on the IO primary host.
-- **`extraConfig`**: Injected directly into the Caddy `handle` block. `localhost` references are automatically replaced with the backend host's address.
+{{#include ../../../../generated/server-proxy-options.md}}
 
 ## Per-Module Examples
 

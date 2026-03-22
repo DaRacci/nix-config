@@ -2,37 +2,21 @@
 
 Schedules automatic NixOS upgrades from flake host outputs.
 
-- **Entry point**: `modules/nixos/core/auto-upgrade.nix`
+- **Entry point**: [auto-upgrade.nix](../../../../../modules/nixos/core/auto-upgrade.nix)
 
-______________________________________________________________________
+---
 
 ## Overview
 
 This module configures `system.autoUpgrade` to rebuild host from `github:DaRacci/nix-config#<host>`. It also applies resource limits to `nixos-upgrade.service` so scheduled upgrades run with lower CPU and IO priority.
 
-______________________________________________________________________
+---
 
 ## Options
 
-### `core.auto-upgrade.enable`
+{{#include ../../../../generated/core-auto-upgrade-options.md}}
 
-| | |
-|---|---|
-| Type | `bool` |
-| Default | `true` |
-
-Enable automatic upgrade configuration.
-
-### `core.auto-upgrade.hostName`
-
-| | |
-|---|---|
-| Type | `string` |
-| Default | `config.networking.hostName` |
-
-Host output name used in flake reference `github:DaRacci/nix-config#<hostName>`.
-
-______________________________________________________________________
+---
 
 ## Behaviour
 
@@ -45,7 +29,7 @@ When enabled, module configures:
 
 Auto-upgrade itself only turns on when flake has `self.rev`, meaning repository is in clean revisioned state.
 
-______________________________________________________________________
+---
 
 ## Usage Example
 
@@ -58,7 +42,7 @@ ______________________________________________________________________
 }
 ```
 
-______________________________________________________________________
+---
 
 ## Operational Notes
 

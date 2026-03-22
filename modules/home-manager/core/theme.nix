@@ -7,10 +7,11 @@
 }:
 let
   inherit (lib)
+    getExe'
     hasAttr
+    literalExpression
     mkEnableOption
     mkIf
-    getExe'
     ;
 
   cfg = config.core.theme;
@@ -19,6 +20,7 @@ in
   options.core.theme = {
     enable = mkEnableOption "theming" // {
       default = osConfig != null && hasAttr "stylix" osConfig && osConfig.stylix.enable;
+      defaultText = literalExpression "osConfig != null && hasAttr \"stylix\" osConfig && osConfig.stylix.enable";
     };
   };
 

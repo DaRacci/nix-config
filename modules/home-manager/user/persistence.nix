@@ -6,8 +6,10 @@
 }:
 with lib;
 let
+  inherit (lib) literalExpression;
   cfg = config.user.persistence;
 in
+
 {
   options.user.persistence = {
     enable = mkEnableOption "persistence";
@@ -19,6 +21,12 @@ in
           "${osConfig.host.persistence.root}/home/${config.home.username}"
         else
           "/persist/home/${config.home.username}";
+      defaultText = literalExpression ''
+        if (osConfig != null) then
+          "''${osConfig.host.persistence.root}/home/''${config.home.username}"
+        else
+          "/persist/home/''${config.home.username}"
+      '';
     };
 
     directories = mkOption {

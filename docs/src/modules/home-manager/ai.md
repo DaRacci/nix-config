@@ -6,7 +6,7 @@ This page documents the Home-Manager module at:
 
 It configures editor/agent tooling for AI-assisted development, centered around OpenCode and shared skill directories.
 
-______________________________________________________________________
+---
 
 ## What this module sets up
 
@@ -34,54 +34,13 @@ When enabled, the module:
   - `.local/share/opencode`
   - `.local/state/opencode`
 
-______________________________________________________________________
+---
 
 ## Options
 
-### `purpose.development.editors.ai.enable`
+{{#include ../../../generated/purpose-development-editors-ai-options.md}}
 
-| | |
-|---|---|
-| Type | `bool` |
-| Default | `false` |
-
-Enable AI tools and assistant/editor integrations for the user profile.
-
-______________________________________________________________________
-
-### `purpose.development.editors.ai.includeDefaults`
-
-| | |
-|---|---|
-| Type | `bool` |
-| Default | `true` |
-
-Whether to include the module’s built-in skills and agents from:
-
-- `modules/home-manager/purpose/development/editors/ai/skills`
-- `modules/home-manager/purpose/development/editors/ai/agents`
-
-Set to `false` for a minimal setup with only base OpenCode configuration.
-
-______________________________________________________________________
-
-### `purpose.development.editors.ai.skills`
-
-| | |
-|---|---|
-| Type | `list of string` |
-| Default | `[]` |
-
-Additional skill source paths to register globally under `~/.agents/skills`.
-
-Each entry should point to a skill directory (for example from a flake input or from this repository). The basename of each source path is used as the destination directory name.
-
-Example:
-
-- `"${inputs.my-skill-repo}/skills/my-skill"`
-- `"${self}/skills/another-skill"`
-
-______________________________________________________________________
+---
 
 ## Usage example
 
@@ -99,7 +58,7 @@ ______________________________________________________________________
 }
 ```
 
-______________________________________________________________________
+---
 
 ## Notes
 

@@ -23,7 +23,9 @@ in
     sshSocket = lib.mkOption {
       type = lib.types.str;
       default = "/home/${config.home.username}/.1password/agent.sock";
+      defaultText = lib.literalExpression ''"/home/${config.home.username}/.1password/agent.sock"'';
     };
+
   };
 
   config = {

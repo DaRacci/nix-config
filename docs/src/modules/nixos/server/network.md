@@ -10,15 +10,9 @@ The network module coordinates network subnet definitions and firewall rules, al
 
 - `modules/nixos/server/network.nix`
 
-## Special Options and Behaviors
+## Options
 
-The main configuration options are under `server.network`:
-
-- **`server.network.subnets`**: A list of subnet definitions, each with:
-  - `dns`: The DNS server for the subnet.
-  - `domain`: The domain name for the subnet.
-  - `ipv4`, `ipv6`: Configuration options (like CIDR and ARPA) for the subnet's IP range.
-- **`server.network.openPortsForSubnet`**: Defines TCP and UDP ports to be opened on the firewall for each defined subnet.
+{{#include ../../../../generated/server-network-options.md}}
 
 ## Example Usage
 

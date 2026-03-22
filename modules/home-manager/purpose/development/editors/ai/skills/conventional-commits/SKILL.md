@@ -1,6 +1,6 @@
 ---
 name: conventional-commits
-description: 'Write and review Conventional Commits commit messages (v1.0.0) for semantic versioning and changelogs. Use when drafting git commit messages, PR titles, release notes, or enforcing conventional commit format like `type(scope): subject`, `BREAKING CHANGE`, footers, and `revert`.'
+description: "Write and review Conventional Commits commit messages (v1.0.0) for semantic versioning and changelogs. Use when drafting git commit messages, PR titles, release notes, or enforcing conventional commit format like `type(scope): subject`, `BREAKING CHANGE`, footers, and `revert`."
 ---
 
 # Conventional Commits (v1.0.0)

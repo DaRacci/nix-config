@@ -4,10 +4,10 @@ The database submodule provides a managed interface for PostgreSQL and Redis acr
 
 The module is implemented across several files in `modules/nixos/server/database/`:
 
-- `default.nix`: Core options and connection management.
-- `postgres.nix`: PostgreSQL-specific provisioning and secrets.
-- `redis.nix`: Redis-specific ID mappings and security.
-- `guardian.nix`: Lifecycle synchronization and the [IO Guardian](../../../components/io_guardian.md).
+- [default.nix](../../../../../modules/nixos/server/database/default.nix): Core options and connection management.
+- [postgres.nix](../../../../../modules/nixos/server/database/postgres.nix): PostgreSQL-specific provisioning and secrets.
+- [redis.nix](../../../../../modules/nixos/server/database/redis.nix): Redis-specific ID mappings and security.
+- [guardian.nix](../../../../../modules/nixos/server/database/guardian.nix): Lifecycle synchronization and the [IO Guardian](../../../components/io_guardian.md).
 
 ## Purpose
 

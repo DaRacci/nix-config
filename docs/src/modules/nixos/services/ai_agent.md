@@ -5,9 +5,9 @@ Autonomous AI Agent service powered by Hermes, providing intelligent task automa
 - **Entry point**: `modules/nixos/services/ai-agent.nix`
 - **Upstream**: [Hermes Agent](https://hermes-agent.nousresearch.com/)
 
-### Special Options
+### Options
 
-- `services.ai-agent.enable`: Enable the autonomous AI Agent service.
+{{#include ../../../../generated/services-ai-agent-options.md}}
 
 ### Secrets Management
 

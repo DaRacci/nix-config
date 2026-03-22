@@ -57,7 +57,9 @@ let
         executablePath = mkOption {
           type = types.str;
           default = lib.getExe config.package;
+          defaultText = lib.literalExpression "lib.getExe config.package";
           example = "${pkgs._1password-gui}/bin/1password";
+
           description = ''
             Path to the executable.
 

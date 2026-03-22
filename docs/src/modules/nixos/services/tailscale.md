@@ -3,11 +3,10 @@
 Extensions to the standard NixOS Tailscale module, providing easier tag management.
 
 - **Entry point**: `modules/nixos/services/tailscale.nix`
-- **Upstream**: [Tailscale Tags Documentation](https://tailscale.com/kb/1018/tags/)
 
-### Special Options
+### Options
 
-- `services.tailscale.tags`: A list of tags to advertise for this device. These tags are automatically prefixed with `tag:` when passed to `tailscale up`.
+{{#include ../../../../generated/services-tailscale-options.md}}
 
 ### Usage Example
 

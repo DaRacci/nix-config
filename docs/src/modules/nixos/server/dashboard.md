@@ -10,14 +10,9 @@ The dashboard module integrates with [Dashy](https://dashy.to/) and collects das
 
 - `modules/nixos/server/dashboard.nix`
 
-## Special Options and Behaviors
+## Options
 
-The module provides options under `server.dashboard` to define the section for each server:
-
-- **`server.dashboard.name`**: The name of the section in the dashboard, defaulting to the capitalized hostname.
-- **`server.dashboard.icon`**: An optional icon for the section.
-- **`server.dashboard.items`**: A set of dashboard items (with `title`, `icon`, and `url`) to be displayed.
-- **`server.dashboard.displayData`**: Arbitrary JSON data to be passed to the dashboard configuration.
+{{#include ../../../../generated/server-dashboard-options.md}}
 
 ## Example Usage
 

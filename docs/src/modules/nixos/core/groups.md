@@ -2,28 +2,21 @@
 
 Applies shared extra group membership to all declared users.
 
-- **Entry point**: `modules/nixos/core/groups.nix`
+- **Entry point**: [groups.nix](../../../../../modules/nixos/core/groups.nix)
 
-______________________________________________________________________
+---
 
 ## Overview
 
 This module defines `core.defaultGroups`, shared list of Unix groups appended to every configured standard user. Other core modules use this option to grant access to subsystems like audio, networking, Docker, printing, and virtualisation.
 
-______________________________________________________________________
+---
 
 ## Options
 
-### `core.defaultGroups`
+{{#include ../../../../generated/core-groups-options.md}}
 
-| | |
-|---|---|
-| Type | `list of string` |
-| Default | `[]` |
-
-Additional groups added to all users by default.
-
-______________________________________________________________________
+---
 
 ## Behaviour
 
@@ -31,7 +24,7 @@ When `core.defaultGroups` is non-empty, module rewrites `users.users` entries so
 
 This means module appends shared groups after any user-specific group configuration instead of replacing it.
 
-______________________________________________________________________
+---
 
 ## Usage Example
 
@@ -45,7 +38,7 @@ ______________________________________________________________________
 }
 ```
 
-______________________________________________________________________
+---
 
 ## Operational Notes
 
