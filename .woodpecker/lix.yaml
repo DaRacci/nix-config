@@ -69,11 +69,16 @@ steps:
 
   - name: Publish to Registry
     image: registry.racci.dev/lix-woodpecker
-    when:
-      evaluate: 'BUILD_PUBLISH == "true"'
     environment:
       REGISTRY_USER:
         from_secret: REGISTRY_USER
       REGISTRY_TOKEN:
         from_secret: REGISTRY_TOKEN
-    commands: nix run ".#lix-woodpecker.copyToRegistry" -- --dest-creds "$REGISTRY_USER:$REGISTRY_TOKEN"
+    commands: |
+      source envvar
+      if [ "$SHOULD_PUBLISH" = "true" ]; then
+        echo "Publishing lix-woodpecker image to registry..."
+        nix run ".#lix-woodpecker.copyToRegistry" -- --dest-creds "$REGISTRY_USER:$REGISTRY_TOKEN"
+      else
+        echo "Skipping publish step."
+      fi
