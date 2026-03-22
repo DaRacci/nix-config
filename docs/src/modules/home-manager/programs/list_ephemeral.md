@@ -4,27 +4,7 @@
 
 ## Options
 
-```
-programs.list-ephemeral.enable
-```
-
-Enable the list-ephemeral integration and generate the runtime config at:
-
-```
-$XDG_CONFIG_HOME/list-ephemeral/config.json
-```
-
-```
-programs.list-ephemeral.extraExcludes
-```
-
-Additional exclude patterns for the fd scan.
-
-```
-programs.list-ephemeral.extraIncludes
-```
-
-Additional paths to always include as candidates. Relative paths are treated as relative to `$HOME`.
+{{#include ../../../../generated/programs-list-ephemeral-options.md}}
 
 ## Usage
 
@@ -36,17 +16,17 @@ list-ephemeral
 
 ### TUI Keybindings
 
-| Key | Action |
-|-----|--------|
-| `/` | Enable search mode (type to fuzzy filter) |
-| `Escape` | Disable search and clear query |
-| `Ctrl-P` | Open program filter (gum picker) |
-| `Ctrl-X` | Clear program filter |
-| `Space` | Toggle selection and move down |
-| `Ctrl-A` | Select all |
-| `Ctrl-D` | Deselect all |
-| `Ctrl-C` | Quit (standard fzf behavior) |
-| `Enter` | Confirm selection |
+| Key      | Action                                    |
+| -------- | ----------------------------------------- |
+| `/`      | Enable search mode (type to fuzzy filter) |
+| `Escape` | Disable search and clear query            |
+| `Ctrl-P` | Open program filter (gum picker)          |
+| `Ctrl-X` | Clear program filter                      |
+| `Space`  | Toggle selection and move down            |
+| `Ctrl-A` | Select all                                |
+| `Ctrl-D` | Deselect all                              |
+| `Ctrl-C` | Quit (standard fzf behavior)              |
+| `Enter`  | Confirm selection                         |
 
 **Note:** In browse mode (default), typing text will appear in the prompt but won't filter results. Press `/` to enable search filtering.
 

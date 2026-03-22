@@ -10,6 +10,10 @@ The primary purpose of this module is to establish a shared environment for serv
 
 - `modules/nixos/server/default.nix`
 
+## Options
+
+{{#include ../../../../generated/server-options.md}}
+
 ## Special Options and Behaviors
 
 The main configuration entry point is `server.enable`. Once enabled, it sets up the server-specific baseline:

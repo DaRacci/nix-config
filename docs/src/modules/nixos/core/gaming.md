@@ -2,28 +2,31 @@
 
 Enables gaming, VR, and Steam-focused desktop features.
 
-- **Entry point**: `modules/nixos/core/gaming.nix`
+- **Entry point**: [gaming.nix](../../../../../modules/nixos/core/gaming.nix)
 
-______________________________________________________________________
+---
 
 ## Overview
 
 This module configures desktop gaming stack around Steam, 32-bit graphics support, Android ADB tools, and WiVRn streaming. It also adds firewall rules, udev rules for common gaming devices, and optional Decky Loader lifecycle integration.
 
-______________________________________________________________________
+---
 
 ## Options
 
-### `core.gaming.enable`
+{{#include ../../../../generated/purpose-gaming-options.md}}
 
-| | |
-|---|---|
-| Type | `bool` |
-| Default | disabled |
+{{#include ../../../../generated/purpose-gaming-gamemode-options.md}}
 
-Enable gaming feature set.
+{{#include ../../../../generated/purpose-gaming-minecraft-options.md}}
+{{#include ../../../../generated/purpose-gaming-modding-options.md}}
+{{#include ../../../../generated/purpose-gaming-osu-options.md}}
+{{#include ../../../../generated/purpose-gaming-roblox-options.md}}
+{{#include ../../../../generated/purpose-gaming-simulator-options.md}}
+{{#include ../../../../generated/purpose-gaming-steam-options.md}}
+{{#include ../../../../generated/purpose-gaming-vr-options.md}}
 
-______________________________________________________________________
+---
 
 ## Behaviour
 
@@ -43,7 +46,7 @@ When enabled, module:
 
 It also overlays `gamescope-session` to use 4K resolution and wider refresh limits, and opens firewall ports UDP `41492`, `9943`, `9944` plus TCP `8082`, `9943`, `9944`, and `24070`.
 
-______________________________________________________________________
+---
 
 ## Decky Loader Integration
 
@@ -53,7 +56,7 @@ If `config.jovian.decky-loader.enable` is true, module additionally:
 - adds Polkit rule so active local user can start and stop `decky-loader.service`, and
 - when Home Manager is present, installs user service that polls Steam PID file, starts Decky Loader once Steam is running, and stops it after Steam exits.
 
-______________________________________________________________________
+---
 
 ## Usage Example
 
@@ -63,7 +66,7 @@ ______________________________________________________________________
 }
 ```
 
-______________________________________________________________________
+---
 
 ## Operational Notes
 

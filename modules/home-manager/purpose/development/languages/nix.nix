@@ -3,10 +3,20 @@
   config,
   pkgs,
   lib,
+  importExternals ? true,
   ...
 }:
+let
+  inherit (lib) optional;
+in
+
 import ./mkLanguage.nix {
-  inherit config pkgs lib;
+  inherit
+    config
+    pkgs
+    lib
+    ;
+
   name = "nix";
 
   lspPackages = [
@@ -21,9 +31,7 @@ import ./mkLanguage.nix {
     pkgs.nixpkgs-review
   ];
 
-  imports = [
-    inputs.nix-index-database.homeModules.default
-  ];
+  imports = optional importExternals inputs.nix-index-database.homeModules.default;
 
   extraConfig = {
     programs.nix-index.enable = true;

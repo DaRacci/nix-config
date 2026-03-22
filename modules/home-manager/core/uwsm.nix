@@ -8,6 +8,7 @@ let
   inherit (lib)
     flatten
     listToAttrs
+    literalExpression
     mapAttrsToList
     mkEnableOption
     mkIf
@@ -23,6 +24,7 @@ in
   options.core.uwsm = {
     enable = mkEnableOption "uwsm" // {
       default = osConfig != null && osConfig.programs.uwsm.enable;
+      defaultText = literalExpression "osConfig != null && osConfig.programs.uwsm.enable";
     };
 
     sliceAllocation = mkOption {

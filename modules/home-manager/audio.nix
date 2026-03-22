@@ -11,6 +11,7 @@ let
     filter
     hasPrefix
     length
+    literalExpression
     mapAttrsToList
     mkEnableOption
     mkIf
@@ -38,6 +39,7 @@ in
   options.core.audio = {
     enable = mkEnableOption "audio module" // {
       default = osConfig != null && !osConfig.host.device.isHeadless;
+      defaultText = literalExpression "osConfig != null && !osConfig.host.device.isHeadless";
     };
 
     disabledDevices = mkOption {

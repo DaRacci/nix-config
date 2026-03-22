@@ -1,7 +1,7 @@
 { lib, config, ... }:
 with lib;
 let
-  cfg = config.purposes;
+  cfg = config.purpose;
 in
 {
   imports = [

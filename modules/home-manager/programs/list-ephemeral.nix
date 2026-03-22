@@ -115,6 +115,7 @@ in
   options.programs.list-ephemeral = {
     enable = mkEnableOption "list-ephemeral helper" // {
       default = hostPersistEnabled || config.user.persistence.enable;
+      defaultText = lib.literalExpression "hostPersistEnabled || config.user.persistence.enable";
     };
 
     extraExcludes = mkOption {

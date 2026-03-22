@@ -5,13 +5,20 @@
   ...
 }:
 let
-  inherit (lib) getExe mkIf mkEnableOption;
+  inherit (lib)
+    getExe
+    literalExpression
+    mkIf
+    mkEnableOption
+    ;
+
   cfg = config.core.activation;
 in
 {
   options.core.activation = {
     enable = mkEnableOption "report diff on activation" // {
       default = config.core.enable;
+      defaultText = literalExpression "config.core.enable";
     };
   };
 

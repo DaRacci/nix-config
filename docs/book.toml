@@ -5,11 +5,20 @@ src = "src"
 
 [output.html]
 site-url = "/nix-config/"
-git-repository-url = "https://github.com/DaRacci/nix-config"
-edit-url-template = "https://github.com/DaRacci/nix-config/edit/master/docs/{path}"
+git-repository-url = "https://codeberg.org/Racci/nix-config"
+edit-url-template = "https://codeberg.org/Racci/nix-config/src/docs/{path}"
 no-section-label = true
-# Ensure static file (css, js) have a unique filename, to avoid outdated cache.
+# Ensure static file assets have unique filename, to avoid outdated cache.
 hash-files = true
 
 [output.html.fold]
 enable = true
+
+[preprocessor.rewrite-links]
+command = "mdbook-rewrite-links"
+git-branch = "master"
+renderers = ["html"]
+
+
+[preprocessor.gitinfo]
+branch = "master"

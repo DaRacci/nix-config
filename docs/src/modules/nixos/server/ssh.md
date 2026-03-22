@@ -6,7 +6,9 @@ The Server SSH module provides a rich interactive environment for root users upo
 
 The SSH submodule enhances administrative access by providing a session-only environment tailored for server management. It removes the need for manual setup of common tools and aliases by automatically entering a pre-configured `nix-shell` when a root user logs in interactively over SSH.
 
-## Key Options and Behaviors
+## Options
+
+{{#include ../../../../generated/server-ssh-options.md}}
 
 ### Auto-entry Logic (`ssh/default.nix`)
 

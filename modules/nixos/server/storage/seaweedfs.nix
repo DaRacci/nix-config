@@ -2,6 +2,7 @@
   config,
   inputs,
   lib,
+  importExternals ? true,
   ...
 }:
 let
@@ -16,6 +17,7 @@ let
     flatten
     attrsToList
     optionals
+    optional
     ;
   inherit (config.server) ioPrimaryHost;
 
@@ -136,9 +138,7 @@ let
   ];
 in
 {
-  imports = [
-    inputs.seaweedfs.outPath
-  ];
+  imports = optional importExternals inputs.seaweedfs.outPath;
 
   config = mkIf isIOPrimary {
     # Access to sops certs.

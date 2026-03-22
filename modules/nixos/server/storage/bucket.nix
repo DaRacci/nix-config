@@ -397,6 +397,7 @@ in
               credentialsFile = mkOption {
                 type = nullOr str;
                 default = null;
+                example = literalExpression "/run/secrets/s3fs-credentials";
                 description = ''
                   Path to the MinIO credentials file in `ACCESS_KEY_ID:SECRET_ACCESS_KEY` format.
 

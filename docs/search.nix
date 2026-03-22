@@ -34,5 +34,9 @@ in
 mkMultiSearch {
   title = "RacciDev Search";
   baseHref = "/nix-config/search/";
-  scopes = rootModules |> map (path: mkRacciDevModule path "${self}/modules/nixos/${path}");
+  scopes =
+    rootModules |> map (path: mkRacciDevModule path "${self}/modules/nixos/${path}/default.nix");
+}
+// {
+  passthru.discovery = false;
 }

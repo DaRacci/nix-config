@@ -11,7 +11,6 @@ cross-host discovery.
 The system consists of three layers:
 
 1. **Exporters** (run on all servers)
-
    - node_exporter for system-level metrics (CPU, memory, disk, network, per-process stats)
    - Grafana Alloy for shipping journald logs and Caddy access logs to Loki
    - Caddy access logs are parsed as JSON at ingest time so `detected_level`, `logger`, and `status` are available in Loki
@@ -19,14 +18,12 @@ The system consists of three layers:
    - Application-specific exporters (Caddy, PostgreSQL, Redis) enabled automatically
 
 1. **Collectors** (run on the monitoring primary host)
-
    - Prometheus for metrics aggregation with 90-day retention
    - Loki for log aggregation with 90-day retention
    - Alertmanager for alert routing and notifications
    - OTLP/HTTP ingestion on `otlp.<domain>` with bearer-token authentication
 
 1. **Visualization** (runs on the monitoring primary host)
-
    - Grafana with provisioned datasources and dashboards
    - Native Kanidm OAuth2 authentication
 
@@ -63,27 +60,9 @@ Monitoring is enabled by default on all servers (`server.monitoring.enable = tru
 The monitoring primary host is configured via the `allocations.server.monitoringPrimaryHost`
 option, currently set to `nixmon`.
 
-### Options Reference
+### Options
 
-All options live under `server.monitoring`:
-
-| Option | Type | Default | Description |
-| ----------------------------------------- | ------ | ------- | --------------------------------------------------------------- |
-| `enable` | bool | `true` | Enable monitoring for this server |
-| `retention.metrics` | string | `"90d"` | Prometheus TSDB retention period |
-| `retention.logs` | string | `"90d"` | Loki log retention period |
-| `exporters.node.enable` | bool | `true` | Enable node_exporter |
-| `exporters.caddy.enable` | bool | auto | Enable Caddy metrics (auto if proxy configured) |
-| `exporters.postgres.enable` | bool | auto | Enable PostgreSQL exporter (auto on IO host) |
-| `exporters.redis.enable` | bool | auto | Enable Redis exporter (auto on IO host) |
-| `logs.enable` | bool | `true` | Enable Alloy log shipping |
-| `collector.enable` | bool | auto | Enable collectors (auto on monitoring host) |
-| `collector.grafana.kanidm.enable` | bool | `true` | Enable Kanidm OAuth2 for Grafana |
-| `collector.otlp.enable` | bool | auto | Enable authenticated OTLP/HTTP ingestion on the monitoring host |
-| `collector.alerting.enable` | bool | `true` | Enable Alertmanager |
-| `collector.alerting.homeAssistant.enable` | bool | `false` | Enable Home Assistant webhook alerting |
-| `collector.alerting.nextcloudTalk.enable` | bool | `false` | Enable Nextcloud Talk webhook alerting |
-| `collector.proxmox.enable` | bool | `true` | Enable Proxmox VE metrics collection |
+{{#include ../../generated/server-monitoring-options.md}}
 
 ### Auto-Detection
 
@@ -132,12 +111,12 @@ under `KANIDM/OAUTH2/GRAFANA_SECRET` (the Kanidm provisioning side).
 
 The module configures four virtual hosts on nixmon:
 
-| Service | Subdomain | Access |
+| Service    | Subdomain             | Access                        |
 | ---------- | --------------------- | ----------------------------- |
-| Grafana | `grafana.<domain>` | Public |
-| OTLP | `otlp.<domain>` | Public, bearer token required |
-| Prometheus | `prometheus.<domain>` | LAN |
-| Loki | `loki.<domain>` | LAN |
+| Grafana    | `grafana.<domain>`    | Public                        |
+| OTLP       | `otlp.<domain>`       | Public, bearer token required |
+| Prometheus | `prometheus.<domain>` | LAN                           |
+| Loki       | `loki.<domain>`       | LAN                           |
 
 Grafana remains protected by the existing Kanidm-backed login flow. The OTLP
 ingestion endpoint is intended for machine-to-machine clients and requires an
@@ -151,13 +130,13 @@ primary host's Caddy configuration.
 
 The following alerts are configured by default:
 
-| Alert | Condition | Severity |
+| Alert               | Condition                                | Severity |
 | ------------------- | ---------------------------------------- | -------- |
-| `HostDown` | `up{job="node"} == 0` for 2 minutes | Critical |
+| `HostDown`          | `up{job="node"} == 0` for 2 minutes      | Critical |
 | `DiskSpaceCritical` | Root filesystem < 10% free for 5 minutes | Critical |
-| `HighCPUUsage` | CPU usage > 90% for 5 minutes | Warning |
-| `HighMemoryUsage` | Memory usage > 90% for 5 minutes | Warning |
-| `ServiceDown` | `up{job!="node"} == 0` for 2 minutes | Critical |
+| `HighCPUUsage`      | CPU usage > 90% for 5 minutes            | Warning  |
+| `HighMemoryUsage`   | Memory usage > 90% for 5 minutes         | Warning  |
+| `ServiceDown`       | `up{job!="node"} == 0` for 2 minutes     | Critical |
 
 Alerts are routed to:
 

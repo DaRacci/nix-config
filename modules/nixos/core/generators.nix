@@ -28,6 +28,7 @@ in
   options.core.generators = {
     enable = mkEnableOption "generators configuration" // {
       default = config.core.enable;
+      defaultText = literalExpression "config.core.enable";
     };
 
     proxmoxLXC = {
