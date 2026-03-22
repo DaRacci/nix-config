@@ -49,11 +49,11 @@ VERIFICATION: Reference the `test` agent and `testing` skill for guidance on ide
 
 ### Build Commands
 
-| Command | Purpose |
-|---------|---------|
-| `nix build .#nixosConfigurations.<host>.config.system.build.toplevel` | Build host |
-| `nix build .#homeConfigurations."<user>@<host>".activationPackage` | Build home |
-| `nix fmt` | Format code |
+| Command                                                                        | Purpose     |
+| ------------------------------------------------------------------------------ | ----------- |
+| `nix build .#nixosConfigurations.<host>.config.system.build.toplevel`          | Build host  |
+| `nix build .#homeConfigurations."<user>@<host>".activationPackage`             | Build home  |
+| `nix fmt`                                                                      | Format code |
 | `nix flake check --override-input devenv-root "file+file://$PWD/.devenv/root"` | Check flake |
 
 ### DevEnv Override

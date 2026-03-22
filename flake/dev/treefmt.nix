@@ -24,6 +24,7 @@
         keep-sorted.enable = true;
         ruff-check.enable = true;
         ruff-format.enable = true;
+        prettier.enable = true;
         yamlfmt = {
           enable = true;
           settings = {
@@ -52,7 +53,10 @@
       };
 
       settings = {
-        formatter.shellcheck.excludes = [ ".envrc" ];
+        formatter = {
+          shellcheck.excludes = [ ".envrc" ];
+          prettier.includes = [ "*.{yaml,yml}" ];
+        };
         global.excludes = [
           ".opencode/**"
           "openspec/**"
