@@ -36,3 +36,6 @@ mkMultiSearch {
   baseHref = "/nix-config/search/";
   scopes = rootModules |> map (path: mkRacciDevModule path "${self}/modules/nixos/${path}");
 }
+// {
+  passthru.discovery = false;
+}
