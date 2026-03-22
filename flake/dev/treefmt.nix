@@ -24,6 +24,7 @@
         keep-sorted.enable = true;
         ruff-check.enable = true;
         ruff-format.enable = true;
+        prettier.enable = true;
         biome = {
           enable = true;
           settings.formatter = {
@@ -40,9 +41,13 @@
       };
 
       settings = {
-        formatter.shellcheck.excludes = [ ".envrc" ];
+        formatter = {
+          shellcheck.excludes = [ ".envrc" ];
+          prettier.includes = [ "*.{yaml,yml}" ];
+        };
         global.excludes = [
           ".opencode/**"
+          "openspec/**"
           "**/secrets.yaml"
           "**/ssh_host_ed25519_key.pub"
           "hosts/server/nixcloud/provisioning.json"
