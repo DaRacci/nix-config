@@ -12,7 +12,6 @@ in
   archive-flakes = writeNuApplicationWithLibs {
     inherit pkgs libSource sourceRoot;
     name = "archive-flakes";
-    runtimeInputs = [ pkgs.nix ];
   };
 
   create-pr = writeNuApplicationWithLibs {
@@ -33,18 +32,21 @@ in
 
   detect-affected-outputs = writeNuApplicationWithLibs {
     inherit pkgs libSource sourceRoot;
+    name = "detect-affected-outputs";
   };
 
   discover-packages = writeNuApplicationWithLibs {
     inherit pkgs libSource sourceRoot;
     name = "discover-packages";
-    runtimeInputs = [ ];
+    runtimeInputs = [
+      pkgs.fd
+    ];
   };
 
   setup-attic = writeNuApplicationWithLibs {
     inherit pkgs libSource sourceRoot;
     name = "setup-attic";
-    runtimeInputs = [ pkgs.attic-client ];
+    runtimeInputs = [ pkgs.bash pkgs.attic-client ];
   };
 
   setup-git = writeNuApplicationWithLibs {
@@ -59,6 +61,10 @@ in
   update-locks = writeNuApplicationWithLibs {
     inherit pkgs libSource sourceRoot;
     name = "update-locks";
-    runtimeInputs = [ pkgs.nix ];
+  };
+
+  update-matrix = writeNuApplicationWithLibs {
+    inherit pkgs libSource sourceRoot;
+    name = "update-matrix";
   };
 }

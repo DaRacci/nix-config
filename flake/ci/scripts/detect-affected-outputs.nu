@@ -19,7 +19,8 @@ def main [
   let cache_key = init_cache $flake_info $cache_dir
   let dirty_files = collect_files $files $range
 
-  if $outputs | is-empty {
+  mut outputs = $outputs
+  if ($outputs | is-empty) {
     log info "No specific outputs provided, checking all outputs for type ($type)..."
     $outputs = get_outputs $type
     if ($outputs | is-empty) {
