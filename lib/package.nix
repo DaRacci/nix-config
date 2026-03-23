@@ -92,17 +92,10 @@ rec {
         ''
           mkdir -p $out/bin/lib
 
-          ${
-            if builtins.pathExists libDir then
-              readDir "${sourceRoot}/lib"
-              |> attrNames
-              |> filter (libFile: hasSuffix "nu" libFile)
-              |> map (libFile: "cp ${"${sourceRoot}/lib/${libFile}"} $out/bin/lib/${libFile}")
-              |> concatStringsSep "\n"
-            else
-              ""
-          }
+          find ${libStore} -maxdepth 1 -type f -name '*.nu' -print0 \
+            | xargs -0 -r cp -t "$out/bin/lib"
         '';
+
 
       passthru.discovery = false;
     };

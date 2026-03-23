@@ -1,4 +1,7 @@
 variables:
+  - &env
+    BASE_BRANCH: &base_branch master
+    BRANCH: &branch chore/update-ci-matrix
   - &when_change
     event: [push, pull_request]
     branch: master
@@ -100,11 +103,11 @@ steps:
       nix run ".#update-matrix" -- \
         .woodpecker/update-packages.yaml \
         PACKAGE \
-        .#package.x86_64-linux \
+        .#packages.x86_64-linux \
         "builtins.filter (p: p.passthru ? update-script) |> builtins.attrNames"
 
-  - name: Make PR for matrix entries
-    image: registry.racci.dev/lix-woodpecker
+  - name: Push matrix changes to branch
+    image: appleboy/drone-git-push
     pull: true
     when: *when_ci
     depends_on:
@@ -114,35 +117,9 @@ steps:
         "matrix-ci-packages.yaml",
         "matrix-update-packages.yaml",
       ]
-    environment:
-      GITHUB_AUTH_KEY:
-        from_secret: GITHUB_AUTH_KEY
-      BASE_BRANCH: master
-      BRANCH: chore/update-ci-matrix
-    commands: |-
-      nix run .#setup-git
-      CHANGED_FILES=$(git diff --name-only HEAD~1)
-      if echo "$CHANGED_FILES" | grep -E '(ci-(hosts|homes|packages)|update-packages)\.yaml' > /dev/null; then
-        git checkout -b $BRANCH
-        git add .woodpecker/ci-hosts.yaml .woodpecker/ci-homes.yaml .woodpecker/ci-packages.yaml .woodpecker/update-packages.yaml
-        git commit -m "chore(ci): update CI matrix entries"
-      else
-        echo "No changes to matrix files, skipping PR"
-      fi
-
-  - name: Push matrix changes to branch
-    image: appleboy/drone-git-push
-    pull: true
-    when: *when_ci
-    depends_on: [
-      "matrix-ci-hosts.yaml",
-      "matrix-ci-homes.yaml",
-      "matrix-ci-packages.yaml",
-      "matrix-update-packages.yaml",
-    ]
     settings:
       remote: git@github.com:DaRacci/nix-config.git
-      branch: chore/update-ci-matrix
+      branch: &branch
       force: true
       commit: true
       author_name: "Woodpecker CI"
