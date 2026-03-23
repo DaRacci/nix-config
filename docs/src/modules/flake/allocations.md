@@ -91,10 +91,10 @@ Imported by the Home-Manager builder. Currently a no-op (`mkMerge []`) — exist
 
 ## Source Files
 
-| File | Role |
-|------|------|
-| [`modules/flake/allocations.nix`](../../../modules/flake/allocations.nix) | Option definitions |
-| [`modules/flake/apply/system.nix`](../../../modules/flake/apply/system.nix) | NixOS system apply |
-| [`modules/flake/apply/home-manager.nix`](../../../modules/flake/apply/home-manager.nix) | Home-Manager apply (placeholder) |
-| [`flake/nixos/flake-module.nix`](../../../flake/nixos/flake-module.nix) | Actual configuration values |
-| [`lib/builders/default.nix`](../../../lib/builders/default.nix) | Builder that consumes allocations |
+| File                                                                                    | Role                              |
+| --------------------------------------------------------------------------------------- | --------------------------------- |
+| [`modules/flake/allocations.nix`](../../../modules/flake/allocations.nix)               | Option definitions                |
+| [`modules/flake/apply/system.nix`](../../../modules/flake/apply/system.nix)             | NixOS system apply                |
+| [`modules/flake/apply/home-manager.nix`](../../../modules/flake/apply/home-manager.nix) | Home-Manager apply (placeholder)  |
+| [`flake/nixos/flake-module.nix`](../../../flake/nixos/flake-module.nix)                 | Actual configuration values       |
+| [`lib/builders/default.nix`](../../../lib/builders/default.nix)                         | Builder that consumes allocations |

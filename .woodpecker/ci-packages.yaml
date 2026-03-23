@@ -50,7 +50,7 @@ steps:
       set -euo pipefail
 
       SHOULD_BUILD=false
-      if [ "$${CI_PREV_PIPELINE_STATUS}" = "failure" ]; then
+      if [ "$${CI_PREV_PIPELINE_STATUS}" = "error" ]; then
         echo "Previous pipeline failed for $${PACKAGE}, Building to check if it was a transient issue."
         SHOULD_BUILD=true
       else
@@ -74,7 +74,7 @@ steps:
         touch .do-build
       fi
 
-  - name: build-${package}
+  - name: build-${PACKAGE}
     image: registry.racci.dev/lix-woodpecker
     pull: true
     depends_on: ["decide-${PACKAGE}"]
