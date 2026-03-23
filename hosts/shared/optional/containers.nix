@@ -1,12 +1,9 @@
 { pkgs, lib, ... }:
-with lib;
+let
+  inherit (lib) mkForce;
+in
 {
-  custom.defaultGroups = [
-    "docker"
-    "podman"
-  ];
-
-  environment.systemPackages = with pkgs; [ podman-tui ];
+  custom.defaultGroups = [ "docker" ];
 
   virtualisation = {
     # Sadly there are still lots of things podman / podman-compose can't do
@@ -37,6 +34,8 @@ with lib;
       "${docker}/image"
       "${docker}/volumes"
       "${docker}/containers"
+      "${docker}/containerd"
+      "${docker}/buildkit"
     ];
 
   networking.firewall.allowedTCPPorts = [ 2375 ];
