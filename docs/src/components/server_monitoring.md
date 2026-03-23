@@ -64,22 +64,22 @@ option, currently set to `nixmon`.
 
 All options live under `server.monitoring`:
 
-| Option | Type | Default | Description |
-| ----------------------------------------- | ------ | --------- | ------------------------------------------------- |
-| `enable` | bool | `true` | Enable monitoring for this server |
-| `retention.metrics` | string | `"90d"` | Prometheus TSDB retention period |
-| `retention.logs` | string | `"90d"` | Loki log retention period |
-| `exporters.node.enable` | bool | `true` | Enable node_exporter |
-| `exporters.caddy.enable` | bool | auto | Enable Caddy metrics (auto if proxy configured) |
-| `exporters.postgres.enable` | bool | auto | Enable PostgreSQL exporter (auto on IO host) |
-| `exporters.redis.enable` | bool | auto | Enable Redis exporter (auto on IO host) |
-| `logs.enable` | bool | `true` | Enable Alloy log shipping |
-| `collector.enable` | bool | auto | Enable collectors (auto on monitoring host) |
-| `collector.grafana.kanidm.enable` | bool | `true` | Enable Kanidm OAuth2 for Grafana |
-| `collector.alerting.enable` | bool | `true` | Enable Alertmanager |
-| `collector.alerting.homeAssistant.enable` | bool | `false` | Enable Home Assistant webhook alerting |
-| `collector.alerting.nextcloudTalk.enable` | bool | `false` | Enable Nextcloud Talk webhook alerting |
-| `collector.proxmox.enable` | bool | `true` | Enable Proxmox VE metrics collection |
+| Option                                    | Type   | Default | Description                                     |
+| ----------------------------------------- | ------ | ------- | ----------------------------------------------- |
+| `enable`                                  | bool   | `true`  | Enable monitoring for this server               |
+| `retention.metrics`                       | string | `"90d"` | Prometheus TSDB retention period                |
+| `retention.logs`                          | string | `"90d"` | Loki log retention period                       |
+| `exporters.node.enable`                   | bool   | `true`  | Enable node_exporter                            |
+| `exporters.caddy.enable`                  | bool   | auto    | Enable Caddy metrics (auto if proxy configured) |
+| `exporters.postgres.enable`               | bool   | auto    | Enable PostgreSQL exporter (auto on IO host)    |
+| `exporters.redis.enable`                  | bool   | auto    | Enable Redis exporter (auto on IO host)         |
+| `logs.enable`                             | bool   | `true`  | Enable Promtail log shipping                    |
+| `collector.enable`                        | bool   | auto    | Enable collectors (auto on monitoring host)     |
+| `collector.grafana.kanidm.enable`         | bool   | `true`  | Enable Kanidm OAuth2 for Grafana                |
+| `collector.alerting.enable`               | bool   | `true`  | Enable Alertmanager                             |
+| `collector.alerting.homeAssistant.enable` | bool   | `false` | Enable Home Assistant webhook alerting          |
+| `collector.alerting.nextcloudTalk.enable` | bool   | `false` | Enable Nextcloud Talk webhook alerting          |
+| `collector.proxmox.enable`                | bool   | `true`  | Enable Proxmox VE metrics collection            |
 
 ### Auto-Detection
 
@@ -126,11 +126,11 @@ under `KANIDM/OAUTH2/GRAFANA_SECRET` (the Kanidm provisioning side).
 
 The module configures three virtual hosts on nixmon:
 
-| Service | Subdomain | Access |
-| ---------- | ----------------------- | ------ |
-| Grafana | `grafana.<domain>` | Public |
-| Prometheus | `prometheus.<domain>` | LAN |
-| Loki | `loki.<domain>` | LAN |
+| Service    | Subdomain             | Access |
+| ---------- | --------------------- | ------ |
+| Grafana    | `grafana.<domain>`    | Public |
+| Prometheus | `prometheus.<domain>` | LAN    |
+| Loki       | `loki.<domain>`       | LAN    |
 
 These are defined in `hosts/server/nixmon/default.nix` and collected by the IO
 primary host's Caddy configuration.
@@ -139,13 +139,13 @@ primary host's Caddy configuration.
 
 The following alerts are configured by default:
 
-| Alert | Condition | Severity |
-| ------------------- | ------------------------------------------- | -------- |
-| `HostDown` | `up{job="node"} == 0` for 2 minutes | Critical |
+| Alert               | Condition                                | Severity |
+| ------------------- | ---------------------------------------- | -------- |
+| `HostDown`          | `up{job="node"} == 0` for 2 minutes      | Critical |
 | `DiskSpaceCritical` | Root filesystem < 10% free for 5 minutes | Critical |
-| `HighCPUUsage` | CPU usage > 90% for 5 minutes | Warning |
-| `HighMemoryUsage` | Memory usage > 90% for 5 minutes | Warning |
-| `ServiceDown` | `up{job!="node"} == 0` for 2 minutes | Critical |
+| `HighCPUUsage`      | CPU usage > 90% for 5 minutes            | Warning  |
+| `HighMemoryUsage`   | Memory usage > 90% for 5 minutes         | Warning  |
+| `ServiceDown`       | `up{job!="node"} == 0` for 2 minutes     | Critical |
 
 Alerts are routed to:
 

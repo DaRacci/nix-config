@@ -80,6 +80,6 @@
 
 - [Overview](lib/overview.md)
 
-______________________________________________________________________
+---
 
 [RacciDev Options Search](./search/index.html)
