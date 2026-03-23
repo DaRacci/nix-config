@@ -38,6 +38,9 @@ in
   discover-packages = writeNuApplicationWithLibs {
     inherit pkgs libSource sourceRoot;
     name = "discover-packages";
+    runtimeInputs = [
+      pkgs.fd
+    ];
   };
 
   setup-attic = writeNuApplicationWithLibs {
