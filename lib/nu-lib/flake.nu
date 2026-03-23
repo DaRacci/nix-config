@@ -156,7 +156,6 @@ export def has_flake_inputs_changed [
   input_name: string
 ] {
   let split_range = $git_range | split row ".."
-  let head_commit = $split_range | last
   let prev_commit = $split_range | first
 
   let root_flake_changed = not (git diff --name-only $git_range -- flake.lock | str trim | is-empty)
@@ -164,6 +163,8 @@ export def has_flake_inputs_changed [
     let prev_lock_file = mktemp -t "old-lock.XXXX"
     git show $"($prev_commit):flake.lock" | save -f $prev_lock_file
     let prev_input = get_flake_input $prev_lock_file $input_name
+    rm -f $prev_lock_file
+
     let curr_input = get_flake_input flake.lock $input_name
     log info $"Previous ($input_name): ($prev_input), Current ($input_name): ($curr_input)"
     if $prev_input.rev != $curr_input.rev {
@@ -182,7 +183,6 @@ export def check_file_changed [
 ] {
   log info $"Checking files for changes: ($files)"
   let split_range = $git_range | split row ".."
-  let head_commit = $split_range | last
   let prev_commit = $split_range | first
 
   let git_file_diffs = git diff --name-only $git_range -- ...$files | str trim | split row "\n" | where {|f| not ($f | is-empty) }
@@ -194,13 +194,13 @@ export def check_file_changed [
   log info $"Git file diffs: ($git_file_diffs)"
   mut changed_files = [ ];
   for file in $git_file_diffs {
-    let has_changed = $git_file_diffs | any {|f| $f == $file }
     let old_file = mktemp -t "old-file.XXXX"
     git show $"($prev_commit):($file)" | save -f $old_file
 
     log info $"Checking differences between ($file) and ($old_file)"
     let old_hash = nix hash file $old_file
     let cur_hash = nix hash file $file
+    rm -f $old_file
 
     if $old_hash != $cur_hash {
       log info $"File [($file)] has changed."

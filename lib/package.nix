@@ -60,6 +60,8 @@ in
       + ''
         ${readFile "${sourceStore}/${name}.nu"}
       '';
+
+      # We use the checkPhase since writeTextFile doesn't support buildPhase.
       checkPhase = ''
         mkdir -p "$out/bin/lib"
 
