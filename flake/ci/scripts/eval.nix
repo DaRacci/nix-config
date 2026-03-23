@@ -80,7 +80,7 @@ let
     else
       sanitizePosition (positionFromMeta pkg);
 
-  eval = builtins.tryEval (position.file);
+  eval = builtins.tryEval position.file;
 in
 if eval.success then
   eval.value

@@ -4,7 +4,7 @@ Configures opinionated SSH server and client defaults.
 
 - **Entry point**: `modules/nixos/core/openssh.nix`
 
-______________________________________________________________________
+---
 
 ## Overview
 
@@ -12,20 +12,20 @@ This module enables OpenSSH with ed25519-only host keys, disables password authe
 
 It also wires SOPS-managed host private key into `sshd` and publishes matching public key under `/etc/ssh/ssh_host_ed25519_key.pub`.
 
-______________________________________________________________________
+---
 
 ## Options
 
 ### `core.openssh.enable`
 
-| | |
-|---|---|
-| Type | `bool` |
+|         |        |
+| ------- | ------ |
+| Type    | `bool` |
 | Default | `true` |
 
 Enable opinionated OpenSSH server and client configuration.
 
-______________________________________________________________________
+---
 
 ## Behaviour
 
@@ -43,7 +43,7 @@ When enabled, module:
 
 Client configuration also restricts host key algorithms and accepted public key types to `ssh-ed25519`.
 
-______________________________________________________________________
+---
 
 ## Usage Example
 
@@ -53,7 +53,7 @@ ______________________________________________________________________
 }
 ```
 
-______________________________________________________________________
+---
 
 ## Operational Notes
 

@@ -22,18 +22,7 @@
         };
         mdsh.enable = true;
         keep-sorted.enable = true;
-        yamlfmt = {
-          enable = true;
-          settings = {
-            formatter = {
-              retain_line_breaks_single = true;
-              scan_folded_as_literal = true;
-              drop_merge_tag = true;
-              trim_trailing_whitespace = true;
-              eof_newline = true;
-            };
-          };
-        };
+        prettier.enable = true;
         biome = {
           enable = true;
           settings.formatter = {

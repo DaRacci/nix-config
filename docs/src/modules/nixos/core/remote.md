@@ -4,58 +4,58 @@ Provides optional remote desktop and game-streaming capabilities for desktop hos
 
 - **Entry point**: `modules/nixos/core/remote.nix`
 
-______________________________________________________________________
+---
 
 ## Overview
 
 This module exposes `core.remote` with two independent sub-features:
 
-| Sub-feature | Implementation | Purpose |
-|---|---|---|
-| Remote Desktop | xrdp | Full desktop access over RDP |
-| Streaming | Sunshine | Low-latency game or desktop streaming |
+| Sub-feature    | Implementation | Purpose                               |
+| -------------- | -------------- | ------------------------------------- |
+| Remote Desktop | xrdp           | Full desktop access over RDP          |
+| Streaming      | Sunshine       | Low-latency game or desktop streaming |
 
-______________________________________________________________________
+---
 
 ## Options
 
 ### `core.remote.enable`
 
-| | |
-|---|---|
-| Type | `bool` |
+|         |          |
+| ------- | -------- |
+| Type    | `bool`   |
 | Default | disabled |
 
 Master switch. Nothing in this module activates unless this is `true`.
 
 ### `core.remote.remoteDesktop.enable`
 
-| | |
-|---|---|
-| Type | `bool` |
+|         |          |
+| ------- | -------- |
+| Type    | `bool`   |
 | Default | disabled |
 
 Enable xrdp-based remote desktop access.
 
 ### `core.remote.remoteDesktop.startCommand`
 
-| | |
-|---|---|
-| Type | `string` |
+|         |                   |
+| ------- | ----------------- |
+| Type    | `string`          |
 | Default | `"gnome-session"` |
 
 Command xrdp uses as `defaultWindowManager`.
 
 ### `core.remote.streaming.enable`
 
-| | |
-|---|---|
-| Type | `bool` |
+|         |          |
+| ------- | -------- |
+| Type    | `bool`   |
 | Default | disabled |
 
 Enable Sunshine streaming server.
 
-______________________________________________________________________
+---
 
 ## Behaviour
 
@@ -65,7 +65,7 @@ When `core.remote.enable = true`:
 - `streaming.enable` turns on `services.sunshine`, enables auto-start, opens firewall, and sets `capSysAdmin = true`.
 - if Home Manager is present, streaming also persists `.config/sunshine` through shared Home Manager module.
 
-______________________________________________________________________
+---
 
 ## Hyprland Integration
 
@@ -76,12 +76,12 @@ When both `core.remote.streaming.enable` and `programs.hyprland.enable` are `tru
 - creates headless output at login with `hyprctl output create headless`, and
 - keeps `HEADLESS-2` disabled until Sunshine prep commands enable it.
 
-| Application | Behaviour |
-|---|---|
-| **Shared Desktop** | Enables `HEADLESS-2` at client resolution and leaves physical monitors active. |
+| Application           | Behaviour                                                                                                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Shared Desktop**    | Enables `HEADLESS-2` at client resolution and leaves physical monitors active.                                                                                                             |
 | **Exclusive Desktop** | Enables `HEADLESS-2`, saves active physical monitor state to `$XDG_STATE_HOME/hyprland-disabled-monitors-pre-sunshine.json`, disables physical monitors, then restores them on disconnect. |
 
-______________________________________________________________________
+---
 
 ## Usage Examples
 
@@ -110,7 +110,7 @@ ______________________________________________________________________
 }
 ```
 
-______________________________________________________________________
+---
 
 ## Operational Notes
 

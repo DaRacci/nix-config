@@ -6,7 +6,7 @@ This page documents the Home-Manager module at:
 
 It configures editor/agent tooling for AI-assisted development, centered around OpenCode and shared skill directories.
 
-______________________________________________________________________
+---
 
 ## What this module sets up
 
@@ -34,26 +34,26 @@ When enabled, the module:
   - `.local/share/opencode`
   - `.local/state/opencode`
 
-______________________________________________________________________
+---
 
 ## Options
 
 ### `purpose.development.editors.ai.enable`
 
-| | |
-|---|---|
-| Type | `bool` |
+|         |         |
+| ------- | ------- |
+| Type    | `bool`  |
 | Default | `false` |
 
 Enable AI tools and assistant/editor integrations for the user profile.
 
-______________________________________________________________________
+---
 
 ### `purpose.development.editors.ai.includeDefaults`
 
-| | |
-|---|---|
-| Type | `bool` |
+|         |        |
+| ------- | ------ |
+| Type    | `bool` |
 | Default | `true` |
 
 Whether to include the module’s built-in skills and agents from:
@@ -63,14 +63,14 @@ Whether to include the module’s built-in skills and agents from:
 
 Set to `false` for a minimal setup with only base OpenCode configuration.
 
-______________________________________________________________________
+---
 
 ### `purpose.development.editors.ai.skills`
 
-| | |
-|---|---|
-| Type | `list of string` |
-| Default | `[]` |
+|         |                  |
+| ------- | ---------------- |
+| Type    | `list of string` |
+| Default | `[]`             |
 
 Additional skill source paths to register globally under `~/.agents/skills`.
 
@@ -81,7 +81,7 @@ Example:
 - `"${inputs.my-skill-repo}/skills/my-skill"`
 - `"${self}/skills/another-skill"`
 
-______________________________________________________________________
+---
 
 ## Usage example
 
@@ -99,7 +99,7 @@ ______________________________________________________________________
 }
 ```
 
-______________________________________________________________________
+---
 
 ## Notes
 

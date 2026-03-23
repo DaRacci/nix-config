@@ -2,9 +2,12 @@ variables:
   - &env
     BASE_BRANCH: &base_branch master
     BRANCH: &branch chore/update-ci-matrix
+  - &when_push
+    event: [push]
+    branch: *base_branch
   - &when_change
     event: [push, pull_request]
-    branch: master
+    branch: *base_branch
   - &when_cron
     event: cron
     cron: weekly
@@ -22,13 +25,12 @@ labels:
   platform: linux/amd64
 
 steps:
-  - name: Build flake checks
+  - name: build-flake-checks
     image: registry.racci.dev/lix-woodpecker
     pull: true
-    failure: ignore
     environment:
       BINARY_CACHE_TOKEN:
-        from_secret: binary_cache_token
+        from_secret: BINARY_CACHE_TOKEN
     when: *when_ci
     depends_on: [] # enable parallel steps
     commands: |
@@ -36,32 +38,28 @@ steps:
       nix run .#archive-flakes -- "." "flake/ci" "flake/dev"
       nix run nixpkgs#nix-fast-build -- --skip-cached --no-nom --flake ".#checks.$(nix eval --raw --impure --expr builtins.currentSystem)"
 
-  - name: Run flake checks
+  - name: run-flake-checks
     image: registry.racci.dev/lix-woodpecker
     pull: true
-    failure: ignore
     when: *when_ci
-    depends_on: ["Build flake checks"]
+    depends_on: ["build-flake-checks"]
     commands: nix flake check
 
-  - name: Check upstream TODOs
+  - name: check-upstream-todos
     image: registry.racci.dev/lix-woodpecker
     pull: true
-    failure: ignore
     when: *when_all
     commands: nix run .#check-upstream-todos
 
-  - name: Run flake checker
+  - name: run-flake-checker
     image: registry.racci.dev/lix-woodpecker
     pull: true
-    failure: ignore
     when: *when_all
     commands: nix run nixpkgs#flake-checker
 
-  - name: GitGuardian Secret Scan
+  - name: run-gitguardian
     image: gitguardian/ggshield
     pull: true
-    failure: ignore
     environment:
       GITGUARDIAN_API_KEY:
         from_secret: GITGUARDIAN_API_KEY
@@ -71,22 +69,19 @@ steps:
   - name: matrix-ci-hosts.yaml
     image: registry.racci.dev/lix-woodpecker
     pull: true
-    failure: ignore
     when: *when_ci
     commands: nix run ".#update-matrix" -- .woodpecker/ci-hosts.yaml HOST .#nixosConfigurations
 
   - name: matrix-ci-homes.yaml
     image: registry.racci.dev/lix-woodpecker
     pull: true
-    failure: ignore
     when: *when_ci
     commands: nix run ".#update-matrix" -- .woodpecker/ci-homes.yaml HOME .#homeConfigurations
 
   - name: matrix-ci-packages.yaml
     image: registry.racci.dev/lix-woodpecker
     pull: true
-    failure: ignore
-    when: *when_ci
+    when: *when_push
     commands: |
       nix run ".#update-matrix" -- \
         .woodpecker/ci-packages.yaml \
@@ -97,8 +92,7 @@ steps:
   - name: matrix-update-packages.yaml
     image: registry.racci.dev/lix-woodpecker
     pull: true
-    failure: ignore
-    when: *when_ci
+    when: *when_push
     commands: |
       nix run ".#update-matrix" -- \
         .woodpecker/update-packages.yaml \
@@ -106,10 +100,10 @@ steps:
         .#packages.x86_64-linux \
         "builtins.filter (p: p.passthru ? update-script) |> builtins.attrNames"
 
-  - name: Push matrix changes to branch
+  - name: push-matrix-updates
     image: appleboy/drone-git-push
     pull: true
-    when: *when_ci
+    when: *when_push
     depends_on:
       [
         "matrix-ci-hosts.yaml",
@@ -119,19 +113,20 @@ steps:
       ]
     settings:
       remote: git@github.com:DaRacci/nix-config.git
-      branch: &branch
+      branch: *branch
       force: true
       commit: true
       author_name: "Woodpecker CI"
       author_email: "woodpecker@racci.dev"
-      commit_message: "chore(ci): update CI matrix entries"
+      commit_message: "chore(ci): update CI matrix entries [SKIP CI]"
       ssh_key:
         from_secret: GITHUB_AUTH_KEY
 
-  - name: Create/Update PR
+  - name: create-matrix-update-pr
     image: registry.racci.dev/lix-woodpecker
     pull: true
-    when: *when_ci
+    when: *when_push
+    depends_on: ["push-matrix-updates"]
     environment:
       <<: *env
       GITHUB_TOKEN:

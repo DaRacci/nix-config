@@ -4,7 +4,7 @@ Configures libvirt, VFIO passthrough, bridge networking, and guest isolation hel
 
 - **Entry point**: `modules/nixos/core/virtualisation.nix`
 
-______________________________________________________________________
+---
 
 ## Overview
 
@@ -12,83 +12,83 @@ This module enables libvirt with QEMU, VFIO GPU passthrough, Looking Glass share
 
 It also generates helper scripts that change `AllowedCPUs` on host slices while selected guests run, detach and reattach passthrough GPUs for `-single` guests, and block host sleep while libvirt domains are active.
 
-______________________________________________________________________
+---
 
 ## Options
 
 ### `core.virtualisation.enable`
 
-| | |
-|---|---|
-| Type | `bool` |
+|         |          |
+| ------- | -------- |
+| Type    | `bool`   |
 | Default | disabled |
 
 Master switch for virtualisation support.
 
 ### `core.virtualisation.vmUsers`
 
-| | |
-|---|---|
-| Type | `list of string` |
-| Default | `[]` |
+|         |                  |
+| ------- | ---------------- |
+| Type    | `list of string` |
+| Default | `[]`             |
 
 Users that receive `kvm` and `libvirtd` group membership for VM management.
 
 ### `core.virtualisation.isolatedGuests`
 
-| | |
-|---|---|
-| Type | `list of string` |
+|         |                              |
+| ------- | ---------------------------- |
+| Type    | `list of string`             |
 | Default | `[ "win11" "win11-gaming" ]` |
 
 Guest names that receive generated libvirt hook directories for CPU isolation helpers. Each guest also gets `-single` hook variants that add GPU detach and attach helpers.
 
 ### `core.virtualisation.bridgeInterface`
 
-| | |
-|---|---|
-| Type | `string` |
-| Default | `"br0"` |
+|         |          |
+| ------- | -------- |
+| Type    | `string` |
+| Default | `"br0"`  |
 
 Bridge interface exposed to libvirt guests.
 
 ### `core.virtualisation.externalInterface`
 
-| | |
-|---|---|
-| Type | `string` |
+|         |          |
+| ------- | -------- |
+| Type    | `string` |
 | Default | `"eth0"` |
 
 Physical interface attached to `core.virtualisation.bridgeInterface`.
 
 ### `core.virtualisation.cpuCores`
 
-| | |
-|---|---|
-| Type | `int >= 4` |
-| Default | `24` |
+|         |            |
+| ------- | ---------- |
+| Type    | `int >= 4` |
+| Default | `24`       |
 
 Total CPU core or thread count used by isolation helpers.
 
 ### `core.virtualisation.gpu.video`
 
-| | |
-|---|---|
-| Type | `string` |
+|         |               |
+| ------- | ------------- |
+| Type    | `string`      |
 | Default | `"10de:1b06"` |
 
 PCI ID for passthrough GPU video device.
 
 ### `core.virtualisation.gpu.audio`
 
-| | |
-|---|---|
-| Type | `string` |
+|         |               |
+| ------- | ------------- |
+| Type    | `string`      |
 | Default | `"10de:1bef"` |
 
 PCI ID for passthrough GPU audio device.
 
-______________________________________________________________________
+---
 
 ## Behaviour
 
@@ -106,7 +106,7 @@ When enabled, module:
 
 Module also persists libvirt and swtpm state under `host.persistence.directories`.
 
-______________________________________________________________________
+---
 
 ## Isolation and Hook Helpers
 
@@ -119,7 +119,7 @@ For each guest in `core.virtualisation.isolatedGuests`, module creates libvirt h
 
 It also creates `libvirt-nosleep@<guest>` service that uses `systemd-inhibit` to block sleep while guest is running.
 
-______________________________________________________________________
+---
 
 ## Firmware and Persistence
 
@@ -133,7 +133,7 @@ Persisted paths include:
 - `/var/lib/libvirt/secrets`
 - `/var/lib/swtpm-localca`
 
-______________________________________________________________________
+---
 
 ## Usage Example
 
@@ -155,7 +155,7 @@ ______________________________________________________________________
 }
 ```
 
-______________________________________________________________________
+---
 
 ## Operational Notes
 

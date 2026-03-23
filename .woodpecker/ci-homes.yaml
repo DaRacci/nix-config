@@ -5,6 +5,15 @@ when:
   - event: manual
   - event: [push, pull_request]
     branch: master
+    path:
+      [
+        .woodpecker/ci-homes.yaml,
+        home/**,
+        modules/home-manager/**,
+        overlays/**,
+        flake.nix,
+        flake.lock,
+      ]
 
 clone:
   - name: git
@@ -21,12 +30,11 @@ steps:
   - name: decide-${HOME}
     image: registry.racci.dev/lix-woodpecker
     pull: true
-    depends_on: [] # enable parallel steps
     commands: |
       set -euo pipefail
 
       SHOULD_BUILD=false
-      if [ "$${CI_PREV_PIPELINE_STATUS}" = "failure" ]; then
+      if [ "$${CI_PREV_PIPELINE_STATUS}" = "error" ]; then
         echo "Previous pipeline failed for $${HOME}, Building to check if it was a transient issue."
         SHOULD_BUILD=true
       else

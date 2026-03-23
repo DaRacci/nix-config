@@ -4,35 +4,35 @@ Adds Windows Subsystem for Linux specific integration and fixes.
 
 - **Entry point**: `modules/nixos/core/wsl.nix`
 
-______________________________________________________________________
+---
 
 ## Overview
 
 This module configures WSL-focused defaults such as default user, Windows interop, graphics library paths, `nix-ld`, and Start Menu launcher syncing.
 
-______________________________________________________________________
+---
 
 ## Options
 
 ### `core.wsl.enable`
 
-| | |
-|---|---|
-| Type | `bool` |
+|         |          |
+| ------- | -------- |
+| Type    | `bool`   |
 | Default | disabled |
 
 Enable WSL-specific configuration.
 
 ### `core.wsl.user`
 
-| | |
-|---|---|
-| Type | `string` |
-| Default | none |
+|         |          |
+| ------- | -------- |
+| Type    | `string` |
+| Default | none     |
 
 Default user used for WSL integration.
 
-______________________________________________________________________
+---
 
 ## Behaviour
 
@@ -54,7 +54,7 @@ If `wsl` module exists in option tree, module also:
 - exposes `dirname`, `readlink`, and `uname` through `wsl.extraBin` for VS Code Remote WSL compatibility, and
 - copies per-user Home Manager `applications` and `icons` into `/usr/share` during activation so launchers appear in Windows Start Menu.
 
-______________________________________________________________________
+---
 
 ## Usage Example
 
@@ -67,7 +67,7 @@ ______________________________________________________________________
 }
 ```
 
-______________________________________________________________________
+---
 
 ## Operational Notes
 
