@@ -10,19 +10,16 @@ cross-host discovery.
 The system consists of three layers:
 
 1. **Exporters** (run on all servers)
-
    - node_exporter for system-level metrics (CPU, memory, disk, network)
    - Promtail for shipping journald logs to Loki
    - Application-specific exporters (Caddy, PostgreSQL, Redis) enabled automatically
 
 1. **Collectors** (run on the monitoring primary host)
-
    - Prometheus for metrics aggregation with 90-day retention
    - Loki for log aggregation with 90-day retention
    - Alertmanager for alert routing and notifications
 
 1. **Visualization** (runs on the monitoring primary host)
-
    - Grafana with provisioned datasources and dashboards
    - Native Kanidm OAuth2 authentication
 
@@ -62,22 +59,22 @@ option, currently set to `nixmon`.
 
 All options live under `server.monitoring`:
 
-| Option | Type | Default | Description |
-| ----------------------------------------- | ------ | --------- | ------------------------------------------------- |
-| `enable` | bool | `true` | Enable monitoring for this server |
-| `retention.metrics` | string | `"90d"` | Prometheus TSDB retention period |
-| `retention.logs` | string | `"90d"` | Loki log retention period |
-| `exporters.node.enable` | bool | `true` | Enable node_exporter |
-| `exporters.caddy.enable` | bool | auto | Enable Caddy metrics (auto if proxy configured) |
-| `exporters.postgres.enable` | bool | auto | Enable PostgreSQL exporter (auto on IO host) |
-| `exporters.redis.enable` | bool | auto | Enable Redis exporter (auto on IO host) |
-| `logs.enable` | bool | `true` | Enable Promtail log shipping |
-| `collector.enable` | bool | auto | Enable collectors (auto on monitoring host) |
-| `collector.grafana.kanidm.enable` | bool | `true` | Enable Kanidm OAuth2 for Grafana |
-| `collector.alerting.enable` | bool | `true` | Enable Alertmanager |
-| `collector.alerting.homeAssistant.enable` | bool | `false` | Enable Home Assistant webhook alerting |
-| `collector.alerting.nextcloudTalk.enable` | bool | `false` | Enable Nextcloud Talk webhook alerting |
-| `collector.proxmox.enable` | bool | `true` | Enable Proxmox VE metrics collection |
+| Option                                    | Type   | Default | Description                                     |
+| ----------------------------------------- | ------ | ------- | ----------------------------------------------- |
+| `enable`                                  | bool   | `true`  | Enable monitoring for this server               |
+| `retention.metrics`                       | string | `"90d"` | Prometheus TSDB retention period                |
+| `retention.logs`                          | string | `"90d"` | Loki log retention period                       |
+| `exporters.node.enable`                   | bool   | `true`  | Enable node_exporter                            |
+| `exporters.caddy.enable`                  | bool   | auto    | Enable Caddy metrics (auto if proxy configured) |
+| `exporters.postgres.enable`               | bool   | auto    | Enable PostgreSQL exporter (auto on IO host)    |
+| `exporters.redis.enable`                  | bool   | auto    | Enable Redis exporter (auto on IO host)         |
+| `logs.enable`                             | bool   | `true`  | Enable Promtail log shipping                    |
+| `collector.enable`                        | bool   | auto    | Enable collectors (auto on monitoring host)     |
+| `collector.grafana.kanidm.enable`         | bool   | `true`  | Enable Kanidm OAuth2 for Grafana                |
+| `collector.alerting.enable`               | bool   | `true`  | Enable Alertmanager                             |
+| `collector.alerting.homeAssistant.enable` | bool   | `false` | Enable Home Assistant webhook alerting          |
+| `collector.alerting.nextcloudTalk.enable` | bool   | `false` | Enable Nextcloud Talk webhook alerting          |
+| `collector.proxmox.enable`                | bool   | `true`  | Enable Proxmox VE metrics collection            |
 
 ### Auto-Detection
 
@@ -94,17 +91,17 @@ The monitoring module requires the following secrets in `hosts/server/nixmon/sec
 
 ```yaml
 MONITORING:
-    GRAFANA:
-        SECRET_KEY: <random-secret-key>
-        OAUTH_SECRET: <kanidm-oauth2-secret>
-    HOME_ASSISTANT:
-        WEBHOOK_URL: <ha-webhook-url>
-    NEXTCLOUD_TALK:
-        WEBHOOK_URL: <nc-talk-webhook-url>
+  GRAFANA:
+    SECRET_KEY: <random-secret-key>
+    OAUTH_SECRET: <kanidm-oauth2-secret>
+  HOME_ASSISTANT:
+    WEBHOOK_URL: <ha-webhook-url>
+  NEXTCLOUD_TALK:
+    WEBHOOK_URL: <nc-talk-webhook-url>
 PROXMOX:
-    USER: <proxmox-user-at-realm>
-    TOKEN_ID: <proxmox-token-name>
-    TOKEN_SECRET: <proxmox-token-secret>
+  USER: <proxmox-user-at-realm>
+  TOKEN_ID: <proxmox-token-name>
+  TOKEN_SECRET: <proxmox-token-secret>
 ```
 
 ### Generating Secrets
@@ -122,11 +119,11 @@ under `KANIDM/OAUTH2/GRAFANA_SECRET` (the Kanidm provisioning side).
 
 The module configures three virtual hosts on nixmon:
 
-| Service | Subdomain | Access |
-| ---------- | ----------------------- | ------ |
-| Grafana | `grafana.<domain>` | Public |
-| Prometheus | `prometheus.<domain>` | LAN |
-| Loki | `loki.<domain>` | LAN |
+| Service    | Subdomain             | Access |
+| ---------- | --------------------- | ------ |
+| Grafana    | `grafana.<domain>`    | Public |
+| Prometheus | `prometheus.<domain>` | LAN    |
+| Loki       | `loki.<domain>`       | LAN    |
 
 These are defined in `hosts/server/nixmon/default.nix` and collected by the IO
 primary host's Caddy configuration.
@@ -135,13 +132,13 @@ primary host's Caddy configuration.
 
 The following alerts are configured by default:
 
-| Alert | Condition | Severity |
-| ------------------- | ------------------------------------------- | -------- |
-| `HostDown` | `up{job="node"} == 0` for 2 minutes | Critical |
+| Alert               | Condition                                | Severity |
+| ------------------- | ---------------------------------------- | -------- |
+| `HostDown`          | `up{job="node"} == 0` for 2 minutes      | Critical |
 | `DiskSpaceCritical` | Root filesystem < 10% free for 5 minutes | Critical |
-| `HighCPUUsage` | CPU usage > 90% for 5 minutes | Warning |
-| `HighMemoryUsage` | Memory usage > 90% for 5 minutes | Warning |
-| `ServiceDown` | `up{job!="node"} == 0` for 2 minutes | Critical |
+| `HighCPUUsage`      | CPU usage > 90% for 5 minutes            | Warning  |
+| `HighMemoryUsage`   | Memory usage > 90% for 5 minutes         | Warning  |
+| `ServiceDown`       | `up{job!="node"} == 0` for 2 minutes     | Critical |
 
 Alerts are routed to:
 
