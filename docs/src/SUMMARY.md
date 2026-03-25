@@ -31,6 +31,7 @@
   - [Proxy](modules/nixos/server/proxy.md)
   - [SSH](modules/nixos/server/ssh.md)
 - [Flake Allocations](modules/flake/allocations.md)
+- [Home-Manager: DIY & Making](modules/home-manager/diy.md)
 
 # Packages
 

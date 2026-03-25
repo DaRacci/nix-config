@@ -20,6 +20,7 @@ This section provides an overview of the custom NixOS and Home-Manager modules d
 - `modules/flake/`: Flake-level modules for cross-host configuration.
   - [Flake Allocations](flake/allocations.md)
 - `modules/home-manager/`: Contains Home-Manager-specific modules.
+  - [DIY & Making](home-manager/diy.md)
 
 ## Key Options/Knobs
 

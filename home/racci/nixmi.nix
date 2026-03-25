@@ -118,7 +118,14 @@
 
     diy = {
       enable = true;
-      printing.enable = true;
+      printing = {
+        enable = true;
+        gitSync = {
+          enable = true;
+          remoteUrl = "https://github.com/DaRacci/.orca-slicer.git";
+        };
+      };
+
       cad.enable = true;
     };
   };
