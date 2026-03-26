@@ -17,15 +17,14 @@
         "flake-compat": [],
         "nixpkgs": [
           "nixpkgs"
-        ],
-        "tiny-audio-player": "tiny-audio-player"
+        ]
       },
       "locked": {
-        "lastModified": 1771347729,
-        "narHash": "sha256-FlmgIfxSdqWXmPxuLnOCL7NwqXsij56izpo31JZ3a2Y=",
+        "lastModified": 1773767380,
+        "narHash": "sha256-fHrKh0/EQlEJe6czXPo9/bw1lki7w0RAGKRqYv/445s=",
         "owner": "emmanuelrosa",
         "repo": "erosanix",
-        "rev": "5fbad454f9907299ac79a53ec0d2ff229d46f35a",
+        "rev": "ada69cf31f7649f8e59fe5376c94f3b0ea38bf37",
         "type": "github"
       },
       "original": {
@@ -41,11 +40,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1769996383,
-        "narHash": "sha256-AnYjnFWgS49RlqX7LrC4uA+sCCDBj0Ry/WOJ5XWAsa0=",
+        "lastModified": 1772408722,
+        "narHash": "sha256-rHuJtdcOjK7rAHpHphUb1iCvgkU3GpfvicLMwwnfMT0=",
         "owner": "hercules-ci",
         "repo": "flake-parts",
-        "rev": "57928607ea566b5db3ad13af0e57e921e6b12381",
+        "rev": "f20dc5d9b8027381c474144ecabc9034d6a839a3",
         "type": "github"
       },
       "original": {
@@ -92,11 +91,11 @@
     "lix": {
       "flake": false,
       "locked": {
-        "lastModified": 1768477706,
-        "narHash": "sha256-8BUrR3MXgpnWf6m68+D5viK0HKPWKTmobmtAkM/raKI=",
+        "lastModified": 1773429476,
+        "narHash": "sha256-XPGFph7e9hzUUNg8q8YaZ+nPwD7YPbfgPSt2iCZwWwY=",
         "ref": "release-2.94",
-        "rev": "6350f514582994ad92745732a173a0c474100937",
-        "revCount": 18534,
+        "rev": "7b210490aac51c4fdae827072e2a7cb540ea9ed9",
+        "revCount": 18540,
         "type": "git",
         "url": "https://git.lix.systems/lix-project/lix.git"
       },
@@ -182,11 +181,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1771369470,
-        "narHash": "sha256-0NBlEBKkN3lufyvFegY4TYv5mCNHbi5OmBDrzihbBMQ=",
+        "lastModified": 1774106199,
+        "narHash": "sha256-US5Tda2sKmjrg2lNHQL3jRQ6p96cgfWh3J1QBliQ8Ws=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "0182a361324364ae3f436a63005877674cf45efb",
+        "rev": "6c9a78c09ff4d6c21d0319114873508a6ec01655",
         "type": "github"
       },
       "original": {
@@ -222,27 +221,6 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
-        "type": "github"
-      }
-    },
-    "tiny-audio-player": {
-      "inputs": {
-        "nixpkgs": [
-          "erosanix",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1771101510,
-        "narHash": "sha256-S5of51uyVJsU7QJ41S+HK4OhDhK1+e4mvHJbJAgMlf0=",
-        "owner": "emmanuelrosa",
-        "repo": "tiny_audio_player",
-        "rev": "6b26f05b18c7db9137e9c0dea34f2a48ab2213ae",
-        "type": "github"
-      },
-      "original": {
-        "owner": "emmanuelrosa",
-        "repo": "tiny_audio_player",
         "type": "github"
       }
     }
