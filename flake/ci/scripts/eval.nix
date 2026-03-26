@@ -50,8 +50,14 @@ let
       packages = flake.packages.${system} or { };
       # Try packages.${system} first, fall back to flake root if attribute not found
       packagesResult = tryGetAttrPath attributePath packages;
+      flakeResult = tryGetAttrPath attributePath flake;
     in
-    if packagesResult.success then packagesResult.value else (tryGetAttrPath attributePath flake).value;
+    if packagesResult.success then
+      packagesResult.value
+    else if flakeResult.success then
+      flakeResult.value
+    else
+      throw "Package not found at attribute path: ${builtins.toJSON attributePath}";
 
   sanitizePosition =
     let
@@ -69,16 +75,21 @@ let
     let
       parts = builtins.match "(.*):([0-9]+)" pkg.meta.position;
     in
-    {
-      file = builtins.elemAt parts 0;
-      line = builtins.fromJSON (builtins.elemAt parts 1);
-    };
+    if parts == null then
+      throw "Unable to parse meta.position '${pkg.meta.position}': expected 'file:line' format"
+    else
+      {
+        file = builtins.elemAt parts 0;
+        line = builtins.fromJSON (builtins.elemAt parts 1);
+      };
 
   position =
     if (builtins.unsafeGetAttrPos "src" pkg) != null then
       sanitizePosition (builtins.unsafeGetAttrPos "src" pkg)
+    else if pkg ? meta && pkg.meta ? position then
+      sanitizePosition (positionFromMeta pkg)
     else
-      sanitizePosition (positionFromMeta pkg);
+      throw "Unable to determine position: package has neither 'src' attribute nor 'meta.position'";
 
   eval = builtins.tryEval position.file;
 in

@@ -87,7 +87,7 @@ steps:
         .woodpecker/ci-packages.yaml \
         PACKAGE \
         .#packages.x86_64-linux \
-        "builtins.filter (p: p.passthru.discovery or true) |> builtins.attrNames"
+        "pkgs: builtins.attrNames pkgs |> builtins.filter (name: (pkgs.${name}.passthru.discovery or true))"
 
   - name: matrix-update-packages.yaml
     image: registry.racci.dev/lix-woodpecker
@@ -98,7 +98,7 @@ steps:
         .woodpecker/update-packages.yaml \
         PACKAGE \
         .#packages.x86_64-linux \
-        "builtins.filter (p: p.passthru ? update-script) |> builtins.attrNames"
+        "pkgs: builtins.attrNames pkgs |> builtins.filter (name: (pkgs.${name}.passthru ? update-script))"
 
   - name: push-matrix-updates
     image: appleboy/drone-git-push
@@ -134,7 +134,7 @@ steps:
     commands: |-
       # check if the head commit of the branch is different from the base branch to avoid creating PRs with no changes
       if git rev-parse HEAD | grep -q "$(git rev-parse "${BASE_BRANCH}")"; then
-        echo "No changes detected for ${PACKAGE}, skipping PR creation."
+        echo "No changes detected, skipping PR creation."
         exit 0
       fi
 
