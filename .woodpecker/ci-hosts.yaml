@@ -39,7 +39,7 @@ steps:
         echo "Previous pipeline state was $${CI_PREV_PIPELINE_STATUS} for $${HOST}, checking if it is affected by changes."
         if [ -n "$${CI_PREV_COMMIT_SHA:-}" ]; then
           RANGE="$${CI_PREV_COMMIT_SHA}..$${CI_COMMIT_SHA}"
-          AFFECTED=$(nix run .#detect-affected-outputs -- --json --range "$${RANGE}" --output "$${HOST}" 2>/dev/null || echo "[]")
+          AFFECTED=$(nix run .#detect-affected-outputs -- nixosConfigurations --json --range "$${RANGE}" --outputs "$${HOST}" 2>/dev/null || echo "[]")
           if echo "$${AFFECTED}" | jq -e --arg host "$${HOST}" 'index($host)' > /dev/null 2>&1; then
             echo "Host $${HOST} is affected by changes, proceeding with build"
             SHOULD_BUILD=true
