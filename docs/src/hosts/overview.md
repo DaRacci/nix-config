@@ -37,7 +37,7 @@ Global options still shared across all hosts remain in `hosts/shared/global/`.
 
 - [Adding a New Host](../development/adding_a_new_host.md)
 
-______________________________________________________________________
+---
 
 ## Decky Loader Lifecycle
 

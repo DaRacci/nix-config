@@ -41,7 +41,7 @@ steps:
         echo "Previous pipeline state was $${CI_PREV_PIPELINE_STATUS} for $${HOME}, checking if it is affected by changes."
         if [ -n "$${CI_PREV_COMMIT_SHA:-}" ]; then
           RANGE="$${CI_PREV_COMMIT_SHA}..$${CI_COMMIT_SHA}"
-          AFFECTED=$(nix run .#detect-affected-outputs -- homeConfigurations --json --range "$${RANGE}" "$${HOME}" 2>/dev/null || echo "[]")
+          AFFECTED=$(nix run .#detect-affected-outputs -- homeConfigurations --json --range "$${RANGE}" --outputs "$${HOME}" 2>/dev/null || echo "[]")
           if echo "$${AFFECTED}" | jq -e --arg home "$${HOME}" 'index($home)' > /dev/null 2>&1; then
             echo "Home $${HOME} is affected by changes, proceeding with build"
             SHOULD_BUILD=true
