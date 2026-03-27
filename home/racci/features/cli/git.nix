@@ -10,6 +10,11 @@
   ];
 
   programs = {
+    ssh.matchBlocks."codeberg.org" = {
+      host = "codeberg.org";
+      user = "git";
+    };
+
     git = {
       enable = true;
       package = pkgs.gitFull;
