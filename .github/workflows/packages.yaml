@@ -23,6 +23,7 @@ jobs:
   discover-packages:
     name: Discover Packages
     runs-on: self-hosted
+    if: ${{ env.GITHUB_ACTIONS == 'true' }}
     outputs:
       matrix: ${{ steps.filtered-packages.outputs.matrix }}
     steps:

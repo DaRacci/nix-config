@@ -16,6 +16,7 @@ jobs:
   docs:
     runs-on: self-hosted
     name: Documentation
+    if: ${{ env.GITHUB_ACTIONS == 'true' }}
     permissions:
       contents: read
       id-token: write
