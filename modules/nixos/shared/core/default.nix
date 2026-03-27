@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   inherit (lib)
     literalExpression
@@ -6,6 +11,7 @@ let
     mkForce
     mkIf
     mkMerge
+    getExe
     ;
 
   cfg = config.custom.core;
@@ -103,7 +109,7 @@ in
     (mkIf cfg.bluetooth.enable {
       system.activationScripts = {
         rfkillUnblockBluetooth.text = ''
-          rfkill unblock bluetooth
+          ${getExe pkgs.rfkill} unblock bluetooth
         '';
       };
 
