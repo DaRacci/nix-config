@@ -27,13 +27,16 @@ in
       icon = "sh-immich";
     };
 
-    proxy.virtualHosts.photos.extraConfig =
-      let
-        cfg = config.services.immich;
-      in
-      ''
-        reverse_proxy http://${cfg.host}:${toString cfg.port}
-      '';
+    proxy.virtualHosts.photos = {
+      public = true;
+      extraConfig =
+        let
+          cfg = config.services.immich;
+        in
+        ''
+          reverse_proxy http://${cfg.host}:${toString cfg.port}
+        '';
+    };
 
     storage.bucketMounts = {
       immich = {
@@ -100,7 +103,7 @@ in
 
         server = {
           externalDomain = "https://photos.racci.dev";
-          publicUsers = false;
+          publicUsers = true;
         };
 
         storageTemplate = {
