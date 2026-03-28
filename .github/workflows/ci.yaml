@@ -13,7 +13,6 @@ permissions:
 jobs:
   generate-matrix:
     runs-on: self-hosted
-    if: ${{ env.GITHUB_ACTIONS == 'true' }}
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
