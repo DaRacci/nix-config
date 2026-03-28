@@ -41,7 +41,7 @@
       thumbfast
       smartskip
       mpv-notify-send
-      mpv-cheatsheet
+      mpv-cheatsheet-ng
       mpris
       modernz
       memo

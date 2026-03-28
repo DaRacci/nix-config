@@ -74,9 +74,6 @@ in
             port
             user
             ;
-
-          enableVectors = false; # Will be removed in future versions
-          enableVectorChord = true;
         };
 
       redis = {
