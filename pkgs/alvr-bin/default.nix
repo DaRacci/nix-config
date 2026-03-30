@@ -17,6 +17,7 @@
   libva,
   libvdpau,
   libxkbcommon,
+  libz,
   openssl,
   pipewire,
   pulseaudio,
@@ -52,6 +53,7 @@ stdenv.mkDerivation (finalAttrs: rec {
     libunwind
     libva
     libvdpau
+    libz
     vulkan-loader
     pipewire
     SDL2
