@@ -50,7 +50,16 @@
     };
   };
 
-  services.transmission.openPeerPorts = lib.mkForce true;
+  services.transmission = {
+    openPeerPorts = lib.mkForce true;
+    settings = {
+      upload_limit = 4096;
+      upload_limit_enabled = true;
+
+      ratio_limit = 2;
+      ratio_limit_enabled = true;
+    };
+  };
 
   server.proxy.virtualHosts.transmission.extraConfig = ''
     reverse_proxy localhost:${toString config.nixarr.transmission.uiPort}
