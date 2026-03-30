@@ -6,7 +6,7 @@ This section documents the custom NixOS service modules available in this config
 
 Managed EDR (Endpoint Detection and Response) platform that protects systems by detecting malicious footholds used by attackers.
 
-- **Entry point**: `modules/nixos/services/huntress.nix`
+- **Entry point**: `modules/nixos/shared/services/huntress.nix`
 - **Upstream**: [Huntress Managed EDR](https://www.huntress.com/platform/managed-edr)
 
 ### Special Options
@@ -36,7 +36,7 @@ ______________________________________________________________________
 
 Orchestrates Model Context Protocol (MCP) servers, providing a centralized way to manage and expose multiple MCP servers.
 
-- **Entry point**: `modules/nixos/services/mcpo.nix`
+- **Entry point**: `modules/nixos/shared/services/mcpo.nix`
 - **Upstream**: [MCPO GitHub Repository](https://github.com/open-webui/mcpo)
 
 ### Special Options
@@ -69,7 +69,7 @@ ______________________________________________________________________
 
 Comprehensive metrics collection and integration with Home Assistant via `hacompanion`.
 
-- **Entry point**: `modules/nixos/services/metrics.nix`
+- **Entry point**: `modules/nixos/shared/services/metrics.nix`
 - **Upstream**: [Hacompanion GitHub Repository](https://github.com/tobias-kuendig/hacompanion)
 
 ### Special Options
@@ -106,7 +106,7 @@ ______________________________________________________________________
 
 Extensions to the standard NixOS Tailscale module, providing easier tag management.
 
-- **Entry point**: `modules/nixos/services/tailscale.nix`
+- **Entry point**: `modules/nixos/shared/services/tailscale.nix`
 - **Upstream**: [Tailscale Tags Documentation](https://tailscale.com/kb/1018/tags/)
 
 ### Special Options
