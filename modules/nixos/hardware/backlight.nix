@@ -26,7 +26,7 @@ in
 
   config = mkMerge [
     (mkIf cfg.backlight.enable {
-      programs.light.enable = true;
+      hardware.acpilight.enable = true;
 
       environment.systemPackages = with pkgs; [
         ddcutil
