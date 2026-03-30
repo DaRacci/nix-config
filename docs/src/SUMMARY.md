@@ -32,6 +32,7 @@
   - [SSH](modules/nixos/server/ssh.md)
 - [Flake Allocations](modules/flake/allocations.md)
 - [Home-Manager: DIY & Making](modules/home-manager/diy.md)
+- [Home-Manager: AI Editors & Assistants](modules/home-manager/ai.md)
 
 # Packages
 

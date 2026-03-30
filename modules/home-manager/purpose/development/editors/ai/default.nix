@@ -8,12 +8,13 @@
 }:
 let
   inherit (lib)
-    types
+    mkEnableOption
     mkIf
     mkMerge
     mkOption
+    nameValuePair
     optionals
-    mkEnableOption
+    types
     ;
   inherit (types) listOf bool str;
 
@@ -21,9 +22,6 @@ let
 
   defaultSkills =
     builtins.readDir ./skills |> builtins.attrNames |> map (skillName: "${self}/skills/${skillName}");
-
-  defaultAgents =
-    builtins.readDir ./agents |> builtins.attrNames |> map (agentName: "${self}/agents/${agentName}");
 in
 {
   options.purpose.development.editors.ai = {
@@ -240,17 +238,13 @@ in
     home.file = mkMerge [
       (
         cfg.skills ++ optionals cfg.includeDefaults defaultSkills
-        |> map (skillSource: {
-          target = ".agents/skills/${baseNameOf skillSource}";
-          source = skillSource;
-        })
-      )
-      (
-        cfg.agents ++ optionals cfg.includeDefaults defaultAgents
-        |> map (agentSource: {
-          target = ".agents/agents/${baseNameOf agentSource}";
-          source = agentSource;
-        })
+        |> map (
+          skillSource:
+          nameValuePair ".agents/skills/${builtins.unsafeDiscardStringContext (baseNameOf skillSource)}" {
+            source = skillSource;
+          }
+        )
+        |> lib.listToAttrs
       )
     ];
 
