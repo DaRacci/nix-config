@@ -103,6 +103,16 @@
       url = "github:soulhotel/FF-ULTIMA";
       flake = false;
     };
+
+    # Agent Skills
+    skills-skill-creator = {
+      url = "github:anthropics/skills?dir=skills/skill-creator";
+      flake = false;
+    };
+    skills-systematic-debugging = {
+      url = "github:obra/superpowers?dir=skills/systematic-debugging";
+      flake = false;
+    };
   };
 
   outputs = _: { };

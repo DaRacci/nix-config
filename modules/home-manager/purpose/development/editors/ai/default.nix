@@ -1,4 +1,5 @@
 {
+  self,
   osConfig,
   config,
   pkgs,
@@ -6,13 +7,57 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
+  inherit (lib)
+    types
+    mkIf
+    mkMerge
+    mkOption
+    optionals
+    mkEnableOption
+    ;
+  inherit (types) listOf bool str;
 
   cfg = config.purpose.development.editors.ai;
+
+  defaultSkills =
+    builtins.readDir ./skills |> builtins.attrNames |> map (skillName: "${self}/skills/${skillName}");
+
+  defaultAgents =
+    builtins.readDir ./agents |> builtins.attrNames |> map (agentName: "${self}/agents/${agentName}");
 in
 {
   options.purpose.development.editors.ai = {
     enable = mkEnableOption "Enable AI Tools & Assistants";
+
+    includeDefaults = mkOption {
+      type = bool;
+      default = true;
+      description = ''
+        Whether to include the default set of agents and skills provided by this module.
+        This includes the agents and skills defined in the `./agents` and `./skills` directories of this module.
+
+        Disabling this will result in a minimal setup with only the base configuration for OpenCode and no pre-registered agents or skills.
+      '';
+    };
+
+    skills = mkOption {
+      type = listOf str;
+      default = [ ];
+      description = ''
+        List of additional AI skills to add to the global registry.
+        These should be paths to a skill directory, this could be through
+        a flake input or a path in the flake.
+
+        These skills will be installed to ~/.agents/skills and will be available to
+        all agents that support the skill system, such as Claude and OpenCode.
+      '';
+      example = ''
+        [
+          ''${inputs.my-skill-repo}/skills/my-skill
+          ''${self}/skills/another-skill
+        ]
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -191,6 +236,23 @@ in
         timeout = 5;
       };
     };
+
+    home.file = mkMerge [
+      (
+        cfg.skills ++ optionals cfg.includeDefaults defaultSkills
+        |> map (skillSource: {
+          target = ".agents/skills/${baseNameOf skillSource}";
+          source = skillSource;
+        })
+      )
+      (
+        cfg.agents ++ optionals cfg.includeDefaults defaultAgents
+        |> map (agentSource: {
+          target = ".agents/agents/${baseNameOf agentSource}";
+          source = agentSource;
+        })
+      )
+    ];
 
     user.persistence.directories = [
       ".local/share/opencode"
