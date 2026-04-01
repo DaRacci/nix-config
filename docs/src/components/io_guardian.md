@@ -9,12 +9,10 @@ It provides graceful startup and shutdown coordination between the database host
 The system consists of two components:
 
 1. **Guardian Server** (runs on client servers)
-
    - WebSocket server that listens for commands from the coordinator
    - Executes drain/undrain commands by controlling `io-databases.target`
 
 1. **Guardian Client** (runs on the IO Host)
-
    - WebSocket client that connects to all guardian servers
    - Sends `undrain` command after databases are online (start dependent services)
    - Sends `drain` command before database shutdown (stop dependent services)
@@ -109,16 +107,16 @@ Services listed here will:
 
 ### On Client Servers
 
-| Unit | Type | Description |
-| --------------------------------- | ------- | ------------------------------------------------ |
-| `io-guardian.service` | simple | WebSocket server for receiving commands |
-| `io-databases.target` | target | Represents "databases are online" |
-| `wait-for-io-databases.service`| oneshot | Waits for databases at boot (runs once) |
+| Unit                            | Type    | Description                             |
+| ------------------------------- | ------- | --------------------------------------- |
+| `io-guardian.service`           | simple  | WebSocket server for receiving commands |
+| `io-databases.target`           | target  | Represents "databases are online"       |
+| `wait-for-io-databases.service` | oneshot | Waits for databases at boot (runs once) |
 
 ### On nixio
 
-| Unit | Type | Description |
-| ---------------------------------- | ------- | ------------------------------------------ |
+| Unit                              | Type    | Description                           |
+| --------------------------------- | ------- | ------------------------------------- |
 | `io-database-coordinator.service` | oneshot | Sends undrain on start, drain on stop |
 
 ## Troubleshooting

@@ -15,4 +15,6 @@ writeShellApplication {
     ${lib.optionalString open-webpage "xdg-open http://localhost:8080"}
     wait
   '';
+
+  passthru.discovery = false;
 }

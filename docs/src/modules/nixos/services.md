@@ -30,7 +30,7 @@ Managed EDR (Endpoint Detection and Response) platform that protects systems by 
 
 The agent configuration is generated at `/etc/huntress/agent_config.yaml` during the service's `preStart` phase. It merges the provided account and organisation keys using `yaml-merge`. The keys are securely loaded into the service using systemd `LoadCredential`.
 
-______________________________________________________________________
+---
 
 ## MCPO (Model Context Protocol Orchestrator)
 
@@ -63,7 +63,7 @@ Orchestrates Model Context Protocol (MCP) servers, providing a centralized way t
 
 MCPO runs as a `DynamicUser` with a state directory at `/var/lib/mcpo`. The configuration is rendered via `sops.templates` and loaded into the service via systemd credentials. The service's `PATH` includes `bash`, `nodejs`, and `uv` by default to support various MCP server types.
 
-______________________________________________________________________
+---
 
 ## Metrics & Hacompanion
 
@@ -100,7 +100,7 @@ Comprehensive metrics collection and integration with Home Assistant via `hacomp
 
 Hacompanion uses a generated TOML configuration file and securely loads the Home Assistant API token from `sops.secrets.HACOMPANION_ENV`. The `upgradeStatus` feature can also integrate with Uptime Kuma to provide heartbeat notifications for successful system upgrades.
 
-______________________________________________________________________
+---
 
 ## Tailscale
 

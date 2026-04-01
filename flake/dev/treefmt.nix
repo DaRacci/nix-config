@@ -17,8 +17,10 @@
           disabled-lints = [ "manual_inherit_from" ];
         };
         mdformat.enable = true;
-        mdsh.enable = true;
         keep-sorted.enable = true;
+        prettier = {
+          enable = true;
+        };
         biome = {
           enable = true;
           settings.formatter = {
@@ -35,9 +37,13 @@
       };
 
       settings = {
-        formatter.shellcheck.excludes = [ ".envrc" ];
+        formatter = {
+          shellcheck.excludes = [ ".envrc" ];
+          prettier.includes = [ "*.{yaml}" ];
+        };
         global.excludes = [
           ".opencode/**"
+          "openspec/**"
           "**/secrets.yaml"
           "**/ssh_host_ed25519_key.pub"
           "hosts/server/nixcloud/provisioning.json"

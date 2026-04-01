@@ -6,15 +6,10 @@ let
   inherit (lib)
     getExe
     makeBinPath
-    filter
-    hasSuffix
     ;
   inherit (builtins)
     readFile
-    readDir
-    attrNames
-    map
-    concatStringsSep
+    path
     ;
 in
 {
@@ -23,8 +18,23 @@ in
       name,
       runtimeInputs ? [ ],
       sourceRoot,
+      libSource ? null,
       pkgs,
     }:
+    let
+      sourceStore = path {
+        path = sourceRoot;
+        name = "${name}-source";
+      };
+      libStore =
+        if libSource == null then
+          sourceStore + "/lib"
+        else
+          path {
+            path = libSource;
+            name = "${name}-lib";
+          };
+    in
     pkgs.writeTextFile {
       inherit name;
 
@@ -39,6 +49,7 @@ in
           makeBinPath (
             runtimeInputs
             ++ [
+              pkgs.jq
               pkgs.nix
               pkgs.git
               pkgs.busybox
@@ -47,25 +58,17 @@ in
         }" | split row (char esep)))
       ''
       + ''
-        ${readFile "${sourceRoot}/${name}.nu"}
+        ${readFile "${sourceStore}/${name}.nu"}
       '';
-      checkPhase =
-        let
-          libDir = "${sourceRoot}/lib";
-        in
-        ''
-          mkdir -p $out/bin/lib
 
-          ${
-            if builtins.pathExists libDir then
-              readDir "${sourceRoot}/lib"
-              |> attrNames
-              |> filter (libFile: hasSuffix "nu" libFile)
-              |> map (libFile: "cp ${"${sourceRoot}/lib/${libFile}"} $out/bin/lib/${libFile}")
-              |> concatStringsSep "\n"
-            else
-              ""
-          }
-        '';
+      # We use the checkPhase since writeTextFile doesn't support buildPhase.
+      checkPhase = ''
+        mkdir -p "$out/bin/lib"
+
+        find ${libStore} -maxdepth 1 -type f -name '*.nu' -print0 \
+          | xargs -0 -r cp -t "$out/bin/lib"
+      '';
+
+      passthru.discovery = false;
     };
 }

@@ -1,0 +1,148 @@
+variables:
+  - &env
+    BASE_BRANCH: &base_branch master
+    BRANCH: &branch chore/update-ci-matrix
+  - &when_push
+    event: [push]
+    branch: *base_branch
+  - &when_change
+    event: [push, pull_request]
+    branch: *base_branch
+  - &when_cron
+    event: cron
+    cron: weekly
+  - &when_manual
+    event: manual
+  - &when_all
+    - *when_manual
+    - *when_change
+    - *when_cron
+  - &when_ci
+    - *when_manual
+    - *when_change
+
+labels:
+  platform: linux/amd64
+
+steps:
+  - name: build-flake-checks
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    environment:
+      BINARY_CACHE_TOKEN:
+        from_secret: BINARY_CACHE_TOKEN
+    when: *when_ci
+    depends_on: [] # enable parallel steps
+    commands: |
+      nix run .#setup-attic -- --watch
+      nix run .#archive-flakes -- "." "flake/ci" "flake/dev"
+      nix run nixpkgs#nix-fast-build -- --skip-cached --no-nom --flake ".#checks.$(nix eval --raw --impure --expr builtins.currentSystem)"
+
+  - name: run-flake-checks
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    when: *when_ci
+    depends_on: ["build-flake-checks"]
+    commands: nix flake check
+
+  - name: check-upstream-todos
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    when: *when_all
+    commands: nix run .#check-upstream-todos
+
+  - name: run-flake-checker
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    when: *when_all
+    commands: nix run nixpkgs#flake-checker
+
+  - name: run-gitguardian
+    image: gitguardian/ggshield
+    pull: true
+    environment:
+      GITGUARDIAN_API_KEY:
+        from_secret: GITGUARDIAN_API_KEY
+    when: *when_ci
+    commands: ggshield secret scan commit-range $${CI_PREV_COMMIT_SHA}..
+
+  - name: matrix-ci-hosts.yaml
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    when: *when_ci
+    commands: nix run ".#update-matrix" -- .woodpecker/ci-hosts.yaml HOST .#nixosConfigurations
+
+  - name: matrix-ci-homes.yaml
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    when: *when_ci
+    commands: nix run ".#update-matrix" -- .woodpecker/ci-homes.yaml HOME .#homeConfigurations
+
+  - name: matrix-ci-packages.yaml
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    when: *when_push
+    commands: |
+      nix run ".#update-matrix" -- \
+        .woodpecker/ci-packages.yaml \
+        PACKAGE \
+        .#packages.x86_64-linux \
+        "pkgs: builtins.attrNames pkgs |> builtins.filter (name: (pkgs.${name}.passthru.discovery or true))"
+
+  - name: matrix-update-packages.yaml
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    when: *when_push
+    commands: |
+      nix run ".#update-matrix" -- \
+        .woodpecker/update-packages.yaml \
+        PACKAGE \
+        .#packages.x86_64-linux \
+        "pkgs: builtins.attrNames pkgs |> builtins.filter (name: (pkgs.${name}.passthru ? update-script))"
+
+  - name: push-matrix-updates
+    image: appleboy/drone-git-push
+    pull: true
+    when: *when_push
+    depends_on:
+      [
+        "matrix-ci-hosts.yaml",
+        "matrix-ci-homes.yaml",
+        "matrix-ci-packages.yaml",
+        "matrix-update-packages.yaml",
+      ]
+    settings:
+      remote: git@github.com:DaRacci/nix-config.git
+      branch: *branch
+      force: true
+      commit: true
+      author_name: "Woodpecker CI"
+      author_email: "woodpecker@racci.dev"
+      commit_message: "chore(ci): update CI matrix entries [SKIP CI]"
+      ssh_key:
+        from_secret: GITHUB_AUTH_KEY
+
+  - name: create-matrix-update-pr
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    when: *when_push
+    depends_on: ["push-matrix-updates"]
+    environment:
+      <<: *env
+      GITHUB_TOKEN:
+        from_secret: GITHUB_TOKEN
+    commands: |-
+      # check if the head commit of the branch is different from the base branch to avoid creating PRs with no changes
+      if git rev-parse HEAD | grep -q "$(git rev-parse "${BASE_BRANCH}")"; then
+        echo "No changes detected, skipping PR creation."
+        exit 0
+      fi
+
+      TITLE=$(git log -1 --pretty=%s)
+      nix run .#create-pr -- \
+        --title "$TITLE" \
+        --branch "$BRANCH" \
+        --base "${BASE_BRANCH}" \
+        --labels "automated,merge-queue" \
+        --reviewers "DaRacci" \
+        --body "This PR was created automatically by the Woodpecker CI pipeline to update the CI matrix entries based on changes to the configuration files."
