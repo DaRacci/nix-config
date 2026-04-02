@@ -44,8 +44,8 @@ def main [
   }
 
   let updated_yaml = $yaml | update $"matrix.($matrix_key)" $new_matrix
-  let yaml_string = updated_yaml | to yaml
+  let yaml_string = $updated_yaml | to yaml
 
-  yaml_string | save --force $workflow_file
+  $yaml_string | save --force $workflow_file
   log info $"Updated workflow file ($workflow_file) with new matrix for key ($matrix_key)"
 }

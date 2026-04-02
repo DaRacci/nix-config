@@ -46,7 +46,7 @@ steps:
     settings:
       remote: git@github.com:DaRacci/nix-config.git
       branch: *branch
-      force: true
+      rebase: true
       ssh_key:
         from_secret: GITHUB_AUTH_KEY
 

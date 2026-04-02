@@ -8,7 +8,7 @@ export-env {
 # Setup logging level and format
 #
 # Environment variables:
-#   VERBOSE
+#   DEBUG
 export def --env setup_logging [] {
   log set-level (if $env.DEBUG? == true { 10 } else { 20 })
   log info $"Logging initialized. Level: ($env.NU_LOG_LEVEL)"
@@ -17,7 +17,7 @@ export def --env setup_logging [] {
 
 # Checks if the provided variables are available from the environment.
 export def check_required_vars [
-  --exit            # If the required vars aren't present exit the script with code 0
+  --exit            # If the required vars aren't present exit the script with code 1
   ...vars: string   # The variables to look for.
 ] {
   mut missing_vars = [ ];

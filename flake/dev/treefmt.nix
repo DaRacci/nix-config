@@ -39,7 +39,7 @@
       settings = {
         formatter = {
           shellcheck.excludes = [ ".envrc" ];
-          prettier.includes = [ "*.{yaml}" ];
+          prettier.includes = [ "*.{yaml,yml}" ];
         };
         global.excludes = [
           ".opencode/**"
