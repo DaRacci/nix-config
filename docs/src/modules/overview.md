@@ -25,6 +25,7 @@ This section provides an overview of the custom NixOS and Home-Manager modules d
     - [MCPO](nixos/services/mcpo.md)
     - [Metrics](nixos/services/metrics.md)
     - [Tailscale](nixos/services/tailscale.md)
+    - [Woodpecker Nix](nixos/services/woodpecker-nix.md)
 - `modules/flake/`: Flake-level modules for cross-host configuration.
   - [Flake Allocations](flake/allocations.md)
 - `modules/home-manager/`: Contains Home-Manager-specific modules.
