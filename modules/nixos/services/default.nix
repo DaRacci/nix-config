@@ -3,5 +3,6 @@ _: {
     ./huntress.nix
     ./metrics.nix
     ./tailscale.nix
+    ./woodpecker-nix.nix
   ];
 }
