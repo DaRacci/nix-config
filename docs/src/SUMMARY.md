@@ -40,6 +40,7 @@
   - [Huntress](modules/nixos/services/huntress.md)
   - [Metrics](modules/nixos/services/metrics.md)
   - [Tailscale](modules/nixos/services/tailscale.md)
+  - [Woodpecker Nix](modules/nixos/services/woodpecker_nix.md)
 - [Core](modules/nixos/core/default.md)
   - [Activation](modules/nixos/core/activation.md)
   - [Auto Upgrade](modules/nixos/core/auto_upgrade.md)

@@ -3,7 +3,11 @@
   ...
 }:
 let
-  inherit (builtins) elem concatStringsSep;
+  inherit (builtins)
+    elem
+    concatStringsSep
+    elemAt
+    ;
   inherit (lib)
     head
     tail
@@ -15,7 +19,20 @@ let
     toUpper
     splitStringBy
     flatten
+    toInt
     ;
+
+  scalar = 1024;
+  sizeTable = rec {
+    K = scalar;
+    Ki = K;
+    M = K * scalar;
+    Mi = M;
+    G = M * scalar;
+    Gi = G;
+    T = G * scalar;
+    Ti = T;
+  };
 in
 rec {
   capitalise =
@@ -30,10 +47,10 @@ rec {
   /*
     Splits a formatted string into its component parts based on common word boundaries.
     For example:
-    - "HelloWorld" -> [ "Hello", "World" ]
-    - "hello_world" -> [ "hello", "world" ]
-    - "hello-world" -> [ "hello", "world" ]
-    - "hello world" -> [ "hello", "world" ]
+    - "HelloWorld" -> [ "Hello", "World" ] (CamelCase)
+    - "hello_world" -> [ "hello", "world" ] (Snake case)
+    - "hello-world" -> [ "hello", "world" ] (Kebab case)
+    - "hello world" -> [ "hello", "world" ] (Space separated)
   */
   splitFormattedString =
     str:
@@ -60,4 +77,19 @@ rec {
   toSnakeCase = str: concatStringsSep "_" (map toLower (splitFormattedString str));
 
   toKebabCase = str: concatStringsSep "-" (map toLower (splitFormattedString str));
+
+  parseSize =
+    s:
+    let
+      m = match "^([0-9]+)([KMGT]i?)B?$" s;
+    in
+    if m == null then
+      throw "Invalid size format: ${toString s}"
+    else
+      let
+        num = toInt (elemAt m 0);
+        unit = elemAt m 1;
+        multiplier = sizeTable.${unit} or (throw "Unknown size unit: ${unit}");
+      in
+      num * multiplier;
 }
