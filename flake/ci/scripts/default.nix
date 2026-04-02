@@ -46,7 +46,7 @@ in
   setup-attic = writeNuApplicationWithLibs {
     inherit pkgs libSource sourceRoot;
     name = "setup-attic";
-    runtimeInputs = [ pkgs.attic-client ];
+    runtimeInputs = [ pkgs.bash pkgs.attic-client ];
   };
 
   setup-git = writeNuApplicationWithLibs {

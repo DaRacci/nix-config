@@ -43,7 +43,7 @@ steps:
     pull: true
     when: *when_ci
     depends_on: ["build-flake-checks"]
-    commands: nix flake check
+    commands: nix flake check --override-input devenv-root "file+file://$PWD/.devenv/root"
 
   - name: check-upstream-todos
     image: registry.racci.dev/lix-woodpecker
@@ -64,7 +64,7 @@ steps:
       GITGUARDIAN_API_KEY:
         from_secret: GITGUARDIAN_API_KEY
     when: *when_ci
-    commands: ggshield secret scan commit-range $${CI_PREV_COMMIT_SHA}..
+    commands: ggshield secret scan commit-range $${CI_PREV_COMMIT_SHA:-HEAD}..
 
   - name: matrix-ci-hosts.yaml
     image: registry.racci.dev/lix-woodpecker
@@ -114,7 +114,7 @@ steps:
     settings:
       remote: git@github.com:DaRacci/nix-config.git
       branch: *branch
-      force: true
+      rebase: true
       commit: true
       author_name: "Woodpecker CI"
       author_email: "woodpecker@racci.dev"

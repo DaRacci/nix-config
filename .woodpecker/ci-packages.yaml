@@ -43,9 +43,6 @@ steps:
     image: registry.racci.dev/lix-woodpecker
     pull: true
     depends_on: [] # enable parallel steps
-    environment:
-      BINARY_CACHE_TOKEN:
-        from_secret: BINARY_CACHE_TOKEN
     commands: |
       set -euo pipefail
 
@@ -57,7 +54,7 @@ steps:
         echo "Previous pipeline state was $${CI_PREV_PIPELINE_STATUS} for $${PACKAGE}, checking if it is affected by changes."
         if [ -n "$${CI_PREV_COMMIT_SHA:-}" ]; then
           RANGE="$${CI_PREV_COMMIT_SHA}..$${CI_COMMIT_SHA}"
-          AFFECTED=$(nix run .#discover-packages -- --json "$${RANGE}" "$${PACKAGE}" 2>/dev/null || echo "[]")
+          AFFECTED=$(nix run .#discover-packages -- --json "$${RANGE}" "$${PACKAGE}" || echo "[]")
           if echo "$${AFFECTED}" | jq -e --arg package "$${PACKAGE}" 'index($package)' > /dev/null 2>&1; then
             echo "Package $${PACKAGE} is affected by changes, proceeding with build"
             SHOULD_BUILD=true

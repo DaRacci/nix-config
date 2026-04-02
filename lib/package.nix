@@ -6,9 +6,14 @@ let
   inherit (lib)
     getExe
     makeBinPath
+    filter
+    hasSuffix
     ;
   inherit (builtins)
     readFile
+    readDir
+    attrNames
+    concatStringsSep
     path
     ;
 in
@@ -80,12 +85,19 @@ rec {
         pkgs
         ;
 
-      extraDrv.checkPhase = ''
-        mkdir -p $out/bin/lib
+      extraDrv.checkPhase =
+        let
+          libDir = "${sourceRoot}/lib";
+        in
+        ''
+          mkdir -p $out/bin/lib
 
-        find ${libStore} -maxdepth 1 -type f -name '*.nu' -print0 \
-          | xargs -0 -r cp -t "$out/bin/lib"
-      '';
+          if [ -d ${libStore} ]; then
+            find ${libStore} -maxdepth 1 -type f -name '*.nu' -print0 \
+              | xargs -0 -r cp -t "$out/bin/lib"
+          fi
+        '';
+
 
       passthru.discovery = false;
     };
