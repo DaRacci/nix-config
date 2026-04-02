@@ -7,7 +7,6 @@ This section provides an overview of the custom NixOS and Home-Manager modules d
 ## Entry Points
 
 - `modules/nixos/`: Contains NixOS-specific modules.
-  - [NixOS Services](nixos/services.md)
   - [Desktop Module](nixos/desktop.md)
   - [Server Module](nixos/server/default.md)
     - [Dashboard Module](nixos/server/dashboard.md)
@@ -17,6 +16,13 @@ This section provides an overview of the custom NixOS and Home-Manager modules d
     - [Storage Module](nixos/server/storage.md)
     - [Proxy Module](nixos/server/proxy.md)
     - [SSH Module](nixos/server/ssh.md)
+  - [NixOS Services](nixos/services/default.md)
+    - [AI Agent](nixos/services/ai-agent.md)
+    - [Huntress](nixos/services/huntress.md)
+    - [MCPO](nixos/services/mcpo.md)
+    - [Metrics](nixos/services/metrics.md)
+    - [Tailscale](nixos/services/tailscale.md)
+    - [Woodpecker Nix](nixos/services/woodpecker-nix.md)
 - `modules/flake/`: Flake-level modules for cross-host configuration.
   - [Flake Allocations](flake/allocations.md)
 - `modules/home-manager/`: Contains Home-Manager-specific modules.

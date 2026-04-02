@@ -21,6 +21,7 @@
 
 - [Overview](modules/overview.md)
 - [Services](modules/nixos/services.md)
+  - [Woodpecker Shared Nix Store](modules/nixos/services/woodpecker-nix-store.md)
 - [Desktop](modules/nixos/desktop.md)
 - [Server](modules/nixos/server/default.md)
   - [Dashboard](modules/nixos/server/dashboard.md)
