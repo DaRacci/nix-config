@@ -1,5 +1,6 @@
 _: {
   imports = [
+    ./ai-agent.nix
     ./backend.nix
     ./voice.nix
     ./web.nix

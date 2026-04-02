@@ -1,7 +1,6 @@
----
-name: conventional-commits
-description: "Writes and reviews Conventional Commits commit messages (v1.0.0) to support semantic versioning and automated changelogs. Use when drafting git commit messages, PR titles, release notes, or when enforcing a conventional commit format (type(scope): subject, BREAKING CHANGE, footers, revert)."
----
+______________________________________________________________________
+
+## name: conventional-commits description: "Writes and reviews Conventional Commits commit messages (v1.0.0) to support semantic versioning and automated changelogs. Use when drafting git commit messages, PR titles, release notes, or when enforcing a conventional commit format (type(scope): subject, BREAKING CHANGE, footers, revert)."
 
 # Conventional Commits (v1.0.0)
 
@@ -166,8 +165,8 @@ Collect missing inputs quickly:
 Then produce:
 
 1. A conventional header
-2. Optional body (only if it adds clarity)
-3. Optional footers (`Refs:`, `Closes:`, `BREAKING CHANGE:`)
+1. Optional body (only if it adds clarity)
+1. Optional footers (`Refs:`, `Closes:`, `BREAKING CHANGE:`)
 
 ## Ready-to-use templates
 

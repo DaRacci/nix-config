@@ -383,6 +383,7 @@
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_2",
         "rust-overlay": "rust-overlay",
+        "services-zeroclaw": "services-zeroclaw",
         "ucodenix": "ucodenix"
       }
     },
@@ -404,6 +405,18 @@
         "owner": "oxalica",
         "repo": "rust-overlay",
         "type": "github"
+      }
+    },
+    "services-zeroclaw": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-5y37z+M81f1Vb6OYO2p98/F5r7Aqx72UK3+pboPc6Wo=",
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/marijanp/nixpkgs/refs/heads/add-zeroclaw-module/nixos/modules/services/misc/zeroclaw.nix"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/marijanp/nixpkgs/refs/heads/add-zeroclaw-module/nixos/modules/services/misc/zeroclaw.nix"
       }
     },
     "treefmt-nix": {

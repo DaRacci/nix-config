@@ -1,7 +1,6 @@
----
-name: nushell
-description: Processes structured data through pipelines, filters tables, transforms JSON/CSV/YAML, and defines custom commands. Use when scripting with typed parameters or working with tabular data.
----
+______________________________________________________________________
+
+## name: nushell description: Processes structured data through pipelines, filters tables, transforms JSON/CSV/YAML, and defines custom commands. Use when scripting with typed parameters or working with tabular data.
 
 # nu-shell
 

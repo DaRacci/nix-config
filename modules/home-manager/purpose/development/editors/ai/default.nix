@@ -86,7 +86,6 @@ in
           share = "disabled";
 
           plugin = [
-            "jj-opencode"
             "oh-my-opencode@latest"
             "@simonwjackson/opencode-direnv"
             "opencode-plugin-openspec"

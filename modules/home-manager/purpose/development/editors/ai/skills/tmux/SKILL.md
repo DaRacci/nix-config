@@ -1,7 +1,6 @@
----
-name: tmux
-description: Manages background processes, captures command output, and handles session multiplexing. Use when running long-running commands, capturing output from detached processes, or managing concurrent tasks in headless environments.
----
+______________________________________________________________________
+
+## name: tmux description: Manages background processes, captures command output, and handles session multiplexing. Use when running long-running commands, capturing output from detached processes, or managing concurrent tasks in headless environments.
 
 # tmux
 
@@ -9,14 +8,14 @@ Terminal multiplexer for background processes, output capture, and session manag
 
 ## Quick Reference
 
-| Command                               | Description                       |
+| Command | Description |
 | ------------------------------------- | --------------------------------- |
-| `tmux new -d -s name 'cmd'`           | Run command in background session |
-| `tmux capture-pane -t name -p`        | Capture output from session       |
-| `tmux send-keys -t name 'text' Enter` | Send input to session             |
-| `tmux kill-session -t name`           | Terminate session                 |
-| `tmux ls`                             | List all sessions                 |
-| `tmux has -t name`                    | Check if session exists           |
+| `tmux new -d -s name 'cmd'` | Run command in background session |
+| `tmux capture-pane -t name -p` | Capture output from session |
+| `tmux send-keys -t name 'text' Enter` | Send input to session |
+| `tmux kill-session -t name` | Terminate session |
+| `tmux ls` | List all sessions |
+| `tmux has -t name` | Check if session exists |
 
 ## Running Background Processes
 
