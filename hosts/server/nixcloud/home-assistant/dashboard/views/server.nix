@@ -1,7 +1,7 @@
 { lib, ... }:
 with (import ../lib.nix { inherit lib; });
 let
-  navbar = import ../components/navbar.nix { };
+  navbar = import ../components/navbar.nix { inherit lib; };
   viewHeader = import ../components/view-header.nix {
     content = ''
       # Server

@@ -7,7 +7,7 @@ let
     '';
   };
 
-  navbar = import ../components/navbar.nix { };
+  navbar = import ../components/navbar.nix { inherit lib; };
 in
 mkView {
   title = "Security";

@@ -1,0 +1,133 @@
+- id: bedroom_ac_adaptive_fan_speed
+  alias: Bedroom AC - Adaptive Fan Speed
+  description: >
+    Automatically adjusts bedroom AC fan speed based on how quickly the room's
+    temperature distance to target is shrinking.
+  mode: single
+
+  trigger:
+    - platform: time_pattern
+      minutes: "/5"
+    - platform: state
+      entity_id: sensor.bedroom_ac_temperature
+    - platform: state
+      entity_id: climate.bedroom_ac
+      attribute: current_temperature
+
+  condition:
+    # Only run while the AC is actively heating or cooling.
+    - condition: template
+      value_template: "{{ states('climate.bedroom_ac') in ['cool', 'heat'] }}"
+
+    # Cooldown: if this automation changed fan speed in the last 5 minutes, stop.
+    - condition: template
+      value_template: >
+        {% set ts = as_timestamp(states('input_datetime.bedroom_ac_fan_last_adjusted')) %}
+        {{ ts is none or (as_timestamp(now()) - ts) >= 300 }}
+
+  action:
+    - variables:
+        current_temp: "{{ state_attr('climate.bedroom_ac', 'current_temperature') | float(0) }}"
+        target_temp: "{{ states('input_number.target_temperature') | float(0) }}"
+        current_distance: "{{ (current_temp - target_temp) | abs }}"
+
+        elapsed_minutes: >
+          {% set ts = as_timestamp(states('input_datetime.bedroom_ac_fan_last_adjusted')) %}
+          {% if ts is none %}
+            15
+          {% else %}
+            {{ ((as_timestamp(now()) - ts) / 60) | float(0) }}
+          {% endif %}
+
+        # Use the shorter window: time since last fan adjustment or 15 minutes.
+        # Implemented as 5/10/15 minute buckets (automation cadence is 5 minutes).
+        window_minutes: >
+          {% set e = elapsed_minutes | float(15) %}
+          {% if e < 10 %}
+            5
+          {% elif e < 15 %}
+            10
+          {% else %}
+            15
+          {% endif %}
+
+        selected_change_sensor: >
+          {% if (window_minutes | int) == 5 %}
+            sensor.bedroom_ac_distance_change_5m
+          {% elif (window_minutes | int) == 10 %}
+            sensor.bedroom_ac_distance_change_10m
+          {% else %}
+            sensor.bedroom_ac_distance_change_15m
+          {% endif %}
+
+        # Statistics change sensor is newest - oldest.
+        # If distance to target is reducing, this value is negative.
+        distance_change: "{{ states(selected_change_sensor) | float(0) }}"
+        distance_reduced_by: "{{ (0 - distance_change) | float(0) }}"
+
+        fan_modes:
+          - quiet
+          - low
+          - medium_low
+          - medium
+          - medium_high
+          - high
+
+        current_fan_mode: "{{ state_attr('climate.bedroom_ac', 'fan_mode') | default('medium', true) }}"
+        current_index: >
+          {% if current_fan_mode in fan_modes %}
+            {{ fan_modes.index(current_fan_mode) }}
+          {% else %}
+            {{ fan_modes.index('medium') }}
+          {% endif %}
+
+        increase_fan_mode: >
+          {% if (current_index | int) < (fan_modes | count - 1) %}
+            {{ fan_modes[current_index | int + 1] }}
+          {% else %}
+            {{ current_fan_mode }}
+          {% endif %}
+
+        decrease_fan_mode: >
+          {% if (current_index | int) > 0 %}
+            {{ fan_modes[current_index | int - 1] }}
+          {% else %}
+            {{ current_fan_mode }}
+          {% endif %}
+
+    - choose:
+        # If we're reducing distance fast (>0.4) and we're already close (<2.0), reduce fan speed.
+        - conditions:
+            - condition: template
+              value_template: "{{ distance_reduced_by > 0.4 and current_distance < 2 }}"
+            - condition: template
+              value_template: "{{ decrease_fan_mode != current_fan_mode }}"
+          sequence:
+            - service: climate.set_fan_mode
+              target:
+                entity_id: climate.bedroom_ac
+              data:
+                fan_mode: "{{ decrease_fan_mode }}"
+            - service: input_datetime.set_datetime
+              target:
+                entity_id: input_datetime.bedroom_ac_fan_last_adjusted
+              data:
+                datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+        # If distance has not reduced by at least 0.2, increase fan speed.
+        - conditions:
+            - condition: template
+              value_template: "{{ distance_reduced_by < 0.2 }}"
+            - condition: template
+              value_template: "{{ increase_fan_mode != current_fan_mode }}"
+          sequence:
+            - service: climate.set_fan_mode
+              target:
+                entity_id: climate.bedroom_ac
+              data:
+                fan_mode: "{{ increase_fan_mode }}"
+            - service: input_datetime.set_datetime
+              target:
+                entity_id: input_datetime.bedroom_ac_fan_last_adjusted
+              data:
+                datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"

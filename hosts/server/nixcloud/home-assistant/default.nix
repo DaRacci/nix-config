@@ -43,7 +43,7 @@
             pkgs.pyarlo
             spotifyaio
 
-            aiobotocore # For S3 Backup to Minio
+            # aiobotocore # For S3 Backup to Minio
 
             # Required for home-generative-agent integration
             # Source: https://github.com/goruck/home-generative-agent/blob/main/custom_components/home_generative_agent/manifest.json
@@ -57,7 +57,7 @@
             langchain-core
             langchain-ollama
             langchain-openai
-            langchain-google-genai
+            # langchain-google-genai
           ];
       };
       customComponents = with pkgs.home-assistant-custom-components; [
