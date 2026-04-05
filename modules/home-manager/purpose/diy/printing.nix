@@ -23,6 +23,7 @@ let
     runtimeInputs = [
       pkgs.git
       pkgs.inotify-tools
+      pkgs.busybox
     ];
     text = ''
       REPO_DIR="${gitSyncCfg.repoPath}"
