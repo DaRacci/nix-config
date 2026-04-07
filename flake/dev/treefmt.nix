@@ -53,6 +53,7 @@
           "hosts/server/nixcloud/provisioning.json"
           "hosts/server/nixio/redis-mappings.json"
           "hosts/server/nixio/tunnel/credentials.json"
+          "pkgs/lix-woodpecker/v2.nix"
         ];
       };
     };

@@ -90,11 +90,11 @@ jj resolve               # Interactive conflict resolution
 
 **⚠️ Common mistakes:**
 
-- ❌ `@~1` → ✅ `@-`
-- ❌ `@^` → ✅ `@-`
-- ❌ `@~-1` → ✅ `@+`
+- ❌ `@~1` → ✅ `@-` (parent)
+- ❌ `@^` → ✅ `@-` (parent)
+- ❌ `@~-1` → ✅ `@+` (child)
 - ❌ `jj changes` → ✅ `jj log` or `jj diff`
-- ❌ `a,b,c` → ✅ `a | b | c`
+- ❌ `a,b,c` → ✅ `a | b | c` (union uses pipe, not comma)
 
 **Functions:**
 
