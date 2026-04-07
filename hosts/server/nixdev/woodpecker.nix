@@ -72,7 +72,7 @@
 
         WOODPECKER_GITHUB = "true";
         # WOODPECKER_FORGEJO = "true";
-        WOODPECKER_FORGEJO_URL = "https://codeberg.org";
+        # WOODPECKER_FORGEJO_URL = "https://codeberg.org";
 
         WOODPECKER_SERVER_ADDR = ":8000";
         WOODPECKER_GRPC_ADDR = ":9000";
