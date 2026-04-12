@@ -20,11 +20,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1773767380,
-        "narHash": "sha256-fHrKh0/EQlEJe6czXPo9/bw1lki7w0RAGKRqYv/445s=",
+        "lastModified": 1775661113,
+        "narHash": "sha256-bI6FIgj/v2dUoJyf8EVrpXg+fVoWP/HDxz8d19TXH2w=",
         "owner": "emmanuelrosa",
         "repo": "erosanix",
-        "rev": "ada69cf31f7649f8e59fe5376c94f3b0ea38bf37",
+        "rev": "c34899df5fb4e1744b780e4cae3b0999d780210d",
         "type": "github"
       },
       "original": {
@@ -40,11 +40,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1772408722,
-        "narHash": "sha256-rHuJtdcOjK7rAHpHphUb1iCvgkU3GpfvicLMwwnfMT0=",
+        "lastModified": 1775087534,
+        "narHash": "sha256-91qqW8lhL7TLwgQWijoGBbiD4t7/q75KTi8NxjVmSmA=",
         "owner": "hercules-ci",
         "repo": "flake-parts",
-        "rev": "f20dc5d9b8027381c474144ecabc9034d6a839a3",
+        "rev": "3107b77cd68437b9a76194f0f7f9c55f2329ca5b",
         "type": "github"
       },
       "original": {
@@ -181,11 +181,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1774386573,
-        "narHash": "sha256-4hAV26quOxdC6iyG7kYaZcM3VOskcPUrdCQd/nx8obc=",
+        "lastModified": 1775710090,
+        "narHash": "sha256-ar3rofg+awPB8QXDaFJhJ2jJhu+KqN/PRCXeyuXR76E=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "46db2e09e1d3f113a13c0d7b81e2f221c63b8ce9",
+        "rev": "4c1018dae018162ec878d42fec712642d214fdfa",
         "type": "github"
       },
       "original": {
