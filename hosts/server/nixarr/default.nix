@@ -24,6 +24,7 @@
   sops.secrets.wireguard = {
     format = "binary";
     sopsFile = ./wg.conf;
+    restartUnits = [ "wg.service" ];
   };
 
   vpnNamespaces.wg.accessibleFrom = lib.mkForce [

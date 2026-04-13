@@ -21,7 +21,6 @@ jobs:
   discover:
     name: Discover packages
     runs-on: self-hosted
-    if: ${{ env.GITHUB_ACTIONS == 'true' }}
     outputs:
       matrix: ${{ steps.build-matrix.outputs.matrix }}
       count: ${{ steps.build-matrix.outputs.count }}

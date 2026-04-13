@@ -63,13 +63,13 @@
     environmentFile = config.sops.templates.WOODPECKER_SERVER_ENV.path;
     environment = {
       WOODPECKER_HOST = "https://woodpecker.racci.dev";
-      WOODPECKER_OPEN = "open";
+      WOODPECKER_OPEN = "true";
       WOODPECKER_ADMIN = "DaRacci,Racci";
 
       WOODPECKER_DATABASE_DRIVER = "postgres";
 
       WOODPECKER_GITHUB = "true";
-      WOODPECKER_FORGEJO = "true";
+      # WOODPECKER_FORGEJO = "true";
       WOODPECKER_FORGEJO_URL = "https://codeberg.org";
 
       WOODPECKER_SERVER_ADDR = ":8000";

@@ -32,6 +32,9 @@ pkgs.mkShellNoCC {
     helix
     btop
     gping
+    dust
+    duf
+    ncdu
 
     # Core tooling typically expected
     uutils-coreutils-noprefix

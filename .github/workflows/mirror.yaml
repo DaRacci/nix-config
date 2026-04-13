@@ -4,7 +4,6 @@ on: [push, delete]
 
 jobs:
   mirror:
-    if: ${{ env.GITHUB_ACTIONS == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout full repo

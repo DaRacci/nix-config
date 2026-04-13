@@ -1,4 +1,5 @@
 {
+  self,
   osConfig,
   config,
   pkgs,
@@ -6,20 +7,68 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
+  inherit (lib)
+    mkEnableOption
+    mkIf
+    mkMerge
+    mkOption
+    nameValuePair
+    optionals
+    types
+    ;
+  inherit (types) listOf bool str;
 
   cfg = config.purpose.development.editors.ai;
+
+  defaultSkills =
+    builtins.readDir ./skills |> builtins.attrNames |> map (skillName: "${self}/skills/${skillName}");
 in
 {
   options.purpose.development.editors.ai = {
     enable = mkEnableOption "Enable AI Tools & Assistants";
+
+    includeDefaults = mkOption {
+      type = bool;
+      default = true;
+      description = ''
+        Whether to include the default set of agents and skills provided by this module.
+        This includes the agents and skills defined in the `./agents` and `./skills` directories of this module.
+
+        Disabling this will result in a minimal setup with only the base configuration for OpenCode and no pre-registered agents or skills.
+      '';
+    };
+
+    skills = mkOption {
+      type = listOf str;
+      default = [ ];
+      description = ''
+        List of additional AI skills to add to the global registry.
+        These should be paths to a skill directory, this could be through
+        a flake input or a path in the flake.
+
+        These skills will be installed to ~/.agents/skills and will be available to
+        all agents that support the skill system, such as Claude and OpenCode.
+      '';
+      example = ''
+        [
+          ''${inputs.my-skill-repo}/skills/my-skill
+          ''${self}/skills/another-skill
+        ]
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
-    home.activation.ensure-aifs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      run mkdir -p $VERBOSE_ARG \
-        "${config.home.homeDirectory}/Projects/AIFS";
-    '';
+    home = {
+      sessionVariables = {
+        OMO_SEND_ANONYMOUS_TELEMETRY = "0";
+      };
+
+      activation.ensure-aifs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        run mkdir -p $VERBOSE_ARG \
+          "${config.home.homeDirectory}/Projects/AIFS";
+      '';
+    };
 
     programs = {
       git.ignores = [
@@ -43,7 +92,6 @@ in
           share = "disabled";
 
           plugin = [
-            "jj-opencode"
             "oh-my-opencode@latest"
             "@simonwjackson/opencode-direnv"
             "opencode-plugin-openspec"
@@ -191,6 +239,19 @@ in
         timeout = 5;
       };
     };
+
+    home.file = mkMerge [
+      (
+        cfg.skills ++ optionals cfg.includeDefaults defaultSkills
+        |> map (
+          skillSource:
+          nameValuePair ".agents/skills/${builtins.unsafeDiscardStringContext (baseNameOf skillSource)}" {
+            source = skillSource;
+          }
+        )
+        |> lib.listToAttrs
+      )
+    ];
 
     user.persistence.directories = [
       ".local/share/opencode"

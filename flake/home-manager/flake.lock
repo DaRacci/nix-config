@@ -497,6 +497,8 @@
         "nix-index-database": "nix-index-database",
         "nix4vscode": "nix4vscode",
         "nixpkgs": "nixpkgs",
+        "skills-skill-creator": "skills-skill-creator",
+        "skills-systematic-debugging": "skills-systematic-debugging",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
         "systems": "systems",
@@ -523,6 +525,42 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "skills-skill-creator": {
+      "flake": false,
+      "locked": {
+        "dir": "skills/skill-creator",
+        "lastModified": 1774451446,
+        "narHash": "sha256-w//9LB1OVG9jlllY+VDse7Js0dn5x6Ys2vPuQACKsTM=",
+        "owner": "anthropics",
+        "repo": "skills",
+        "rev": "98669c11ca63e9c81c11501e1437e5c47b556621",
+        "type": "github"
+      },
+      "original": {
+        "dir": "skills/skill-creator",
+        "owner": "anthropics",
+        "repo": "skills",
+        "type": "github"
+      }
+    },
+    "skills-systematic-debugging": {
+      "flake": false,
+      "locked": {
+        "dir": "skills/systematic-debugging",
+        "lastModified": 1774462089,
+        "narHash": "sha256-r/Z+UxSFQIx99HnSPoU/toWMddXDcnLsbFXpQfLfj1k=",
+        "owner": "obra",
+        "repo": "superpowers",
+        "rev": "eafe962b18f6c5dc70fb7c8cc7e83e61f4cdde06",
+        "type": "github"
+      },
+      "original": {
+        "dir": "skills/systematic-debugging",
+        "owner": "obra",
+        "repo": "superpowers",
         "type": "github"
       }
     },

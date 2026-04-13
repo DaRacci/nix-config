@@ -86,6 +86,13 @@
         nixpkgs.follows = "nixpkgs";
       };
     };
+
+    # TODO:https://github.com/NixOS/nixpkgs/pull/500045
+    services-zeroclaw = {
+      url = "https://raw.githubusercontent.com/marijanp/nixpkgs/refs/heads/add-zeroclaw-module/nixos/modules/services/misc/zeroclaw.nix";
+      flake = false;
+      type = "file";
+    };
   };
 
   outputs = _: { };

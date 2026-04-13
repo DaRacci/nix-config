@@ -80,6 +80,7 @@ Huge thanks to the people who worked on these repositories.
 
 - https://github.com/pinpox/nixos/tree/main
 - https://github.com/25ASAB015/nix-dotfiles - Referenced for crafting the AI agents, skills and openspec config
+- https://github.com/knoopx/pi/ - Referenced for yet again more AI skills.
 
 [home-manager]: https://github.com/nix-community/home-manager
 [impermanence]: https://github.com/nix-community/impermanence

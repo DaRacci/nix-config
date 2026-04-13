@@ -1,8 +1,6 @@
 ---
+name: nixos-hardening
 description: Audits configurations for security issues, secrets handling, and hardening
-mode: subagent
-model: copilot/gpt-4.1
-temperature: 0.1
 tools:
   write: false
   edit: false

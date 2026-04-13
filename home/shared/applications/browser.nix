@@ -28,7 +28,14 @@ let
 in
 {
   home = {
-    sessionVariables.BROWSER = lib.mkForce "firefox";
+    sessionVariables = {
+      BROWSER = lib.mkForce "firefox";
+    }
+    // (optional (osConfig != null && osConfig.hardware.graphics.hasNvidia) {
+      # https://github.com/elFarto/nvidia-vaapi-driver?tab=readme-ov-file#firefox
+      MOZ_DISABLE_RDD_SANDBOX = "1";
+      CUDA_DISABLE_PERF_BOOST = "1";
+    });
 
     file."firefox-ultima" = {
       target = ".mozilla/firefox/${config.home.username}/chrome/firefox-ultima";
@@ -340,7 +347,16 @@ in
             "signon.autofillForms.autocompleteOff" = lock-true;
             "signon.autofillForms" = lock-false;
             "signon.generation.enabled" = lock-false;
-          };
+          }
+          // (optional (osConfig != null && osConfig.hardware.graphics.hasNvidia) {
+            # https://github.com/elFarto/nvidia-vaapi-driver?tab=readme-ov-file#firefox
+            "media.ffmpeg.vaapi.enabled" = lock-true;
+            "media.hardware-video-decoding.force-enabled" = lock-true;
+            "media.rdd-ffmpeg.enabled" = lock-true;
+            "media.av1.enabled" = lock-true;
+            "gfx.x11-egl.force.enabled" = lock-true;
+            "widget.dmabuf.force-enabled" = lock-true;
+          });
         };
 
       profiles.${config.home.username} = {

@@ -1,13 +1,8 @@
----
-name: code-style
-description: Write Nix code following repository conventions
----
+______________________________________________________________________
+
+## name: code-style-nix description: Write Nix code following repository conventions
 
 # Code Style
-
-## Critical Requirement
-
-**MUST** run `nix fmt <paths...>` after making any changes to ensure consistent formatting.
 
 ## Indentation
 
