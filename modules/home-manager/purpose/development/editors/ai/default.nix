@@ -59,10 +59,16 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.activation.ensure-aifs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      run mkdir -p $VERBOSE_ARG \
-        "${config.home.homeDirectory}/Projects/AIFS";
-    '';
+    home = {
+      sessionVariables = {
+        OMO_SEND_ANONYMOUS_TELEMETRY = "0";
+      };
+
+      activation.ensure-aifs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        run mkdir -p $VERBOSE_ARG \
+          "${config.home.homeDirectory}/Projects/AIFS";
+      '';
+    };
 
     programs = {
       git.ignores = [
