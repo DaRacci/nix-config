@@ -1,6 +1,6 @@
 {
   imports = [
-    ../shared/display-manager.nix
-    ../shared/remote.nix
+    ../shared/features/display-manager.nix
+    ../shared/features/remote.nix
   ];
 }

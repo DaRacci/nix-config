@@ -18,8 +18,7 @@ in
 {
   imports = [
     ./core
-    ./auto-upgrade.nix
-    ./core.nix
+    ./services
   ];
 
   options.custom = {

@@ -6,7 +6,7 @@
 }:
 let
   inherit (lib) mkEnableOption mkIf mkMerge;
-  cfg = config.custom.core.printing;
+  cfg = config.custom.core;
 in
 {
   options.custom.core.printing = {
@@ -18,7 +18,7 @@ in
       custom.core.printing.enable = config.host.device.role != "server" && !config.host.device.isVirtual;
     }
 
-    (mkIf cfg.enable {
+    (mkIf (cfg.enable && cfg.printing.enable) {
       services.printing = {
         enable = true;
         drivers = [
