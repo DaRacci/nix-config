@@ -12,17 +12,17 @@ description: Write Nix code following repository conventions
 
 ## Naming Conventions
 
-| Context | Convention | Example |
-|---------|------------|---------|
+| Context               | Convention | Example                          |
+| --------------------- | ---------- | -------------------------------- |
 | Files and directories | kebab-case | `my-module.nix`, `home-manager/` |
-| Nix attributes | camelCase | `myOption`, `enableFeature` |
-| Option paths | camelCase | `services.myService.enable` |
+| Nix attributes        | camelCase  | `myOption`, `enableFeature`      |
+| Option paths          | camelCase  | `services.myService.enable`      |
 
 ## Comments
 
 - Minimal comments preferred
 - Code should be self-explanatory
-- Use comments to explain *why*, not *what*
+- Use comments to explain _why_, not _what_
 
 ```nix
 # Good: explains why

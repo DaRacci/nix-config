@@ -4,26 +4,26 @@ Configures the display manager for graphical sessions on desktop and laptop host
 
 - **Entry point**: `modules/nixos/shared/display-manager.nix`
 
-______________________________________________________________________
+---
 
 ## Overview
 
 This module sets up [greetd](https://sr.ht/~kennylevinsen/greetd/) with [tuigreet](https://github.com/apognu/tuigreet) as the default display manager. It is automatically enabled on any host where `host.device.isHeadless` is `false`.
 
-______________________________________________________________________
+---
 
 ## Options
 
 ### `custom.display-manager.enable`
 
-| | |
-|---|---|
-| Type | `bool` |
+|         |                                  |
+| ------- | -------------------------------- |
+| Type    | `bool`                           |
 | Default | `!config.host.device.isHeadless` |
 
 Enable the custom display manager configuration. Automatically disabled on headless (server) hosts.
 
-______________________________________________________________________
+---
 
 ## Behaviour
 
@@ -36,7 +36,7 @@ When enabled, greetd is started with tuigreet providing a terminal-based greeter
 
 The greeter cache is persisted to `/var/cache/tuigreet` on impermanence-enabled hosts.
 
-______________________________________________________________________
+---
 
 ## Operational Notes
 
