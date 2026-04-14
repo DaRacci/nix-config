@@ -15,6 +15,15 @@
 
     settings =
       let
+        tessdata = pkgs.symlinkJoin {
+          name = "tessdata-multilang";
+          paths = with pkgs.tesseract.passthru.languages; [
+            eng
+            jpn
+            osd
+          ];
+        };
+
         ocrRegion = lib.getExe (
           pkgs.writeShellApplication {
             name = "ocrRegion";
@@ -22,6 +31,7 @@
               pkgs.uutils-coreutils-noprefix
               pkgs.grimblast
               pkgs.tesseract
+              pkgs.imagemagick
               pkgs.wl-clipboard
               pkgs.pulseaudio
               pkgs.sound-theme-freedesktop
@@ -29,11 +39,28 @@
             ];
             text = ''
               TEMP_FILE="$(mktemp --suffix=.png)";
+              PROCESSED_FILE="$(mktemp --suffix=.png)";
+              trap 'rm -f "$TEMP_FILE" "$PROCESSED_FILE"' EXIT;
 
               GRIMBLAST_HIDE_CURSOR=1 grimblast --freeze save area "$TEMP_FILE";
-              tesseract "$TEMP_FILE" - | wl-copy;
+
+              # upscale 3x, greyscale, sharpen, normalise contrast, and adds a 10px border.
+              # This significantly improves recognition on small or low-DPI captures.
+              convert "$TEMP_FILE" \
+                -resize 300% \
+                -colorspace Gray \
+                -sharpen 0x1 \
+                -contrast-stretch 0.15%x0.15% \
+                -bordercolor White \
+                -border 10x10 \
+                "$PROCESSED_FILE";
+
+              TESSDATA_PREFIX="${tessdata}" tesseract \
+                --oem 1 \
+                --psm 1 \
+                "$PROCESSED_FILE" - -l eng jpy osd | wl-copy;
+
               paplay ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/camera-shutter.oga;
-              rm "$TEMP_FILE";
 
               notify-send \
                 "OCR Text Copied" \
