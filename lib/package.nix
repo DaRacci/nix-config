@@ -13,11 +13,47 @@ let
     readFile
     readDir
     attrNames
-    map
     concatStringsSep
     ;
 in
-{
+rec {
+  writeNuApplication =
+    {
+      name,
+      runtimeInputs ? [ ],
+      sourceRoot,
+      pkgs,
+      extraDrv ? { },
+    }:
+    pkgs.writeTextFile (
+      {
+        inherit name;
+
+        executable = true;
+        destination = "/bin/${name}";
+        allowSubstitutes = true;
+        preferLocalBuild = false;
+        text = ''
+          #!${getExe pkgs.nushell}
+
+          $env.PATH = ($env.PATH | split row (char esep) | (prepend $"${
+            makeBinPath (
+              runtimeInputs
+              ++ [
+                pkgs.nix
+                pkgs.git
+                pkgs.busybox
+              ]
+            )
+          }" | split row (char esep)))
+        ''
+        + ''
+          ${readFile "${sourceRoot}/${name}.nu"}
+        '';
+      }
+      // extraDrv
+    );
+
   writeNuApplicationWithLibs =
     {
       name,
@@ -25,31 +61,15 @@ in
       sourceRoot,
       pkgs,
     }:
-    pkgs.writeTextFile {
-      inherit name;
+    writeNuApplication {
+      inherit
+        name
+        runtimeInputs
+        sourceRoot
+        pkgs
+        ;
 
-      executable = true;
-      destination = "/bin/${name}";
-      allowSubstitutes = true;
-      preferLocalBuild = false;
-      text = ''
-        #!${getExe pkgs.nushell}
-
-        $env.PATH = ($env.PATH | split row (char esep) | (prepend $"${
-          makeBinPath (
-            runtimeInputs
-            ++ [
-              pkgs.nix
-              pkgs.git
-              pkgs.busybox
-            ]
-          )
-        }" | split row (char esep)))
-      ''
-      + ''
-        ${readFile "${sourceRoot}/${name}.nu"}
-      '';
-      checkPhase =
+      extraDrv.checkPhase =
         let
           libDir = "${sourceRoot}/lib";
         in
@@ -67,5 +87,6 @@ in
               ""
           }
         '';
+
     };
 }

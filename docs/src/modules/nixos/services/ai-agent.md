@@ -45,32 +45,39 @@ The AI Agent has automatic approval for the following common and safe bash utili
 The AI Agent service includes 15 specialized agents designed for different development tasks. Each agent is optimized for specific roles:
 
 #### Deep Work & Architecture
+
 - **sisyphus**: Deep architectural analysis and foundational problem solving (Claude Opus 4.6)
 - **metis**: Strategic planning, best practices, and architectural wisdom (Claude Opus 4.6)
 - **architect**: System design, architecture decisions, and scalability planning (Claude Opus 4.6)
 
 #### Code Understanding & Exploration
+
 - **atlas**: Code exploration, pattern discovery, and codebase navigation (GPT-5.2 Codex)
 - **prometheus**: Code analysis, refactoring planning, and optimization strategies (GPT-5.2 Codex)
 - **explorer**: Quick code exploration and debugging assistance (GPT-5 Mini)
 
 #### Implementation & Building
+
 - **hephaestus**: Implementation, building, and crafting solutions (GPT-5.2 Codex)
 - **validator**: Test design, QA strategy, and reliability verification (GPT-5.2)
 
 #### Quality & Security
+
 - **critic**: Code review, quality analysis, and best practice enforcement (Claude Opus 4.6)
 - **guardian**: Security analysis, vulnerability assessment, and hardening (Claude Opus 4.6)
 
 #### Operations & Infrastructure
+
 - **devops**: Infrastructure, deployment, and operational excellence (Claude Opus 4.6)
 
 #### Knowledge & Communication
+
 - **oracle**: General technical inquiry and consultation (GPT-5.2)
 - **librarian**: Documentation lookup, API reference, and quick answers (GPT-5 Mini)
 - **scribe**: Documentation writing, README creation, and technical communication (GPT-5 Mini)
 
 #### General Purpose
+
 - **default**: General purpose agent for miscellaneous tasks (Claude Opus 4.6)
 
 ### Usage Example
