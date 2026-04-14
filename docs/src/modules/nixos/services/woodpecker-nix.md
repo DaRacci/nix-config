@@ -13,7 +13,7 @@ has two problems:
 
 1. **Security** – untrusted build code runs in the same store that powers your
    production system.
-2. **Pollution** – CI builds leave large, unrelated closures in the host store
+1. **Pollution** – CI builds leave large, unrelated closures in the host store
    and make GC harder to reason about.
 
 The module solves both by keeping a completely separate store under
@@ -48,11 +48,11 @@ and the containers that use it are sandboxed away from the host.
 
 ### systemd services
 
-| Service | Purpose | Sandboxed? |
-|---------|---------|-----------|
-| `woodpecker-nix-init` | Hash-aware bootstrap: creates directories, copies `runtimeEnv` + `bootstrapPackages` closures into the CI store, reconstructs profile symlinks, and registers GC roots. Runs on every start — only the `nix copy` is skipped when the hash is unchanged. | No – needs host `/nix/store` |
-| `woodpecker-nix-daemon` | Runs `nix daemon` with the CI store bind-mounted at `/nix` | Yes – `PrivateMounts`, `ProtectSystem`, etc. |
-| `woodpecker-nix-gc` (timer) | Periodic `nix-collect-garbage` against the CI store | No |
+| Service                     | Purpose                                                                                                                                                                                                                                                  | Sandboxed?                                   |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `woodpecker-nix-init`       | Hash-aware bootstrap: creates directories, copies `runtimeEnv` + `bootstrapPackages` closures into the CI store, reconstructs profile symlinks, and registers GC roots. Runs on every start — only the `nix copy` is skipped when the hash is unchanged. | No – needs host `/nix/store`                 |
+| `woodpecker-nix-daemon`     | Runs `nix daemon` with the CI store bind-mounted at `/nix`                                                                                                                                                                                               | Yes – `PrivateMounts`, `ProtectSystem`, etc. |
+| `woodpecker-nix-gc` (timer) | Periodic `nix-collect-garbage` against the CI store                                                                                                                                                                                                      | No                                           |
 
 ## How version-drift is handled
 
@@ -88,17 +88,16 @@ This leaves the shell with no tools besides builtins, `sh`, and `env`.
    so they survive the store overlay and let the OCI runtime exec the
    container regardless of what is in the CI store.
 
-2. **`runtimePackages` + PATH injection** — The module builds a merged
+1. **`runtimePackages` + PATH injection** — The module builds a merged
    `buildEnv` ("runtimeEnv") from the host's current packages and injects
    `PATH=<runtimeEnv>/bin:/bin:/usr/bin` into every pipeline container via
    `WOODPECKER_ENVIRONMENT`. This completely decouples the container's
    runtime tools from the image's own `/nix/store` paths:
-
    - The tools (nix, git, jq, …) always match the **host's** store.
    - The `runtimeEnv` closure is copied into the CI store during bootstrap.
    - Version drift between image and host never causes missing-binary failures.
 
-3. **Profile symlink reconstruction** — The init service rebuilds the Nix
+1. **Profile symlink reconstruction** — The init service rebuilds the Nix
    profile chain inside the CI store's profile directory and mounts it into
    containers at `/nix/var/nix/profiles:ro`. This ensures the image's
    default PATH entries (`/root/.nix-profile/bin`,
@@ -191,7 +190,7 @@ Mounts `<stateDir>/cache` at `/root/.cache/nix` inside every container,
 sharing the entire Nix cache directory (including the eval cache).
 
 > **Warning:** the eval cache is a SQLite database. SQLite supports many
-> concurrent *readers* but only a single *writer* at a time. Enabling this
+> concurrent _readers_ but only a single _writer_ at a time. Enabling this
 > option with high-parallelism agents can cause lock contention and stale
 > reads. Only enable it when you know builds are effectively sequential
 > (e.g. `WOODPECKER_MAX_WORKFLOWS=1`) or when contention is acceptable.
@@ -202,48 +201,48 @@ sharing the entire Nix cache directory (including the eval cache).
 
 All options live under `services.woodpeckerNix`.
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `enable` | `bool` | `false` | Enable the module |
-| `stateDir` | `str` | `"/var/lib/woodpecker-nix"` | Host directory for the CI store, profiles, socket, and config |
-| `isolatedStore.enable` | `bool` | `false` | Set up the isolated Nix store and daemon |
-| `isolatedStore.runtimePackages` | `[package]` | bash, coreutils, cacert, git, tar, gzip, grep, findutils, curl | Packages copied into the CI store and added to container `PATH` |
-| `isolatedStore.bootstrapPackages` | `[package]` | `[]` | Extra packages copied into the CI store (closures only, not on `PATH`) |
-| `isolatedStore.package` | `package` | `config.nix.package` | Nix/Lix package for the daemon (always in runtime env) |
-| `isolatedStore.maxJobs` | `uint` | `8` | Maximum parallel builds for the CI daemon |
-| `isolatedStore.substituters` | `[str]` | host substituters | Binary cache substituters for the CI daemon |
-| `isolatedStore.trustedPublicKeys` | `[str]` | host keys | Trusted public keys for the substituters |
-| `isolatedStore.extraConfig` | `lines` | `""` | Extra lines appended to the CI daemon's `nix.conf` |
-| `isolatedStore.gc.automatic` | `bool` | `true` | Enable periodic GC of the isolated store |
-| `isolatedStore.gc.interval` | `str` | `"weekly"` | systemd calendar expression for GC |
-| `isolatedStore.gc.olderThan` | `str` | `"14d"` | Delete paths older than this |
-| `cache` | `enum` | `"git"` | Cache sharing level: `"none"`, `"git"`, or `"all"` |
-| `woodpecker.agents` | `[str]` | `[]` | Agent names to configure (must match `services.woodpecker-agents.agents.<name>`) |
-| `woodpecker.extraVolumes` | `[str]` | `[]` | Extra Docker volume specs added to every container |
-| `woodpecker.extraEnvironment` | `attrsOf str` | `{}` | Extra `KEY=VALUE` entries added to `WOODPECKER_ENVIRONMENT` |
+| Option                            | Type          | Default                                                        | Description                                                                      |
+| --------------------------------- | ------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `enable`                          | `bool`        | `false`                                                        | Enable the module                                                                |
+| `stateDir`                        | `str`         | `"/var/lib/woodpecker-nix"`                                    | Host directory for the CI store, profiles, socket, and config                    |
+| `isolatedStore.enable`            | `bool`        | `false`                                                        | Set up the isolated Nix store and daemon                                         |
+| `isolatedStore.runtimePackages`   | `[package]`   | bash, coreutils, cacert, git, tar, gzip, grep, findutils, curl | Packages copied into the CI store and added to container `PATH`                  |
+| `isolatedStore.bootstrapPackages` | `[package]`   | `[]`                                                           | Extra packages copied into the CI store (closures only, not on `PATH`)           |
+| `isolatedStore.package`           | `package`     | `config.nix.package`                                           | Nix/Lix package for the daemon (always in runtime env)                           |
+| `isolatedStore.maxJobs`           | `uint`        | `8`                                                            | Maximum parallel builds for the CI daemon                                        |
+| `isolatedStore.substituters`      | `[str]`       | host substituters                                              | Binary cache substituters for the CI daemon                                      |
+| `isolatedStore.trustedPublicKeys` | `[str]`       | host keys                                                      | Trusted public keys for the substituters                                         |
+| `isolatedStore.extraConfig`       | `lines`       | `""`                                                           | Extra lines appended to the CI daemon's `nix.conf`                               |
+| `isolatedStore.gc.automatic`      | `bool`        | `true`                                                         | Enable periodic GC of the isolated store                                         |
+| `isolatedStore.gc.interval`       | `str`         | `"weekly"`                                                     | systemd calendar expression for GC                                               |
+| `isolatedStore.gc.olderThan`      | `str`         | `"14d"`                                                        | Delete paths older than this                                                     |
+| `cache`                           | `enum`        | `"git"`                                                        | Cache sharing level: `"none"`, `"git"`, or `"all"`                               |
+| `woodpecker.agents`               | `[str]`       | `[]`                                                           | Agent names to configure (must match `services.woodpecker-agents.agents.<name>`) |
+| `woodpecker.extraVolumes`         | `[str]`       | `[]`                                                           | Extra Docker volume specs added to every container                               |
+| `woodpecker.extraEnvironment`     | `attrsOf str` | `{}`                                                           | Extra `KEY=VALUE` entries added to `WOODPECKER_ENVIRONMENT`                      |
 
 ### Injected container environment
 
 When `isolatedStore.enable` is true, the module automatically injects the
 following into every pipeline container:
 
-| Variable | Value | Purpose |
-|----------|-------|---------|
-| `PATH` | `<runtimeEnv>/bin:/bin:/usr/bin` | Tools from the CI store + static busybox fallback |
-| `NIX_REMOTE` | `daemon` | Route all Nix operations through the shared daemon |
-| `SSL_CERT_FILE` | `<runtimeEnv>/etc/ssl/certs/ca-bundle.crt` | TLS certificate bundle |
-| `NIX_SSL_CERT_FILE` | (same as above) | Nix-specific TLS certs |
-| `GIT_SSL_CAINFO` | (same as above) | Git TLS certs |
+| Variable            | Value                                      | Purpose                                            |
+| ------------------- | ------------------------------------------ | -------------------------------------------------- |
+| `PATH`              | `<runtimeEnv>/bin:/bin:/usr/bin`           | Tools from the CI store + static busybox fallback  |
+| `NIX_REMOTE`        | `daemon`                                   | Route all Nix operations through the shared daemon |
+| `SSL_CERT_FILE`     | `<runtimeEnv>/etc/ssl/certs/ca-bundle.crt` | TLS certificate bundle                             |
+| `NIX_SSL_CERT_FILE` | (same as above)                            | Nix-specific TLS certs                             |
+| `GIT_SSL_CAINFO`    | (same as above)                            | Git TLS certs                                      |
 
 ### Injected container volumes
 
-| Host path | Container path | Mode | Purpose |
-|-----------|---------------|------|---------|
-| `<stateDir>/nix/store` | `/nix/store` | `ro` | Shared Nix store |
-| `<stateDir>/nix/var/nix/daemon-socket` | `/nix/var/nix/daemon-socket` | `rw` | Daemon socket |
-| `<stateDir>/nix/var/nix/profiles` | `/nix/var/nix/profiles` | `ro` | Reconstructed profile symlinks |
-| `<stateDir>/cache/gitv3` | `/root/.cache/nix/gitv3` | `rw` | Git cache (when `cache = "git"`) |
-| `<stateDir>/cache` | `/root/.cache/nix` | `rw` | Full cache (when `cache = "all"`) |
+| Host path                              | Container path               | Mode | Purpose                           |
+| -------------------------------------- | ---------------------------- | ---- | --------------------------------- |
+| `<stateDir>/nix/store`                 | `/nix/store`                 | `ro` | Shared Nix store                  |
+| `<stateDir>/nix/var/nix/daemon-socket` | `/nix/var/nix/daemon-socket` | `rw` | Daemon socket                     |
+| `<stateDir>/nix/var/nix/profiles`      | `/nix/var/nix/profiles`      | `ro` | Reconstructed profile symlinks    |
+| `<stateDir>/cache/gitv3`               | `/root/.cache/nix/gitv3`     | `rw` | Git cache (when `cache = "git"`)  |
+| `<stateDir>/cache`                     | `/root/.cache/nix`           | `rw` | Full cache (when `cache = "all"`) |
 
 ## Troubleshooting
 
@@ -273,13 +272,13 @@ appear broken:
 
 1. Check that `<stateDir>/nix/var/nix/profiles` is mounted into the container
    (verify agent `WOODPECKER_BACKEND_DOCKER_VOLUMES`).
-2. Inspect the host-side symlinks:
+1. Inspect the host-side symlinks:
    ```bash
    ls -la /var/lib/woodpecker-nix/nix/var/nix/profiles/
    ```
    You should see `default-1-link` pointing to a `/nix/store/...-woodpecker-ci-runtime`
    path, and `default` pointing to `default-1-link`.
-3. Restart the init service to force reconstruction:
+1. Restart the init service to force reconstruction:
    ```bash
    systemctl restart woodpecker-nix-init.service
    ```
