@@ -33,17 +33,17 @@ serviceConfig = {
 
 **Why each matters:**
 
-| Option | What it prevents |
-| ----------------------- | ------------------------------------------------------------------------------------------------ |
-| `NoNewPrivileges` | Process or children gaining new privilege through setuid/setgid binaries or filesystem capabilities |
-| `ProtectClock` | Modifying system clock (only NTP daemons need this) |
-| `ProtectHostname` | Changing system hostname or NIS domain |
-| `ProtectKernelModules` | Loading or unloading kernel modules |
-| `ProtectKernelLogs` | Accessing kernel log ring buffer |
-| `ProtectKernelTunables` | Writing to `/proc/sys`, `/sys`, or similar kernel tunables |
-| `RestrictRealtime` | Acquiring real-time scheduling policies (prevents CPU starvation attacks) |
-| `RestrictSUIDSGID` | Creating setuid/setgid files |
-| `LockPersonality` | Changing execution personality (prevents running non-native binaries) |
+| Option                  | What it prevents                                                                                 	 |
+| ----------------------- | ------------------------------------------------------------------------------------------------ 	 |
+| `NoNewPrivileges`       | Process or children gaining new privileges through setuid/setgid binaries or filesystem capabilities |
+| `ProtectClock`          | Modifying system clock (only NTP daemons need this)                                       		 |
+| `ProtectHostname`       | Changing system hostname or NIS domain                                                       	 |
+| `ProtectKernelModules`  | Loading or unloading kernel modules                                                              	 |
+| `ProtectKernelLogs`     | Accessing the kernel log ring buffer                                                             	 |
+| `ProtectKernelTunables` | Writing to `/proc/sys`, `/sys`, or similar kernel tunables                                       	 |
+| `RestrictRealtime`      | Acquiring real-time scheduling policies (prevents CPU starvation attacks)                        	 |
+| `RestrictSUIDSGID`      | Creating setuid/setgid files                                                                     	 |
+| `LockPersonality`       | Changing execution personality (prevents running non-native binaries)                        	 |
 
 ### Tier 2: Isolation (safe for most services)
 
@@ -60,14 +60,14 @@ serviceConfig = {
 };
 ```
 
-| Option | What it does | When to relax |
+| Option               | What it does                                                           | When to relax                                                                                     |
 | -------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `PrivateDevices` | Hides `/dev` device nodes (only pseudo-devices remain) | Service needs raw device access (for example GPU or USB) |
-| `PrivateTmp` | Gives service its own `/tmp` and `/var/tmp` | Rarely needs relaxing |
-| `PrivateMounts` | Isolates mount namespace | Service creates mount points |
-| `ProtectHome` | Makes `/home`, `/root`, `/run/user` inaccessible | Service reads user home directories |
-| `ProtectSystem` | Makes filesystem read-only (`"strict"`) or mostly read-only (`"full"`) | Use `"full"` if service writes to `/etc`; pair `"strict"` with `ReadWritePaths` for specific dirs |
-| `RestrictNamespaces` | Blocks creating new namespaces | Service uses containers or sandboxing internally |
+| `PrivateDevices`     | Hides `/dev` device nodes (only pseudo-devices remain)                 | Service needs raw device access (for example GPU or USB)                                                  |
+| `PrivateTmp`         | Gives service its own `/tmp` and `/var/tmp`                            | Rarely needs relaxing                                                                             |
+| `PrivateMounts`      | Isolates mount namespace                                               | Service creates mount points                                                                      |
+| `ProtectHome`        | Makes `/home`, `/root`, `/run/user` inaccessible                       | Service reads user home directories                                                               |
+| `ProtectSystem`      | Makes filesystem read-only (`"strict"`) or mostly read-only (`"full"`) | Use `"full"` if service writes to `/etc`; pair `"strict"` with `ReadWritePaths` for specific dirs |
+| `RestrictNamespaces` | Blocks creating new namespaces                                         | Service uses containers or sandboxing internally                                                  |
 
 **`ProtectSystem` levels:**
 
@@ -95,11 +95,11 @@ serviceConfig = {
 };
 ```
 
-| Option | What it does | When to use |
+| Option         | What it does                                                          | When to use                                                            |
 | -------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `DynamicUser` | Allocates temporary uid/gid that is released when service stops | Stateless services, no persistent file ownership needed |
-| `User`/`Group` | Run as specific pre-created user | Services needing stable uid (for example file ownership across restarts) |
-| `PrivateUsers` | Isolates user/group databases | Most services; breaks if service needs to look up other system users |
+| `DynamicUser`  | Allocates a temporary uid/gid that is released when the service stops | Stateless services, no persistent file ownership needed                |
+| `User`/`Group` | Run as a specific pre-created user                                    | Services needing stable uid (e.g., for file ownership across restarts) |
+| `PrivateUsers` | Isolates user/group databases                                         | Most services; breaks if service needs to look up other system users   |
 
 **Choosing between DynamicUser and User/Group:**
 
@@ -141,15 +141,15 @@ serviceConfig = {
 
 **Capability reference (common services):**
 
-| Capability | Purpose | Typical services |
+(??)| Capability | Purpose | Typical services |
 | --------------------------- | ------------------------------------- | ------------------------------------------- |
-| `CAP_NET_BIND_SERVICE` | Bind to privileged ports (< 1024) | Web servers, DNS |
-| `CAP_CHOWN` | Change file ownership | Services managing files for multiple users |
-| `CAP_DAC_OVERRIDE` | Bypass file read/write/execute checks | Backup services, file managers |
-| `CAP_SETUID` / `CAP_SETGID` | Change process UID/GID | Services that drop privileges after startup |
-| `CAP_SYS_CHROOT` | Use `chroot(2)` | Mail servers, FTP servers |
-| `CAP_NET_RAW` | Use raw sockets | Ping, network monitoring |
-| `CAP_NET_ADMIN` | Network administration | VPN, firewall management |
+(??)| `CAP_NET_BIND_SERVICE` | Bind to privileged ports (< 1024) | Web servers, DNS |
+(??)| `CAP_CHOWN` | Change file ownership | Services managing files for multiple users |
+(??)| `CAP_DAC_OVERRIDE` | Bypass file read/write/execute checks | Backup services, file managers |
+(??)| `CAP_SETUID` / `CAP_SETGID` | Change process UID/GID | Services that drop privileges after startup |
+(??)| `CAP_SYS_CHROOT` | Use chroot(2) | Mail servers, FTP servers |
+(??)| `CAP_NET_RAW` | Use raw sockets | Ping, network monitoring |
+(??)| `CAP_NET_ADMIN` | Network administration | VPN, firewall management |
 
 **SystemCallFilter sets:**
 
@@ -271,16 +271,16 @@ When hardened service fails to start, isolate which option caused failure:
 1. If service fails, check `journalctl -u myservice.service` for errors
 1. Look for common failure patterns:
 
-| Error pattern | Likely cause | Fix |
+| Error pattern                            | Likely cause                                | Fix                                                        |
 | ---------------------------------------- | ------------------------------------------- | ---------------------------------------------------------- |
-| `Permission denied` on filesystem paths | `ProtectSystem` too strict | Add `ReadWritePaths` or use `StateDirectory` |
-| `Operation not permitted` on device | `PrivateDevices = true` | Set to `false` or add specific `DeviceAllow` entries |
-| `Permission denied` on port bind | Missing `CAP_NET_BIND_SERVICE` | Add to `CapabilityBoundingSet` |
-| `Protocol not supported` / socket errors | `RestrictAddressFamilies` too restrictive | Add required `AF_*` families |
-| Segfault or JIT failure | `MemoryDenyWriteExecute = true` | Set to `false` for JIT-dependent services |
-| `Operation not permitted` on syscall | `SystemCallFilter` missing required syscall | Add syscall or filter set; use `SystemCallLog` to identify |
-| Service can't find users/groups | `PrivateUsers = true` | Set to `false` if service needs system user lookups |
-| `Failed to set hostname` | `ProtectHostname = true` | Set to `false` (rare — most services don't set hostname) |
+| `Permission denied` on filesystem paths  | `ProtectSystem` too strict                  | Add `ReadWritePaths` or use `StateDirectory`               |
+| `Operation not permitted` on device      | `PrivateDevices = true`                     | Set to `false` or add specific `DeviceAllow` entries       |
+| `Permission denied` on port bind         | Missing `CAP_NET_BIND_SERVICE`              | Add to `CapabilityBoundingSet`                             |
+| `Protocol not supported` / socket errors | `RestrictAddressFamilies` too restrictive   | Add required `AF_*` families                               |
+| Segfault or JIT failure                  | `MemoryDenyWriteExecute = true`             | Set to `false` for JIT-dependent services                  |
+| `Operation not permitted` on syscall     | `SystemCallFilter` missing required syscall | Add syscall or filter set; use `SystemCallLog` to identify |
+| Service can't find users/groups          | `PrivateUsers = true`                       | Set to `false` if service needs system user lookups        |
+| `Failed to set hostname`                 | `ProtectHostname = true`                    | Set to `false` (rare — most services don't set hostname)   |
 
 ### Using systemd-analyze security
 

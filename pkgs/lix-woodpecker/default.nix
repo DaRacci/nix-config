@@ -8,7 +8,8 @@ let
   inherit (pkgs.stdenv.hostPlatform) system;
   inherit (inputs.nix2container.packages.${system}) nix2container;
   buildLixImage = import ./v2.nix;
-in buildLixImage {
+in
+buildLixImage {
   inherit pkgs nix2container;
   name = "registry.racci.dev/lix-woodpecker";
   maxLayers = 128;
