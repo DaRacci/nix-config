@@ -1,11 +1,23 @@
 {
   writeShellApplication,
   fd,
+  fzf,
+  gum,
+  jq,
+  strace,
+  wl-clipboard,
   lib,
 }:
 writeShellApplication {
   name = "list-ephemeral";
-  runtimeInputs = [ fd ];
+  runtimeInputs = [
+    fd
+    fzf
+    gum
+    jq
+    strace
+    wl-clipboard
+  ];
 
   text = builtins.readFile ./list-ephemeral.sh;
 

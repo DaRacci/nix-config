@@ -24,6 +24,7 @@
             hyperfine # Benchmarking
             cocogitto # Conventional Commits
             dive
+            openspec
 
             # Nix tools
             dix

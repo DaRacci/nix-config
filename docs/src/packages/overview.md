@@ -14,7 +14,7 @@ This section documents the custom packages defined in this repository. These are
   - `hypr-gamemode`: Script to optimize Hyprland performance for gaming.
   - `io-guardian`: Database lifecycle management across hosts.
   - `lidarr-plugins`: Lidarr plugins branch.
-  - `list-ephemeral`: Utility to identify and list ephemeral filesystem entries.
+  - `list-ephemeral`: Utility to identify ephemeral paths, trace file access, and generate persistence snippets.
   - `lix-woodpecker`: Woodpecker CI runner.
   - `mcp-sequential-thinking`: MCP server for step-by-step reasoning.
   - `mcp-server-amazon`: MCP server for Amazon services interaction.

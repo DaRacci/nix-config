@@ -20,6 +20,7 @@
 # Modules
 
 - [Overview](modules/overview.md)
+- [NixOS](modules/nixos/overview.md)
 - [Services](modules/nixos/services.md)
 - [Desktop](modules/nixos/desktop.md)
 - [Server](modules/nixos/server/default.md)
@@ -33,6 +34,7 @@
 - [Flake Allocations](modules/flake/allocations.md)
 - [Home-Manager: DIY & Making](modules/home-manager/diy.md)
 - [Home-Manager: AI Editors & Assistants](modules/home-manager/ai.md)
+- [Home-Manager: list-ephemeral](modules/home-manager/programs/list-ephemeral.md)
 
 # Packages
 

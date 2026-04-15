@@ -189,6 +189,7 @@ in
       home.packages = [
         pkgs.orca-slicer-zink
         pkgs.lycheeslicer
+        pkgs.uvtools
       ];
 
       user.persistence.directories = [
