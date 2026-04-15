@@ -92,7 +92,7 @@ in
           share = "disabled";
 
           plugin = [
-            "oh-my-opencode@latest"
+            "oh-my-openagent@latest"
             "@simonwjackson/opencode-direnv"
             "opencode-plugin-openspec"
             "@plannotator/opencode@latest"
