@@ -85,6 +85,26 @@
             };
           };
         };
+
+        tasks."bash:linkSkills" = {
+          before = [ "devenv:enterShell" ];
+          exec = ''
+            skills_src="$DEVENV_ROOT/modules/home-manager/purpose/development/editors/ai/skills"
+            skills_dst="$DEVENV_ROOT/.opencode/skills"
+
+            for skill_dir in "$skills_src"/*/; do
+              [ -d "$skill_dir" ] || continue
+              skill_name=$(basename "$skill_dir")
+              target="$skills_dst/$skill_name"
+
+              if [ ! -e "$target" ] && [ ! -L "$target" ]; then
+                echo "Linking skill: $skill_name"
+                rel_path=$(realpath --relative-to="$skills_dst" "$skill_dir")
+                ln -s "$rel_path" "$target"
+              fi
+            done
+          '';
+        };
       };
     };
 }
