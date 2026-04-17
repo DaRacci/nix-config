@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: vhs description: Creates terminal screenshots and GIFs using VHS tape files. Use when automating terminal recordings, capturing TUI screenshots, or generating demo GIFs.
+---
+name: vhs
+description: Creates terminal screenshots and GIFs using VHS tape files. Use when automating terminal recordings, capturing TUI screenshots, or generating demo GIFs.
+---
 
 # VHS
 

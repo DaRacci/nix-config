@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: code-style-nix description: Write Nix code following repository conventions
+---
+name: code-style-nix
+description: Write Nix code following repository conventions
+---
 
 # Code Style
 

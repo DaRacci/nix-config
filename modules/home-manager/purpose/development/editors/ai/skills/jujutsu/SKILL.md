@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: jujutsu description: Manages version control with Jujutsu (jj), including rebasing, conflict resolution, and Git interop. Use when tracking changes, navigating history, squashing/splitting commits, or pushing to Git remotes.
+---
+name: jujutsu
+description: Manages version control with Jujutsu (jj), including rebasing, conflict resolution, and Git interop. Use when tracking changes, navigating history, squashing/splitting commits, or pushing to Git remotes.
+---
 
 # Jujutsu
 
@@ -142,8 +143,3 @@ jj metaedit -r @ -m "new message"  # Edit metadata only
 - `jj op log` to see operation history
 - Bookmarks are like branches
 - `jj absorb` is powerful for fixing up commits in a stack
-
-## Related Skills
-
-- **gh**: GitHub CLI for PRs and issues
-- **review**: Code review before committing

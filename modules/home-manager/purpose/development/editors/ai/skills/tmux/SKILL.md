@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: tmux description: Manages background processes, captures command output, and handles session multiplexing. Use when running long-running commands, capturing output from detached processes, or managing concurrent tasks in headless environments.
+---
+name: tmux
+description: Manages background processes, captures command output, and handles session multiplexing. Use when running long-running commands, capturing output from detached processes, or managing concurrent tasks in headless environments.
+---
 
 # tmux
 
