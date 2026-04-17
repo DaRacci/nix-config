@@ -16,7 +16,10 @@
           # TODO:https://github.com/oppiliappan/statix/pull/152
           disabled-lints = [ "manual_inherit_from" ];
         };
-        mdformat.enable = true;
+        mdformat = {
+          enable = true;
+          plugins = ps: [ ps.mdformat-front-matters ];
+        };
         mdsh.enable = true;
         keep-sorted.enable = true;
         biome = {
