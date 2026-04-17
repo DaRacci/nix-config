@@ -1,7 +1,6 @@
----
-name: systemd-hardening
-description: "Hardens systemd services against security issues using sandboxing, capability restriction, and syscall filtering. Use when creating or modifying systemd services, writing NixOS modules with systemd.services, reviewing service security, or whenever a serviceConfig block is involved. Ensures services follow defense-in-depth principles with minimal privilege."
----
+______________________________________________________________________
+
+## name: systemd-hardening description: "Hardens systemd services against security issues using sandboxing, capability restriction, and syscall filtering. Use when creating or modifying systemd services, writing NixOS modules with systemd.services, reviewing service security, or whenever a serviceConfig block is involved. Ensures services follow defense-in-depth principles with minimal privilege."
 
 # Systemd Service Hardening
 

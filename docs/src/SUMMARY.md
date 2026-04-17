@@ -1,6 +1,6 @@
 [Introduction](README.md)
 
-# User guides
+# User Guides
 
 - [Installation](installation.md)
 
@@ -20,9 +20,19 @@
 # Modules
 
 - [Overview](modules/overview.md)
-- [NixOS](modules/nixos/overview.md)
-- [Services](modules/nixos/services.md)
-- [Desktop](modules/nixos/desktop.md)
+
+# NixOS Modules
+
+- [Overview](modules/nixos/overview.md)
+- [Services](modules/nixos/services/default.md)
+  - [AI Agent](modules/nixos/services/ai-agent.md)
+  - [Huntress](modules/nixos/services/huntress.md)
+  - [MCPO](modules/nixos/services/mcpo.md)
+  - [Metrics](modules/nixos/services/metrics.md)
+  - [Tailscale](modules/nixos/services/tailscale.md)
+- [Desktop](modules/nixos/desktop/default.md)
+  - [Display Manager](modules/nixos/desktop/display-manager.md)
+  - [Remote Access](modules/nixos/desktop/remote.md)
 - [Server](modules/nixos/server/default.md)
   - [Dashboard](modules/nixos/server/dashboard.md)
   - [Network](modules/nixos/server/network.md)
@@ -32,9 +42,12 @@
   - [Proxy](modules/nixos/server/proxy.md)
   - [SSH](modules/nixos/server/ssh.md)
 - [Flake Allocations](modules/flake/allocations.md)
-- [Home-Manager: DIY & Making](modules/home-manager/diy.md)
-- [Home-Manager: AI Editors & Assistants](modules/home-manager/ai.md)
-- [Home-Manager: list-ephemeral](modules/home-manager/programs/list-ephemeral.md)
+
+# Home-Manager Modules
+
+- [DIY & Making](modules/home-manager/diy.md)
+- [AI Editors & Assistants](modules/home-manager/ai.md)
+- [Programs](modules/home-manager/programs/list-ephemeral.md)
 
 # Packages
 
