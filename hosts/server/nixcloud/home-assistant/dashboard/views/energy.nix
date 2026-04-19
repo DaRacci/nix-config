@@ -6,7 +6,7 @@ let
     '';
   };
 
-  navbar = import ../components/navbar.nix { };
+  navbar = import ../components/navbar.nix { inherit lib; };
 in
 with (import ../lib.nix { inherit lib; });
 mkView {
@@ -51,8 +51,11 @@ mkView {
           icon = "mdi:flash";
         })
         {
-          type = "markdown";
-          content = "Add power graphs (e.g., history-graph/statistics-graph) for your power sensors here.";
+          type = "history-graph";
+          hours_to_show = 24;
+          entities = [
+            { entity = "sensor.power_consumption"; }
+          ];
         }
       ];
     })
@@ -64,12 +67,10 @@ mkView {
           icon = "mdi:gauge";
         })
         {
-          type = "markdown";
-          content = "Add your energy-related sensors (e.g., daily energy, grid import/export) to an Entities card here.";
+          type = "energy-date-selection";
         }
         {
-          type = "entities";
-          entities = [ ];
+          type = "energy-solar-consumed-gauge";
         }
       ];
     })

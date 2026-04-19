@@ -1,3 +1,8 @@
+{ lib }:
+let
+  dashLib = import ./lib.nix { inherit lib; };
+  inherit (dashLib) entities;
+in
 {
   non_admin_settings = {
     hide_header = true;
@@ -5,11 +10,11 @@
   };
   entity_settings = [
     {
-      entity."input_boolean.debug_rounded" = "on";
+      entity.${entities.inputBooleans.debugRounded} = "on";
       hide_header = false;
     }
     {
-      entity."input_boolean.debug_rounded" = "off";
+      entity.${entities.inputBooleans.debugRounded} = "off";
       hide_header = true;
     }
   ];
