@@ -112,7 +112,9 @@ let
 in
 {
   options.programs.list-ephemeral = {
-    enable = mkEnableOption "list-ephemeral helper";
+    enable = mkEnableOption "list-ephemeral helper" // {
+      default = hostPersistEnabled || (config.user.persistence.enable);
+    };
 
     extraExcludes = mkOption {
       type = with types; listOf str;
