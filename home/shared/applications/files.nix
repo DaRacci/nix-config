@@ -34,12 +34,14 @@
     "org/gtk/gtk4/settings/file-chooser" = {
       sort-directories-first = true;
       show-hidden = true;
+      sort-column = "modified";
       location-mode = "path-bar";
     };
 
     "org/gtk/settings/file-chooser" = {
       show-hidden = true;
       sort-directories-first = true;
+      sort-column = "modified";
       location-mode = "path-bar";
     };
   };
