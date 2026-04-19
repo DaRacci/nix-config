@@ -20,7 +20,10 @@ When enabled, the module:
 - Enables and configures `programs.opencode` with:
   - plugins
   - Nix formatter integration
-  - Nix LSP integrations (`nixd`, `nil`)
+  - LSP integrations:
+    - **Nix**: `nixd`, `nil`
+    - **Config formats**: `marksman` (Markdown), `yaml-language-server`, `vscode-json-language-server`, `taplo` (TOML), `vscode-css-language-server`, `vscode-html-language-server`
+    - **Languages**: `rust-analyzer`, `gopls`, `pyright`, `typescript-language-server`, `bash-language-server`, `lua-language-server`, `nushell`, `powershell-editor-services`, `dockerfile-language-server`
   - command permissions policy
   - local MCP server (`mcp-nixos` via `uvx`)
 - Writes:

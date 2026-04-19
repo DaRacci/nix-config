@@ -110,6 +110,7 @@ in
           };
 
           lsp = {
+            # Nix
             nixd = {
               command = [
                 "${lib.getExe pkgs.nixd}"
@@ -124,6 +125,135 @@ in
             nil = {
               command = [ "${lib.getExe pkgs.nil}" ];
               extensions = [ ".nix" ];
+            };
+
+            # Configuration formats
+            marksman = {
+              command = [
+                "${lib.getExe pkgs.marksman}"
+                "server"
+              ];
+              extensions = [
+                ".md"
+                ".mdx"
+              ];
+            };
+            yaml-language-server = {
+              command = [
+                "${lib.getExe pkgs.yaml-language-server}"
+                "--stdio"
+              ];
+              extensions = [
+                ".yaml"
+                ".yml"
+              ];
+            };
+            json-language-server = {
+              command = [
+                "${lib.getExe' pkgs.vscode-langservers-extracted "vscode-json-language-server"}"
+                "--stdio"
+              ];
+              extensions = [
+                ".json"
+                ".jsonc"
+              ];
+            };
+            css-language-server = {
+              command = [
+                "${lib.getExe' pkgs.vscode-langservers-extracted "vscode-css-language-server"}"
+                "--stdio"
+              ];
+              extensions = [
+                ".css"
+                ".scss"
+                ".less"
+              ];
+            };
+            html-language-server = {
+              command = [
+                "${lib.getExe' pkgs.vscode-langservers-extracted "vscode-html-language-server"}"
+                "--stdio"
+              ];
+              extensions = [
+                ".html"
+                ".htm"
+              ];
+            };
+            taplo = {
+              command = [
+                "${lib.getExe pkgs.taplo}"
+                "lsp"
+                "stdio"
+              ];
+              extensions = [ ".toml" ];
+            };
+
+            # Programming languages
+            rust-analyzer = {
+              command = [ "${lib.getExe pkgs.rust-analyzer}" ];
+              extensions = [ ".rs" ];
+            };
+            gopls = {
+              command = [ "${lib.getExe pkgs.gopls}" ];
+              extensions = [ ".go" ];
+            };
+            pyright = {
+              command = [
+                "${lib.getExe pkgs.pyright}"
+                "--stdio"
+              ];
+              extensions = [ ".py" ];
+            };
+            typescript-language-server = {
+              command = [
+                "${lib.getExe pkgs.typescript-language-server}"
+                "--stdio"
+              ];
+              extensions = [
+                ".ts"
+                ".tsx"
+                ".js"
+                ".jsx"
+                ".mjs"
+                ".cjs"
+              ];
+            };
+            bash-language-server = {
+              command = [
+                "${lib.getExe pkgs.bash-language-server}"
+                "start"
+              ];
+              extensions = [
+                ".sh"
+                ".bash"
+                ".zsh"
+              ];
+            };
+            lua-language-server = {
+              command = [ "${lib.getExe pkgs.lua-language-server}" ];
+              extensions = [ ".lua" ];
+            };
+            nushell = {
+              command = [
+                "${lib.getExe pkgs.nushell}"
+                "--lsp"
+              ];
+              extensions = [ ".nu" ];
+            };
+            powershell-editor-services = {
+              command = [ "${pkgs.powershell-editor-services}/bin/pwsh-es" ];
+              extensions = [
+                ".ps1"
+                ".psm1"
+                ".psd1"
+              ];
+            };
+            dockerfile-language-server = {
+              command = [
+                "${lib.getExe pkgs.dockerfile-language-server}"
+                "--stdio"
+              ];
+              extensions = [ "Dockerfile" ];
             };
           };
 
