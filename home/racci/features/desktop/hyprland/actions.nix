@@ -15,13 +15,21 @@
 
     settings =
       let
-        tessdata = pkgs.symlinkJoin {
+        tessdata = pkgs.stdenv.mkDerivation {
           name = "tessdata-multilang";
-          paths = with pkgs.tesseract.passthru.languages; [
-            eng
-            jpn
-            osd
-          ];
+          buildCommand = ''
+            mkdir $out
+            ${lib.concatStringsSep "\n" (
+              map (lang: "cp ${lang} $out/${lang.name}") (
+                with pkgs.tesseract.passthru.languages;
+                [
+                  eng
+                  jpn
+                  osd
+                ]
+              )
+            )}
+          '';
         };
 
         ocrRegion = lib.getExe (
