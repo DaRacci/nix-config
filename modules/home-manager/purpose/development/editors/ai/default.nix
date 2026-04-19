@@ -145,6 +145,8 @@ in
               "nix build *" = "allow";
               "nix flake *" = "allow";
               "nix fmt *" = "allow";
+              "nix eval *" = "allow";
+              "nix-instantiate *" = "allow";
               "printf *" = "allow";
               "rm *" = "deny";
               "sops --encrypt" = "allow";
