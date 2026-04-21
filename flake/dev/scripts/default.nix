@@ -110,6 +110,7 @@ in
   build-changed = writeNuApplicationWithLibs {
     inherit pkgs sourceRoot;
     name = "build-changed";
+	runtimeInputs = [ pkgs.git ];
   };
 
   get-symbol-value = writeNuApplicationWithLibs {

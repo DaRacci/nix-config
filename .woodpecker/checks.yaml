@@ -98,7 +98,7 @@ steps:
         .woodpecker/update-packages.yaml \
         PACKAGE \
         .#packages.x86_64-linux \
-        "pkgs: builtins.attrNames pkgs |> builtins.filter (name: (pkgs.${name}.passthru ? update-script))"
+        "pkgs: builtins.attrNames pkgs |> builtins.filter (name: (pkgs.${name}.passthru ? updateScript))"
 
   - name: push-matrix-updates
     image: appleboy/drone-git-push
