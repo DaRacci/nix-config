@@ -199,27 +199,11 @@ sharing the entire Nix cache directory (including the eval cache).
 
 ### Options
 
-All options live under `services.woodpeckerNix`.
+All options live under `services.woodpeckerNix`. The section below is generated
+automatically from the module source at build time — it is always in sync with
+the actual option declarations.
 
-| Option                            | Type          | Default                                                        | Description                                                                      |
-| --------------------------------- | ------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `enable`                          | `bool`        | `false`                                                        | Enable the module                                                                |
-| `stateDir`                        | `str`         | `"/var/lib/woodpecker-nix"`                                    | Host directory for the CI store, profiles, socket, and config                    |
-| `isolatedStore.enable`            | `bool`        | `false`                                                        | Set up the isolated Nix store and daemon                                         |
-| `isolatedStore.runtimePackages`   | `[package]`   | bash, coreutils, cacert, git, tar, gzip, grep, findutils, curl | Packages copied into the CI store and added to container `PATH`                  |
-| `isolatedStore.bootstrapPackages` | `[package]`   | `[]`                                                           | Extra packages copied into the CI store (closures only, not on `PATH`)           |
-| `isolatedStore.package`           | `package`     | `config.nix.package`                                           | Nix/Lix package for the daemon (always in runtime env)                           |
-| `isolatedStore.maxJobs`           | `uint`        | `8`                                                            | Maximum parallel builds for the CI daemon                                        |
-| `isolatedStore.substituters`      | `[str]`       | host substituters                                              | Binary cache substituters for the CI daemon                                      |
-| `isolatedStore.trustedPublicKeys` | `[str]`       | host keys                                                      | Trusted public keys for the substituters                                         |
-| `isolatedStore.extraConfig`       | `lines`       | `""`                                                           | Extra lines appended to the CI daemon's `nix.conf`                               |
-| `isolatedStore.gc.automatic`      | `bool`        | `true`                                                         | Enable periodic GC of the isolated store                                         |
-| `isolatedStore.gc.interval`       | `str`         | `"weekly"`                                                     | systemd calendar expression for GC                                               |
-| `isolatedStore.gc.olderThan`      | `str`         | `"14d"`                                                        | Delete paths older than this                                                     |
-| `cache`                           | `enum`        | `"git"`                                                        | Cache sharing level: `"none"`, `"git"`, or `"all"`                               |
-| `woodpecker.agents`               | `[str]`       | `[]`                                                           | Agent names to configure (must match `services.woodpecker-agents.agents.<name>`) |
-| `woodpecker.extraVolumes`         | `[str]`       | `[]`                                                           | Extra Docker volume specs added to every container                               |
-| `woodpecker.extraEnvironment`     | `attrsOf str` | `{}`                                                           | Extra `KEY=VALUE` entries added to `WOODPECKER_ENVIRONMENT`                      |
+{{#include ../../../generated/woodpecker-nix-options.md}}
 
 ### Injected container environment
 

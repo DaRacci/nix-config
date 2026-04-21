@@ -5,9 +5,20 @@ Extensions to the standard NixOS Tailscale module, providing easier tag manageme
 - **Entry point**: `modules/nixos/services/tailscale.nix`
 - **Upstream**: [Tailscale Tags Documentation](https://tailscale.com/kb/1018/tags/)
 
-### Special Options
+### Options
 
-- `services.tailscale.tags`: A list of tags to advertise for this device. These tags are automatically prefixed with `tag:` when passed to `tailscale up`.
+The option reference below is loaded live from the co-deployed search index.
+It always reflects the current module source without any manual maintenance.
+
+<div class="nix-options-widget"
+     data-module="tailscale"
+     data-prefix="services.tailscale">
+  <em>Loading options from search index…</em>
+</div>
+
+> **Tip:** You can also browse these options in the full
+> [RacciDev Options Search](../../../search/index.html?query=services.tailscale)
+> for richer filtering and cross-module comparison.
 
 ### Usage Example
 
