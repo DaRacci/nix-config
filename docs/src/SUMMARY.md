@@ -30,7 +30,7 @@
   - [MCPO](modules/nixos/services/mcpo.md)
   - [Metrics](modules/nixos/services/metrics.md)
   - [Tailscale](modules/nixos/services/tailscale.md)
-  - [Woodpecker Shared Nix Store](modules/nixos/services/woodpecker-nix-store.md)
+  - [Woodpecker Nix](modules/nixos/services/woodpecker-nix.md)
 - [Core](modules/nixos/core/default.md)
   - [Activation](modules/nixos/core/activation.md)
   - [Auto Upgrade](modules/nixos/core/auto_upgrade.md)

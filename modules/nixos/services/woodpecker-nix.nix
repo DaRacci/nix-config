@@ -52,7 +52,7 @@ let
     allowed-users = *
     substituters = ${concatStringsSep " " cfg.isolatedStore.substituters}
     trusted-public-keys = ${concatStringsSep " " cfg.isolatedStore.trustedPublicKeys}
-    sandbox = false
+    sandbox = true
     keep-outputs = true
     keep-derivations = true
     max-jobs = ${toString cfg.isolatedStore.maxJobs}
@@ -309,7 +309,7 @@ in
             "${stateDir}/nix/var/nix/profiles"
             "${stateDir}/nix/var/nix/gcroots"
           ]
-          |> map (p: lib.nameValuePair p { d.mode = "1777"; })
+          |> map (p: lib.nameValuePair p { d.mode = "0700"; })
           |> lib.listToAttrs
         );
 

@@ -25,7 +25,6 @@ matrix:
     - io-guardian-client
     - io-guardian-server
     - lidarr-plugins
-    - list-ephemeral
     - lix-woodpecker
     - mcp-sequential-thinking
     - mcp-server-amazon
