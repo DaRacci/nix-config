@@ -167,8 +167,8 @@ export def has_flake_inputs_changed [
 
     let curr_input = get_flake_input flake.lock $input_name
     log info $"Previous ($input_name): ($prev_input), Current ($input_name): ($curr_input)"
-    if $prev_input.rev != $curr_input.rev {
-      log info $"Root flake.nix ($input_name) version changed from [($prev_input.rev)] to [($curr_input.rev)]"
+    if $prev_input.rev != $curr_input.rev or ($prev_input.hash != $curr_input.hash) {
+      log info $"Root flake input ($input_name) version changed from [rev=($prev_input.rev), hash=($prev_input.hash)] to [rev=($curr_input.rev), hash=($curr_input.hash)]."
       return true
     }
   }

@@ -272,13 +272,18 @@ appear broken:
 
 1. Check that `<stateDir>/nix/var/nix/profiles` is mounted into the container
    (verify agent `WOODPECKER_BACKEND_DOCKER_VOLUMES`).
+
 1. Inspect the host-side symlinks:
+
    ```bash
    ls -la /var/lib/woodpecker-nix/nix/var/nix/profiles/
    ```
+
    You should see `default-1-link` pointing to a `/nix/store/...-woodpecker-ci-runtime`
    path, and `default` pointing to `default-1-link`.
+
 1. Restart the init service to force reconstruction:
+
    ```bash
    systemctl restart woodpecker-nix-init.service
    ```
