@@ -2,7 +2,7 @@ schema: spec-driven
 
 context: |
   Tech Stack:
-    - Languages: Nix (Primary), Bash & Nushell (helper scripts)
+    - Languages: Nix (Primary), Bash & Nushell (helper scripts),
     - Frameworks: NixOS, home-manager, flake-parts, devenv
     - Tools: Nix flakes, sops, lanzaboote, direnv
 
@@ -15,12 +15,18 @@ context: |
 
 rules:
   proposal:
-    - Follow existing module patterns in modules/*
-    - Never add hardcoded paths or values; use variables and functions instead
+    - Identify the NixOS configurations, home-manager configurations that will be affected by the proposal
     - Always include a "Non-goals" section to clarify what the proposal does not address
     - Never refactor existing code in a proposal without explicitly stating it in the proposal, and only if it is necessary to achieve the proposal's goals
+  specs:
+    - Use Given/When/Then format for writing test scenarios
+    - Be explicit about mechanisms, not just outcomes (say HOW, not just WHAT)
+  design:
+    - Include sequence diagrams to illustrate the flow of data and interactions between components
+    - For complex modules that interact with other modules, include component diagrams to show the relationships and dependencies between them
   tasks:
     - Run `nix fmt .` after any Nix file modifications
+    - Each task is its own commit, and the commit message MUST follow repository commit message guidelines
     - Documentation MUST NOT expose personal info (use placeholders like example-tailnet.ts.net)
     - After making changes, ensure it builds successfully using the skill "building" before marking the task as complete
     - For unique components e.g the IO Guardian, documentation MUST include a detailed explanation of its purpose, functionality, and how it integrates with the rest of the system
