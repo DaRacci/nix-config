@@ -1,0 +1,67 @@
+/* ─── nix-options-widget (Option 2: client-side) ─────────────────────── */
+
+.nix-options-widget {
+  margin: 1.25em 0;
+}
+
+.nix-options-loading,
+.nix-options-error {
+  font-style: italic;
+  opacity: 0.75;
+}
+
+/* Individual option card */
+.nix-option-card {
+  margin: 1.25em 0;
+}
+
+.nix-option-name {
+  margin: 0 0 0.5em 0;
+  font-size: 1em;
+  font-weight: 600;
+  font-family: var(--mono-font, monospace);
+}
+
+/* Metadata table (type / default / example) */
+.nix-option-meta {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 0.6em;
+  font-size: 0.9em;
+}
+
+.nix-option-meta td {
+  padding: 0.3em 0.65em;
+  border: 1px solid var(--table-border-color, #ddd);
+  vertical-align: top;
+}
+
+.nix-option-meta td:first-child {
+  width: 130px;
+  white-space: nowrap;
+}
+
+/* Description block */
+.nix-option-description {
+  margin: 0.4em 0 0.5em 0;
+  line-height: 1.55;
+}
+
+.nix-option-description p:first-child {
+  margin-top: 0;
+}
+
+.nix-option-description p:last-child {
+  margin-bottom: 0;
+}
+
+/* Source declaration */
+.nix-option-declarations {
+  font-size: 0.82em;
+  opacity: 0.75;
+  margin-top: 0.3em;
+}
+
+/* ─── Generated build-time options (Option 1) ────────────────────────── */
+/* The {{#include}} fragment uses standard mdbook-rendered tables and
+   headings; no extra CSS needed beyond light separator spacing. */
