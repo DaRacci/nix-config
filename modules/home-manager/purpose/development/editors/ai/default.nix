@@ -305,23 +305,27 @@ in
     };
 
     xdg.configFile = {
-      "opencode/oh-my-opencode.json".text = builtins.toJSON {
+      "opencode/oh-my-openagent.json".text = builtins.toJSON {
         "$schema" =
-          "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json";
+          "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/master/assets/oh-my-opencode.schema.json";
 
         disabled_skills = [
           "playwright"
           "git-master"
         ];
 
+        sisyphus = {
+          tasks.enabled = true;
+        };
+
         agents = {
           sisyphus.model = "github-copilot/claude-opus-4.6";
-          atlas.model = "github-copilot/gpt-5.2-codex";
-          prometheus.model = "github-copilot/gpt-5.2-codex";
+          atlas.model = "github-copilot/claude-sonnet-4.6";
+          prometheus.model = "github-copilot/gpt-5.4";
 
-          hephaestus.model = "github-copilot/gpt-5.2-codex";
-          oracle.model = "github-copilot/gpt-5.2";
-          momus.model = "github-copilot/gpt-5.2";
+          hephaestus.model = "github-copilot/gpt-5.4";
+          oracle.model = "github-copilot/gpt-5.4";
+          momus.model = "github-copilot/gpt-5.4";
           metis.model = "github-copilot/claude-opus-4.6";
 
           explore.model = "github-copilot/grok-code-fast-1";
@@ -332,11 +336,11 @@ in
         categories = {
           quick.model = "github-copilot/claude-haiku-4.5";
           deep = {
-            model = "github-copilot/gpt-5.2-codex";
+            model = "github-copilot/gpt-5.4";
             variant = "medium";
           };
           ultrabrain = {
-            model = "github-copilot/gpt-5.2-codex";
+            model = "github-copilot/gpt-5.4";
             variant = "xhigh";
           };
           artistry.model = "github-copilot/gemini-3.1-pro-preview";
@@ -351,15 +355,25 @@ in
         };
 
         background_task = {
+          defaultConcurrency = 5;
           modelConcurrency = {
-            "github-copilot/gpt-5.2-mini" = 20;
+            "github-copilot/grok-code-fast-1" = 10;
+            "github-copilot/gpt-5-mini" = 20;
             "github-copilot/claude-opus-4.6" = 2;
           };
         };
 
         disabled_hooks = [
           "prometheus-md-only" # Try to allow prometheus to use openspec instead.
+          "auto-update-checker"
+          "startup-toast"
         ];
+
+        hashline_edit = true;
+        experimental = {
+          task_system = true;
+          dynamic_context_pruning.enabled = true;
+        };
       };
 
       "opencode/opencode-notifier.json".text = builtins.toJSON {
