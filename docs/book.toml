@@ -10,6 +10,8 @@ edit-url-template = "https://github.com/DaRacci/nix-config/edit/master/docs/{pat
 no-section-label = true
 # Ensure static file (css, js) have a unique filename, to avoid outdated cache.
 hash-files = true
+additional-js = ["src/components/nix-options.js"]
+additional-css = ["src/components/nix-options.css"]
 
 [output.html.fold]
 enable = true
