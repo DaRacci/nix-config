@@ -63,6 +63,7 @@
 
         env = {
           NIX_CONFIG = "extra-experimental-features = nix-command flakes pipe-operator";
+          OPENSPEC_TELEMETRY = "0";
         };
 
         git-hooks = {
