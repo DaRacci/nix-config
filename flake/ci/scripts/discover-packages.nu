@@ -80,10 +80,8 @@ def get_changed [
       continue
     }
 
-    let all_related_files = fd --type f . $pkg_folder | lines
-    log info $"Checking package ($package) for changes, files: ($all_related_files)"
-
-    let changed = check_file_changed $git_range ...$all_related_files
+    log info $"Checking package ($package) for changes under ($pkg_folder)"
+    let changed = check_file_changed $git_range $pkg_folder
     if $changed {
       log info $"Package ($package) has changed."
       $changed_packages = $changed_packages | append $package

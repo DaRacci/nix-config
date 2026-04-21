@@ -8,7 +8,9 @@ when:
     path:
       [
         .woodpecker/ci-homes.yaml,
+        flake/ci/**,
         home/**,
+        lib/nu-lib/**,
         modules/home-manager/**,
         overlays/**,
         flake.nix,

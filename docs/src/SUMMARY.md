@@ -30,7 +30,7 @@
   - [MCPO](modules/nixos/services/mcpo.md)
   - [Metrics](modules/nixos/services/metrics.md)
   - [Tailscale](modules/nixos/services/tailscale.md)
-  - [Woodpecker Shared Nix Store](modules/nixos/services/woodpecker-nix-store.md)
+  - [Woodpecker Nix](modules/nixos/services/woodpecker-nix.md)
 - [Desktop](modules/nixos/desktop/default.md)
   - [Display Manager](modules/nixos/desktop/display-manager.md)
   - [Remote Access](modules/nixos/desktop/remote.md)
