@@ -7,14 +7,7 @@ Extensions to the standard NixOS Tailscale module, providing easier tag manageme
 
 ### Options
 
-The option reference below is loaded live from the co-deployed search index.
-It always reflects the current module source without any manual maintenance.
-
-<div class="nix-options-widget"
-     data-module="tailscale"
-     data-prefix="services.tailscale">
-  <em>Loading options from search index…</em>
-</div>
+{{#include ../../../generated/tailscale-options.md}}
 
 > **Tip:** You can also browse these options in the full
 > [RacciDev Options Search](../../../search/index.html?query=services.tailscale)
