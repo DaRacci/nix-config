@@ -199,10 +199,6 @@ sharing the entire Nix cache directory (including the eval cache).
 
 ### Options
 
-All options live under `services.woodpeckerNix`. The section below is generated
-automatically from the module source at build time — it is always in sync with
-the actual option declarations.
-
 {{#include ../../../generated/woodpecker-nix-options.md}}
 
 ### Injected container environment

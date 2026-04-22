@@ -5,10 +5,9 @@ Managed EDR (Endpoint Detection and Response) platform that protects systems by 
 - **Entry point**: `modules/nixos/services/huntress.nix`
 - **Upstream**: [Huntress Managed EDR](https://www.huntress.com/platform/managed-edr)
 
-### Special Options
+### Options
 
-- `services.huntress.accountKeyFile`: Path to a file containing the Huntress account key.
-- `services.huntress.organisationKeyFile`: Path to a file containing the Huntress organisation key.
+{{#include ../../../generated/huntress-options.md}}
 
 ### Usage Example
 

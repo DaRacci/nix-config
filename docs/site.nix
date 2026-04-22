@@ -2,8 +2,13 @@
   pkgs,
   lib,
   search,
-  woodpeckerNixOptionsJSON,
+  aiAgentOptionsJSON,
+  huntressOptionsJSON,
+  mcpoOptionsJSON,
+  metricsOptionsJSON,
   tailscaleOptionsJSON,
+  woodpeckerNixOptionsJSON,
+  diyPrintingOptionsJSON,
   ...
 }:
 let
@@ -12,6 +17,52 @@ let
   genOptionsMd = pkgs.writeText "gen-options-md.py" (builtins.readFile ./gen-options-md.py);
   genOptionsJson = pkgs.writeText "gen-options-json.py" (builtins.readFile ./gen-options-json.py);
   py3 = "${pkgs.python3}/bin/python3";
+
+  optionFragments = [
+    {
+      json = aiAgentOptionsJSON;
+      prefix = "services.ai-agent";
+      output = "src/generated/ai-agent-options.md";
+    }
+    {
+      json = huntressOptionsJSON;
+      prefix = "services.huntress";
+      output = "src/generated/huntress-options.md";
+    }
+    {
+      json = mcpoOptionsJSON;
+      prefix = "services.mcpo";
+      output = "src/generated/mcpo-options.md";
+    }
+    {
+      json = metricsOptionsJSON;
+      prefix = "services.metrics";
+      output = "src/generated/metrics-options.md";
+    }
+    {
+      json = tailscaleOptionsJSON;
+      prefix = "services.tailscale";
+      output = "src/generated/tailscale-options.md";
+    }
+    {
+      json = woodpeckerNixOptionsJSON;
+      prefix = "services.woodpeckerNix";
+      output = "src/generated/woodpecker-nix-options.md";
+    }
+
+    {
+      json = diyPrintingOptionsJSON;
+      prefix = "purpose.diy.printing";
+      output = "src/generated/diy-printing-options.md";
+    }
+  ];
+
+  generateOptionFragments = lib.concatMapStringsSep "\n" (fragment: ''
+    ${py3} ${genOptionsMd} \
+      ${fragment.json} \
+      "${fragment.prefix}" \
+      ${fragment.output}
+  '') optionFragments;
 in
 pkgs.stdenv.mkDerivation (finalAttrs: {
   name = "raccidev-docs";
@@ -43,14 +94,11 @@ pkgs.stdenv.mkDerivation (finalAttrs: {
 
     ${pkgs.fd}/bin/fd
 
-    # ── Option 1: build-time Markdown generation ─────────────────────────
-    # Generate a Markdown fragment for the woodpecker-nix Reference section.
-    # woodpecker-nix.md includes this via {{#include}}.
+    # ── Option reference fragments ───────────────────────────────────────
+    # Generate Markdown fragments for all docs pages that embed module
+    # options via {{#include}}.
     mkdir -p src/generated
-    ${py3} ${genOptionsMd} \
-      ${woodpeckerNixOptionsJSON} \
-      "services.woodpeckerNix" \
-      src/generated/woodpecker-nix-options.md
+    ${generateOptionFragments}
 
     # ── README substitution ───────────────────────────────────────────────
     substituteInPlace ./src/index.md \
@@ -64,8 +112,9 @@ pkgs.stdenv.mkDerivation (finalAttrs: {
     mkdir -p "$out/search"
     cp -r ${finalAttrs.passthru.search}/* "$out/search"
 
-    # ── Option 2: client-side widget JSON ────────────────────────────────
-    # Generate a slim JSON blob consumed by nix-options.js on the page.
+    # ── Search-side option JSON ──────────────────────────────────────────
+    # Keep generating the slim JSON blob for the search bundle so the
+    # client-side widget remains available where needed.
     mkdir -p "$out/search/module-options"
     ${py3} ${genOptionsJson} \
       ${woodpeckerNixOptionsJSON} \
