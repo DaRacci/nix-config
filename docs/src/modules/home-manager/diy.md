@@ -12,40 +12,11 @@ The printing module installs 3D-printing software and wires up persistent storag
 
 ### Options
 
-#### `purpose.diy.printing.enable`
-
-|         |         |
-| ------- | ------- |
-| Type    | `bool`  |
-| Default | `false` |
-
-Enables 3D-printing support. Installs OrcaSlicer and LycheeSlicer and registers their configuration directories for persistence.
-
----
+{{#include ../../generated/diy-printing-options.md}}
 
 ### Git Sync
 
 The `gitSync` sub-module adds a long-running systemd user service that watches the OrcaSlicer profile directory and automatically creates a git commit every time a profile file is added, changed, or removed. This gives you a full revision history of your slicer settings with zero manual effort.
-
-#### `purpose.diy.printing.gitSync.enable`
-
-|         |         |
-| ------- | ------- |
-| Type    | `bool`  |
-| Default | `false` |
-
-Enable the OrcaSlicer git auto-commit watcher. Requires `purpose.diy.printing.enable = true`.
-
-#### `purpose.diy.printing.gitSync.repoPath`
-
-|         |                                                                  |
-| ------- | ---------------------------------------------------------------- |
-| Type    | `string`                                                         |
-| Default | `"${config.home.homeDirectory}/.config/OrcaSlicer/user/default"` |
-
-Absolute path to the directory that will be managed as a git repository. The directory is initialised automatically the first time the watcher service starts, so it does not need to exist at activation time.
-
-The default points at the standard OrcaSlicer per-user profile directory, which contains the `filament/`, `process/`, and `machine/` sub-directories, so all profile types are tracked without any additional configuration.
 
 ---
 

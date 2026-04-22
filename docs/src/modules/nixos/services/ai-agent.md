@@ -5,9 +5,9 @@ Autonomous AI Agent service powered by Zeroclaw, providing intelligent task auto
 - **Entry point**: `modules/nixos/services/ai-agent.nix`
 - **Bundled module**: `modules/nixos/services/zeroclaw.nix`
 
-### Special Options
+### Options
 
-- `services.ai-agent.enable`: Enable the autonomous AI Agent service.
+{{#include ../../../generated/ai-agent-options.md}}
 
 ### Allowed Domains
 

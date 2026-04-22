@@ -5,12 +5,9 @@ Orchestrates Model Context Protocol (MCP) servers, providing a centralized way t
 - **Entry point**: `modules/nixos/services/mcpo.nix`
 - **Upstream**: [MCPO GitHub Repository](https://github.com/open-webui/mcpo)
 
-### Special Options
+### Options
 
-- `services.mcpo.configuration`: An attribute set defining the MCP servers to orchestrate.
-- `services.mcpo.apiTokenFile`: Optional path to a file containing an API token for the service.
-- `services.mcpo.extraPackages`: Additional packages to include in the service's `PATH`.
-- `services.mcpo.helpers`: Read-only attribute set of helper functions for common server types (e.g., `npxServer`, `uvxServer`).
+{{#include ../../../generated/mcpo-options.md}}
 
 ### Usage Example
 
