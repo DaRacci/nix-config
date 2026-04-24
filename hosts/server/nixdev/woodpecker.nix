@@ -122,6 +122,7 @@
         agents = [ "local" ];
         extraVolumes = [
           "${config.services.woodpeckerNix.stateDir}/ci-cache:/ci-cache"
+          "${config.services.woodpeckerNix.stateDir}/vulnix-cache:/root/.cache/vulnix"
         ];
       };
     };
