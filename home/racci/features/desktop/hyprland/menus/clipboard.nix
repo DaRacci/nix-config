@@ -340,7 +340,7 @@ in
     cliphist-images = cliphist;
   };
 
-  custom.uwsm.sliceAllocation.background = [
+  core.uwsm.sliceAllocation.background = [
     "cliphist"
     "cliphist-images"
   ];

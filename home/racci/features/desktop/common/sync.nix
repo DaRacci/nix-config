@@ -14,5 +14,5 @@
     ".config/Nextcloud"
   ];
 
-  custom.uwsm.sliceAllocation.background-graphical = [ "nextcloud-client" ];
+  core.uwsm.sliceAllocation.background-graphical = [ "nextcloud-client" ];
 }

@@ -5,7 +5,7 @@ _: {
   };
 
   user.persistence.directories = [ ".config/kdeconnect" ];
-  custom.uwsm.sliceAllocation = {
+  core.uwsm.sliceAllocation = {
     background = [ "kdeconnect" ];
     background-graphical = [ "kdeconnect-indicator" ];
   };

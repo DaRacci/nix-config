@@ -4,11 +4,15 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkDefault mkEnableOption;
+  inherit (lib)
+    mkDefault
+    mkEnableOption
+    mkIf
+    ;
 in
 {
   options.core.locale = {
-    enable = mkEnableOption "locale configuration" {
+    enable = (mkEnableOption "locale configuration") // {
       default = true;
     };
   };

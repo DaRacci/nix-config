@@ -13,15 +13,13 @@ let
     ;
   inherit (types) listOf str;
 
-  cfg = config.custom;
+  cfg = config.core.groups;
 in
 {
-  options.custom = {
-    defaultGroups = mkOption {
-      type = listOf str;
-      default = [ ];
-      description = "Additional Groups to add all users to by default.";
-    };
+  options.core.defaultGroups = mkOption {
+    type = listOf str;
+    default = [ ];
+    description = "Additional groups to add all users to by default.";
   };
 
   config = mkIf (cfg.defaultGroups != [ ]) {

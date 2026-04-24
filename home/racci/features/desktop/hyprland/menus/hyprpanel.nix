@@ -112,5 +112,5 @@
     };
   };
 
-  custom.uwsm.sliceAllocation.background = [ "hyprpaper" ];
+  core.uwsm.sliceAllocation.background = [ "hyprpaper" ];
 }

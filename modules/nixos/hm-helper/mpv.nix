@@ -9,14 +9,19 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkMerge literalExpression;
+  inherit (lib)
+    literalExpression
+    mkEnableOption
+    mkIf
+    mkMerge
+    ;
 
-  cfg = config.custom.hm-helper;
+  cfg = config.core.hm-helper;
   ff2mpvCfg = cfg.ff2mpv;
 in
 {
-  options.custom.hm-helper.ff2mpv = {
-    enable = lib.mkEnableOption "Enable ff2mpv native messaging host for Firefox." // {
+  options.core.hm-helper.ff2mpv = {
+    enable = mkEnableOption "Enable ff2mpv native messaging host for Firefox." // {
       default = anyoneHasPackage pkgs.ff2mpv-rust;
       defaultText = literalExpression "anyoneHasPackage pkgs.ff2mpv-rust";
     };

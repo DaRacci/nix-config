@@ -13,13 +13,18 @@ let
     modules = [
       path
       { _module.args = { inherit self inputs pkgs; }; }
+      # Stylix fixes
+      {
+        # options.programs = { }; # Stylix uses this unconditionally and it causes an error if it's not defined
+        disabledModules = [ "${inputs.stylix.nixosModules.stylix._file}" ];
+      }
     ];
     specialArgs = {
-      inherit inputs;
+      inherit inputs lib;
       users = [ ];
     };
     name = "rd-${name}";
-    urlPrefix = "https://github.com/DaRacci/nix-config/blob/master/";
+    urlPrefix = "https://codeberg.org/Racci/nix-config/src/branch/master/";
   };
 
   rootModules =

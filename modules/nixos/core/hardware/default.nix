@@ -15,5 +15,7 @@
 
   options = { };
 
-  config = { };
+  config = {
+    hardware.enableRedistributableFirmware = true;
+  };
 }

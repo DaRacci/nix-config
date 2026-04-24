@@ -5,13 +5,19 @@
   lib,
   ...
 }:
-with lib;
 let
-  cfg = config.custom.theme;
+  inherit (lib)
+    hasAttr
+    mkEnableOption
+    mkIf
+    getExe'
+    ;
+
+  cfg = config.core.theme;
 in
 {
-  options.custom.theme = {
-    enable = mkEnableOption "Theming" // {
+  options.core.theme = {
+    enable = mkEnableOption "theming" // {
       default = osConfig != null && hasAttr "stylix" osConfig && osConfig.stylix.enable;
     };
   };
@@ -23,9 +29,9 @@ in
           "hyprctl setcursor ${config.stylix.cursor.name} ${toString config.stylix.cursor.size}"
         ];
 
-    xdg.dataFile = lib.mkIf (config.stylix.image != null) (
+    xdg.dataFile = mkIf (config.stylix.image != null) (
       let
-        magick = lib.getExe' pkgs.imagemagick "magick";
+        magick = getExe' pkgs.imagemagick "magick";
         wallpaperManipulations = pkgs.runCommand "wallpaperManipulations" { } ''
           mkdir -p $out
 

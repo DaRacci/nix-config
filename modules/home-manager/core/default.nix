@@ -5,7 +5,7 @@ _: {
     ./uwsm.nix
   ];
 
-  options.custom = { };
+  options.core = { };
 
   config = { };
 }

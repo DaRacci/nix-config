@@ -38,7 +38,7 @@ in
         ];
       };
 
-      custom.defaultGroups = [ "lp" ];
+      core.defaultGroups = [ "lp" ];
     })
   ];
 }

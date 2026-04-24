@@ -9,14 +9,19 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkMerge literalExpression;
+  inherit (lib)
+    literalExpression
+    mkEnableOption
+    mkIf
+    mkMerge
+    ;
 
-  cfg = config.custom.hm-helper;
+  cfg = config.core.hm-helper;
   nautilusCfg = cfg.nautilus;
 in
 {
-  options.custom.hm-helper.nautilus = {
-    enable = lib.mkEnableOption "Enable Nautilus extensions and integration helpers." // {
+  options.core.hm-helper.nautilus = {
+    enable = mkEnableOption "Enable Nautilus extensions and integration helpers." // {
       default = anyoneHasPackage pkgs.nautilus;
       defaultText = literalExpression "anyoneHasPackage pkgs.nautilus";
     };
