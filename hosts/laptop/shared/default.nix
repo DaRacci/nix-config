@@ -6,7 +6,7 @@
     ../../desktop/shared/xdg.nix
   ];
 
-  custom.core = {
+  core = {
     audio.enable = true;
     bluetooth.enable = true;
   };

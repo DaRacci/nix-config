@@ -1,3 +1,3 @@
 {
-  shared = import ./shared;
+  core = import ./core;
 }

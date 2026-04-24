@@ -8,15 +8,14 @@
 {
   imports = [
     ./generators.nix
-    ./locale.nix
-    ./networking.nix
-    ./nix.nix
-    ./openssh.nix
     ./sops.nix
-    ./security.nix
     ./stylix.nix
-    ./time.nix
-    ./zram.nix
+
+    "${self}/modules/nixos/core/locale.nix"
+    "${self}/modules/nixos/core/networking"
+    "${self}/modules/nixos/core/nix.nix"
+    "${self}/modules/nixos/core/openssh.nix"
+    "${self}/modules/nixos/core/security.nix"
   ];
 
   environment = {
