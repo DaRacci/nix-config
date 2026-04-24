@@ -5,23 +5,42 @@
   lib,
   ...
 }:
-with lib;
 let
-  cfg = config.custom.audio;
+  inherit (lib)
+    concatStringsSep
+    filter
+    hasPrefix
+    length
+    mapAttrsToList
+    mkEnableOption
+    mkIf
+    mkOption
+    pipe
+    ;
+  inherit (lib.types)
+    attrsOf
+    bool
+    int
+    listOf
+    oneOf
+    str
+    ;
+
+  cfg = config.core.audio;
   updatedDevicesPath = "wireplumber/wireplumber.conf.d/50-update-devices.conf";
   disabledDevicesPath = "wireplumber/wireplumber.conf.d/51-disabled-devices.conf";
   disabledNodesPath = "wireplumber/wireplumber.conf.d/52-disabled-nodes.conf";
 
-  getType = target: if (lib.hasPrefix "alsa_card" target) then "device" else "node";
+  getType = target: if hasPrefix "alsa_card" target then "device" else "node";
 in
 {
-  options.custom.audio = {
-    enable = mkEnableOption "Enable Audio Module" // {
+  options.core.audio = {
+    enable = mkEnableOption "audio module" // {
       default = osConfig != null && !osConfig.host.device.isHeadless;
     };
 
     disabledDevices = mkOption {
-      type = with types; listOf str;
+      type = listOf str;
       default = [ ];
       description = ''
         A list of ALSA device names or node names to disable.
@@ -30,15 +49,13 @@ in
     };
 
     updateDevices = mkOption {
-      type =
-        with types;
-        attrsOf (
-          attrsOf (oneOf [
-            str
-            int
-            bool
-          ])
-        );
+      type = attrsOf (
+        attrsOf (oneOf [
+          str
+          int
+          bool
+        ])
+      );
       default = { };
       description = ''
         A list of ALSA device names or node names to update.
@@ -62,12 +79,11 @@ in
         disabledDevices = filter (name: getType name == "device") cfg.disabledDevices;
       in
       {
-        "${updatedDevicesPath}" = mkIf ((length (builtins.attrValues cfg.updateDevices)) > 0) {
+        "${updatedDevicesPath}" = mkIf (length (builtins.attrValues cfg.updateDevices) > 0) {
           text = ''
             monitor.alsa.rules = [
-              ${
-                cfg.updateDevices
-                |> lib.mapAttrsToList (
+              ${pipe cfg.updateDevices [
+                (mapAttrsToList (
                   name: props: ''
                     {
                       matches = [
@@ -78,26 +94,26 @@ in
 
                       actions = {
                         update-props = {
-                          ${lib.pipe props [
-                            (mapAttrsToList (name: value: "${name} = ${builtins.toJSON value}"))
+                          ${pipe props [
+                            (mapAttrsToList (propName: value: "${propName} = ${builtins.toJSON value}"))
                             (concatStringsSep "\n")
                           ]}
                         }
                       }
                     }
                   ''
-                )
-                |> concatStringsSep "\n"
-              }
+                ))
+                (concatStringsSep "\n")
+              ]}
             ]
           '';
         };
 
-        "${disabledNodesPath}" = mkIf ((length disabledNodes) > 0) {
+        "${disabledNodesPath}" = mkIf (length disabledNodes > 0) {
           text = ''
             monitor.alsa.rules = [{
               matches = [
-                ${lib.pipe disabledNodes [
+                ${pipe disabledNodes [
                   (map (name: ''
                     {
                       node.name = "${name}"
@@ -116,11 +132,11 @@ in
           '';
         };
 
-        "${disabledDevicesPath}" = mkIf ((length disabledDevices) > 0) {
+        "${disabledDevicesPath}" = mkIf (length disabledDevices > 0) {
           text = ''
             monitor.alsa.rules = [{
               matches = [
-                ${lib.pipe disabledDevices [
+                ${pipe disabledDevices [
                   (map (name: ''
                     {
                       device.name = "${name}"
@@ -140,6 +156,6 @@ in
         };
       };
 
-    custom.uwsm.sliceAllocation.background = [ "playerctld" ];
+    core.uwsm.sliceAllocation.background = [ "playerctld" ];
   };
 }

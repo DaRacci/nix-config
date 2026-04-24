@@ -42,6 +42,7 @@ in
 1. Create file at `modules/nixos/<category>/<name>.nix`
 
 2. Define options and config:
+
    ```nix
    {
      config,
@@ -67,6 +68,7 @@ in
    ```
 
 3. Register in parent `default.nix`:
+
    ```nix
    # modules/nixos/services/default.nix
    _: {
@@ -88,6 +90,7 @@ in
 1. Create file at `modules/home-manager/<category>/<name>.nix`
 
 2. Define with optional osConfig access:
+
    ```nix
    {
      osConfig ? null,
@@ -120,16 +123,16 @@ in
 
 ## Common Namespaces
 
-| Namespace | Module Type | Purpose |
-|-----------|-------------|---------|
-| `services.<name>` | NixOS | System services |
-| `hardware.<name>` | NixOS | Hardware configuration |
-| `boot.<name>` | NixOS | Boot configuration |
-| `host.<name>` | NixOS | Host-specific options |
-| `server.<name>` | NixOS | Server cluster options |
-| `purpose.<category>` | Home-Manager | Use-case modules |
-| `custom.<name>` | Home-Manager | Custom extensions |
-| `user.<name>` | Home-Manager | User-specific options |
+| Namespace            | Module Type        | Purpose                               |
+| -------------------- | ------------------ | ------------------------------------- |
+| `services.<name>`    | NixOS              | System services                       |
+| `hardware.<name>`    | NixOS              | Hardware configuration                |
+| `boot.<name>`        | NixOS              | Boot configuration                    |
+| `host.<name>`        | NixOS              | Host-specific options                 |
+| `server.<name>`      | NixOS              | Server cluster options                |
+| `core.<name>`        | Home-Manager/NixOS | Opionioated configurations & features |
+| `purpose.<category>` | Home-Manager       | Use-case modules                      |
+| `user.<name>`        | Home-Manager       | User-specific options                 |
 
 ## Directory Index Patterns
 

@@ -26,6 +26,7 @@ in
 {
   imports = [
     crtified.modules.virtualisation.nix
+    ../desktop/vfio.nix
   ];
 
   options.core.virtualisation = {
@@ -66,7 +67,7 @@ in
 
   config = mkIf cfg.enable (mkMerge [
     {
-      custom.defaultGroups = [
+      core.defaultGroups = [
         "kvm"
         "libvirtd"
       ];

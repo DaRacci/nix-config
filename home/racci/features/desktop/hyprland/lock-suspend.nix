@@ -8,7 +8,7 @@ let
   inherit (lib) getExe;
 in
 {
-  custom.uwsm.sliceAllocation.background = [ "hypridle" ];
+  core.uwsm.sliceAllocation.background = [ "hypridle" ];
 
   wayland.windowManager.hyprland.custom-settings.permission.screenCopy = [
     (lib.getExe config.programs.hyprlock.package)

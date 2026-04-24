@@ -14,7 +14,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    custom.defaultGroups = [ "docker" ];
+    core.defaultGroups = [ "docker" ];
 
     virtualisation = {
       # Sadly there are still lots of things podman / podman-compose can't do
@@ -38,6 +38,7 @@ in
 
     host.persistence.directories =
       let
+
         docker = "/var/lib/docker";
       in
       [

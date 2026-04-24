@@ -8,15 +8,20 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkMerge literalExpression;
+  inherit (lib)
+    literalExpression
+    mkEnableOption
+    mkIf
+    mkMerge
+    ;
 
-  cfg = config.custom.hm-helper;
+  cfg = config.core.hm-helper;
   connectCfg = cfg.kde-connect;
 in
 {
-  options.custom.hm-helper.kde-connect = {
+  options.core.hm-helper.kde-connect = {
     enable =
-      lib.mkEnableOption "Enable KDE Connect firewall rules if any user has KDE Connect enabled."
+      (mkEnableOption "Enable KDE Connect firewall rules if any user has KDE Connect enabled.")
       // {
         default = anyoneHasOption (user: user.services.kdeconnect.enable);
         defaultText = literalExpression "anyoneHasOption (user: user.services.kdeconnect.enable)";

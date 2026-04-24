@@ -29,7 +29,7 @@
     picard
   ];
 
-  custom = {
+  core = {
     audio = {
       disabledDevices = [
         # Disable monitoring line

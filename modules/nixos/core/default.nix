@@ -6,7 +6,6 @@
 }:
 let
   inherit (lib)
-    getExe
     literalExpression
     mkDefault
     mkEnableOption
@@ -22,20 +21,26 @@ in
     ./boot
     ./hardware
     ./host
+    ./networking
 
+    ./activation.nix
     ./auto-upgrade.nix
     ./containers.nix
+    ./display-manager.nix
     ./gaming.nix
+    ./generators.nix
+    ./groups.nix
     ./locale.nix
     ./networking
     ./nix.nix
     ./openssh.nix
     ./printing.nix
+    ./remote.nix
     ./security.nix
+    ./sops.nix
+    ./stylix.nix
     ./virtualisation.nix
     ./wsl.nix
-
-    ../shared/features/remote.nix
   ];
 
   options.core = {
@@ -66,8 +71,12 @@ in
   };
 
   config = mkIf cfg.enable (mkMerge [
+    {
+      services.dbus.implementation = "broker";
+    }
+
     (mkIf cfg.audio.enable {
-      custom.defaultGroups = [
+      core.defaultGroups = [
         "audio"
         "pipewire"
         "rtkit"
@@ -122,7 +131,7 @@ in
     (mkIf cfg.bluetooth.enable {
       system.activationScripts = {
         rfkillUnblockBluetooth.text = ''
-          ${getExe pkgs.rfkill} unblock bluetooth
+          ${lib.getExe' pkgs.util-linux "rfkill"} unblock bluetooth
         '';
       };
 
@@ -140,12 +149,12 @@ in
     })
 
     (mkIf cfg.network.enable {
-      custom.defaultGroups = [ "network" ];
+      core.defaultGroups = [ "network" ];
       networking.networkmanager.enable = true;
     })
 
     (mkIf (!config.host.device.isHeadless) {
-      custom.defaultGroups = [
+      core.defaultGroups = [
         "video"
         "i2c"
       ];

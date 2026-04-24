@@ -1,5 +1,6 @@
 {
   config,
+  options,
   pkgs,
   lib,
   ...
@@ -13,8 +14,9 @@ let
     optionalAttrs
     optionals
     ;
+
   cfg = config.core.gaming;
-  hasHomeManager = config ? home-manager;
+  hasHomeManager = options ? home-manager;
 in
 {
   options.core.gaming = {
@@ -23,7 +25,7 @@ in
 
   config = mkIf cfg.enable (mkMerge [
     {
-      custom.defaultGroups = [
+      core.defaultGroups = [
         "adbusers" # For Oculus Quest ADB access
       ];
 
@@ -41,11 +43,8 @@ in
             prePatch = ''
               substituteInPlace gamescope-session \
                 --replace-fail "-w 1280 -h 800" "-w 3840 -h 2160" \
-                --replace-fail "exec gamescope \\" "
-                export STEAM_DISPLAY_REFRESH_LIMITS=48,240
-                export STEAM_GAMESCOPE_FORCE_HDR_DEFAULT=1
-                export STEAM_GAMESCOPE_FORCE_OUTPUT_TO_HDR10PQ_DEFAULT=1
-                exec gamescope \\"
+                --replace-fail "export STEAM_DISPLAY_REFRESH_LIMITS=45,90" "export STEAM_DISPLAY_REFRESH_LIMITS=48,240" \
+                --replace-fail "export STEAM_DISPLAY_REFRESH_LIMITS=40,60" "export STEAM_DISPLAY_REFRESH_LIMITS=48,240"
             '';
           });
         })
@@ -89,9 +88,7 @@ in
           defaultRuntime = true;
           steam.importOXRRuntimes = true;
           highPriority = true;
-          monadoEnvironment = {
-
-          };
+          monadoEnvironment = { };
           config = {
             enable = true;
             json = {
@@ -125,13 +122,11 @@ in
           };
         };
 
-        udev = {
-          extraRules = ''
-            SUBSYSTEM=="sound", ACTION=="change", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ce6", ENV{SOUND_DESCRIPTION}="Wireless Controller"
-            SUBSYSTEM=="usb", ATTR{idVendor}=="2833", ATTR{idProduct}=="0186", MODE="0660", TAG+="uaccess", SYMLINK+="ocuquest%n"
-            SUBSYSTEM=="tty", KERNEL=="ttyACM*", ATTRS{idVendor}=="346e", ACTION=="add", MODE="0666", TAG+="uaccess"
-          '';
-        };
+        udev.extraRules = ''
+          SUBSYSTEM=="sound", ACTION=="change", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ce6", ENV{SOUND_DESCRIPTION}="Wireless Controller"
+          SUBSYSTEM=="usb", ATTR{idVendor}=="2833", ATTR{idProduct}=="0186", MODE="0660", TAG+="uaccess", SYMLINK+="ocuquest%n"
+          SUBSYSTEM=="tty", KERNEL=="ttyACM*", ATTRS{idVendor}=="346e", ACTION=="add", MODE="0666", TAG+="uaccess"
+        '';
       };
 
       networking.firewall =
@@ -147,32 +142,32 @@ in
         };
     }
 
-    (mkIf (config.jovian.decky-loader.enable or false) {
-      # Do not auto-start decky-loader at boot, the decky-loader-steam-watch
-      # user service manages its lifecycle alongside the Steam process.
-      systemd.services.decky-loader = {
-        wantedBy = mkForce [ ];
-        serviceConfig = {
-          # Suppress the CSS_Loader health-check spam that fires every few seconds
-          # whenever Steam's internal web interface (port 8080) is not running.
-          LogFilterPatterns = "~\\[CSS_Loader\\].*\\[Health Check\\].*Cannot connect";
+    (mkIf (config.jovian.decky-loader.enable or false) (
+      {
+        # Do not auto-start decky-loader at boot, decky-loader-steam-watch
+        # user service manages lifecycle alongside Steam process.
+        systemd.services.decky-loader = {
+          wantedBy = mkForce [ ];
+          serviceConfig = {
+            # Suppress CSS_Loader health-check spam when Steam web UI is down.
+            LogFilterPatterns = "~\\\\[CSS_Loader\\\\].*\\\\[Health Check\\\\].*Cannot connect";
+          };
         };
-      };
 
-      # Allow any active local user session to start/stop decky-loader without a password prompt
-      security.polkit.extraConfig = ''
-        polkit.addRule(function(action, subject) {
-          if (action.id == "org.freedesktop.systemd1.manage-units" &&
-              action.lookup("unit") == "decky-loader.service" &&
-              (action.lookup("verb") == "start" || action.lookup("verb") == "stop") &&
-              subject.local && subject.active) {
-            return polkit.Result.YES;
-          }
-        });
-      '';
-
-      home-manager = optionalAttrs hasHomeManager {
-        sharedModules = [
+        # Allow active local user session to start/stop decky-loader without password.
+        security.polkit.extraConfig = ''
+          polkit.addRule(function(action, subject) {
+            if (action.id == "org.freedesktop.systemd1.manage-units" &&
+                action.lookup("unit") == "decky-loader.service" &&
+                (action.lookup("verb") == "start" || action.lookup("verb") == "stop") &&
+                subject.local && subject.active) {
+              return polkit.Result.YES;
+            }
+          });
+        '';
+      }
+      // optionalAttrs hasHomeManager {
+        home-manager.sharedModules = [
           (
             {
               pkgs,
@@ -197,7 +192,7 @@ in
 
                   systemctl start decky-loader.service || true
 
-                  # tail --pid blocks until the given PID exits, then returns immediately.
+                  # tail --pid blocks until given PID exits, then returns immediately.
                   tail --pid="$STEAM_PID" -f /dev/null 2>/dev/null || true
                   systemctl stop decky-loader.service || true
 
@@ -227,7 +222,7 @@ in
             }
           )
         ];
-      };
-    })
+      }
+    ))
   ]);
 }
