@@ -6,15 +6,16 @@
 }:
 let
   inherit (lib)
+    getExe
     literalExpression
+    mkDefault
     mkEnableOption
     mkForce
     mkIf
     mkMerge
-    getExe
     ;
 
-  cfg = config.custom.core;
+  cfg = config.core;
 in
 {
   imports = [
@@ -23,10 +24,21 @@ in
     ./host
 
     ./auto-upgrade.nix
+    ./containers.nix
+    ./gaming.nix
+    ./locale.nix
+    ./networking
+    ./nix.nix
+    ./openssh.nix
     ./printing.nix
+    ./security.nix
+    ./virtualisation.nix
+    ./wsl.nix
+
+    ../shared/features/remote.nix
   ];
 
-  options.custom.core = {
+  options.core = {
     enable = (mkEnableOption "Enable core features") // {
       default = true;
     };
@@ -106,6 +118,7 @@ in
         }
       ];
     })
+
     (mkIf cfg.bluetooth.enable {
       system.activationScripts = {
         rfkillUnblockBluetooth.text = ''
@@ -117,7 +130,7 @@ in
         enable = true;
         settings.General = {
           Experimental = true;
-          KernelExperimental = lib.mkDefault true;
+          KernelExperimental = mkDefault true;
         };
       };
 

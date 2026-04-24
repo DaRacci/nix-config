@@ -11,14 +11,20 @@
 
     ./hardware.nix
 
-    "${self}/hosts/shared/optional/containers.nix"
-    "${self}/hosts/shared/optional/virtualisation.nix"
-
     "${self}/hosts/desktop/shared/sessions/hyprland.nix"
-
-    "${self}/hosts/shared/optional/gaming.nix"
-    "${self}/hosts/shared/optional/tailscale.nix"
   ];
+
+  core = {
+    containers.enable = true;
+    virtualisation.enable = true;
+    gaming.enable = true;
+    networking.tailscale.enable = true;
+
+    remote = {
+      enable = true;
+      streaming.enable = true;
+    };
+  };
 
   services = {
     hardware.bolt.enable = true;
@@ -36,11 +42,6 @@
         };
       };
     };
-  };
-
-  custom.remote = {
-    enable = true;
-    streaming.enable = true;
   };
 
   boot = {
@@ -109,11 +110,6 @@
       vulkan-loader
       zlib
     ];
-    alvr = {
-      enable = true;
-      package = pkgs.alvr-bin;
-      openFirewall = true;
-    };
   };
 
   host = {

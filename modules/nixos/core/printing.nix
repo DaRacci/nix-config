@@ -5,20 +5,27 @@
   ...
 }:
 let
-  inherit (lib) mkEnableOption mkIf mkMerge;
-  cfg = config.custom.core;
+  inherit (lib)
+    mkDefault
+    mkEnableOption
+    mkIf
+    mkMerge
+    ;
+  cfg = config.core.printing;
 in
 {
-  options.custom.core.printing = {
-    enable = mkEnableOption "Enable printing support";
+  options.core.printing = {
+    enable = mkEnableOption "printing support";
   };
 
   config = mkMerge [
     {
-      custom.core.printing.enable = config.host.device.role != "server" && !config.host.device.isVirtual;
+      core.printing.enable = mkDefault (
+        config.host.device.role != "server" && !config.host.device.isVirtual
+      );
     }
 
-    (mkIf (cfg.enable && cfg.printing.enable) {
+    (mkIf (config.core.enable && cfg.enable) {
       services.printing = {
         enable = true;
         drivers = [

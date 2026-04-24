@@ -24,8 +24,6 @@ let
 in
 {
   imports = [
-    "${self}/hosts/shared/optional/tailscale.nix"
-
     ./tunnel
     ./adguard.nix
     ./dashboard.nix
@@ -34,6 +32,10 @@ in
     (importFile ./proxy.nix)
     (importFile ./storage.nix)
   ];
+
+  core = {
+    networking.tailscale.enable = true;
+  };
 
   server.dashboard = {
     name = "NixIO";

@@ -6,8 +6,8 @@
 }:
 let
   inherit (lib)
-    mkOption
     mkIf
+    mkOption
     nameValuePair
     types
     ;
@@ -16,11 +16,6 @@ let
   cfg = config.custom;
 in
 {
-  imports = [
-    ./core
-    ./services
-  ];
-
   options.custom = {
     defaultGroups = mkOption {
       type = listOf str;
@@ -29,7 +24,7 @@ in
     };
   };
 
-  config = (mkIf (cfg.defaultGroups != [ ])) {
+  config = mkIf (cfg.defaultGroups != [ ]) {
     users.users =
       users
       |> map (
