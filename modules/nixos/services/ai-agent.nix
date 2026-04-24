@@ -1,5 +1,4 @@
 {
-  inputs,
   config,
   pkgs,
   lib,
@@ -12,7 +11,7 @@ let
 in
 {
   imports = [
-    "${inputs.services-zeroclaw}"
+    ./zeroclaw.nix
   ];
 
   options.services.ai-agent = {

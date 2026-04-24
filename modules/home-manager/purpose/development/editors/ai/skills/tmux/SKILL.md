@@ -9,14 +9,14 @@ Terminal multiplexer for background processes, output capture, and session manag
 
 ## Quick Reference
 
-| Command | Description |
+| Command                               | Description                       |
 | ------------------------------------- | --------------------------------- |
-| `tmux new -d -s name 'cmd'` | Run command in background session |
-| `tmux capture-pane -t name -p` | Capture output from session |
-| `tmux send-keys -t name 'text' Enter` | Send input to session |
-| `tmux kill-session -t name` | Terminate session |
-| `tmux ls` | List all sessions |
-| `tmux has -t name` | Check if session exists |
+| `tmux new -d -s name 'cmd'`           | Run command in background session |
+| `tmux capture-pane -t name -p`        | Capture output from session       |
+| `tmux send-keys -t name 'text' Enter` | Send input to session             |
+| `tmux kill-session -t name`           | Terminate session                 |
+| `tmux ls`                             | List all sessions                 |
+| `tmux has -t name`                    | Check if session exists           |
 
 ## Running Background Processes
 

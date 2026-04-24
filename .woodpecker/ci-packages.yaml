@@ -1,0 +1,88 @@
+labels:
+  platform: linux/amd64
+
+when:
+  - event: manual
+  - event: [push, pull_request]
+    path:
+      - pkgs/**
+      - flake.nix
+      - flake.lock
+      - .woodpecker/ci-packages.yaml
+
+clone:
+  - name: git
+    image: woodpeckerci/plugin-git
+    settings:
+      partial: false
+      depth: 0
+
+matrix:
+  PACKAGE:
+    - alvr-bin
+    - drive-stats
+    - huntress
+    - io-guardian-client
+    - io-guardian-server
+    - lidarr-plugins
+    - lix-woodpecker
+    - mcp-sequential-thinking
+    - mcp-server-amazon
+    - monocoque
+    - orca-slicer-zink
+    - proton-mcp
+    - pyarlo
+    - pyuptimekuma
+    - ssh-terminal-manager
+    - take-control-viewer
+    - terminal-manager
+
+steps:
+  - name: decide-${PACKAGE}
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    depends_on: [] # enable parallel steps
+    commands: |
+      set -euo pipefail
+
+      SHOULD_BUILD=false
+      if [ "$${CI_PREV_PIPELINE_STATUS}" = "error" ]; then
+        echo "Previous pipeline failed for $${PACKAGE}, Building to check if it was a transient issue."
+        SHOULD_BUILD=true
+      else
+        echo "Previous pipeline state was $${CI_PREV_PIPELINE_STATUS} for $${PACKAGE}, checking if it is affected by changes."
+        if [ -n "$${CI_PREV_COMMIT_SHA:-}" ]; then
+          RANGE="$${CI_PREV_COMMIT_SHA}..$${CI_COMMIT_SHA}"
+          AFFECTED=$(nix run .#discover-packages -- --json "$${RANGE}" "$${PACKAGE}" || echo "[]")
+          if echo "$${AFFECTED}" | jq -e --arg package "$${PACKAGE}" 'index($package)' > /dev/null 2>&1; then
+            echo "Package $${PACKAGE} is affected by changes, proceeding with build"
+            SHOULD_BUILD=true
+          else
+            echo "Package $${PACKAGE} is not affected by changes, skipping build"
+          fi
+        else
+          echo "No previous commit SHA, building..."
+          SHOULD_BUILD=true
+        fi
+      fi
+
+      if [ "$${SHOULD_BUILD}" = "true" ]; then
+        touch .do-build
+      fi
+
+  - name: build-${PACKAGE}
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    depends_on: ["decide-${PACKAGE}"]
+    environment:
+      BINARY_CACHE_TOKEN:
+        from_secret: BINARY_CACHE_TOKEN
+    commands: |-
+      if [ ! -f .do-build ]; then
+        echo "Skipping build for ${PACKAGE} - not affected by changes"
+        exit 0
+      fi
+
+      nix run .#setup-attic
+      nix run .#archive-flakes -- "."
+      nix-fast-build --no-nom --no-link --attic-cache raccidev --skip-cached --flake ".#packages.x86_64-linux.${PACKAGE}"

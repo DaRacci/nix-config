@@ -1,0 +1,99 @@
+# This was mostly just taken from https://github.com/Mic92/nix-update/blob/main/nix_update/eval.nix
+{
+  importPath,
+  attribute,
+  system ? builtins.currentSystem,
+}:
+
+let
+  inherit (builtins)
+    getFlake
+    stringLength
+    substring
+    foldl'
+    fromJSON
+    ;
+
+  # Parse the attribute path from JSON string
+  attributePath = fromJSON attribute;
+  # In case of flakes, we must pass a url with git attrs of the flake
+  # otherwise the entire directory is copied to nix store
+  flakeOrImportPath = importPath;
+
+  # Try to navigate nested attributes, returning { success = bool; value = ...; }
+  tryGetAttrPath =
+    attrPath: root:
+    foldl'
+      (
+        acc: attr:
+        if acc.success && acc.value ? ${attr} then
+          {
+            success = true;
+            value = acc.value.${attr};
+          }
+        else
+          {
+            success = false;
+            value = null;
+          }
+      )
+      {
+        success = true;
+        value = root;
+      }
+      attrPath;
+
+  flake = getFlake flakeOrImportPath;
+
+  pkg =
+    let
+      packages = flake.packages.${system} or { };
+      # Try packages.${system} first, fall back to flake root if attribute not found
+      packagesResult = tryGetAttrPath attributePath packages;
+      flakeResult = tryGetAttrPath attributePath flake;
+    in
+    if packagesResult.success then
+      packagesResult.value
+    else if flakeResult.success then
+      flakeResult.value
+    else
+      throw "Package not found at attribute path: ${builtins.toJSON attributePath}";
+
+  sanitizePosition =
+    let
+      outPath = flake.outPath;
+      outPathLen = stringLength outPath;
+    in
+    { file, ... }@pos:
+    if substring 0 outPathLen file != outPath then
+      throw "${file} is not in ${outPath}"
+    else
+      pos // { file = importPath + substring outPathLen (stringLength file - outPathLen) file; };
+
+  positionFromMeta =
+    pkg:
+    let
+      parts = builtins.match "(.*):([0-9]+)" pkg.meta.position;
+    in
+    if parts == null then
+      throw "Unable to parse meta.position '${pkg.meta.position}': expected 'file:line' format"
+    else
+      {
+        file = builtins.elemAt parts 0;
+        line = builtins.fromJSON (builtins.elemAt parts 1);
+      };
+
+  position =
+    if (builtins.unsafeGetAttrPos "src" pkg) != null then
+      sanitizePosition (builtins.unsafeGetAttrPos "src" pkg)
+    else if pkg ? meta && pkg.meta ? position then
+      sanitizePosition (positionFromMeta pkg)
+    else
+      throw "Unable to determine position: package has neither 'src' attribute nor 'meta.position'";
+
+  eval = builtins.tryEval position.file;
+in
+if eval.success then
+  eval.value
+else
+  builtins.addErrorContext "Unable to evaluate file or extract position from meta, returning null" null

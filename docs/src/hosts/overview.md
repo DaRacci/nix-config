@@ -26,7 +26,7 @@ Host-specific configurations are found in `hosts/{device-type}/{hostname}/defaul
 
 - [Adding a New Host](../development/adding_a_new_host.md)
 
-______________________________________________________________________
+---
 
 ## Decky Loader Lifecycle
 

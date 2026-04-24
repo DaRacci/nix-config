@@ -3,11 +3,11 @@
 Autonomous AI Agent service powered by Zeroclaw, providing intelligent task automation with security controls for code review and development tasks.
 
 - **Entry point**: `modules/nixos/services/ai-agent.nix`
-- **Upstream**: [Zeroclaw Services](https://github.com/torproject/services-zeroclaw)
+- **Bundled module**: `modules/nixos/services/zeroclaw.nix`
 
-### Special Options
+### Options
 
-- `services.ai-agent.enable`: Enable the autonomous AI Agent service.
+{{#include ../../../generated/ai-agent-options.md}}
 
 ### Allowed Domains
 

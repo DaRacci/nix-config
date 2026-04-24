@@ -22,6 +22,7 @@
         };
         mdsh.enable = true;
         keep-sorted.enable = true;
+        prettier.enable = true;
         biome = {
           enable = true;
           settings.formatter = {
@@ -38,14 +39,19 @@
       };
 
       settings = {
-        formatter.shellcheck.excludes = [ ".envrc" ];
+        formatter = {
+          shellcheck.excludes = [ ".envrc" ];
+          prettier.includes = [ "*.{yaml,yml}" ];
+        };
         global.excludes = [
           ".opencode/**"
+          "openspec/**"
           "**/secrets.yaml"
           "**/ssh_host_ed25519_key.pub"
           "hosts/server/nixcloud/provisioning.json"
           "hosts/server/nixio/redis-mappings.json"
           "hosts/server/nixio/tunnel/credentials.json"
+          "pkgs/lix-woodpecker/v2.nix"
         ];
       };
     };

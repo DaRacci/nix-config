@@ -6,10 +6,10 @@ The Desktop module provides a base configuration for desktop environments in the
 
 This module bundles the common desktop-related services that should be present on all workstations. It does not expose its own options — it is purely an import aggregator for the following components:
 
-| Component | Source | Documentation |
-|---|---|---|
+| Component       | Source                                     | Documentation                           |
+| --------------- | ------------------------------------------ | --------------------------------------- |
 | Display Manager | `modules/nixos/shared/display-manager.nix` | [Display Manager](./display-manager.md) |
-| Remote Access | `modules/nixos/shared/remote.nix` | [Remote Access](./remote.md) |
+| Remote Access   | `modules/nixos/shared/remote.nix`          | [Remote Access](./remote.md)            |
 
 ## Entry Point
 
