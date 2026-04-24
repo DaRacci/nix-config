@@ -85,4 +85,4 @@ steps:
 
       nix run .#setup-attic
       nix run .#archive-flakes -- "."
-      nix-fast-build --no-nom --no-link --attic-cache raccidev --skip-cached --flake ".#packages.x86_64-linux.${PACKAGE}"
+      nix-fast-build --no-nom --no-link --attic-cache raccidev --skip-cached --flake ".#packages.x86_64-linux.${PACKAGE}" --out-link "result-${PACKAGE}"
