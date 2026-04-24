@@ -4,18 +4,25 @@
   lib,
   ...
 }:
-with lib;
 let
-  cfg = config.custom.auto-upgrade;
+  inherit (lib)
+    literalExpression
+    mkEnableOption
+    mkIf
+    mkOption
+    ;
+  inherit (lib.types) str;
+
+  cfg = config.core.auto-upgrade;
 in
 {
-  options.custom.auto-upgrade = {
+  options.core.auto-upgrade = {
     enable = (mkEnableOption "auto-upgrade") // {
       default = true;
     };
 
     hostName = mkOption {
-      type = types.str;
+      type = str;
       default = config.networking.hostName;
       defaultText = literalExpression ''
         config.networking.hostName

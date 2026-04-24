@@ -6,29 +6,30 @@
 }:
 let
   inherit (lib)
-    mkIf
+    getExe
     mkEnableOption
-    mkOption
+    mkIf
     mkMerge
+    mkOption
     ;
-  inherit (lib.types) submodule str;
+  inherit (lib.types) str submodule;
 
-  cfg = config.custom.remote;
+  cfg = config.core.remote;
 in
 {
-  options.custom.remote = {
-    enable = mkEnableOption "Enable remote features";
+  options.core.remote = {
+    enable = mkEnableOption "remote features";
 
     remoteDesktop = mkOption {
       default = { };
       type = submodule {
         options = {
-          enable = mkEnableOption "Enable remote desktop";
+          enable = mkEnableOption "remote desktop";
 
           startCommand = mkOption {
             type = str;
             default = "gnome-session";
-            description = "Command to start the remote desktop session.";
+            description = "Command to start remote desktop session.";
           };
         };
       };
@@ -38,7 +39,7 @@ in
       default = { };
       type = submodule {
         options = {
-          enable = mkEnableOption "Enable remote streaming";
+          enable = mkEnableOption "remote streaming";
         };
       };
     };
@@ -46,7 +47,7 @@ in
 
   config = mkIf cfg.enable (mkMerge [
     (mkIf cfg.remoteDesktop.enable {
-      services.xrdp = mkIf cfg.remoteDesktop.enable {
+      services.xrdp = {
         enable = true;
         defaultWindowManager = cfg.remoteDesktop.startCommand;
         openFirewall = true;
@@ -54,7 +55,7 @@ in
     })
 
     (mkIf cfg.streaming.enable {
-      services.sunshine = mkIf cfg.streaming.enable {
+      services.sunshine = {
         enable = true;
         autoStart = true;
         openFirewall = true;
@@ -62,76 +63,61 @@ in
         # settings.port = 47889;
       };
 
-      systemd.user =
-        # let
-        #   # Loosely based off https://github.com/NixOS/nixpkgs/blob/ad7196ae55c295f53a7d1ec39e4a06d922f3b899/nixos/modules/services/networking/sunshine.nix
-        #   basePort = config.services.sunshine.settings.port;
-        #   generatePorts = port: offsets: map (offset: port + offset) offsets;
-        #   # https://web.archive.org/web/20240303183334/https://docs.lizardbyte.dev/projects/sunshine/en/latest/about/advanced_usage.html#port
-        #   offsets = {
-        #     tcp = [
-        #       (-5)
-        #       0
-        #       1
-        #       21
-        #     ];
-        #     udp = [
-        #       9
-        #       10
-        #       11
-        #       13
-        #     ];
+      systemd.user = {
+        # sockets.sunshine-proxy = {
+        #   wantedBy = [ "sockets.target" ];
+        #   socketConfig = {
+        #     ListenStream = generatePorts (basePort + 100) offsets.tcp;
+        #     ListenDatagram = generatePorts (basePort + 100) offsets.udp;
         #   };
-        # in
-        {
-          # sockets.sunshine-proxy = {
-          #   wantedBy = [ "sockets.target" ];
-          #   socketConfig = {
-          #     ListenStream = generatePorts (basePort + 100) offsets.tcp;
-          #     ListenDatagram = generatePorts (basePort + 100) offsets.udp;
-          #   };
-          # };
+        # };
 
-          # services = {
-          # sunshine-proxy = {
-          #   bindsTo = [
-          #     "sunshine-proxy.socket"
-          #     "sunshine.service"
-          #   ];
-          #   after = [
-          #     "sunshine-proxy.socket"
-          #     "sunshine.service"
-          #   ];
-          #   serviceConfig = {
-          #     Type = "notify";
-          #     RemainAfterExit = "yes";
-          #     # https://web.archive.org/web/20240303183334/https://docs.lizardbyte.dev/projects/sunshine/en/latest/about/advanced_usage.html#port
-          #     ExecStart =
-          #       (offsets.tcp)
-          #       |> generatePorts basePort
-          #       |> map (
-          #         port:
-          #         "${pkgs.systemd}/lib/systemd/systemd-socket-proxyd --exit-idle-time=300s 127.0.0.1:${toString port}"
-          #       );
-          #     Restart = "no";
-          #   };
-          # };
-          # sunshine = {
-          #   serviceConfig = {
-          #     Restart = lib.mkForce "no";
-          #     ExecStartPost = "${lib.getExe' pkgs.toybox "sleep"} 3"; # Allow sunshine to startup fully
-          #   };
-          #   unitConfig = {
-          #     StopWhenUnneeded = "yes";
-          #   };
-          # };
-          # };
-        };
+        # services = {
+        # sunshine-proxy = {
+        #   bindsTo = [
+        #     "sunshine-proxy.socket"
+        #     "sunshine.service"
+        #   ];
+        #   after = [
+        #     "sunshine-proxy.socket"
+        #     "sunshine.service"
+        #   ];
+        #   serviceConfig = {
+        #     Type = "notify";
+        #     RemainAfterExit = "yes";
+        #     # https://web.archive.org/web/20240303183334/https://docs.lizardbyte.dev/projects/sunshine/en/latest/about/advanced_usage.html#port
+        #     ExecStart =
+        #       (offsets.tcp)
+        #       |> generatePorts basePort
+        #       |> map (
+        #         port:
+        #         "${pkgs.systemd}/lib/systemd/systemd-socket-proxyd --exit-idle-time=300s 127.0.0.1:${toString port}"
+        #       );
+        #     Restart = "no";
+        #   };
+        # };
+        # sunshine = {
+        #   serviceConfig = {
+        #     Restart = lib.mkForce "no";
+        #     ExecStartPost = "${lib.getExe' pkgs.toybox "sleep"} 3"; # Allow sunshine to startup fully
+        #   };
+        #   unitConfig = {
+        #     StopWhenUnneeded = "yes";
+        #   };
+        # };
+        # };
+      };
 
-      home-manager.sharedModules = [ { user.persistence.directories = [ ".config/sunshine" ]; } ];
+      home-manager = lib.optionalAttrs (config ? home-manager) {
+        sharedModules = [
+          {
+            user.persistence.directories = [ ".config/sunshine" ];
+          }
+        ];
+      };
     })
 
-    (mkIf (cfg.streaming.enable && config.programs.hyprland.enable) {
+    (mkIf (cfg.streaming.enable && config.programs.hyprland.enable && config ? home-manager) {
       services.sunshine = {
         settings.output_name = "3";
         applications.apps = [
@@ -169,6 +155,7 @@ in
                       done
                     '';
                   };
+
                   undoScript = pkgs.writeShellApplication {
                     name = "hyprland-restore-disabled-monitors-post-sunshine";
                     runtimeInputs = [
@@ -187,8 +174,8 @@ in
                   };
                 in
                 {
-                  do = "sh -c '${lib.getExe doScript}'";
-                  undo = "sh -c '${lib.getExe undoScript}'";
+                  do = "sh -c '${getExe doScript}'";
+                  undo = "sh -c '${getExe undoScript}'";
                 }
               )
             ];
