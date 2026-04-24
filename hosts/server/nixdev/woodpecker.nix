@@ -98,7 +98,10 @@
     woodpeckerNix = {
       enable = true;
       isolatedStore.enable = true;
-      woodpecker.agents = [ "local" ];
+      woodpecker = {
+        agents = [ "local" ];
+        extraVolumes = [ "/var/lib/woodpecker-nix/vulnix-cache:/root/.cache/vulnix" ];
+      };
     };
   };
 }

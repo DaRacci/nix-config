@@ -57,6 +57,7 @@
                 nh
                 nil
                 nix-diff
+                nix-fast-build
                 nix-init
                 nix-tree
                 nix-update
@@ -67,6 +68,7 @@
                 sops
                 ssh-to-age
                 vale
+                vulnix
                 ;
             in
             [
@@ -86,6 +88,8 @@
               nix-init
               nh
               nix-update
+              vulnix
+              nix-fast-build
 
               # Required Tools
               lix
