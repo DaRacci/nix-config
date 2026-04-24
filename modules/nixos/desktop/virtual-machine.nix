@@ -71,7 +71,7 @@ let
                 throw "reservedMemory must be the percent of memory which is reserved, between 0 and 100"
               else
                 v;
-            description = mkDoc "The percentage of maxMemory to reserve for the host.";
+            description = "The percentage of maxMemory to reserve for the host.";
           };
 
           maxMemory = mkOption {

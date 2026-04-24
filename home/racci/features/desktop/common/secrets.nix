@@ -66,5 +66,5 @@
     pinentry.package = pkgs.pinentry-tty;
   };
 
-  custom.uwsm.sliceAllocation.background = [ "gpg-agent" ];
+  core.uwsm.sliceAllocation.background = [ "gpg-agent" ];
 }

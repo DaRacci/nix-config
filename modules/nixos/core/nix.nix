@@ -29,6 +29,8 @@ in
     inputs.angrr.overlays.default
     inputs.nix4vscode.overlays.default
   ];
+  
+  system.stateVersion = builtins.readFile "${self}/state.version";
 
   nix = {
     settings = rec {

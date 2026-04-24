@@ -11,21 +11,22 @@
 }:
 let
   inherit (lib)
+    literalExpression
+    mkEnableOption
     mkIf
     mkMerge
-    mkEnableOption
-    literalExpression
     ;
 
-  cfg = config.custom.hm-helper;
+  cfg = config.core.hm-helper;
   opCfg = cfg._1password;
 in
 {
-  options.custom.hm-helper._1password = {
+  options.core.hm-helper._1password = {
     enableGUI = mkEnableOption "Enable 1Password GUI support" // {
       default = anyoneHasPackage pkgs._1password-gui;
       defaultText = literalExpression "anyoneHasPackage pkgs._1password-gui";
     };
+
     enableCli = mkEnableOption "Enable 1Password Cli support" // {
       default = anyoneHasPackage pkgs._1password-cli;
       defaultText = literalExpression "anyoneHasPackage pkgs._1password-cli";

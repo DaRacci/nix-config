@@ -1,7 +1,7 @@
 {
   audio = import ./audio.nix;
   programs = import ./programs;
-  custom = import ./custom;
+  core = import ./core;
   user = import ./user;
   purpose = import ./purpose;
   security = import ./security;

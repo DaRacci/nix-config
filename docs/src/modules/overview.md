@@ -7,7 +7,9 @@ This section provides an overview of the custom NixOS and Home-Manager modules d
 ## Entry Points
 
 - `modules/nixos/`: Contains NixOS-specific modules.
-  - [Desktop Module](nixos/desktop.md)
+  - [Core Module](nixos/core/default.md)
+    - [Display Manager](nixos/core/display-manager.md)
+    - [Remote Desktop & Streaming](nixos/core/remote.md)
   - [Server Module](nixos/server/default.md)
     - [Dashboard Module](nixos/server/dashboard.md)
     - [Network Module](nixos/server/network.md)

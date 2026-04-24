@@ -1,0 +1,203 @@
+{
+  config,
+  options,
+  pkgs,
+  lib,
+  ...
+}:
+let
+  inherit (lib)
+    getExe
+    mkEnableOption
+    mkIf
+    mkMerge
+    mkOption
+    optionalAttrs
+    ;
+  inherit (lib.types) str submodule;
+
+  cfg = config.core.remote;
+  hasHomeManager = options ? home-manager;
+in
+{
+  options.core.remote = {
+    enable = mkEnableOption "remote features";
+
+    remoteDesktop = mkOption {
+      default = { };
+      type = submodule {
+        options = {
+          enable = mkEnableOption "remote desktop";
+
+          startCommand = mkOption {
+            type = str;
+            default = "gnome-session";
+            description = "Command to start remote desktop session.";
+          };
+        };
+      };
+    };
+
+    streaming = mkOption {
+      default = { };
+      type = submodule {
+        options = {
+          enable = mkEnableOption "remote streaming";
+        };
+      };
+    };
+  };
+
+  config = mkIf cfg.enable (mkMerge [
+    (mkIf cfg.remoteDesktop.enable {
+      services.xrdp = {
+        enable = true;
+        defaultWindowManager = cfg.remoteDesktop.startCommand;
+        openFirewall = true;
+      };
+    })
+
+    (mkIf cfg.streaming.enable (
+      {
+        services.sunshine = {
+          enable = true;
+          autoStart = true;
+          openFirewall = true;
+          capSysAdmin = true;
+          # settings.port = 47889;
+        };
+
+        systemd.user = {
+          # sockets.sunshine-proxy = {
+          #   wantedBy = [ "sockets.target" ];
+          #   socketConfig = {
+          #     ListenStream = generatePorts (basePort + 100) offsets.tcp;
+          #     ListenDatagram = generatePorts (basePort + 100) offsets.udp;
+          #   };
+          # };
+
+          # services = {
+          # sunshine-proxy = {
+          #   bindsTo = [
+          #     "sunshine-proxy.socket"
+          #     "sunshine.service"
+          #   ];
+          #   after = [
+          #     "sunshine-proxy.socket"
+          #     "sunshine.service"
+          #   ];
+          #   serviceConfig = {
+          #     Type = "notify";
+          #     RemainAfterExit = "yes";
+          #     # https://web.archive.org/web/20240303183334/https://docs.lizardbyte.dev/projects/sunshine/en/latest/about/advanced_usage.html#port
+          #     ExecStart =
+          #       (offsets.tcp)
+          #       |> generatePorts basePort
+          #       |> map (
+          #         port:
+          #         "${pkgs.systemd}/lib/systemd/systemd-socket-proxyd --exit-idle-time=300s 127.0.0.1:${toString port}"
+          #       );
+          #     Restart = "no";
+          #   };
+          # };
+          # sunshine = {
+          #   serviceConfig = {
+          #     Restart = lib.mkForce "no";
+          #     ExecStartPost = "${lib.getExe' pkgs.toybox "sleep"} 3"; # Allow sunshine to startup fully
+          #   };
+          #   unitConfig = {
+          #     StopWhenUnneeded = "yes";
+          #   };
+          # };
+          # };
+        };
+      }
+      // optionalAttrs hasHomeManager {
+        home-manager.sharedModules = [
+          {
+            user.persistence.directories = [ ".config/sunshine" ];
+          }
+        ];
+      }
+    ))
+
+    (mkIf (cfg.streaming.enable && config.programs.hyprland.enable) (
+      {
+        services.sunshine = {
+          settings.output_name = "3";
+          applications.apps = [
+            {
+              name = "Shared Desktop";
+              prep-cmd = [
+                {
+                  do = ''sh -c "hyprctl keyword monitor HEADLESS-2,''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS},auto,1"'';
+                  undo = "hyprctl keyword monitor HEADLESS-2,disable";
+                }
+              ];
+            }
+            {
+              name = "Exclusive Desktop";
+              prep-cmd = [
+                {
+                  do = ''sh -c "hyprctl keyword monitor HEADLESS-2,''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS},auto,1" && sleep 5'';
+                  undo = "hyprctl keyword monitor HEADLESS-2,disable";
+                }
+                (
+                  let
+                    doScript = pkgs.writeShellApplication {
+                      name = "hyprland-disable-other-monitors-pre-sunshine";
+                      runtimeInputs = [
+                        pkgs.hyprland
+                        pkgs.jq
+                      ];
+                      text = ''
+                        OUTPUT_FILE="$XDG_STATE_HOME/hyprland-disabled-monitors-pre-sunshine.json"
+                        ENABLED_MONITORS=$(hyprctl -j monitors | jq '. - map(select((.name | contains("HEADLESS")) or .disabled == true))')
+                        echo "$ENABLED_MONITORS" > "$OUTPUT_FILE"
+
+                        for monitor in $(echo "$ENABLED_MONITORS" | jq -r '.[].name'); do
+                          hyprctl keyword monitor "$monitor,disable"
+                        done
+                      '';
+                    };
+
+                    undoScript = pkgs.writeShellApplication {
+                      name = "hyprland-restore-disabled-monitors-post-sunshine";
+                      runtimeInputs = [
+                        pkgs.hyprland
+                        pkgs.jq
+                      ];
+                      text = ''
+                        INPUT_FILE="$XDG_STATE_HOME/hyprland-disabled-monitors-pre-sunshine.json"
+                        if [ -f "$INPUT_FILE" ]; then
+                          for monitor in $(jq -r '.[].name' < "$INPUT_FILE"); do
+                            hyprctl keyword monitor "$monitor,enable"
+                          done
+                          rm "$INPUT_FILE"
+                        fi
+                      '';
+                    };
+                  in
+                  {
+                    do = "sh -c '${getExe doScript}'";
+                    undo = "sh -c '${getExe undoScript}'";
+                  }
+                )
+              ];
+            }
+          ];
+        };
+      }
+      // optionalAttrs hasHomeManager {
+        home-manager.sharedModules = [
+          {
+            wayland.windowManager.hyprland.settings = {
+              exec-once = [ "hyprctl output create headless" ];
+              monitor = [ "HEADLESS-2,disable" ];
+            };
+          }
+        ];
+      }
+    ))
+  ]);
+}

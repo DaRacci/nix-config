@@ -7,7 +7,7 @@
 }:
 let
   inherit (lib) mkEnableOption mkIf mkOption;
-  inherit (lib.types) natural;
+  inherit (lib.types) ints;
 
   cfg = config.core.security;
 in
@@ -18,7 +18,7 @@ in
     };
 
     userLimit = mkOption {
-      type = natural;
+      type = ints.unsigned;
       default = 32768;
       description = ''
         The maximum number of open files per user.
