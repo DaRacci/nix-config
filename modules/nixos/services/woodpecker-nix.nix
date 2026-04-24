@@ -323,6 +323,30 @@ in
             serviceConfig = {
               Type = "oneshot";
               RemainAfterExit = true;
+
+              NoNewPrivileges = true;
+              ProtectClock = true;
+              ProtectHostname = true;
+              ProtectKernelModules = true;
+              ProtectKernelLogs = true;
+              ProtectKernelTunables = true;
+              RestrictRealtime = true;
+              RestrictSUIDSGID = true;
+              LockPersonality = true;
+
+              PrivateDevices = true;
+              PrivateTmp = true;
+              ProtectHome = true;
+              ProtectSystem = "strict";
+              RestrictNamespaces = true;
+
+              CapabilityBoundingSet = "";
+              SystemCallFilter = [ "@system-service" ];
+              SystemCallArchitectures = "native";
+              SystemCallErrorNumber = "EPERM";
+              MemoryDenyWriteExecute = true;
+
+              ReadWritePaths = [ stateDir ];
             };
 
             path = [
@@ -387,16 +411,34 @@ in
               BindPaths = [ "${stateDir}/nix:/nix" ];
               ReadWritePaths = [ stateDir ];
 
+              NoNewPrivileges = true;
+              ProtectClock = true;
+              ProtectHostname = true;
+              ProtectKernelModules = true;
+              ProtectKernelLogs = true;
+              ProtectKernelTunables = true;
+              ProtectControlGroups = true;
+              RestrictRealtime = true;
+              RestrictSUIDSGID = true;
+              LockPersonality = true;
+
+              PrivateDevices = true;
               PrivateMounts = true;
               PrivateTmp = true;
               ProtectSystem = "strict";
               ProtectHome = true;
-              PrivateDevices = true;
-              ProtectKernelTunables = true;
-              ProtectKernelModules = true;
-              ProtectControlGroups = true;
-              NoNewPrivileges = true;
-              RestrictSUIDSGID = true;
+              RestrictNamespaces = true;
+
+              CapabilityBoundingSet = "";
+              RestrictAddressFamilies = [
+                "AF_UNIX"
+                "AF_INET"
+                "AF_INET6"
+              ];
+              SystemCallFilter = [ "@system-service" ];
+              SystemCallArchitectures = "native";
+              SystemCallErrorNumber = "EPERM";
+              MemoryDenyWriteExecute = true;
 
               LimitNOFILE = 65536;
               Restart = "on-failure";
@@ -416,7 +458,35 @@ in
           after = [ "woodpecker-nix-daemon.service" ];
           requires = [ "woodpecker-nix-daemon.service" ];
 
-          serviceConfig.Type = "oneshot";
+          serviceConfig = {
+            Type = "oneshot";
+
+            DynamicUser = true;
+            NoNewPrivileges = true;
+            ProtectClock = true;
+            ProtectHostname = true;
+            ProtectKernelModules = true;
+            ProtectKernelLogs = true;
+            ProtectKernelTunables = true;
+            RestrictRealtime = true;
+            RestrictSUIDSGID = true;
+            LockPersonality = true;
+
+            PrivateDevices = true;
+            PrivateTmp = true;
+            ProtectHome = true;
+            ProtectSystem = "strict";
+            RestrictNamespaces = true;
+
+            CapabilityBoundingSet = "";
+            RestrictAddressFamilies = [ "AF_UNIX" ];
+            SystemCallFilter = [ "@system-service" ];
+            SystemCallArchitectures = "native";
+            SystemCallErrorNumber = "EPERM";
+            MemoryDenyWriteExecute = true;
+
+            ReadWritePaths = [ stateDir ];
+          };
 
           script = ''
             export NIX_REMOTE="unix://${stateDir}/nix/var/nix/daemon-socket/socket"
