@@ -3,6 +3,7 @@
   config,
   lib,
   hostDirectory,
+  importExternals ? true,
   ...
 }:
 let
@@ -11,6 +12,7 @@ let
     mkOption
     mkEnableOption
     types
+    optional
     literalExpression
     ;
   inherit (types) path;
@@ -21,7 +23,7 @@ let
   keys = builtins.filter isEd25519 config.services.openssh.hostKeys;
 in
 {
-  imports = [ inputs.sops-nix.nixosModules.sops ];
+  imports = optional importExternals [ inputs.sops-nix.nixosModules.sops ];
 
   options.core.sops = {
     enable = mkEnableOption "SOPS auto configuration" // {

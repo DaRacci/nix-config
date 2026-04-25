@@ -2,18 +2,19 @@
   inputs,
   config,
   lib,
+  importExternals ? true,
   ...
 }:
 let
   inherit (lib)
-    mkEnableOption
     literalExpression
+    mkIf
+    optional
+    mkEnableOption
     ;
   cfg = config.core.stylix;
 in
 {
-  imports = [ inputs.stylix.nixosModules.stylix ];
-
   options.core.stylix = {
     enable = mkEnableOption "Stylix configuration" // {
       default = !config.host.device.isHeadless;
@@ -21,9 +22,11 @@ in
     };
   };
 
-  config = {
+  imports = optional importExternals inputs.stylix.nixosModules.stylix;
+
+  config = mkIf cfg.enable {
     stylix = {
-      enable = cfg.enable;
+      enable = true;
       polarity = "dark";
       base16Scheme = "${inputs.stylix.inputs.tinted-schemes}/base16/tokyo-night-dark.yaml";
     };

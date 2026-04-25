@@ -23,16 +23,19 @@ let
   anyoneHasPackage = pkg: length (usersWithPackage pkg) > 0;
   anyoneHasOption = userFilter: length (filter userFilter hmUserAttrs) > 0;
 
-  importWithExtras =
-    path:
-    import path {
-      inherit
-        hasPackage
-        usersWithPackage
-        anyoneHasPackage
-        anyoneHasOption
-        ;
-    };
+  importWithExtras = path: {
+    _file = toString path;
+    imports = [
+      (import path {
+        inherit
+          hasPackage
+          usersWithPackage
+          anyoneHasPackage
+          anyoneHasOption
+          ;
+      })
+    ];
+  };
 in
 {
   imports = [
