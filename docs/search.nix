@@ -15,16 +15,20 @@ let
       { _module.args = { inherit self inputs pkgs; }; }
     ];
     specialArgs = {
-      inherit inputs;
+      inherit inputs lib;
+      hostDirectory = "${self}/hosts";
+      importExternals = false;
       users = [ ];
     };
     name = "rd-${name}";
-    urlPrefix = "https://github.com/DaRacci/nix-config/blob/master/";
+    urlPrefix = "https://codeberg.org/Racci/nix-config/src/branch/master/";
   };
 
   rootModules =
     builtins.readDir "${self}/modules/nixos"
-    |> lib.filterAttrs (_: type: type == "directory")
+    |> lib.filterAttrs (
+      name: type: type == "directory" && builtins.pathExists "${self}/modules/nixos/${name}/default.nix"
+    )
     |> builtins.attrNames;
 in
 mkMultiSearch {

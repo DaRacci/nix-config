@@ -41,6 +41,7 @@ nixosSystem rec {
     ++ (usersWithRoot |> map osConfigPath |> filter pathExists) # Include each user's os-config.nix if it exists
     ++ [
       "${self}/modules/nixos/${deviceType}"
+      "${self}/modules/nixos/shared"
 
       (import "${self}/modules/flake/apply/system.nix" {
         inherit allocations deviceType hostName;

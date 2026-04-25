@@ -285,6 +285,7 @@ in
               "tail *" = "allow";
               "touch *" = "allow";
               "wc *" = "allow";
+              "openspec *" = "allow";
             };
             webfetch = "allow";
           };

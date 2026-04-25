@@ -43,7 +43,7 @@
       vrr = false
     }
   '';
-  custom.audio = {
+  core.audio = {
     disabledDevices = [
       "alsa_card.pci-0000_01_00.1" # Dedicated GPU
       "alsa_card.pci-0000_74_00.1" # HDMI Audio

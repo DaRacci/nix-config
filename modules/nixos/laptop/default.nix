@@ -1,6 +1,8 @@
 {
-  imports = [
-    ../shared/display-manager.nix
-    ../shared/remote.nix
-  ];
+  config = {
+    core = {
+      display-manager.enable = true;
+      remote.enable = true;
+    };
+  };
 }

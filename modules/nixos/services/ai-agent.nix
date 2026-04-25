@@ -3,6 +3,7 @@
   config,
   pkgs,
   lib,
+  importExternals ? true,
   ...
 }:
 let
@@ -11,9 +12,7 @@ let
   cfg = config.services.ai-agent;
 in
 {
-  imports = [
-    "${inputs.services-zeroclaw}"
-  ];
+  imports = lib.optional importExternals "${inputs.services-zeroclaw}";
 
   options.services.ai-agent = {
     enable = mkEnableOption "autonomous AI Agent service";

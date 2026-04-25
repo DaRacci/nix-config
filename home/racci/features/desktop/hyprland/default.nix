@@ -56,6 +56,7 @@ with lib;
     QT_QPA_PLATFORM = "wayland;xcb";
     # "SDL_VIDEODRIVER,wayland" # Breaks osu! hardware acceleration
     CLUTTER_BACKEND = "wayland";
+    NIXOS_OZONE_WL = "1";
     #endregion
   };
 
