@@ -2,14 +2,20 @@
   inputs,
   config,
   lib,
+  importExternals ? true,
   ...
 }:
 let
-  inherit (lib) mkIf mkForce mkEnableOption;
+  inherit (lib)
+    mkIf
+    mkForce
+    mkEnableOption
+    optional
+    ;
   cfg = config.boot.secure;
 in
 {
-  imports = [ inputs.lanzaboote.nixosModules.lanzaboote ];
+  imports = optional importExternals inputs.lanzaboote.nixosModules.lanzaboote;
 
   options.boot.secure = {
     enable = mkEnableOption "enable secureboot";

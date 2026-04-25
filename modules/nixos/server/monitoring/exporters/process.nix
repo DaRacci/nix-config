@@ -15,7 +15,10 @@ in
       enable = true;
       process_names = [
         # Remove nix store path from process name.
-        { name = "{{.Matches.Wrapped}} {{ .Matches.Args }}"; cmdline = [ "^/nix/store[^ ]*/(?P<Wrapped>[^ /]*) (?P<Args>.*)" ]; }
+        {
+          name = "{{.Matches.Wrapped}} {{ .Matches.Args }}";
+          cmdline = [ "^/nix/store[^ ]*/(?P<Wrapped>[^ /]*) (?P<Args>.*)" ];
+        }
 
       ];
     };

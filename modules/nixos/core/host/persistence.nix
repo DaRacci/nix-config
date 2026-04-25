@@ -2,11 +2,34 @@
   inputs,
   config,
   lib,
+  importExternals ? true,
   ...
 }:
-with lib;
-with types;
 let
+  inherit (lib)
+    mkIf
+    mkEnableOption
+    mkOption
+    mkDefault
+    mapAttrs
+    mapAttrsToList
+    attrNames
+    filter
+    optionalString
+    optional
+    types
+    concatLines
+    nameValuePair
+    ;
+  inherit (types)
+    str
+    bool
+    listOf
+    coercedTo
+    path
+    nullOr
+    submodule
+    ;
   cfg = config.host.persistence;
 
   defaultPerms = {
@@ -193,7 +216,7 @@ in
     };
   };
 
-  imports = [ inputs.impermanence.nixosModules.impermanence ];
+  imports = optional importExternals inputs.impermanence.nixosModules.impermanence;
 
   config = mkIf cfg.enable {
     programs.fuse.userAllowOther = true;

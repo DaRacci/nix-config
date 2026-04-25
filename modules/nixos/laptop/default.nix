@@ -1,6 +1,10 @@
 {
-  imports = [
-    ../shared/features/display-manager.nix
-    ../shared/features/remote.nix
-  ];
+  config = {
+    core = {
+      audio.enable = true;
+      bluetooth.enable = true;
+      display-manager.enable = true;
+      remote.enable = true;
+    };
+  };
 }
