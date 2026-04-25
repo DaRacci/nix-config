@@ -13,14 +13,11 @@ let
     modules = [
       path
       { _module.args = { inherit self inputs pkgs; }; }
-      # Stylix fixes
-      {
-        # options.programs = { }; # Stylix uses this unconditionally and it causes an error if it's not defined
-        disabledModules = [ "${inputs.stylix.nixosModules.stylix._file}" ];
-      }
     ];
     specialArgs = {
       inherit inputs lib;
+      hostDirectory = "${self}/hosts";
+      importExternals = false;
       users = [ ];
     };
     name = "rd-${name}";
@@ -29,7 +26,9 @@ let
 
   rootModules =
     builtins.readDir "${self}/modules/nixos"
-    |> lib.filterAttrs (_: type: type == "directory")
+    |> lib.filterAttrs (
+      name: type: type == "directory" && builtins.pathExists "${self}/modules/nixos/${name}/default.nix"
+    )
     |> builtins.attrNames;
 in
 mkMultiSearch {

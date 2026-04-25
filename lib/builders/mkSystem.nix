@@ -40,16 +40,13 @@ nixosSystem rec {
     (attrValues (import "${self}/modules/nixos"))
     ++ (usersWithRoot |> map osConfigPath |> filter pathExists) # Include each user's os-config.nix if it exists
     ++ [
+      hostDirectory
       "${self}/modules/nixos/${deviceType}"
-      "${self}/modules/nixos/shared"
+      "${self}/hosts/${deviceType}/shared"
 
       (import "${self}/modules/flake/apply/system.nix" {
         inherit allocations deviceType hostName;
       })
-
-      "${self}/hosts/shared/global"
-      "${self}/hosts/${deviceType}/shared"
-      hostDirectory
 
       {
         imports = [ inputs.disko.nixosModules.disko ];
@@ -117,5 +114,6 @@ nixosSystem rec {
     inherit self hostDirectory;
     inherit (self) inputs outputs;
     users = deviceUsers;
+    importExternals = true;
   };
 }

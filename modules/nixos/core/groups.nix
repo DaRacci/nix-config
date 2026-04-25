@@ -13,7 +13,7 @@ let
     ;
   inherit (types) listOf str;
 
-  cfg = config.core.groups;
+  cfg = config.core;
 in
 {
   options.core.defaultGroups = mkOption {

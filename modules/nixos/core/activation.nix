@@ -16,7 +16,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    activationScripts.report-changes = ''
+    system.activationScripts.report-changes = ''
       LINKS=($(ls -dv /nix/var/nix/profiles/system-*-link))
       if [ $(echo $LINKS | wc -w) -gt 1 ]; then
         NEW=$(readlink -f ''${LINKS[-1]})
