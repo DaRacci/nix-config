@@ -10,7 +10,7 @@
     (importModule ./options.nix { })
     (importModule ./collector { })
     (importModule ./exporters { })
-    (importModule ./logs/promtail.nix { })
+    (importModule ./logs/alloy.nix { })
     (importModule ./integrations/proxmox.nix { })
   ];
 }

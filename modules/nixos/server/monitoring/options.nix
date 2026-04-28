@@ -76,7 +76,7 @@ in
     };
 
     logs = {
-      enable = mkEnableOption "Promtail log shipping" // {
+      enable = mkEnableOption "Alloy log shipping" // {
         default = cfg.enable;
       };
     };

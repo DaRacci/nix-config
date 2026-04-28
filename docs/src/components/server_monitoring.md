@@ -11,8 +11,9 @@ The system consists of three layers:
 
 1. **Exporters** (run on all servers)
 
-   - node_exporter for system-level metrics (CPU, memory, disk, network)
-   - Promtail for shipping journald logs to Loki
+   - node_exporter for system-level metrics (CPU, memory, disk, network, per-process stats)
+   - Grafana Alloy for shipping journald logs to Loki
+   - Ingest-time log parsing for `stdout` journal entries to infer `detected_level` and normalize common timestamp formats
    - Application-specific exporters (Caddy, PostgreSQL, Redis) enabled automatically
 
 1. **Collectors** (run on the monitoring primary host)
@@ -42,7 +43,7 @@ The system consists of three layers:
 │  ▼       ▼   ▼             ▼                        │
 │  All servers:          Home Assistant / Nextcloud    │
 │  - node_exporter :9100                              │
-│  - promtail → Loki                                  │
+│  - alloy → Loki                                     │
 │  - caddy metrics :2019 (if proxy configured)        │
 │  - postgres_exporter :9187 (if postgres configured) │
 │  - redis_exporter :9121 (if redis configured)       │
@@ -71,7 +72,7 @@ All options live under `server.monitoring`:
 | `exporters.caddy.enable` | bool | auto | Enable Caddy metrics (auto if proxy configured) |
 | `exporters.postgres.enable` | bool | auto | Enable PostgreSQL exporter (auto on IO host) |
 | `exporters.redis.enable` | bool | auto | Enable Redis exporter (auto on IO host) |
-| `logs.enable` | bool | `true` | Enable Promtail log shipping |
+| `logs.enable` | bool | `true` | Enable Alloy log shipping |
 | `collector.enable` | bool | auto | Enable collectors (auto on monitoring host) |
 | `collector.grafana.kanidm.enable` | bool | `true` | Enable Kanidm OAuth2 for Grafana |
 | `collector.alerting.enable` | bool | `true` | Enable Alertmanager |
@@ -86,6 +87,7 @@ The module automatically detects and enables exporters based on host role:
 - **Caddy exporter**: Enabled when `server.proxy.virtualHosts` is non-empty
 - **PostgreSQL exporter**: Enabled on the IO primary host when postgres databases are configured
 - **Redis exporter**: Enabled on the IO primary host when redis instances are configured
+- **node_exporter process collector**: Enabled on all servers via the `processes` collector to expose per-process stats
 - **Collector services**: Enabled only on the monitoring primary host
 
 ## Secrets
@@ -168,7 +170,7 @@ modules/nixos/server/monitoring/
 │   ├── postgres.nix         # PostgreSQL exporter
 │   └── redis.nix            # Redis exporter
 ├── logs/
-│   └── promtail.nix         # Promtail log shipping
+│   └── alloy.nix            # Alloy log shipping
 └── integrations/
     └── proxmox.nix          # PVE exporter for Proxmox API
 ```
@@ -191,7 +193,7 @@ On any server:
 
 ```sh
 systemctl status prometheus-node-exporter.service
-systemctl status promtail.service
+systemctl status alloy.service
 ```
 
 ### Verifying Metrics Collection
@@ -204,10 +206,18 @@ curl -s http://localhost:9090/api/v1/targets | jq '.data.activeTargets[] | {inst
 
 ### Verifying Log Collection
 
-Check Promtail is shipping logs:
+Alloy applies ingest-time parsing for journal `stdout` logs before forwarding to Loki:
+
+- Legacy timestamps in form `YYYY/MM/DD HH:MM:SS` are parsed and used as event timestamps
+- ISO-8601 timestamps with a log level prefix are parsed and normalized
+- `detected_level` defaults to `info` when the source log line does not provide one
+
+node_exporter also enables the `processes` collector, which exposes per-process metrics such as CPU and memory usage for running processes.
+
+Check Alloy is shipping logs:
 
 ```sh
-journalctl -u promtail.service -f
+journalctl -u alloy.service -f
 ```
 
 Query Loki directly:
