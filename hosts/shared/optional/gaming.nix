@@ -69,7 +69,6 @@ lib.mkMerge [
         package = pkgs.wivrn;
         openFirewall = true;
         autoStart = true;
-        defaultRuntime = true;
         steam.importOXRRuntimes = true;
         highPriority = true;
         monadoEnvironment = {
