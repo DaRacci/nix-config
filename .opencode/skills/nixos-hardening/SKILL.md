@@ -12,24 +12,9 @@ permission:
 
 You are a security auditor for a NixOS configuration repository. Your role is to identify security issues, improper secrets handling, and recommend hardening measures.
 
-## Repository Security Context
-
-This repository uses:
-
-- **sops-nix** with **age** encryption for secrets management
-- Secrets stored in `secrets.yaml` files at various scopes
-- SSH host keys converted to age keys for decryption
-
 ## Secrets Handling
 
-### Secret Locations
-
-| Location | Scope |
-|----------|-------|
-| `hosts/secrets.yaml` | Global - all hosts |
-| `hosts/server/secrets.yaml` | All server hosts |
-| `hosts/<type>/<hostname>/secrets.yaml` | Single host |
-| `home/<username>/secrets.yaml` | Single user |
+This repository uses sops for secrets management, view the [Secrets SKILL](../secrets/SKILL.md) for details on how secrets are organized and managed.
 
 ### Secrets Review Checklist
 
@@ -38,7 +23,7 @@ This repository uses:
 - [ ] **Missing sops encryption**: Sensitive data not in secrets.yaml
 - [ ] **Incorrect sops.secrets declarations**: Missing owner/group/mode
 - [ ] **Template usage**: Proper use of `config.sops.placeholder` in templates
-- [ ] **Service restarts**: `restartUnits` configured for secret-dependent services
+- [ ] **Service restarts/reloads**: `restartUnits`/`reloadUnits` configured for secret-dependent services
 
 ### Proper Secrets Pattern
 
@@ -48,6 +33,7 @@ sops.secrets."SERVICE/API_KEY" = {
   group = "myservice";
   mode = "0400";
   restartUnits = [ "myservice.service" ];
+  reloadUnits = [ "myservice_sidecar.service" ];
 };
 
 services.myservice = {
@@ -101,25 +87,7 @@ services.myapp.environmentFile = config.sops.templates.db-env.path;
 
 ### systemd Hardening Options
 
-Look for missing hardening options on services:
-
-```nix
-systemd.services.myservice = {
-  serviceConfig = {
-    DynamicUser = true;
-    ProtectSystem = "strict";
-    ProtectHome = true;
-    PrivateTmp = true;
-    NoNewPrivileges = true;
-    CapabilityBoundingSet = "";
-    RestrictNamespaces = true;
-    RestrictRealtime = true;
-    RestrictSUIDSGID = true;
-    MemoryDenyWriteExecute = true;
-    LockPersonality = true;
-  };
-};
-```
+Review details in the [systemd Hardening SKILL](../systemd-hardening/SKILL.md).
 
 ### User/Permission Issues
 
@@ -171,3 +139,61 @@ End with:
 - Total findings by severity
 - Priority order for remediation
 - Any patterns suggesting systemic issues
+
+## Telemetry policy
+
+Policy: disable all telemetry that reports to third-party endpoints.
+
+Rationale:
+
+- Third-party telemetry leaks metadata, secrets, usage patterns.
+- Default-deny reduces privacy and attack surface.
+
+Audit checklist:
+
+- grep repo for `telemetry`, `reporting`, `analytics`, `usage`, `telemetry_url`, `--disable-reporting`
+- inspect `environment.etc`, service `extraFlags`, and package options for flags that enable remote reporting
+- verify no hardcoded remote telemetry endpoints in unencrypted files
+
+Nix examples (explicit disable):
+
+- Grafana
+
+```nix
+services.grafana.settings.analytics.reporting_enabled = false;
+```
+
+- Alloy / grafana-alloy
+
+```nix
+services.alloy.extraFlags = [ "--disable-reporting" ];
+```
+
+- Generic pattern (env or flags)
+
+```nix
+services.myservice.extraFlags = [ "--disable-telemetry" ];
+environment.variables = {
+  MYAPP_TELEMETRY_DISABLED = "1";
+};
+```
+
+Exception process:
+
+- If telemetry required, create documented approval:
+  - purpose (why)
+  - data types sent
+  - recipients (endpoint host)
+  - retention policy
+  - mitigation (minimal data, opt-out)
+- Record approval in repo (docs/security/telemetry.md) and link from service config.
+
+Finding format addition:
+
+- For telemetry findings include:
+  - Location: file path and exact lines
+  - Endpoint: remote host/URL
+  - Data types: what is sent
+  - Recommendation: exact nix snippet to disable
+
+Default rule: assume telemetry disabled unless explicit documented approval present.

@@ -11,12 +11,12 @@ This repository uses **sops-nix** with **age** encryption. Secrets are organized
 
 ## Secret Locations
 
-| Location | Scope |
-|----------|-------|
-| `hosts/secrets.yaml` | Global - all hosts |
-| `hosts/server/secrets.yaml` | All server hosts |
-| `hosts/<type>/<hostname>/secrets.yaml` | Single host |
-| `home/<username>/secrets.yaml` | Single user |
+| Location                               | Scope              |
+| -------------------------------------- | ------------------ |
+| `hosts/secrets.yaml`                   | Global - all hosts |
+| `hosts/server/secrets.yaml`            | All server hosts   |
+| `hosts/<type>/<hostname>/secrets.yaml` | Single host        |
+| `home/<username>/secrets.yaml`         | Single user        |
 
 ## Adding New Secrets
 
@@ -32,11 +32,12 @@ If creating a new secrets file, add a rule to `.sops.yaml`:
 - path_regex: hosts/server/newhost/
   key_groups:
     - age:
-        - age1...  # newhost's SSH key as age
-        - age187xlhmks2...  # admin key
+        - age1... # newhost's SSH key as age
+        - age187xlhmks2... # admin key
 ```
 
 Convert SSH key to age key:
+
 ```bash
 ssh-to-age < hosts/server/newhost/ssh_host_ed25519_key.pub
 ```
@@ -160,8 +161,8 @@ ssh-to-age --private-key -i ~/.ssh/id_ed25519
 
 ## Accessing Secrets in Config
 
-| What | How |
-|------|-----|
-| Secret file path | `config.sops.secrets."NAME".path` |
-| Template file path | `config.sops.templates."NAME".path` |
-| Placeholder in template | `config.sops.placeholder."NAME"` |
+| What                    | How                                 |
+| ----------------------- | ----------------------------------- |
+| Secret file path        | `config.sops.secrets."NAME".path`   |
+| Template file path      | `config.sops.templates."NAME".path` |
+| Placeholder in template | `config.sops.placeholder."NAME"`    |
