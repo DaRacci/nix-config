@@ -11,14 +11,14 @@ Each host needs these files in `hosts/<type>/<hostname>/`:
 
 | File | Required | Purpose |
 |------|----------|---------|
-| `default.nix` | Yes | Main configuration entry point |
-| `secrets.yaml` | Yes | SOPS-encrypted secrets (SSH key, passwords) |
+| `default.nix` | Yes | Main config entry point |
+| `secrets.yaml` | Yes | SOPS-encrypted secrets like SSH key and passwords |
 | `ssh_host_ed25519_key.pub` | Yes | SSH public key for sops age encryption |
-| `hardware.nix` | For physical | Hardware-specific config (desktops/laptops) |
+| `hardware.nix` | For physical | Hardware-specific config for desktops and laptops |
 
-## Using the Helper Script
+## Using Helper Script
 
-The easiest way to create a new host:
+Easiest way to create new host:
 
 ```bash
 # Usage: new-host.sh <host-type> <host-name>
@@ -27,10 +27,11 @@ nix run .#new-host -- desktop mynewdesktop
 ```
 
 This script:
-1. Creates the host directory
+
+1. Creates host directory
 2. Generates SSH keypair
 3. Creates minimal `default.nix`
-4. Updates `.sops.yaml` with the new host's age key
+4. Updates `.sops.yaml` with new host age key
 5. Creates encrypted `secrets.yaml`
 
 ## Manual Host Creation
@@ -41,7 +42,7 @@ This script:
 mkdir -p hosts/server/myserver
 ```
 
-### 2. Create default.nix
+### 2. Create `default.nix`
 
 ```nix
 # hosts/server/myserver/default.nix
@@ -60,7 +61,7 @@ mkdir -p hosts/server/myserver
 }
 ```
 
-### 3. Create hardware.nix (physical machines)
+### 3. Create `hardware.nix` for physical machines
 
 ```nix
 # hosts/desktop/mydesktop/hardware.nix
@@ -83,7 +84,7 @@ mkdir -p hosts/server/myserver
 }
 ```
 
-### 4. Generate SSH key and setup secrets
+### 4. Generate SSH key and set up secrets
 
 ```bash
 # Generate key
@@ -101,31 +102,31 @@ sops hosts/server/myserver/secrets.yaml
 
 ## Auto-Discovery
 
-Hosts are automatically discovered - no manual flake registration needed. The system:
+Hosts are auto-discovered. No manual flake registration needed. System:
 
 1. Scans `hosts/` for subdirectories
 2. Filters out `shared/` and `secrets.yaml`
-3. Registers each as a nixosConfiguration
+3. Registers each as `nixosConfiguration`
 
 ## Device Types
 
 | Type | Location | Characteristics |
 |------|----------|-----------------|
-| `server` | `hosts/server/` | Headless, LXC containers typically |
+| `server` | `hosts/server/` | Usually headless, often LXC |
 | `desktop` | `hosts/desktop/` | GUI, physical hardware |
 | `laptop` | `hosts/laptop/` | GUI, battery, physical hardware |
 
 ## Shared Configurations
 
-Configurations are applied in order:
+Configurations apply in this order:
 
-1. `hosts/shared/global/` - All hosts
-2. `hosts/<type>/shared/` - All hosts of this type
-3. `hosts/<type>/<hostname>/` - This specific host
+1. `hosts/shared/global/` - all hosts
+2. `hosts/<type>/shared/` - all hosts of that type
+3. `hosts/<type>/<hostname>/` - specific host
 
 ## Hardware Acceleration
 
-For CUDA or ROCm support, add the host to `flake/nixos/flake-module.nix`:
+For CUDA or ROCm support, add host to `flake/nixos/flake-module.nix`:
 
 ```nix
 accelerationHosts = {
@@ -136,6 +137,6 @@ accelerationHosts = {
 
 ## Binding Users to Hosts
 
-Create `home/<username>/<hostname>.nix` to assign a user to a host. The system auto-detects this and includes the user's home-manager configuration.
+Create `home/<username>/<hostname>.nix` to bind user to host. System auto-detects this file and includes user Home-Manager configuration.
 
 See also: `docs/Creating-Hosts.md`

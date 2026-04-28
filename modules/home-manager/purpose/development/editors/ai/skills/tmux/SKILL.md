@@ -1,21 +1,21 @@
 ---
 name: tmux
-description: Manages background processes, captures command output, and handles session multiplexing. Use when running long-running commands, capturing output from detached processes, or managing concurrent tasks in headless environments.
+description: Manage background jobs, capture command output, and handle session multiplexing. Use when running long commands, capturing output from detached processes, or managing concurrent tasks in headless environments.
 ---
 
 # tmux
 
-Terminal multiplexer for background processes, output capture, and session management.
+Terminal multiplexer for background jobs, output capture, and session control.
 
 ## Quick Reference
 
 | Command | Description |
 | ------------------------------------- | --------------------------------- |
 | `tmux new -d -s name 'cmd'` | Run command in background session |
-| `tmux capture-pane -t name -p` | Capture output from session |
+| `tmux capture-pane -t name -p` | Capture session output |
 | `tmux send-keys -t name 'text' Enter` | Send input to session |
-| `tmux kill-session -t name` | Terminate session |
-| `tmux ls` | List all sessions |
+| `tmux kill-session -t name` | Kill session |
+| `tmux ls` | List sessions |
 | `tmux has -t name` | Check if session exists |
 
 ## Running Background Processes
@@ -27,10 +27,10 @@ tmux new-session -d -s myserver 'python -m http.server 8080'
 # With specific working directory
 tmux new-session -d -s build -c /path/to/project 'make build'
 
-# Keep session alive after command completes
+# Keep session alive after command ends
 tmux new-session -d -s task 'command; exec bash'
 
-# Run only if session doesn't exist
+# Run only if session does not already exist
 tmux has -t myserver || tmux new-session -d -s myserver 'command'
 ```
 
@@ -40,7 +40,7 @@ tmux has -t myserver || tmux new-session -d -s myserver 'command'
 # Capture visible output
 tmux capture-pane -t mysession -p
 
-# Capture entire scrollback history
+# Capture whole scrollback
 tmux capture-pane -t mysession -p -S -
 
 # Capture last N lines
@@ -56,7 +56,7 @@ tmux capture-pane -t mysession -p -e
 ## Sending Input
 
 ```bash
-# Send text and Enter
+# Send text and press Enter
 tmux send-keys -t mysession 'echo hello' Enter
 
 # Send without Enter
@@ -79,7 +79,7 @@ tmux kill-session -t myserver
 # Kill all sessions
 tmux kill-server
 
-# Check if session exists
+# Check whether session exists
 tmux has -t mysession
 ```
 
@@ -103,7 +103,7 @@ tmux new-session -d -s frontend 'bun run frontend'
 tmux new-session -d -s tests 'vitest --watch'
 ```
 
-### Run and Capture Output
+# Run and capture output
 
 ```bash
 tmux new-session -d -s job 'command'
@@ -112,13 +112,13 @@ output=$(tmux capture-pane -t job -p)
 echo "$output"
 ```
 
-### Conditional Session
+### Conditional session
 
 ```bash
 tmux has -t myserver || tmux new-session -d -s myserver 'command'
 ```
 
-### Cleanup
+### Clean up
 
 ```bash
 tmux kill-session -t backend
@@ -128,9 +128,9 @@ tmux kill-server  # Kill all
 
 ## Tips
 
-- Use `tmux new-session -d` for background processes
-- Use `tmux capture-pane -p -S -` for full scrollback
-- Use `tmux has -t name` to check session existence
+- Use `tmux new-session -d` for background jobs
+- Use `tmux capture-pane -p -S -` for whole scrollback
+- Use `tmux has -t name` to check whether session exists
 - Use `tmux kill-server` to clean up all sessions
 - Use `-c /path` to set working directory
 - Use `exec bash` to keep session alive after command

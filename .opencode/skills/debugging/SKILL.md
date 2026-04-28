@@ -15,7 +15,7 @@ Add trace statements to see values during evaluation:
 let
   myValue = builtins.trace "myValue is: ${toString someVar}" someVar;
 in
-# myValue will print during evaluation
+# myValue prints during evaluation
 ```
 
 For complex values:
@@ -29,7 +29,7 @@ builtins.trace (builtins.toJSON someAttrSet) someAttrSet
 Test expressions without building:
 
 ```bash
-# Evaluate a specific option
+# Evaluate specific option
 nix eval .#nixosConfigurations.nixdev.config.networking.hostName
 
 # Check if something evaluates
@@ -53,10 +53,10 @@ nix build .#nixosConfigurations.nixdev.config.system.build.toplevel --show-trace
 
 **Causes**:
 - Circular imports between modules
-- Option depending on itself
-- Config referencing options that reference config
+- Option depends on itself
+- Config references options that reference config
 
-**Fix**: Check for circular dependencies in imports or option definitions.
+**Fix**: Check imports and option definitions for circular dependencies.
 
 ### Attribute not found
 
@@ -88,17 +88,17 @@ nix eval .#nixosConfigurations.nixdev.config.services --apply 'builtins.attrName
 **Error**: `assertion ... failed`
 
 **Causes**:
-- Configuration constraint not met
-- Missing required option
+- Config constraint not met
+- Required option missing
 
-**Fix**: Read the assertion message, provide required configuration.
+**Fix**: Read assertion message and provide required config.
 
 ## Build Debugging
 
 ### View build logs
 
 ```bash
-# For a failed derivation
+# For failed derivation
 nix log /nix/store/...-derivation.drv
 
 # Or from error output
@@ -125,7 +125,7 @@ nix develop .#nixosConfigurations.nixdev.config.system.build.toplevel
 nix eval .#nixosConfigurations.nixdev.config.services.myService.enable
 ```
 
-### List all options in a namespace
+### List all options in namespace
 
 ```bash
 nix eval .#nixosConfigurations.nixdev.options.services.myService --apply 'builtins.attrNames'
@@ -164,7 +164,7 @@ nix eval .#homeConfigurations --apply 'builtins.attrNames'
 |---------|---------|
 | Does it evaluate? | `nix eval .#... --apply 'x: "ok"'` |
 | What options exist? | `nix eval .#...options --apply 'builtins.attrNames'` |
-| What's the value? | `nix eval .#...config.<path>` |
-| Where's the error? | `nix build --show-trace` |
-| What went wrong in build? | `nix log <drv>` |
+| What is value? | `nix eval .#...config.<path>` |
+| Where is error? | `nix build --show-trace` |
+| What failed in build? | `nix log <drv>` |
 | Is syntax valid? | `nix flake check --no-build` |

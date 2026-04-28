@@ -5,17 +5,17 @@ description: Hardens systemd services against security issues using sandboxing, 
 
 # Systemd Service Hardening
 
-When creating or modifying systemd services in NixOS, every service should be hardened by default. An unhardened service runs with far more privileges than it needs, meaning any vulnerability in that service becomes a foothold for lateral movement, privilege escalation, or data exfiltration.
+When creating or modifying systemd services in NixOS, harden every service by default. Unhardened service runs with far more privilege than it needs, so any vulnerability can become foothold for lateral movement, privilege escalation, or data exfiltration.
 
-The goal is simple: give each service the absolute minimum access it needs to function, and deny everything else.
+Goal is simple: give each service minimum access it needs to function, and deny everything else.
 
 ## Hardening Tiers
 
-Apply hardening incrementally. Start with Tier 1 (safe for virtually all services), then add tiers as the service allows. If a service breaks after adding a tier, back off that specific option rather than removing the entire tier.
+Apply hardening incrementally. Start with Tier 1 (safe for almost all services), then add more tiers as service allows. If service breaks after adding tier, back off that specific option instead of removing whole tier.
 
 ### Tier 1: Universal (apply to every service)
 
-These options have near-zero risk of breaking any service and should always be present:
+These options almost never break service and should always be present:
 
 ```nix
 serviceConfig = {
@@ -34,20 +34,20 @@ serviceConfig = {
 **Why each matters:**
 
 | Option | What it prevents |
-|--------|-----------------|
-| `NoNewPrivileges` | Process or children gaining new privileges via setuid/setgid binaries or filesystem capabilities |
-| `ProtectClock` | Modifying the system clock (only NTP daemons need this) |
-| `ProtectHostname` | Changing the system hostname or NIS domain |
+| ----------------------- | ------------------------------------------------------------------------------------------------ |
+| `NoNewPrivileges` | Process or children gaining new privilege through setuid/setgid binaries or filesystem capabilities |
+| `ProtectClock` | Modifying system clock (only NTP daemons need this) |
+| `ProtectHostname` | Changing system hostname or NIS domain |
 | `ProtectKernelModules` | Loading or unloading kernel modules |
-| `ProtectKernelLogs` | Accessing the kernel log ring buffer |
+| `ProtectKernelLogs` | Accessing kernel log ring buffer |
 | `ProtectKernelTunables` | Writing to `/proc/sys`, `/sys`, or similar kernel tunables |
 | `RestrictRealtime` | Acquiring real-time scheduling policies (prevents CPU starvation attacks) |
 | `RestrictSUIDSGID` | Creating setuid/setgid files |
-| `LockPersonality` | Changing the execution personality (prevents running non-native binaries) |
+| `LockPersonality` | Changing execution personality (prevents running non-native binaries) |
 
 ### Tier 2: Isolation (safe for most services)
 
-These create filesystem and device isolation. Most services don't need direct device access or write access to system directories:
+These create filesystem and device isolation. Most services do not need direct device access or write access to system directories:
 
 ```nix
 serviceConfig = {
@@ -61,8 +61,8 @@ serviceConfig = {
 ```
 
 | Option | What it does | When to relax |
-|--------|-------------|---------------|
-| `PrivateDevices` | Hides `/dev` device nodes (only pseudo-devices remain) | Service needs raw device access (e.g., GPU, USB) |
+| -------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `PrivateDevices` | Hides `/dev` device nodes (only pseudo-devices remain) | Service needs raw device access (for example GPU or USB) |
 | `PrivateTmp` | Gives service its own `/tmp` and `/var/tmp` | Rarely needs relaxing |
 | `PrivateMounts` | Isolates mount namespace | Service creates mount points |
 | `ProtectHome` | Makes `/home`, `/root`, `/run/user` inaccessible | Service reads user home directories |
@@ -77,7 +77,7 @@ serviceConfig = {
 
 ### Tier 3: User isolation (for services that don't need root)
 
-Most services should not run as root. NixOS offers several approaches:
+Most services should not run as root. NixOS gives several approaches:
 
 ```nix
 serviceConfig = {
@@ -96,20 +96,20 @@ serviceConfig = {
 ```
 
 | Option | What it does | When to use |
-|--------|-------------|-------------|
-| `DynamicUser` | Allocates a temporary uid/gid that is released when the service stops | Stateless services, no persistent file ownership needed |
-| `User`/`Group` | Run as a specific pre-created user | Services needing stable uid (e.g., for file ownership across restarts) |
+| -------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `DynamicUser` | Allocates temporary uid/gid that is released when service stops | Stateless services, no persistent file ownership needed |
+| `User`/`Group` | Run as specific pre-created user | Services needing stable uid (for example file ownership across restarts) |
 | `PrivateUsers` | Isolates user/group databases | Most services; breaks if service needs to look up other system users |
 
 **Choosing between DynamicUser and User/Group:**
 
-- `DynamicUser = true` is simpler and more secure — prefer it unless the service needs persistent file ownership or other users can see its files.
-- If using `DynamicUser`, always pair it with `StateDirectory`/`RuntimeDirectory` for any writable paths.
-- If the service needs to interact with files owned by a static user (e.g., database data directories), use `User`/`Group` instead.
+- `DynamicUser = true` is simpler and more secure — prefer it unless service needs persistent file ownership or other users can see its files.
+- If using `DynamicUser`, always pair it with `StateDirectory`/`RuntimeDirectory` for writable paths.
+- If service needs to interact with files owned by static user (for example database data directories), use `User`/`Group` instead.
 
 ### Tier 4: Capability and syscall restriction (strongest, requires testing)
 
-This tier provides the tightest sandbox but is most likely to need tuning per service:
+This tier gives tightest sandbox but is most likely to need per-service tuning:
 
 ```nix
 serviceConfig = {
@@ -142,12 +142,12 @@ serviceConfig = {
 **Capability reference (common services):**
 
 | Capability | Purpose | Typical services |
-|-----------|---------|-----------------|
+| --------------------------- | ------------------------------------- | ------------------------------------------- |
 | `CAP_NET_BIND_SERVICE` | Bind to privileged ports (< 1024) | Web servers, DNS |
 | `CAP_CHOWN` | Change file ownership | Services managing files for multiple users |
 | `CAP_DAC_OVERRIDE` | Bypass file read/write/execute checks | Backup services, file managers |
 | `CAP_SETUID` / `CAP_SETGID` | Change process UID/GID | Services that drop privileges after startup |
-| `CAP_SYS_CHROOT` | Use chroot(2) | Mail servers, FTP servers |
+| `CAP_SYS_CHROOT` | Use `chroot(2)` | Mail servers, FTP servers |
 | `CAP_NET_RAW` | Use raw sockets | Ping, network monitoring |
 | `CAP_NET_ADMIN` | Network administration | VPN, firewall management |
 
@@ -159,13 +159,13 @@ serviceConfig = {
 - `@network-io` — Network socket operations
 - `@debug` — Debugging syscalls (ptrace, etc.)
 
-**`MemoryDenyWriteExecute`** prevents creating memory regions that are both writable and executable. This blocks most exploit techniques but also breaks JIT compilation (Node.js, Java, .NET). Disable for JIT-dependent services.
+**`MemoryDenyWriteExecute`** prevents creating memory regions that are both writable and executable. This blocks most exploit techniques but also breaks JIT compilation (`Node.js`, `Java`, `.NET`). Disable it for JIT-dependent services.
 
 ## NixOS-Specific Patterns
 
 ### Using StateDirectory and friends (preferred over manual paths)
 
-Instead of manually creating directories and setting permissions, use systemd's managed directories. These are automatically created, owned by the service user, and cleaned up:
+Instead of manually creating directories and setting permissions, use systemd managed directories. These are created automatically, owned by service user, and cleaned up:
 
 ```nix
 serviceConfig = {
@@ -181,7 +181,7 @@ These work with both `DynamicUser` and static `User`/`Group`.
 
 ### Using LoadCredential for secrets (preferred over EnvironmentFile)
 
-Instead of exposing secrets via environment variables (visible in `/proc`), use systemd credentials:
+Instead of exposing secrets through environment variables (visible in `/proc`), use systemd credentials:
 
 ```nix
 serviceConfig = {
@@ -193,11 +193,11 @@ serviceConfig = {
 # Access in ExecStart via: ${CREDENTIALS_DIRECTORY}/api-key
 ```
 
-This is more secure than `EnvironmentFile` because credentials are stored in a private directory accessible only to the service process.
+This is more secure than `EnvironmentFile` because credentials are stored in private directory accessible only to service process.
 
 ### Using ReadWritePaths with ProtectSystem strict
 
-When a service needs write access to specific paths under a read-only filesystem:
+When service needs write access to specific paths under read-only filesystem:
 
 ```nix
 serviceConfig = {
@@ -212,7 +212,7 @@ serviceConfig = {
 
 ### Hardened service template
 
-A complete example combining all tiers for a typical network service:
+Complete example combining all tiers for typical network service:
 
 ```nix
 systemd.services.myservice = {
@@ -265,14 +265,14 @@ systemd.services.myservice = {
 
 ## Troubleshooting
 
-When a hardened service fails to start, isolate which option caused the failure:
+When hardened service fails to start, isolate which option caused failure:
 
 1. Start with all hardening enabled
 1. If service fails, check `journalctl -u myservice.service` for errors
-1. Common failure patterns:
+1. Look for common failure patterns:
 
 | Error pattern | Likely cause | Fix |
-|--------------|-------------|-----|
+| ---------------------------------------- | ------------------------------------------- | ---------------------------------------------------------- |
 | `Permission denied` on filesystem paths | `ProtectSystem` too strict | Add `ReadWritePaths` or use `StateDirectory` |
 | `Operation not permitted` on device | `PrivateDevices = true` | Set to `false` or add specific `DeviceAllow` entries |
 | `Permission denied` on port bind | Missing `CAP_NET_BIND_SERVICE` | Add to `CapabilityBoundingSet` |
@@ -290,11 +290,11 @@ Check the hardening score of a service:
 systemd-analyze security myservice.service
 ```
 
-This produces a score from 0 (fully hardened) to 10 (no hardening). Aim for below 5 for most services, below 3 for sensitive ones.
+This produces score from 0 (fully hardened) to 10 (no hardening). Aim for below 5 for most services, below 3 for sensitive ones.
 
 ## Decision Checklist
 
-Before finalizing a service definition, verify:
+Before finalizing service definition, verify:
 
 - [ ] All Tier 1 options are present (no valid reason to omit these)
 - [ ] Tier 2 options are present unless service has a documented need to bypass

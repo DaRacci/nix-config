@@ -1,11 +1,11 @@
 ---
 name: nushell
-description: Processes structured data through pipelines, filters tables, transforms JSON/CSV/YAML, and defines custom commands. Use when scripting with typed parameters or working with tabular data.
+description: Process structured data in pipelines, filter tables, transform JSON/CSV/YAML, and define custom commands. Use when scripting with typed parameters or working with tabular data.
 ---
 
 # nu-shell
 
-Structured data scripting through pipelines with tables, lists, and records.
+Structured-data shell. Pipelines work on tables, lists, and records, not only text.
 
 ## Core Concepts
 
@@ -13,7 +13,7 @@ Structured data scripting through pipelines with tables, lists, and records.
 
 - **Record**: `{ name: "John", age: 30 }`
 - **List**: `[1, 2, 3]`
-- **Table**: A list of records with the same keys
+- **Table**: list of records with same fields
 
 ### Pipelines
 
@@ -135,13 +135,13 @@ $content | save --append "file.txt"   # Append
 
 ## Tips
 
-- Use `nu -c 'command'` to run commands inline
-- Use `open` to load data from various formats
-- Use `save` to write data to various formats
+- Use `nu -c 'command'` for inline runs
+- Use `open` to load many data formats
+- Use `save` to write many data formats
 - Use `where` to filter tables
-- Use `select` to choose columns
+- Use `select` to pick columns
 - Use `sort-by` to sort tables
-- Use `each` to map over lists
-- Use `reduce` to combine list elements
-- Use `def` to define custom commands with typed parameters
+- Use `each` to map lists
+- Use `reduce` to combine list items
+- Use `def` for custom commands with typed params
 - Use `...` to merge records

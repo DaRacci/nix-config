@@ -7,7 +7,7 @@ description: Manage encrypted secrets with sops-nix
 
 ## Overview
 
-This repository uses **sops-nix** with **age** encryption. Secrets are organized hierarchically with different access levels.
+Repo uses **sops-nix** with **age** encryption. Secrets are grouped by scope and access level.
 
 ## Secret Locations
 
@@ -22,17 +22,17 @@ This repository uses **sops-nix** with **age** encryption. Secrets are organized
 
 ### Step 1: Determine scope
 
-Choose the appropriate secrets file based on who needs access.
+Pick right secrets file based on who needs access.
 
-### Step 2: Update .sops.yaml (if new path)
+### Step 2: Update `.sops.yaml` (if new path)
 
-If creating a new secrets file, add a rule to `.sops.yaml`:
+If creating new secrets file, add rule to `.sops.yaml`:
 
 ```yaml
 - path_regex: hosts/server/newhost/
   key_groups:
     - age:
-        - age1... # newhost's SSH key as age
+        - age1... # newhost SSH key as age
         - age187xlhmks2... # admin key
 ```
 
@@ -42,7 +42,7 @@ Convert SSH key to age key:
 ssh-to-age < hosts/server/newhost/ssh_host_ed25519_key.pub
 ```
 
-### Step 3: Add the secret
+### Step 3: Add secret
 
 ```bash
 # Edit existing file
@@ -74,7 +74,7 @@ sops.secrets = {
 };
 ```
 
-### Step 5: Use the secret
+### Step 5: Use secret
 
 ```nix
 services.myservice = {
@@ -105,7 +105,7 @@ sops.secrets."DATABASE_PASSWORD" = {
 
 ### Using templates
 
-Combine multiple secrets into a config file:
+Combine multiple secrets into config file:
 
 ```nix
 sops = {
@@ -145,9 +145,9 @@ sops.secrets."config-file" = {
 
 ### Age key sources
 
-1. **Host SSH keys**: Converted to age format
-2. **User SSH keys**: In `home/<user>/id_ed25519.pub`
-3. **Admin key**: Shared admin access
+1. **Host SSH keys**: converted to age format
+2. **User SSH keys**: in `home/<user>/id_ed25519.pub`
+3. **Admin key**: shared admin access
 
 ### Converting SSH to age
 

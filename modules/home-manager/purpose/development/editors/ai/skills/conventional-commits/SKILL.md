@@ -1,11 +1,11 @@
 ---
 name: conventional-commits
-description: 'Writes and reviews Conventional Commits commit messages (v1.0.0) to support semantic versioning and automated changelogs. Use when drafting git commit messages, PR titles, release notes, or when enforcing a conventional commit format (type(scope): subject, BREAKING CHANGE, footers, revert).'
+description: 'Write and review Conventional Commits commit messages (v1.0.0) for semantic versioning and changelogs. Use when drafting git commit messages, PR titles, release notes, or enforcing conventional commit format like `type(scope): subject`, `BREAKING CHANGE`, footers, and `revert`.'
 ---
 
 # Conventional Commits (v1.0.0)
 
-Use the Conventional Commits spec to produce consistent commit messages that are easy to parse for changelogs and semantic versioning.
+Use Conventional Commits spec to keep commit messages consistent and easy for changelog and semantic-versioning tools to parse.
 
 ## Commit message format (canonical)
 
@@ -19,35 +19,35 @@ Use the Conventional Commits spec to produce consistent commit messages that are
 
 Rules:
 
-- Separate **header**, **body**, **footers** with a blank line.
-- Keep the **header** on one line.
-- Put `!` immediately before `:` to mark a breaking change (e.g. `feat!: ...`, `refactor(api)!: ...`).
+- Separate **header**, **body**, and **footers** with blank line
+- Keep **header** on one line
+- Put `!` right before `:` to mark breaking change, like `feat!: ...` or `refactor(api)!: ...`
 
-## Choose a type
+## Choose type
 
-The spec allows any type, but these are common and widely supported by tooling:
+Spec allows any type, but these are common and widely supported:
 
-- `feat`: introduce a new feature (user-facing)
-- `fix`: bug fix (user-facing)
-- `docs`: documentation-only changes
-- `refactor`: refactor that neither fixes a bug nor adds a feature
+- `feat`: new user-facing feature
+- `fix`: user-facing bug fix
+- `docs`: docs-only change
+- `refactor`: refactor with no feature and no bug fix
 - `perf`: performance improvement
 - `test`: add or adjust tests
-- `build`: build system/dependencies
-- `ci`: CI configuration/scripts
-- `chore`: maintenance tasks
-- `style`: formatting (whitespace, missing semicolons, etc.)
-- `revert`: revert a previous commit
+- `build`: build system or dependency change
+- `ci`: CI config or scripts
+- `chore`: maintenance work
+- `style`: formatting only, like whitespace or missing semicolons
+- `revert`: revert earlier commit
 
 Default choice when unsure:
 
-- If users see new behavior → `feat`
-- If users see corrected behavior → `fix`
-- Otherwise → `chore` or a more specific maintenance type (`refactor`, `build`, `ci`)
+- If users get new behavior → `feat`
+- If users get corrected behavior → `fix`
+- Otherwise → `chore` or more specific maintenance type like `refactor`, `build`, or `ci`
 
 ## Optional scope
 
-Use scope to clarify the area impacted.
+Use scope when it makes impacted area clearer.
 
 Format:
 
@@ -57,19 +57,19 @@ type(scope): description
 
 Guidelines:
 
-- Use a short noun: `api`, `auth`, `ui`, `db`, `cli`, `deps`, `docs`.
-- Use repo/module/package name when working in a monorepo.
-- If scope adds no clarity, omit it.
+- Use short noun: `api`, `auth`, `ui`, `db`, `cli`, `deps`, `docs`
+- In monorepo, use repo, module, or package name if useful
+- If scope adds no clarity, leave it out
 
 ## Description (subject)
 
-Write the description as a short summary of what the change does.
+Write description as short summary of what change does.
 
 Guidelines:
 
-- Use **imperative** mood: "add", "fix", "remove", "update".
-- Avoid ending punctuation.
-- Be specific; avoid "stuff", "changes", "update things".
+- Use **imperative** mood: `add`, `fix`, `remove`, `update`
+- No ending punctuation
+- Be specific; avoid vague words like `stuff`, `changes`, `update things`
 
 Examples:
 
@@ -81,14 +81,14 @@ chore(deps): bump react to 18.3.0
 
 ## Body (optional)
 
-Use the body to explain motivation, constraints, or high-level implementation notes.
+Use body for motivation, constraints, or high-level implementation notes.
 
 Guidelines:
 
-- Prefer complete sentences.
-- If helpful, include:
-  - why the change was needed
-  - what approach was chosen
+- Prefer complete sentences
+- If useful, include:
+  - why change was needed
+  - what approach you chose
   - notable trade-offs
 
 Example:
@@ -96,16 +96,16 @@ Example:
 ```text
 refactor(parser): simplify tokenisation
 
-Replace the regex pipeline with a small state machine to reduce backtracking.
+Replace regex pipeline with small state machine to reduce backtracking.
 ```
 
 ## Footers (optional)
 
-Footers are key/value-like lines at the end. Use them for:
+Footers are key/value-like lines at end. Use them for:
 
 - breaking change details
 - issue references
-- metadata used by tooling
+- tooling metadata
 
 Examples:
 
@@ -117,15 +117,15 @@ Co-authored-by: Name <email@example.com>
 
 ## Breaking changes
 
-Mark breaking changes in one (or both) of these ways:
+Mark breaking changes in one or both ways:
 
-1. Add `!` in the header:
+1. Add `!` in header:
 
 ```text
 feat(api)!: remove deprecated v1 endpoints
 ```
 
-2. Add a `BREAKING CHANGE:` footer (recommended when you need an explanation):
+2. Add `BREAKING CHANGE:` footer. Best when change needs explanation:
 
 ```text
 feat(api): remove deprecated v1 endpoints
@@ -135,7 +135,7 @@ BREAKING CHANGE: /v1/* endpoints are removed; migrate to /v2/*.
 
 ## Reverts
 
-Use the `revert` type when undoing a previous change.
+Use `revert` type when undoing earlier change.
 
 Example:
 
@@ -147,27 +147,27 @@ This reverts commit 1a2b3c4.
 
 ## Semantic versioning mapping (typical)
 
-Common mapping for automated version bumps:
+Common automated version-bump mapping:
 
 - `fix` → patch
 - `feat` → minor
 - any breaking change (`!` or `BREAKING CHANGE:`) → major
 
-## When asked to “write a commit message”
+## When asked to “write commit message”
 
-Collect missing inputs quickly:
+Collect missing inputs fast:
 
 - What changed? (1–2 sentences)
-- Scope/module? (optional)
+- Scope or module? (optional)
 - User-facing? (feature vs fix vs chore)
 - Breaking? (yes/no; migration note if yes)
 - Any issue IDs to reference?
 
 Then produce:
 
-1. A conventional header
-1. Optional body (only if it adds clarity)
-1. Optional footers (`Refs:`, `Closes:`, `BREAKING CHANGE:`)
+1. Conventional header
+1. Optional body, only if it adds clarity
+1. Optional footers like `Refs:`, `Closes:`, `BREAKING CHANGE:`
 
 ## Ready-to-use templates
 

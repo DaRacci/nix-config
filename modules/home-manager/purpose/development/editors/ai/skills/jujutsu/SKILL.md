@@ -5,32 +5,32 @@ description: Manages version control with Jujutsu (jj), including rebasing, conf
 
 # Jujutsu
 
-Git-compatible VCS focused on concurrent development and ease of use.
+Git-compatible VCS for concurrent work and easier history editing.
 
-> ⚠️ **Not Git!** Jujutsu syntax differs from Git:
+> ⚠️ **Not Git!** Jujutsu syntax differs:
 >
 > - Parent: `@-` not `@~1` or `@^`
 > - Grandparent: `@--` not `@~2`
 > - Child: `@+` not `@~-1`
-> - Use `jj log` not `jj changes`
+> - Use `jj log`, not `jj changes`
 
 ## Key Commands
 
 | Command | Description |
-| -------------------------- | -------------------------------------------- |
+| -------------------------- | ----------------------------------------- |
 | `jj st` | Show working copy status |
 | `jj log` | Show change log |
-| `jj diff` | Show changes in working copy |
+| `jj diff` | Show working copy changes |
 | `jj new` | Create new change |
 | `jj desc` | Edit change description |
 | `jj squash` | Move changes to parent |
 | `jj split` | Split current change |
 | `jj rebase -s src -d dest` | Rebase changes |
-| `jj absorb` | Move changes into stack of mutable revisions |
+| `jj absorb` | Move changes into mutable stack |
 | `jj bisect` | Find bad revision by bisection |
-| `jj fix` | Update files with formatting fixes |
-| `jj sign` | Cryptographically sign a revision |
-| `jj metaedit` | Modify metadata without changing content |
+| `jj fix` | Update files with formatter fixes |
+| `jj sign` | Cryptographically sign revision |
+| `jj metaedit` | Edit metadata without changing content |
 
 ## Project Setup
 
@@ -46,7 +46,7 @@ jj new                   # Create new change
 jj desc -m "feat: add feature"  # Set description
 jj log                   # View history
 jj edit change-id        # Switch to change
-jj new --before @        # Time travel (create before current)
+jj new --before @        # Insert before current
 jj edit @-               # Go to parent
 ```
 
@@ -64,13 +64,13 @@ jj new --before @ -m msg # Insert before current
 ```bash
 jj new x yz -m msg       # Merge changes
 jj rebase -s src -d dest # Rebase source onto dest
-jj abandon              # Delete current change
+jj abandon               # Drop current change
 ```
 
 ## Conflicts
 
 ```bash
-jj resolve              # Interactive conflict resolution
+jj resolve               # Interactive conflict resolution
 # Edit files, then continue
 ```
 
@@ -90,11 +90,11 @@ jj resolve              # Interactive conflict resolution
 
 **⚠️ Common mistakes:**
 
-- ❌ `@~1` → ✅ `@-` (parent)
-- ❌ `@^` → ✅ `@-` (parent)
-- ❌ `@~-1` → ✅ `@+` (child)
+- ❌ `@~1` → ✅ `@-`
+- ❌ `@^` → ✅ `@-`
+- ❌ `@~-1` → ✅ `@+`
 - ❌ `jj changes` → ✅ `jj log` or `jj diff`
-- ❌ `a,b,c` → ✅ `a | b | c` (union uses pipe, not comma)
+- ❌ `a,b,c` → ✅ `a | b | c`
 
 **Functions:**
 
@@ -117,29 +117,29 @@ jj log -T 'commit_id ++ "\n" ++ description'
 ## Git Interop
 
 ```bash
-jj bookmark create main -r @  # Create bookmark
-jj git push --bookmark main   # Push bookmark
-jj git fetch                 # Fetch from remote
-jj bookmark track main@origin # Track remote
+jj bookmark create main -r @   # Create bookmark
+jj git push --bookmark main    # Push bookmark
+jj git fetch                   # Fetch remote
+jj bookmark track main@origin  # Track remote
 ```
 
 ## Advanced Commands
 
 ```bash
-jj absorb               # Auto-move changes to relevant commits in stack
-jj bisect start         # Start bisection
-jj bisect good          # Mark current as good
-jj bisect bad           # Mark current as bad
-jj fix                  # Run configured formatters on files
-jj sign -r @            # Sign current revision
+jj absorb                      # Auto-move changes into matching commits
+jj bisect start                # Start bisection
+jj bisect good                 # Mark current good
+jj bisect bad                  # Mark current bad
+jj fix                         # Run configured formatters on files
+jj sign -r @                   # Sign current revision
 jj metaedit -r @ -m "new message"  # Edit metadata only
 ```
 
 ## Tips
 
-- No staging: changes are immediate
+- No staging; changes apply immediately
 - Use conventional commits: `type(scope): desc`
-- `jj undo` to revert operations
-- `jj op log` to see operation history
+- `jj undo` reverts operations
+- `jj op log` shows operation history
 - Bookmarks are like branches
-- `jj absorb` is powerful for fixing up commits in a stack
+- `jj absorb` is strong tool for fixing stacks

@@ -7,7 +7,7 @@ description: Create custom packages and overlays
 
 ## Package Directory Structure
 
-```
+```text
 pkgs/
   default.nix           # Central registry - exports all packages
   <package-name>/       # Each package in its own directory
@@ -18,7 +18,7 @@ pkgs/
     pyuptimekuma.nix
 ```
 
-## Adding a New Package
+## Adding New Package
 
 ### 1. Create package directory
 
@@ -54,7 +54,7 @@ stdenv.mkDerivation rec {
 }
 ```
 
-### 3. Register in pkgs/default.nix
+### 3. Register in `pkgs/default.nix`
 
 ```nix
 # pkgs/default.nix
@@ -195,7 +195,7 @@ additions = final: prev:
   };
 ```
 
-This makes all packages available as `pkgs.<package-name>`.
+This makes packages available as `pkgs.<package-name>`.
 
 ## Update Scripts
 
@@ -207,4 +207,8 @@ passthru.updateScript = nix-update-script {
 };
 ```
 
-Then update with: `nix-update --flake <package-name>`
+Then update with:
+
+```bash
+nix-update --flake <package-name>
+```

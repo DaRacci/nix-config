@@ -1,44 +1,44 @@
 ---
 name: code-style-nix
-description: Write Nix code following repository conventions
+description: Write Nix code using repo conventions
 ---
 
 # Code Style
 
 ## Indentation
 
-- Use 2 spaces for indentation
-- No tabs allowed
+- Use 2 spaces
+- No tabs
 
 ## Naming Conventions
 
-| Context | Convention | Example |
-|---------|------------|---------|
+| Context               | Convention | Example                          |
+| --------------------- | ---------- | -------------------------------- |
 | Files and directories | kebab-case | `my-module.nix`, `home-manager/` |
-| Nix attributes | camelCase | `myOption`, `enableFeature` |
-| Option paths | camelCase | `services.myService.enable` |
+| Nix attributes        | camelCase  | `myOption`, `enableFeature`      |
+| Option paths          | camelCase  | `services.myService.enable`      |
 
 ## Comments
 
-- Minimal comments preferred
-- Code should be self-explanatory
-- Use comments to explain *why*, not *what*
+- Keep comments minimal
+- Let code explain itself
+- Use comments for _why_, not _what_
 
 ```nix
 # Good: explains why
 # Workaround for upstream bug #1234
 extraConfig = "...";
 
-# Bad: describes what (obvious from code)
-# Set extraConfig to the value
+# Bad: repeats obvious code
+# Set extraConfig to value
 extraConfig = "...";
 ```
 
 ## Imports
 
 - Prefer relative imports: `./modules/foo.nix`
-- Group imports at the top of the file
-- Use list format for multiple imports:
+- Group imports at top
+- Use list form for multiple imports:
 
 ```nix
 {
@@ -52,7 +52,7 @@ extraConfig = "...";
 
 ## Structured Data
 
-When generating JSON, YAML, or other structured formats, define as Nix attribute sets and convert:
+When generating JSON, YAML, or other structured formats, define data as Nix attr sets first, then convert:
 
 ```nix
 # Good: define as Nix, convert to JSON

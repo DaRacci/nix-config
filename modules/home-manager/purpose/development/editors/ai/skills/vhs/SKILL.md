@@ -1,11 +1,11 @@
 ---
 name: vhs
-description: Creates terminal screenshots and GIFs using VHS tape files. Use when automating terminal recordings, capturing TUI screenshots, or generating demo GIFs.
+description: Create terminal screenshots and GIFs with VHS tape files. Use when automating terminal recordings, capturing TUI screenshots, or generating demo GIFs.
 ---
 
 # VHS
 
-Terminal recorder from Charm that creates GIFs/PNGs from scripted interactions.
+Terminal recorder from Charm. Makes GIFs, PNGs, MP4s, or WebMs from scripted terminal actions.
 
 ## Run
 
@@ -36,12 +36,12 @@ Screenshot output.png       # Capture current frame
 ## Commands
 
 | Command | Description |
-| --------------------------------- | ----------------- |
+| --------------------------------- | ---------------- |
 | `Type "text"` | Type text |
 | `Enter`, `Tab`, `Escape`, `Space` | Press key |
 | `Ctrl+x`, `Alt+x` | Key combo |
 | `Up`, `Down`, `Left`, `Right` | Arrow keys |
-| `Sleep 1s` | Wait (ms, s) |
+| `Sleep 1s` | Wait (`ms`, `s`) |
 | `Screenshot file.png` | Capture frame |
 | `Hide` / `Show` | Toggle visibility |
 
@@ -82,6 +82,14 @@ Escape
 Type "q"
 Enter
 ```
+
+## Tips
+
+- Use tape files for repeatable terminal demos
+- Use `Hide` when command text should stay out of output
+- Use `Sleep` to give TUIs time to render
+- Use `Screenshot` for still images
+- Use GIF or video output for motion demos
 
 ## List Themes
 

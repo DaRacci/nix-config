@@ -7,19 +7,19 @@ description: Add and configure new Home-Manager users
 
 ## User Directory Structure
 
-Each user has a directory in `home/<username>/`:
+Each user has directory in `home/<username>/`:
 
-```
+```text
 home/<username>/
   hm-config.nix       # Main Home-Manager entry point
-  os-config.nix       # NixOS config applied to all hosts (optional)
+  os-config.nix       # NixOS config for all hosts (optional)
   secrets.yaml        # User-specific secrets (optional)
-  id_ed25519.pub      # User's SSH public key
-  <hostname>.nix      # Host-specific config (one per host, optional)
-  features/           # User's feature modules (optional)
+  id_ed25519.pub      # User SSH public key
+  <hostname>.nix      # Host-specific config (optional, one per host)
+  features/           # User feature modules (optional)
 ```
 
-## Creating a New User
+## Creating New User
 
 ### 1. Create user directory
 
@@ -29,7 +29,7 @@ mkdir -p home/newuser
 
 ### 2. Create host-specific configuration
 
-Create `home/newuser/<hostname>.nix` for each host the user will use:
+Create `home/newuser/<hostname>.nix` for each host user will use:
 
 ```nix
 # home/newuser/nixmi.nix
@@ -48,13 +48,13 @@ Create `home/newuser/<hostname>.nix` for each host the user will use:
 }
 ```
 
-### 3. Create hm-config.nix (shared config)
+### 3. Create `hm-config.nix` (shared config)
 
 ```nix
 # home/newuser/hm-config.nix
 { ... }:
 {
-  # Configuration shared across all hosts
+  # Config shared across all hosts
   programs.bash.enable = true;
 
   home.sessionVariables = {
@@ -63,9 +63,9 @@ Create `home/newuser/<hostname>.nix` for each host the user will use:
 }
 ```
 
-### 4. Create os-config.nix (optional)
+### 4. Create `os-config.nix` (optional)
 
-For NixOS settings that should apply to all hosts where this user exists:
+For NixOS settings that should apply on all hosts where user exists:
 
 ```nix
 # home/newuser/os-config.nix
@@ -80,11 +80,11 @@ For NixOS settings that should apply to all hosts where this user exists:
 
 ## User-Host Binding
 
-The system automatically links users to hosts based on file existence:
+System auto-links users to hosts based on file existence:
 
-- If `home/<username>/<hostname>.nix` exists, that user is configured on that host
-- The user's `os-config.nix` is applied to the host's NixOS config
-- The user's home-manager config is built as `homeConfigurations."<user>@<host>"`
+- If `home/<username>/<hostname>.nix` exists, user is configured on that host
+- User `os-config.nix` is applied to host NixOS config
+- User Home-Manager config is built as `homeConfigurations."<user>@<host>"`
 
 ## User Secrets
 
@@ -97,18 +97,18 @@ SSH_PRIVATE_KEY: |
   -----END OPENSSH PRIVATE KEY-----
 ```
 
-Update `.sops.yaml` to include the user's age key for their secrets path.
+Update `.sops.yaml` to include user age key for that secrets path.
 
 ## Shared User Configurations
 
-Common configurations live in `home/shared/`:
+Common configs live in `home/shared/`:
 
-| Path | Purpose |
-|------|---------|
-| `home/shared/global/` | Applied to all users |
-| `home/shared/applications/` | Application configs (browsers, editors) |
-| `home/shared/desktop/` | Desktop environment configs |
-| `home/shared/features/cli/` | CLI tool configurations |
+| Path                        | Purpose                              |
+| --------------------------- | ------------------------------------ |
+| `home/shared/global/`       | Applied to all users                 |
+| `home/shared/applications/` | App configs like browsers or editors |
+| `home/shared/desktop/`      | Desktop environment configs          |
+| `home/shared/features/cli/` | CLI tool configs                     |
 
 Import these in user configs:
 
@@ -124,7 +124,7 @@ Import these in user configs:
 ## Testing User Configuration
 
 ```bash
-# Build home-manager configuration
+# Build Home-Manager configuration
 nix build .#homeConfigurations.newuser.activationPackage
 
 # Or use home-manager directly

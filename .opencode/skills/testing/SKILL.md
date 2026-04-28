@@ -7,17 +7,17 @@ description: Test changes using module-graph and build commands
 
 ## Critical Requirement
 
-After making changes you **MUST ALWAYS** evaluate and test your changes.
+After making changes you **must always** evaluate and test them.
 
 ## Finding Affected Configurations
 
-Use the module-graph script to determine which hosts and homes are affected by your changes:
+Use module-graph script to find which hosts and homes are affected by changed files:
 
 ```bash
 ./flake/dev/scripts/module-graph.nu
 ```
 
-This outputs JSON showing which configurations use each file:
+This outputs JSON showing which configs use each file:
 
 ```json
 {
@@ -29,23 +29,23 @@ This outputs JSON showing which configurations use each file:
 
 ## Minimum Test Requirements
 
-Based on the module-graph output, you must test **at least one** of each type affected:
+Based on module-graph output, test **at least one** of each affected type:
 
-| Changed File Affects | Minimum Test |
-|---------------------|--------------|
-| Hosts only | Build one affected host |
-| Homes only | Build one affected home |
-| Both hosts and homes | Build one host AND one home |
+| Changed File Affects | Minimum Test                |
+| -------------------- | --------------------------- |
+| Hosts only           | Build one affected host     |
+| Homes only           | Build one affected home     |
+| Both hosts and homes | Build one host and one home |
 
 ## Test Commands
 
-### Test a host configuration
+### Test host configuration
 
 ```bash
 nix build .#nixosConfigurations.<hostname>.config.system.build.toplevel
 ```
 
-### Test a home configuration
+### Test home configuration
 
 ```bash
 nix build .#homeConfigurations."<user>@<host>".activationPackage
@@ -62,16 +62,18 @@ nix flake check --override-input devenv-root "file+file://$PWD/.devenv/root"
 1. Make changes to `modules/nixos/services/tailscale.nix`
 
 2. Run module-graph to find affected configs:
+
    ```bash
    ./flake/dev/scripts/module-graph.nu | jq '.[] | select(.file | contains("tailscale"))'
    ```
 
-3. Pick one affected host and build:
+3. Pick one affected host and build it:
+
    ```bash
    nix build .#nixosConfigurations.nixdev.config.system.build.toplevel
    ```
 
-4. If the change also affects homes, build one:
+4. If change also affects homes, build one:
    ```bash
    nix build .#homeConfigurations."racci@nixmi".activationPackage
    ```
