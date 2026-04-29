@@ -1,7 +1,4 @@
-{
-  isThisMonitoringPrimaryHost,
-  ...
-}:
+_:
 {
   config,
   lib,
@@ -15,7 +12,7 @@ in
 {
   config =
     mkIf
-      (cfg.enable && cfg.collector.enable && cfg.collector.proxmox.enable && isThisMonitoringPrimaryHost)
+      (cfg.enable && cfg.collector.enable && cfg.collector.proxmox.enable)
       {
         sops = {
           secrets = {

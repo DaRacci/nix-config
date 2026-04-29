@@ -50,6 +50,14 @@ in
       node = {
         enable = mkEnableOption "node_exporter for system-level metrics" // {
           default = cfg.enable;
+          defaultText = literalExpression "cfg.enable";
+        };
+      };
+
+      process = {
+        enable = mkEnableOption "Process exporter for monitoring specific processes" // {
+          default = cfg.enable;
+          defaultText = literalExpression "cfg.enable";
         };
       };
 
@@ -78,6 +86,7 @@ in
     logs = {
       enable = mkEnableOption "Alloy log shipping" // {
         default = cfg.enable;
+        defaultText = literalExpression "cfg.enable";
       };
     };
 
@@ -97,7 +106,8 @@ in
 
       alerting = {
         enable = mkEnableOption "Alertmanager and alert rules" // {
-          default = true;
+          default = cfg.enable;
+          defaultText = literalExpression "cfg.enable";
         };
 
         homeAssistant = {
@@ -115,7 +125,8 @@ in
 
       proxmox = {
         enable = mkEnableOption "Proxmox VE metrics collection" // {
-          default = true;
+          default = isThisMonitoringPrimaryHost && cfg.enable;
+          defaultText = literalExpression "isThisMonitoringPrimaryHost && cfg.enable";
         };
       };
     };
