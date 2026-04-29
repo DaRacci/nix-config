@@ -32,6 +32,6 @@ in
       ];
     };
 
-    networking.firewall.allowedTCPPorts = [ 9100 ];
+    server.network.openPortsForSubnet.tcp = [ config.services.prometheus.exporters.node.port ];
   };
 }

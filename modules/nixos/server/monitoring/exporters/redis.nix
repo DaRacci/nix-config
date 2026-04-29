@@ -28,13 +28,12 @@ in
 
         services.prometheus.exporters.redis = {
           enable = true;
-          port = 9121;
           extraFlags = [
             "--redis.password-file %d/redis-password"
           ];
         };
 
-        networking.firewall.allowedTCPPorts = [ 9121 ];
+        server.networking.openPortsForSubnet.tcp = [ config.services.prometheus.exporters.redis.port ];
 
         systemd.services.prometheus-redis-exporter.serviceConfig.LoadCredential = [
           "redis-password:${config.sops.templates."redis-exporter-password".path}"

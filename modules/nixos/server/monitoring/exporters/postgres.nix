@@ -9,7 +9,7 @@
   ...
 }:
 let
-  inherit (lib) mkIf;
+  inherit (lib) mkIf mkAfter;
 
   cfg = config.server.monitoring;
 
@@ -20,14 +20,20 @@ in
   config =
     mkIf (cfg.enable && cfg.exporters.postgres.enable && isThisIOPrimaryHost && hasPostgresDatabases)
       {
-        services.prometheus.exporters.postgres = {
-          enable = true;
-          port = 9187;
-          listenAddress = "0.0.0.0";
+        services = {
+          prometheus.exporters.postgres = {
+            enable = true;
+          };
 
-          runAsLocalSuperUser = true;
+          postgresql = {
+            ensureUsers.postgres-exporter = { };
+          };
         };
 
-        networking.firewall.allowedTCPPorts = [ 9187 ];
+        systemd.services.postgresql-setup.postStart = mkAfter ''
+          GRANT pg_monitor to postgres_exporter;
+        '';
+
+        server.network.openPortsForSubnet.tcp = [ config.services.prometheus.exporters.postgres.port ];
       };
 }
