@@ -5,12 +5,26 @@ _:
   ...
 }:
 let
-  inherit (lib) mkIf;
+  inherit (lib) mkIf mkOption types;
+  inherit (types) lines;
 
   cfg = config.server.monitoring;
   lokiHost = config.server.monitoringPrimaryHost;
 in
 {
+  options.server.monitoring.logs = {
+    extraConfiguration = mkOption {
+      type = lines;
+      default = "";
+      description = ''
+        Additional configuration for the alloy log processor.
+        This is useful for adding custom Loki stages, relabeling rules, or write targets.
+
+        Note that the default configuration for processing the system journal is always included and does not need to be specified here.
+      '';
+    };
+  };
+
   config = mkIf (cfg.enable && cfg.logs.enable) {
     services.alloy = {
       enable = true;
@@ -116,6 +130,8 @@ in
           host = "${config.host.name}"
         }
       }
+
+      ${config.server.monitoring.logs.extraConfiguration}
     '';
   };
 }

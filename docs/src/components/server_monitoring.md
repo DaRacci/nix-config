@@ -12,8 +12,9 @@ The system consists of three layers:
 1. **Exporters** (run on all servers)
 
    - node_exporter for system-level metrics (CPU, memory, disk, network, per-process stats)
-   - Grafana Alloy for shipping journald logs to Loki
-   - Ingest-time log parsing for `stdout` journal entries to infer `detected_level` and normalize common timestamp formats
+   - Grafana Alloy for shipping journald logs and Caddy access logs to Loki
+   - Caddy access logs are parsed as JSON at ingest time so `detected_level`, `logger`, and `status` are available in Loki
+   - Ingest-time log parsing for journal `stdout` entries and Caddy access logs to infer `detected_level` and normalize common timestamp formats
    - Application-specific exporters (Caddy, PostgreSQL, Redis) enabled automatically
 
 1. **Collectors** (run on the monitoring primary host)
@@ -87,6 +88,7 @@ The module automatically detects and enables exporters based on host role:
 - **Caddy exporter**: Enabled when `server.proxy.virtualHosts` is non-empty
 - **PostgreSQL exporter**: Enabled on the IO primary host when postgres databases are configured
 - **Redis exporter**: Enabled on the IO primary host when redis instances are configured
+- **Caddy access logs**: Enabled when Caddy metrics/logs are enabled; each access log file under `/var/log/caddy-access-*` is shipped to Loki and parsed as JSON
 - **node_exporter process collector**: Enabled on all servers via the `processes` collector to expose per-process stats
 - **Collector services**: Enabled only on the monitoring primary host
 
@@ -206,11 +208,19 @@ curl -s http://localhost:9090/api/v1/targets | jq '.data.activeTargets[] | {inst
 
 ### Verifying Log Collection
 
-Alloy applies ingest-time parsing for journal `stdout` logs before forwarding to Loki:
+Alloy applies ingest-time parsing for journal `stdout` logs and Caddy access logs before forwarding to Loki:
+
+- Caddy access logs are read as JSON, not plain text
 
 - Legacy timestamps in form `YYYY/MM/DD HH:MM:SS` are parsed and used as event timestamps
+
 - ISO-8601 timestamps with a log level prefix are parsed and normalized
+
 - `detected_level` defaults to `info` when the source log line does not provide one
+
+- Caddy JSON fields `level`, `ts`, `logger`, and `status` are extracted into Loki labels and timestamps
+
+- Caddy access logs are read from `/var/log/caddy-access-*.log` and use the timestamp and level prefix in each line when present
 
 node_exporter also enables the `processes` collector, which exposes per-process metrics such as CPU and memory usage for running processes.
 

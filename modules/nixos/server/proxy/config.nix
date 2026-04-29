@@ -55,7 +55,7 @@ in
                 virtualHosts
                 |> builtins.attrValues
                 |> builtins.filter (vh: vh.l4 != null)
-                |> builtins.map (vh: ''
+                |> map (vh: ''
                   ${vh.baseUrl}:${toString vh.l4.listenPort} {
                     ${replaceLocalHost hostCfg.host.name vh.l4.config}
                   }
