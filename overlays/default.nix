@@ -62,7 +62,7 @@ in
 
     discord = prev.discord.override {
       withOpenASAR = true;
-      withVencord = true;
+      # withVencord = true;
       nss = final.nss_latest;
     };
 
