@@ -33,7 +33,7 @@ in
           ];
         };
 
-        server.networking.openPortsForSubnet.tcp = [ config.services.prometheus.exporters.redis.port ];
+        server.network.openPortsForSubnet.tcp = [ config.services.prometheus.exporters.redis.port ];
 
         systemd.services.prometheus-redis-exporter.serviceConfig.LoadCredential = [
           "redis-password:${config.sops.templates."redis-exporter-password".path}"
