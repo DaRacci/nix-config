@@ -56,7 +56,7 @@ in
     nextcloud = {
       enable = true;
       configureRedis = true;
-      package = pkgs.nextcloud32;
+      package = pkgs.nextcloud33;
       appstoreEnable = false;
       extraAppsEnable = true;
       extraApps = {
