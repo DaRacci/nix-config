@@ -59,7 +59,7 @@ jobs:
 
       - name: Filter to changed packages
         id: filtered-packages
-        uses: workflow/nix-shell-action@v3
+        uses: workflow/nix-shell-action@v4.0.0
         with:
           packages: gawk
           script: |
