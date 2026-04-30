@@ -26,7 +26,11 @@ in
           };
 
           postgresql = {
-            ensureUsers.postgres-exporter = { };
+            ensureUsers = [
+              {
+                name = "postgres-exporter";
+              }
+            ];
           };
         };
 
