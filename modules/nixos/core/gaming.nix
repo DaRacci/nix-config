@@ -12,7 +12,6 @@ let
     mkIf
     mkMerge
     optionalAttrs
-    optionals
     ;
 
   cfg = config.core.gaming;
@@ -181,24 +180,23 @@ in
                 STEAM_PID_FILE="$HOME/.steam/steam.pid"
 
                 while true; do
-                  while true; do
-                    if [ -f "$STEAM_PID_FILE" ]; then
-                      STEAM_PID=$(cat "$STEAM_PID_FILE" 2>/dev/null || true)
-                      if [ -n "$STEAM_PID" ] && kill -0 "$STEAM_PID" 2>/dev/null; then
+                  if [ -f "$STEAM_PID_FILE" ]; then
+                    STEAM_PID=$(cat "$STEAM_PID_FILE" 2>/dev/null || true)
+                    if [ -n "$STEAM_PID" ] && kill -0 "$STEAM_PID" 2>/dev/null; then
+                      # Validate PID belongs to Steam to avoid PID reuse races.
+                      STEAM_COMM=$(cat "/proc/$STEAM_PID/comm" 2>/dev/null || true)
+                      if [ "$STEAM_COMM" = "steam" ]; then
                         break
                       fi
                     fi
-                    sleep 3
+                  fi
+                  sleep 3
                   done
 
-                  systemctl start decky-loader.service || true
+                systemctl start decky-loader.service || true
 
-                  # tail --pid blocks until given PID exits, then returns immediately.
-                  tail --pid="$STEAM_PID" -f /dev/null 2>/dev/null || true
-                  systemctl stop decky-loader.service || true
-
-                  sleep 2
-                done
+                tail --pid="$STEAM_PID" -f /dev/null 2>/dev/null || true
+                systemctl stop decky-loader.service || true
               '';
             in
             {
