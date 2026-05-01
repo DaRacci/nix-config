@@ -8,8 +8,11 @@
 let
   inherit (lib)
     mkEnableOption
-    mkIf
     mkOption
+    mkBefore
+    mkAfter
+    mkMerge
+    mkIf
     optionalAttrs
     stringAfter
     ;
@@ -42,20 +45,24 @@ in
         ];
       };
 
-      environment.sessionVariables = {
-        CUDA_PATH = "${pkgs.cudatoolkit}";
-        EXTRA_LDFLAGS = "-L/lib -L${pkgs.linuxPackages.nvidia_x11_latest}/lib";
-        EXTRA_CCFLAGS = "-I/usr/include";
-        LD_LIBRARY_PATH = [
-          "/usr/lib/wsl/lib"
-          "/run/opengl-driver/lib"
-          "${pkgs.linuxPackages.nvidia_x11_latest}/lib"
-        ];
-        NIX_LD_LIBRARY_PATH_x86_64_linux = [
-          "/usr/lib/wsl/lib"
-          "/run/opengl-driver/lib"
-        ];
-      };
+      environment.sessionVariables = mkMerge [
+        {
+          EXTRA_CCFLAGS = "-I/usr/include";
+          LD_LIBRARY_PATH = mkBefore [
+            "/usr/lib/wsl/lib"
+            "/run/opengl-driver/lib"
+          ];
+          NIX_LD_LIBRARY_PATH_x86_64_linux = [
+            "/usr/lib/wsl/lib"
+            "/run/opengl-driver/lib"
+          ];
+        }
+        (mkIf config.hardware.graphics.hasNvidia {
+          CUDA_PATH = "${pkgs.cudatoolkit}";
+          EXTRA_LDFLAGS = "-L/lib -L${pkgs.linuxPackages.nvidia_x11_latest}/lib";
+          LD_LIBRARY_PATH = mkAfter [ "${pkgs.linuxPackages.nvidia_x11_latest}/lib" ];
+        })
+      ];
 
       hardware.graphics = {
         enable = true;

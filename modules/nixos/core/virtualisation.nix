@@ -467,74 +467,67 @@ in
                 ]) cfg.isolatedGuests
               );
 
-            qemuFirmware = pkgs.runCommand "qemu-firmware" { } ''
-              mkdir -p $out/share/firmware
-
-              cat <<EOF > $out/share/firmware/30-edk2-ovmf-x64-sb-enrolled.json
-              {
-                "description": "OVMF with SB+SMM, SB enabled, MS certs enrolled",
-                "interface-types": ["uefi"],
-                "mapping": {
-                  "device": "flash",
-                  "mode": "split",
-                  "executable": {
-                    "filename": "/run/libvirt/nix-ovmf/OVMF_CODE.ms.fd",
-                    "format": "raw"
-                  },
-                  "nvram-template": {
-                    "filename": "/run/libvirt/nix-ovmf/OVMF_VARS.ms.fd",
-                    "format": "raw"
-                  }
-                },
-                "targets": [
+            qemuFirmware =
+              let
+                mkFirmwareJson =
                   {
-                    "architecture": "x86_64",
-                    "machines": ["pc-q35-*"]
-                  }
-                ],
-                "features": [
-                  "acpi-s3",
-                  "enrolled-keys",
-                  "requires-smm",
-                  "secure-boot",
-                  "verbose-dynamic"
-                ],
-                "tags": []
-              }
-              EOF
+                    name,
+                    filenameExt ? "",
+                    featuresExt ? [ ],
+                    descriptionExt ? "",
+                  }:
+                  let
+                    json = {
+                      description = "OVMF with SB+SMM, SB enabled${descriptionExt}";
+                      interface-types = [ "uefi" ];
+                      mapping = {
+                        device = "flash";
+                        mode = "split";
+                        executable = {
+                          filename = "/run/libvirt/nix-ovmf/OVMF_CODE${filenameExt}.fd";
+                          format = "raw";
+                        };
+                        nvram-template = {
+                          filename = "/run/libvirt/nix-ovmf/OVMF_VARS${filenameExt}.fd";
+                          format = "raw";
+                        };
+                      };
+                      targets = [
+                        {
+                          architecture = "x86_64";
+                          machines = [ "pc-q35-*" ];
+                        }
+                      ];
+                      features = [
+                        "acpi-s3"
+                        "secure-boot"
+                        "requires-smm"
+                        "verbose-dynamic"
+                      ]
+                      ++ featuresExt;
+                      tags = [ ];
+                    };
+                  in
+                  pkgs.writeTextDir "share/firmware/${name}" (builtins.toJSON json);
 
-              cat <<EOF > $out/share/firmware/40-edk2-ovmf-x64-sb.json
-              {
-                "description": "OVMF with SB+SMM, SB enabled",
-                "interface-types": ["uefi"],
-                "mapping": {
-                  "device": "flash",
-                  "mode": "split",
-                  "executable": {
-                    "filename": "/run/libvirt/nix-ovmf/OVMF_CODE.fd",
-                    "format": "raw"
-                  },
-                  "nvram-template": {
-                    "filename": "/run/libvirt/nix-ovmf/OVMF_VARS.fd",
-                    "format": "raw"
-                  }
-                },
-                "targets": [
-                  {
-                    "architecture": "x86_64",
-                    "machines": ["pc-q35-*"]
-                  }
-                ],
-                "features": [
-                  "acpi-s3",
-                  "secure-boot",
-                  "requires-smm",
-                  "verbose-dynamic"
-                ],
-                "tags": []
-              }
-              EOF
-            '';
+                enrolledJson = mkFirmwareJson {
+                  name = "30-edk2-ovmf-x64-sb-enrolled.json";
+                  filenameExt = ".ms";
+                  featuresExt = [ "enrolled-keys" ];
+                  descriptionExt = ", MS certs enrolled";
+                };
+
+                sbJson = mkFirmwareJson {
+                  name = "40-edk2-ovmf-x64-sb.json";
+                };
+              in
+              pkgs.symlinkJoin {
+                name = "qemu-firmware";
+                paths = [
+                  enrolledJson
+                  sbJson
+                ];
+              };
           in
           mkBefore (
             [

@@ -142,7 +142,7 @@ in
       };
     }
 
-    (mkIf (config.jovian.decky-loader.enable) (
+    (mkIf config.jovian.decky-loader.enable (
       {
         # Do not auto-start decky-loader at boot, decky-loader-steam-watch
         # user service manages lifecycle alongside Steam process.
