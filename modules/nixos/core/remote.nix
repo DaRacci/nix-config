@@ -121,6 +121,7 @@ in
       }
     ))
 
+    # TODO:Why headless-2 and not headless-1, cant remember, need to test.
     (mkIf (cfg.streaming.enable && config.programs.hyprland.enable) (
       {
         services.sunshine = {

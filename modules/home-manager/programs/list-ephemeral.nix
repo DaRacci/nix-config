@@ -17,7 +17,8 @@ let
     "etc/NIXOS"
     "etc/group"
     "etc/machine-id"
-    "etc/resolve.conf"
+    "etc/resolv.conf"
+
     "etc/ssh"
     "etc/shadow"
     "etc/subgid"

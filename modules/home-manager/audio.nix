@@ -25,6 +25,7 @@ let
     oneOf
     str
     ;
+  inherit (builtins) attrValues;
 
   cfg = config.core.audio;
   updatedDevicesPath = "wireplumber/wireplumber.conf.d/50-update-devices.conf";
@@ -79,7 +80,7 @@ in
         disabledDevices = filter (name: getType name == "device") cfg.disabledDevices;
       in
       {
-        "${updatedDevicesPath}" = mkIf (length (builtins.attrValues cfg.updateDevices) > 0) {
+        "${updatedDevicesPath}" = mkIf (length (attrValues cfg.updateDevices) > 0) {
           text = ''
             monitor.alsa.rules = [
               ${pipe cfg.updateDevices [

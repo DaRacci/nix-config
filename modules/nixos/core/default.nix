@@ -31,7 +31,6 @@ in
     ./generators.nix
     ./groups.nix
     ./locale.nix
-    ./networking
     ./nix.nix
     ./openssh.nix
     ./printing.nix

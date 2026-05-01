@@ -15,6 +15,7 @@ let
     mkBefore
     types
     ;
+  inherit (types) str listOf int;
 
   cfg = config.core.virtualisation;
 
@@ -32,34 +33,43 @@ in
   options.core.virtualisation = {
     enable = mkEnableOption "virtualisation support";
 
+    isolatedGuests = mkOption {
+      type = listOf str;
+      default = [
+        "win11"
+        "win11-gaming"
+      ];
+      description = "List of guests to apply isolation helpers to.";
+    };
+
     bridgeInterface = mkOption {
-      type = types.str;
+      type = str;
       default = "br0";
       description = "Bridge interface used for libvirt networking.";
     };
 
     externalInterface = mkOption {
-      type = types.str;
+      type = str;
       default = "eth0";
       description = "Physical interface attached to bridge.";
     };
 
     cpuCores = mkOption {
-      type = types.int;
+      type = int;
       default = 24;
       description = "Total CPU core/thread count used for isolation helpers.";
     };
 
     gpu = {
       video = mkOption {
-        type = types.str;
-        default = "0b:00.0";
+        type = str;
+        default = "10de:1b06";
         description = "PCI address for passthrough GPU video device.";
       };
 
       audio = mkOption {
-        type = types.str;
-        default = "0b:00.1";
+        type = str;
+        default = "10de:1bef";
         description = "PCI address for passthrough GPU audio device.";
       };
     };
@@ -89,8 +99,8 @@ in
           disableEFIfb = true;
           IOMMUType = "amd";
           devices = [
-            "10de:1b06"
-            "10de:10ef"
+            cfg.gpu.video
+            cfg.gpu.audio
           ];
         };
 
@@ -446,20 +456,15 @@ in
                 prefix = "L+ /var/lib/libvirt/hooks/guests/";
               in
               builtins.foldl' (existing: new: existing ++ new) [ ] (
-                map
-                  (guest: [
-                    "${prefix}${guest}/prepare/begin/core-isolation - - - - ${getExe win-isolation-start}"
-                    "${prefix}${guest}/release/end/core-isolation - - - - ${getExe win-isolation-release}"
+                map (guest: [
+                  "${prefix}${guest}/prepare/begin/core-isolation - - - - ${getExe win-isolation-start}"
+                  "${prefix}${guest}/release/end/core-isolation - - - - ${getExe win-isolation-release}"
 
-                    "${prefix}${guest}-single/prepare/begin/core-isolation - - - - ${getExe win-isolation-start}"
-                    "${prefix}${guest}-single/release/end/core-isolation - - - - ${getExe win-isolation-release}"
-                    "${prefix}${guest}-single/prepare/begin/detach-gpu - - - - ${getExe detach-gpu}"
-                    "${prefix}${guest}-single/release/end/attach-gpu - - - - ${getExe attach-gpu}"
-                  ])
-                  [
-                    "win11"
-                    "win11-gaming"
-                  ]
+                  "${prefix}${guest}-single/prepare/begin/core-isolation - - - - ${getExe win-isolation-start}"
+                  "${prefix}${guest}-single/release/end/core-isolation - - - - ${getExe win-isolation-release}"
+                  "${prefix}${guest}-single/prepare/begin/detach-gpu - - - - ${getExe detach-gpu}"
+                  "${prefix}${guest}-single/release/end/attach-gpu - - - - ${getExe attach-gpu}"
+                ]) cfg.isolatedGuests
               );
 
             qemuFirmware = pkgs.runCommand "qemu-firmware" { } ''
@@ -540,7 +545,7 @@ in
           );
       };
 
-      services.udev.extraRules = ''
+      services.udev.extraRules = mkBefore ''
         SUBSYSTEM=="kvmfr", OWNER="racci", GROUP="kvm", MODE="0660"
       '';
 
@@ -551,7 +556,6 @@ in
           virtiofsd
           virtio-win
           win-spice
-          virtio-win
         ];
       };
 

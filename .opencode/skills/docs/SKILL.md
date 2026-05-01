@@ -35,7 +35,7 @@ Keep docs clear, accurate, and synced with repo. Goal: make system configs, user
 
 ### Adding new module doc
 1. Create `docs/src/modules/my_service.md`:
-```markdown
+````markdown
 # My Service
 
 Overview of what service does and why it is included in config.
@@ -48,16 +48,16 @@ Link to implementation: [modules/nixos/services/my-service.nix](../../modules/ni
   services.myService.enable = true;
 }
 ```
-```
 
 2. Update `docs/src/SUMMARY.md`:
+
 ```markdown
 # Summary
 
 - [Introduction](README.md)
 - [Modules](modules/overview.md)
   - [My Service](modules/my_service.md)
-```
+````
 
 ### Updating host documentation
 If host config changes in significant way:

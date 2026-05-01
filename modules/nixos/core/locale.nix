@@ -18,14 +18,10 @@ in
   };
 
   config = mkIf config.core.locale.enable {
-    time = {
-      timeZone = "Australia/Sydney";
-      hardwareClockInLocalTime = true;
-    };
+    time.timeZone = mkDefault "Australia/Sydney";
 
     i18n = {
-      defaultLocale = "en_AU.UTF-8";
-
+      defaultLocale = mkDefault "en_AU.UTF-8";
       supportedLocales = mkDefault [
         "en_AU.UTF-8/UTF-8"
         "en_US.UTF-8/UTF-8"

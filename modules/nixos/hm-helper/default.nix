@@ -4,7 +4,13 @@
   ...
 }:
 let
-  inherit (lib) literalExpression mkEnableOption;
+  inherit (lib)
+    literalExpression
+    mkOption
+    mkEnableOption
+    types
+    ;
+  inherit (types) listOf str;
   inherit (builtins)
     attrNames
     attrValues
@@ -14,9 +20,7 @@ let
     ;
 
   hmUserAttrs = attrValues config.home-manager.users;
-  hmUsers = filter (user: elem user (attrNames config.home-manager.users)) (
-    attrNames config.users.users
-  );
+  hmUsers = filter (user: config.home-manager.users ? ${user}) (attrNames config.users.users);
 
   hasPackage = pkg: username: elem pkg config.home-manager.users.${username}.home.packages;
   usersWithPackage = pkg: filter (username: hasPackage pkg username) hmUsers;
@@ -49,6 +53,13 @@ in
     enable = mkEnableOption "Home Manager helper functions" // {
       default = config ? home-manager;
       defaultText = literalExpression "config ? home-manager";
+    };
+
+    hmUsers = mkOption {
+      type = listOf str;
+      default = hmUsers;
+      readOnly = true;
+      description = "List of Home Manager users defined in config.home-manager.users";
     };
   };
 }
