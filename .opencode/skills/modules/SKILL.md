@@ -130,7 +130,7 @@ in
 | `boot.<name>`        | NixOS              | Boot configuration                    |
 | `host.<name>`        | NixOS              | Host-specific options                 |
 | `server.<name>`      | NixOS              | Server cluster options                |
-| `core.<name>`        | Home-Manager/NixOS | Opionioated configurations & features |
+| `core.<name>`        | Home-Manager/NixOS | Opinionated configurations & features |
 | `purpose.<category>` | Home-Manager       | Use-case modules                      |
 | `user.<name>`        | Home-Manager       | User-specific options                 |
 

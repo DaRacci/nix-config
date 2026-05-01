@@ -32,7 +32,7 @@ in
     {
       users.allowNoPasswordLogin = true;
 
-      environment.systemPackages = with pkgs; [ wslu ];
+      environment.systemPackages = [ pkgs.wslu ];
 
       programs.nix-ld = {
         enable = true;
@@ -59,10 +59,10 @@ in
 
       hardware.graphics = {
         enable = true;
-        extraPackages = with pkgs; [
+        extraPackages = [
           config.hardware.graphics.package
           config.hardware.graphics.package32
-          libvdpau-va-gl
+          pkgs.libvdpau-va-gl
         ];
       };
     }
@@ -90,19 +90,17 @@ in
       system.activationScripts.copy-user-launchers = stringAfter [ ] ''
         for x in applications icons; do
           echo "setting up /usr/share/''${x}..."
-          targets=()
-          if [[ -d "/etc/profiles/per-user/${config.wsl.defaultUser}/share/$x" ]]; then
-            targets+=("/etc/profiles/per-user/${config.wsl.defaultUser}/share/$x/.")
-          fi
+          target="/etc/profiles/per-user/${config.wsl.defaultUser}/share/$x/."
 
-          if (( ''${#targets[@]} != 0 )); then
+          if [ -d "/etc/profiles/per-user/${config.wsl.defaultUser}/share/$x" ]; then
             mkdir -p "/usr/share/$x"
-            ${pkgs.rsync}/bin/rsync -ar --delete-after "''${targets[@]}" "/usr/share/$x"
+            ${pkgs.rsync}/bin/rsync -ar --delete-after "$target" "/usr/share/$x"
           else
             rm -rf "/usr/share/$x"
           fi
         done
       '';
+
     }
   );
 }

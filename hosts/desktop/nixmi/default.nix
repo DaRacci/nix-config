@@ -128,11 +128,6 @@
   networking = {
     firewall = {
       allowedUDPPorts = [
-        # ALVR
-        9942 # OSC
-        9944 # Stream
-        8082 # Web
-
         7860
         11434
         27031
@@ -150,11 +145,6 @@
         27037
         10400
         10401
-
-        # ALVR
-        9942
-        9944
-        8082
       ];
     };
 

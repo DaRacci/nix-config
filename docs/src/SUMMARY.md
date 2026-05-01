@@ -25,13 +25,13 @@
 
 - [Overview](modules/nixos/overview.md)
 - [Services](modules/nixos/services/default.md)
-  - [AI Agent](modules/nixos/services/ai-agent.md)
+  - [AI Agent](modules/nixos/services/ai_agent.md)
   - [Huntress](modules/nixos/services/huntress.md)
   - [MCPO](modules/nixos/services/mcpo.md)
   - [Metrics](modules/nixos/services/metrics.md)
   - [Tailscale](modules/nixos/services/tailscale.md)
 - [Desktop](modules/nixos/desktop/default.md)
-  - [Display Manager](modules/nixos/desktop/display-manager.md)
+  - [Display Manager](modules/nixos/desktop/display_manager.md)
   - [Remote Access](modules/nixos/desktop/remote.md)
 - [Server](modules/nixos/server/default.md)
   - [Dashboard](modules/nixos/server/dashboard.md)
@@ -47,7 +47,7 @@
 
 - [DIY & Making](modules/home-manager/diy.md)
 - [AI Editors & Assistants](modules/home-manager/ai.md)
-- [Programs](modules/home-manager/programs/list-ephemeral.md)
+- [Programs](modules/home-manager/programs/list_ephemeral.md)
 
 # Packages
 

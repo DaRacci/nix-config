@@ -7,7 +7,7 @@
   ...
 }:
 let
-  inherit (lib) mkEnableOption optional;
+  inherit (lib) mkIf mkEnableOption optional;
   inherit (builtins) mapAttrs readFile;
   inherit (config.networking) hostName;
 
@@ -25,12 +25,12 @@ let
 in
 {
   options.core.openssh = {
-    enable = mkEnableOption "OpenSSH server and client opionated configuration" // {
+    enable = mkEnableOption "OpenSSH server and client opinionated configuration" // {
       default = true;
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
     users.users.root.openssh.authorizedKeys.keyFiles = [ hostSSHPubKey ];
     environment.etc."ssh/ssh_host_ed25519_key.pub".source = hostSSHPubKey;
     security.pam.sshAgentAuth.enable = true;

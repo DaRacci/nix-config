@@ -7,6 +7,14 @@
   ...
 }:
 let
+  inherit (lib)
+    fileContents
+    mapAttrsToList
+    attrValues
+    mkForce
+    getExe
+    ;
+
   caches = {
     cachenixosorg = {
       url = "https://cache.nixos.org";
@@ -30,7 +38,7 @@ in
     inputs.nix4vscode.overlays.default
   ];
 
-  system.stateVersion = builtins.readFile "${self}/state.version";
+  system.stateVersion = fileContents "${self}/state.version";
 
   nix = {
     settings = rec {
@@ -38,16 +46,16 @@ in
         "root"
         "@wheel"
       ];
-      auto-optimise-store = lib.mkForce true;
+      auto-optimise-store = mkForce true;
       experimental-features = [
         "nix-command"
         "flakes"
         "pipe-operator"
       ];
 
-      substituters = map (sub: sub.url) (lib.attrValues caches);
+      substituters = map (sub: sub.url) (attrValues caches);
       trusted-substituters = substituters;
-      trusted-public-keys = map (sub: sub.key) (lib.attrValues caches);
+      trusted-public-keys = map (sub: sub.key) (attrValues caches);
     };
 
     gc = {
@@ -56,7 +64,7 @@ in
       persistent = true;
     };
 
-    nixPath = lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
+    nixPath = mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
   };
 
   sops.secrets.CACHE_PUSH_KEY = {
@@ -92,7 +100,7 @@ in
       Restart = "on-failure";
     };
 
-    script = lib.getExe (
+    script = getExe (
       pkgs.writeShellApplication {
         name = "attic-watch-store";
         runtimeInputs = [ pkgs.attic-client ];

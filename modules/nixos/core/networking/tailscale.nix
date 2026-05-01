@@ -6,7 +6,7 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
+  inherit (lib) getExe' optional mkIf mkEnableOption;
   cfg = config.core.networking.tailscale;
 in
 {
@@ -23,72 +23,36 @@ in
 
     services.tailscale = {
       enable = true;
-      package = pkgs.tailscale;
+      disableUpstreamLogging = true;
+      disableTaildrop = true;
       useRoutingFeatures = "client";
+
       authKeyFile = config.sops.secrets.TAILSCALE_AUTH_KEY.path;
-      extraDaemonFlags = [ "--no-logs-no-support" ];
+      authKeyParameters.preauthorized = true;
+
       extraUpFlags = [
         "--accept-dns=true"
-        "--accept-routes"
+        "--accept-routes=true"
       ];
+
       tags = [
         "nixos"
         config.host.device.role
       ]
       ++ config.host.device.purpose
-      ++ (lib.optional config.host.device.isVirtual "virtual")
-      ++ (lib.optional config.host.device.isHeadless "headless");
+      ++ (optional config.host.device.isVirtual "virtual")
+      ++ (optional config.host.device.isHeadless "headless");
     };
 
     systemd = {
-      services = {
-        tailscaled-autoconnect = {
-          serviceConfig.ExecCondition = lib.getExe (
-            pkgs.writeShellApplication {
-              name = "tailscale-check-condition";
-              runtimeInputs = [
-                pkgs.tailscale
-                pkgs.jq
-              ];
-              text = ''
-                STATE=$(tailscale status --json --peers=false | jq -r .BackendState)
-                if [ "$STATE" == "NeedsLogin" ]; then
-                  exit 0
-                else
-                  exit 1
-                fi
-              '';
-            }
-          );
-        };
-
-        tailscale-check = {
-          description = "Check Tailscale login status";
-          after = [ "tailscaled.service" ];
-          wants = [ "tailscaled.service" ];
-          serviceConfig = {
-            Type = "oneshot";
-            User = "root";
-            ExecStart = lib.getExe (
-              pkgs.writeShellApplication {
-                name = "tailscale-check";
-                runtimeInputs = [
-                  pkgs.tailscale
-                  pkgs.systemd
-                  pkgs.jq
-                ];
-                text = ''
-                  STATE=$(tailscale status --json --peers=false | jq -r .BackendState)
-                  if [ "$STATE" == "NeedsLogin" ]; then
-                    echo "Tailscale is not logged in. Running tailscaled-autoconnect service."
-                    systemctl start tailscaled-autoconnect.service
-                  else
-                    echo "Tailscale is logged in."
-                  fi
-                '';
-              }
-            );
-          };
+      services.tailscale-check = {
+        description = "Check Tailscale login status";
+        after = [ "tailscaled.service" ];
+        wants = [ "tailscaled.service" ];
+        serviceConfig = {
+          Type = "oneshot";
+          User = "root";
+          ExecStart = "${getExe' pkgs.systemd "systemctl"} start tailscaled-autoconnect.service";
         };
       };
 

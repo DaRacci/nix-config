@@ -5,7 +5,7 @@
   ...
 }:
 let
-  inherit (lib) mkEnableOption mkIf;
+  inherit (lib) optional mkEnableOption mkIf;
   cfg = config.core.containers;
 in
 {
@@ -49,7 +49,5 @@ in
         "${docker}/containerd"
         "${docker}/buildkit"
       ];
-
-    networking.firewall.allowedTCPPorts = [ 2375 ];
   };
 }

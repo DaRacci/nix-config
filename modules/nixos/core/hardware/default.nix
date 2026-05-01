@@ -1,7 +1,13 @@
 {
+  config,
+  lib,
   ...
 }:
+let
+  inherit (lib) mkDefault;
+in
 {
+
   imports = [
     ./storage
     ./backlight.nix
@@ -16,6 +22,6 @@
   options = { };
 
   config = {
-    hardware.enableRedistributableFirmware = true;
+    hardware.enableRedistributableFirmware = mkDefault (!config.host.device.isVirtual);
   };
 }

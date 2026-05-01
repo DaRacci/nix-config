@@ -38,8 +38,11 @@
         rpc-host-whitelist-enabled = true;
         rpc-host-whitelist = "transmission.racci.dev";
 
-        speed-limit-up-enabled = true;
-        speed-limit-up = 8192;
+        upload_limit = 4096;
+        upload_limit_enabled = true;
+
+        ratio_limit = 2;
+        ratio_limit_enabled = true;
       };
     };
 
@@ -52,13 +55,6 @@
 
   services.transmission = {
     openPeerPorts = lib.mkForce true;
-    settings = {
-      upload_limit = 4096;
-      upload_limit_enabled = true;
-
-      ratio_limit = 2;
-      ratio_limit_enabled = true;
-    };
   };
 
   server.proxy.virtualHosts.transmission.extraConfig = ''

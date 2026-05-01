@@ -63,7 +63,7 @@ ______________________________________________________________________
 
 ## Hyprland Integration
 
-When both `core.remote.streaming.enable` and `programs.hyprland.enable` are `true`, module additionally:
+When both `core.remote.streaming.enable` and `programs.hyprland.enable` are `true`, the module additionally:
 
 - Creates virtual headless monitor on startup with `hyprctl output create headless`.
 - Registers two pre-configured Sunshine application entries.

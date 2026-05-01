@@ -49,6 +49,7 @@ in
       secrets = {
         SSH_PRIVATE_KEY = {
           path = "/etc/ssh/ssh_host_ed25519_key";
+          restartUnits = [ "sshd.service" ];
         };
       };
     };

@@ -50,8 +50,8 @@ in
         })
       ];
 
-      environment.systemPackages = with pkgs; [
-        android-tools
+      environment.systemPackages = [
+        pkgs.android-tools
       ];
 
       programs = {
@@ -66,11 +66,11 @@ in
             };
           };
           extest.enable = true;
-          extraPackages = with pkgs; [
-            xwayland-run
+          extraPackages = [
+            pkgs.xwayland-run
 
             # Steam logs errors about missing these, not sure for what though.
-            xwininfo
+            pkgs.xwininfo
           ];
           extraCompatPackages = [ pkgs.proton-ge-bin ];
 
@@ -128,20 +128,22 @@ in
         '';
       };
 
-      networking.firewall =
-        let
-          alvrPorts = optionals config.programs.alvr.enable [
-            9942 # OSC
-            8082 # Web
-          ];
-        in
-        {
-          allowedUDPPorts = alvrPorts;
-          allowedTCPPorts = [ 24070 ] ++ alvrPorts;
-        };
+      networking.firewall = {
+        allowedUDPPorts = [
+          41492 # OSC
+          9943 # Discovery
+          9944 # Streaming
+        ];
+        allowedTCPPorts = [
+          8082 # Dashboard
+          9943 # Discovery
+          9944 # Streaming
+          24070 # ?
+        ];
+      };
     }
 
-    (mkIf (config.jovian.decky-loader.enable or false) (
+    (mkIf (config.jovian.decky-loader.enable) (
       {
         # Do not auto-start decky-loader at boot, decky-loader-steam-watch
         # user service manages lifecycle alongside Steam process.
