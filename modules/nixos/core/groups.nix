@@ -6,11 +6,13 @@
 }:
 let
   inherit (lib)
+    mkAfter
     mkIf
     mkOption
     nameValuePair
     types
     ;
+
   inherit (types) listOf str;
 
   cfg = config.core;
@@ -28,9 +30,11 @@ in
       |> map (
         user:
         nameValuePair user {
-          extraGroups = cfg.defaultGroups;
+          extraGroups = mkAfter cfg.defaultGroups;
         }
+
       )
       |> builtins.listToAttrs;
   };
+
 }

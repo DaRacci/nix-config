@@ -19,6 +19,10 @@ in
 
   environment.shells = [ config.users.users.racci.shell ];
 
+  core = {
+    virtualisation.vmUsers = [ "racci" ];
+  };
+
   hardware.keyboard.qmk.enable = true;
 
   services = {
