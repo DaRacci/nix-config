@@ -10,6 +10,7 @@ This section provides an overview of the custom NixOS and Home-Manager modules d
   - `Core Module`
     - [Display Manager](nixos/core/display_manager.md)
     - [Remote Desktop & Streaming](nixos/core/remote.md)
+    - [Virtualisation](nixos/core/virtualisation.md)
   - [Server Module](nixos/server/default.md)
     - [Dashboard Module](nixos/server/dashboard.md)
     - [Network Module](nixos/server/network.md)

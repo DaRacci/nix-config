@@ -15,7 +15,8 @@ let
     mkBefore
     types
     ;
-  inherit (types) str listOf int;
+  inherit (types) int str listOf addCheck;
+  inherit (builtins) listToAttrs foldl' toJSON;
 
   cfg = config.core.virtualisation;
 
@@ -32,6 +33,12 @@ in
 
   options.core.virtualisation = {
     enable = mkEnableOption "virtualisation support";
+
+    vmUsers = mkOption {
+      type = listOf str;
+      default = [ ];
+      description = "Users that should receive `kvm` and `libvirtd` group membership for VM management.";
+    };
 
     isolatedGuests = mkOption {
       type = listOf str;
@@ -55,9 +62,9 @@ in
     };
 
     cpuCores = mkOption {
-      type = int;
+      type = addCheck int (value: value >= 4);
       default = 24;
-      description = "Total CPU core/thread count used for isolation helpers.";
+      description = "Total CPU core/thread count used for isolation helpers. Must be >= 4.";
     };
 
     gpu = {
@@ -77,13 +84,27 @@ in
 
   config = mkIf cfg.enable (mkMerge [
     {
-      core.defaultGroups = [
-        "kvm"
-        "libvirtd"
+      assertions = [
+        {
+          assertion = cfg.cpuCores >= 4;
+          message = "core.virtualisation.cpuCores must be >= 4 so AllowedCPUs isolation ranges stay valid.";
+        }
       ];
 
+      users.users = listToAttrs (
+        map (user: {
+          name = user;
+          value.extraGroups = [
+            "kvm"
+            "libvirtd"
+          ];
+        }) cfg.vmUsers
+      );
+
       boot = {
-        extraModulePackages = [ config.boot.kernelPackages.kvmfr ];
+
+        extraModulePackages = mkBefore [ config.boot.kernelPackages.kvmfr ];
+
         extraModprobeConfig = ''
           options kvmfr static_size_mb=128
         '';
@@ -108,8 +129,9 @@ in
           looking-glass = {
             user = "racci";
             group = "qemu-libvirtd";
-            mode = "666";
+            mode = "660";
           };
+
         };
 
         libvirtd = {
@@ -128,9 +150,10 @@ in
                 "/dev/null", "/dev/full", "/dev/zero",
                 "/dev/random", "/dev/urandom",
                 "/dev/ptmx", "/dev/kvm", "/dev/kqemu",
-                "/dev/rtc","/dev/hpet", "/dev/vfio/vfio",
-                "/dev/kvmfr0"
+                "/dev/rtc", "/dev/hpet", "/dev/vfio/vfio",
+                "/dev/kvmfr0",
               ]
+
             '';
           };
         };
@@ -455,7 +478,7 @@ in
               let
                 prefix = "L+ /var/lib/libvirt/hooks/guests/";
               in
-              builtins.foldl' (existing: new: existing ++ new) [ ] (
+              foldl' (existing: new: existing ++ new) [ ] (
                 map (guest: [
                   "${prefix}${guest}/prepare/begin/core-isolation - - - - ${getExe win-isolation-start}"
                   "${prefix}${guest}/release/end/core-isolation - - - - ${getExe win-isolation-release}"
@@ -508,7 +531,7 @@ in
                       tags = [ ];
                     };
                   in
-                  pkgs.writeTextDir "share/firmware/${name}" (builtins.toJSON json);
+                  pkgs.writeTextDir "share/firmware/${name}" (toJSON json);
 
                 enrolledJson = mkFirmwareJson {
                   name = "30-edk2-ovmf-x64-sb-enrolled.json";
