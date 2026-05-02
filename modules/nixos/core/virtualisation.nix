@@ -15,7 +15,12 @@ let
     mkBefore
     types
     ;
-  inherit (types) int str listOf addCheck;
+  inherit (types)
+    int
+    str
+    listOf
+    addCheck
+    ;
   inherit (builtins) listToAttrs foldl' toJSON;
 
   cfg = config.core.virtualisation;
