@@ -103,8 +103,8 @@ Expected backend model:
 Recovery sequence:
 
 1. detect unhealthy mount state with `mountpoint`/`findmnt` plus a timeout-protected stat/read on the mount path
-2. perform a lazy FUSE unmount (`fusermount -uz`) when needed
-3. restart the corresponding mount unit or service
+1. perform a lazy FUSE unmount (`fusermount -uz`) when needed
+1. restart the corresponding mount unit or service
 
 **Rationale:** External s3fs operational guidance shows that broken FUSE mounts often remain present but unusable, so `Restart=always` on its own is insufficient. A health-check service closes that gap and gives the abstraction a consistent recovery story across both backends.
 
@@ -131,29 +131,29 @@ Recovery sequence:
 
 ## Risks / Trade-offs
 
-**[Different runtime models per backend]** -> MinIO and SeaweedFS mounts will be implemented differently under the hood.  
+**[Different runtime models per backend]** -> MinIO and SeaweedFS mounts will be implemented differently under the hood.\
 *Mitigation:* Keep the common option surface small and explicit, and isolate backend-specific logic behind clearly separated emitters.
 
-**[Health checks may flap under transient IO stalls]** -> An aggressive probe interval or short timeout could cause unnecessary remounts.  
+**[Health checks may flap under transient IO stalls]** -> An aggressive probe interval or short timeout could cause unnecessary remounts.\
 *Mitigation:* Make timeout and interval configurable with conservative defaults, and keep recovery idempotent.
 
-**[Lazy unmount can interrupt in-flight work]** -> `fusermount -uz` is pragmatic for broken FUSE mounts but may cut off operations already in progress.  
+**[Lazy unmount can interrupt in-flight work]** -> `fusermount -uz` is pragmatic for broken FUSE mounts but may cut off operations already in progress.\
 *Mitigation:* Use it only after a failed health probe, log the reason, and document the behavior as a recovery trade-off.
 
-**[SeaweedFS mount configuration may diverge from the current evaluation deployment]** -> The mount abstraction could assume filer/security details that are not universally true outside the evaluation host.  
+**[SeaweedFS mount configuration may diverge from the current evaluation deployment]** -> The mount abstraction could assume filer/security details that are not universally true outside the evaluation host.\
 *Mitigation:* Require explicit filer/security inputs in the SeaweedFS backend instead of hardcoding evaluation-only defaults.
 
-**[Requested name is singular while the option remains an attrset]** -> `swfsMount` is slightly less intuitive than `swfsMounts`.  
+**[Requested name is singular while the option remains an attrset]** -> `swfsMount` is slightly less intuitive than `swfsMounts`.\
 *Mitigation:* Preserve the user-requested name in the API and document that it remains an attribute set of named mount definitions.
 
 ## Migration Plan
 
 1. Replace the current option definition in `bucket.nix` with the new `server.storage.swfsMount` schema.
-2. Convert all current in-repo consumers to the new API with `backend = "minio"` and preserve their existing mount paths, ownership, and permissions.
-3. Add SeaweedFS backend support through generated `weed mount` units and package/runtime wiring.
-4. Add generated health-check services/timers and backend-specific remount actions.
-5. Update storage documentation to describe the breaking rename, backend selection, and health-recovery behavior.
-6. Validate affected host builds and `nix flake check --override-input devenv-root "file+file://$PWD/.devenv/root"`.
+1. Convert all current in-repo consumers to the new API with `backend = "minio"` and preserve their existing mount paths, ownership, and permissions.
+1. Add SeaweedFS backend support through generated `weed mount` units and package/runtime wiring.
+1. Add generated health-check services/timers and backend-specific remount actions.
+1. Update storage documentation to describe the breaking rename, backend selection, and health-recovery behavior.
+1. Validate affected host builds and `nix flake check --override-input devenv-root "file+file://$PWD/.devenv/root"`.
 
 **Rollback:** Revert the change as a unit. Because backward compatibility is intentionally not preserved, rollback is repository-level rather than per-option.
 
@@ -183,5 +183,5 @@ check service -> systemd: restart weed-mount service
 ## Open Questions
 
 1. What default probe interval and timeout should be used before maintainers tune them per mount?
-2. Which SeaweedFS mount flags should be exposed directly in the first version versus left in an `extraArgs` escape hatch?
-3. Should the MinIO backend also move fully to explicit systemd services in a later follow-up for backend parity, or is the existing `fileSystems` pattern sufficient once health checks are added?
+1. Which SeaweedFS mount flags should be exposed directly in the first version versus left in an `extraArgs` escape hatch?
+1. Should the MinIO backend also move fully to explicit systemd services in a later follow-up for backend parity, or is the existing `fileSystems` pattern sufficient once health checks are added?

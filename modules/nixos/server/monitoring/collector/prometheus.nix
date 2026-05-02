@@ -42,11 +42,13 @@ in
     users.users.prometheus.uid = mkForce 950;
     users.groups.prometheus.gid = mkForce 950;
 
-    server.storage.bucketMounts.prometheus = {
+    server.storage.swfsMount.prometheus = {
+      backend = "minio";
       mountLocation = "/var/lib/prometheus2";
       uid = 950;
       gid = 950;
       umask = 077;
+      requiredByServices = [ "prometheus" ];
     };
 
     server.proxy.virtualHosts.prometheus =

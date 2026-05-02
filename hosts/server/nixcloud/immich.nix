@@ -38,11 +38,16 @@ in
         '';
     };
 
-    storage.bucketMounts = {
+    storage.swfsMount = {
       immich = {
+        backend = "minio";
         mountLocation = "/var/lib/immich";
         inherit (config.users.users.immich) uid;
         inherit (config.users.groups.immich) gid;
+        requiredByServices = [
+          "immich-server"
+          "immich-machine-learning"
+        ];
       };
     };
   };

@@ -20,12 +20,14 @@ The current `server.storage.bucketMounts` module hardcodes a MinIO+s3fs flow, wh
 ## Capabilities
 
 ### New Capabilities
+
 - `swfs-mount-abstraction`: Define the renamed `server.storage.swfsMount` interface, backend selection, and consumer-facing mount behavior.
 - `swfs-mount-backends`: Specify how MinIO-backed mounts continue to use s3fs and how SeaweedFS-backed mounts use `weed mount` with backend-specific settings.
 - `swfs-mount-health-recovery`: Detect broken mounts and restore them through systemd-managed health-check and remount behavior.
 - `swfs-mount-documentation`: Document the breaking rename, backend schema, and operating model for resilient mounts.
 
 ### Modified Capabilities
+
 None.
 
 ## Impact

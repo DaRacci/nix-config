@@ -42,12 +42,20 @@ in
       '';
     };
 
-    storage.bucketMounts = {
+    storage.swfsMount = {
       nextcloud = {
+        backend = "minio";
         mountLocation = "/var/lib/nextcloud/data";
         inherit (config.users.users.nextcloud) uid;
         inherit (config.users.groups.nextcloud) gid;
         umask = 007;
+        requiredByServices = [
+          "nextcloud-setup"
+          "phpfpm-nextcloud"
+        ];
+        healthCheck.restartServices = [
+          "notify_push"
+        ];
       };
     };
   };
