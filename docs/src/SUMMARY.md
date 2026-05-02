@@ -54,6 +54,7 @@
   - [Distributed Builds](modules/nixos/server/distributed_builds.md)
   - [Database](modules/nixos/server/database.md)
   - [Storage](modules/nixos/server/storage.md)
+    - [SeaweedFS Evaluation](modules/nixos/server/storage/seaweedfs.md)
   - [Proxy](modules/nixos/server/proxy.md)
   - [SSH](modules/nixos/server/ssh.md)
 - [Flake Allocations](modules/flake/allocations.md)
