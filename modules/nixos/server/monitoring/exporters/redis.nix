@@ -23,7 +23,7 @@ in
       )
       {
         sops.templates."redis-exporter-password".content = builtins.toJSON {
-          "reids://localhost:16379" = config.sops.placeholder."REDIS/PASSWORD";
+          "redis://localhost:16379" = config.sops.placeholder."REDIS/PASSWORD";
         };
 
         services.prometheus.exporters.redis = {
