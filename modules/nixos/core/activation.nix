@@ -17,14 +17,11 @@ in
 
   config = mkIf cfg.enable {
     system.activationScripts.report-changes.text = ''
-      CURRENT=$(readlink -f /nix/var/nix/profiles/system)
       PREVIOUS=$(ls -dv /nix/var/nix/profiles/system-*-link 2>/dev/null | tail -n 2 | head -n 1)
       NEW=$(ls -dv /nix/var/nix/profiles/system-*-link 2>/dev/null | tail -n 1)
-
-      if [ -n "$PREVIOUS" ] && [ -n "$NEW" ]; then
-        CURRENT=$(readlink -f "$PREVIOUS")
+      if [ -n "$CURRENT" ] && [ -n "$NEW" ]; then
+        PREVIOUS=$(readlink -f "$PREVIOUS")
         NEW=$(readlink -f "$NEW")
-
         ${getExe pkgs.nvd} diff "$CURRENT" "$NEW" || true
       fi
     '';

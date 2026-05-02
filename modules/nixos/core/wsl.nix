@@ -94,7 +94,7 @@ in
       };
 
       # Fixes Home-Manager applications not appearing in Start Menu
-      system.activationScripts.copy-user-launchers = stringAfter [ ] ''
+      system.activationScripts.copy-user-launchers = stringAfter [ "users" "etc" ] ''
         for x in applications icons; do
           echo "setting up /usr/share/''${x}..."
           target="/etc/profiles/per-user/${config.wsl.defaultUser}/share/$x/."

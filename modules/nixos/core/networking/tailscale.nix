@@ -42,9 +42,9 @@ in
 
       tags = [
         "nixos"
-        config.host.device.role
       ]
       ++ config.host.device.purpose
+      ++ (optional (config.host.device.role != null) config.host.device.role)
       ++ (optional config.host.device.isVirtual "virtual")
       ++ (optional config.host.device.isHeadless "headless");
     };
