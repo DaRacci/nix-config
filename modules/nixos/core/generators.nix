@@ -84,12 +84,11 @@ in
           ''
             mkdir -p "${persistDirectory}"
             KEY_FILE="${persistDirectory}/ssh_host_ed25519_key"
-            if [ ! -f "$KEY_FILE" ]; then
-              if ! test -t 0; then
-                echo "Skipping SSH private key prompt: no controlling terminal available" >&2
-                exit 0
-              fi
-
+            IS_TTY=$(test -t 0 && echo "true" || echo "false")
+            if [ "$IS_TTY" = "false" ]; then
+              echo "Skipping SSH private key prompt: no controlling terminal available" >&2
+            fi
+            if [ ! -f "$KEY_FILE" && "$IS_TTY" = "true" ]; then
               # Takes some time for the container to be ready to print the message.
               # TODO:Is there a better way to do this?
               sleep 2
@@ -119,12 +118,7 @@ in
                 echo "$KEY" > "$KEY_FILE"
                 chmod 600 "$KEY_FILE"
 
-                echo "Key from file"
-                cat "$KEY_FILE"
-
-                ${cfg.proxmoxLXC.sshKeygenPath} -y -f "$KEY_FILE"
-                if [ $? -ne 0 ]; then
-                  ${cfg.proxmoxLXC.clearPath}
+                if ! ${cfg.proxmoxLXC.sshKeygenPath} -y -f "$KEY_FILE" >/dev/null 2>&1; then                  ${cfg.proxmoxLXC.clearPath}
                   rm "$KEY_FILE"
                   echo "Key provided is invalid, failed to validate the key with ssh-keygen"
                   continue
@@ -134,6 +128,7 @@ in
                 EXPECTED_PUB_KEY=$(cat /etc/ssh/ssh_host_ed25519_key.pub)
                 if [ "$PUB_KEY" != "$EXPECTED_PUB_KEY" ]; then
                   ${cfg.proxmoxLXC.clearPath}
+                  rm "$KEY_FILE"
                   echo "Key provided does not match the public key"
                   echo "Expected: $EXPECTED_PUB_KEY"
                   echo "Got: $PUB_KEY"
