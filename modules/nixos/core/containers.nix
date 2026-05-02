@@ -5,7 +5,7 @@
   ...
 }:
 let
-  inherit (lib) optional mkEnableOption mkIf;
+  inherit (lib) mkEnableOption mkIf;
   cfg = config.core.containers;
 in
 {

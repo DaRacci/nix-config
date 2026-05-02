@@ -6,7 +6,12 @@
   ...
 }:
 let
-  inherit (lib) getExe' optional mkIf mkEnableOption;
+  inherit (lib)
+    getExe'
+    optional
+    mkIf
+    mkEnableOption
+    ;
   cfg = config.core.networking.tailscale;
 in
 {
