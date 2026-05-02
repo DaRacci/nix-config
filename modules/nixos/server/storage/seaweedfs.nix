@@ -258,7 +258,7 @@ in
         [
           (mkVHost a.name a.value)
         ]
-        ++ optionals (a.value.withGrpc) [
+        ++ optionals a.value.withGrpc [
           (mkVHostGrpc a.name a.value)
         ]
       )
@@ -337,7 +337,7 @@ in
           dataDir = "${baseDir}/worker";
         };
       }
-      |> mapAttrs (_: v: mkTmpfilesDirAndSecurity v)
+      |> mapAttrs (_: mkTmpfilesDirAndSecurity)
     );
 
     systemd.services = {

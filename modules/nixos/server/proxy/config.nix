@@ -160,7 +160,7 @@ in
           name: _: hasSuffix ".${cfg.domain}" name && !builtins.elem name noAcmeCertsDomains
         )
         |> lib.mapAttrs (
-          name: vh: {
+          _name: vh: {
             extraDomainNames = vh.serverAliases;
           }
         );
