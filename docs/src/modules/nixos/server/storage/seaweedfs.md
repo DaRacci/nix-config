@@ -1,6 +1,6 @@
 # SeaweedFS Evaluation
 
-SeaweedFS is currently deployed here as an evaluation-only storage service alongside MinIO. It exists to validate SeaweedFS as a possible S3-compatible replacement candidate without changing existing MinIO-backed workloads, bucket mounts, or migration flows.
+SeaweedFS is currently deployed here as an evaluation-only storage service alongside MinIO. It exists to validate SeaweedFS as a possible replacement candidate without changing existing MinIO-backed workloads or the repository's migration posture.
 
 ## Purpose
 
@@ -43,7 +43,7 @@ These entries live under the `SEAWEEDFS` secret tree on the IO primary host and 
 ## Operational Notes
 
 - The SeaweedFS module uses the upstream `services.seaweedfs` option surface rather than introducing a repository-local `server.storage.seaweedfs.*` option tree.
-- Existing `server.storage.bucketMounts` and MinIO configuration remain the active path for current workloads.
+- The evaluation deployment is still separate from `server.storage.swfsMount`. The new storage abstraction can use `weed mount` for SeaweedFS-backed workload mounts without changing the evaluation topology described here.
 - This deployment is intended to shake out integration details first; repository-local abstractions can be added later if SeaweedFS proves to be a good fit.
 
 ## References

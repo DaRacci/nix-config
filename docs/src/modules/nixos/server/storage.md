@@ -1,23 +1,33 @@
 # Storage
 
-The storage module manages persistent storage abstractions for the server fleet. Today that includes both the established MinIO-backed bucket mount flow and an evaluation-only SeaweedFS deployment.
+The storage module manages persistent storage abstractions for the server fleet. Today that includes the `server.storage.swfsMount` mount abstraction and an evaluation-only SeaweedFS deployment.
 
 ## Purpose
 
 This area provides:
 
-- declarative MinIO-backed bucket mounts through `server.storage.bucketMounts`
+- declarative MinIO-backed and SeaweedFS-backed mounts through `server.storage.swfsMount`
 - a SeaweedFS evaluation deployment on the IO primary host
 
 ## Key Options and Behaviors
 
-### Bucket Mounts
+### swfsMount
 
-The `bucketMounts` option uses `s3fs-fuse` to mount buckets from `https://minio.racci.dev`.
+The `swfsMount` option is the repository's declarative storage mount interface. It is a breaking rename from `server.storage.bucketMounts` and each entry chooses a backend explicitly.
 
-- **Credential Management**: It automatically looks for sops secrets with the pattern `S3FS_AUTH/<NAME_IN_UPPERCASE>`. These secrets should contain the credentials in the `ACCESS_KEY_ID:SECRET_ACCESS_KEY` format.
-- **Mount Points**: Buckets are mounted at `/mnt/buckets/<bucket-name>` unless a different `mountLocation` is specified.
-- **Ownership and Permissions**: You can control the mount ownership using `uid` and `gid`. The `umask` option (defaulting to `022`) controls the default file and directory permissions.
+- **Backend Selection**: Set `backend = "minio"` to mount a MinIO bucket through `s3fs`, or `backend = "seaweedfs"` to mount a SeaweedFS filer path through `weed mount`.
+- **Common Mount Controls**: Each entry supports `mountLocation`, `uid`, `gid`, `umask`, and `requiredByServices` so consuming services can wait for the generated mount unit.
+- **Health Recovery**: Each entry also supports `healthCheck.*` options. By default the module generates a timer-driven probe that can lazily unmount stale FUSE mounts, restart the mount service, and optionally restart dependent services.
+
+#### MinIO backend
+
+- **Credential Management**: By default the MinIO backend provisions and uses sops secrets with the pattern `S3FS_AUTH/<NAME_IN_UPPERCASE>`. These secrets must contain `ACCESS_KEY_ID:SECRET_ACCESS_KEY`.
+- **Runtime Model**: MinIO mounts now run as generated systemd services instead of `fileSystems` entries so they can share the same recovery model as SeaweedFS.
+
+#### SeaweedFS backend
+
+- **Mount Command**: SeaweedFS mounts use `weed mount` directly against a filer endpoint and filer path.
+- **Runtime Inputs**: Configure the SeaweedFS backend through `seaweedfs.filer`, `seaweedfs.filerPath`, and optional runtime flags such as UID/GID mapping or write-buffer limits.
 
 ### SeaweedFS Evaluation
 
@@ -27,11 +37,12 @@ See [SeaweedFS Evaluation](storage/seaweedfs.md) for details on scope, host gati
 
 #### Example
 
-The following example mounts a "media" bucket and sets specific ownership.
+The following example mounts a MinIO-backed `media` bucket and sets specific ownership.
 
 ```nix
 {
-  server.storage.bucketMounts.media = {
+  server.storage.swfsMount.media = {
+    backend = "minio";
     uid = 1000;
     gid = 1000;
     umask = 007;
@@ -41,11 +52,11 @@ The following example mounts a "media" bucket and sets specific ownership.
 
 ## Operational Notes
 
-- **s3fs-fuse**: This module uses the `s3fs` package. It relies on FUSE, so it requires `programs.fuse.userAllowOther = true` which the module enables automatically when mounts are defined.
-- **Network Dependency**: Mounts use the `_netdev` option to ensure they are only attempted after the network is up.
-- **Credential Format**: Ensure that your sops secrets provide the exact string format required by s3fs.
-- **MinIO Endpoint**: The module is currently configured to use `https://minio.racci.dev`.
-- **SeaweedFS Scope**: The SeaweedFS deployment is evaluation-only and does not replace or migrate existing MinIO-backed workloads.
+- **FUSE Access**: The module enables `programs.fuse.userAllowOther = true` whenever mounts are defined so both `s3fs` and `weed mount` can expose shared FUSE mounts safely.
+- **Network Dependency**: Generated mount services depend on `network-online.target` before attempting either backend.
+- **MinIO Endpoint**: The MinIO backend defaults to `https://minio.racci.dev` unless a mount overrides the endpoint explicitly.
+- **Recovery Behavior**: The health-check timer uses `mountpoint` plus a bounded `stat` probe. On failure it lazily unmounts the path, restarts the generated mount service, and can restart configured dependent services.
+- **SeaweedFS Scope**: The SeaweedFS evaluation deployment remains separate from this abstraction. The new SeaweedFS backend only reuses `weed mount` for workload mounts and does not replace the evaluation stack.
 
 ## References
 

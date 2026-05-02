@@ -14,11 +14,13 @@ in
     users.users.loki.uid = mkForce 951;
     users.groups.loki.gid = mkForce 951;
 
-    server.storage.bucketMounts.loki = {
+    server.storage.swfsMount.loki = {
+      backend = "minio";
       mountLocation = "/var/lib/loki";
       uid = 951;
       gid = 951;
       umask = 007;
+      requiredByServices = [ "loki" ];
     };
 
     server.proxy.virtualHosts.loki =

@@ -5,98 +5,468 @@
   ...
 }:
 let
-  cfg = config.server.storage.bucketMounts;
+  inherit (builtins)
+    all
+    any
+    length
+    listToAttrs
+    ;
 
   inherit (lib)
-    toUpper
-    mkOption
-    mkIf
+    concatLists
+    concatMapStringsSep
+    escapeShellArg
+    escapeShellArgs
+    filterAttrs
+    getExe
+    getExe'
+    literalExpression
     mapAttrs
     mapAttrs'
+    mapAttrsToList
+    mkIf
+    mkMerge
+    mkOption
     nameValuePair
-    literalExpression
+    optional
+    optionalString
+    toUpper
+    unique
     ;
+
   inherit (lib.types)
     attrsOf
-    submodule
-    str
+    bool
+    enum
     int
+    listOf
     nullOr
+    str
+    submodule
     ;
+
+  cfg = config.server.storage.swfsMount;
+
+  formatUmask =
+    umask:
+    let
+      value = toString umask;
+    in
+    if umask < 10 then
+      "00${value}"
+    else if umask < 100 then
+      "0${value}"
+    else
+      value;
+
+  mkMountUnitName = name: "swfs-mount-${name}";
+  mkHealthUnitName = name: "swfs-mount-health-${name}";
+
+  anyMounts = cfg != { };
+  anyMinioMounts = any (mountCfg: mountCfg.backend == "minio") (
+    mapAttrsToList (_: mountCfg: mountCfg) cfg
+  );
+  anySeaweedMounts = any (mountCfg: mountCfg.backend == "seaweedfs") (
+    mapAttrsToList (_: mountCfg: mountCfg) cfg
+  );
+
+  effectiveMinioCredentialsFile =
+    name: mountCfg:
+    if mountCfg.minio.credentialsFile != null then
+      mountCfg.minio.credentialsFile
+    else
+      config.sops.secrets."S3FS_AUTH/${toUpper name}".path;
+
+  effectiveRestartServices =
+    mountCfg: unique (mountCfg.requiredByServices ++ mountCfg.healthCheck.restartServices);
+
+  mkPrepareScript =
+    name: mountCfg:
+    pkgs.writeShellApplication {
+      name = "${mkMountUnitName name}-prepare";
+      runtimeInputs = with pkgs; [
+        coreutils
+      ];
+      text = ''
+        set -euo pipefail
+
+        install -d -m 0755 ${escapeShellArg mountCfg.mountLocation}
+        ${optionalString (mountCfg.uid != null && mountCfg.gid != null)
+          "chown ${toString mountCfg.uid}:${toString mountCfg.gid} ${escapeShellArg mountCfg.mountLocation}"
+        }
+        ${optionalString (
+          mountCfg.uid != null && mountCfg.gid == null
+        ) "chown ${toString mountCfg.uid} ${escapeShellArg mountCfg.mountLocation}"}
+        ${optionalString (
+          mountCfg.uid == null && mountCfg.gid != null
+        ) "chgrp ${toString mountCfg.gid} ${escapeShellArg mountCfg.mountLocation}"}
+      '';
+    };
+
+  mkStopScript =
+    name: mountCfg:
+    pkgs.writeShellApplication {
+      name = "${mkMountUnitName name}-stop";
+      runtimeInputs = with pkgs; [
+        fuse3
+        util-linux
+      ];
+      text = ''
+        set -euo pipefail
+
+        if mountpoint -q ${escapeShellArg mountCfg.mountLocation}; then
+          fusermount3 -u ${escapeShellArg mountCfg.mountLocation} 2>/dev/null \
+            || fusermount -uz ${escapeShellArg mountCfg.mountLocation} 2>/dev/null \
+            || umount -l ${escapeShellArg mountCfg.mountLocation} 2>/dev/null \
+            || true
+        fi
+      '';
+    };
+
+  mkMountScript =
+    name: mountCfg:
+    let
+      commonRuntimeInputs = with pkgs; [
+        coreutils
+      ];
+      mountCommand =
+        if mountCfg.backend == "minio" then
+          "${getExe' pkgs.s3fs "s3fs"} ${escapeShellArgs minioArgs}"
+        else
+          "${getExe' config.services.seaweedfs.package "weed"} ${escapeShellArgs seaweedArgs}";
+
+      minioArgs = [
+        mountCfg.minio.bucketName
+        mountCfg.mountLocation
+        "-f"
+        "-o"
+        "allow_other"
+        "-o"
+        "use_path_request_style"
+        "-o"
+        "url=${mountCfg.minio.endpoint}"
+        "-o"
+        "passwd_file=${effectiveMinioCredentialsFile name mountCfg}"
+        "-o"
+        "umask=${formatUmask mountCfg.umask}"
+        "-o"
+        "mp_umask=${formatUmask mountCfg.umask}"
+        "-o"
+        "nonempty"
+      ]
+      ++ optional (mountCfg.uid != null) "-o"
+      ++ optional (mountCfg.uid != null) "uid=${toString mountCfg.uid}"
+      ++ optional (mountCfg.gid != null) "-o"
+      ++ optional (mountCfg.gid != null) "gid=${toString mountCfg.gid}"
+      ++ concatLists (
+        map (value: [
+          "-o"
+          value
+        ]) mountCfg.minio.extraOptions
+      );
+
+      seaweedArgs = [
+        "mount"
+        "-filer=${mountCfg.seaweedfs.filer}"
+        "-filer.path=${mountCfg.seaweedfs.filerPath}"
+        "-dir=${mountCfg.mountLocation}"
+        "-dirAutoCreate=${if mountCfg.seaweedfs.dirAutoCreate then "true" else "false"}"
+        "-allowOthers=${if mountCfg.seaweedfs.allowOthers then "true" else "false"}"
+        "-readOnly=${if mountCfg.seaweedfs.readOnly then "true" else "false"}"
+        "-umask=${formatUmask mountCfg.umask}"
+        "-metadataFlushSeconds=${toString mountCfg.seaweedfs.metadataFlushSeconds}"
+      ]
+      ++ optional (mountCfg.seaweedfs.uidMap != null) "-map.uid=${mountCfg.seaweedfs.uidMap}"
+      ++ optional (mountCfg.seaweedfs.gidMap != null) "-map.gid=${mountCfg.seaweedfs.gidMap}"
+      ++ optional (
+        mountCfg.seaweedfs.writeBufferSizeMB != null
+      ) "-writeBufferSizeMB=${toString mountCfg.seaweedfs.writeBufferSizeMB}"
+      ++ mountCfg.seaweedfs.extraArgs;
+    in
+    pkgs.writeShellApplication {
+      name = mkMountUnitName name;
+      runtimeInputs =
+        commonRuntimeInputs
+        ++ (if mountCfg.backend == "minio" then [ pkgs.s3fs ] else [ config.services.seaweedfs.package ]);
+      text = ''
+        set -euo pipefail
+
+        exec ${mountCommand}
+      '';
+    };
+
+  mkHealthScript =
+    name: mountCfg:
+    let
+      restartServices = effectiveRestartServices mountCfg;
+    in
+    pkgs.writeShellApplication {
+      name = "${mkHealthUnitName name}-check";
+      runtimeInputs = with pkgs; [
+        coreutils
+        fuse3
+        systemd
+        util-linux
+      ];
+      text = ''
+        set -euo pipefail
+
+        mount_path=${escapeShellArg mountCfg.mountLocation}
+        timeout_window=${escapeShellArg mountCfg.healthCheck.timeout}
+
+        if mountpoint -q "$mount_path" && timeout --foreground "$timeout_window" stat "$mount_path" >/dev/null 2>&1; then
+          exit 0
+        fi
+
+        fusermount3 -u "$mount_path" 2>/dev/null \
+          || fusermount -uz "$mount_path" 2>/dev/null \
+          || umount -l "$mount_path" 2>/dev/null \
+          || true
+
+        systemctl restart ${escapeShellArg "${mkMountUnitName name}.service"}
+
+        ${concatMapStringsSep "\n" (
+          serviceName: "systemctl restart ${escapeShellArg serviceName}"
+        ) restartServices}
+      '';
+    };
+
+  mountServices =
+    cfg
+    |> mapAttrs' (
+      name: mountCfg:
+      nameValuePair (mkMountUnitName name) {
+        description = "Storage mount ${name}";
+        wantedBy = [ "multi-user.target" ];
+        wants = [ "network-online.target" ];
+        requires = [ "network-online.target" ];
+        after = [ "network-online.target" ];
+        serviceConfig = {
+          Type = "simple";
+          ExecStartPre = getExe (mkPrepareScript name mountCfg);
+          ExecStart = getExe (mkMountScript name mountCfg);
+          ExecStop = getExe (mkStopScript name mountCfg);
+          KillMode = "control-group";
+          Restart = "always";
+          RestartSec = "45s";
+          TimeoutStopSec = "90s";
+        };
+      }
+    );
+
+  healthServices =
+    cfg
+    |> filterAttrs (_: mountCfg: mountCfg.healthCheck.enable)
+    |> mapAttrs' (
+      name: mountCfg:
+      nameValuePair (mkHealthUnitName name) {
+        description = "Health check for storage mount ${name}";
+        after = [ "${mkMountUnitName name}.service" ];
+        requires = [ "${mkMountUnitName name}.service" ];
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = getExe (mkHealthScript name mountCfg);
+        };
+      }
+    );
+
+  healthTimers =
+    cfg
+    |> filterAttrs (_: mountCfg: mountCfg.healthCheck.enable)
+    |> mapAttrs (
+      name: mountCfg: {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          Persistent = true;
+          OnActiveSec = mountCfg.healthCheck.interval;
+          OnUnitActiveSec = mountCfg.healthCheck.interval;
+          Unit = "${mkHealthUnitName name}.service";
+        };
+      }
+    );
+
+  dependentServiceConfig =
+    cfg
+    |> mapAttrsToList (
+      name: mountCfg:
+      listToAttrs (
+        map (
+          serviceName:
+          nameValuePair serviceName {
+            after = [ "${mkMountUnitName name}.service" ];
+            requires = [ "${mkMountUnitName name}.service" ];
+          }
+        ) mountCfg.requiredByServices
+      )
+    )
+    |> mkMerge;
+
+  mountLocations = mapAttrsToList (_: mountCfg: mountCfg.mountLocation) cfg;
 in
 {
-  options.server.storage.bucketMounts = mkOption {
+  options.server.storage.swfsMount = mkOption {
     type = attrsOf (
       submodule (
         { name, ... }:
         {
-          options = rec {
-            bucketName = mkOption {
-              type = str;
-              default = name;
-              description = "The name of the S3 bucket to mount.";
-            };
-
-            credentialsFile = mkOption {
-              type = str;
-              default =
-                let
-                  secretName = "S3FS_AUTH/${toUpper name}";
-                in
-                if config.sops.secrets ? "${secretName}" then config.sops.secrets."${secretName}".path else "";
-              defaultText = literalExpression ''
-                let
-                  secretName = "S3FS_AUTH/''${toUpper name}";
-                in
-                if config.sops.secrets ? "''${secretName}" then config.sops.secrets."''${secretName}".path else "";
-              '';
-              description = "Path to the file containing the minio credentials.";
+          options = {
+            backend = mkOption {
+              type = enum [
+                "minio"
+                "seaweedfs"
+              ];
+              description = "The storage backend to mount.";
             };
 
             mountLocation = mkOption {
               type = str;
-              description = "Path where the bucket should be mounted.";
-              default = "/mnt/buckets/${bucketName}";
+              default = "/mnt/storage/${name}";
               defaultText = literalExpression ''
-                "/mnt/buckets/''${bucketName}"
+                "/mnt/storage/''${name}"
               '';
+              description = "Path where the backend should be mounted.";
             };
 
             uid = mkOption {
               type = nullOr int;
-              description = "User ID to own the mounted bucket.";
               default = null;
+              description = "User ID that should own the mounted path.";
             };
 
             gid = mkOption {
               type = nullOr int;
-              description = "Group ID to own the mounted bucket.";
               default = null;
+              description = "Group ID that should own the mounted path.";
             };
 
             umask = mkOption {
               type = int;
-              default = 022;
-              description = ''
-                Umask for the mounted bucket.
+              default = 22;
+              description = "Umask applied to files and directories inside the mount.";
+            };
 
-                Files default to 666 and directories to 777, so a umask of 022 results
-                in files being created with permissions 644 and directories with 755.
+            requiredByServices = mkOption {
+              type = listOf str;
+              default = [ ];
+              description = "Systemd services that must wait for this mount before starting.";
+            };
 
-                See the umask bits table below for details:
-                | Umask Bit | File Permissions | Directory Permissions |
-                |-----------|------------------|-----------------------|
-                | 0         | rw-              | rwx                   |
-                | 1         | rw-              | rw-                   |
-                | 2         | r--              | r-x                   |
-                | 3         | r--              | r--                   |
-                | 4         | -w-              | -wx                   |
-                | 5         | -w-              | -w-                   |
-                | 6         | ---              | -x-                   |
-                | 7         | ---              | ---                   |
+            healthCheck = {
+              enable = mkOption {
+                type = bool;
+                default = true;
+                description = "Whether to monitor this mount and attempt automated recovery.";
+              };
 
-                A online calculator can be found at https://www.howtouselinux.com/linux-umask-calculator
-              '';
+              interval = mkOption {
+                type = str;
+                default = "15min";
+                description = "Systemd timer interval between mount health probes.";
+              };
+
+              timeout = mkOption {
+                type = str;
+                default = "30s";
+                description = "Timeout applied to the mount health probe.";
+              };
+
+              restartServices = mkOption {
+                type = listOf str;
+                default = [ ];
+                description = "Additional systemd services to restart after recovering this mount.";
+              };
+            };
+
+            minio = {
+              bucketName = mkOption {
+                type = str;
+                default = name;
+                description = "The MinIO bucket to mount with s3fs.";
+              };
+
+              credentialsFile = mkOption {
+                type = nullOr str;
+                default = null;
+                description = ''
+                  Path to the MinIO credentials file in `ACCESS_KEY_ID:SECRET_ACCESS_KEY` format.
+
+                  When left null, the module provisions and uses the `S3FS_AUTH/<NAME_IN_UPPERCASE>` sops secret.
+                '';
+              };
+
+              endpoint = mkOption {
+                type = str;
+                default = "https://minio.racci.dev";
+                description = "The S3-compatible MinIO endpoint used by s3fs.";
+              };
+
+              extraOptions = mkOption {
+                type = listOf str;
+                default = [ ];
+                description = "Additional `-o` options passed to s3fs.";
+              };
+            };
+
+            seaweedfs = {
+              filer = mkOption {
+                type = str;
+                default = "";
+                description = "SeaweedFS filer address in host:port form.";
+              };
+
+              filerPath = mkOption {
+                type = str;
+                default = "/";
+                description = "Remote filer path to expose through the mount.";
+              };
+
+              dirAutoCreate = mkOption {
+                type = bool;
+                default = true;
+                description = "Whether `weed mount` should create the mount directory when needed.";
+              };
+
+              allowOthers = mkOption {
+                type = bool;
+                default = true;
+                description = "Whether to allow non-owning users to access the SeaweedFS mount.";
+              };
+
+              readOnly = mkOption {
+                type = bool;
+                default = false;
+                description = "Whether the SeaweedFS mount should be read-only.";
+              };
+
+              metadataFlushSeconds = mkOption {
+                type = int;
+                default = 120;
+                description = "How often `weed mount` flushes metadata to the filer.";
+              };
+
+              writeBufferSizeMB = mkOption {
+                type = nullOr int;
+                default = null;
+                description = "Optional write buffer cap passed to `weed mount` in megabytes.";
+              };
+
+              uidMap = mkOption {
+                type = nullOr str;
+                default = null;
+                description = "Optional local-to-filer UID mapping string for `weed mount`.";
+              };
+
+              gidMap = mkOption {
+                type = nullOr str;
+                default = null;
+                description = "Optional local-to-filer GID mapping string for `weed mount`.";
+              };
+
+              extraArgs = mkOption {
+                type = listOf str;
+                default = [ ];
+                description = "Additional arguments passed directly to `weed mount`.";
+              };
             };
           };
         }
@@ -104,49 +474,50 @@ in
     );
     default = { };
     description = ''
-      A list of S3 bucket names to mount via s3fs-fuse.
+      Declarative storage mounts backed by MinIO or SeaweedFS.
 
-      Each bucket will be mounted at /mnt/buckets/<bucket-name>.
+      Each entry creates a systemd-managed FUSE mount service plus an optional health-check timer.
     '';
   };
 
-  config = mkIf (cfg != { }) {
+  config = mkIf anyMounts {
+    assertions = [
+      {
+        assertion = length mountLocations == length (unique mountLocations);
+        message = "server.storage.swfsMount entries must use unique mountLocation values.";
+      }
+      {
+        assertion = all (mountCfg: mountCfg.backend != "seaweedfs" || mountCfg.seaweedfs.filer != "") (
+          mapAttrsToList (_: mountCfg: mountCfg) cfg
+        );
+        message = "SeaweedFS mounts must set server.storage.swfsMount.<name>.seaweedfs.filer.";
+      }
+    ];
+
     sops.secrets =
       cfg
+      |> filterAttrs (_: mountCfg: mountCfg.backend == "minio" && mountCfg.minio.credentialsFile == null)
       |> mapAttrs' (
-        name: value:
+        name: mountCfg:
         nameValuePair "S3FS_AUTH/${toUpper name}" (
-          lib.filterAttrs (_: v: v != null) {
-            inherit (value) uid gid;
+          filterAttrs (_: value: value != null) {
+            inherit (mountCfg) uid gid;
           }
         )
       );
 
-    environment.systemPackages = [ pkgs.s3fs ];
+    environment.systemPackages =
+      optional anyMinioMounts pkgs.s3fs ++ optional anySeaweedMounts config.services.seaweedfs.package;
 
     programs.fuse.userAllowOther = true;
 
-    fileSystems =
-      cfg
-      |> mapAttrs (
-        name: bucketCfg: {
-          device = "${lib.getExe' pkgs.s3fs "s3fs"}#${name}";
-          mountPoint = bucketCfg.mountLocation;
-          fsType = "fuse";
-          noCheck = true;
-          options = [
-            "_netdev"
-            "allow_other"
-            "use_path_request_style"
-            "url=https://minio.racci.dev"
-            "passwd_file=${bucketCfg.credentialsFile}"
-            "umask=${toString bucketCfg.umask}"
-            "mp_umask=${toString bucketCfg.umask}"
-            "nonempty"
-          ]
-          ++ lib.optional (bucketCfg.uid != null) "uid=${toString bucketCfg.uid}"
-          ++ lib.optional (bucketCfg.gid != null) "gid=${toString bucketCfg.gid}";
-        }
-      );
+    systemd = {
+      services = mkMerge [
+        mountServices
+        healthServices
+        dependentServiceConfig
+      ];
+      timers = healthTimers;
+    };
   };
 }
