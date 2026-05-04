@@ -18,7 +18,6 @@
 
       libz
     ];
-
     extensions = [
       "autocorrect"
       "cargo-appraiser"
@@ -48,10 +47,6 @@
       relative_line_numbers = "disabled";
       restore_on_startup = "last_workspace";
       show_signature_help_after_edits = true;
-
-      features = {
-        edit_prediction_provider = "copilot";
-      };
 
       agent = {
         default_profile = "write";
@@ -97,17 +92,7 @@
       };
 
       language_models = {
-        ollama = {
-          api_url = "http://localhost:11434";
-          available_models = [
-            {
-              display_name = "Llama 3.2";
-              name = "llama3.2";
-              keep_alive = "60s";
-              max_tokens = 131072;
-            }
-          ];
-        };
+        ollama.api_url = "http://localhost:11434";
       };
 
       node = {
@@ -126,6 +111,12 @@
           "**/*.crt"
           "**/secrets.yml"
         ];
+        ollama = {
+          max_output_tokens = 256;
+          prompt_format = "zeta2";
+          api_url = "http://localhost:11434";
+          model = "hf.co/bluevoid-pl/zeta2-GUFF:Q8_0";
+        };
       };
 
       diagnostics = {
@@ -248,6 +239,7 @@
 
       git = {
         git_gutter = "tracked_files";
+        gutter_debounce = 50;
         inline_blame = {
           enabled = true;
           delay_ms = 500;
