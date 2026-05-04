@@ -128,7 +128,7 @@ in
 
   systemd.services = {
     immich-server = {
-      requires = lib.mkForce [ ];
+      requires = lib.mkForce [ "swfs-mount-nextcloud.service" ];
       after = lib.mkForce [ "network.target" ];
     };
 

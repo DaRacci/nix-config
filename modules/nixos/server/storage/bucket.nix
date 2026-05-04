@@ -199,6 +199,7 @@ let
     name: mountCfg:
     let
       restartServices = effectiveRestartServices mountCfg;
+      reloadServices = mountCfg.healthCheck.reloadServices;
     in
     pkgs.writeShellApplication {
       name = "${mkHealthUnitName name}-check";
@@ -228,6 +229,9 @@ let
         ${concatMapStringsSep "\n" (
           serviceName: "systemctl restart ${escapeShellArg serviceName}"
         ) restartServices}
+        ${concatMapStringsSep "\n" (
+          serviceName: "systemctl reload ${escapeShellArg serviceName}"
+        ) reloadServices}
       '';
     };
 
@@ -374,6 +378,12 @@ in
                 type = listOf str;
                 default = [ ];
                 description = "Additional systemd services to restart after recovering this mount.";
+              };
+
+              reloadServices = mkOption {
+                type = listOf str;
+                default = [ ];
+                description = "Additional systemd services to reload after recovering this mount";
               };
             };
 

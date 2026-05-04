@@ -31,7 +31,7 @@ The `swfsMount` option is the repository's declarative storage mount interface. 
 
 ### SeaweedFS Evaluation
 
-SeaweedFS is documented separately because it is not part of the current bucket-mount workflow. The repository uses it as an evaluation deployment that runs alongside MinIO on the IO primary host and exposes its endpoint set through the existing Caddy proxy integration.
+SeaweedFS is documented separately because it is not part of the current software filesystem workflow. The repository uses it as an evaluation deployment that runs alongside MinIO on the IO primary host and exposes its endpoint set through the existing Caddy proxy integration.
 
 See [SeaweedFS Evaluation](storage/seaweedfs.md) for details on scope, host gating, proxy behavior, and security material.
 
