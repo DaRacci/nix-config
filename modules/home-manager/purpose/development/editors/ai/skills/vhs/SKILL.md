@@ -35,27 +35,27 @@ Screenshot output.png       # Capture current frame
 
 ## Commands
 
-| Command | Description |
-| --------------------------------- | ---------------- |
-| `Type "text"` | Type text |
-| `Enter`, `Tab`, `Escape`, `Space` | Press key |
-| `Ctrl+x`, `Alt+x` | Key combo |
-| `Up`, `Down`, `Left`, `Right` | Arrow keys |
-| `Sleep 1s` | Wait (`ms`, `s`) |
-| `Screenshot file.png` | Capture frame |
-| `Hide` / `Show` | Toggle visibility |
+| Command                           | Description       |
+| --------------------------------- | ----------------- |
+| `Type "text"`                     | Type text         |
+| `Enter`, `Tab`, `Escape`, `Space` | Press key         |
+| `Ctrl+x`, `Alt+x`                 | Key combo         |
+| `Up`, `Down`, `Left`, `Right`     | Arrow keys        |
+| `Sleep 1s`                        | Wait (`ms`, `s`)  |
+| `Screenshot file.png`             | Capture frame     |
+| `Hide` / `Show`                   | Toggle visibility |
 
 ## Settings
 
-| Setting | Example |
+| Setting                        | Example            |
 | ------------------------------ | ------------------ |
-| `Set Shell "bash"` | Shell to use |
-| `Set FontSize 14` | Font size |
-| `Set Width 1200` | Terminal width |
-| `Set Height 600` | Terminal height |
-| `Set Theme "Catppuccin Mocha"` | Color theme |
-| `Set Padding 20` | Window padding |
-| `Set WindowBar Colorful` | Window decorations |
+| `Set Shell "bash"`             | Shell to use       |
+| `Set FontSize 14`              | Font size          |
+| `Set Width 1200`               | Terminal width     |
+| `Set Height 600`               | Terminal height    |
+| `Set Theme "Catppuccin Mocha"` | Color theme        |
+| `Set Padding 20`               | Window padding     |
+| `Set WindowBar Colorful`       | Window decorations |
 
 ## Example: TUI Screenshot
 

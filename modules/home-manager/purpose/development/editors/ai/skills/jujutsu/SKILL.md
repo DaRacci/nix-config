@@ -16,21 +16,21 @@ Git-compatible VCS for concurrent work and easier history editing.
 
 ## Key Commands
 
-| Command | Description |
-| -------------------------- | ----------------------------------------- |
-| `jj st` | Show working copy status |
-| `jj log` | Show change log |
-| `jj diff` | Show working copy changes |
-| `jj new` | Create new change |
-| `jj desc` | Edit change description |
-| `jj squash` | Move changes to parent |
-| `jj split` | Split current change |
-| `jj rebase -s src -d dest` | Rebase changes |
-| `jj absorb` | Move changes into mutable stack |
-| `jj bisect` | Find bad revision by bisection |
-| `jj fix` | Update files with formatter fixes |
-| `jj sign` | Cryptographically sign revision |
-| `jj metaedit` | Edit metadata without changing content |
+| Command                    | Description                                  |
+| -------------------------- | -------------------------------------------- |
+| `jj st`                    | Show working copy status                     |
+| `jj log`                   | Show change log                              |
+| `jj diff`                  | Show working copy changes                 |
+| `jj new`                   | Create new change                            |
+| `jj desc`                  | Edit change description                      |
+| `jj squash`                | Move changes to parent                       |
+| `jj split`                 | Split current change                         |
+| `jj rebase -s src -d dest` | Rebase changes                               |
+| `jj absorb`                | Move changes into stack of mutable revisions |
+| `jj bisect`                | Find bad revision by bisection               |
+| `jj fix`                   | Update files with formatting fixes           |
+| `jj sign`                  | Cryptographically sign a revision            |
+| `jj metaedit`              | Modify metadata without changing content     |
 
 ## Project Setup
 
@@ -78,23 +78,23 @@ jj resolve               # Interactive conflict resolution
 
 **Parent/child operators:**
 
-| Syntax | Meaning | Example |
+| Syntax | Meaning          | Example              |
 | ------ | ---------------- | -------------------- |
-| `@-` | Parent of @ | `jj diff -r @-` |
-| `@--` | Grandparent | `jj log -r @--` |
-| `x-` | Parent of x | `jj diff -r abc123-` |
-| `@+` | Child of @ | `jj log -r @+` |
-| `x::y` | x to y inclusive | `jj log -r main::@` |
-| `x..y` | x to y exclusive | `jj log -r main..@` |
-| `x\|y` | Union (or) | `jj log -r 'a \| b'` |
+| `@-`   | Parent of @      | `jj diff -r @-`      |
+| `@--`  | Grandparent      | `jj log -r @--`      |
+| `x-`   | Parent of x      | `jj diff -r abc123-` |
+| `@+`   | Child of @       | `jj log -r @+`       |
+| `x::y` | x to y inclusive | `jj log -r main::@`  |
+| `x..y` | x to y exclusive | `jj log -r main..@`  |
+| `x\|y` | Union (or)       | `jj log -r 'a \| b'` |
 
 **⚠️ Common mistakes:**
 
-- ❌ `@~1` → ✅ `@-`
-- ❌ `@^` → ✅ `@-`
-- ❌ `@~-1` → ✅ `@+`
+- ❌ `@~1` → ✅ `@-` (parent)
+- ❌ `@^` → ✅ `@-` (parent)
+- ❌ `@~-1` → ✅ `@+` (child)
 - ❌ `jj changes` → ✅ `jj log` or `jj diff`
-- ❌ `a,b,c` → ✅ `a | b | c`
+- ❌ `a,b,c` → ✅ `a | b | c` (union uses pipe, not comma)
 
 **Functions:**
 
