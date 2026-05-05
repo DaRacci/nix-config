@@ -90,23 +90,24 @@ in
             {
               name = "nix";
               roots = [ "flake.nix" ];
-              language-servers = [
-                "nixd"
-                "nil"
-              ];
+              formatter.command = lib.getExe pkgs.nixfmt;
             }
           ];
 
-          language-server.nixd = {
-            name = "nixd";
-            command = lib.getExe pkgs.nixd;
-            args = [
-              "--semantic-tokens"
-              "--inlay-hints"
-            ]
-            ++ (lib.optionals (config.system != null) [
-              "--nixos-options-expr (builtins.getFlake (builtins.toString ./.)).nixosConfigurations.(${config.system.host.name}).options"
-            ]);
+          language-server = {
+            nixd = {
+              command = lib.getExe pkgs.nixd;
+              args = [
+                "--semantic-tokens"
+                "--inlay-hints"
+              ]
+              ++ (lib.optionals (config.system != null) [
+                "--nixos-options-expr (builtins.getFlake (builtins.toString ./.)).nixosConfigurations.(${config.system.host.name}).options"
+              ]);
+
+            };
+
+            nil.command = lib.getExe pkgs.nil;
           };
         })
       ];
