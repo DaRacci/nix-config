@@ -1,84 +1,92 @@
 ## AI Agent
 
-Autonomous AI Agent service powered by Zeroclaw, providing intelligent task automation with security controls for code review and development tasks.
+Autonomous AI Agent service powered by Hermes, providing intelligent task automation with security controls for code review and development tasks.
 
 - **Entry point**: `modules/nixos/services/ai-agent.nix`
-- **Upstream**: [Zeroclaw Services](https://github.com/torproject/services-zeroclaw)
+- **Upstream**: [Hermes Agent](https://hermes-agent.nousresearch.com/)
 
 ### Special Options
 
 - `services.ai-agent.enable`: Enable the autonomous AI Agent service.
 
-### Allowed Domains
+### Configuration
 
-The AI Agent is configured to access the following domains for development, coding, and general information tasks:
+The Hermes agent is configured with the following defaults:
 
-- **Version Control & Collaboration**: `github.com`, `gitlab.com`, `codeberg.org`, `git.sr.ht`, `raw.githubusercontent.com`
-- **Programming Languages & Frameworks**: `rust-lang.org`, `golang.org`, `registry.npmjs.org`, `pypi.org`, `developer.mozilla.org`, `cppreference.com`
-- **Documentation & Reference**: `docs.rs`, `crates.io`, `devdocs.io`, `learn.microsoft.com`, `w3.org`, `gnu.org`, `curl.se`, `man.archlinux.org`
-- **General Information**: `wikipedia.org`
-- **Package Management & Containers**: `docker.io`, `hub.docker.com`
-- **Development Tools**: `stackoverflow.com`
-- **NixOS Ecosystem**: `nixos.org`
+- **Model**: `tencent/hy3-preview:free` via OpenRouter
+- **Toolsets**: `hermes-cli`
+- **Max Turns**: 150
+- **Terminal Backend**: Docker with `nikolaik/python-nodejs:python3.11-nodejs20`
+- **Compression**: Enabled with threshold `0.5`
+- **Memory**: Enabled with user profiles
+- **Display**: Full UI with `kawaii` personality
+- **Security**: Hermes redaction + Tirith enabled
+- **MCP**: Filesystem server available
 
-### Allowed Commands
+#### Model Configuration
 
-The AI Agent has automatic approval for the following common and safe bash utilities and developer tools:
+```nix
+services.hermes-agent.settings.model = {
+  base_url = "https://openrouter.ai/api/v1";
+  default = "anthropic/claude-sonnet-4-20250514";
+};
+```
 
-- **File Operations**: `cat`, `diff`, `fd`, `file`, `find`, `head`, `od`, `strings`, `tail`, `tree`, `wc`
-- **Text Processing & Search**: `awk`, `cut`, `echo`, `grep`, `jq`, `printf`, `rg`, `sed`, `sort`, `tr`, `uniq`
-- **Archiving & Compression**: `gzip`, `gunzip`, `tar`
-- **Hashing & Encoding**: `base64`, `md5sum`, `sha256sum`
-- **System Information**: `date`, `pwd`, `uname`, `whoami`
-- **Network & Connectivity**: `curl`, `dig`, `ping`, `wget`
-- **Text Editors & Pagers**: `less`, `more`, `nano`, `vim`
-- **Rust Development**: `cargo`, `cargo-build`, `cargo-check`, `cargo-test`, `rustc`, `rustfmt`, `rustup`
-- **Nix Tools**: `nix`, `nix-build`, `nix-env`, `nix-flake`, `nix-fmt`, `nix-shell`
-- **C/C++ Development**: `clang`, `cmake`, `g++`, `gcc`
-- **Version Control**: `git`, `hg`, `jj`
-- **Language Runtimes**: `go`, `lua`, `node`, `npm`, `pip`, `poetry`, `python`, `python3`, `ruby`
-- **Build Tools**: `make`
-- **Debugging & Analysis**: `gdb`, `lldb`, `ltrace`, `strace`, `valgrind`
+Supported providers:
 
-### Specialized Agents
+- **OpenRouter** (default): `https://openrouter.ai/api/v1`
+- **Anthropic**: `https://api.anthropic.com`
+- **OpenAI**: `https://api.openai.com/v1`
 
-The AI Agent service includes 15 specialized agents designed for different development tasks. Each agent is optimized for specific roles:
+### Secrets Management
 
-#### Deep Work & Architecture
+Hermes requires API keys via environment files. Configure via sops-nix:
 
-- **sisyphus**: Deep architectural analysis and foundational problem solving (Claude Opus 4.6)
-- **metis**: Strategic planning, best practices, and architectural wisdom (Claude Opus 4.6)
-- **architect**: System design, architecture decisions, and scalability planning (Claude Opus 4.6)
+```nix
+sops = {
+  secrets = {
+    "AI_AGENT/OPENROUTER_API_KEY" = { };
+  };
+  templates."HERMES_ENV".content = ''
+    OPENROUTER_API_KEY=${config.sops.placeholder."AI_AGENT/OPENROUTER_API_KEY"}
+  '';
+};
 
-#### Code Understanding & Exploration
+services.hermes-agent.environmentFile = config.sops.templates."HERMES_ENV".path;
+```
 
-- **atlas**: Code exploration, pattern discovery, and codebase navigation (GPT-5.2 Codex)
-- **prometheus**: Code analysis, refactoring planning, and optimization strategies (GPT-5.2 Codex)
-- **explorer**: Quick code exploration and debugging assistance (GPT-5 Mini)
+### Messaging Channels
 
-#### Implementation & Building
+Hermes supports multiple messaging platforms:
 
-- **hephaestus**: Implementation, building, and crafting solutions (GPT-5.2 Codex)
-- **validator**: Test design, QA strategy, and reliability verification (GPT-5.2)
+#### Discord
 
-#### Quality & Security
+```nix
+services.hermes-agent.settings.channels.discord.enabled = true;
+services.hermes-agent.settings.channels_config.discord = {
+  allowed_users = [ "613898815447105547" ];
+  stream_mode = "partial";
+};
+```
 
-- **critic**: Code review, quality analysis, and best practice enforcement (Claude Opus 4.6)
-- **guardian**: Security analysis, vulnerability assessment, and hardening (Claude Opus 4.6)
+#### Telegram
 
-#### Operations & Infrastructure
+```nix
+services.hermes-agent.settings.channels.telegram.enabled = true;
+```
 
-- **devops**: Infrastructure, deployment, and operational excellence (Claude Opus 4.6)
+### MCP Servers
 
-#### Knowledge & Communication
+Configure MCP (Model Context Protocol) servers:
 
-- **oracle**: General technical inquiry and consultation (GPT-5.2)
-- **librarian**: Documentation lookup, API reference, and quick answers (GPT-5 Mini)
-- **scribe**: Documentation writing, README creation, and technical communication (GPT-5 Mini)
-
-#### General Purpose
-
-- **default**: General purpose agent for miscellaneous tasks (Claude Opus 4.6)
+```nix
+services.hermes-agent.mcpServers = {
+  filesystem = {
+    command = "npx";
+    args = [ "-y" "@modelcontextprotocol/server-filesystem" "/data/workspace" ];
+  };
+};
+```
 
 ### Usage Example
 
@@ -92,4 +100,13 @@ The AI Agent service includes 15 specialized agents designed for different devel
 
 ### Operational Notes
 
-The AI Agent service runs with automatic approval for safe operations (`file_read`, `memory_recall`, `web_fetch`, `web_search`) as well as a curated set of non-destructive bash commands. It enforces security controls including OTP gating for sensitive domains (banking, finance, medical, government, identity providers) and an emergency stop capability. The service is configured to operate only within designated workspace boundaries and maintains a local SQLite memory backend with automatic saving. It runs a heartbeat check every 15 minutes to ensure operational health.
+The Hermes agent service provides:
+
+- Declarative configuration via NixOS
+- Hardened systemd service with security controls
+- Multiple messaging channel support (Discord, Telegram)
+- MCP server integration
+- Memory and user profile persistence
+- Gateway service for incoming messages
+
+The service runs as the `hermes` user with state in `/var/lib/hermes/`. Use `hermes` CLI (when `addToSystemPackages = true`) to interact with the agent.

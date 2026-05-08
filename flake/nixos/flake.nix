@@ -53,6 +53,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.website-builder.follows = "";
     };
+    hermes-agent = {
+      url = "github:NousResearch/hermes-agent";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
+    };
 
     # System Configurations
     jovian = {
@@ -89,13 +94,6 @@
 
     seaweedfs = {
       url = "https://raw.githubusercontent.com/liberodark/nixpkgs/refs/heads/seawedfs/nixos/modules/services/network-filesystems/seaweedfs.nix";
-      flake = false;
-      type = "file";
-    };
-
-    # TODO:https://github.com/NixOS/nixpkgs/pull/500045
-    services-zeroclaw = {
-      url = "https://raw.githubusercontent.com/marijanp/nixpkgs/refs/heads/add-zeroclaw-module/nixos/modules/services/misc/zeroclaw.nix";
       flake = false;
       type = "file";
     };
