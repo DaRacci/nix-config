@@ -4,19 +4,25 @@
   lib,
   ...
 }:
+let
+  db = config.server.database.postgres.open_webui;
+  sopsPlaceholder = config.sops.placeholder;
+
+in
 {
-  sops =
-    let
-      db = config.server.database.postgres.open_webui;
-      inherit (config.sops) placeholder;
-    in
-    {
-      templates.openweb-ui-env.content = lib.toShellVars {
-        DATABASE_URL = "postgresql://${db.user}:${
-          placeholder."POSTGRES/OPEN_WEBUI_PASSWORD"
-        }@${db.host}/${db.database}";
-      };
+  sops = {
+    templates.openweb-ui-env.content = lib.toShellVars {
+      DATABASE_URL = "postgresql://${db.user}:${
+        sopsPlaceholder."POSTGRES/OPEN_WEBUI_PASSWORD"
+
+      }@${db.host}/${db.database}";
     };
+  };
+
+  sops.secrets = {
+    "FIRECRAWL/API_KEY" = { };
+    "FIRECRAWL/BULL_AUTH_KEY" = { };
+  };
 
   server = {
     database.postgres.open_webui = { };
@@ -38,9 +44,33 @@
           }
         '';
       };
+
+    proxy.virtualHosts.firecrawl =
+      let
+        cfg = config.services.firecrawl;
+      in
+      {
+        ports = [ cfg.port ];
+        extraConfig = ''
+          reverse_proxy http://${cfg.host}:${toString cfg.port}
+        '';
+      };
+
   };
 
   services = {
+    firecrawl = {
+      enable = true;
+      host = "127.0.0.1";
+      openFirewall = false;
+      apiKeyFile = config.sops.secrets."FIRECRAWL/API_KEY".path;
+      bullAuthKeyFile = config.sops.secrets."FIRECRAWL/BULL_AUTH_KEY".path;
+      environment = {
+        FIRECRAWL_API_KEY = sopsPlaceholder."FIRECRAWL/API_KEY";
+        BULL_AUTH_KEY = sopsPlaceholder."FIRECRAWL/BULL_AUTH_KEY";
+      };
+    };
+
     open-webui = {
       enable = true;
       host = "0.0.0.0";
