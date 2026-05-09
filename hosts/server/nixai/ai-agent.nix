@@ -8,13 +8,11 @@
     secrets = {
       "AI_AGENT/OPENROUTER_API_KEY" = { };
       "AI_AGENT/DISCORD_BOT_TOKEN" = { };
+      "AI_AGENT/SERVER_API_KEY" = { };
     };
 
     templates."HERMES_ENV".content = lib.toShellVars {
       OPENROUTER_API_KEY = config.sops.placeholder."AI_AGENT/OPENROUTER_API_KEY";
-      DISCORD_BOT_TOKEN = config.sops.placeholder."AI_AGENT/DISCORD_BOT_TOKEN";
-      DISCORD_ALLOWED_USERS = "613898815447105547";
-      DISCORD_HOME_CHANNEL = "634580724158038027";
       SEARXNG_URL = "https://search.racci.dev";
     };
   };
@@ -27,36 +25,26 @@
     ai-agent = {
       enable = true;
       dashboard.enable = true;
+      apiServer.enable = true;
+
+      platform = {
+        discord = {
+          enable = true;
+          botTokenReference = "AI_AGENT/DISCORD_BOT_TOKEN";
+          homeChannel = "634580724158038027";
+          allowedUsers = [ "613898815447105547" ];
+        };
+
+        hassio = {
+          enable = true;
+          tokenReference = "AI_AGENT/HASSIO_TOKEN";
+          url = "https://hassio.racci.dev";
+        };
+      };
     };
 
     hermes-agent = {
       environmentFiles = [ config.sops.templates."HERMES_ENV".path ];
-
-      settings = {
-        gateway = {
-          allow_public_bind = true;
-        };
-
-        channels = {
-          discord = {
-            enabled = true;
-          };
-          telegram = {
-            enabled = true;
-          };
-        };
-
-        channels_config = {
-          discord = {
-            allowed_users = [ "613898815447105547" ];
-            stream_mode = "partial";
-          };
-        };
-
-        memory = {
-          embedding_model = "default";
-        };
-      };
     };
   };
 }
