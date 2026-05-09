@@ -29,6 +29,8 @@ in
     })
 
     (mkIf (cfg.enable && cfg.exporters.caddy.enable && cfg.logs.enable) {
+      systemd.services.alloy.serviceConfig.SupplementaryGroups = [ "caddy" ]; # Allow alloy to read caddy logs
+
       server.monitoring.logs.extraConfiguration = ''
         loki.source.file "caddy_access" {
           file_match {

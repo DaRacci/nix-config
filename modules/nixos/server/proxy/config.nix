@@ -127,6 +127,13 @@ in
               inherit hostName;
               useACMEHost = if !vh.useAcmeCerts then null else vh.baseUrl;
               serverAliases = vh.aliases ++ additionalPortAliases;
+              logFormat = ''
+                output file ${config.services.caddy.logDir}/access-${
+                  lib.replaceStrings [ "/" " " ] [ "_" "_" ] hostName
+                }.log {
+                  mode 0640 # Group access for alloy to read logs.
+                }
+              '';
               extraConfig = ''
                 import default
                 ${optionalString vh.public "import public"}
