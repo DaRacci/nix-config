@@ -24,6 +24,10 @@ in
   options.services.ai-agent = {
     enable = mkEnableOption "autonomous AI Agent service";
 
+    dashboard = {
+      enable = mkEnableOption "Hermes web dashboard";
+    };
+
     models = {
       primary = mkOption {
         type = str;
@@ -58,6 +62,11 @@ in
     services.hermes-agent = {
       enable = true;
       container.enable = true;
+
+      extraPackages = [
+        pkgs.docker
+        pkgs.opencode
+      ];
 
       extraPlugins = [
         (pkgs.fetchFromGitHub {
@@ -107,7 +116,7 @@ in
         };
 
         terminal = {
-          backend = "docker";
+          backend = "local";
           container_persistent = true;
           persistent_shell = true;
         };
@@ -176,6 +185,31 @@ in
           auto_thread = true;
         };
       };
+    };
+
+    systemd.services.hermes-dashboard = mkIf cfg.dashboard.enable {
+      description = "Hermes web dashboard";
+      after = [ "network.target" ];
+      wantedBy = [ "multi-user.target" ];
+      path = [ pkgs.docker ];
+      serviceConfig = {
+        Type = "simple";
+        User = "hermes";
+        Group = "hermes";
+        WorkingDirectory = "/var/lib/hermes";
+        ExecStart = "${config.services.hermes-agent.package}/bin/hermes dashboard --host 0.0.0.0 --no-open --insecure";
+        Restart = "on-failure";
+        RestartSec = 5;
+        SupplementaryGroups = [ "docker" ];
+      };
+    };
+
+    server = {
+      proxy.virtualHosts.agent.extraConfig = ''
+        reverse_proxy localhost:9119
+      '';
+
+      network.openPortsForSubnet.tcp = [ 9119 ];
     };
   };
 }

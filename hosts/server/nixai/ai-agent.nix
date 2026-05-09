@@ -24,7 +24,10 @@
   '';
 
   services = {
-    ai-agent.enable = true;
+    ai-agent = {
+      enable = true;
+      dashboard.enable = true;
+    };
 
     hermes-agent = {
       environmentFiles = [ config.sops.templates."HERMES_ENV".path ];
