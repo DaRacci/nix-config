@@ -37,42 +37,40 @@ in
 
           targets = [
             {
-              __path__ = "/var/log/caddy/*.log"
-              __path_exclude__ = "/var/log/caddy/*.gz"
-              job = "caddy_access"
-            }
+              __path__ = "/var/log/caddy/*.log",
+              __path_exclude__ = "/var/log/caddy/*.gz",
+              job = "caddy_access",
+            },
           ]
 
           forward_to = [loki.process.caddy.receiver]
         }
 
         loki.process "caddy" {
+          forward_to = [loki.write.default.receiver]
+
           stage.json {
             expressions = {
-              level = "level"
-              ts = "ts"
-              msg = "msg"
-              logger = "logger"
-              bytes_read = "bytes_read"
-              duration = "duration"
-              size = "size"
-              status = "status"
-              ip = "request.remote_addr"
+              level = "level",
+              ts = "ts",
+              msg = "msg",
+              logger = "logger",
+              bytes_read = "bytes_read",
+              duration = "duration",
+              size = "size",
+              status = "status",
+              ip = "request.remote_addr",
 
-              request = "request"
-              resp_headers = "resp_headers"
+              request = "request",
+              resp_headers = "resp_headers",
             }
-          }
-
-          stage.geoip {
-            dsb = "ip"
           }
 
           stage.labels {
             values = {
-              detected_level = "detected_level"
-              logger = "logger"
-              status = "status"
+              detected_level = "detected_level",
+              logger = "logger",
+              status = "status",
             }
           }
 

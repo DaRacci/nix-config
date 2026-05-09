@@ -58,7 +58,7 @@ in
 
           stage.labels {
             values = {
-              detected_level = "detected_level"
+              detected_level = "detected_level",
             }
           }
 
@@ -81,7 +81,7 @@ in
 
           stage.labels {
             values = {
-              detected_level = "detected_level"
+              detected_level = "detected_level",
             }
           }
 
@@ -127,7 +127,7 @@ in
         relabel_rules = loki.relabel.journal.rules
 
         labels = {
-          host = "${config.host.name}"
+          host = "${config.host.name}",
         }
       }
 
