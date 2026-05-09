@@ -88,9 +88,8 @@ in
             stage.match {
               selector = "{transport=\"stdout\"}"
               stage.replace {
-                # early slot: optional single token,
                 expression = "^${regex.ws_opt}${regex.token_space_opt}${regex.ts_prefix}(?:(?P<prefix_ts>(?:${regex.syslog}|${regex.iso}|${regex.apache}|${regex.unix}))(?:(?::${regex.ws_opt})|(?:${regex.ws}))|(?:(?:(?:${regex.level_kv_key})=)?(?P<detected_level>${regex.level_any})${regex.level_sep}))(?P<message>.*)$"
-                template   = "{{ .message }}"
+                replace    = "{{ .message }}"
               }
 
               stage.labels {
@@ -103,10 +102,8 @@ in
             stage.match {
               selector = "{transport=\"stdout\"}"
               stage.replace {
-                # Bracketed early slot: up to 4 tokens then bracket containing timestamp or level.
-                # Eats extra bracket tokens like [INF] [23], then colon/whitespace, then message.
                 expression = "^${regex.ws_opt}${regex.tokens_up_to_4}\\[(?:(?P<bracket_ts>${regex.apache}|${regex.iso}|${regex.time_only})|(?P<detected_level>${regex.level_any}))\\](?:\\s*\\[[^\\]]*\\])*\\s*(?:[^:]+:\\s+|\\s+)(?P<message>.*)$"
-                template   = "{{ .message }}"
+                replace    = "{{ .message }}"
               }
 
               stage.labels {
@@ -119,9 +116,8 @@ in
             stage.match {
               selector = "{transport=\"stdout\"}"
               stage.replace {
-                # Numeric slot: optional token then unix epoch with colon/space, or level forms.
                 expression = "^${regex.ws_opt}${regex.token_space_opt}(?:(?P<prefix_unix>${regex.unix}):${regex.ws_opt}|(?:(?:${regex.level_kv_key})=(?P<detected_level>${regex.level_any})\\b${regex.level_sep})|(?:(?P<detected_level>${regex.level_any})${regex.level_sep}))(?P<message>.*)$"
-                template   = "{{ .message }}"
+                replace    = "{{ .message }}"
               }
 
               stage.labels {
