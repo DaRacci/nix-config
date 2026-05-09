@@ -35,7 +35,12 @@ in
         };
 
         systemd.services.postgresql-setup.postStart = mkAfter ''
-          GRANT pg_monitor to postgres_exporter;
+          psql -tA <<'EOF'
+            DO $$
+            BEGIN
+              GRANT pg_monitor to postgres_exporter;
+            END $$;
+          EOF
         '';
 
         server.network.openPortsForSubnet.tcp = [ config.services.prometheus.exporters.postgres.port ];
