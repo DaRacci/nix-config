@@ -104,6 +104,31 @@ in
         };
       };
 
+      otlp = {
+        enable = mkEnableOption "OTLP/HTTP ingestion via Grafana Alloy" // {
+          default = isThisMonitoringPrimaryHost && cfg.enable;
+          defaultText = literalExpression "isThisMonitoringPrimaryHost && cfg.enable";
+        };
+
+        port = mkOption {
+          type = str;
+          default = "4318";
+          description = "Port for the OTLP/HTTP ingestion endpoint.";
+        };
+
+        bearerTokenSecret = mkOption {
+          type = str;
+          default = "MONITORING/OLTP/BEARER_TOKEN";
+          description = "SOPS secret path used as the bearer token for OTLP/HTTP ingestion.";
+        };
+
+        subdomain = mkOption {
+          type = str;
+          default = "otlp";
+          description = "Subdomain used for the OTLP/HTTP ingestion endpoint.";
+        };
+      };
+
       alerting = {
         enable = mkEnableOption "Alertmanager and alert rules" // {
           default = cfg.enable;

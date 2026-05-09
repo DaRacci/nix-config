@@ -1,7 +1,8 @@
 # Server Cluster Monitoring
 
 The monitoring module provides a comprehensive observability stack for the server
-cluster using Prometheus (metrics), Loki (logs), and Grafana (visualization).
+cluster using Prometheus (metrics), Loki (logs), Grafana (visualization), and
+Grafana Alloy for authenticated OTLP ingestion.
 All components are configured as reusable NixOS modules with automatic
 cross-host discovery.
 
@@ -22,6 +23,7 @@ The system consists of three layers:
    - Prometheus for metrics aggregation with 90-day retention
    - Loki for log aggregation with 90-day retention
    - Alertmanager for alert routing and notifications
+   - OTLP/HTTP ingestion on `otlp.<domain>` with bearer-token authentication
 
 1. **Visualization** (runs on the monitoring primary host)
 
@@ -30,21 +32,22 @@ The system consists of three layers:
 
 ## Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
-│                    nixmon (Monitoring Primary)        │
-│  ┌──────────┐  ┌──────┐  ┌─────────┐  ┌──────────┐ │
-│  │Prometheus │  │ Loki │  │ Grafana │  │Alertmgr  │ │
-│  │  :9090    │  │:3100 │  │  :3000  │  │  :9093   │ │
-│  └────┬──┬──┘  └──┬───┘  └─────────┘  └────┬─────┘ │
-│       │  │        │                         │       │
-│  ┌────┘  │   ┌────┘        ┌────────────────┘       │
+│                    nixmon (Monitoring Primary)      │
+│  ┌──────────┐  ┌──────┐  ┌─────────┐  ┌──────────┐  │
+│  │Prometheus│  │ Loki │  │ Grafana │  │Alertmgr  │  │
+│  │  :9090   │  │:3100 │  │  :3000  │  │  :9093   │  │
+│  └────┬──┬──┘  └──┬───┘  └─────────┘  └────┬─────┘  │
+│       │  │        │                        │        │
+│  ┌────┘  │   ┌────┘        ┌───────────────┘        │
 │  │ scrape│   │ push        │ webhooks               │
 ├──┼───────┼───┼─────────────┼────────────────────────┤
 │  ▼       ▼   ▼             ▼                        │
-│  All servers:          Home Assistant / Nextcloud    │
+│  All servers:          Home Assistant / Nextcloud   │
 │  - node_exporter :9100                              │
 │  - alloy → Loki                                     │
+│  - OTLP/HTTP → Alloy :4318                          │
 │  - caddy metrics :2019 (if proxy configured)        │
 │  - postgres_exporter :9187 (if postgres configured) │
 │  - redis_exporter :9121 (if redis configured)       │
@@ -65,7 +68,7 @@ option, currently set to `nixmon`.
 All options live under `server.monitoring`:
 
 | Option | Type | Default | Description |
-| ----------------------------------------- | ------ | --------- | ------------------------------------------------- |
+| ----------------------------------------- | ------ | ------- | --------------------------------------------------------------- |
 | `enable` | bool | `true` | Enable monitoring for this server |
 | `retention.metrics` | string | `"90d"` | Prometheus TSDB retention period |
 | `retention.logs` | string | `"90d"` | Loki log retention period |
@@ -76,6 +79,7 @@ All options live under `server.monitoring`:
 | `logs.enable` | bool | `true` | Enable Alloy log shipping |
 | `collector.enable` | bool | auto | Enable collectors (auto on monitoring host) |
 | `collector.grafana.kanidm.enable` | bool | `true` | Enable Kanidm OAuth2 for Grafana |
+| `collector.otlp.enable` | bool | auto | Enable authenticated OTLP/HTTP ingestion on the monitoring host |
 | `collector.alerting.enable` | bool | `true` | Enable Alertmanager |
 | `collector.alerting.homeAssistant.enable` | bool | `false` | Enable Home Assistant webhook alerting |
 | `collector.alerting.nextcloudTalk.enable` | bool | `false` | Enable Nextcloud Talk webhook alerting |
@@ -98,22 +102,24 @@ The monitoring module requires the following secrets in `hosts/server/nixmon/sec
 
 ```yaml
 MONITORING:
-    GRAFANA:
-        SECRET_KEY: <random-secret-key>
-        OAUTH_SECRET: <kanidm-oauth2-secret>
-    HOME_ASSISTANT:
-        WEBHOOK_URL: <ha-webhook-url>
-    NEXTCLOUD_TALK:
-        WEBHOOK_URL: <nc-talk-webhook-url>
+  OLTP:
+    BEARER_TOKEN: <random-secret-key>
+  GRAFANA:
+    SECRET_KEY: <random-secret-key>
+    OAUTH_SECRET: <kanidm-oauth2-secret>
+  HOME_ASSISTANT:
+    WEBHOOK_URL: <ha-webhook-url>
+  NEXTCLOUD_TALK:
+    WEBHOOK_URL: <nc-talk-webhook-url>
 PROXMOX:
-    USER: <proxmox-user-at-realm>
-    TOKEN_ID: <proxmox-token-name>
-    TOKEN_SECRET: <proxmox-token-secret>
+  USER: <proxmox-user-at-realm>
+  TOKEN_ID: <proxmox-token-name>
+  TOKEN_SECRET: <proxmox-token-secret>
 ```
 
 ### Generating Secrets
 
-Generate the Grafana secret key:
+Generating secure random secrets can be done with the following command:
 
 ```sh
 cat /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 48
@@ -124,13 +130,19 @@ under `KANIDM/OAUTH2/GRAFANA_SECRET` (the Kanidm provisioning side).
 
 ## Caddy Virtual Hosts
 
-The module configures three virtual hosts on nixmon:
+The module configures four virtual hosts on nixmon:
 
 | Service | Subdomain | Access |
-| ---------- | ----------------------- | ------ |
+| ---------- | --------------------- | ----------------------------- |
 | Grafana | `grafana.<domain>` | Public |
+| OTLP | `otlp.<domain>` | Public, bearer token required |
 | Prometheus | `prometheus.<domain>` | LAN |
 | Loki | `loki.<domain>` | LAN |
+
+Grafana remains protected by the existing Kanidm-backed login flow. The OTLP
+ingestion endpoint is intended for machine-to-machine clients and requires an
+`Authorization: Bearer <token>` header on every request. The exposed OTLP/HTTP
+paths are the standard `/v1/metrics` and `/v1/logs` endpoints.
 
 These are defined in `hosts/server/nixmon/default.nix` and collected by the IO
 primary host's Caddy configuration.
@@ -140,7 +152,7 @@ primary host's Caddy configuration.
 The following alerts are configured by default:
 
 | Alert | Condition | Severity |
-| ------------------- | ------------------------------------------- | -------- |
+| ------------------- | ---------------------------------------- | -------- |
 | `HostDown` | `up{job="node"} == 0` for 2 minutes | Critical |
 | `DiskSpaceCritical` | Root filesystem < 10% free for 5 minutes | Critical |
 | `HighCPUUsage` | CPU usage > 90% for 5 minutes | Warning |
@@ -154,7 +166,7 @@ Alerts are routed to:
 
 ## Module Structure
 
-```
+```text
 modules/nixos/server/monitoring/
 ├── default.nix              # Entry point, imports sub-modules
 ├── options.nix              # All server.monitoring.* options
@@ -163,6 +175,7 @@ modules/nixos/server/monitoring/
 │   ├── prometheus.nix       # Prometheus server + scrape targets
 │   ├── loki.nix             # Loki server + storage config
 │   ├── grafana.nix          # Grafana + Kanidm OAuth2
+│   ├── otlp.nix             # OTLP ingestion
 │   ├── alerting.nix         # Alertmanager + alert rules
 │   └── dashboards.nix       # Dashboard provisioning
 ├── exporters/

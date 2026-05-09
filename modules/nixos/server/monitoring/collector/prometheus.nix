@@ -12,9 +12,11 @@ let
     mkForce
     mkIf
     optional
+    optionals
     ;
 
   cfg = config.server.monitoring;
+  otlpCfg = cfg.collector.otlp;
 
   # Build scrape targets from all server configurations
   nodeTargets =
@@ -66,6 +68,7 @@ in
       enable = true;
       port = 9090;
       listenAddress = "0.0.0.0";
+      extraFlags = optionals otlpCfg.enable [ "--web.enable-remote-write-receiver" ];
 
       retentionTime = cfg.retention.metrics;
 
