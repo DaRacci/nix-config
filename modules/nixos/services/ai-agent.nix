@@ -17,7 +17,12 @@ let
     toShellVars
     concatStringsSep
     ;
-  inherit (types) str nullOr listOf;
+  inherit (types)
+    int
+    str
+    nullOr
+    listOf
+    ;
 
   cfg = config.services.ai-agent;
 in
@@ -43,8 +48,8 @@ in
         description = "The sops secret attribute for the API server authentication token.";
       };
       port = mkOption {
-        type = str;
-        default = "8642";
+        type = int;
+        default = 8642;
         description = "The port for the API server to listen on.";
       };
       host = mkOption {
@@ -121,7 +126,7 @@ in
 
       brains = mkOption {
         type = str;
-        default = "deepseek/deepseek-v4-flash";
+        default = "deepseek/deepseek-v4-pro";
         description = "The smartest model to use for complex reasoning and decision-making tasks.";
       };
     };
@@ -285,7 +290,7 @@ in
         templates."HERMES_API_ENV".content = lib.toShellVars {
           API_SERVER_ENABLED = "true";
           API_SERVER_HOST = cfg.apiServer.host;
-          API_SERVER_PORT = cfg.apiServer.port;
+          API_SERVER_PORT = toString cfg.apiServer.port;
           API_SERVER_KEY = config.sops.placeholder."${cfg.apiServer.tokenReference}";
         };
       };

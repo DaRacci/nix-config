@@ -26,6 +26,8 @@
       enable = true;
       dashboard.enable = true;
       apiServer.enable = true;
+      voice.enable = true;
+      memory.enable = true;
 
       platform = {
         discord = {
