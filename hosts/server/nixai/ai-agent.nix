@@ -30,7 +30,7 @@
       platform = {
         discord = {
           enable = true;
-          botTokenReference = "AI_AGENT/DISCORD_BOT_TOKEN";
+          tokenReference = "AI_AGENT/DISCORD_BOT_TOKEN";
           homeChannel = "634580724158038027";
           allowedUsers = [ "613898815447105547" ];
         };
