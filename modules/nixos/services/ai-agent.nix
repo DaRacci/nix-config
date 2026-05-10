@@ -340,9 +340,12 @@ in
         }
       ];
 
-      sops.templates."HERMES_HASSIO_ENV".content = toShellVars {
-        HASS_TOKEN = config.sops.placeholder."AI_AGENT/HASSIO_TOKEN";
-        HASS_URL = cfg.platform.hassio.url;
+      sops = {
+        secrets."${cfg.platform.hassio.tokenReference}" = { };
+        templates."HERMES_HASSIO_ENV".content = toShellVars {
+          HASS_TOKEN = config.sops.placeholder."${cfg.platform.hassio.tokenReference}";
+          HASS_URL = cfg.platform.hassio.url;
+        };
       };
     })
   ];

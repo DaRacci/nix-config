@@ -8,7 +8,7 @@
     secrets = {
       "AI_AGENT/OPENROUTER_API_KEY" = { };
       "AI_AGENT/DISCORD_BOT_TOKEN" = { };
-      "AI_AGENT/SERVER_API_KEY" = { };
+      "AI_AGENT/API_SERVER_TOKEN" = { };
     };
 
     templates."HERMES_ENV".content = lib.toShellVars {
@@ -37,7 +37,6 @@
 
         hassio = {
           enable = true;
-          tokenReference = "AI_AGENT/HASSIO_TOKEN";
           url = "https://hassio.racci.dev";
         };
       };
