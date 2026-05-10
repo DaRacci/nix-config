@@ -43,12 +43,20 @@ in
          && [ -z "''${NIX_SKIP_SHELL:-}" ]; then
         export SSH_NIX_SHELL=1
 
-        if nix-shell "${cfg.shellFile}"; then
-          exit $?
-        else
-          echo "SSH devShell failed to start; continuing with default shell." >&2
-          unset SSH_NIX_SHELL
+        profile_root=/nix/var/nix/gcroots/per-user/root/ssh-shell
+        profile_link=/nix/var/nix/gcroots/per-user/root/ssh-shell-result
+
+        if shell_drv=$(nix-instantiate "${cfg.shellFile}") && \
+          shell_path=$(nix-store --add-root "$profile_link" --indirect --realise "$shell_drv" 2>/dev/null | tail -n1); then
+          ln -sfn "$profile_link" "$profile_root"
+          if [ -x "$shell_path/bin/fish" ]; then
+            exec "$shell_path/bin/fish" -C "source $shell_path"
+          fi
         fi
+
+        echo "SSH devShell failed to start; continuing with default shell." >&2
+        unset SSH_NIX_SHELL
+        return 0
       fi
     '';
   };

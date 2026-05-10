@@ -10,6 +10,8 @@ The SSH submodule enhances administrative access by providing a session-only env
 
 ### Auto-entry Logic (`ssh/default.nix`)
 
+The module creates an indirect GC root for the SSH shell at login time by instantiating shell expression to derivation, then realizing it with `nix-store --add-root --indirect --realise`. This keeps realized shell alive across upgrades without referencing `config.system.build.toplevel` during system evaluation.
+
 The module modifies `/etc/bashrc` to detect interactive root logins via SSH. It evaluates several conditions before launching the session shell:
 
 - User must be root (`EUID=0`).
@@ -66,7 +68,7 @@ This is particularly useful for automated scripts or troubleshooting scenarios w
 
 ### Guard Mechanism
 
-The auto-entry script uses the `SSH_NIX_SHELL` environment variable to prevent recursive shell entries. If `nix-shell` fails to start, the system falls back to the default shell and provides a warning message.
+The auto-entry script uses the `SSH_NIX_SHELL` environment variable to prevent recursive shell entries. It instantiates shell file with `nix-instantiate`, realizes that derivation while registering an indirect GC root under `/nix/var/nix/gcroots/per-user/root/ssh-shell-result`, links that result into `/nix/var/nix/gcroots/per-user/root/ssh-shell`, and then execs fish from realized shell output. If that fails, system falls back to default shell, clears guard, and prints stderr message.
 
 ## References
 
