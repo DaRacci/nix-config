@@ -38,7 +38,7 @@ in
 
         prometheus.remote_write "otlp" {
           endpoint {
-            url = "http://127.0.0.1:${config.services.prometheus.port}/api/v1/write"
+            url = "http://127.0.0.1:${toString config.services.prometheus.port}/api/v1/write"
           }
         }
 
@@ -52,7 +52,7 @@ in
 
         otelcol.receiver.otlp "default" {
           http {
-            endpoint = "0.0.0.0:${cfg.collector.otlp.port}"
+            endpoint = "0.0.0.0:${toString cfg.collector.otlp.port}"
             auth     = otelcol.auth.bearer.otlp.handler
           }
 

@@ -17,6 +17,7 @@ let
     ;
   inherit (lib.types)
     str
+    int
     ;
 
   hasPostgresDatabases =
@@ -111,8 +112,8 @@ in
         };
 
         port = mkOption {
-          type = str;
-          default = "4318";
+          type = int;
+          default = 4318;
           description = "Port for the OTLP/HTTP ingestion endpoint.";
         };
 
