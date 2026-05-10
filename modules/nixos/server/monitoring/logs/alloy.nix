@@ -179,11 +179,14 @@ in
     }
 
     (mkIf (cfg.collector.enable && otlpCfg.enable) {
-      sops.templates.monitoringAlloyEnvironment = {
-        content = lib.toShellVars {
-          OTLP_BEARER_TOKEN = config.sops.placeholder."${otlpCfg.bearerTokenSecret}";
+      sops = {
+        secrets."${otlpCfg.bearerTokenSecret}" = { };
+        templates.monitoringAlloyEnvironment = {
+          content = lib.toShellVars {
+            OTLP_BEARER_TOKEN = config.sops.placeholder."${otlpCfg.bearerTokenSecret}";
+          };
+          restartUnits = [ "alloy.service" ];
         };
-        restartUnits = [ "alloy.service" ];
       };
 
       services.alloy.environmentFile = config.sops.templates.monitoringAlloyEnvironment.path;
