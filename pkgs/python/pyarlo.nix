@@ -19,14 +19,14 @@
 
 buildPythonPackage rec {
   pname = "pyaarlo";
-  version = "0.8.0.15";
+  version = "0.8.0.19";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "twrecked";
     repo = "pyaarlo";
     rev = "v${version}";
-    hash = "sha256-wWTIVADgAu3/egjyt+FgfutZsscWmc7SN7MTzhFBWso=";
+    hash = "sha256-LHOfr1aa+arFogudfx1kTaG8+osUXaA6oN/cIrvxH4o=";
   };
 
   build-system = [
