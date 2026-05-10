@@ -57,6 +57,16 @@
     openPeerPorts = lib.mkForce true;
   };
 
+  systemd.services.transmission = {
+    after = [ "wg.service" ];
+    serviceConfig = {
+      Restart = "on-failure";
+      RestartSec = "10s";
+      StartLimitIntervalSec = 90;
+      StartLimitBurst = 3;
+    };
+  };
+
   server.proxy.virtualHosts.transmission.extraConfig = ''
     reverse_proxy localhost:${toString config.nixarr.transmission.uiPort}
   '';

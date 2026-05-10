@@ -113,7 +113,16 @@
         ];
       };
     };
+  };
 
+  systemd.services.radarr = {
+    after = [ "wg.service" ];
+    serviceConfig = {
+      Restart = "on-failure";
+      RestartSec = "10s";
+      StartLimitIntervalSec = 90;
+      StartLimitBurst = 3;
+    };
   };
 
   server.proxy.virtualHosts.radarr.extraConfig = ''
