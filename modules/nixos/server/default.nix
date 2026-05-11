@@ -209,11 +209,18 @@ in
       storage = "persistent";
       extraConfig = ''
         SystemMaxUse=256M
-        SystemMaxFileSize=64M
+        SystemMaxFileSize=256M
         SystemKeepFree=512M
-        MaxRetentionSec=14day
+        MaxRetentionSec=7day
       '';
     };
+
+    # Vacuum existing journals on activation so the limits take effect immediately.
+    # Without this, journald only enforces SystemMaxUse/SystemMaxFileSize/MaxRetentionSec
+    # as new logs are written — existing oversized files are left untouched.
+    system.activationScripts.journald-vacuum = lib.mkAfter ''
+      ${pkgs.systemd}/bin/journalctl --vacuum-size=250M --vacuum-time=7days 2>&1 | ${pkgs.coreutils}/bin/cat
+    '';
 
     system.preSwitchChecks.reportChanges = ''
       if [ "$2" == "test" ]; then
