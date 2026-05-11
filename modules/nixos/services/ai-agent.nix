@@ -37,7 +37,7 @@ in
     };
 
     memory = {
-      enable = mkEnableOption "long-term memory using hermes-lcm";
+      enable = mkEnableOption "long-term memory";
     };
 
     apiServer = {
@@ -138,6 +138,14 @@ in
         enable = true;
         container.enable = true;
 
+        extraDependencyGroups = [
+          "acp"
+          "homeassistant"
+          "messaging"
+          "voice"
+          "youtube"
+        ];
+
         settings = {
           model = {
             base_url = "https://openrouter.ai/api/v1";
@@ -178,7 +186,6 @@ in
 
           compression = {
             enabled = true;
-            engine = "lcm";
           };
 
           browser = {
@@ -264,23 +271,7 @@ in
 
     (mkIf (cfg.enable && cfg.memory.enable) {
       services.hermes-agent = {
-        extraPlugins = [
-          (pkgs.fetchFromGitHub {
-            owner = "stephenschoettler";
-            repo = "hermes-lcm";
-            rev = "v0.9.2";
-            hash = "sha256-0z83j4Mhv1n66fKYSVuEkBAGHXwOBmxQG/4CtyfIwrE=";
-          })
-        ];
-
-        environment = {
-          LCM_SUMMARY_MODEL = cfg.models.compression;
-          LCM_EXPANSION_MODEL = cfg.models.compression;
-          LCM_LARGE_OUTPUT_EXTERNALIZATION_ENABLED = "true";
-          LCM_IGNORE_MESSAGE_PATTERNS = "^Cronjob Response:,^>>>Cronjob Response<<<:";
-        };
-
-        settings.plugins.enabled = [ "hermes-lcm" ];
+        settings.memory.provider = "byterover";
       };
     })
 
