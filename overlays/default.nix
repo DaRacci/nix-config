@@ -15,6 +15,10 @@ let
   packagesFromOtherInstances = [ ];
 in
 {
+  singleton = import ./singleton.nix {
+    inherit inputs lib;
+  };
+
   # Packages taken from other instances of nixpkgs inputs, (i.e) pr branches and the like.
   fromOtherInstances =
     final: _prev:
@@ -69,12 +73,6 @@ in
     bottles = prev.bottles.override {
       removeWarningPopup = true;
     };
-
-    open-webui = prev.open-webui.overridePythonAttrs (oldAttrs: {
-      dependencies = oldAttrs.dependencies ++ [
-        prev.python3Packages.itsdangerous
-      ];
-    });
 
     statix = prev.statix.overrideAttrs (_: rec {
       src = prev.fetchFromGitHub {

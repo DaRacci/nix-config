@@ -20,7 +20,6 @@ The `swfsMount` option is the repository's declarative storage mount interface. 
 - **Common Mount Controls**: Each entry supports `mountLocation`, `uid`, `gid`, `umask`, and `requiredByServices` so consuming services can wait for the generated mount unit.
 - **Health Recovery**: Each entry also supports `healthCheck.*` options. By default the module generates a timer-driven probe that can lazily unmount stale FUSE mounts, restart the mount service, and optionally restart dependent services.
 
-
 #### MinIO backend
 
 - **Credential Management**: By default the MinIO backend provisions and uses sops secrets with the pattern `S3FS_AUTH/<NAME_IN_UPPERCASE>`. These secrets must contain `ACCESS_KEY_ID:SECRET_ACCESS_KEY`.
