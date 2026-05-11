@@ -134,6 +134,18 @@ let
     |> map (cfg: cfg.host.name);
   #endregion
 
+  # Journald configuration limits — defined once to prevent drift between
+  # the daemon config (extraConfig) and the activation vacuum script.
+  journalMaxUse = "256M";
+  # 1/8 of SystemMaxUse so journald can retain ~7 rotated files at a time.
+  # Setting SystemMaxFileSize equal to SystemMaxUse prevents rotation entirely.
+  journalMaxFileSize = "32M";
+  journalKeepFree = "512M";
+  journalRetentionSec = "7day";
+  # Slightly under SystemMaxUse so the activation vacuum doesn't fight
+  # journald's runtime limit when new logs arrive immediately after cleanup.
+  journalVacuumSize = "250M";
+
   importModule =
     path: inherits:
     import path (
@@ -208,10 +220,10 @@ in
     services.journald = {
       storage = "persistent";
       extraConfig = ''
-        SystemMaxUse=256M
-        SystemMaxFileSize=256M
-        SystemKeepFree=512M
-        MaxRetentionSec=7day
+        SystemMaxUse=${journalMaxUse}
+        SystemMaxFileSize=${journalMaxFileSize}
+        SystemKeepFree=${journalKeepFree}
+        MaxRetentionSec=${journalRetentionSec}
       '';
     };
 
@@ -219,7 +231,7 @@ in
     # Without this, journald only enforces SystemMaxUse/SystemMaxFileSize/MaxRetentionSec
     # as new logs are written — existing oversized files are left untouched.
     system.activationScripts.journald-vacuum = lib.mkAfter ''
-      ${pkgs.systemd}/bin/journalctl --vacuum-size=250M --vacuum-time=7days 2>&1 | ${pkgs.coreutils}/bin/cat
+      ${pkgs.systemd}/bin/journalctl --vacuum-size=${journalVacuumSize} --vacuum-time=${journalRetentionSec} 2>&1 | ${pkgs.coreutils}/bin/cat
     '';
 
     system.preSwitchChecks.reportChanges = ''
