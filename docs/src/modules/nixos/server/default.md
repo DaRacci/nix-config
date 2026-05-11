@@ -14,7 +14,7 @@ The primary purpose of this module is to establish a shared environment for serv
 
 The main configuration entry point is `server.enable`. Once enabled, it sets up the server-specific baseline:
 
-- **Journald Persistence**: Configured with a 7-day retention period, 256MB max file size, and storage limits. An activation script runs `journalctl --vacuum` on every deploy to immediately enforce the limits on existing logs.
+- **Journald Persistence**: Configured with a 7-day retention period, 256MB total max disk usage, and 512MB keep-free threshold. Per-file size is set to 32MB (1/8 of max use) to allow proper log rotation with ~7 archived files. All limits are defined as `let` variables in the module for consistency between the daemon config and the activation vacuum script. The activation script runs `journalctl --vacuum` on every deploy to immediately enforce the limits on existing logs.
 - **Pre-Switch Checks**: Runs `dix` on system activation to report changes between generations.
 - **`server.ioPrimaryHost`**: Specifies the hostname of the coordinator host for the cluster. This host runs primary database instances, the reverse proxy, and storage master nodes. This option is typically set on the coordinator host and used by other servers in the cluster for synchronization.
 
