@@ -118,6 +118,12 @@ in
         default = "stepfun/step-3.5-flash";
         description = "The simpleton model to delegate tasks to that require less reasoning, basic understanding and small context windows.";
       };
+
+      brains = mkOption {
+        type = str;
+        default = "deepseek/deepseek-v4-flash";
+        description = "The smartest model to use for complex reasoning and decision-making tasks.";
+      };
     };
   };
 
@@ -153,9 +159,10 @@ in
           auxiliary = {
             approval.model = cfg.models.simpleton;
             compression.model = cfg.models.compression;
-            curator.model = cfg.models;
+            curator.model = cfg.models.simpleton;
             session_search.model = cfg.models.simpleton;
             title_generation.model = cfg.models.compression;
+            auxiliary.triage_specifier = cfg.models.brains;
           };
 
           terminal = {

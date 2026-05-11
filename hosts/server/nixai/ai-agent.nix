@@ -43,6 +43,7 @@
     };
 
     hermes-agent = {
+      settings.timezone = "Australia/Sydney";
       environmentFiles = [ config.sops.templates."HERMES_ENV".path ];
     };
   };
