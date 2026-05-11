@@ -69,6 +69,16 @@
       flake = false;
       type = "file";
     };
+    tabby = {
+      url = "https://raw.githubusercontent.com/dillonfrederica/nixpkgs/refs/heads/tabby-0.32.0/pkgs/by-name/ta/tabby/package.nix";
+      flake = false;
+      type = "file";
+    };
+    tabby-agent = {
+      url = "https://raw.githubusercontent.com/r-ryantm/nixpkgs/refs/heads/auto-update/tabby-agent/pkgs/by-name/ta/tabby-agent/package.nix";
+      flake = false;
+      type = "file";
+    };
 
     # Misc Flake Inputs for other Inputs
     systems.url = "github:nix-systems/default";
