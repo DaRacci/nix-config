@@ -83,6 +83,11 @@
             context_servers = { };
           };
         };
+
+        thread_summary_model = {
+          provider = "openrouter";
+          model = "google/gemini-3.1-flash-lite";
+        };
       };
 
       icon_theme = {
