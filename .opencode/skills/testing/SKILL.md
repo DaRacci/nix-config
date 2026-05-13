@@ -11,11 +11,17 @@ After making changes you **must always** evaluate and test them.
 
 ## Finding Affected Configurations
 
-Use module-graph script to find which hosts and homes are affected by changed files:
+Use module-graph script with `--since` to find only hosts and homes affected by files changed since commit or ref. Add `--refine` to further narrow results for files under `modules/nixos/` and `modules/home-manager/` when module exposes `options.<path>.enable`:
+
 
 ```bash
-nix run .#module-graph
+nix run .#module-graph -- --since <COMMIT_HASH> --refine --report
 ```
+
+Add `--report` to print summary table grouping hosts/homes into priority buckets based on how many changed files affect them.
+
+
+
 
 This outputs JSON showing which configs use each file:
 
@@ -61,11 +67,13 @@ nix flake check --override-input devenv-root "file+file://$PWD/.devenv/root"
 
 1. Make changes to `modules/nixos/services/tailscale.nix`
 
-2. Run module-graph to find affected configs:
+2. Run module-graph with `--since` to find affected configs from your change range. Add `--refine` when you want enable-option based narrowing:
 
    ```bash
-   nix run .#module-graph | jq '.[] | select(.file | contains("tailscale"))'
+   nix run .#module-graph -- --since origin/main --refine | jq '.[] | select(.file | contains("tailscale"))'
    ```
+
+
 
 3. Pick one affected host and build it:
 
