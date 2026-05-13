@@ -2,11 +2,14 @@
 
 use std/log
 use lib/flake.nu
+use lib/lib.nu
 
 def main [
   --since: string # Git commit/ref used to filter results to files changed since that point
   --refine # Try narrow affected hosts/homes by checking detected enable options
+  --report # Print summary table of recommended actions
 ] {
+
   log info "Getting flake information..."
   let flake_info = get_flake_info
 
@@ -28,10 +31,12 @@ def main [
 
   let filtered_modules = if $since != null {
     log info "Filtering module graph to affected files..."
-    filter_module_graph_by_changed_files $all_modules $changed_files
+    $all_modules | where { |entry| $entry.file in $changed_files }
   } else {
     $all_modules
   }
+
+  log info $"Total modules: ($all_modules | length), Affected modules: ($filtered_modules | length)"
 
   let refined_modules = if $refine {
     log info "Refining module graph with detected enable options..."
@@ -40,7 +45,14 @@ def main [
     $filtered_modules
   }
 
-  $refined_modules | to json
+  log info $"Total modules with refinement: ($refined_modules | length)"
+
+  if $report {
+    log info "Generating summary report..."
+    generate_report $refined_modules $changed_files
+  } else {
+    $refined_modules | to json
+  }
 }
 
 def get_flake_info [] {
@@ -160,17 +172,6 @@ def build_module_graph [hosts: record, homes: record] {
   }
 }
 
-def filter_module_graph_by_changed_files [
-  module_graph: list
-  changed_files: list<string>
-] {
-  if ($changed_files | is-empty) {
-    []
-  } else {
-    $module_graph | where { |entry| $entry.file in $changed_files }
-  }
-}
-
 def refine_module_graph [module_graph: list] {
   $module_graph | each { |entry|
     refine_module_graph_entry $entry
@@ -232,13 +233,17 @@ def refine_module_graph_entry [entry: record] {
   }
 }
 
-
 def supports_enable_option_refinement [file_path: string] {
   ($file_path | str starts-with "modules/nixos/") or ($file_path | str starts-with "modules/home-manager/")
 }
 
-
 def detect_enable_options [file_path: string] {
+  # only run detection for files under modules/nixos or modules/home-manager
+  # (extra guard; callers already check this, but keep here safe)
+  if not (supports_enable_option_refinement $file_path) {
+    return []
+  }
+
   let file_contents = try {
     open $file_path
   } catch { |err|
@@ -259,7 +264,6 @@ def detect_enable_options [file_path: string] {
   ($nested_options ++ $direct_options)
   | uniq
   | sort
-
 }
 
 def refine_targets_by_option [
@@ -284,5 +288,54 @@ def is_option_enabled_for_target [
     $result == true
   } catch {
     false
+  }
+}
+
+# Report generation
+# - aggregate counts per host/home
+# - group hosts/homes into priority buckets
+def generate_report [module_graph: list, changed_files: list] {
+  mut host_counts = {}
+  mut home_counts = {}
+
+  for entry in $module_graph {
+    for h in $entry.hosts { $host_counts = ($host_counts | upsert $h (($host_counts | get -o $h | default 0) + 1)) }
+    for m in $entry.homes { $home_counts = ($home_counts | upsert $m (($home_counts | get -o $m | default 0) + 1)) }
+  }
+
+  let host_rows = $host_counts | items {|key, value| { name: $key, count: $value } } | sort-by { $in.count } -r
+  let home_rows = $home_counts | items {|key, value| { name: $key, count: $value } } | sort-by { $in.count } -r
+
+  let host_table = [
+    { priority: "HIGH", rows: ($host_rows | where { $in.count > 3 }) },
+    { priority: "MEDIUM", rows: ($host_rows | where { ($in.count > 1) and ($in.count <= 3) }) },
+    { priority: "LOW", rows: ($host_rows | where { $in.count == 1 }) }
+  ]
+
+  let home_table = [
+    { priority: "HIGH", rows: ($home_rows | where { $in.count > 3 }) },
+    { priority: "MEDIUM", rows: ($home_rows | where { ($in.count > 1) and ($in.count <= 3) }) },
+    { priority: "LOW", rows: ($home_rows | where { $in.count == 1 }) }
+  ]
+
+  print_section "NixOS HOSTS" $host_table
+  print_section "HOME-MANAGER CONFIGS" $home_table
+}
+
+def print_section [title: string, table: list] {
+  print ""
+  print "*************************************************************"
+  print $"  ($title)"
+  print "*************************************************************"
+  print ""
+
+  for section in $table {
+    if ($section.rows | length) > 0 {
+      print $"Priority: ($section.priority)"
+      for r in $section.rows {
+        print $"  - ($r.name) [($r.count) modules]"
+      }
+      print ""
+    }
   }
 }

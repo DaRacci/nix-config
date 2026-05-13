@@ -15,8 +15,11 @@ Use module-graph script with `--since` to find only hosts and homes affected by 
 
 
 ```bash
-nix run .#module-graph -- --since <COMMIT_HASH> --refine
+nix run .#module-graph -- --since <COMMIT_HASH> --refine --report
 ```
+
+Add `--report` to print summary table grouping hosts/homes into priority buckets based on how many changed files affect them.
+
 
 
 
