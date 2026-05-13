@@ -23,6 +23,7 @@ in
   module-graph = writeNuApplicationWithLibs {
     inherit pkgs libSource sourceRoot;
     name = "module-graph";
+    runtimeInputs = [ pkgs.git ];
   };
 
   nix-tree-host = writeNuApplicationWithLibs {
