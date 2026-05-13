@@ -121,5 +121,6 @@ in
   module-graph = writeNuApplicationWithLibs {
     inherit pkgs sourceRoot;
     name = "module-graph";
+	runtimeInputs = [ pkgs.git ];
   };
 }
