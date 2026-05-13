@@ -66,10 +66,10 @@ This repository uses `devenv`. You must provide the override for `nix flake chec
 
 ### Finding Affected Configurations
 
-Before testing, determine what your changes affect:
+Before testing, determine what your changes affect. Prefer `--since` so output only includes entries tied to files changed in your range:
 
 ```bash
-nix run .#module-graph
+nix run .#module-graph -- --since <COMMIT_HASH>
 ```
 
 ### Project Structure Overview

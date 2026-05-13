@@ -3,9 +3,18 @@
 use std/log
 use lib/flake.nu
 
-def main [] {
+def main [
+  --since: string # Git commit/ref used to filter results to files changed since that point
+] {
   log info "Getting flake information..."
   let flake_info = get_flake_info
+
+  let changed_files = if $since != null {
+    log info $"Getting changed files since: ($since)"
+    get_changed_files_since $since
+  } else {
+    []
+  }
 
   log info "Getting host configurations..."
   let hosts = get_hosts $flake_info.hosts $flake_info.source
@@ -16,7 +25,14 @@ def main [] {
   log info "Building module graph..."
   let all_modules = build_module_graph $hosts $homes
 
-  $all_modules | to json
+  let filtered_modules = if $since != null {
+    log info "Filtering module graph to affected files..."
+    filter_module_graph_by_changed_files $all_modules $changed_files
+  } else {
+    $all_modules
+  }
+
+  $filtered_modules | to json
 }
 
 def get_flake_info [] {
@@ -42,6 +58,32 @@ def get_flake_info [] {
   let flake_source = (flake get_flake_info).source_path
   let flake_info = { hosts: $hosts, homes: $homes, source: $flake_source }
   $flake_info
+}
+
+def get_changed_files_since [since: string] {
+  let tracked_changes = try {
+    git diff --name-only $since | lines
+  } catch { |err|
+    log error $"Failed to get changed files since '($since)': ($err)"
+    exit 1
+  }
+
+  let untracked_changes = try {
+    git ls-files --others --exclude-standard | lines
+  } catch { |err|
+    log warning $"Failed to get untracked files: ($err)"
+    []
+  }
+
+  let changed_files = ($tracked_changes ++ $untracked_changes)
+    | where { |file| $file != "" }
+    | uniq
+
+  if ($changed_files | is-empty) {
+    log warning $"No changed files found since '($since)'"
+  }
+
+  $changed_files
 }
 
 def get_hosts [
@@ -103,5 +145,16 @@ def build_module_graph [hosts: record, homes: record] {
       hosts: $hosts_using_module,
       homes: $homes_using_module
     }
+  }
+}
+
+def filter_module_graph_by_changed_files [
+  module_graph: list,
+  changed_files: list<string>
+] {
+  if ($changed_files | is-empty) {
+    []
+  } else {
+    $module_graph | where { |entry| $entry.file in $changed_files }
   }
 }
