@@ -5,6 +5,7 @@ use lib/flake.nu
 
 def main [
   --since: string # Git commit/ref used to filter results to files changed since that point
+  --refine # Try narrow affected hosts/homes by checking detected enable options
 ] {
   log info "Getting flake information..."
   let flake_info = get_flake_info
@@ -32,7 +33,14 @@ def main [
     $all_modules
   }
 
-  $filtered_modules | to json
+  let refined_modules = if $refine {
+    log info "Refining module graph with detected enable options..."
+    refine_module_graph $filtered_modules
+  } else {
+    $filtered_modules
+  }
+
+  $refined_modules | to json
 }
 
 def get_flake_info [] {
@@ -52,8 +60,12 @@ def get_flake_info [] {
     []
   }
 
-  if ($hosts | is-empty) { log warning "Host list came back empty" }
-  if ($homes | is-empty) { log warning "Home list came back empty" }
+  if ($hosts | is-empty) {
+    log warning "Host list came back empty"
+  }
+  if ($homes | is-empty) {
+    log warning "Home list came back empty"
+  }
 
   let flake_source = (flake get_flake_info).source_path
   let flake_info = { hosts: $hosts, homes: $homes, source: $flake_source }
@@ -87,7 +99,7 @@ def get_changed_files_since [since: string] {
 }
 
 def get_hosts [
-  host_names: list<string>,
+  host_names: list<string>
   flake_source: string
 ] {
   let host_configs = $host_names | reduce -f {} { |host, acc|
@@ -105,7 +117,7 @@ def get_hosts [
 }
 
 def get_homes [
-  home_names: list<string>,
+  home_names: list<string>
   flake_source: string
 ] {
   let home_configs = $home_names | reduce -f {} { |home, acc|
@@ -141,20 +153,136 @@ def build_module_graph [hosts: record, homes: record] {
     } | where { $in != null }
 
     {
-      file: $module_file,
-      hosts: $hosts_using_module,
+      file: $module_file
+      hosts: $hosts_using_module
       homes: $homes_using_module
     }
   }
 }
 
 def filter_module_graph_by_changed_files [
-  module_graph: list,
+  module_graph: list
   changed_files: list<string>
 ] {
   if ($changed_files | is-empty) {
     []
   } else {
     $module_graph | where { |entry| $entry.file in $changed_files }
+  }
+}
+
+def refine_module_graph [module_graph: list] {
+  $module_graph | each { |entry|
+    refine_module_graph_entry $entry
+  }
+}
+
+def refine_module_graph_entry [entry: record] {
+  if not (supports_enable_option_refinement $entry.file) {
+    $entry | insert refinement {
+      mode: "none"
+      reason: "unsupported-file-path"
+    }
+  } else {
+    let enable_options = detect_enable_options $entry.file
+
+    if ($enable_options | is-empty) {
+
+      $entry | insert refinement {
+        mode: "none"
+        reason: "no-enable-option-detected"
+      }
+    } else if ($enable_options | length) > 1 {
+      log debug $"Skipping refinement for '($entry.file)': multiple enable options detected"
+      $entry | insert refinement {
+        mode: "none"
+        reason: "multiple-enable-options-detected"
+        options: $enable_options
+      }
+    } else {
+      let option_path = ($enable_options | first)
+      let refined_hosts = refine_targets_by_option "nixosConfigurations" $entry.hosts $option_path
+      let refined_homes = refine_targets_by_option "homeConfigurations" $entry.homes $option_path
+
+      let final_hosts = if ($entry.hosts | is-empty) or not ($refined_hosts | is-empty) {
+        $refined_hosts
+      } else {
+        $entry.hosts
+      }
+      let final_homes = if ($entry.homes | is-empty) or not ($refined_homes | is-empty) {
+        $refined_homes
+      } else {
+        $entry.homes
+      }
+
+      $entry
+      | upsert hosts $final_hosts
+      | upsert homes $final_homes
+      | insert refinement {
+        mode: "enable-option"
+        option: $option_path
+        hosts_before: $entry.hosts
+        hosts_after: $final_hosts
+        homes_before: $entry.homes
+        homes_after: $final_homes
+        hosts_refined: ($final_hosts != $entry.hosts)
+        homes_refined: ($final_homes != $entry.homes)
+      }
+    }
+  }
+}
+
+
+def supports_enable_option_refinement [file_path: string] {
+  ($file_path | str starts-with "modules/nixos/") or ($file_path | str starts-with "modules/home-manager/")
+}
+
+
+def detect_enable_options [file_path: string] {
+  let file_contents = try {
+    open $file_path
+  } catch { |err|
+    log warning $"Failed to read '($file_path)' for refinement: ($err)"
+    return []
+  }
+
+  let nested_options = ($file_contents
+    | parse --regex '(?ms)options\.(?<path>[A-Za-z0-9_.-]+)\s*=\s*\{.*?enable\s*=\s*(?:mkEnableOption|mkOption)'
+    | get -o path
+    | default [])
+
+  let direct_options = ($file_contents
+    | parse --regex '(?m)options\.(?<path>[A-Za-z0-9_.-]+)\.enable\s*=\s*(?:mkEnableOption|mkOption)'
+    | get -o path
+    | default [])
+
+  ($nested_options ++ $direct_options)
+  | uniq
+  | sort
+
+}
+
+def refine_targets_by_option [
+  output_kind: string
+  targets: list<string>
+  option_path: string
+] {
+  $targets | where { |target|
+    is_option_enabled_for_target $output_kind $target $option_path
+  }
+}
+
+def is_option_enabled_for_target [
+  output_kind: string
+  target: string
+  option_path: string
+] {
+  let attr_path = $".#($output_kind).($target).config.($option_path).enable"
+
+  try {
+    let result = (nix eval --json $attr_path | from json)
+    $result == true
+  } catch {
+    false
   }
 }
