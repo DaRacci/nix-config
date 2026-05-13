@@ -66,11 +66,13 @@ This repository uses `devenv`. You must provide the override for `nix flake chec
 
 ### Finding Affected Configurations
 
-Before testing, determine what your changes affect. Prefer `--since` so output only includes entries tied to files changed in your range. Add `--refine` to narrow host or home lists for files under `modules/nixos/` and `modules/home-manager/` when module exposes `options.<path>.enable`:
+Before testing, determine what your changes affect. Prefer `--since` so output only includes entries tied to files changed in your range. Add `--refine` to narrow host or home lists for files under `modules/nixos/` and `modules/home-manager/` when module exposes `options.<path>.enable`. Use `--report` to print a summary table grouping affected hosts/homes by priority:
 
 ```bash
-nix run .#module-graph -- --since <COMMIT_HASH> --refine
+SILENT=true nix run .#module-graph -- --since <COMMIT_HASH> --refine --report
 ```
+
+Recommend setting `SILENT=true` when sending output to LLMs or remote analysis tools to reduce logging verbosity and token usage.
 
 ### Project Structure Overview
 
