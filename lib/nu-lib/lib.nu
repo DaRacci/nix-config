@@ -2,15 +2,20 @@ use std/log
 
 # Code ran at import time
 export-env {
-  setup_logging
+  setup_logging $env.DEBUG? $env.SILENT?
 }
 
 # Setup logging level and format
 #
 # Environment variables:
-#   DEBUG
-export def --env setup_logging [] {
-  log set-level (if $env.DEBUG? == true { 10 } else { 20 })
+#   DEBUG: set to "true" to enable debug logging
+#   SILENT: set to "true" to suppress logging
+export def --env setup_logging [debug: string = "", silent: string = ""] {
+  log set-level (
+    if $debug == "true" { 10 }
+    else if $silent == "true" { 40 }
+    else { 20 }
+  )
   log info $"Logging initialized. Level: ($env.NU_LOG_LEVEL)"
   $env.NU_LOG_FORMAT = "%ANSI_START%%LEVEL%|%MSG%%ANSI_STOP%"
 }
