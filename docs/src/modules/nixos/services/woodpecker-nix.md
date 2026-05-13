@@ -52,7 +52,7 @@ and the containers that use it are sandboxed away from the host.
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
 | `woodpecker-nix-init`       | Hash-aware bootstrap: creates directories, copies `runtimeEnv` + `bootstrapPackages` closures into the CI store, reconstructs profile symlinks, and registers GC roots. Runs on every start — only the `nix copy` is skipped when the hash is unchanged. | No – needs host `/nix/store`                 |
 | `woodpecker-nix-daemon`     | Runs `nix daemon` with the CI store bind-mounted at `/nix`                                                                                                                                                                                               | Yes – `PrivateMounts`, `ProtectSystem`, etc. |
-| `woodpecker-nix-gc` (timer) | Periodic `nix-collect-garbage` against the CI store                                                                                                                                                                                                      | No                                           |
+| `woodpecker-nix-gc` (timer) | Periodic `nix-collect-garbage` against the CI store. Runs with its own writable state directory so Nix can create XDG/Home cache paths even under `ProtectSystem=strict`.                                                                                | No                                           |
 
 ## How version-drift is handled
 
@@ -275,6 +275,18 @@ store. Subsequent starts are instant (hash unchanged → skip copy, still verify
 profiles). Enable a binary cache substituter (via
 `isolatedStore.substituters` / `isolatedStore.trustedPublicKeys`) to speed up
 the initial copy.
+
+### GC service fails with `error: creating directory '//.local': Read-only file system`
+
+`nix-collect-garbage` may try to resolve XDG/Home paths even when talking to remote daemon. With `DynamicUser=true` and `ProtectSystem=strict`, leaving `HOME` unset can make Nix fall back to `/.local`, which is read-only inside service sandbox.
+
+Module now gives `woodpecker-nix-gc` dedicated writable home under `/var/lib/woodpecker-nix-gc` via `StateDirectory=` and sets `HOME`, `XDG_CACHE_HOME`, `XDG_CONFIG_HOME`, and `XDG_DATA_HOME` there.
+
+If you still see this error after deploy, verify generated unit contains those environment variables:
+
+```bash
+systemctl cat woodpecker-nix-gc.service
+```
 
 ### Daemon socket permission denied
 

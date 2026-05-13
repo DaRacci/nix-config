@@ -462,7 +462,15 @@ in
             Type = "oneshot";
 
             DynamicUser = true;
+            StateDirectory = "woodpecker-nix-gc";
+            Environment = [
+              "HOME=/var/lib/woodpecker-nix-gc"
+              "XDG_CACHE_HOME=/var/lib/woodpecker-nix-gc/.cache"
+              "XDG_CONFIG_HOME=/var/lib/woodpecker-nix-gc/.config"
+              "XDG_DATA_HOME=/var/lib/woodpecker-nix-gc/.local/share"
+            ];
             NoNewPrivileges = true;
+
             ProtectClock = true;
             ProtectHostname = true;
             ProtectKernelModules = true;
