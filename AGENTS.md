@@ -66,10 +66,10 @@ This repository uses `devenv`. You must provide the override for `nix flake chec
 
 ### Finding Affected Configurations
 
-Before testing, determine what your changes affect:
+Before testing, determine what your changes affect. Prefer `--since` so output only includes entries tied to files changed in your range. Add `--refine` to narrow host or home lists for files under `modules/nixos/` and `modules/home-manager/` when module exposes `options.<path>.enable`:
 
 ```bash
-nix run .#module-graph
+nix run .#module-graph -- --since <COMMIT_HASH> --refine
 ```
 
 ### Project Structure Overview
