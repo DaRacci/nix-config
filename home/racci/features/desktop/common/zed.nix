@@ -22,7 +22,7 @@
       "autocorrect"
       "cargo-appraiser"
       "cargo-tom"
-      "colored-zed-icons-theme"
+      "catppuccin-icons"
       "docker-compose"
       "dockerfile"
       "git-firefly"
@@ -92,8 +92,8 @@
 
       icon_theme = {
         mode = "dark";
-        dark = "Colored Zed Icons Theme Dark";
-        light = "Colored Zed Icons Theme Light";
+        dark = "Catppuccin Latte";
+        light = "Catppuccin Mocha";
       };
 
       language_models = {
@@ -107,7 +107,6 @@
 
       edit_predictions = {
         mode = "eager";
-        enabled_in_text_threads = true;
         disabled_globs = [
           "**/.env*"
           "**/*.pem"
