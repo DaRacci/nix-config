@@ -23,7 +23,7 @@ jobs:
       - name: Generate Matrix
         id: set-matrix
         # Do not update until https://github.com/workflow/nix-shell-action/issues/364 is fixed.
-        uses: workflow/nix-shell-action@v3
+        uses: workflow/nix-shell-action@v4.0.0
         with:
           flakes: nixpkgs#jq,nixpkgs#nushell
           script: |
