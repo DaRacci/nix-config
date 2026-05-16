@@ -9,7 +9,6 @@ queue_rules:
       - "#check-failure==0"
     merge_method: rebase
     update_method: rebase
-    autoqueue: true
     branch_protection_injection_mode: merge
 pull_request_rules:
   - name: Label conflicting pull requests
@@ -48,12 +47,14 @@ merge_protections:
     if:
       - base = master
     success_conditions:
-      - "title ~=
-        ^(fix|feat|docs|style|refactor|perf|test|build|ci|chore|revert)(?:\\(.+\
-        \\))?:"
+      - "title ~= ^(fix|feat|docs|style|refactor|perf|test|build|ci|chore|revert)(?:\\(.+\\\
+        ))?:"
   - name: Do not merge outdated PRs
     description: Make sure PRs are almost up to date before merging
     if:
       - base = master
     success_conditions:
       - "#commits-behind <= 10"
+merge_protections_settings:
+  auto_merge_conditions: true
+  reporting_method: check-runs
