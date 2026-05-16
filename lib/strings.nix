@@ -3,7 +3,7 @@
   ...
 }:
 let
-  inherit (builtins) elem concatStringsSep;
+  inherit (builtins) elem concatStringsSep split;
   inherit (lib)
     head
     tail
@@ -15,7 +15,20 @@ let
     toUpper
     splitStringBy
     flatten
+    toInt
     ;
+
+  scalar = 1024;
+  sizeTable = rec {
+    K  = scalar;
+    Ki = K;
+    M  = K * scalar;
+    Mi = M;
+    G  = M * scalar;
+    Gi = G;
+    T  = G * scalar;
+    Ti = T;
+  };
 in
 rec {
   capitalise =
@@ -60,4 +73,12 @@ rec {
   toSnakeCase = str: concatStringsSep "_" (map toLower (splitFormattedString str));
 
   toKebabCase = str: concatStringsSep "-" (map toLower (splitFormattedString str));
+
+  parseSize = s:
+    let
+      num = toInt (head (split "[KMGT]i?B\$" s));
+      unit = match "([KMGT]i?B)\$" s;
+      multiplier = sizeTable.${unit} or throw "Unknown size unit: ${unit}";
+    in
+      num * multiplier;
 }

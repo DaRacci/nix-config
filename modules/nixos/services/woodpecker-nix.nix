@@ -14,6 +14,8 @@ let
     types
     literalExpression
     concatStringsSep
+    optionalString
+    toInt
     ;
   inherit (types)
     attrsOf
@@ -21,6 +23,7 @@ let
     enum
     lines
     listOf
+    nullOr
     ints
     package
     ;
@@ -28,6 +31,23 @@ let
   cfg = config.services.woodpeckerNix;
   stateDir = cfg.stateDir;
   cacheDir = "${stateDir}/cache";
+
+  storeRealDir = "${stateDir}/nix/store-real";
+  overlayDir = "${stateDir}/nix/overlay";
+  upperDir = "${overlayDir}/upper";
+  workDir = "${overlayDir}/work";
+
+  gcSizeThreshold = cfg.isolatedStore.gc.sizeThreshold;
+  gcMinInterval = cfg.isolatedStore.gc.minInterval;
+  gcMaxFreed = cfg.isolatedStore.gc.maxFreed;
+
+  propagationEnabled = cfg.isolatedStore.propagation.enable;
+  propagationInterval = cfg.isolatedStore.propagation.interval;
+
+  overlayEnabled = cfg.isolatedStore.overlayfs.enable;
+
+  storeSizeBytes = lib.mine.strings.parseSize gcSizeThreshold;
+  gcMaxFreedBytes = lib.mine.strings.parseSize gcMaxFreed;
 
   runtimeEnv = pkgs.buildEnv {
     name = "woodpecker-ci-runtime";
@@ -154,6 +174,32 @@ in
         description = "Extra lines appended verbatim to the isolated daemon's nix.conf.";
       };
 
+      overlayfs = {
+        enable = mkEnableOption "Whether to use overlayfs for the isolated Nix store" // {
+          default = true;
+        };
+
+        upperDir = mkOption {
+          type = str;
+          default = "${stateDir}/nix/overlay/upper";
+          defaultText = literalExpression "\${stateDir}/nix/overlay/upper";
+          description = ''
+            Path for the overlayfs upper (writable) layer.
+            New store paths from container builds land here.
+          '';
+        };
+
+        workDir = mkOption {
+          type = str;
+          default = "${stateDir}/nix/overlay/work";
+          defaultText = literalExpression "\${stateDir}/nix/overlay/work";
+          description = ''
+            Path for the overlayfs work directory.
+            Required by overlayfs; not used for storage.
+          '';
+        };
+      };
+
       gc = {
         enable = mkEnableOption "Whether to set up periodic garbage collection for the isolated store" // {
           default = true;
@@ -169,6 +215,46 @@ in
           type = str;
           default = "14d";
           description = "Delete store paths older than this threshold.";
+        };
+
+        sizeThreshold = mkOption {
+          type = str;
+          default = "20G";
+          description = ''
+            Minimum store size before GC is triggered.
+            Prevents unnecessary GC when the store is small.
+            Accepts units: K, Ki, M, Mi, G, Gi, T, Ti.
+          '';
+        };
+
+        minInterval = mkOption {
+          type = str;
+          default = "7d";
+          description = ''
+            Minimum time between GC runs.
+            Prevents GC thrashing when the store hovers near the size threshold.
+          '';
+        };
+
+        maxFreed = mkOption {
+          type = nullOr str;
+          default = null;
+          description = ''
+            Maximum amount of data to free in a single GC run.
+            Prevents overly aggressive collection.
+          '';
+        };
+      };
+
+      propagation = {
+        enable = mkEnableOption "Whether to run a propagation sidecar that audits new store paths" // {
+          default = true;
+        };
+
+        interval = mkOption {
+          type = str;
+          default = "15m";
+          description = "systemd calendar expression for the propagation audit timer.";
         };
       };
     };
@@ -276,7 +362,7 @@ in
 
         woodpecker = {
           extraVolumes = [
-            "${stateDir}/nix/store:/nix/store"
+            "${stateDir}/nix:/nix"
             "${stateDir}/nix/var/nix/daemon-socket:/nix/var/nix/daemon-socket"
             "${stateDir}/nix/var/nix/profiles:/nix/var/nix/profiles"
           ];
@@ -311,7 +397,12 @@ in
           ]
           |> map (p: lib.nameValuePair p { d.mode = "0700"; })
           |> lib.listToAttrs
-        );
+        )
+        // (mkIf overlayEnabled {
+          "${storeRealDir}".d = { mode = "0700"; };
+          "${upperDir}".d = { mode = "0700"; };
+          "${workDir}".d = { mode = "0700"; };
+        });
 
         services = {
           woodpecker-nix-init = {
@@ -352,11 +443,32 @@ in
             path = [
               cfg.isolatedStore.package
               pkgs.uutils-coreutils-noprefix
-            ];
+            ]
+            ++ (mkIf overlayEnabled [ pkgs.util-linux ]);
 
             script =
               let
                 bootstrapStorePaths = concatStringsSep " " (map (p: ''"${p}"'') allBootstrapPkgs);
+                overlaySetup = optionalString overlayEnabled ''
+                  echo ">>> Setting up overlayfs for isolated Nix store ..."
+
+                  mkdir -p "${storeRealDir}"
+                  mkdir -p "${upperDir}"
+                  mkdir -p "${workDir}"
+
+                  # Move existing store content into store-real (lower layer)
+                  if [ -d "${stateDir}/nix/store" ] && [ -z "$(ls -A ${stateDir}/nix/store 2>/dev/null)" ]; then
+                    echo "    Fresh install -- store is empty, nothing to move."
+                  elif [ -d "${stateDir}/nix/store" ]; then
+                    echo "    Moving existing store content to store-real ..."
+                    mv "${stateDir}/nix/store"/* "${storeRealDir}/" 2>/dev/null || true
+                    rm -rf "${stateDir}/nix/store"
+                  fi
+
+                  mount -t overlay overlay -o "lowerdir=${storeRealDir},upperdir=${upperDir},workdir=${workDir}" "${stateDir}/nix/store"
+
+                  echo "    Overlayfs mounted: lower=${storeRealDir}, upper=${upperDir}"
+                '';
               in
               ''
                 set -euo pipefail
@@ -365,32 +477,31 @@ in
                 HASH_FILE="${stateDir}/.bootstrap-hash"
 
                 if [ -f "$HASH_FILE" ] && [ "$(cat "$HASH_FILE")" = "$CURRENT_HASH" ]; then
-                  echo "==> Store is up-to-date (hash: $CURRENT_HASH). Verifying profiles ..."
+                  echo ">>> Store is up-to-date (hash: $CURRENT_HASH). Verifying profiles ..."
                 else
-                  echo "==> Bootstrapping CI Nix store at ${stateDir} ..."
+                  echo ">>> Bootstrapping CI Nix store at ${stateDir} ..."
 
                   for pkg in ${bootstrapStorePaths}; do
                     echo "    Copying closure: $pkg ..."
-                    nix copy \
-                      --no-check-sigs \
-                      --to "local?root=${stateDir}" \
-                      "$pkg"
+                    nix copy --no-check-sigs --to "local?root=${stateDir}" "$pkg"
                   done
 
                   printf '%s' "$CURRENT_HASH" > "$HASH_FILE"
-                  echo "==> Store bootstrap complete (hash: $CURRENT_HASH)."
+                  echo ">>> Store bootstrap complete (hash: $CURRENT_HASH)."
                 fi
 
-                echo "==> Reconstructing profile symlinks ..."
+                ${overlaySetup}
+
+                echo ">>> Reconstructing profile symlinks ..."
                 ln -sfn ${runtimeEnv} "${stateDir}/nix/var/nix/profiles/default-1-link"
                 ln -sfn /nix/var/nix/profiles/default-1-link "${stateDir}/nix/var/nix/profiles/default"
 
                 mkdir -p "${stateDir}/nix/var/nix/profiles/per-user/root"
 
-                echo "==> Registering GC roots ..."
+                echo ">>> Registering GC roots ..."
                 ln -sfn ${runtimeEnv} "${stateDir}/nix/var/nix/gcroots/runtime-env"
 
-                echo "==> Init complete."
+                echo ">>> Init complete."
               '';
           };
 
@@ -468,7 +579,13 @@ in
               "XDG_CACHE_HOME=/var/lib/woodpecker-nix-gc/.cache"
               "XDG_CONFIG_HOME=/var/lib/woodpecker-nix-gc/.config"
               "XDG_DATA_HOME=/var/lib/woodpecker-nix-gc/.local/share"
-            ];
+              "STATE_DIR=${stateDir}"
+              "STORE_SIZE_FILE=${stateDir}/.store-size"
+              "SIZE_THRESHOLD_BYTES=${toString storeSizeBytes}"
+              "GC_OLDER_THAN=${cfg.isolatedStore.gc.olderThan}"
+              "MIN_INTERVAL=${cfg.isolatedStore.gc.minInterval}"
+              "NIX_REMOTE=unix://${stateDir}/nix/var/nix/daemon-socket/socket"
+            ] ++ optionalString cfg.isolatedStore.gc.maxFreed [ "GC_MAX_FREED=${cfg.isolatedStore.gc.maxFreed}" ];
             NoNewPrivileges = true;
 
             ProtectClock = true;
@@ -497,9 +614,58 @@ in
           };
 
           script = ''
+            set -euo pipefail
+
+            SIZE_THRESHOLD_BYTES="$SIZE_THRESHOLD_BYTES"
+            MIN_INTERVAL="$MIN_INTERVAL"
+            LAST_GC_FILE="$STATE_DIR/.last-gc"
+            STORE_SIZE_FILE="$STATE_DIR/.store-size"
+
+            # --- Size gate ---
+            if [ -f "$STORE_SIZE_FILE" ]; then
+              CURRENT_SIZE=$(cat "$STORE_SIZE_FILE")
+            else
+              CURRENT_SIZE=0
+            fi
+
+            SIZE_HUMAN=$(( CURRENT_SIZE / 1024 / 1024 ))
+            THRESHOLD_HUMAN=$(( SIZE_THRESHOLD_BYTES / 1024 / 1024 ))
+
+            if [ "$CURRENT_SIZE" -lt "$SIZE_THRESHOLD_BYTES" ]; then
+              echo ">>> GC: Store size (''${SIZE_HUMAN}MB) below threshold (''${THRESHOLD_HUMAN}MB). Skipping."
+              exit 0
+            fi
+
+            # --- Time gate ---
+            if [ -f "$LAST_GC_FILE" ]; then
+              LAST_GC_EPOCH=$(cat "$LAST_GC_FILE")
+              NOW_EPOCH=$(date +%s)
+              MIN_SECONDS=$(date -d "now $MIN_INTERVAL" +%s 2>/dev/null || date -v-''${MIN_INTERVAL} +%s 2>/dev/null || echo 0)
+              ELAPSED=$(( NOW_EPOCH - LAST_GC_EPOCH ))
+              MIN_SECONDS_AGO=$(( NOW_EPOCH - MIN_SECONDS ))
+
+              if [ "$ELAPSED" -lt "$MIN_SECONDS_AGO" ]; then
+                REMAINING=$(( MIN_SECONDS_AGO - ELAPSED ))
+                echo ">>> GC: Last GC was ''${ELAPSED}s ago, minimum interval not met (''${REMAINING}s remaining). Skipping."
+                exit 0
+              fi
+            fi
+
+            echo ">>> GC: Store size (''${SIZE_HUMAN}MB) exceeds threshold (''${THRESHOLD_HUMAN}MB). Running GC..."
+
             export NIX_REMOTE="unix://${stateDir}/nix/var/nix/daemon-socket/socket"
             ${cfg.isolatedStore.package}/bin/nix-collect-garbage \
-              --delete-older-than "${cfg.isolatedStore.gc.olderThan}"
+              --delete-older-than "${cfg.isolatedStore.gc.olderThan}" \
+              ${optionalString cfg.isolatedStore.gc.maxFreed ''--max-freed "${cfg.isolatedStore.gc.maxFreed}"''}
+
+            # Record GC timestamp
+            date +%s > "$LAST_GC_FILE"
+
+            # Update store size cache after GC
+            NEW_SIZE=$(du -sb "$STATE_DIR/nix/store" 2>/dev/null | awk '{print $1}' || echo 0)
+            echo "$NEW_SIZE" > "$STORE_SIZE_FILE"
+
+            echo ">>> GC: Complete."
           '';
         };
 
@@ -513,6 +679,149 @@ in
             OnCalendar = cfg.isolatedStore.gc.interval;
             Persistent = true;
             RandomizedDelaySec = "30m";
+          };
+        };
+      };
+    })
+
+    (mkIf (cfg.enable && cfg.isolatedStore.enable && cfg.isolatedStore.propagation.enable) {
+      systemd = {
+        services.woodpecker-nix-propagate = {
+          description = "Audit new store paths in overlayfs upper layer";
+          after = [
+            "woodpecker-nix-daemon.service"
+          ];
+          requires = [ "woodpecker-nix-daemon.service" ];
+          wantedBy = [ "multi-user.target" ];
+
+          serviceConfig = {
+            Type = "simple";
+            DynamicUser = true;
+            StateDirectory = "woodpecker-nix-propagate";
+            Environment = [
+              "STATE_DIR=${stateDir}"
+              "UPPER_DIR=${upperDir}"
+              "STORE_REAL_DIR=${storeRealDir}"
+              "JOURNAL=${stateDir}/propagation-journal"
+              "STORE_SIZE_FILE=${stateDir}/.store-size"
+              "NIX_REMOTE=unix://${stateDir}/nix/var/nix/daemon-socket/socket"
+            ];
+            NoNewPrivileges = true;
+            ProtectClock = true;
+            ProtectHostname = true;
+            ProtectKernelModules = true;
+            ProtectKernelLogs = true;
+            ProtectKernelTunables = true;
+            RestrictRealtime = true;
+            RestrictSUIDSGID = true;
+            LockPersonality = true;
+            PrivateDevices = true;
+            PrivateTmp = true;
+            ProtectHome = true;
+            ProtectSystem = "strict";
+            RestrictNamespaces = true;
+            CapabilityBoundingSet = "";
+            RestrictAddressFamilies = [ "AF_UNIX" ];
+            SystemCallFilter = [ "@system-service" ];
+            SystemCallArchitectures = "native";
+            SystemCallErrorNumber = "EPERM";
+            MemoryDenyWriteExecute = true;
+            ReadWritePaths = [ stateDir ];
+            ExecStart = pkgs.writeShellScript "woodpecker-nix-propagate" ''
+              set -euo pipefail
+
+              STATE_DIR="$STATE_DIR"
+              UPPER_DIR="$UPPER_DIR"
+              STORE_REAL_DIR="$STORE_REAL_DIR"
+              JOURNAL="$JOURNAL"
+              STORE_SIZE_FILE="$STORE_SIZE_FILE"
+              NIX="${cfg.isolatedStore.package}/bin/nix"
+
+              touch "$JOURNAL"
+
+              log() {
+                echo "[$(date -Iseconds)] propagate: $*"
+              }
+
+              update_store_size() {
+                local size_bytes
+                size_bytes=$(du -sb "$STATE_DIR/nix/store" 2>/dev/null | awk '{print $1}' || echo 0)
+                echo "$size_bytes" > "$STORE_SIZE_FILE"
+                log "Store size: $(( size_bytes / 1024 / 1024 )) MB"
+              }
+
+              scan_new_paths() {
+                local new_count=0
+
+                if [ ! -d "$UPPER_DIR" ]; then
+                  log "No upperdir found at $UPPER_DIR, skipping scan"
+                  return 0
+                fi
+
+                while IFS= read -r narinfo; do
+                  local basename
+                  basename=$(basename "$narinfo" .narinfo)
+                  local store_path="store-''${basename}"
+
+                  if grep -qF "$store_path" "$JOURNAL" 2>/dev/null; then
+                    continue
+                  fi
+
+                  local path_size
+                  path_size=$(grep -oP 'servedb-size: \K[0-9]+' "$narinfo" 2>/dev/null || echo "0")
+
+                  log "NEW: $store_path (narinfo-size: ''${path_size} bytes)"
+                  echo "$(date -Iseconds) $store_path $path_size" >> "$JOURNAL"
+                  new_count=$(( new_count + 1 ))
+                done < <(find "$UPPER_DIR" -name '*.narinfo' -type f 2>/dev/null)
+
+                while IFS= read -r store_dir; do
+                  local dir_name
+                  dir_name=$(basename "$store_dir")
+
+                  case "$dir_name" in
+                    info|locks|temp|log|db) continue ;;
+                  esac
+
+                  if grep -qF "$dir_name" "$JOURNAL" 2>/dev/null; then
+                    continue
+                  fi
+
+                  if [[ "$dir_name" =~ ^[a-z0-9]{32}-.*$ ]]; then
+                    local dir_size
+                    dir_size=$(du -sb "$store_dir" 2>/dev/null | awk '{print $1}' || echo "0")
+                    log "NEW: $dir_name (dir-size: ''${dir_size} bytes)"
+                    echo "$(date -Iseconds) $dir_name $dir_size" >> "$JOURNAL"
+                    new_count=$(( new_count + 1 ))
+                  fi
+                done < <(find "$UPPER_DIR" -maxdepth 1 -mindepth 1 -type d 2>/dev/null)
+
+                log "Scan complete: $new_count new paths found"
+              }
+
+              log "Propagation sidecar started"
+              log "Upper dir: $UPPER_DIR"
+              log "Store real dir: $STORE_REAL_DIR"
+              log "Journal: $JOURNAL"
+
+              update_store_size
+              scan_new_paths
+
+              log "Propagation audit complete. Exiting."
+            '';
+          };
+        };
+
+        timers.woodpecker-nix-propagate = {
+          description = "Periodically audit new store paths in overlayfs";
+          wantedBy = [ "timers.target" ];
+          after = [ "woodpecker-nix-daemon.service" ];
+          requires = [ "woodpecker-nix-daemon.service" ];
+
+          timerConfig = {
+            OnCalendar = propagationInterval;
+            Persistent = true;
+            RandomizedDelaySec = "2m";
           };
         };
       };
