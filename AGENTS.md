@@ -49,11 +49,11 @@ VERIFICATION: Reference the `test` agent and `testing` skill for guidance on ide
 
 ### Build Commands
 
-| Command | Purpose |
-|---------|---------|
-| `nix build .#nixosConfigurations.<host>.config.system.build.toplevel` | Build host |
-| `nix build .#homeConfigurations."<user>@<host>".activationPackage` | Build home |
-| `nix fmt` | Format code |
+| Command                                                                        | Purpose     |
+| ------------------------------------------------------------------------------ | ----------- |
+| `nix build .#nixosConfigurations.<host>.config.system.build.toplevel`          | Build host  |
+| `nix build .#homeConfigurations."<user>@<host>".activationPackage`             | Build home  |
+| `nix fmt`                                                                      | Format code |
 | `nix flake check --override-input devenv-root "file+file://$PWD/.devenv/root"` | Check flake |
 
 ### DevEnv Override
@@ -66,11 +66,13 @@ This repository uses `devenv`. You must provide the override for `nix flake chec
 
 ### Finding Affected Configurations
 
-Before testing, determine what your changes affect:
+Before testing, determine what your changes affect. Prefer `--since` so output only includes entries tied to files changed in your range. Add `--refine` to narrow host or home lists for files under `modules/nixos/` and `modules/home-manager/` when module exposes `options.<path>.enable`. Use `--report` to print a summary table grouping affected hosts/homes by priority:
 
 ```bash
-./flake/dev/scripts/module-graph.nu
+SILENT=true nix run .#module-graph -- --since <COMMIT_HASH> --refine --report
 ```
+
+Recommend setting `SILENT=true` when sending output to LLMs or remote analysis tools to reduce logging verbosity and token usage.
 
 ### Project Structure Overview
 

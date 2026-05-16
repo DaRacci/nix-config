@@ -4,26 +4,26 @@ Applies shared system theme defaults with Stylix.
 
 - **Entry point**: `modules/nixos/core/stylix.nix`
 
-______________________________________________________________________
+---
 
 ## Overview
 
 This module imports Stylix and enables dark Tokyo Night theming on non-headless hosts by default.
 
-______________________________________________________________________
+---
 
 ## Options
 
 ### `core.stylix.enable`
 
-| | |
-|---|---|
-| Type | `bool` |
+|         |                                  |
+| ------- | -------------------------------- |
+| Type    | `bool`                           |
 | Default | `!config.host.device.isHeadless` |
 
 Enable Stylix configuration. Default disables theming on headless hosts.
 
-______________________________________________________________________
+---
 
 ## Behaviour
 
@@ -34,7 +34,7 @@ When enabled, module:
 - sets `stylix.polarity = "dark"`, and
 - uses Tokyo Night dark Base16 scheme from `tinted-schemes` input.
 
-______________________________________________________________________
+---
 
 ## Usage Example
 
@@ -44,7 +44,7 @@ ______________________________________________________________________
 }
 ```
 
-______________________________________________________________________
+---
 
 ## Operational Notes
 

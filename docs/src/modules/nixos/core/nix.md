@@ -4,7 +4,7 @@ Defines shared Nix daemon, cache, and registry defaults.
 
 - **Entry point**: `modules/nixos/core/nix.nix`
 
-______________________________________________________________________
+---
 
 ## Overview
 
@@ -12,13 +12,13 @@ This module establishes global Nix configuration for hosts in this flake. It set
 
 It also provisions cache push secret and `attic-watch-store` service for automatic uploads to remote Attic cache.
 
-______________________________________________________________________
+---
 
 ## Options
 
 This module does not define `core.*` options. It applies shared baseline configuration directly.
 
-______________________________________________________________________
+---
 
 ## Behaviour
 
@@ -35,7 +35,7 @@ Module configures:
 
 It also enables `services.angrr` to retain recent system profiles and creates `systemd.services.attic-watch-store` that waits for `network-online.target`, restarts on failure, logs into Attic with SOPS-managed `CACHE_PUSH_KEY`, and watches store for uploads.
 
-______________________________________________________________________
+---
 
 ## Operational Notes
 

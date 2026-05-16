@@ -15,7 +15,7 @@ when:
 
 steps:
   - name: Update all flake.lock files
-    image: registry.racci.dev/lix-woodpecker:latest
+    image: registry.racci.dev/lix-woodpecker
     pull: true
     environment:
       GITHUB_TOKEN:
@@ -49,7 +49,7 @@ steps:
     environment:
       GITHUB_TOKEN:
         from_secret: GITHUB_TOKEN
-    commands: |
+    commands: |-
       nix run .#create-pr -- \
         --title "chore(deps): Update flake inputs" \
         --body "This PR updates the flake inputs to their latest versions, see individual commits for changes." \

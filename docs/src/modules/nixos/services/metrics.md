@@ -5,13 +5,9 @@ Comprehensive metrics collection and integration with Home Assistant via `hacomp
 - **Entry point**: `modules/nixos/services/metrics.nix`
 - **Upstream**: [Hacompanion GitHub Repository](https://github.com/tobias-kuendig/hacompanion)
 
-### Special Options
+### Options
 
-- `services.metrics.hacompanion.enable`: Enable the Home Assistant Companion service.
-- `services.metrics.hacompanion.sensor.<name>.enable`: Enable specific built-in sensors (e.g., `cpu_temp`, `memory`, `uptime`).
-- `services.metrics.hacompanion.script`: Define custom scripts to expose as sensors or switches in Home Assistant.
-- `services.metrics.hacompanion.storage`: Configure monitoring for storage devices and ZFS pools.
-- `services.metrics.upgradeStatus.enable`: Enable a specialized sensor for tracking NixOS upgrade status.
+{{#include ../../../generated/metrics-options.md}}
 
 ### Usage Example
 

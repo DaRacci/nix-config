@@ -1,0 +1,86 @@
+labels:
+  platform: linux/amd64
+
+when:
+  - event: manual
+  - event: [push, pull_request]
+    branch: master
+
+clone:
+  - name: git
+    image: woodpeckerci/plugin-git
+    settings:
+      partial: false
+      depth: 0
+
+matrix:
+  HOST:
+    - nixai
+    - nixarr
+    - nixcloud
+    - nixdev
+    - nixio
+    - nixmi
+    - nixmon
+    - nixserv
+
+steps:
+  - name: decide-${HOST}
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    commands: |
+      set -euo pipefail
+
+      SHOULD_BUILD=false
+      if [ "$${CI_PREV_PIPELINE_STATUS}" = "error" ]; then
+        echo "Previous pipeline failed for $${HOST}, Building to check if it was a transient issue."
+        SHOULD_BUILD=true
+      else
+        echo "Previous pipeline state was $${CI_PREV_PIPELINE_STATUS} for $${HOST}, checking if it is affected by changes."
+        if [ -n "$${CI_PREV_COMMIT_SHA:-}" ]; then
+          RANGE="$${CI_PREV_COMMIT_SHA}..$${CI_COMMIT_SHA}"
+          AFFECTED=$(nix run .#detect-affected-outputs -- nixosConfigurations --json --range "$${RANGE}" --outputs "$${HOST}" 2>/dev/null || echo "[]")
+          if echo "$${AFFECTED}" | jq -e --arg host "$${HOST}" 'index($host)' > /dev/null 2>&1; then
+            echo "Host $${HOST} is affected by changes, proceeding with build"
+            SHOULD_BUILD=true
+          else
+            echo "Host $${HOST} is not affected by changes, skipping build"
+          fi
+        else
+          echo "No previous commit SHA, building..."
+          SHOULD_BUILD=true
+        fi
+      fi
+
+      if [ "$${SHOULD_BUILD}" = "true" ]; then
+        touch .do-build
+      fi
+
+  - name: build-${HOST}
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    depends_on: ["decide-${HOST}"]
+    environment:
+      BINARY_CACHE_TOKEN:
+        from_secret: BINARY_CACHE_TOKEN
+    commands: |-
+      if [ ! -f .do-build ]; then
+        echo "Skipping build for ${HOST} - not affected by changes"
+        exit 0
+      fi
+
+      nix run .#setup-attic
+      nix run .#archive-flakes -- "." "flake/nixos" "flake/home-manager"
+      nix-fast-build --no-nom --attic-cache raccidev --skip-cached --flake ".#nixosConfigurations.${HOST}.config.system.build.toplevel" --out-link "result-${HOST}"
+
+  - name: vulnerability-scan-${HOST}
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    depends_on: ["build-${HOST}"]
+    commands: |-
+      if [ ! -f "result-${HOST}" ]; then
+        echo "Build output for ${HOST} not found, skipping vulnerability scan"
+        exit 0
+      fi
+
+      vulnix "result-${HOST}"

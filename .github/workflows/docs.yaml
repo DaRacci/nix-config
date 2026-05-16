@@ -1,17 +1,13 @@
 name: Documentation
-
 on:
   push:
     branches: [master]
-
 concurrency:
   cancel-in-progress: true
   group: pages
-
 defaults:
   run:
     shell: bash
-
 jobs:
   docs:
     runs-on: self-hosted
@@ -23,18 +19,14 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
-
     steps:
       - uses: actions/checkout@v6
-
       - name: Build Documentation
         run: nix build .#docs
-
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: result
-
       - name: Deploy Pages
         id: deploy
         uses: actions/deploy-pages@v5

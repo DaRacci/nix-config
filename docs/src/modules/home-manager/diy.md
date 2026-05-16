@@ -2,7 +2,7 @@
 
 This section documents the Home-Manager modules under `purpose.diy`, which provide tooling and configuration for hardware tinkering, 3D printing, and related maker activities.
 
-______________________________________________________________________
+---
 
 ## Printing
 
@@ -12,52 +12,23 @@ The printing module installs 3D-printing software and wires up persistent storag
 
 ### Options
 
-#### `purpose.diy.printing.enable`
-
-| | |
-|---|---|
-| Type | `bool` |
-| Default | `false` |
-
-Enables 3D-printing support. Installs OrcaSlicer and LycheeSlicer and registers their configuration directories for persistence.
-
-______________________________________________________________________
+{{#include ../../generated/diy-printing-options.md}}
 
 ### Git Sync
 
 The `gitSync` sub-module adds a long-running systemd user service that watches the OrcaSlicer profile directory and automatically creates a git commit every time a profile file is added, changed, or removed. This gives you a full revision history of your slicer settings with zero manual effort.
 
-#### `purpose.diy.printing.gitSync.enable`
-
-| | |
-|---|---|
-| Type | `bool` |
-| Default | `false` |
-
-Enable the OrcaSlicer git auto-commit watcher. Requires `purpose.diy.printing.enable = true`.
-
-#### `purpose.diy.printing.gitSync.repoPath`
-
-| | |
-|---|---|
-| Type | `string` |
-| Default | `"${config.home.homeDirectory}/.config/OrcaSlicer/user/default"` |
-
-Absolute path to the directory that will be managed as a git repository. The directory is initialised automatically the first time the watcher service starts, so it does not need to exist at activation time.
-
-The default points at the standard OrcaSlicer per-user profile directory, which contains the `filament/`, `process/`, and `machine/` sub-directories, so all profile types are tracked without any additional configuration.
-
-______________________________________________________________________
+---
 
 ### Commit Message Convention
 
 Commit messages are generated automatically based on the type of filesystem event and the location of the file within the repository:
 
-| Event | Commit message format |
-|---|---|
-| File added / created | `feat(<type>): added <name>` |
-| File modified | `refactor(<type>): updated <name>` |
-| File deleted | `chore(<type>): removed <name>` |
+| Event                | Commit message format              |
+| -------------------- | ---------------------------------- |
+| File added / created | `feat(<type>): added <name>`       |
+| File modified        | `refactor(<type>): updated <name>` |
+| File deleted         | `chore(<type>): removed <name>`    |
 
 Where:
 
@@ -72,7 +43,7 @@ refactor(process): updated Standard_0.2mm_Quality
 chore(machine): removed Prusa_MK4S
 ```
 
-______________________________________________________________________
+---
 
 ### How It Works
 
@@ -82,7 +53,7 @@ ______________________________________________________________________
 1. All pending changes are then committed **one file at a time**, each with an individually crafted commit message.
 1. If the watched directory does not yet exist (e.g. OrcaSlicer has never been run), the service polls every 10 seconds until it appears, then initialises the repository and starts watching.
 
-______________________________________________________________________
+---
 
 ### Usage Example
 
@@ -102,7 +73,7 @@ ______________________________________________________________________
 }
 ```
 
-______________________________________________________________________
+---
 
 ### Operational Notes
 

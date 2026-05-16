@@ -35,6 +35,8 @@
             nix-init
             nh
             nix-update
+            vulnix
+            nix-fast-build
 
             # Required Tools
             nix

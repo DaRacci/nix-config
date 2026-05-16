@@ -7,7 +7,7 @@
 let
   inherit (pkgs.stdenv.hostPlatform) system;
   inherit (inputs.nix2container.packages.${system}) nix2container;
-  buildLixImage = import "${inputs.lix}/docker.nix";
+  buildLixImage = import ./v2.nix;
 in
 buildLixImage {
   inherit pkgs nix2container;
@@ -17,6 +17,7 @@ buildLixImage {
   extraPkgs = with pkgs; [
     gawk
     jq
+    yq-go
     gnupg
     attic-client
   ];
@@ -28,6 +29,8 @@ buildLixImage {
     trusted-substituters = "https://cache.racci.dev/global";
     extra-trusted-public-keys = "global:OKNSxDYKp8Q8Tr5/5Bc7CYVSfvdFQV0dMhpG0fOAG0k=";
     extra-substituters = trusted-substituters;
-    netrc-file = "/tmp/netrc"; # For use with the setup-attic.nu ci script.
+    netrc-file = "/tmp/netrc";
   };
+
+  staticShellLayer = true;
 }
