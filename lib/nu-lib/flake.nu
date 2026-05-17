@@ -72,6 +72,7 @@ export def get_output_graph_files [
   let graph_file = (mktemp -t "module-graph.XXXX")
 
   try {
+    log debug $"Evaluating graph for ($identifier) with flake source ($flake_source)"
     run-external "nix" "eval" "--json" $".#($identifier).graph" o> $graph_file
   } catch { |err|
     log error $"Failed to evaluate graph for ($identifier): ($err)"

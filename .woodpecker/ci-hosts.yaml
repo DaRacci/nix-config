@@ -78,7 +78,7 @@ steps:
     pull: true
     depends_on: ["build-${HOST}"]
     commands: |-
-      if [ ! -f "result-${HOST}" ]; then
+      if [ ! -e "result-${HOST}" ]; then
         echo "Build output for ${HOST} not found, skipping vulnerability scan"
         exit 0
       fi
