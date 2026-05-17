@@ -305,14 +305,14 @@ GC is gated by **both** size and time. If GC never runs:
    cat /var/lib/woodpecker-nix/.store-size
    ```
 
-2. Check time since last GC:
+1. Check time since last GC:
 
    ```bash
    cat /var/lib/woodpecker-nix/.last-gc  # epoch timestamp
    date -d @$(cat /var/lib/woodpecker-nix/.last-gc)
    ```
 
-3. Both conditions must be met: store > `sizeThreshold` AND more than
+1. Both conditions must be met: store > `sizeThreshold` AND more than
    `minInterval` (default 7d) since last GC.
 
 If GC runs too aggressively, adjust `gc.maxFreed` (default 2GB) to cap

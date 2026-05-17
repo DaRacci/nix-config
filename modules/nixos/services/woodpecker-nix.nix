@@ -15,7 +15,6 @@ let
     literalExpression
     concatStringsSep
     optionalString
-    toInt
     ;
   inherit (types)
     attrsOf
@@ -38,16 +37,11 @@ let
   workDir = "${overlayDir}/work";
 
   gcSizeThreshold = cfg.isolatedStore.gc.sizeThreshold;
-  gcMinInterval = cfg.isolatedStore.gc.minInterval;
-  gcMaxFreed = cfg.isolatedStore.gc.maxFreed;
-
-  propagationEnabled = cfg.isolatedStore.propagation.enable;
   propagationInterval = cfg.isolatedStore.propagation.interval;
 
   overlayEnabled = cfg.isolatedStore.overlayfs.enable;
 
   storeSizeBytes = lib.mine.strings.parseSize gcSizeThreshold;
-  gcMaxFreedBytes = lib.mine.strings.parseSize gcMaxFreed;
 
   runtimeEnv = pkgs.buildEnv {
     name = "woodpecker-ci-runtime";
@@ -399,9 +393,15 @@ in
           |> lib.listToAttrs
         )
         // (mkIf overlayEnabled {
-          "${storeRealDir}".d = { mode = "0700"; };
-          "${upperDir}".d = { mode = "0700"; };
-          "${workDir}".d = { mode = "0700"; };
+          "${storeRealDir}".d = {
+            mode = "0700";
+          };
+          "${upperDir}".d = {
+            mode = "0700";
+          };
+          "${workDir}".d = {
+            mode = "0700";
+          };
         });
 
         services = {
@@ -585,7 +585,8 @@ in
               "GC_OLDER_THAN=${cfg.isolatedStore.gc.olderThan}"
               "MIN_INTERVAL=${cfg.isolatedStore.gc.minInterval}"
               "NIX_REMOTE=unix://${stateDir}/nix/var/nix/daemon-socket/socket"
-            ] ++ optionalString cfg.isolatedStore.gc.maxFreed [ "GC_MAX_FREED=${cfg.isolatedStore.gc.maxFreed}" ];
+            ]
+            ++ optionalString cfg.isolatedStore.gc.maxFreed [ "GC_MAX_FREED=${cfg.isolatedStore.gc.maxFreed}" ];
             NoNewPrivileges = true;
 
             ProtectClock = true;
