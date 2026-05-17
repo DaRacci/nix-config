@@ -43,7 +43,7 @@ def main [
     exit 0
   }
 
-  let updated_yaml = $yaml | update $"matrix.($matrix_key)" $new_matrix
+  let updated_yaml = $yaml | update (["matrix", $matrix_key] | into cell-path) $new_matrix
   let yaml_string = $updated_yaml | to yaml
 
   $yaml_string | save --force $workflow_file

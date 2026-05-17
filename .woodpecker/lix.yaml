@@ -75,7 +75,7 @@ steps:
       REGISTRY_TOKEN:
         from_secret: REGISTRY_TOKEN
     commands: |
-      source envvar
+      . /envvar
       if [ "$SHOULD_PUBLISH" = "true" ]; then
         echo "Publishing lix-woodpecker image to registry..."
         nix run ".#lix-woodpecker.copyToRegistry" -- --dest-creds "$REGISTRY_USER:$REGISTRY_TOKEN"

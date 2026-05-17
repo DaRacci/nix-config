@@ -95,8 +95,8 @@ def get_changed_files_since [since: string] {
   let untracked_changes = try {
     git ls-files --others --exclude-standard | lines
   } catch { |err|
-    log warning $"Failed to get untracked files: ($err)"
-    []
+    log error $"Failed to get untracked files: ($err)"
+    exit 1
   }
 
   let changed_files = ($tracked_changes ++ $untracked_changes)

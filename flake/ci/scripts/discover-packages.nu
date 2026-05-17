@@ -56,7 +56,7 @@ export def get_package_location [
     log warning $"Unable to evaluate location from nix positions for ($package_name)"
   }
   if ($package_path | is-empty) {
-    $package_path = $"pkgs/($package_name)"
+    $package_path = ([$env.GIT_ROOT, "pkgs" $package_name] | path join)
   }
 
   return $package_path

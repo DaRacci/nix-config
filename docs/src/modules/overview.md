@@ -28,7 +28,7 @@ These modules allow for modular and reusable configurations across different hos
     - [Huntress](nixos/services/huntress.md)
     - [Metrics](nixos/services/metrics.md)
     - [Tailscale](nixos/services/tailscale.md)
-    - [Woodpecker Nix](nixos/services/woodpecker-nix.md)
+    - [Woodpecker Nix](nixos/services/woodpecker_nix.md)
   - [AI Modules](nixos/ai/overview.md)
     - [Agents](nixos/ai/agents.md)
     - [Mnemosyne](nixos/ai/mnemosyne.md)

@@ -132,8 +132,9 @@ steps:
       GITHUB_TOKEN:
         from_secret: GITHUB_TOKEN
     commands: |-
-      # check if the head commit of the branch is different from the base branch to avoid creating PRs with no changes
-      if git rev-parse HEAD | grep -q "$(git rev-parse "${BASE_BRANCH}")"; then
+      # avoid creating PRs with no changes
+      git fetch --depth=1 origin "${BASE_BRANCH}"
+      if git diff --quiet "origin/${BASE_BRANCH}"...HEAD; then
         echo "No changes detected, skipping PR creation."
         exit 0
       fi
