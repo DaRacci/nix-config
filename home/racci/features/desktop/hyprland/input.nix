@@ -53,7 +53,7 @@ in
 
         "CTRL+ALT+DELETE" = [
           "exec"
-          "uwsm stop"
+          "sh -c '${lib.getExe pkgs.zenity} --question --title=\"Exit Hyprland?\" --text=\"Are you sure you want to exit Hyprland?\" --ok-label=\"Exit\" --cancel-label=\"Cancel\" && uwsm stop'"
         ];
 
         #region Media
