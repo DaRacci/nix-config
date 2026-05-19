@@ -10,6 +10,7 @@
       [
         pkgs.grim
         pkgs.hyprpicker
+        pkgs.slurp
       ]
       |> map (exe: lib.getExe exe);
 

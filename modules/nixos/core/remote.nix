@@ -195,6 +195,9 @@ in
             wayland.windowManager.hyprland.settings = {
               exec-once = [ "hyprctl output create headless" ];
               monitor = [ "HEADLESS-2,disable" ];
+              permission = [
+                "${lib.getExe pkgs.sunshine}, screencopy, allow"
+              ];
             };
           }
         ];
