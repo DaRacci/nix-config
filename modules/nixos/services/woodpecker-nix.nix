@@ -15,6 +15,7 @@ let
     literalExpression
     concatStringsSep
     optionalString
+    optional
     ;
   inherit (types)
     attrsOf
@@ -514,6 +515,7 @@ in
             ];
             wants = [ "network-online.target" ];
             requires = [ "woodpecker-nix-init.service" ];
+            restartTriggers = [ (pkgs.writeText "woodpecker-nix.conf" nixConf) ];
 
             serviceConfig = {
               Type = "simple";
@@ -521,6 +523,7 @@ in
               Environment = "NIX_CONF_DIR=${stateDir}/etc/nix";
               BindPaths = [ "${stateDir}/nix:/nix" ];
               ReadWritePaths = [ stateDir ];
+              DynamicUser = true;
 
               NoNewPrivileges = true;
               ProtectClock = true;
@@ -586,7 +589,7 @@ in
               "MIN_INTERVAL=${cfg.isolatedStore.gc.minInterval}"
               "NIX_REMOTE=unix://${stateDir}/nix/var/nix/daemon-socket/socket"
             ]
-            ++ optionalString cfg.isolatedStore.gc.maxFreed [ "GC_MAX_FREED=${cfg.isolatedStore.gc.maxFreed}" ];
+            ++ (optional cfg.isolatedStore.gc.maxFreed "GC_MAX_FREED=${cfg.isolatedStore.gc.maxFreed}");
             NoNewPrivileges = true;
 
             ProtectClock = true;
@@ -641,12 +644,9 @@ in
             if [ -f "$LAST_GC_FILE" ]; then
               LAST_GC_EPOCH=$(cat "$LAST_GC_FILE")
               NOW_EPOCH=$(date +%s)
-              MIN_SECONDS=$(date -d "now $MIN_INTERVAL" +%s 2>/dev/null || date -v-''${MIN_INTERVAL} +%s 2>/dev/null || echo 0)
-              ELAPSED=$(( NOW_EPOCH - LAST_GC_EPOCH ))
-              MIN_SECONDS_AGO=$(( NOW_EPOCH - MIN_SECONDS ))
-
-              if [ "$ELAPSED" -lt "$MIN_SECONDS_AGO" ]; then
-                REMAINING=$(( MIN_SECONDS_AGO - ELAPSED ))
+              CUTOFF_EPOCH=$(date -d "$MIN_INTERVAL ago" +%s 2>/dev/null || date -v-''${MIN_INTERVAL} +%s 2>/dev/null || echo 0)
+              if [ "$LAST_GC_EPOCH" -gt "$CUTOFF_EPOCH" ]; then
+                REMAINING=$(( LAST_GC_EPOCH - CUTOFF_EPOCH ))
                 echo ">>> GC: Last GC was ''${ELAPSED}s ago, minimum interval not met (''${REMAINING}s remaining). Skipping."
                 exit 0
               fi
