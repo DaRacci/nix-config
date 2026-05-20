@@ -195,8 +195,15 @@ export def check_file_changed [
   log info $"Git file diffs: ($git_file_diffs)"
   mut changed_files = [ ];
   for file in $git_file_diffs {
+    let prev_blob = $"($prev_commit):($file)"
+    if (git cat-file -e $prev_blob | complete | get exit_code) != 0 {
+      log info $"File [($file)] is new or renamed; previous blob missing."
+      $changed_files = $changed_files | append $file
+      continue
+    }
+
     let old_file = mktemp -t "old-file.XXXX"
-    git show $"($prev_commit):($file)" | save -f $old_file
+    git show $prev_blob | save -f $old_file
 
     log info $"Checking differences between ($file) and ($old_file)"
     let old_hash = nix hash file $old_file
@@ -208,6 +215,7 @@ export def check_file_changed [
       $changed_files = $changed_files | append $file
     }
   }
+
 
   return (($changed_files | length) > 0)
 }
