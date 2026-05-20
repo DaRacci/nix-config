@@ -15,6 +15,7 @@ let
     literalExpression
     concatStringsSep
     optionalString
+    optional
     ;
   inherit (types)
     attrsOf
@@ -60,12 +61,13 @@ let
     concatStringsSep " " (map (p: builtins.unsafeDiscardStringContext (toString p)) allBootstrapPkgs)
   );
 
+  nixBuildUsersGroup = "woodpecker-nix-build-users";
   nixConf = ''
-    build-users-group =
-    trusted-users = root *
+    build-users-group = ${nixBuildUsersGroup}
     allowed-users = *
     substituters = ${concatStringsSep " " cfg.isolatedStore.substituters}
     trusted-public-keys = ${concatStringsSep " " cfg.isolatedStore.trustedPublicKeys}
+    require-sigs = true
     sandbox = true
     keep-outputs = true
     keep-derivations = true
@@ -342,7 +344,9 @@ in
       {
         services.woodpeckerNix.woodpecker.extraVolumes = [ "${hostPath}:${containerPath}" ];
         systemd.tmpfiles.settings."woodpecker-nix"."${cacheDir}".d = {
-          mode = "1777";
+          mode = "0700";
+          user = "woodpecker-nix";
+          group = nixBuildUsersGroup;
         };
       }
     ))
@@ -483,7 +487,7 @@ in
 
                   for pkg in ${bootstrapStorePaths}; do
                     echo "    Copying closure: $pkg ..."
-                    nix copy --no-check-sigs --to "local?root=${stateDir}" "$pkg"
+                    nix copy --to "local?root=${stateDir}" "$pkg"
                   done
 
                   printf '%s' "$CURRENT_HASH" > "$HASH_FILE"
@@ -514,12 +518,17 @@ in
             ];
             wants = [ "network-online.target" ];
             requires = [ "woodpecker-nix-init.service" ];
+            restartTriggers = [ (pkgs.writeText "woodpecker-nix.conf" nixConf) ];
 
             serviceConfig = {
               Type = "simple";
               ExecStart = "${cfg.isolatedStore.package}/bin/nix daemon";
               Environment = "NIX_CONF_DIR=${stateDir}/etc/nix";
               BindPaths = [ "${stateDir}/nix:/nix" ];
+              StateDirectory = "woodpecker-nix";
+              DynamicUser = true;
+              Group = nixBuildUsersGroup;
+              SupplementaryGroups = [ nixBuildUsersGroup ];
               ReadWritePaths = [ stateDir ];
 
               NoNewPrivileges = true;
@@ -586,7 +595,7 @@ in
               "MIN_INTERVAL=${cfg.isolatedStore.gc.minInterval}"
               "NIX_REMOTE=unix://${stateDir}/nix/var/nix/daemon-socket/socket"
             ]
-            ++ optionalString cfg.isolatedStore.gc.maxFreed [ "GC_MAX_FREED=${cfg.isolatedStore.gc.maxFreed}" ];
+            ++ (optional cfg.isolatedStore.gc.maxFreed "GC_MAX_FREED=${cfg.isolatedStore.gc.maxFreed}");
             NoNewPrivileges = true;
 
             ProtectClock = true;
@@ -641,12 +650,9 @@ in
             if [ -f "$LAST_GC_FILE" ]; then
               LAST_GC_EPOCH=$(cat "$LAST_GC_FILE")
               NOW_EPOCH=$(date +%s)
-              MIN_SECONDS=$(date -d "now $MIN_INTERVAL" +%s 2>/dev/null || date -v-''${MIN_INTERVAL} +%s 2>/dev/null || echo 0)
-              ELAPSED=$(( NOW_EPOCH - LAST_GC_EPOCH ))
-              MIN_SECONDS_AGO=$(( NOW_EPOCH - MIN_SECONDS ))
-
-              if [ "$ELAPSED" -lt "$MIN_SECONDS_AGO" ]; then
-                REMAINING=$(( MIN_SECONDS_AGO - ELAPSED ))
+              CUTOFF_EPOCH=$(date -d "$MIN_INTERVAL ago" +%s 2>/dev/null || date -v-''${MIN_INTERVAL} +%s 2>/dev/null || echo 0)
+              if [ "$LAST_GC_EPOCH" -gt "$CUTOFF_EPOCH" ]; then
+                REMAINING=$(( LAST_GC_EPOCH - CUTOFF_EPOCH ))
                 echo ">>> GC: Last GC was ''${ELAPSED}s ago, minimum interval not met (''${REMAINING}s remaining). Skipping."
                 exit 0
               fi
