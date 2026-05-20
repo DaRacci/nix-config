@@ -6,7 +6,6 @@ let
   inherit (builtins)
     elem
     concatStringsSep
-    split
     elemAt
     ;
   inherit (lib)

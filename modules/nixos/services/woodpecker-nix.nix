@@ -61,12 +61,13 @@ let
     concatStringsSep " " (map (p: builtins.unsafeDiscardStringContext (toString p)) allBootstrapPkgs)
   );
 
+  nixBuildUsersGroup = "woodpecker-nix-build-users";
   nixConf = ''
-    build-users-group =
-    trusted-users = root *
+    build-users-group = ${nixBuildUsersGroup}
     allowed-users = *
     substituters = ${concatStringsSep " " cfg.isolatedStore.substituters}
     trusted-public-keys = ${concatStringsSep " " cfg.isolatedStore.trustedPublicKeys}
+    require-sigs = true
     sandbox = true
     keep-outputs = true
     keep-derivations = true
@@ -343,7 +344,9 @@ in
       {
         services.woodpeckerNix.woodpecker.extraVolumes = [ "${hostPath}:${containerPath}" ];
         systemd.tmpfiles.settings."woodpecker-nix"."${cacheDir}".d = {
-          mode = "1777";
+          mode = "0700";
+          user = "woodpecker-nix";
+          group = nixBuildUsersGroup;
         };
       }
     ))
@@ -484,7 +487,7 @@ in
 
                   for pkg in ${bootstrapStorePaths}; do
                     echo "    Copying closure: $pkg ..."
-                    nix copy --no-check-sigs --to "local?root=${stateDir}" "$pkg"
+                    nix copy --to "local?root=${stateDir}" "$pkg"
                   done
 
                   printf '%s' "$CURRENT_HASH" > "$HASH_FILE"
@@ -522,8 +525,11 @@ in
               ExecStart = "${cfg.isolatedStore.package}/bin/nix daemon";
               Environment = "NIX_CONF_DIR=${stateDir}/etc/nix";
               BindPaths = [ "${stateDir}/nix:/nix" ];
-              ReadWritePaths = [ stateDir ];
+              StateDirectory = "woodpecker-nix";
               DynamicUser = true;
+              Group = nixBuildUsersGroup;
+              SupplementaryGroups = [ nixBuildUsersGroup ];
+              ReadWritePaths = [ stateDir ];
 
               NoNewPrivileges = true;
               ProtectClock = true;

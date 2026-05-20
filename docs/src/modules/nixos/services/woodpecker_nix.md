@@ -208,7 +208,7 @@ sharing the entire Nix cache directory (including the eval cache).
 
 ### Options
 
-{{#include ../../../generated/woodpecker-nix-options.md}}
+{{#include ../../../../generated/services-woodpecker-nix-options.md}}
 
 ### Injected container environment
 
@@ -321,9 +321,9 @@ how much is freed per run, or increase `gc.sizeThreshold`.
 ### Daemon socket permission denied
 
 Check that the Woodpecker agent user is in the `docker` group (for the Docker
-backend) and that `<stateDir>/nix/var/nix/daemon-socket` has mode `1777`. The
-init service sets this on every start; check its journal if permissions look
-wrong:
+backend) and that `<stateDir>/nix/var/nix/daemon-socket` is owned by the
+`woodpecker-nix` service user with strict permissions. The init service sets
+this on every start; check its journal if permissions look wrong:
 
 ```bash
 journalctl -u woodpecker-nix-init.service
