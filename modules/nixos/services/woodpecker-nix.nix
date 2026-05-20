@@ -653,6 +653,7 @@ in
               CUTOFF_EPOCH=$(date -d "$MIN_INTERVAL ago" +%s 2>/dev/null || date -v-''${MIN_INTERVAL} +%s 2>/dev/null || echo 0)
               if [ "$LAST_GC_EPOCH" -gt "$CUTOFF_EPOCH" ]; then
                 REMAINING=$(( LAST_GC_EPOCH - CUTOFF_EPOCH ))
+                ELAPSED=$(( NOW_EPOCH - LAST_GC_EPOCH ))
                 echo ">>> GC: Last GC was ''${ELAPSED}s ago, minimum interval not met (''${REMAINING}s remaining). Skipping."
                 exit 0
               fi
