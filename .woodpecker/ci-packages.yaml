@@ -8,6 +8,8 @@ when:
       - pkgs/**
       - flake.nix
       - flake.lock
+      - flake/ci/**
+      - lib/nu-lib/**
       - .woodpecker/ci-packages.yaml
 
 clone:
