@@ -1,16 +1,23 @@
+variables:
+  trigger_paths: &trigger_paths
+    - .woodpecker/ci-packages.yaml
+    - flake.nix
+    - flake.lock
+    - flake/packages.nix
+    - flake/ci/**
+    - lib/nu-lib/**
+    - pkgs/**
+
 labels:
   platform: linux/amd64
 
 when:
   - event: manual
-  - event: [push, pull_request]
-    path:
-      - pkgs/**
-      - flake.nix
-      - flake.lock
-      - flake/ci/**
-      - lib/nu-lib/**
-      - .woodpecker/ci-packages.yaml
+  - event: push
+    branch: master
+    path: *trigger_paths
+  - event: pull_request
+    path: *trigger_paths
 
 clone:
   - name: git

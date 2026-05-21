@@ -1,5 +1,4 @@
 variables: &env
-  BASE_BRANCH: &base_branch master
   BRANCH: &branch update/package-${PACKAGE}
 
 when:
