@@ -448,7 +448,7 @@ in
               cfg.isolatedStore.package
               pkgs.uutils-coreutils-noprefix
             ]
-            ++ (mkIf overlayEnabled [ pkgs.util-linux ]);
+            ++ (optional overlayEnabled pkgs.util-linux);
 
             script =
               let
@@ -463,13 +463,16 @@ in
                   # Move existing store content into store-real (lower layer)
                   if [ -d "${stateDir}/nix/store" ] && [ -z "$(ls -A ${stateDir}/nix/store 2>/dev/null)" ]; then
                     echo "    Fresh install -- store is empty, nothing to move."
-                  elif [ -d "${stateDir}/nix/store" ]; then
+                  elif [ -d "${stateDir}/nix/store" ] && ! mountpoint -q "${stateDir}/nix/store"; then
                     echo "    Moving existing store content to store-real ..."
                     mv "${stateDir}/nix/store"/* "${storeRealDir}/" 2>/dev/null || true
                     rm -rf "${stateDir}/nix/store"
                   fi
 
-                  mount -t overlay overlay -o "lowerdir=${storeRealDir},upperdir=${upperDir},workdir=${workDir}" "${stateDir}/nix/store"
+                  mkdir -p "${stateDir}/nix/store"
+                  if ! mountpoint -q "${stateDir}/nix/store"; then
+                    mount -t overlay overlay -o "lowerdir=${storeRealDir},upperdir=${upperDir},workdir=${workDir}" "${stateDir}/nix/store"
+                  fi
 
                   echo "    Overlayfs mounted: lower=${storeRealDir}, upper=${upperDir}"
                 '';
@@ -595,7 +598,9 @@ in
               "MIN_INTERVAL=${cfg.isolatedStore.gc.minInterval}"
               "NIX_REMOTE=unix://${stateDir}/nix/var/nix/daemon-socket/socket"
             ]
-            ++ (optional cfg.isolatedStore.gc.maxFreed "GC_MAX_FREED=${cfg.isolatedStore.gc.maxFreed}");
+            ++ (optional (
+              cfg.isolatedStore.gc.maxFreed != null
+            ) "GC_MAX_FREED=${cfg.isolatedStore.gc.maxFreed}");
             NoNewPrivileges = true;
 
             ProtectClock = true;
@@ -664,7 +669,9 @@ in
             export NIX_REMOTE="unix://${stateDir}/nix/var/nix/daemon-socket/socket"
             ${cfg.isolatedStore.package}/bin/nix-collect-garbage \
               --delete-older-than "${cfg.isolatedStore.gc.olderThan}" \
-              ${optionalString cfg.isolatedStore.gc.maxFreed ''--max-freed "${cfg.isolatedStore.gc.maxFreed}"''}
+              ${optionalString (
+                cfg.isolatedStore.gc.maxFreed != null
+              ) ''--max-freed "${cfg.isolatedStore.gc.maxFreed}"''}
 
             # Record GC timestamp
             date +%s > "$LAST_GC_FILE"

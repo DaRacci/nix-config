@@ -207,6 +207,13 @@ export def check_file_changed [
 
     log info $"Checking differences between ($file) and ($old_file)"
     let old_hash = nix hash file $old_file
+    if not ($file | path exists) {
+      rm -f $old_file
+      log info $"File [($file)] was deleted; treating as changed."
+      $changed_files = $changed_files | append $file
+      continue
+    }
+
     let cur_hash = nix hash file $file
     rm -f $old_file
 

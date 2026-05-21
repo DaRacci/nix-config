@@ -43,3 +43,33 @@ export def check_required_vars [
 
   return $result
 }
+
+# Quote segments of a nix attribute path to handle special characters
+# e.g. "my-attr" becomes "\"my-attr\"".
+#
+# This will split the input string by dots, quote each segment, and then rejoin them with dots.
+# If a segment is quoted already, it will be kept as is.
+# Preserves .# flake references at the start.
+export def quote_nix_segments [attribute_path: string] {
+  let has_flake_ref = $attribute_path | str starts-with ".#"
+  let path_to_process = if $has_flake_ref { $attribute_path | str substring 2.. } else { $attribute_path }
+
+  let chars = $path_to_process | split chars
+  let result = $chars | reduce -f {segments: [], current: "", in_quotes: false} {|char, acc|
+    if $char == '"' {
+      {segments: $acc.segments, current: ($acc.current + $char), in_quotes: (not $acc.in_quotes)}
+    } else if $char == "." and not $acc.in_quotes {
+      {segments: ($acc.segments | append $acc.current), current: "", in_quotes: $acc.in_quotes}
+    } else {
+      {segments: $acc.segments, current: ($acc.current + $char), in_quotes: $acc.in_quotes}
+    }
+  }
+
+  let all_segments = $result.segments | append $result.current
+  let quoted = $all_segments | each {|s|
+    if (($s | str starts-with '"') and ($s | str ends-with '"')) { $s } else { '"' + $s + '"' }
+  }
+
+  let final = $quoted | str join "."
+  if $has_flake_ref { ".#" + $final } else { $final }
+}
