@@ -87,7 +87,7 @@ steps:
         .woodpecker/ci-packages.yaml \
         PACKAGE \
         .#packages.x86_64-linux \
-        "pkgs: builtins.attrNames pkgs |> builtins.filter (name: (pkgs.${name}.passthru.discovery or true))"
+        'pkgs: builtins.attrNames pkgs |> builtins.filter (name: (pkgs.${name}.passthru.discovery or true))'
 
   - name: matrix-update-packages.yaml
     image: registry.racci.dev/lix-woodpecker
@@ -98,7 +98,7 @@ steps:
         .woodpecker/update-packages.yaml \
         PACKAGE \
         .#packages.x86_64-linux \
-        "pkgs: builtins.attrNames pkgs |> builtins.filter (name: (pkgs.${name}.passthru ? updateScript))"
+        'pkgs: builtins.attrNames pkgs |> builtins.filter (name: ((pkgs.${name}.passthru or {}) ? updateScript))'
 
   - name: push-matrix-updates
     image: appleboy/drone-git-push

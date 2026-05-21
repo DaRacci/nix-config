@@ -252,12 +252,12 @@ def detect_enable_options [file_path: string] {
   }
 
   let nested_options = ($file_contents
-    | parse --regex '(?ms)options\.(?<path>[A-Za-z0-9_.-]+)\s*=\s*\{.*?enable\s*=\s*(?:mkEnableOption|mkOption)'
+    | parse --regex '(?ms)options\.(?<path>[A-Za-z0-9_.-]+)\s*=\s*\{.*?enable\s*=\s*(?:lib\.)?(?:mkEnableOption|mkOption)'
     | get -o path
     | default [])
 
   let direct_options = ($file_contents
-    | parse --regex '(?m)options\.(?<path>[A-Za-z0-9_.-]+)\.enable\s*=\s*(?:mkEnableOption|mkOption)'
+    | parse --regex '(?m)options\.(?<path>[A-Za-z0-9_.-]+)\.enable\s*=\s*(?:lib\.)?(?:mkEnableOption|mkOption)'
     | get -o path
     | default [])
 
@@ -281,7 +281,7 @@ def is_option_enabled_for_target [
   target: string
   option_path: string
 ] {
-  let attr_path = $".#($output_kind).($target).config.($option_path).enable"
+  let attr_path = lib quote_nix_segments $".#($output_kind).($target).config.($option_path).enable"
 
   try {
     let result = (nix eval --json $attr_path | from json)

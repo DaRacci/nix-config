@@ -25,18 +25,6 @@
         ruff-check.enable = true;
         ruff-format.enable = true;
         prettier.enable = true;
-        yamlfmt = {
-          enable = true;
-          settings = {
-            formatter = {
-              retain_line_breaks_single = true;
-              scan_folded_as_literal = true;
-              drop_merge_tag = true;
-              trim_trailing_whitespace = true;
-              eof_newline = true;
-            };
-          };
-        };
         biome = {
           enable = true;
           settings.formatter = {
