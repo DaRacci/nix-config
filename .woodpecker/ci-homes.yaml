@@ -1,21 +1,25 @@
+variables:
+  trigger_paths: &trigger_paths
+    - .woodpecker/ci-homes.yaml
+    - flake.nix
+    - flake.lock
+    - flake/modules.nix
+    - flake/ci/**
+    - flake/home-manager/**
+    - home/**
+    - lib/**
+    - modules/home-manager/**
+
 labels:
   platform: linux/amd64
 
 when:
   - event: manual
-  - event: [push, pull_request]
+  - event: push
     branch: master
-    path:
-      [
-        .woodpecker/ci-homes.yaml,
-        flake/ci/**,
-        home/**,
-        lib/nu-lib/**,
-        modules/home-manager/**,
-        overlays/**,
-        flake.nix,
-        flake.lock,
-      ]
+    path: *trigger_paths
+  - event: pull_request
+    path: *trigger_paths
 
 clone:
   - name: git
