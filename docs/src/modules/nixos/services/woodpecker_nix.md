@@ -315,7 +315,7 @@ GC is gated by **both** size and time. If GC never runs:
 1. Both conditions must be met: store > `sizeThreshold` AND more than
    `minInterval` (default 7d) since last GC.
 
-If GC runs too aggressively, adjust `gc.maxFreed` (default 2GB) to cap
+If GC runs too aggressively, adjust `gc.maxFreed` (default null) to cap
 how much is freed per run, or increase `gc.sizeThreshold`.
 
 ### Daemon socket permission denied

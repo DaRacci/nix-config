@@ -26,7 +26,7 @@ let
     foldl'
       (
         acc: attr:
-        if acc.success && acc.value ? ${attr} then
+        if acc.success && builtins.isAttrs acc.value && acc.value ? ${attr} then
           {
             success = true;
             value = acc.value.${attr};

@@ -40,6 +40,7 @@ in
     name = "discover-packages";
     runtimeInputs = [
       pkgs.fd
+      pkgs.jq
     ];
   };
 
