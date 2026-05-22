@@ -86,7 +86,7 @@
 
       editors = {
         ai.enable = true;
-        ai.tabby.enable = true;
+        # ai.tabby.enable = true;
         vscode.enable = true;
         helix.enable = true;
       };
