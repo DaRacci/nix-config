@@ -19,7 +19,7 @@ in
 
     userLimit = mkOption {
       type = ints.unsigned;
-      default = 32768;
+      default = 131072;
       description = ''
         The maximum number of open files per user.
 
@@ -59,7 +59,7 @@ in
     systemd.user.extraConfig = "DefaultLimitNOFILE=${toString cfg.userLimit}";
 
     boot.kernel.sysctl = {
-      "fs.file-max" = 65536;
+      "fs.file-max" = toString (cfg.userLimit * 4);
     };
   };
 }
