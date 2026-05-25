@@ -1,4 +1,9 @@
-{ pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 {
   programs.zed-editor = {
     enable = true;
@@ -25,6 +30,7 @@
       "catppuccin-icons"
       "docker-compose"
       "dockerfile"
+      "editorconfig"
       "git-firefly"
       "ini"
       "log"
@@ -87,6 +93,10 @@
         thread_summary_model = {
           provider = "openrouter";
           model = "google/gemini-3.1-flash-lite";
+        };
+        subagent_model = {
+          provider = "copilot_chat";
+          model = "gpt-5.4-mini";
         };
       };
 
@@ -179,7 +189,7 @@
           binary.path = lib.getExe pkgs.nil;
           initialization_options = {
             formatting = {
-              command = [ "nixfmt" ];
+              command = [ lib.getExe pkgs.nixfmt ];
             };
           };
         };
@@ -249,6 +259,7 @@
           delay_ms = 500;
           show_commit_summary = true;
         };
+        worktree_directory = "${config.home.directory}/Projects/Coding/zed-worktrees";
       };
 
       gutter = { };
