@@ -21,8 +21,6 @@ import logging
 import os
 import sys
 from pathlib import Path
-from posixpath import curdir
-from socket import timeout
 from time import monotonic, sleep
 
 import websockets

@@ -189,7 +189,7 @@
           binary.path = lib.getExe pkgs.nil;
           initialization_options = {
             formatting = {
-              command = [ lib.getExe pkgs.nixfmt ];
+              command = [ (lib.getExe pkgs.nixfmt) ];
             };
           };
         };
