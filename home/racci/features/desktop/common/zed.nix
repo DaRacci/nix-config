@@ -259,7 +259,7 @@
           delay_ms = 500;
           show_commit_summary = true;
         };
-        worktree_directory = "${config.home.directory}/Projects/Coding/zed-worktrees";
+        worktree_directory = ".git/zed-worktrees";
       };
 
       gutter = { };
