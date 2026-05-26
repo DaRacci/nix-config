@@ -6,7 +6,7 @@
 }:
 {
   nix = {
-    package = lib.mkDefault pkgs.nix;
+    package = lib.mkForce pkgs.lix;
     settings = {
       experimental-features = [
         "nix-command"

@@ -25,6 +25,6 @@ in
     inherit pkgs;
     sourceRoot = ./.;
     name = "update-redis-mappings";
-    runtimeInputs = [ pkgs.nix ];
+    runtimeInputs = [ pkgs.lix ];
   };
 }

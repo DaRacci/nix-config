@@ -23,10 +23,7 @@ let
           rocmSupport = builtins.elem "rocm" accelerators;
         };
 
-        overlays = [
-          inputs.lix-module.overlays.default
-        ]
-        ++ (builtins.attrValues (import ../../overlays { inherit inputs lib; }));
+        overlays = builtins.attrValues (import ../../overlays { inherit inputs lib; });
       }
       // (removeAttrs args [
         "system"

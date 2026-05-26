@@ -37,7 +37,7 @@
             nix-update
 
             # Required Tools
-            nix
+            lix
             git
             home-manager
 
@@ -56,10 +56,6 @@
           ]
           ++ config.treefmt.build.devShell.buildInputs
           ++ (import ./scripts { inherit pkgs lib; } |> builtins.attrValues);
-
-        languages = {
-          nix.enable = false;
-        };
 
         env = {
           NIX_CONFIG = "extra-experimental-features = nix-command flakes pipe-operator";

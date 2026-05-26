@@ -41,6 +41,7 @@ in
   system.stateVersion = fileContents "${self}/state.version";
 
   nix = {
+    package = pkgs.lix;
     settings = rec {
       trusted-users = [
         "root"
@@ -75,7 +76,7 @@ in
   services.angrr = {
     enable = true;
     settings = {
-      system = {
+      profile-policies.system = {
         profile-paths = [ "/nix/var/nix/profiles/system" ];
         keep-since = "14d";
         keep-latest-n = 3;
