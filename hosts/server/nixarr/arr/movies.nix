@@ -1,4 +1,8 @@
 {
+  config,
+  ...
+}:
+{
   nixarr = {
     radarr = {
       enable = true;
@@ -126,6 +130,6 @@
   };
 
   server.proxy.virtualHosts.radarr.extraConfig = ''
-    reverse_proxy localhost:7878
+    reverse_proxy localhost:${toString config.nixarr.radarr.port}
   '';
 }

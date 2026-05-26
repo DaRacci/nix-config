@@ -47,7 +47,7 @@
     };
 
     jellyfin.enable = true;
-    jellyseerr.enable = true;
+    seerr.enable = true;
   };
 
   server = {
@@ -60,10 +60,10 @@
           reverse_proxy localhost:8096
         '';
       };
-      jellyseerr = {
+      seerr = {
         public = true;
         extraConfig = ''
-          reverse_proxy localhost:${toString config.nixarr.jellyseerr.port}
+          reverse_proxy localhost:${toString config.nixarr.seerr.port}
         '';
       };
     };

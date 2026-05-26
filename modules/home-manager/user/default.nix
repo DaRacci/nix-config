@@ -36,19 +36,17 @@ in
         enable = true;
         enableDefaultConfig = false;
 
-        matchBlocks = {
-          hosts = {
-            host = builtins.concatStringsSep " " hostnames;
-            forwardAgent = true;
-            identitiesOnly = true;
-            setEnv = {
+        settings = {
+          "${builtins.concatStringsSep " " hostnames}" = {
+            ForwardAgent = true;
+            IdentitiesOnly = true;
+            SetEnv = {
               TERM = "xterm-256color";
             };
           };
 
           "*" = {
-            host = "*";
-            identityAgent = cfg.sshSocket;
+            IdentityAgent = cfg.sshSocket;
           };
         };
       };

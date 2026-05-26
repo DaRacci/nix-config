@@ -10,9 +10,8 @@
   ];
 
   programs = {
-    ssh.matchBlocks."codeberg.org" = {
-      host = "codeberg.org";
-      user = "git";
+    ssh.settings."codeberg.org" = {
+      User = "git";
     };
 
     git = {

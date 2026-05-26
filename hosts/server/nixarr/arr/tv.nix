@@ -1,4 +1,8 @@
 {
+  config,
+  ...
+}:
+{
   nixarr = {
     sonarr = {
       enable = true;
@@ -73,6 +77,6 @@
   };
 
   server.proxy.virtualHosts.sonarr.extraConfig = ''
-    reverse_proxy localhost:8989
+    reverse_proxy localhost:${toString config.nixarr.sonarr.port}
   '';
 }

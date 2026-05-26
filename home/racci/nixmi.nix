@@ -60,11 +60,11 @@
     };
   };
 
-  programs.ssh.matchBlocks = {
+  programs.ssh.settings = {
     "windows-work" = {
-      hostname = "192.168.122.79";
-      user = "AzureAD\\james@amt.com.au";
-      identitiesOnly = true;
+      HostName = "192.168.122.79";
+      User = "AzureAD\\james@amt.com.au";
+      IdentitiesOnly = true;
     };
   };
 

@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   ...
 }:
@@ -34,7 +35,7 @@
   };
 
   server.proxy.virtualHosts.lidarr.extraConfig = ''
-    reverse_proxy localhost:8686
+    reverse_proxy localhost:${toString config.nixarr.lidarr.port}
   '';
 
 }

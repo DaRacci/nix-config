@@ -1,4 +1,8 @@
 {
+  config,
+  ...
+}:
+{
   nixarr.prowlarr = {
     enable = true;
     vpn.enable = true;
@@ -15,6 +19,6 @@
   };
 
   server.proxy.virtualHosts.prowlarr.extraConfig = ''
-    reverse_proxy localhost:9696
+    reverse_proxy localhost:${toString config.nixarr.prowlarr.port}
   '';
 }

@@ -9,6 +9,7 @@
       enable = true;
       vpn.enable = true;
       flood.enable = true;
+      peerPort = 51413;
       extraAllowedIps = [ "100.100.0.0/16" ];
 
       privateTrackers.cross-seed = {
@@ -49,12 +50,15 @@
     sabnzbd = {
       enable = true;
       vpn.enable = true;
+      whitelistRanges = [ "100.100.0.0/16" ];
       whitelistHostnames = [ "sabnzbd.racci.dev" ];
     };
   };
 
-  services.transmission = {
-    openPeerPorts = lib.mkForce true;
+  services = {
+    transmission.openPeerPorts = lib.mkForce true;
+    #TODO:https://github.com/nix-media-server/nixarr/pull/132
+    sabnzbd.allowConfigWrite = true;
   };
 
   systemd.services.transmission = {
@@ -67,7 +71,12 @@
     };
   };
 
-  server.proxy.virtualHosts.transmission.extraConfig = ''
-    reverse_proxy localhost:${toString config.nixarr.transmission.uiPort}
-  '';
+  server.proxy.virtualHosts = {
+    transmission.extraConfig = ''
+      reverse_proxy localhost:${toString config.nixarr.transmission.uiPort}
+    '';
+    sabnzbd.extraConfig = ''
+      reverse_proxy localhost:${toString config.nixarr.sabnzbd.uiPort}
+    '';
+  };
 }
