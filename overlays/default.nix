@@ -74,6 +74,10 @@ in
       removeWarningPopup = true;
     };
 
+    # openldap = prev.openldap.overrideAttrs (_oldAttrs: {
+    #   doCheck = false;
+    # });
+
     statix = prev.statix.overrideAttrs (_: rec {
       src = prev.fetchFromGitHub {
         owner = "oppiliappan";
