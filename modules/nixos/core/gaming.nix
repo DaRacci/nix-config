@@ -78,12 +78,27 @@ in
         };
       };
 
+      systemd.user.sockets.wivrn = {
+        unitConfig = {
+          Description = "Socket for WiVRn per-connection IPC";
+          Documentation = [ "https://github.com/WiVRn/WiVRn" ];
+        };
+        socketConfig = {
+          ListenStream = "%t/wivrn/comp_ipc";
+          SocketMode = "0770";
+          DirectoryMode = "0750";
+        };
+        wantedBy = [ "default.target" ];
+      };
+
+      systemd.user.services.wivrn.environment.IPC_EXIT_ON_DISCONNECT = lib.mkForce "on";
+
       services = {
         wivrn = {
           enable = true;
           package = pkgs.wivrn;
           openFirewall = true;
-          autoStart = true;
+          autoStart = false;
           steam.importOXRRuntimes = true;
           highPriority = true;
           monadoEnvironment = { };
