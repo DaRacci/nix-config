@@ -16,6 +16,19 @@ let
     ;
   inherit (lib.types) str submodule;
 
+  sunshine-proxy-wrapper = pkgs.writeShellScript "sunshine-proxy-wrapper" ''
+    set -euo pipefail
+    systemctl --user start sunshine.service
+    port=47989
+    ss_bin=${pkgs.iproute2}/bin/ss
+    proxy_bin=${pkgs.systemd}/lib/systemd/systemd-socket-proxyd
+    for i in $(seq 30); do
+      $ss_bin -Htlnp "sport = :$port" 2>/dev/null | grep -q . && { exec $proxy_bin --exit-idle-time=300s 127.0.0.1:$port; }
+      sleep 0.5
+    done
+    exec $proxy_bin --exit-idle-time=300s 127.0.0.1:$port
+  '';
+
   cfg = config.core.remote;
   hasHomeManager = options ? home-manager;
 in
@@ -61,55 +74,55 @@ in
       {
         services.sunshine = {
           enable = true;
-          autoStart = true;
+          autoStart = false;
           openFirewall = true;
           capSysAdmin = true;
-          # settings.port = 47889;
         };
 
-        systemd.user = {
-          # sockets.sunshine-proxy = {
-          #   wantedBy = [ "sockets.target" ];
-          #   socketConfig = {
-          #     ListenStream = generatePorts (basePort + 100) offsets.tcp;
-          #     ListenDatagram = generatePorts (basePort + 100) offsets.udp;
-          #   };
-          # };
+        networking.firewall = {
+          extraCommands = ''
+            iptables -t nat -A PREROUTING -p tcp --dport 47989 -j REDIRECT --to-port 48989
+            ip6tables -t nat -A PREROUTING -p tcp --dport 47989 -j REDIRECT --to-port 48989
+            iptables -A nixos-fw -p tcp --dport 48989 -m conntrack --ctorigdstport 47989 -j nixos-fw-accept
+            ip6tables -A nixos-fw -p tcp --dport 48989 -m conntrack --ctorigdstport 47989 -j nixos-fw-accept
+          '';
+          extraStopCommands = ''
+            iptables -t nat -D PREROUTING -p tcp --dport 47989 -j REDIRECT --to-port 48989 || true
+            ip6tables -t nat -D PREROUTING -p tcp --dport 47989 -j REDIRECT --to-port 48989 || true
+            iptables -D nixos-fw -p tcp --dport 48989 -m conntrack --ctorigdstport 47989 -j nixos-fw-accept || true
+            ip6tables -D nixos-fw -p tcp --dport 48989 -m conntrack --ctorigdstport 47989 -j nixos-fw-accept || true
+          '';
+        };
 
-          # services = {
-          # sunshine-proxy = {
-          #   bindsTo = [
-          #     "sunshine-proxy.socket"
-          #     "sunshine.service"
-          #   ];
-          #   after = [
-          #     "sunshine-proxy.socket"
-          #     "sunshine.service"
-          #   ];
-          #   serviceConfig = {
-          #     Type = "notify";
-          #     RemainAfterExit = "yes";
-          #     # https://web.archive.org/web/20240303183334/https://docs.lizardbyte.dev/projects/sunshine/en/latest/about/advanced_usage.html#port
-          #     ExecStart =
-          #       (offsets.tcp)
-          #       |> generatePorts basePort
-          #       |> map (
-          #         port:
-          #         "${pkgs.systemd}/lib/systemd/systemd-socket-proxyd --exit-idle-time=300s 127.0.0.1:${toString port}"
-          #       );
-          #     Restart = "no";
-          #   };
-          # };
-          # sunshine = {
-          #   serviceConfig = {
-          #     Restart = lib.mkForce "no";
-          #     ExecStartPost = "${lib.getExe' pkgs.toybox "sleep"} 3"; # Allow sunshine to startup fully
-          #   };
-          #   unitConfig = {
-          #     StopWhenUnneeded = "yes";
-          #   };
-          # };
-          # };
+        systemd.user.sockets.sunshine-proxy = {
+          wantedBy = [ "sockets.target" ];
+          socketConfig = {
+            ListenStream = "48989";
+          };
+        };
+
+        systemd.user.services.sunshine-proxy = {
+          requires = [ "sunshine.service" ];
+          bindsTo = [
+            "sunshine.service"
+            "sunshine-proxy.socket"
+          ];
+          after = [
+            "sunshine.service"
+            "sunshine-proxy.socket"
+          ];
+          serviceConfig = {
+            Type = "simple";
+            ExecStart = "${sunshine-proxy-wrapper}";
+            Restart = "no";
+          };
+        };
+
+        systemd.user.services.sunshine = {
+          wantedBy = lib.mkForce [ ];
+          partOf = lib.mkForce [ ];
+          unitConfig.StopWhenUnneeded = true;
+          serviceConfig.Restart = lib.mkForce "no";
         };
       }
       // optionalAttrs hasHomeManager {

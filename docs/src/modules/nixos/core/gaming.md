@@ -41,7 +41,7 @@ When enabled, module:
 - adds `pkgs.xwayland-run` and `pkgs.xwininfo` as Steam extra packages,
 - adds `pkgs.proton-ge-bin` as compatibility package,
 - opens Steam Remote Play and local transfer firewall rules,
-- enables `services.wivrn` with `autoStart`, `highPriority`, `steam.importOXRRuntimes`, firewall access, and JSON config, and
+- enables `services.wivrn` with `highPriority`, `steam.importOXRRuntimes`, firewall access, and JSON config, and
 - installs udev rules for PlayStation controller, Oculus Quest, and tty ACM devices.
 
 It also overlays `gamescope-session` to use 4K resolution and wider refresh limits, and opens firewall ports UDP `41492`, `9943`, `9944` plus TCP `8082`, `9943`, `9944`, and `24070`.
@@ -67,6 +67,18 @@ If `config.jovian.decky-loader.enable` is true, module additionally:
 ```
 
 ---
+
+## WiVRn Socket Activation
+
+WiVRn is activated on-demand through systemd user socket activation instead of running for the full session.
+
+- `systemd.user.sockets.wivrn` listens on `%t/wivrn/comp_ipc` (UNIX socket, mode `0770`).
+- Socket is `WantedBy=default.target`, so it's available all session but WiVRn itself only starts when a client connects.
+- Service env override: `IPC_EXIT_ON_DISCONNECT=on` — WiVRn exits after client disconnects.
+- Steam's OpenXR runtime path resolves to the socket; activating SteamVR/OpenXR game triggers socket activation.
+- Parent dir created with `0750`, socket with `0770`.
+
+______________________________________________________________________
 
 ## Operational Notes
 
