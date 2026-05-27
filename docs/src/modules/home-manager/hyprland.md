@@ -8,6 +8,8 @@ These modules extend `wayland.windowManager.hyprland` with a typed Nix API for b
 
 The repo default (set in `home/shared/desktop/hyprland/default.nix`) uses `configType = "lua"`.
 
+In Lua mode, direct `settings.*` attr names must be Lua-safe identifiers. Use underscore-style names like `exec_once`, `window_rule`, and `workspace_rule` instead of dashed hyprlang names like `exec-once`.
+
 All `custom-settings.*` entries are rendered as typed Lua config attrsets:
 
 - `custom-settings.bind` entries become `settings.bind` entries with `hl.dsp.*` dispatcher expressions.
@@ -15,6 +17,8 @@ All `custom-settings.*` entries are rendered as typed Lua config attrsets:
 - `custom-settings.windowrule` entries become `settings.window_rule` entries.
 - `custom-settings.permission` entries set `settings.permission` directly.
 - `custom-settings.slideIn` entries generate `custom-settings.bind` entries dynamically.
+
+Old dashed forms like `exec-once` stay valid only when passed through unchanged hyprlang/string config, not as direct Lua attr names.
 
 The camelCase custom module API remains consistent in Nix.
 

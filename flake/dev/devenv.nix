@@ -58,7 +58,7 @@
           ++ (import ./scripts { inherit pkgs lib; } |> builtins.attrValues);
 
         env = {
-          NIX_CONFIG = "extra-experimental-features = nix-command flakes pipe-operator";
+          NIX_CONFIG = "extra-experimental-features = nix-command flakes pipe-operator pipe-operators";
           OPENSPEC_TELEMETRY = "0";
         };
 

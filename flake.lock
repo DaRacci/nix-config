@@ -73,6 +73,30 @@
         "type": "github"
       }
     },
+    "hyprlandPlugins.hy3": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-zvS7CSqvJVECR9rXqt+s7/KrFPIsPrkwtFPg2urcEU4=",
+        "type": "file",
+        "url": "https://github.com/r-ryantm/nixpkgs/raw/fc4ff99d24ee5dfa1a9f001118d14727fcc7e6ca/pkgs/applications/window-managers/hyprwm/hyprland-plugins/hy3.nix"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/r-ryantm/nixpkgs/raw/fc4ff99d24ee5dfa1a9f001118d14727fcc7e6ca/pkgs/applications/window-managers/hyprwm/hyprland-plugins/hy3.nix"
+      }
+    },
+    "hyprlandPlugins.hypr-dynamic-cursors": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-Let/Nzonf7VA3iWfesiSuxAyGP2bx7X7WOcOMxbluDA=",
+        "type": "file",
+        "url": "https://github.com/r-ryantm/nixpkgs/raw/462f2c82e745c63a2fc1690b86a7dec5d11c4d6b/pkgs/applications/window-managers/hyprwm/hyprland-plugins/hypr-dynamic-cursors.nix"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/r-ryantm/nixpkgs/raw/462f2c82e745c63a2fc1690b86a7dec5d11c4d6b/pkgs/applications/window-managers/hyprwm/hyprland-plugins/hypr-dynamic-cursors.nix"
+      }
+    },
     "lix": {
       "flake": false,
       "locked": {
@@ -158,6 +182,8 @@
         "erosanix": "erosanix",
         "flake-parts": "flake-parts",
         "flake-utils": "flake-utils",
+        "hyprlandPlugins.hy3": "hyprlandPlugins.hy3",
+        "hyprlandPlugins.hypr-dynamic-cursors": "hyprlandPlugins.hypr-dynamic-cursors",
         "lix": "lix",
         "mcpo": "mcpo",
         "nix2container": "nix2container",
