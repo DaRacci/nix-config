@@ -73,8 +73,23 @@ When both `core.remote.streaming.enable` and `programs.hyprland.enable` are `tru
 
 - sets `services.sunshine.settings.output_name = "3"`,
 - adds two Sunshine application entries named `Shared Desktop` and `Exclusive Desktop`,
-- creates headless output at login with `hyprctl output create headless`, and
-- keeps `HEADLESS-2` disabled until Sunshine prep commands enable it.
+- creates headless output at login via Home Manager, and
+- keeps `HEADLESS-2` disabled by default until Sunshine prep commands enable it.
+
+### Lua Mode Handling
+
+If Hyprland is in Lua mode (`programs.hyprland.configType = "lua"`), the shared
+Home Manager module uses Lua-safe equivalents:
+
+- **Startup hook**: `settings.on` with `hyprland.start` event triggers
+  `hyprctl output create headless`.
+- **Monitor rule**: `{ output = "HEADLESS-2"; disabled = true; }` (attrset form
+  instead of old string).
+- **Screencopy permission**: routed through
+  `wayland.windowManager.hyprland.custom-settings.permission.screenCopy`,
+  which handles both Lua and hyprlang modes automatically.
+
+For hyprlang mode, the old string forms (`exec-once`, `monitor = "HEADLESS-2,disable"`) are used unchanged.
 
 | Application | Behaviour |
 |---|---|

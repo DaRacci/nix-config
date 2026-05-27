@@ -6,11 +6,11 @@
 }:
 {
 
-  wayland.windowManager.hyprland.settings = {
-    exec-once = map (exec: "${lib.getExe' pkgs.uwsm "uwsm-app"} -s b -- ${exec}") [
-      "${lib.getExe' pkgs.blueman "blueman-tray"}"
-    ];
-  };
+  wayland.windowManager.hyprland.extraConfig = ''
+    hl.on("hyprland.start", function()
+      hl.exec_cmd("${lib.getExe' pkgs.uwsm "uwsm-app"} -s b -- ${lib.getExe' pkgs.blueman "blueman-tray"}")
+    end)
+  '';
 
   programs.hyprpanel = {
     enable = true;

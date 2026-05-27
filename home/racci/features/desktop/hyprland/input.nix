@@ -142,7 +142,7 @@ in
       };
     };
 
-    settings = {
+    settings.config = {
       cursor = {
         no_warps = false;
         persistent_warps = true;
@@ -180,10 +180,6 @@ in
         key_press_enables_dpms = false;
         mouse_move_enables_dpms = true;
       };
-
-      bind = [
-        # (binding mainMod "b" "exec" "${lib.getExe pkgs.hdrop} -f -b ${lib.getExe pkgs.overskride}")
-      ];
     };
   };
 }

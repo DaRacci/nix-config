@@ -1,4 +1,3 @@
-# TODO Show me the key integration for placement size & quick launching
 {
   self,
   config,
@@ -62,6 +61,7 @@ with lib;
 
   wayland.windowManager.hyprland = {
     systemd.enable = false;
+    configType = "lua";
 
     plugins = with pkgs.hyprlandPlugins; [
       hy3
@@ -74,29 +74,84 @@ with lib;
         hy3
         hypr-dynamic-cursors
       ]
-      |> lib.map (plugin: "${plugin}/lib/lib${plugin.pname}.so");
+      |> map (plugin: "${plugin}/lib/lib${plugin.pname}.so");
+
+    custom-settings.bind = {
+      # Media transport: no modifiers
+      XF86AudioPause = {
+        action = [
+          "exec"
+          "${getExe config.services.playerctld.package} play-pause"
+        ];
+      };
+      XF86AudioPlay = {
+        action = [
+          "exec"
+          "${getExe config.services.playerctld.package} play-pause"
+        ];
+      };
+      XF86AudioNext = {
+        action = [
+          "exec"
+          "${getExe config.services.playerctld.package} next"
+        ];
+      };
+      XF86AudioPrev = {
+        action = [
+          "exec"
+          "${getExe config.services.playerctld.package} previous"
+        ];
+      };
+
+      # Window management via custom-settings.bind
+      "SUPER+Q" = {
+        action = [ "killactive" ];
+      };
+      "SUPER+SPACE" = {
+        action = [ "fullscreen" ];
+      };
+      "SUPER+SHIFT+SPACE" = {
+        action = [ "togglefloating" ];
+      };
+    };
 
     settings = {
-      debug.disable_logs = true;
+      config = {
+        debug.disable_logs = true;
 
-      ecosystem = {
-        no_update_news = true;
-        no_donation_nag = true;
-        enforce_permissions = true;
+        ecosystem = {
+          no_update_news = true;
+          no_donation_nag = true;
+          enforce_permissions = true;
+        };
+
+        general = {
+          resize_on_border = true;
+          no_focus_fallback = true;
+          layout = "hy3";
+          allow_tearing = true;
+
+          snap.enabled = true;
+        };
+
+        misc = {
+          animate_manual_resizes = false;
+          animate_mouse_windowdragging = false;
+
+          focus_on_activate = true;
+          disable_hyprland_logo = true;
+          force_default_wallpaper = 0;
+          allow_session_lock_restore = true;
+
+          initial_workspace_tracking = 1;
+
+          middle_click_paste = false;
+        };
       };
 
-      general = {
-        resize_on_border = true;
-        no_focus_fallback = true;
-        layout = "hy3";
-        allow_tearing = true;
-
-        snap.enabled = true;
-      };
-
-      layerrule =
+      layer_rule =
         #region No Animations
-        (trivial.pipe
+        (pipe
           [
             "walker"
             "selection"
@@ -109,17 +164,37 @@ with lib;
             "noanim"
           ]
           [
-            (map (layer: "no_anim on, match:namespace ${layer}"))
-            #endregion
-            #region Ags
+            (map (ns: {
+              match = {
+                namespace = ns;
+              };
+              no_anim = true;
+            }))
           ]
         )
+        #endregion
         ++ [
-          "animation slide top, match:namespace sideleft.*"
-          "animation slide top, match:namespace sideright.*"
-          "blur on, match:namespace session"
+          {
+            match = {
+              namespace = "sideleft.*";
+            };
+            animation = "slide top";
+          }
+          {
+            match = {
+              namespace = "sideright.*";
+            };
+            animation = "slide top";
+          }
+          {
+            match = {
+              namespace = "session";
+            };
+            blur = true;
+          }
         ]
-        ++ (trivial.pipe
+        #region Blur & Ignore Alpha
+        ++ (pipe
           [
             "bar"
             "corner.*"
@@ -133,64 +208,40 @@ with lib;
             "osk"
           ]
           [
-            (map (layer: [
-              "blur on, match:namespace ${layer}"
-              "ignore_alpha 0.6, match:namespace ${layer}"
+            (map (ns: [
+              {
+                match = {
+                  namespace = ns;
+                };
+                blur = true;
+              }
+              {
+                match = {
+                  namespace = ns;
+                };
+                ignore_alpha = 0.6;
+              }
             ]))
             flatten
-            #endregion
           ]
         );
+      #endregion
 
-      misc = {
-        animate_manual_resizes = false;
-        animate_mouse_windowdragging = false;
-
-        focus_on_activate = true;
-        disable_hyprland_logo = true;
-        force_default_wallpaper = 0;
-        allow_session_lock_restore = true;
-
-        initial_workspace_tracking = 1;
-
-        middle_click_paste = false;
-      };
+      # Mouse drag/resize via direct Lua hl.bind() with _args
+      bind = [
+        {
+          _args = [
+            "SUPER + mouse:272"
+            (generators.mkLuaInline "hl.dsp.window.drag()")
+          ];
+        }
+        {
+          _args = [
+            "SUPER + mouse:273"
+            (generators.mkLuaInline "hl.dsp.window.resize()")
+          ];
+        }
+      ];
     };
-
-    extraConfig =
-      let
-        mod = "SUPER";
-
-        bindings = {
-          global = {
-            audio =
-              let
-                wpctl = "${pkgs.wireplumber}/bin/wpctl";
-                playerctl = getExe config.services.playerctld.package;
-              in
-              ''
-                bindel=,XF86AudioRaiseVolume,exec,${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+
-                bindel=,XF86AudioLowerVolume,exec,${wpctl} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-
-                bindl=,XF86AudioMute,exec,${wpctl} set-mute @DEFAULT_AUDIO_SINK@ toggle
-                bindl=,XF86AudioMicMute,exec,${wpctl} set-mute @DEFAULT_AUDIO_SOURCE@ toggle
-
-                bind=,XF86AudioPause,exec,${playerctl} play-pause
-                bind=,XF86AudioPlay,exec,${playerctl} play-pause
-                bind=,XF86AudioNext,exec,${playerctl} next
-                bind=,XF86AudioPrev,exec,${playerctl} previous
-              '';
-
-            window = ''
-              bind = ${mod},Q,killactive                # Kill active window
-              bind = ${mod},SPACE,fullscreen            # Toggle fullscreen for the active window
-              bind = ${mod} SHIFT,space,togglefloating  # Toggle floating for the active window
-
-              bindm = ${mod}, mouse:272, movewindow     # Move active window
-              bindm = ${mod}, mouse:273, resizewindow   # Resize active window
-            '';
-          };
-        };
-      in
-      builtins.concatStringsSep "\n" (builtins.attrValues bindings.global);
   };
 }

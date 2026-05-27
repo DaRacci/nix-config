@@ -48,10 +48,6 @@ let
     "8" = {
       name = "Gaming";
       monitor = monitors.left;
-      extraRules = {
-        rounding = "false";
-        shadow = "false";
-      };
     };
     "9" = {
       name = "Miscellaneous";
@@ -63,38 +59,37 @@ let
       monitor = monitors.left;
     };
   };
+
+  uwsmCommand = exe: "${lib.getExe' pkgs.uwsm "uwsm-app"} -s a -- ${exe}";
+
+  toStartupCmd =
+    exe:
+    if builtins.isString exe then
+      uwsmCommand exe
+    else if builtins.isAttrs exe then
+      "${
+        if exe ? options then "[${builtins.concatStringsSep ";" exe.options}] " else ""
+      }${uwsmCommand exe.executable}"
+    else
+      null;
+
+  mkWorkspaceEntry =
+    id: value:
+    {
+      workspace = id;
+    }
+    // (lib.optionalAttrs (value.name != null) {
+      default_name = value.name;
+    })
+    // (lib.optionalAttrs (value.monitor != null) {
+      monitor = value.monitor;
+    })
+    // (lib.optionalAttrs ((value.startup or [ ]) != [ ]) {
+      on_created_empty = builtins.concatStringsSep " && " (map toStartupCmd value.startup);
+    })
+    // (value.extraRules or { });
 in
 {
-  wayland.windowManager.hyprland.settings = {
-    workspace = lib.mapAttrsToList (
-      id: value:
-      let
-        assignNotNull =
-          key: value:
-          if (value != null && (builtins.stringLength value > 0)) then key + ":" + value else null;
-        uwsmCommand = exe: "${lib.getExe' pkgs.uwsm "uwsm-app"} -s a -- ${exe}";
-        executableToCommand =
-          exe:
-          if builtins.isString exe then
-            uwsmCommand exe
-          else if builtins.isAttrs exe then
-            "${
-              if exe ? options then "[${builtins.concatStringsSep ";" exe.options}]" else ""
-            } ${uwsmCommand exe.executable}"
-          else
-            null;
-        args =
-          builtins.filter (v: v != null) [
-            id
-            (assignNotNull "defaultName" value.name)
-            (assignNotNull "monitor" value.monitor)
-            (assignNotNull "on-created-empty" (
-              builtins.concatStringsSep "&&" (map executableToCommand value.startup or [ ])
-            ))
-          ]
-          ++ (lib.mapAttrsToList (k: v: "${k}:${v}") (value.extraRules or { }));
-      in
-      builtins.concatStringsSep "," args
-    ) workspaces;
-  };
+  wayland.windowManager.hyprland.settings.workspace_rule =
+    lib.mapAttrsToList mkWorkspaceEntry workspaces;
 }

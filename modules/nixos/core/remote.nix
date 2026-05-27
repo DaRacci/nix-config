@@ -192,12 +192,24 @@ in
       // optionalAttrs hasHomeManager {
         home-manager.sharedModules = [
           {
-            wayland.windowManager.hyprland.settings = {
-              exec-once = [ "hyprctl output create headless" ];
-              monitor = [ "HEADLESS-2,disable" ];
-              permission = [
-                "${lib.getExe pkgs.sunshine}, screencopy, allow"
-              ];
+            wayland.windowManager.hyprland = {
+              custom-settings.permission.screenCopy = [ (lib.getExe pkgs.sunshine) ];
+              settings = {
+                on = [
+                  {
+                    _args = [
+                      "hyprland.start"
+                      (lib.generators.mkLuaInline "function() hl.exec_cmd('hyprctl output create headless') end")
+                    ];
+                  }
+                ];
+                monitor = [
+                  {
+                    output = "HEADLESS-2";
+                    disabled = true;
+                  }
+                ];
+              };
             };
           }
         ];

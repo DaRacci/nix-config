@@ -32,3 +32,4 @@ This section provides an overview of the custom NixOS and Home-Manager modules d
     - [list-ephemeral](home-manager/programs/list_ephemeral.md)
   - [DIY & Making](home-manager/diy.md)
   - [AI Editors & Assistants](home-manager/ai.md)
+  - [Hyprland](home-manager/hyprland.md)

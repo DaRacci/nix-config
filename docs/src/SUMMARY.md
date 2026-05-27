@@ -63,6 +63,7 @@
 
 - [DIY & Making](modules/home-manager/diy.md)
 - [AI Editors & Assistants](modules/home-manager/ai.md)
+- [Hyprland](modules/home-manager/hyprland.md)
 - [Programs](modules/home-manager/programs/list_ephemeral.md)
 
 # Packages

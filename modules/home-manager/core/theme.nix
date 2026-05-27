@@ -23,11 +23,14 @@ in
   };
 
   config = mkIf cfg.enable {
-    wayland.windowManager.hyprland.settings.exec-once =
-      mkIf config.wayland.windowManager.hyprland.enable
-        [
-          "hyprctl setcursor ${config.stylix.cursor.name} ${toString config.stylix.cursor.size}"
+    wayland.windowManager.hyprland.settings.on = mkIf config.wayland.windowManager.hyprland.enable [
+      {
+        _args = [
+          "hyprland.start"
+          (lib.generators.mkLuaInline "function() hl.exec_cmd('hyprctl setcursor ${config.stylix.cursor.name} ${toString config.stylix.cursor.size}') end")
         ];
+      }
+    ];
 
     xdg.dataFile = mkIf (config.stylix.image != null) (
       let

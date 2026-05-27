@@ -5,15 +5,10 @@
   ...
 }:
 {
-  wayland.windowManager.hyprland.settings =
-    let
-      wlogout = lib.getExe pkgs.wlogout;
-    in
-    {
-      bind = [
-        "Ctrl+Shift+Alt, Delete, exec, pkill ${wlogout} || ${wlogout} -p layer-shell"
-      ];
-    };
+  wayland.windowManager.hyprland.custom-settings.bind."Ctrl+Shift+Alt+Delete" = [
+    "exec"
+    "pkill ${lib.getExe pkgs.wlogout} || ${lib.getExe pkgs.wlogout} -p layer-shell"
+  ];
 
   programs.wlogout = {
     enable = true;

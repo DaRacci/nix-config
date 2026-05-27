@@ -8,8 +8,9 @@ let
   inherit (lib) getExe getExe';
 in
 {
-  wayland.windowManager.hyprland.settings.bind = [
-    "SUPER,V,exec,${getExe' pkgs.uwsm "uwsm-app"} -s a -- ~/.local/bin/rofi-clipboard"
+  wayland.windowManager.hyprland.custom-settings.bind."SUPER+V" = [
+    "exec"
+    "${getExe' pkgs.uwsm "uwsm-app"} -s a -- ~/.local/bin/rofi-clipboard"
   ];
 
   home.packages = with pkgs; [

@@ -50,13 +50,30 @@
   };
 
   wayland.windowManager.hyprland.settings = {
-    layerrule = [
-      "blur on, match:namespace vicinae"
-      "ignore_alpha 0, match:namespace vicinae"
+    layer_rule = [
+      {
+        match = {
+          namespace = "vicinae";
+        };
+        blur = true;
+      }
+      {
+        match = {
+          namespace = "vicinae";
+        };
+        ignore_alpha = 0;
+      }
     ];
-    bind = [
-      "CTRL_ALT, SPACE, exec, vicinae toggle"
-      "SUPER, V, exec, vicinae vicinae://extensions/vicinae/clipboard/history"
+  };
+
+  wayland.windowManager.hyprland.custom-settings.bind = {
+    "CTRL+ALT+SPACE" = [
+      "exec"
+      "vicinae toggle"
+    ];
+    "SUPER+V" = [
+      "exec"
+      "vicinae vicinae://extensions/vicinae/clipboard/history"
     ];
   };
 

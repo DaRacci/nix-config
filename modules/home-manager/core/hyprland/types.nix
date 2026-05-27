@@ -96,12 +96,12 @@ rec {
         type = nullOr (submodule {
           options = {
             internal = mkOption {
-              type = with types; either (enum [ "*" ]) ints.between 0 3;
+              type = either (enum [ "*" ]) ints.between 0 3;
               default = null;
               description = "Set the internal fullscreen state. internal can be * - any, 0 - none, 1 - maximize, 2 - fullscreen, 3 - maximize and fullscreen.";
             };
             client = mkOption {
-              type = with types; either (enum [ "*" ]) ints.between 0 3;
+              type = either (enum [ "*" ]) ints.between 0 3;
               default = null;
               description = "Set the client fullscreen state. client can be * - any, 0 - none, 1 - maximize, 2 - fullscreen, 3 - maximize and fullscreen.";
             };
@@ -152,7 +152,19 @@ rec {
           )
         );
         default = null;
-        apply = v: if builtins.isAttrs v then "${v.width} ${v.height}" else v;
+        apply =
+          v:
+          if builtins.isAttrs v then
+            "${v.width} ${v.height}"
+          else if v != null then
+            let
+              s = builtins.replaceStrings [ "x" ] [ " " ] v;
+              parts = builtins.split "[[:space:]]+" s;
+              nonEmpty = builtins.filter (p: p != null && p != "") parts;
+            in
+            if builtins.length nonEmpty >= 2 then s else "${s} ${s}"
+          else
+            null;
         description = "Set the window size.";
       };
       center = mkOption {
@@ -229,7 +241,6 @@ rec {
         type = nullOr (either int str);
         default = null;
         description = "Makes the window uncloseable with the killactive dispatcher for a given amount of ms on open.";
-        apply = toString;
       };
       #endregion
 

@@ -143,41 +143,44 @@ in
 
   config = mkIf (cfg != [ ]) {
     wayland.windowManager.hyprland = {
-      settings.exec-once = map mkExec cfg;
+      settings.on = map (app: {
+        _args = [
+          "hyprland.start"
+          (lib.generators.mkLuaInline "function() hl.exec_cmd('${mkExec app}') end")
+        ];
+      }) cfg;
 
-      custom-settings = {
-        bind =
-          cfg
-          |> map (
-            item:
-            nameValuePair item.bind [
-              "exec"
-              (builtins.concatStringsSep " " [
-                invokeScript
-                item.class
-                item.exec
-                item.position
-                (
-                  if (lib.hasAttrByPath [ "size" "width" ] item.rule) && item.rule.size.width != null then
-                    item.rule.size.width
-                  else if (isEdgePosition item.position) then
-                    "33%"
-                  else
-                    "20%"
-                )
-                (
-                  if (lib.hasAttrByPath [ "size" "height" ] item.rule) && item.rule.size.height != null then
-                    item.rule.size.height
-                  else if (isEdgePosition item.position) then
-                    "33%"
-                  else
-                    "98%"
-                )
-              ])
-            ]
-          )
-          |> lib.listToAttrs;
-      };
+      custom-settings.bind =
+        cfg
+        |> map (
+          item:
+          nameValuePair item.bind [
+            "exec"
+            (builtins.concatStringsSep " " [
+              invokeScript
+              item.class
+              item.exec
+              item.position
+              (
+                if (lib.hasAttrByPath [ "size" "width" ] item.rule) && item.rule.size.width != null then
+                  item.rule.size.width
+                else if (isEdgePosition item.position) then
+                  "33%"
+                else
+                  "20%"
+              )
+              (
+                if (lib.hasAttrByPath [ "size" "height" ] item.rule) && item.rule.size.height != null then
+                  item.rule.size.height
+                else if (isEdgePosition item.position) then
+                  "33%"
+                else
+                  "98%"
+              )
+            ])
+          ]
+        )
+        |> lib.listToAttrs;
     };
   };
 }

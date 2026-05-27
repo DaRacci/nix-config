@@ -14,35 +14,37 @@
 
   user.persistence.enable = true;
 
-  wayland.windowManager.hyprland.extraConfig = ''
-    monitorv2 {
-      output = DP-6
-      mode = 3840x2160@240
-      position = 0x0
-      scale = 1
-      vrr = true
+  wayland.windowManager.hyprland.settings = {
+    monitor = [
+      {
+        output = "DP-6";
+        mode = "3840x2160@240";
+        position = "0x0";
+        scale = 1;
+        vrr = true;
+        bitdepth = 10;
+        supports_wide_color = true;
+        supports_hdr = true;
+        sdr_min_luminance = 0.005;
+        sdr_max_luminance = 350;
+      }
+      {
+        output = "DP-1";
+        mode = "2560x1440@144";
+        position = "-2560x360";
+        scale = 1;
+        vrr = true;
+      }
+      {
+        output = "HDMI-A-1";
+        mode = "2560x1440@120";
+        position = "3840x360";
+        scale = 1;
+        vrr = false;
+      }
+    ];
+  };
 
-      bitdepth = 10
-      supports_wide_color = true
-      supports_hdr = true
-      sdr_min_luminance = 0.005
-      sdr_max_luminance = 350
-    }
-    monitorv2 {
-      output = DP-1
-      mode = 2560x1440@144
-      position = -2560x360
-      scale = 1
-      vrr = true
-    }
-    monitorv2 {
-      output = HDMI-A-1
-      mode = 2560x1440@120
-      position = 3840x360
-      scale = 1
-      vrr = false
-    }
-  '';
   core.audio = {
     disabledDevices = [
       "alsa_card.pci-0000_01_00.1" # Dedicated GPU

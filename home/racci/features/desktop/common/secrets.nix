@@ -55,8 +55,9 @@
       };
     };
 
-    settings.bind = [
-      "CTRL_SHIFT,SPACE,exec,${lib.getExe pkgs._1password-gui} --quick-access"
+    custom-settings.bind."CTRL+SHIFT+SPACE" = [
+      "exec"
+      "${lib.getExe pkgs._1password-gui} --quick-access"
     ];
   };
 
