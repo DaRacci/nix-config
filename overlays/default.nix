@@ -74,9 +74,12 @@ in
       removeWarningPopup = true;
     };
 
-    # openldap = prev.openldap.overrideAttrs (_oldAttrs: {
-    #   doCheck = false;
-    # });
+    #TODO:https://github.com/NixOS/nixpkgs/pull/525133
+    openldap = prev.openldap.overrideAttrs (oldAttrs: {
+      preCheck = oldAttrs.preCheck + ''
+        rm -f tests/scripts/test*-sync*
+      '';
+    });
 
     statix = prev.statix.overrideAttrs (_: rec {
       src = prev.fetchFromGitHub {
