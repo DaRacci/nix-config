@@ -94,8 +94,8 @@
           model = "google/gemini-3.1-flash-lite";
         };
         subagent_model = {
-          provider = "copilot_chat";
-          model = "gpt-5.4-mini";
+          provider = "openrouter";
+          model = "deepseek/deepseek-v4-flash";
         };
       };
 
@@ -224,7 +224,7 @@
           };
         };
 
-        qml = {
+        qmljs = {
           binary = {
             path = lib.getExe' pkgs.kdePackages.qtdeclarative "qmlls";
             arguments = [ "-E" ];
