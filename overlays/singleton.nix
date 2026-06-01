@@ -32,7 +32,6 @@ let
     "tabby"
     "tabby-agent"
     "hyprlandPlugins.hypr-dynamic-cursors"
-    "hyprlandPlugins.hy3"
   ];
 
   isNestedName = name: lib.strings.match ".*\\..*" name != null;
