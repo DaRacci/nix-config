@@ -31,8 +31,8 @@ steps:
 
       export NIX_CONFIG="access-tokens = github.com=$${GITHUB_TOKEN}"
       nix run .#update-locks -- \
-        --flake-dirs ["." "flake/ci" "flake/dev" "flake/nixos" "flake/home-manager"] \
         --commit-message "chore(deps): Update <flake>"
+        "." "flake/ci" "flake/dev" "flake/nixos" "flake/home-manager"
 
   - name: Push to Branch
     image: appleboy/drone-git-push

@@ -17,7 +17,10 @@ let
         config = {
           allowUnfree = true;
           allowUnfreePredicate = _: true;
-          permittedInsecurePackages = [ ];
+          permittedInsecurePackages = [
+            #TODO:https://github.com/bitwarden/clients/pull/20448
+            "electron-39.8.10"
+          ];
 
           cudaSupport = builtins.elem "cuda" accelerators;
           rocmSupport = builtins.elem "rocm" accelerators;

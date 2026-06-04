@@ -3,8 +3,8 @@
 use std/log
 
 def main [
-  --flake-dirs: list<string>  # List of flake directories to update; relative to the repository root.
-  --commit-message: string    # Commit message template; <flake> will be replaced with the relative path of the flake.lock file.
+  --commit-message: string, # Commit message template; <flake> will be replaced with the relative path of the flake.lock file.
+  ...flake_dirs: string     # List of flake directories to update; relative to the repository root.
 ] {
   if (($flake_dirs | length) == 0) {
     log warning "No flake directories provided to update. Exiting."

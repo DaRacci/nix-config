@@ -17,13 +17,13 @@
 
     # Hardware & Boot
     lanzaboote = {
-      url = "github:nix-community/lanzaboote/v0.4.3";
+      url = "github:nix-community/lanzaboote/v1.0.0";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         rust-overlay.follows = "rust-overlay";
         flake-parts.follows = "flake-parts";
         flake-compat.follows = "";
-        pre-commit-hooks-nix.follows = "";
+        pre-commit.follows = "";
       };
     };
     disko = {

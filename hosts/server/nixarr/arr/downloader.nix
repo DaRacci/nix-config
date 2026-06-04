@@ -76,7 +76,7 @@
       reverse_proxy localhost:${toString config.nixarr.transmission.uiPort}
     '';
     sabnzbd.extraConfig = ''
-      reverse_proxy localhost:${toString config.nixarr.sabnzbd.uiPort}
+      reverse_proxy localhost:${toString config.nixarr.sabnzbd.guiPort}
     '';
   };
 }

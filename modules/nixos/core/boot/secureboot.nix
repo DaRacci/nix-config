@@ -29,6 +29,7 @@ in
       lanzaboote = {
         enable = true;
         pkiBundle = "/var/lib/sbctl";
+        autoGenerateKeys.enable = true;
       };
     };
 

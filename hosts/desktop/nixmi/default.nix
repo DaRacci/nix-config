@@ -26,6 +26,8 @@
     };
   };
 
+  stylix.targets.kmscon.enable = false;
+
   services = {
     hardware.bolt.enable = true;
     metrics = {
