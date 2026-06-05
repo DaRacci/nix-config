@@ -48,8 +48,8 @@
 
           #region Cache Settings
           cache_size = 4194304;
-          cache_ttl_min = 0;
-          cache_ttl_max = 0;
+          cache_ttl_min = 30;
+          cache_ttl_max = 3600;
           cache_optimistic = true;
           #endregion
 
