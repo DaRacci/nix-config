@@ -37,6 +37,7 @@ in
     }
     // (
       config.services.kanidm.provision.systems.oauth2
+      |> lib.filterAttrs (_: client: !(client.public or false))
       |> mapAttrs' (
         clientId: _: nameValuePair "KANIDM/OAUTH2/${toUpper clientId}_SECRET" kanidmPermissions
       )
@@ -172,6 +173,19 @@ in
               sysadmin = [ "admin" ];
             };
           };
+        };
+
+        hermes = {
+          displayName = "Agent Dashboard";
+          originUrl = "https://agent.racci.dev/auth/callback";
+          originLanding = "https://agent.racci.dev";
+          public = true;
+
+          scopeMaps.cloud = [
+            "openid"
+            "profile"
+            "email"
+          ];
         };
       };
     };

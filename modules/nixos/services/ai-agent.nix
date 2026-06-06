@@ -22,6 +22,7 @@ let
     str
     nullOr
     listOf
+    addCheck
     ;
 
   cfg = config.services.ai-agent;
@@ -34,6 +35,51 @@ in
 
     dashboard = {
       enable = mkEnableOption "Hermes web dashboard";
+
+      port = mkOption {
+        type = int;
+        default = 9119;
+        description = "The port for the dashboard to listen on.";
+      };
+
+      publicURL = mkOption {
+        type = nullOr (addCheck str (url: builtins.match "https?://.+" url != null));
+        description = ''
+          The public URL for the dashboard, used for generating links in notifications and similar. If not set, localhost URLs will be used.
+
+          If set, must be a valid URL starting with http:// or https://.
+        '';
+      };
+
+      oidc = {
+        enable = mkEnableOption "OpenID Connect authentication for the dashboard";
+
+        provider = mkOption {
+          type = str;
+          default = "self-hosted";
+          description = "The OIDC plugin to use for dashboard authentication.";
+        };
+
+        issuer = mkOption {
+          type = str;
+          description = "The OIDC issuer URL for dashboard authentication.";
+        };
+
+        clientId = mkOption {
+          type = str;
+          description = "The OIDC client ID for dashboard authentication.";
+        };
+
+        scopes = mkOption {
+          type = listOf str;
+          default = [
+            "openid"
+            "profile"
+            "email"
+          ];
+          description = "The OIDC scopes to request for dashboard authentication.";
+        };
+      };
     };
 
     memory = {
@@ -248,10 +294,20 @@ in
           };
         };
       };
+    })
 
-      systemd.services.hermes-dashboard = mkIf cfg.dashboard.enable {
+    (mkIf (cfg.enable && cfg.dashboard.enable) {
+      services.hermes-agent.settings.dashboard = {
+        public_url = cfg.dashboard.publicURL;
+      };
+
+      systemd.services.hermes-dashboard = {
         description = "Hermes web dashboard";
-        after = [ "network.target" ];
+        after = [
+          "network.target"
+          "hermes-agent.service"
+        ];
+        requires = [ "hermes-agent.service" ];
         wantedBy = [ "multi-user.target" ];
         path = [ pkgs.docker ];
         serviceConfig = {
@@ -259,14 +315,14 @@ in
           User = "hermes";
           Group = "hermes";
           WorkingDirectory = "/var/lib/hermes";
-          ExecStart = "${config.services.hermes-agent.package}/bin/hermes dashboard --host 0.0.0.0 --no-open --insecure";
+          ExecStart = "${config.services.hermes-agent.package}/bin/hermes dashboard --host 0.0.0.0 --no-open --port ${toString cfg.dashboard.port}";
           Restart = "on-failure";
           RestartSec = 5;
           SupplementaryGroups = [ "docker" ];
         };
       };
 
-      networking.firewall.allowedTCPPorts = [ 9119 ];
+      networking.firewall.allowedTCPPorts = [ cfg.dashboard.port ];
     })
 
     (mkIf (cfg.enable && cfg.memory.enable) {
@@ -348,6 +404,36 @@ in
         templates."HERMES_HASSIO_ENV".content = toShellVars {
           HASS_TOKEN = config.sops.placeholder."${cfg.platform.hassio.tokenReference}";
           HASS_URL = cfg.platform.hassio.url;
+        };
+      };
+    })
+
+    (mkIf (cfg.enable && cfg.dashboard.enable && cfg.dashboard.oidc.enable) {
+      assertions = [
+        {
+          assertion = cfg.dashboard.oidc.issuer != null;
+          message = "OIDC issuer must be specified when OIDC authentication is enabled.";
+        }
+        {
+          assertion = cfg.dashboard.oidc.clientId != null;
+          message = "OIDC client ID must be specified when OIDC authentication is enabled.";
+        }
+      ];
+
+      sops.templates."HERMES_DASHBOARD_OIDC_ENV".content = toShellVars {
+        HERMES_DASHBOARD_OIDC_ISSUER = cfg.dashboard.oidc.issuer;
+        HERMES_DASHBOARD_OIDC_CLIENT_ID = cfg.dashboard.oidc.clientId;
+        HERMES_DASHBOARD_OIDC_SCOPES = concatStringsSep " " cfg.dashboard.oidc.scopes;
+      };
+
+      services.hermes-agent = {
+        environmentFiles = [ config.sops.templates."HERMES_DASHBOARD_OIDC_ENV".path ];
+        settings.dashboard.oauth = {
+          inherit (cfg.dashboard.oidc) provider;
+          "${cfg.dashboard.oidc.provider}" = {
+            inherit (cfg.dashboard.oidc) issuer scopes;
+            client_id = cfg.dashboard.oidc.clientId;
+          };
         };
       };
     })

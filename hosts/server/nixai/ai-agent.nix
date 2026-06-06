@@ -22,13 +22,23 @@
   };
 
   server.proxy.virtualHosts.agent.extraConfig = ''
-    reverse_proxy localhost:8000
+    reverse_proxy localhost:${toString config.services.ai-agent.dashboard.port}
   '';
 
   services = {
     ai-agent = {
       enable = true;
-      dashboard.enable = true;
+      dashboard = {
+        enable = true;
+        publicURL = "https://agent.racci.dev";
+
+        oidc = {
+          enable = true;
+          provider = "self-hosted";
+          issuer = "https://auth.racci.dev/oauth2/openid/hermes";
+          clientId = "hermes";
+        };
+      };
       apiServer.enable = true;
       voice.enable = true;
       memory.enable = true;
