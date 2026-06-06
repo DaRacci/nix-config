@@ -32,6 +32,7 @@ ______________________________________________________________________
 When enabled, module:
 
 - enables `services.openssh`,
+- disables socket activation (`startWhenNeeded = false`) to prevent mid-connection disruptions during system configuration switches,
 - disables password authentication,
 - sets `PermitRootLogin = "prohibit-password"`,
 - sets `GatewayPorts = "clientspecified"`,
@@ -61,3 +62,4 @@ ______________________________________________________________________
 - Current host gets `localhost` as extra known-host alias in generated SSH client config.
 - Root authorization here uses host key material from flake, not per-user login keys.
 - Private host key comes from SOPS secret `SSH_PRIVATE_KEY`, so `core.sops` integration usually pairs with this module.
+- **Socket activation disabled**: By default, NixOS uses socket activation for SSH which spawns per-connection service instances (`sshd@...service`). When these instances are restarted during a configuration switch, it disconnects active SSH sessions. Disabling socket activation (`startWhenNeeded = false`) runs SSH as a traditional always-on service, preventing remote disconnection during `nixos-rebuild switch` over SSH.

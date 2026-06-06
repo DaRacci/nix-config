@@ -37,6 +37,7 @@ in
 
     services.openssh = {
       enable = true;
+      startWhenNeeded = false;
       settings = {
         PasswordAuthentication = false;
         PermitRootLogin = "prohibit-password";
