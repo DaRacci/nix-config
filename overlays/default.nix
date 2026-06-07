@@ -88,6 +88,21 @@ in
       };
     });
 
+    kernelPackagesExtensions = prev.kernelPackagesExtensions ++ [
+      (_self: super: {
+        #TODO:Remove once nixpkgs kernel-zen is updated to 7.1 which includes the fix i wanted.
+        universal-pidff = super.universal-pidff.overrideAttrs (_old: {
+          version = "unstable-2026-06-02";
+          src = prev.fetchFromGitHub {
+            owner = "JacKeTUs";
+            repo = "universal-pidff";
+            rev = "595c65bb23ad824cb6d8dedb1d74123f622de1cc";
+            hash = "sha256-0eXrCZSHrD5OkrqeYMcuV20us2Hl6d48dIvrZi/GY8c=";
+          };
+        });
+      })
+    ];
+
     inherit lib;
   };
 
