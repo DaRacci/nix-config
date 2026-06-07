@@ -31,7 +31,6 @@ let
   singletonInputs = [
     "tabby"
     "tabby-agent"
-    "hyprlandPlugins.hypr-dynamic-cursors"
     "hyprlandPlugins.hy3"
   ];
 
