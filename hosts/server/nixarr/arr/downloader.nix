@@ -57,7 +57,6 @@
 
   services = {
     transmission.openPeerPorts = lib.mkForce true;
-    #TODO:https://github.com/nix-media-server/nixarr/pull/132
     sabnzbd.allowConfigWrite = true;
   };
 

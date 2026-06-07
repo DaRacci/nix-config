@@ -74,12 +74,7 @@
       flake = false;
       type = "file";
     };
-    #TODO:https://github.com/NixOS/nixpkgs/pull/522460
-    "hyprlandPlugins.hypr-dynamic-cursors" = {
-      url = "https://github.com/r-ryantm/nixpkgs/raw/462f2c82e745c63a2fc1690b86a7dec5d11c4d6b/pkgs/applications/window-managers/hyprwm/hyprland-plugins/hypr-dynamic-cursors.nix";
-      flake = false;
-      type = "file";
-    };
+
     #TODO:https://github.com/NixOS/nixpkgs/pull/521651
     "hyprlandPlugins.hy3" = {
       url = "https://github.com/r-ryantm/nixpkgs/raw/fc4ff99d24ee5dfa1a9f001118d14727fcc7e6ca/pkgs/applications/window-managers/hyprwm/hyprland-plugins/hy3.nix";
