@@ -16,7 +16,7 @@ The `lib` directory contains custom Nix functions and builders used throughout t
   - `package.nix`: Custom package definitions and derivation helpers.
   - `persistence.nix`: Helpers for managing path persistence in ephemeral (TempFS) environments.
   - `strings.nix`: String manipulation and formatting utilities.
-- `lib/builders/`: Contains specialized builders for system and home configurations.
+- `lib/builders/`: Specialized builders for system and home configurations. Builders forward shared module arguments (e.g. `importExternals` and repo-level args) into both NixOS and nested Home Manager `extraSpecialArgs`, enabling modules that conditionally import external inputs.
 
 ## Key Options/Knobs
 

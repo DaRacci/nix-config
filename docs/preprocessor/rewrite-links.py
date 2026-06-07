@@ -74,7 +74,6 @@ def rewrite_target(
     target: str,
     chapter_path: str,
     docs_root: Path,
-    src_dir: str,
     base_url: str,
     branch: str,
 ) -> str | None:
@@ -108,7 +107,6 @@ def rewrite_text(
     text: str,
     chapter_path: str,
     docs_root: Path,
-    src_dir: str,
     base_url: str,
     branch: str,
 ) -> str:
@@ -121,7 +119,6 @@ def rewrite_text(
             target,
             chapter_path,
             docs_root,
-            src_dir,
             base_url,
             branch,
         )
@@ -137,7 +134,6 @@ def rewrite_text(
             target,
             chapter_path,
             docs_root,
-            src_dir,
             base_url,
             branch,
         )
@@ -153,9 +149,7 @@ def rewrite_text(
     return rewritten_text
 
 
-def process_item(
-    item: object, docs_root: Path, base_url: str, branch: str, src_dir: str
-) -> None:
+def process_item(item: object, docs_root: Path, base_url: str, branch: str) -> None:
     if not isinstance(item, dict):
         return
 
@@ -170,29 +164,26 @@ def process_item(
             chapter.get("content", ""),
             chapter_path,
             docs_root,
-            src_dir,
             base_url,
             branch,
         )
 
     for sub_item in chapter.get("sub_items", []):
-        process_item(sub_item, docs_root, base_url, branch, src_dir)
+        process_item(sub_item, docs_root, base_url, branch)
 
 
-def process_book(
-    book: dict, docs_root: Path, base_url: str, branch: str, src_dir: str
-) -> None:
+def process_book(book: dict, docs_root: Path, base_url: str, branch: str) -> None:
     items = book.get("items")
     if isinstance(items, list):
         for item in items:
-            process_item(item, docs_root, base_url, branch, src_dir)
+            process_item(item, docs_root, base_url, branch)
         return
 
     sections = book.get("sections")
     if isinstance(sections, list):
         LOGGER.debug("fallback to legacy book.sections traversal")
         for item in sections:
-            process_item(item, docs_root, base_url, branch, src_dir)
+            process_item(item, docs_root, base_url, branch)
 
 
 def run_tests() -> None:
@@ -220,7 +211,6 @@ def run_tests() -> None:
                 text,
                 self.chapter_path,
                 self.docs_root,
-                "src",
                 "https://codeberg.org/Racci/nix-config",
                 "master",
             )
@@ -234,7 +224,6 @@ def run_tests() -> None:
                 text,
                 self.chapter_path,
                 self.docs_root,
-                "src",
                 "https://codeberg.org/Racci/nix-config",
                 "master",
             )
@@ -259,7 +248,6 @@ def run_tests() -> None:
                 self.docs_root,
                 "https://codeberg.org/Racci/nix-config",
                 "master",
-                "src",
             )
 
             self.assertIn(
@@ -298,13 +286,12 @@ def main() -> None:
     docs_root = root / src_dir if (root / src_dir).is_dir() else book_root / src_dir
 
     LOGGER.debug(
-        "start rewrite with branch=%s src_dir=%s docs_root=%s",
+        "start rewrite with branch=%s docs_root=%s",
         branch,
-        src_dir,
         docs_root,
     )
 
-    process_book(book, docs_root, base_url, branch, src_dir)
+    process_book(book, docs_root, base_url, branch)
 
     sys.stdout.write(json.dumps(book))
 

@@ -47,7 +47,7 @@ Screenshot output.png       # Capture current frame
 
 ## Settings
 
-| Setting                        | Example            |
+| Setting                        | Description        |
 | ------------------------------ | ------------------ |
 | `Set Shell "bash"`             | Shell to use       |
 | `Set FontSize 14`              | Font size          |

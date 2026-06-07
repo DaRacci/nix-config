@@ -89,6 +89,7 @@ nixosSystem rec {
           extraSpecialArgs = {
             inherit self;
             inherit (self) inputs outputs;
+            importExternals = true;
           };
 
           sharedModules = optionals (!config.stylix.enable) config.stylix.homeManagerIntegration.module;
