@@ -62,7 +62,7 @@ option, currently set to `nixmon`.
 
 ### Options
 
-{{#include ../../generated/server-monitoring-options.md}}
+{{#include ../generated/server-monitoring-options.md}}
 
 ### Auto-Detection
 

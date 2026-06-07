@@ -55,6 +55,6 @@ Keep docs clear, accurate, and synced with repo. Goal: make system configs, user
    - no manually maintained option tables unless there is a very specific reason.
 
 ### Updating host documentation
-If host config changes significant:
+If host config changes significantly:
 - Update relevant host file in `docs/src/hosts/`
 - Make sure hardware-specific details or special manual steps are documented
