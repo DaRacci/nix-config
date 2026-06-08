@@ -36,16 +36,7 @@ in
         enable = true;
         settings = {
           default_session = {
-            command = ''
-              ${getExe pkgs.tuigreet} \
-                --time \
-                --remember \
-                --remember-session ${
-                  optionalString (
-                    length sessions > 0
-                  ) "--sessions '${waylandSessionPaths}' --xsessions '${xSessionPaths}'"
-                }
-            '';
+            command = "${getExe pkgs.tuigreet} --time --remember --remember-session ${optionalString (length sessions > 0) "--sessions '${waylandSessionPaths}' --xsessions '${xSessionPaths}'"}";
             user = "greeter";
           };
         };
