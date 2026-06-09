@@ -4,8 +4,8 @@
     "${self}/home/shared/features/cli"
     ./cava.nix
     ./fastfetch.nix
-    ./git.nix
     ./terminal.nix
+    ./vcs.nix
   ];
 
   user.persistence.directories = [ ".terraform.d" ];
