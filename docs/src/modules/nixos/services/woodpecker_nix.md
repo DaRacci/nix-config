@@ -27,9 +27,9 @@ and the containers that use it are sandboxed away from the host.
 │  Host (NixOS)                                                            │
 │                                                                          │
 │  woodpecker-nix-init     ─── hash-aware bootstrap + profile setup        │
-│  systemd .mount unit       ─── overlayfs mount → store/                   │
+│  woodpecker-nix-mount  ─── overlay mount service (overlayfs only)        │
 │  woodpecker-nix-daemon   ─── serves merged store/ as /nix                │
-│  woodpecker-nix-propagate ─── audits upper layer for new paths           │
+│  woodpecker-nix-propagate ─── audits upper layer (overlayfs only)         │
 │  woodpecker-nix-gc       ─── size- and time-gated garbage collection     │
 │         │                                                                │
 │         │  overlayfs: lower=store-real/ upper=overlay/upper/             │
@@ -51,16 +51,20 @@ and the containers that use it are sandboxed away from the host.
   overlay/upper/    Upper layer (writable). New builds from containers land here.
   overlay/work/     Overlayfs internal work directory.
   store/            Merged mount: store-real + overlay/upper (what nix sees).
+
+> When `isolatedStore.overlayfs.enable = true` but host is an unprivileged
+> Proxmox LXC, overlayfs auto-disables — plain isolated store mode is used.
+> Mount service and propagation do not run in that mode.
 ```
 
 ### systemd services
 
 | Service | Purpose | Sandboxed? |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `woodpecker-nix-init` | Hash-aware bootstrap: creates directories, copies `runtimeEnv` + `bootstrapPackages` closures into `store-real/`, reconstructs profile symlinks, and registers GC roots. Prepares lowerdir/upperdir for overlayfs. Ordered before mount unit (not local-fs.target) to avoid cycle, and reruns on each dependent start so deleted overlay dirs are recreated. | Yes – `ProtectSystem=strict`, `ReadWritePaths = [ stateDir ]` (stateDir created by tmpfiles), runs as woodpecker-nix |
-| `systemd .mount unit` | Path-derived systemd mount unit for `${stateDir}/nix/store` — participates in normal local-fs startup. Mounts overlayfs: lower=`store-real/`, upper=`overlay/upper/`, work=`overlay/work/` → `store/`. Init prepares layers before mount activates. Requires canonical `${stateDir}` — no `/var/lib/private/...` symlink indirection. | N/A |
-| `woodpecker-nix-daemon` | Runs `nix daemon` with the overlayfs-backed store at `/nix`. Depends on the mount unit for `${stateDir}/nix/store`. | Yes – `PrivateMounts`, `ProtectSystem=strict`, runs as `woodpecker-nix` |
-| `woodpecker-nix-propagate` | Audits the overlayfs upper layer for new store paths, logs them to a journal, and updates the store size cache. Runs continuously. | Yes – sandboxed, runs as `woodpecker-nix` |
+| `woodpecker-nix-init` | Hash-aware bootstrap: creates directories, copies `runtimeEnv` + `bootstrapPackages` closures into `store-real/`, reconstructs profile symlinks, and registers GC roots. Prepares lowerdir/upperdir for overlayfs. Ordered before mount service (not local-fs.target) to avoid cycle, and reruns on each dependent start so deleted overlay dirs are recreated. | Yes – `ProtectSystem=strict`, `ReadWritePaths = [ stateDir ]` (stateDir created by tmpfiles), runs as woodpecker-nix |
+| `woodpecker-nix-mount` | Runs `mount -t overlay overlay` to mount `${stateDir}/nix/store`. Required because overlay mount must be host-visible and reliable; path-derived mount units don't work on this host. Init prepares layers before mount starts. **Only active when overlayfs is enabled.** | N/A |
+| `woodpecker-nix-daemon` | Runs `nix daemon` with the overlayfs-backed store at `/nix`. Depends on `woodpecker-nix-mount.service`. | Yes – `PrivateMounts`, `ProtectSystem=strict`, runs as `woodpecker-nix` |
+| `woodpecker-nix-propagate` | Audits the overlayfs upper layer for new store paths, logs them to a journal, and updates the store size cache. Runs continuously. **Only active when overlayfs is enabled.** | Yes – sandboxed, runs as `woodpecker-nix` |
 | `woodpecker-nix-propagate.timer` | Triggers the propagation audit on a configurable schedule (default: every 15 minutes). | N/A |
 | `woodpecker-nix-gc` | Garbage-collects the CI store. Only runs when store size exceeds `gc.sizeThreshold` AND more than `gc.minInterval` has elapsed since the last GC. Respects `--max-freed` budget. | Yes – sandboxed, runs as `woodpecker-nix` |
 | `woodpecker-nix-gc.timer` | Periodic trigger for the GC service (default: weekly). | N/A |
@@ -142,16 +146,21 @@ automatically on the next host rebuild + restart.
 #### Overlay migration and state directory recovery
 
 When migrating from a plain store layout to overlayfs, the init service
-moves existing paths from `${stateDir}/nix/store` into
-`${stateDir}/nix/store-real/` (the overlay lowerdir). This is done incrementally:
+copies top-level store entries from `${stateDir}/nix/store` into
+`${stateDir}/nix/store-real/` (the overlay lowerdir) then deletes the source.
+This runs before the overlay mount starts, so migration completes before
+Nix sees the store. Later init invocations skip entries already present
+in `store-real/` and clean up remaining source entries.
 
-- Paths already in `store-real/` are skipped.
+- Paths already in `store-real/` are skipped (idempotent).
 - If an interrupted run left a partial `store-real/`, the migration resumes
-  safely — entries that failed to move previously are retried.
+  safely — entries copied before interruption are skipped, remaining entries
+  are now copied.
 - After migration completes, the old `${stateDir}/nix/store` is removed;
   the mount unit provides the merged overlay view at `store/`.
 - `stateDir` is created at boot by tmpfiles, so init never touches parent dirs.
   Sandbox remains tight: `ReadWritePaths = [ stateDir ]`.
+  Tmpfiles creates the full directory skeleton under `${stateDir}` as `woodpecker-nix` — including intermediates like `${stateDir}/etc`, `${stateDir}/nix`, `${stateDir}/nix/overlay`, `${stateDir}/gc-home/.local` — so all service-accessible paths are correctly owned without root-owned intermediate parents.
 
 **To force a full re-bootstrap**, delete `.bootstrap-hash` only (see
 Troubleshooting). Deleting the entire `stateDir` triggers an unnecessary
@@ -376,8 +385,8 @@ rm /var/lib/woodpecker-nix/.bootstrap-hash
 systemctl restart woodpecker-nix-init.service
 ```
 
-If you already deleted `stateDir`, tmpfiles recreates it on the next
-boot.
+If you already deleted `stateDir`, tmpfiles recreates the full tree on the next
+boot. Run `systemd-tmpfiles --create` to trigger recreation immediately.
 
 ### Verifying the fix end-to-end
 
