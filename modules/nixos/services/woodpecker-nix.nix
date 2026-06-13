@@ -15,6 +15,7 @@ let
     literalExpression
     concatStringsSep
     optionalString
+    optionals
     optional
     ;
   inherit (types)
@@ -387,33 +388,50 @@ in
         }
         // (
           [
+            stateDir
             "${stateDir}/etc/nix"
             "${stateDir}/nix/var/nix/daemon-socket"
             "${stateDir}/nix/var/nix/db"
             "${stateDir}/nix/var/nix/profiles"
             "${stateDir}/nix/var/nix/gcroots"
-          ]
+          ] ++ (optionals cfg.isolatedStore.gc.enable [
+            "${stateDir}/.gc-home"
+            "${stateDir}/.gc-home/.cache"
+            "${stateDir}/.gc-home/.config"
+            "${stateDir}/.gc-home/.local/share"
+          ]) ++ (optionals overlayEnabled [
+            storeRealDir
+            upperDir
+            workDir
+          ])
           |> map (p: lib.nameValuePair p { d.mode = "0700"; })
           |> lib.listToAttrs
-        )
-        // (mkIf overlayEnabled {
-          "${storeRealDir}".d = {
-            mode = "0700";
-          };
-          "${upperDir}".d = {
-            mode = "0700";
-          };
-          "${workDir}".d = {
-            mode = "0700";
-          };
-        });
+        );
+
+        mounts = mkIf overlayEnabled [
+          {
+            what = "overlay";
+            where = "${stateDir}/nix/store";
+            type = "overlay";
+            options = "lowerdir=${storeRealDir},upperdir=${upperDir},workdir=${workDir}";
+            unitConfig = {
+              Requires = "woodpecker-nix-init.service";
+              After = "woodpecker-nix-init.service";
+              Before = "woodpecker-nix-daemon.service";
+            };
+          }
+        ];
 
         services = {
           woodpecker-nix-init = {
             description = "Bootstrap isolated Nix store for Woodpecker CI";
             requiredBy = [ "woodpecker-nix-daemon.service" ];
             before = [ "woodpecker-nix-daemon.service" ];
-            after = [ "local-fs.target" ];
+            # Intentionally no after=local-fs.target.
+            # The overlay mount at ${stateDir}/nix/store auto-joins
+            # local-fs.target, which would create a cycle:
+            #   mount -> init -> local-fs.target -> mount.
+            # Init only touches rootfs paths, always available at this stage.
 
             serviceConfig = {
               Type = "oneshot";
@@ -435,7 +453,14 @@ in
               ProtectSystem = "strict";
               RestrictNamespaces = true;
 
-              CapabilityBoundingSet = "";
+              # nix copy needs CAP_CHOWN/+FOWNER to set ownership on
+              # destination store paths, and CAP_DAC_OVERRIDE to read
+              # source paths from host /nix/store (0444, root-owned).
+              CapabilityBoundingSet = [
+                "CAP_CHOWN"
+                "CAP_DAC_OVERRIDE"
+                "CAP_FOWNER"
+              ];
               SystemCallFilter = [ "@system-service" ];
               SystemCallArchitectures = "native";
               SystemCallErrorNumber = "EPERM";
@@ -454,27 +479,32 @@ in
               let
                 bootstrapStorePaths = concatStringsSep " " (map (p: ''"${p}"'') allBootstrapPkgs);
                 overlaySetup = optionalString overlayEnabled ''
-                  echo ">>> Setting up overlayfs for isolated Nix store ..."
+                  echo ">>> Preparing directories for overlayfs ..."
 
                   mkdir -p "${storeRealDir}"
                   mkdir -p "${upperDir}"
                   mkdir -p "${workDir}"
 
-                  # Move existing store content into store-real (lower layer)
-                  if [ -d "${stateDir}/nix/store" ] && [ -z "$(ls -A ${stateDir}/nix/store 2>/dev/null)" ]; then
-                    echo "    Fresh install -- store is empty, nothing to move."
-                  elif [ -d "${stateDir}/nix/store" ] && ! mountpoint -q "${stateDir}/nix/store"; then
-                    echo "    Moving existing store content to store-real ..."
-                    mv "${stateDir}/nix/store"/* "${storeRealDir}/" 2>/dev/null || true
+                  # Move existing store content into store-real (lower layer).
+                  # Per-entry to stay idempotent across partial reruns.
+                  if [ -d "${stateDir}/nix/store" ] && ! mountpoint -q "${stateDir}/nix/store"; then
+                    echo "    Moving existing store entries to store-real ..."
+                    for entry in "${stateDir}/nix/store"/*; do
+                      [ -e "$entry" ] || continue
+                      name="$(basename "$entry")"
+                      if [ ! -e "${storeRealDir}/$name" ]; then
+                        mv "$entry" "${storeRealDir}/$name"
+                      else
+                        echo "    Skipping $name — already exists in store-real"
+                      fi
+                    done
+                    chmod -R u+w "${stateDir}/nix/store" 2>/dev/null || true
                     rm -rf "${stateDir}/nix/store"
                   fi
 
                   mkdir -p "${stateDir}/nix/store"
-                  if ! mountpoint -q "${stateDir}/nix/store"; then
-                    mount -t overlay overlay -o "lowerdir=${storeRealDir},upperdir=${upperDir},workdir=${workDir}" "${stateDir}/nix/store"
-                  fi
 
-                  echo "    Overlayfs mounted: lower=${storeRealDir}, upper=${upperDir}"
+                  echo "    Overlayfs mountpoint ready"
                 '';
               in
               ''
@@ -482,7 +512,6 @@ in
 
                 CURRENT_HASH="${bootstrapHash}"
                 HASH_FILE="${stateDir}/.bootstrap-hash"
-
                 if [ -f "$HASH_FILE" ] && [ "$(cat "$HASH_FILE")" = "$CURRENT_HASH" ]; then
                   echo ">>> Store is up-to-date (hash: $CURRENT_HASH). Verifying profiles ..."
                 else
@@ -490,7 +519,7 @@ in
 
                   for pkg in ${bootstrapStorePaths}; do
                     echo "    Copying closure: $pkg ..."
-                    nix copy --to "local?root=${stateDir}" "$pkg"
+                    nix copy --no-check-sigs --to "local?root=${stateDir}" "$pkg"
                   done
 
                   printf '%s' "$CURRENT_HASH" > "$HASH_FILE"
@@ -521,6 +550,9 @@ in
             ];
             wants = [ "network-online.target" ];
             requires = [ "woodpecker-nix-init.service" ];
+            unitConfig = mkIf overlayEnabled {
+              RequiresMountsFor = "${stateDir}/nix/store";
+            };
             restartTriggers = [ (pkgs.writeText "woodpecker-nix.conf" nixConf) ];
 
             serviceConfig = {
@@ -584,13 +616,11 @@ in
           serviceConfig = {
             Type = "oneshot";
 
-            DynamicUser = true;
-            StateDirectory = "woodpecker-nix-gc";
             Environment = [
-              "HOME=/var/lib/woodpecker-nix-gc"
-              "XDG_CACHE_HOME=/var/lib/woodpecker-nix-gc/.cache"
-              "XDG_CONFIG_HOME=/var/lib/woodpecker-nix-gc/.config"
-              "XDG_DATA_HOME=/var/lib/woodpecker-nix-gc/.local/share"
+              "HOME=${stateDir}/gc-home"
+              "XDG_CACHE_HOME=${stateDir}/gc-home/.cache"
+              "XDG_CONFIG_HOME=${stateDir}/gc-home/.config"
+              "XDG_DATA_HOME=${stateDir}/gc-home/.local/share"
               "STATE_DIR=${stateDir}"
               "STORE_SIZE_FILE=${stateDir}/.store-size"
               "SIZE_THRESHOLD_BYTES=${toString storeSizeBytes}"
@@ -711,8 +741,6 @@ in
 
           serviceConfig = {
             Type = "simple";
-            DynamicUser = true;
-            StateDirectory = "woodpecker-nix-propagate";
             Environment = [
               "STATE_DIR=${stateDir}"
               "UPPER_DIR=${upperDir}"
