@@ -41,7 +41,9 @@ let
   gcSizeThreshold = cfg.isolatedStore.gc.sizeThreshold;
   propagationInterval = cfg.isolatedStore.propagation.interval;
 
-  overlayEnabled = cfg.isolatedStore.overlayfs.enable;
+  overlayEnabled =
+    cfg.isolatedStore.overlayfs.enable
+    && !(config.boot.isContainer && !(config.proxmoxLXC.privileged or true));
 
   storeSizeBytes = lib.mine.strings.parseSize gcSizeThreshold;
 
@@ -62,7 +64,7 @@ let
     concatStringsSep " " (map (p: builtins.unsafeDiscardStringContext (toString p)) allBootstrapPkgs)
   );
 
-  nixBuildUsersGroup = "woodpecker-nix-build-users";
+  nixBuildUsersGroup = "nixbld";
   nixConf = ''
     build-users-group = ${nixBuildUsersGroup}
     allowed-users = *
@@ -347,12 +349,16 @@ in
         systemd.tmpfiles.settings."woodpecker-nix"."${cacheDir}".d = {
           mode = "0700";
           user = "woodpecker-nix";
-          group = nixBuildUsersGroup;
+          group = "woodpecker-nix";
         };
       }
     ))
 
     (mkIf (cfg.enable && cfg.isolatedStore.enable) {
+      warnings = optionals (cfg.isolatedStore.overlayfs.enable && !overlayEnabled) [
+        "overlayfs disabled in unprivileged container; using plain isolated store"
+      ];
+
       services.woodpeckerNix = {
         isolatedStore = {
           substituters = mkDefault config.nix.settings.substituters;
@@ -398,9 +404,16 @@ in
           };
         }
         // (
+          # All intermediate parents explicitly listed so tmpfiles does
+          # not create them as root before subdir rules kick in.
           [
             stateDir
+            "${stateDir}/etc"
             "${stateDir}/etc/nix"
+            "${stateDir}/nix"
+            "${stateDir}/nix/store"
+            "${stateDir}/nix/var"
+            "${stateDir}/nix/var/nix"
             "${stateDir}/nix/var/nix/daemon-socket"
             "${stateDir}/nix/var/nix/db"
             "${stateDir}/nix/var/nix/profiles"
@@ -410,10 +423,12 @@ in
             "${stateDir}/gc-home"
             "${stateDir}/gc-home/.cache"
             "${stateDir}/gc-home/.config"
+            "${stateDir}/gc-home/.local"
             "${stateDir}/gc-home/.local/share"
           ])
           ++ (optionals overlayEnabled [
             storeRealDir
+            overlayDir
             upperDir
             workDir
           ])
@@ -430,21 +445,14 @@ in
           |> lib.listToAttrs
         );
 
-        mounts = mkIf overlayEnabled [
-          {
-            what = "overlay";
-            where = "${stateDir}/nix/store";
-            type = "overlay";
-            options = "lowerdir=${storeRealDir},upperdir=${upperDir},workdir=${workDir}";
-            unitConfig.Before = "woodpecker-nix-init.service";
-          }
-        ];
-
         services = {
           woodpecker-nix-init = {
             description = "Bootstrap isolated Nix store for Woodpecker CI";
             requiredBy = [ "woodpecker-nix-daemon.service" ];
-            before = [ "woodpecker-nix-daemon.service" ];
+            before = [
+              "woodpecker-nix-mount.service"
+              "woodpecker-nix-daemon.service"
+            ];
 
             serviceConfig = {
               Type = "oneshot";
@@ -475,7 +483,12 @@ in
                 "CAP_DAC_OVERRIDE"
                 "CAP_FOWNER"
               ];
-              SystemCallFilter = [ "@system-service" ];
+              SystemCallFilter = [
+                "@system-service"
+                "rename"
+                "renameat"
+                "renameat2"
+              ];
               SystemCallArchitectures = "native";
               SystemCallErrorNumber = "EPERM";
               MemoryDenyWriteExecute = true;
@@ -499,21 +512,30 @@ in
                   mkdir -p "${upperDir}"
                   mkdir -p "${workDir}"
 
-                  # Move existing store content into store-real (lower layer).
-                  # Per-entry to stay idempotent across partial reruns.
+                  # Copy existing store content into store-real (lower layer).
+                  # Copy-then-delete avoids rename-at syscall issues with seccomp.
                   if [ -d "${stateDir}/nix/store" ] && ! mountpoint -q "${stateDir}/nix/store"; then
-                    echo "    Moving existing store entries to store-real ..."
+                    echo "    Migrating existing store entries to store-real ..."
+                    HAD_ENTRIES=0
                     for entry in "${stateDir}/nix/store"/*; do
                       [ -e "$entry" ] || continue
+                      HAD_ENTRIES=1
                       name="$(basename "$entry")"
-                      if [ ! -e "${storeRealDir}/$name" ]; then
-                        mv "$entry" "${storeRealDir}/$name"
-                      else
+                      if [ -e "${storeRealDir}/$name" ]; then
                         echo "    Skipping $name — already exists in store-real"
+                        chmod -R u+w "$entry" 2>/dev/null || true
+                        rm -rf "$entry"
+                      else
+                        echo "    Copying $name ..."
+                        cp -a "$entry" "${storeRealDir}/"
+                        # Source no longer needed once copy confirmed success
+                        chmod -R u+w "$entry" 2>/dev/null || true
+                        rm -rf "$entry"
                       fi
                     done
-                    chmod -R u+w "${stateDir}/nix/store" 2>/dev/null || true
-                    rm -rf "${stateDir}/nix/store"
+                    if [ "$HAD_ENTRIES" = 1 ] && [ -d "${stateDir}/nix/store" ] && [ -z "$(ls -A "${stateDir}/nix/store" 2>/dev/null)" ]; then
+                      rmdir "${stateDir}/nix/store"
+                    fi
                   fi
 
                   mkdir -p "${stateDir}/nix/store"
@@ -555,18 +577,83 @@ in
               '';
           };
 
+          woodpecker-nix-mount = mkIf overlayEnabled {
+            description = "Mount overlayfs for Woodpecker CI store";
+            requiredBy = [ "woodpecker-nix-daemon.service" ];
+            before = [ "woodpecker-nix-daemon.service" ];
+            after = [ "woodpecker-nix-init.service" ];
+            requires = [ "woodpecker-nix-init.service" ];
+            partOf = [ "woodpecker-nix-daemon.service" ];
+
+            serviceConfig = {
+              Type = "oneshot";
+              RemainAfterExit = true;
+
+              User = "woodpecker-nix";
+              Group = "woodpecker-nix";
+
+              # Mount is host-visible; cannot isolate filesystem namespace.
+              ProtectClock = true;
+              ProtectHostname = true;
+              ProtectKernelModules = true;
+              ProtectKernelLogs = true;
+              ProtectKernelTunables = true;
+              RestrictRealtime = true;
+              RestrictSUIDSGID = true;
+              LockPersonality = true;
+
+              # SYS_ADMIN needed for non-root mount
+              CapabilityBoundingSet = [ "CAP_SYS_ADMIN" ];
+              AmbientCapabilities = [ "CAP_SYS_ADMIN" ];
+              NoNewPrivileges = false;
+              SystemCallFilter = [
+                "@system-service"
+                "@mount"
+              ];
+              SystemCallArchitectures = "native";
+              SystemCallErrorNumber = "EPERM";
+              MemoryDenyWriteExecute = true;
+            };
+
+            path = [ pkgs.util-linux ];
+
+            script = ''
+              set -euo pipefail
+
+              MOUNTPOINT="${stateDir}/nix/store"
+
+              if mountpoint -q "$MOUNTPOINT"; then
+                echo ">>> Overlay already mounted on $MOUNTPOINT"
+                exit 0
+              fi
+
+              echo ">>> Mounting overlayfs on $MOUNTPOINT ..."
+              mount -t overlay overlay \
+                -o lowerdir=${storeRealDir},upperdir=${upperDir},workdir=${workDir} \
+                "$MOUNTPOINT"
+              echo ">>> Overlay mount complete."
+            '';
+
+            preStop = ''
+              MOUNTPOINT="${stateDir}/nix/store"
+              if mountpoint -q "$MOUNTPOINT"; then
+                echo ">>> Unmounting overlayfs on $MOUNTPOINT ..."
+                umount "$MOUNTPOINT"
+                echo ">>> Overlay unmount complete."
+              fi
+            '';
+          };
+
           woodpecker-nix-daemon = {
             description = "Woodpecker CI Shared Nix Store Daemon";
             wantedBy = [ "multi-user.target" ];
             after = [
               "woodpecker-nix-init.service"
               "network-online.target"
-            ];
+            ]
+            ++ (optionals overlayEnabled [ "woodpecker-nix-mount.service" ]);
             wants = [ "network-online.target" ];
             requires = [ "woodpecker-nix-init.service" ];
-            unitConfig = mkIf overlayEnabled {
-              RequiresMountsFor = "${stateDir}/nix/store";
-            };
             restartTriggers = [ (pkgs.writeText "woodpecker-nix.conf" nixConf) ];
 
             serviceConfig = {
@@ -744,148 +831,151 @@ in
       };
     })
 
-    (mkIf (cfg.enable && cfg.isolatedStore.enable && cfg.isolatedStore.propagation.enable) {
-      systemd = {
-        services.woodpecker-nix-propagate = {
-          description = "Audit new store paths in overlayfs upper layer";
-          after = [
-            "woodpecker-nix-daemon.service"
-          ];
-          requires = [ "woodpecker-nix-daemon.service" ];
-          wantedBy = [ "multi-user.target" ];
-
-          serviceConfig = {
-            Type = "simple";
-            User = "woodpecker-nix";
-            Group = "woodpecker-nix";
-            Environment = [
-              "STATE_DIR=${stateDir}"
-              "UPPER_DIR=${upperDir}"
-              "STORE_REAL_DIR=${storeRealDir}"
-              "JOURNAL=${stateDir}/propagation-journal"
-              "STORE_SIZE_FILE=${stateDir}/.store-size"
-              "NIX_REMOTE=unix://${stateDir}/nix/var/nix/daemon-socket/socket"
+    (mkIf
+      (cfg.enable && cfg.isolatedStore.enable && cfg.isolatedStore.propagation.enable && overlayEnabled)
+      {
+        systemd = {
+          services.woodpecker-nix-propagate = {
+            description = "Audit new store paths in overlayfs upper layer";
+            after = [
+              "woodpecker-nix-daemon.service"
             ];
-            NoNewPrivileges = true;
-            ProtectClock = true;
-            ProtectHostname = true;
-            ProtectKernelModules = true;
-            ProtectKernelLogs = true;
-            ProtectKernelTunables = true;
-            RestrictRealtime = true;
-            RestrictSUIDSGID = true;
-            LockPersonality = true;
-            PrivateDevices = true;
-            PrivateTmp = true;
-            ProtectHome = true;
-            ProtectSystem = "strict";
-            RestrictNamespaces = true;
-            CapabilityBoundingSet = "";
-            RestrictAddressFamilies = [ "AF_UNIX" ];
-            SystemCallFilter = [ "@system-service" ];
-            SystemCallArchitectures = "native";
-            SystemCallErrorNumber = "EPERM";
-            MemoryDenyWriteExecute = true;
-            ReadWritePaths = [ stateDir ];
-            ExecStart = pkgs.writeShellScript "woodpecker-nix-propagate" ''
-              set -euo pipefail
+            requires = [ "woodpecker-nix-daemon.service" ];
+            wantedBy = [ "multi-user.target" ];
 
-              STATE_DIR="$STATE_DIR"
-              UPPER_DIR="$UPPER_DIR"
-              STORE_REAL_DIR="$STORE_REAL_DIR"
-              JOURNAL="$JOURNAL"
-              STORE_SIZE_FILE="$STORE_SIZE_FILE"
-              NIX="${cfg.isolatedStore.package}/bin/nix"
+            serviceConfig = {
+              Type = "simple";
+              User = "woodpecker-nix";
+              Group = "woodpecker-nix";
+              Environment = [
+                "STATE_DIR=${stateDir}"
+                "UPPER_DIR=${upperDir}"
+                "STORE_REAL_DIR=${storeRealDir}"
+                "JOURNAL=${stateDir}/propagation-journal"
+                "STORE_SIZE_FILE=${stateDir}/.store-size"
+                "NIX_REMOTE=unix://${stateDir}/nix/var/nix/daemon-socket/socket"
+              ];
+              NoNewPrivileges = true;
+              ProtectClock = true;
+              ProtectHostname = true;
+              ProtectKernelModules = true;
+              ProtectKernelLogs = true;
+              ProtectKernelTunables = true;
+              RestrictRealtime = true;
+              RestrictSUIDSGID = true;
+              LockPersonality = true;
+              PrivateDevices = true;
+              PrivateTmp = true;
+              ProtectHome = true;
+              ProtectSystem = "strict";
+              RestrictNamespaces = true;
+              CapabilityBoundingSet = "";
+              RestrictAddressFamilies = [ "AF_UNIX" ];
+              SystemCallFilter = [ "@system-service" ];
+              SystemCallArchitectures = "native";
+              SystemCallErrorNumber = "EPERM";
+              MemoryDenyWriteExecute = true;
+              ReadWritePaths = [ stateDir ];
+              ExecStart = pkgs.writeShellScript "woodpecker-nix-propagate" ''
+                set -euo pipefail
 
-              touch "$JOURNAL"
+                STATE_DIR="$STATE_DIR"
+                UPPER_DIR="$UPPER_DIR"
+                STORE_REAL_DIR="$STORE_REAL_DIR"
+                JOURNAL="$JOURNAL"
+                STORE_SIZE_FILE="$STORE_SIZE_FILE"
+                NIX="${cfg.isolatedStore.package}/bin/nix"
 
-              log() {
-                echo "[$(date -Iseconds)] propagate: $*"
-              }
+                touch "$JOURNAL"
 
-              update_store_size() {
-                local size_bytes
-                size_bytes=$(du -sb "$STATE_DIR/nix/store" 2>/dev/null | awk '{print $1}' || echo 0)
-                echo "$size_bytes" > "$STORE_SIZE_FILE"
-                log "Store size: $(( size_bytes / 1024 / 1024 )) MB"
-              }
+                log() {
+                  echo "[$(date -Iseconds)] propagate: $*"
+                }
 
-              scan_new_paths() {
-                local new_count=0
+                update_store_size() {
+                  local size_bytes
+                  size_bytes=$(du -sb "$STATE_DIR/nix/store" 2>/dev/null | awk '{print $1}' || echo 0)
+                  echo "$size_bytes" > "$STORE_SIZE_FILE"
+                  log "Store size: $(( size_bytes / 1024 / 1024 )) MB"
+                }
 
-                if [ ! -d "$UPPER_DIR" ]; then
-                  log "No upperdir found at $UPPER_DIR, skipping scan"
-                  return 0
-                fi
+                scan_new_paths() {
+                  local new_count=0
 
-                while IFS= read -r narinfo; do
-                  local basename
-                  basename=$(basename "$narinfo" .narinfo)
-                  local store_path="store-''${basename}"
-
-                  if grep -qF "$store_path" "$JOURNAL" 2>/dev/null; then
-                    continue
+                  if [ ! -d "$UPPER_DIR" ]; then
+                    log "No upperdir found at $UPPER_DIR, skipping scan"
+                    return 0
                   fi
 
-                  local path_size
-                  path_size=$(grep -oP 'servedb-size: \K[0-9]+' "$narinfo" 2>/dev/null || echo "0")
+                  while IFS= read -r narinfo; do
+                    local basename
+                    basename=$(basename "$narinfo" .narinfo)
+                    local store_path="store-''${basename}"
 
-                  log "NEW: $store_path (narinfo-size: ''${path_size} bytes)"
-                  echo "$(date -Iseconds) $store_path $path_size" >> "$JOURNAL"
-                  new_count=$(( new_count + 1 ))
-                done < <(find "$UPPER_DIR" -name '*.narinfo' -type f 2>/dev/null)
+                    if grep -qF "$store_path" "$JOURNAL" 2>/dev/null; then
+                      continue
+                    fi
 
-                while IFS= read -r store_dir; do
-                  local dir_name
-                  dir_name=$(basename "$store_dir")
+                    local path_size
+                    path_size=$(grep -oP 'servedb-size: \K[0-9]+' "$narinfo" 2>/dev/null || echo "0")
 
-                  case "$dir_name" in
-                    info|locks|temp|log|db) continue ;;
-                  esac
-
-                  if grep -qF "$dir_name" "$JOURNAL" 2>/dev/null; then
-                    continue
-                  fi
-
-                  if [[ "$dir_name" =~ ^[a-z0-9]{32}-.*$ ]]; then
-                    local dir_size
-                    dir_size=$(du -sb "$store_dir" 2>/dev/null | awk '{print $1}' || echo "0")
-                    log "NEW: $dir_name (dir-size: ''${dir_size} bytes)"
-                    echo "$(date -Iseconds) $dir_name $dir_size" >> "$JOURNAL"
+                    log "NEW: $store_path (narinfo-size: ''${path_size} bytes)"
+                    echo "$(date -Iseconds) $store_path $path_size" >> "$JOURNAL"
                     new_count=$(( new_count + 1 ))
-                  fi
-                done < <(find "$UPPER_DIR" -maxdepth 1 -mindepth 1 -type d 2>/dev/null)
+                  done < <(find "$UPPER_DIR" -name '*.narinfo' -type f 2>/dev/null)
 
-                log "Scan complete: $new_count new paths found"
-              }
+                  while IFS= read -r store_dir; do
+                    local dir_name
+                    dir_name=$(basename "$store_dir")
 
-              log "Propagation sidecar started"
-              log "Upper dir: $UPPER_DIR"
-              log "Store real dir: $STORE_REAL_DIR"
-              log "Journal: $JOURNAL"
+                    case "$dir_name" in
+                      info|locks|temp|log|db) continue ;;
+                    esac
 
-              update_store_size
-              scan_new_paths
+                    if grep -qF "$dir_name" "$JOURNAL" 2>/dev/null; then
+                      continue
+                    fi
 
-              log "Propagation audit complete. Exiting."
-            '';
+                    if [[ "$dir_name" =~ ^[a-z0-9]{32}-.*$ ]]; then
+                      local dir_size
+                      dir_size=$(du -sb "$store_dir" 2>/dev/null | awk '{print $1}' || echo "0")
+                      log "NEW: $dir_name (dir-size: ''${dir_size} bytes)"
+                      echo "$(date -Iseconds) $dir_name $dir_size" >> "$JOURNAL"
+                      new_count=$(( new_count + 1 ))
+                    fi
+                  done < <(find "$UPPER_DIR" -maxdepth 1 -mindepth 1 -type d 2>/dev/null)
+
+                  log "Scan complete: $new_count new paths found"
+                }
+
+                log "Propagation sidecar started"
+                log "Upper dir: $UPPER_DIR"
+                log "Store real dir: $STORE_REAL_DIR"
+                log "Journal: $JOURNAL"
+
+                update_store_size
+                scan_new_paths
+
+                log "Propagation audit complete. Exiting."
+              '';
+            };
+          };
+
+          timers.woodpecker-nix-propagate = {
+            description = "Periodically audit new store paths in overlayfs";
+            wantedBy = [ "timers.target" ];
+            after = [ "woodpecker-nix-daemon.service" ];
+            requires = [ "woodpecker-nix-daemon.service" ];
+
+            timerConfig = {
+              OnCalendar = propagationInterval;
+              Persistent = true;
+              RandomizedDelaySec = "2m";
+            };
           };
         };
-
-        timers.woodpecker-nix-propagate = {
-          description = "Periodically audit new store paths in overlayfs";
-          wantedBy = [ "timers.target" ];
-          after = [ "woodpecker-nix-daemon.service" ];
-          requires = [ "woodpecker-nix-daemon.service" ];
-
-          timerConfig = {
-            OnCalendar = propagationInterval;
-            Persistent = true;
-            RandomizedDelaySec = "2m";
-          };
-        };
-      };
-    })
+      }
+    )
 
     (mkIf (cfg.enable && cfg.woodpecker.agents != [ ]) {
       services.woodpecker-agents.agents =
