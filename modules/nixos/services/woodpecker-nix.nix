@@ -379,11 +379,22 @@ in
         };
       };
 
+      users = {
+        groups.woodpecker-nix = { };
+        users.woodpecker-nix = {
+          isSystemUser = true;
+          group = "woodpecker-nix";
+          description = "Woodpecker CI Nix store daemon user";
+        };
+      };
+
       systemd = {
         tmpfiles.settings."woodpecker-nix" = {
           "${stateDir}/etc/nix/nix.conf"."f+" = {
             mode = "0644";
             argument = nixConf;
+            user = "woodpecker-nix";
+            group = "woodpecker-nix";
           };
         }
         // (
@@ -394,17 +405,28 @@ in
             "${stateDir}/nix/var/nix/db"
             "${stateDir}/nix/var/nix/profiles"
             "${stateDir}/nix/var/nix/gcroots"
-          ] ++ (optionals cfg.isolatedStore.gc.enable [
-            "${stateDir}/.gc-home"
-            "${stateDir}/.gc-home/.cache"
-            "${stateDir}/.gc-home/.config"
-            "${stateDir}/.gc-home/.local/share"
-          ]) ++ (optionals overlayEnabled [
+          ]
+          ++ (optionals cfg.isolatedStore.gc.enable [
+            "${stateDir}/gc-home"
+            "${stateDir}/gc-home/.cache"
+            "${stateDir}/gc-home/.config"
+            "${stateDir}/gc-home/.local/share"
+          ])
+          ++ (optionals overlayEnabled [
             storeRealDir
             upperDir
             workDir
           ])
-          |> map (p: lib.nameValuePair p { d.mode = "0700"; })
+          |> map (
+            p:
+            lib.nameValuePair p {
+              d = {
+                mode = "0700";
+                user = "woodpecker-nix";
+                group = "woodpecker-nix";
+              };
+            }
+          )
           |> lib.listToAttrs
         );
 
@@ -414,11 +436,7 @@ in
             where = "${stateDir}/nix/store";
             type = "overlay";
             options = "lowerdir=${storeRealDir},upperdir=${upperDir},workdir=${workDir}";
-            unitConfig = {
-              Requires = "woodpecker-nix-init.service";
-              After = "woodpecker-nix-init.service";
-              Before = "woodpecker-nix-daemon.service";
-            };
+            unitConfig.Before = "woodpecker-nix-init.service";
           }
         ];
 
@@ -427,15 +445,11 @@ in
             description = "Bootstrap isolated Nix store for Woodpecker CI";
             requiredBy = [ "woodpecker-nix-daemon.service" ];
             before = [ "woodpecker-nix-daemon.service" ];
-            # Intentionally no after=local-fs.target.
-            # The overlay mount at ${stateDir}/nix/store auto-joins
-            # local-fs.target, which would create a cycle:
-            #   mount -> init -> local-fs.target -> mount.
-            # Init only touches rootfs paths, always available at this stage.
 
             serviceConfig = {
               Type = "oneshot";
-              RemainAfterExit = true;
+
+              User = "woodpecker-nix";
 
               NoNewPrivileges = true;
               ProtectClock = true;
@@ -557,13 +571,11 @@ in
 
             serviceConfig = {
               Type = "simple";
-              ExecStart = "${cfg.isolatedStore.package}/bin/nix daemon";
+              ExecStart = "${cfg.isolatedStore.package}/bin/nix --extra-experimental-features 'nix-command flakes' daemon";
               Environment = "NIX_CONF_DIR=${stateDir}/etc/nix";
               BindPaths = [ "${stateDir}/nix:/nix" ];
-              StateDirectory = "woodpecker-nix";
-              DynamicUser = true;
-              Group = nixBuildUsersGroup;
-              SupplementaryGroups = [ nixBuildUsersGroup ];
+              User = "woodpecker-nix";
+              Group = "woodpecker-nix";
               ReadWritePaths = [ stateDir ];
 
               NoNewPrivileges = true;
@@ -615,6 +627,9 @@ in
 
           serviceConfig = {
             Type = "oneshot";
+
+            User = "woodpecker-nix";
+            Group = "woodpecker-nix";
 
             Environment = [
               "HOME=${stateDir}/gc-home"
@@ -741,6 +756,8 @@ in
 
           serviceConfig = {
             Type = "simple";
+            User = "woodpecker-nix";
+            Group = "woodpecker-nix";
             Environment = [
               "STATE_DIR=${stateDir}"
               "UPPER_DIR=${upperDir}"
