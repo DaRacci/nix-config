@@ -24,6 +24,19 @@
         keep-sorted.enable = true;
         ruff-check.enable = true;
         ruff-format.enable = true;
+        prettier.enable = true;
+        yamlfmt = {
+          enable = true;
+          settings = {
+            formatter = {
+              retain_line_breaks_single = true;
+              scan_folded_as_literal = true;
+              drop_merge_tag = true;
+              trim_trailing_whitespace = true;
+              eof_newline = true;
+            };
+          };
+        };
         biome = {
           enable = true;
           settings.formatter = {
@@ -40,14 +53,19 @@
       };
 
       settings = {
-        formatter.shellcheck.excludes = [ ".envrc" ];
+        formatter = {
+          shellcheck.excludes = [ ".envrc" ];
+          prettier.includes = [ "*.{yaml,yml}" ];
+        };
         global.excludes = [
           ".opencode/**"
+          "openspec/**"
           "**/secrets.yaml"
           "**/ssh_host_ed25519_key.pub"
           "hosts/server/nixcloud/provisioning.json"
           "hosts/server/nixio/redis-mappings.json"
           "hosts/server/nixio/tunnel/credentials.json"
+          "pkgs/lix-woodpecker/v2.nix"
         ];
       };
     };
