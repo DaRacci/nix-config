@@ -13,26 +13,14 @@ After making changes you **must always** evaluate and test them.
 
 Use module-graph script with `--since` to find only hosts and homes affected by files changed since commit or ref. Add `--refine` to further narrow results for files under `modules/nixos/` and `modules/home-manager/` when module exposes `options.<path>.enable`:
 
-
 ```bash
 SILENT=true nix run .#module-graph -- --since <COMMIT_HASH> --refine --report
 ```
 
-Set `SILENT=true` to lower logging verbosity and reduce token usage when sending output to LLMs or remote analysis tools.
+This will output a report similar to the following, showing which hosts and homes are affected by the changes:
 
-Add `--report` to print summary table grouping hosts/homes into priority buckets based on how many changed files affect them.
+```
 
-
-
-
-This outputs JSON showing which configs use each file:
-
-```json
-{
-  "file": "modules/nixos/services/tailscale.nix",
-  "hosts": ["nixdev", "nixmi", "nixcloud"],
-  "homes": []
-}
 ```
 
 ## Minimum Test Requirements
@@ -74,8 +62,6 @@ nix flake check --override-input devenv-root "file+file://$PWD/.devenv/root"
    ```bash
    nix run .#module-graph -- --since origin/main --refine | jq '.[] | select(.file | contains("tailscale"))'
    ```
-
-
 
 3. Pick one affected host and build it:
 
