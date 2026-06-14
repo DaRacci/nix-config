@@ -59,15 +59,15 @@ and the containers that use it are sandboxed away from the host.
 
 ### systemd services
 
-| Service | Purpose | Sandboxed? |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `woodpecker-nix-init` | Hash-aware bootstrap: creates directories, copies `runtimeEnv` + `bootstrapPackages` closures into `store-real/`, reconstructs profile symlinks, and registers GC roots. Prepares lowerdir/upperdir for overlayfs. Ordered before mount service (not local-fs.target) to avoid cycle, and reruns on each dependent start so deleted overlay dirs are recreated. | Yes – `ProtectSystem=strict`, `ReadWritePaths = [ stateDir ]` (stateDir created by tmpfiles), runs as woodpecker-nix |
-| `woodpecker-nix-mount` | Mounts `${stateDir}/nix/store` as overlay — kernel overlayfs on supported hosts, `fuse-overlayfs` fallback in unprivileged Proxmox LXC. Required because overlay mount must be host-visible and reliable. Init prepares layers before mount starts. | N/A |
-| `woodpecker-nix-daemon` | Runs `nix daemon` with the overlayfs-backed store at `/nix`. Depends on `woodpecker-nix-mount.service`. Polls for ready mount before starting (fuse-overlayfs delay). | Yes – `PrivateMounts`, `ProtectSystem=strict`, runs as `woodpecker-nix` |
-| `woodpecker-nix-propagate` | Audits the overlayfs upper layer for new store paths, logs them to a journal, and updates the store size cache. Runs continuously. | Yes – sandboxed, runs as `woodpecker-nix` |
-| `woodpecker-nix-propagate.timer` | Triggers the propagation audit on a configurable schedule (default: every 15 minutes). | N/A |
-| `woodpecker-nix-gc` | Garbage-collects the CI store. Only runs when store size exceeds `gc.sizeThreshold` AND more than `gc.minInterval` has elapsed since the last GC. Respects `--max-freed` budget. | Yes – sandboxed, runs as `woodpecker-nix` |
-| `woodpecker-nix-gc.timer` | Periodic trigger for the GC service (default: weekly). | N/A |
+| Service                          | Purpose                                                                                                                                                                                                                                                                                                                                                         | Sandboxed?                                                                                                           |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `woodpecker-nix-init`            | Hash-aware bootstrap: creates directories, copies `runtimeEnv` + `bootstrapPackages` closures into `store-real/`, reconstructs profile symlinks, and registers GC roots. Prepares lowerdir/upperdir for overlayfs. Ordered before mount service (not local-fs.target) to avoid cycle, and reruns on each dependent start so deleted overlay dirs are recreated. | Yes – `ProtectSystem=strict`, `ReadWritePaths = [ stateDir ]` (stateDir created by tmpfiles), runs as woodpecker-nix |
+| `woodpecker-nix-mount`           | Mounts `${stateDir}/nix/store` as overlay — kernel overlayfs on supported hosts, `fuse-overlayfs` fallback in unprivileged Proxmox LXC. Required because overlay mount must be host-visible and reliable. Init prepares layers before mount starts.                                                                                                             | N/A                                                                                                                  |
+| `woodpecker-nix-daemon`          | Runs `nix daemon` with the overlayfs-backed store at `/nix`. Depends on `woodpecker-nix-mount.service`. Polls for ready mount before starting (fuse-overlayfs delay).                                                                                                                                                                                           | Yes – `PrivateMounts`, `ProtectSystem=strict`, runs as `woodpecker-nix`                                              |
+| `woodpecker-nix-propagate`       | Audits the overlayfs upper layer for new store paths, logs them to a journal, and updates the store size cache. Runs continuously.                                                                                                                                                                                                                              | Yes – sandboxed, runs as `woodpecker-nix`                                                                            |
+| `woodpecker-nix-propagate.timer` | Triggers the propagation audit on a configurable schedule (default: every 15 minutes).                                                                                                                                                                                                                                                                          | N/A                                                                                                                  |
+| `woodpecker-nix-gc`              | Garbage-collects the CI store. Only runs when store size exceeds `gc.sizeThreshold` AND more than `gc.minInterval` has elapsed since the last GC. Respects `--max-freed` budget.                                                                                                                                                                                | Yes – sandboxed, runs as `woodpecker-nix`                                                                            |
+| `woodpecker-nix-gc.timer`        | Periodic trigger for the GC service (default: weekly).                                                                                                                                                                                                                                                                                                          | N/A                                                                                                                  |
 
 ## How version-drift is handled
 
@@ -108,7 +108,6 @@ This leaves the shell with no tools besides builtins, `sh`, and `env`.
    `PATH=<runtimeEnv>/bin:/bin:/usr/bin` into every pipeline container via
    `WOODPECKER_ENVIRONMENT`. This completely decouples the container's
    runtime tools from the image's own `/nix/store` paths:
-
    - The tools (nix, git, jq, …) always match the **host's** store.
    - The `runtimeEnv` closure is copied into the CI store during bootstrap.
    - Version drift between image and host never causes missing-binary failures.
@@ -261,13 +260,13 @@ sharing the entire Nix cache directory (including the eval cache).
 When `isolatedStore.enable` is true, the module automatically injects the
 following into every pipeline container:
 
-| Variable | Value | Purpose |
+| Variable            | Value                                      | Purpose                                            |
 | ------------------- | ------------------------------------------ | -------------------------------------------------- |
-| `PATH` | `<runtimeEnv>/bin:/bin:/usr/bin` | Tools from the CI store + static busybox fallback |
-| `NIX_REMOTE` | `daemon` | Route all Nix operations through the shared daemon |
-| `SSL_CERT_FILE` | `<runtimeEnv>/etc/ssl/certs/ca-bundle.crt` | TLS certificate bundle |
-| `NIX_SSL_CERT_FILE` | (same as above) | Nix-specific TLS certs |
-| `GIT_SSL_CAINFO` | (same as above) | Git TLS certs |
+| `PATH`              | `<runtimeEnv>/bin:/bin:/usr/bin`           | Tools from the CI store + static busybox fallback  |
+| `NIX_REMOTE`        | `daemon`                                   | Route all Nix operations through the shared daemon |
+| `SSL_CERT_FILE`     | `<runtimeEnv>/etc/ssl/certs/ca-bundle.crt` | TLS certificate bundle                             |
+| `NIX_SSL_CERT_FILE` | (same as above)                            | Nix-specific TLS certs                             |
+| `GIT_SSL_CAINFO`    | (same as above)                            | Git TLS certs                                      |
 
 ### Injected container volumes
 
@@ -276,13 +275,13 @@ With overlayfs enabled, containers receive the full merged view of the store
 version-drift problem that the old `:ro` bind-mount of `/nix/store` alone
 could cause.
 
-| Host path | Container path | Mode | Purpose |
+| Host path                              | Container path               | Mode | Purpose                                   |
 | -------------------------------------- | ---------------------------- | ---- | ----------------------------------------- |
-| `<stateDir>/nix` | `/nix` | `rw` | Full Nix tree via overlayfs (merged view) |
-| `<stateDir>/nix/var/nix/daemon-socket` | `/nix/var/nix/daemon-socket` | `rw` | Daemon socket |
-| `<stateDir>/nix/var/nix/profiles` | `/nix/var/nix/profiles` | `ro` | Reconstructed profile symlinks |
-| `<stateDir>/cache/gitv3` | `/root/.cache/nix/gitv3` | `rw` | Git cache (when `cache = "git"`) |
-| `<stateDir>/cache` | `/root/.cache/nix` | `rw` | Full cache (when `cache = "all"`) |
+| `<stateDir>/nix`                       | `/nix`                       | `rw` | Full Nix tree via overlayfs (merged view) |
+| `<stateDir>/nix/var/nix/daemon-socket` | `/nix/var/nix/daemon-socket` | `rw` | Daemon socket                             |
+| `<stateDir>/nix/var/nix/profiles`      | `/nix/var/nix/profiles`      | `ro` | Reconstructed profile symlinks            |
+| `<stateDir>/cache/gitv3`               | `/root/.cache/nix/gitv3`     | `rw` | Git cache (when `cache = "git"`)          |
+| `<stateDir>/cache`                     | `/root/.cache/nix`           | `rw` | Full cache (when `cache = "all"`)         |
 
 ## Troubleshooting
 
