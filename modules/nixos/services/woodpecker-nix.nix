@@ -41,9 +41,11 @@ let
   gcSizeThreshold = cfg.isolatedStore.gc.sizeThreshold;
   propagationInterval = cfg.isolatedStore.propagation.interval;
 
-  overlayEnabled =
-    cfg.isolatedStore.overlayfs.enable
-    && !(config.boot.isContainer && !(config.proxmoxLXC.privileged or true));
+  overlayRequested = cfg.isolatedStore.overlayfs.enable;
+  unprivilegedProxmoxLxc = config.boot.isContainer && !(config.proxmoxLXC.privileged or true);
+  fuseOverlayEnabled = overlayRequested && unprivilegedProxmoxLxc;
+  kernelOverlayEnabled = overlayRequested && !unprivilegedProxmoxLxc;
+  overlayEnabled = kernelOverlayEnabled || fuseOverlayEnabled;
 
   storeSizeBytes = lib.mine.strings.parseSize gcSizeThreshold;
 
@@ -355,10 +357,6 @@ in
     ))
 
     (mkIf (cfg.enable && cfg.isolatedStore.enable) {
-      warnings = optionals (cfg.isolatedStore.overlayfs.enable && !overlayEnabled) [
-        "overlayfs disabled in unprivileged container; using plain isolated store"
-      ];
-
       services.woodpeckerNix = {
         isolatedStore = {
           substituters = mkDefault config.nix.settings.substituters;
@@ -586,60 +584,88 @@ in
             partOf = [ "woodpecker-nix-daemon.service" ];
 
             serviceConfig = {
-              Type = "oneshot";
-              RemainAfterExit = true;
+              Type = if fuseOverlayEnabled then "simple" else "oneshot";
+              RemainAfterExit = !fuseOverlayEnabled;
 
               User = "woodpecker-nix";
               Group = "woodpecker-nix";
 
               # Mount is host-visible; cannot isolate filesystem namespace.
+              # ProtectKernelModules/Logs/Tunables blocked FUSE daemon.
               ProtectClock = true;
               ProtectHostname = true;
-              ProtectKernelModules = true;
-              ProtectKernelLogs = true;
-              ProtectKernelTunables = true;
               RestrictRealtime = true;
               RestrictSUIDSGID = true;
               LockPersonality = true;
 
-              # SYS_ADMIN needed for non-root mount
+              # Kernel overlay and FUSE daemon both need CAP_SYS_ADMIN
+              # (FUSE needs it for unmount cleanup).
               CapabilityBoundingSet = [ "CAP_SYS_ADMIN" ];
               AmbientCapabilities = [ "CAP_SYS_ADMIN" ];
-              NoNewPrivileges = false;
               SystemCallFilter = [
                 "@system-service"
                 "@mount"
               ];
               SystemCallArchitectures = "native";
-              SystemCallErrorNumber = "EPERM";
               MemoryDenyWriteExecute = true;
+              NoNewPrivileges = false;
+
+              # FUSE daemon: poll store paths until mount is responsive
+              # so dependent services don't race with first FS access.
+              ExecStartPost = optionals fuseOverlayEnabled [
+                (pkgs.writeShellScript "wait-fuse-ready" ''
+                  set -euo pipefail
+                  for i in $(seq 1 15); do
+                    entry="$(ls "${storeRealDir}" 2>/dev/null | head -1 || true)"
+                    if [ -n "$entry" ] && [ -e "${stateDir}/nix/store/$entry" ]; then
+                      exit 0
+                    fi
+                    sleep 1
+                  done
+                  echo "Timed out waiting for fuse overlay to become responsive"
+                  exit 1
+                '')
+              ];
             };
 
-            path = [ pkgs.util-linux ];
+            path = [
+              pkgs.util-linux
+            ]
+            ++ optionals fuseOverlayEnabled [
+              pkgs.fuse-overlayfs
+              pkgs.fuse3
+            ]
+            # poll helper for fuse readiness
+            ++ optionals fuseOverlayEnabled [ pkgs.bashInteractive ];
 
-            script = ''
-              set -euo pipefail
-
-              MOUNTPOINT="${stateDir}/nix/store"
-
-              if mountpoint -q "$MOUNTPOINT"; then
-                echo ">>> Overlay already mounted on $MOUNTPOINT"
-                exit 0
-              fi
-
-              echo ">>> Mounting overlayfs on $MOUNTPOINT ..."
-              mount -t overlay overlay \
-                -o lowerdir=${storeRealDir},upperdir=${upperDir},workdir=${workDir} \
-                "$MOUNTPOINT"
-              echo ">>> Overlay mount complete."
-            '';
+            script =
+              if kernelOverlayEnabled then
+                ''
+                  set -euo pipefail
+                  MOUNTPOINT="${stateDir}/nix/store"
+                  if mountpoint -q "$MOUNTPOINT"; then
+                    echo ">>> Overlay already mounted on $MOUNTPOINT"
+                    exit 0
+                  fi
+                  echo ">>> Mounting kernel overlayfs on $MOUNTPOINT ..."
+                  mount -t overlay overlay \
+                    -o lowerdir=${storeRealDir},upperdir=${upperDir},workdir=${workDir} \
+                    "$MOUNTPOINT"
+                  echo ">>> Kernel overlay mount complete."
+                ''
+              else
+                ''
+                  set -euo pipefail
+                  MOUNTPOINT="${stateDir}/nix/store"
+                  echo ">>> Mounting fuse-overlayfs on $MOUNTPOINT ..."
+                  exec fuse-overlayfs -f -o allow_other,lowerdir=${storeRealDir},upperdir=${upperDir},workdir=${workDir} \
+                    "$MOUNTPOINT"
+                '';
 
             preStop = ''
               MOUNTPOINT="${stateDir}/nix/store"
               if mountpoint -q "$MOUNTPOINT"; then
-                echo ">>> Unmounting overlayfs on $MOUNTPOINT ..."
-                umount "$MOUNTPOINT"
-                echo ">>> Overlay unmount complete."
+                umount -l "$MOUNTPOINT"
               fi
             '';
           };
@@ -653,7 +679,10 @@ in
             ]
             ++ (optionals overlayEnabled [ "woodpecker-nix-mount.service" ]);
             wants = [ "network-online.target" ];
-            requires = [ "woodpecker-nix-init.service" ];
+            requires = [
+              "woodpecker-nix-init.service"
+            ]
+            ++ (optionals overlayEnabled [ "woodpecker-nix-mount.service" ]);
             restartTriggers = [ (pkgs.writeText "woodpecker-nix.conf" nixConf) ];
 
             serviceConfig = {
@@ -681,7 +710,9 @@ in
               PrivateTmp = true;
               ProtectSystem = "strict";
               ProtectHome = true;
-              RestrictNamespaces = true;
+              # User namespaces required for nix sandbox builds;
+              # blocked when enabled.
+              RestrictNamespaces = false;
 
               CapabilityBoundingSet = "";
               RestrictAddressFamilies = [
@@ -703,6 +734,11 @@ in
           };
         };
       };
+    })
+
+    (mkIf (cfg.enable && cfg.isolatedStore.enable && fuseOverlayEnabled) {
+      warnings = [ "using fuse-overlayfs fallback in unprivileged Proxmox LXC" ];
+      programs.fuse.userAllowOther = mkDefault true;
     })
 
     (mkIf (cfg.enable && cfg.isolatedStore.enable && cfg.isolatedStore.gc.enable) {
@@ -842,6 +878,10 @@ in
             ];
             requires = [ "woodpecker-nix-daemon.service" ];
             wantedBy = [ "multi-user.target" ];
+            path = [
+              cfg.isolatedStore.package
+              pkgs.gawk
+            ];
 
             serviceConfig = {
               Type = "simple";
@@ -878,13 +918,6 @@ in
               ReadWritePaths = [ stateDir ];
               ExecStart = pkgs.writeShellScript "woodpecker-nix-propagate" ''
                 set -euo pipefail
-
-                STATE_DIR="$STATE_DIR"
-                UPPER_DIR="$UPPER_DIR"
-                STORE_REAL_DIR="$STORE_REAL_DIR"
-                JOURNAL="$JOURNAL"
-                STORE_SIZE_FILE="$STORE_SIZE_FILE"
-                NIX="${cfg.isolatedStore.package}/bin/nix"
 
                 touch "$JOURNAL"
 
