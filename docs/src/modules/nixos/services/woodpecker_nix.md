@@ -64,6 +64,7 @@ and the containers that use it are sandboxed away from the host.
 | `woodpecker-nix-init`            | Hash-aware bootstrap: creates directories, copies `runtimeEnv` + `bootstrapPackages` closures into `store-real/`, reconstructs profile symlinks, and registers GC roots. Prepares lowerdir/upperdir for overlayfs. Ordered before mount service (not local-fs.target) to avoid cycle, and reruns on each dependent start so deleted overlay dirs are recreated. | Yes – `ProtectSystem=strict`, `ReadWritePaths = [ stateDir ]` (stateDir created by tmpfiles), runs as woodpecker-nix |
 | `woodpecker-nix-mount`           | Mounts `${stateDir}/nix/store` as overlay — kernel overlayfs on supported hosts, `fuse-overlayfs` fallback in unprivileged Proxmox LXC. Required because overlay mount must be host-visible and reliable. Init prepares layers before mount starts.                                                                                                             | N/A                                                                                                                  |
 | `woodpecker-nix-daemon`          | Runs `nix daemon` with the overlayfs-backed store at `/nix`. Depends on `woodpecker-nix-mount.service`. Polls for ready mount before starting (fuse-overlayfs delay).                                                                                                                                                                                           | Yes – `PrivateMounts`, `ProtectSystem=strict`, runs as `woodpecker-nix`                                              |
+| `woodpecker-nix-populate-cache`  | Oneshot cache warmer. After daemon is ready, fetches git inputs from each flake listed in `isolatedStore.cache.populate` into host `gitv3` cache before CI containers start.                                                                                                                                                                                     | Yes – sandboxed, runs as `woodpecker-nix`                                                                            |
 | `woodpecker-nix-propagate`       | Audits the overlayfs upper layer for new store paths, logs them to a journal, and updates the store size cache. Runs continuously.                                                                                                                                                                                                                              | Yes – sandboxed, runs as `woodpecker-nix`                                                                            |
 | `woodpecker-nix-propagate.timer` | Triggers the propagation audit on a configurable schedule (default: every 15 minutes).                                                                                                                                                                                                                                                                          | N/A                                                                                                                  |
 | `woodpecker-nix-gc`              | Garbage-collects the CI store. Only runs when store size exceeds `gc.sizeThreshold` AND more than `gc.minInterval` has elapsed since the last GC. Respects `--max-freed` budget.                                                                                                                                                                                | Yes – sandboxed, runs as `woodpecker-nix`                                                                            |
@@ -234,9 +235,11 @@ but slowest.
 ### `"git"` (default)
 
 Mounts `<stateDir>/cache/gitv3` at `/root/.cache/nix/gitv3` inside every
-container. Git pack files use atomic writes, so concurrent jobs share the
-cache safely. This eliminates repeated `git fetch` operations and pack
-unpacking on every job.
+container as read-only. Host-side `woodpecker-nix-populate-cache.service`
+pre-warms that cache from flakes listed in `isolatedStore.cache.populate`, so
+containers avoid concurrent write contention while still reusing fetched git
+inputs. This eliminates repeated `git fetch` operations and pack unpacking on
+every job.
 
 ### `"all"`
 
@@ -280,7 +283,7 @@ could cause.
 | `<stateDir>/nix`                       | `/nix`                       | `rw` | Full Nix tree via overlayfs (merged view) |
 | `<stateDir>/nix/var/nix/daemon-socket` | `/nix/var/nix/daemon-socket` | `rw` | Daemon socket                             |
 | `<stateDir>/nix/var/nix/profiles`      | `/nix/var/nix/profiles`      | `ro` | Reconstructed profile symlinks            |
-| `<stateDir>/cache/gitv3`               | `/root/.cache/nix/gitv3`     | `rw` | Git cache (when `cache = "git"`)          |
+| `<stateDir>/cache/gitv3`               | `/root/.cache/nix/gitv3`     | `ro` | Git cache (when `cache = "git"`)          |
 | `<stateDir>/cache`                     | `/root/.cache/nix`           | `rw` | Full cache (when `cache = "all"`)         |
 
 ## Troubleshooting

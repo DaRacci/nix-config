@@ -98,6 +98,8 @@
     woodpeckerNix = {
       enable = true;
       isolatedStore.enable = true;
+      cachePopulate = [ "github:DaRacci/nix-config" ];
+      cachePopulateInterval = "hourly";
       woodpecker = {
         agents = [ "local" ];
         extraVolumes = [ "${config.services.woodpeckerNix.stateDir}/vulnix-cache:/root/.cache/vulnix" ];

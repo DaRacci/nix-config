@@ -292,6 +292,25 @@ in
       '';
     };
 
+    cachePopulate = mkOption {
+      type = listOf str;
+      default = [ ];
+      description = ''
+        Flake URLs to prefetch on host into shared gitv3 cache.
+        Each entry is cloned, locked at repo root, then scanned for nested flakes.
+        Only used with `cache = "git"`.
+      '';
+    };
+
+    cachePopulateInterval = mkOption {
+      type = nullOr str;
+      default = null;
+      description = ''
+        systemd calendar expression for periodic gitv3 cache prewarming.
+        `null` disables timer.
+      '';
+    };
+
     woodpecker = {
       agents = mkOption {
         type = listOf str;
@@ -329,7 +348,7 @@ in
             if cfg.cache == "git" then
               {
                 hostPath = "${cacheDir}/gitv3";
-                containerPath = "/root/.cache/nix/gitv3";
+                containerPath = "/root/.cache/nix/gitv3:ro";
               }
             else if cfg.cache == "all" then
               {
@@ -740,6 +759,96 @@ in
     (mkIf (cfg.enable && cfg.isolatedStore.enable && fuseOverlayEnabled) {
       warnings = [ "using fuse-overlayfs fallback in unprivileged Proxmox LXC" ];
       programs.fuse.userAllowOther = mkDefault true;
+    })
+
+    (mkIf (cfg.enable && cfg.cache == "git" && cfg.cachePopulate != [ ]) {
+      systemd = {
+        services.woodpecker-nix-populate-cache = {
+          description = "Populate Woodpecker CI gitv3 cache";
+          after = [ "woodpecker-nix-daemon.service" ];
+          requires = [ "woodpecker-nix-daemon.service" ];
+          wantedBy = [ "multi-user.target" ];
+
+          serviceConfig = {
+            Type = "oneshot";
+            User = "woodpecker-nix";
+            Group = "woodpecker-nix";
+            Environment = [
+              "NIX_REMOTE=unix://${stateDir}/nix/var/nix/daemon-socket/socket"
+              "XDG_CACHE_HOME=${cacheDir}"
+              "HOME=${stateDir}/gc-home"
+            ];
+            NoNewPrivileges = true;
+            ProtectClock = true;
+            ProtectHostname = true;
+            ProtectKernelModules = true;
+            ProtectKernelLogs = true;
+            ProtectKernelTunables = true;
+            RestrictRealtime = true;
+            RestrictSUIDSGID = true;
+            LockPersonality = true;
+            PrivateDevices = true;
+            PrivateTmp = true;
+            ProtectHome = true;
+            ProtectSystem = "strict";
+            RestrictNamespaces = true;
+            CapabilityBoundingSet = "";
+            RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_INET6" ];
+            SystemCallFilter = [ "@system-service" ];
+            SystemCallArchitectures = "native";
+            SystemCallErrorNumber = "EPERM";
+            MemoryDenyWriteExecute = true;
+            ReadWritePaths = [ stateDir ];
+          };
+
+          path = [ cfg.isolatedStore.package pkgs.coreutils pkgs.gitMinimal ];
+
+          script = ''
+            set -euo pipefail
+            mkdir -p "${cacheDir}/nix/gitv3"
+
+            while IFS= read -r entry; do
+              [ -n "$entry" ] || continue
+
+              clone_dir="/tmp/woodpecker-cache-$$"
+              rm -rf "$clone_dir"
+
+              echo ">>> Cloning $entry to $clone_dir ..."
+              nix flake clone "$entry" --dest "$clone_dir"
+
+              echo ">>> Archiving root flake in $clone_dir ..."
+              (cd "$clone_dir" && nix flake archive)
+
+              find "$clone_dir" -maxdepth 3 -name flake.nix | while IFS= read -r flake_file; do
+                flake_dir=$(dirname "$flake_file")
+                rel_dir=$(realpath --relative-to="$clone_dir" "$flake_dir")
+                [ "$rel_dir" = "." ] && continue
+                [ -f "$flake_dir/flake.lock" ] || continue
+
+                echo ">>> Archiving subflake in $flake_dir ..."
+                (cd "$flake_dir" && nix flake archive)
+              done
+
+              rm -rf "$clone_dir"
+            done <<'EOF'
+            ${concatStringsSep "\n" cfg.cachePopulate}
+            EOF
+          '';
+        };
+      };
+    })
+
+    (mkIf (cfg.enable && cfg.cache == "git" && cfg.cachePopulate != [ ] && cfg.cachePopulateInterval != null) {
+      systemd.timers.woodpecker-nix-populate-cache = {
+        description = "Periodically populate Woodpecker CI gitv3 cache";
+        wantedBy = [ "timers.target" ];
+        after = [ "woodpecker-nix-daemon.service" ];
+        requires = [ "woodpecker-nix-daemon.service" ];
+        timerConfig = {
+          OnCalendar = cfg.cachePopulateInterval;
+          Persistent = true;
+        };
+      };
     })
 
     (mkIf (cfg.enable && cfg.isolatedStore.enable && cfg.isolatedStore.gc.enable) {
