@@ -22,7 +22,7 @@ Old dashed forms like `exec-once` stay valid only when passed through unchanged 
 
 The camelCase custom module API remains consistent in Nix.
 
-______________________________________________________________________
+---
 
 ## Module Files
 
@@ -146,7 +146,7 @@ Shared type definitions used across the modules:
 - `rule` — all typed window rule properties (float, fullscreen, opacity, size, move, center, monitor, workspace, and dozens more)
 - `windowMatch` — match condition types (class, title, initialClass, initialTitle, tag, xwayland, float, fullscreen, pin, focus, group, modal, fullscreenstate, workspace, content, xdg_tag)
 
-______________________________________________________________________
+---
 
 ## Usage Example
 
@@ -189,7 +189,7 @@ ______________________________________________________________________
 }
 ```
 
-______________________________________________________________________
+---
 
 ## Notes
 
