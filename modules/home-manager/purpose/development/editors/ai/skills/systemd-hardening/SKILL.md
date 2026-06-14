@@ -282,7 +282,17 @@ When hardened service fails to start, isolate which option caused failure:
 | Service can't find users/groups          | `PrivateUsers = true`                       | Set to `false` if service needs system user lookups        |
 | `Failed to set hostname`                 | `ProtectHostname = true`                    | Set to `false` (rare — most services don't set hostname)   |
 
-### Using systemd-analyze security
+## FUSE / Mount Daemon Considerations
+
+FUSE daemons and kernel mount operations have specific hardening requirements. For a full reference table of which options break FUSE vs kernel overlay vs Nix daemon, see [the capability reference](references/REFERENCE.md).
+
+Key rules for FUSE daemons:
+
+- `ProtectKernelModules`, `ProtectKernelLogs`, `ProtectKernelTunables` must be `false` — `fusermount3` needs kernel probe access
+- `SystemCallErrorNumber` must be omitted — seccomp EPERM kills setuid `fusermount3` helper
+- `SystemCallFilter` must include `@mount` — `mount(2)` is used by setuid helper
+- `CAP_SYS_ADMIN` needed only for `preStop`/`ExecStop` cleanup (unmount), not for daemon runtime
+- `ExecStartPost` polling loop recommended for `Type=simple` FUSE daemons — FUSE fork returns before filesystem is responsive
 
 Check the hardening score of a service:
 
