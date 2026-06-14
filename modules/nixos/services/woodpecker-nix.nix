@@ -374,6 +374,7 @@ in
               sslCertPath = "${runtimeEnv}/etc/ssl/certs/ca-bundle.crt";
             in
             {
+              HOME = "/root";
               NIX_REMOTE = "daemon";
               PATH = "${runtimeEnv}/bin:/bin:/usr/bin";
               SSL_CERT_FILE = sslCertPath;
