@@ -26,11 +26,13 @@ and the containers that use it are sandboxed away from the host.
 ┌──────────────────────────────────────────────────────────────────────────┐
 │  Host (NixOS)                                                            │
 │                                                                          │
-│  woodpecker-nix-init     ─── hash-aware bootstrap + profile setup        │
-│  woodpecker-nix-mount  ─── overlay mount service                        │
-│  woodpecker-nix-daemon   ─── serves merged store/ as /nix                │
-│  woodpecker-nix-propagate ─── audits upper layer                           │
-│  woodpecker-nix-gc       ─── size- and time-gated garbage collection     │
+	│  woodpecker-nix-init     ─── hash-aware bootstrap + profile setup        │
+	│  woodpecker-nix-mount    ─── overlay mount service                        │
+	│  woodpecker-nix-daemon   ─── serves merged store/ as /nix                │
+	│  woodpecker-nix-propagate ─── audits or promotes upper-layer paths       │
+	│  woodpecker-nix-compact  ─── whiteout compaction + lower-layer promotion│
+	│  woodpecker-nix-healthcheck ─ health-check + remount on ESTALE         │
+	│  woodpecker-nix-gc       ─── size- and time-gated garbage collection     │
 │         │                                                                │
 │         │  overlayfs: lower=store-real/ upper=overlay/upper/             │
 │         └──────────────────────────────────────────────────────────────┤ │
@@ -54,7 +56,8 @@ and the containers that use it are sandboxed away from the host.
 
 > On unprivileged Proxmox LXC, kernel overlayfs is unavailable. The module
 > falls back to `fuse-overlayfs` (with `programs.fuse.userAllowOther = true`)
-> so mount service and propagation still work normally.
+> and mounts with `index=on` plus `redirect_dir=on` so hard-link deduplication
+> and atomic rename semantics stay intact.
 ```
 
 ### systemd services
@@ -64,11 +67,35 @@ and the containers that use it are sandboxed away from the host.
 | `woodpecker-nix-init`            | Hash-aware bootstrap: creates directories, copies `runtimeEnv` + `bootstrapPackages` closures into `store-real/`, reconstructs profile symlinks, and registers GC roots. Prepares lowerdir/upperdir for overlayfs. Ordered before mount service (not local-fs.target) to avoid cycle, and reruns on each dependent start so deleted overlay dirs are recreated. | Yes – `ProtectSystem=strict`, `ReadWritePaths = [ stateDir ]` (stateDir created by tmpfiles), runs as woodpecker-nix |
 | `woodpecker-nix-mount`           | Mounts `${stateDir}/nix/store` as overlay — kernel overlayfs on supported hosts, `fuse-overlayfs` fallback in unprivileged Proxmox LXC. Required because overlay mount must be host-visible and reliable. Init prepares layers before mount starts.                                                                                                             | N/A                                                                                                                  |
 | `woodpecker-nix-daemon`          | Runs `nix daemon` with the overlayfs-backed store at `/nix`. Depends on `woodpecker-nix-mount.service`. Polls for ready mount before starting (fuse-overlayfs delay).                                                                                                                                                                                           | Yes – `PrivateMounts`, `ProtectSystem=strict`, runs as `woodpecker-nix`                                              |
-| `woodpecker-nix-populate-cache`  | Oneshot cache warmer. After daemon is ready, fetches git inputs from each flake listed in `isolatedStore.cache.populate` into host `gitv3` cache before CI containers start.                                                                                                                                                                                     | Yes – sandboxed, runs as `woodpecker-nix`                                                                            |
-| `woodpecker-nix-propagate`       | Audits the overlayfs upper layer for new store paths, logs them to a journal, and updates the store size cache. Runs continuously.                                                                                                                                                                                                                              | Yes – sandboxed, runs as `woodpecker-nix`                                                                            |
+| `woodpecker-nix-populate-cache`  | Oneshot cache warmer. After daemon is ready, fetches git inputs from each flake listed in `isolatedStore.cache.populate` into host `gitv3` cache before CI containers start.                                                                                                                                                                                    | Yes – sandboxed, runs as `woodpecker-nix`                                                                            |
+| `woodpecker-nix-propagate`       | Audits the overlayfs upper layer for new store paths. In `mode = "promote"` it also copies stable paths from `upper/` into `store-real/` and removes them from `upper/` once they have aged past the configured threshold.                                                                                                                                       | Yes – sandboxed, runs as `woodpecker-nix`                                                                            |
 | `woodpecker-nix-propagate.timer` | Triggers the propagation audit on a configurable schedule (default: every 15 minutes).                                                                                                                                                                                                                                                                          | N/A                                                                                                                  |
+| `woodpecker-nix-compact`         | Optional monthly compaction service. It stops the daemon, unmounts the overlay, removes whiteout-marked paths from `store-real/`, optionally promotes stable paths from `upper/`, remounts the overlay, and restarts the daemon.                                                                                                                                         | Yes – root-run maintenance service with mount/admin caps                                                             |
+| `woodpecker-nix-compact.timer`   | Triggers compaction on the configured calendar schedule.                                                                                                                                                                                                                                                                                                         | N/A                                                                                                                  |
+| `woodpecker-nix-healthcheck`     | Periodically `stat`s a known store path and remounts the overlay if the mount becomes stale or unresponsive.                                                                                                                                                                                                                                                        | Yes – root-run maintenance service with mount/admin caps                                                             |
+| `woodpecker-nix-healthcheck.timer` | Triggers the health check on a short cadence.                                                                                                                                                                                                                                                                                                                   | N/A                                                                                                                  |
 | `woodpecker-nix-gc`              | Garbage-collects the CI store. Only runs when store size exceeds `gc.sizeThreshold` AND more than `gc.minInterval` has elapsed since the last GC. Respects `--max-freed` budget.                                                                                                                                                                                | Yes – sandboxed, runs as `woodpecker-nix`                                                                            |
 | `woodpecker-nix-gc.timer`        | Periodic trigger for the GC service (default: weekly).                                                                                                                                                                                                                                                                                                          | N/A                                                                                                                  |
+
+## Overlay compaction, promotion, and limits
+
+The store is now split into two layers so GC and promotion behave correctly:
+
+- `stateDir/nix/store-real/` remains the reusable lower layer that is populated by bootstrap and later promotion.
+- `stateDir/nix/overlay/upper/` is the writable upper layer for CI build outputs.
+- `stateDir/nix/store/` is the merged overlay view that the daemon and containers see.
+
+The module measures `store-real/` and `upper/` separately for size-based GC decisions, so whiteouts from removed lower-layer paths do not silently hide the real disk usage. If you enable `isolatedStore.compaction.enable`, the monthly compaction service will stop the daemon, unmount the overlay, remove lower-layer paths that are hidden by whiteouts in `upper/`, optionally promote older upper-layer paths into `store-real/`, remount the overlay, and restart the daemon.
+
+The propagation sidecar now supports `isolatedStore.propagation.mode = "audit"` (default) or `"promote"`. In promote mode it copies stable paths from the upper layer into the reusable lower layer after they have aged past `isolatedStore.propagation.promoteStableAfter`.
+
+### Known limitation with nested overlays
+
+Docker’s `overlay2` storage driver can be layered on top of this fuse-backed store. That nesting is mostly safe for the host-visible mount, but it introduces a few caveats:
+
+- `overlay.*` xattrs from the inner overlay can be stripped by Docker’s own overlay layer.
+- Whiteout markers may not survive the nesting path exactly as they do on a single overlay mount.
+- The module therefore treats the lower/upper split as the authoritative storage model and uses the merged store only as a view layer.
 
 ## How version-drift is handled
 
@@ -349,7 +376,8 @@ GC is gated by **both** size and time. If GC never runs:
 1. Check current store size against the threshold (default 20GB):
 
    ```bash
-   du -sh /var/lib/woodpecker-nix/nix/store
+   du -sh /var/lib/woodpecker-nix/nix/store-real
+   du -sh /var/lib/woodpecker-nix/nix/overlay/upper
    cat /var/lib/woodpecker-nix/.store-size
    ```
 
