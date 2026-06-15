@@ -37,6 +37,7 @@ let
   overlayDir = "${stateDir}/nix/overlay";
   upperDir = "${overlayDir}/upper";
   workDir = "${overlayDir}/work";
+  storeMountDir = "${stateDir}/nix/store";
 
   gcSizeThreshold = cfg.isolatedStore.gc.sizeThreshold;
   propagationInterval = cfg.isolatedStore.propagation.interval;
@@ -59,6 +60,7 @@ let
       "/lib"
     ];
   };
+  runtimeStorePathName = baseNameOf runtimeEnv;
 
   allBootstrapPkgs = [ runtimeEnv ] ++ cfg.isolatedStore.bootstrapPackages;
 
@@ -247,6 +249,28 @@ in
         };
       };
 
+      compaction = {
+        enable = mkEnableOption "Whether to compact the overlay-backed store periodically" // {
+          default = false;
+        };
+
+        interval = mkOption {
+          type = str;
+          default = "monthly";
+          description = "systemd calendar expression for the compaction timer.";
+        };
+
+        promoteStableAfter = mkOption {
+          type = nullOr str;
+          default = "7d";
+          description = ''
+            Promote stable store paths from the overlay upper layer into the reusable
+            lower layer after they have remained untouched for this long.
+            Set to `null` to disable promotion during compaction.
+          '';
+        };
+      };
+
       propagation = {
         enable = mkEnableOption "Whether to run a propagation sidecar that audits new store paths" // {
           default = true;
@@ -256,6 +280,27 @@ in
           type = str;
           default = "15m";
           description = "systemd calendar expression for the propagation audit timer.";
+        };
+
+        mode = mkOption {
+          type = enum [
+            "audit"
+            "promote"
+          ];
+          default = "audit";
+          description = ''
+            Whether propagation only audits the upper layer or also promotes stable
+            store paths into the reusable lower layer.
+          '';
+        };
+
+        promoteStableAfter = mkOption {
+          type = str;
+          default = "7d";
+          description = ''
+            Minimum age before a store path is promoted from the upper layer into the
+            lower layer when propagation runs in promote mode.
+          '';
         };
       };
     };
@@ -341,13 +386,31 @@ in
   };
 
   config = mkMerge [
+    {
+      assertions = [
+        {
+          assertion =
+            !(
+              cfg.isolatedStore.compaction.enable
+              && cfg.isolatedStore.gc.enable
+              && cfg.isolatedStore.compaction.interval == cfg.isolatedStore.gc.interval
+            );
+          message = ''
+            services.woodpeckerNix.isolatedStore.compaction.interval and
+            services.woodpeckerNix.isolatedStore.gc.interval must differ because
+            compaction and GC both mutate the overlay-backed store and can race.
+          '';
+        }
+      ];
+    }
+
     (mkIf (cfg.enable && cfg.cache != "none") (
       let
         inherit
           (
             if cfg.cache == "git" then
               {
-                hostPath = "${cacheDir}/gitv3";
+                hostPath = "${cacheDir}/nix/gitv3";
                 containerPath = "/root/.cache/nix/gitv3:ro";
               }
             else if cfg.cache == "all" then
@@ -471,6 +534,7 @@ in
               "woodpecker-nix-mount.service"
               "woodpecker-nix-daemon.service"
             ];
+            conflicts = [ "woodpecker-nix-mount.service" ];
 
             serviceConfig = {
               Type = "oneshot";
@@ -669,7 +733,7 @@ in
                   fi
                   echo ">>> Mounting kernel overlayfs on $MOUNTPOINT ..."
                   mount -t overlay overlay \
-                    -o lowerdir=${storeRealDir},upperdir=${upperDir},workdir=${workDir} \
+                    -o lowerdir=${storeRealDir},upperdir=${upperDir},workdir=${workDir},index=on,redirect_dir=on \
                     "$MOUNTPOINT"
                   echo ">>> Kernel overlay mount complete."
                 ''
@@ -678,7 +742,7 @@ in
                   set -euo pipefail
                   MOUNTPOINT="${stateDir}/nix/store"
                   echo ">>> Mounting fuse-overlayfs on $MOUNTPOINT ..."
-                  exec fuse-overlayfs -f -o allow_other,lowerdir=${storeRealDir},upperdir=${upperDir},workdir=${workDir} \
+                  exec fuse-overlayfs -f -o allow_other,lowerdir=${storeRealDir},upperdir=${upperDir},workdir=${workDir},index=on,redirect_dir=on \
                     "$MOUNTPOINT"
                 '';
 
@@ -752,6 +816,216 @@ in
               KillMode = "mixed";
             };
           };
+
+          woodpecker-nix-compact = mkIf (cfg.isolatedStore.compaction.enable && overlayEnabled) {
+            description = "Compact the overlay-backed Woodpecker CI shared Nix store";
+            after = [
+              "woodpecker-nix-daemon.service"
+              "woodpecker-nix-mount.service"
+            ];
+            wants = [ "woodpecker-nix-mount.service" ];
+            requires = [
+              "woodpecker-nix-daemon.service"
+              "woodpecker-nix-mount.service"
+            ];
+            conflicts = [
+              "woodpecker-nix-daemon.service"
+              "woodpecker-nix-gc.service"
+              "woodpecker-nix-propagate.service"
+            ];
+
+            serviceConfig = {
+              Type = "oneshot";
+              User = "root";
+              Group = "root";
+              NoNewPrivileges = true;
+              ProtectClock = true;
+              ProtectHostname = true;
+              ProtectKernelModules = true;
+              ProtectKernelLogs = true;
+              ProtectKernelTunables = true;
+              RestrictRealtime = true;
+              RestrictSUIDSGID = true;
+              LockPersonality = true;
+              PrivateDevices = true;
+              PrivateTmp = true;
+              ProtectHome = true;
+              ProtectSystem = "strict";
+              RestrictNamespaces = true;
+              CapabilityBoundingSet = [
+                "CAP_SYS_ADMIN"
+                "CAP_CHOWN"
+                "CAP_DAC_OVERRIDE"
+                "CAP_FOWNER"
+              ];
+              AmbientCapabilities = [
+                "CAP_SYS_ADMIN"
+                "CAP_CHOWN"
+                "CAP_DAC_OVERRIDE"
+                "CAP_FOWNER"
+              ];
+              SystemCallFilter = [
+                "@system-service"
+                "@mount"
+              ];
+              SystemCallArchitectures = "native";
+              SystemCallErrorNumber = "EPERM";
+              MemoryDenyWriteExecute = true;
+              ReadWritePaths = [ stateDir ];
+            };
+
+            path = [
+              pkgs.coreutils
+              pkgs.util-linux
+            ];
+
+            script = ''
+              set -euo pipefail
+              echo ">>> Compaction: stopping daemon"
+              systemctl stop woodpecker-nix-daemon.service || true
+              systemctl stop woodpecker-nix-mount.service || true
+              sleep 2
+
+              echo ">>> Compaction: removing whiteout'd lower-layer paths"
+              for entry in "${storeRealDir}"/*; do
+                [ -e "$entry" ] || continue
+                name="$(basename "$entry")"
+                if [ -e "${upperDir}/.wh.$name" ]; then
+                  echo "    Removing whiteouted lower path $name"
+                  rm -rf "$entry"
+                fi
+              done
+
+              ${optionalString (cfg.isolatedStore.compaction.promoteStableAfter != null) ''
+                cutoff_epoch=$(date -d "${cfg.isolatedStore.compaction.promoteStableAfter} ago" +%s 2>/dev/null || true)
+                if [ -n "$cutoff_epoch" ]; then
+                  echo ">>> Compaction: promoting stable paths from upper to lower"
+                  for entry in "${upperDir}"/*; do
+                    [ -e "$entry" ] || continue
+                    [ -d "$entry" ] || continue
+                    name="$(basename "$entry")"
+                    case "$name" in
+                      info|locks|temp|log|db) continue ;;
+                    esac
+                    if [[ "$name" =~ ^[a-z0-9]{32}-.*$ ]]; then
+                      mtime_epoch=$(stat -c %Y "$entry")
+                      if [ "$mtime_epoch" -le "$cutoff_epoch" ]; then
+                        dest="${storeRealDir}/$name"
+                        if [ -e "$dest" ]; then
+                          rm -rf "$entry"
+                        else
+                          cp -a "$entry" "${storeRealDir}/"
+                          rm -rf "$entry"
+                        fi
+                      fi
+                    fi
+                  done
+                fi
+              ''}
+
+              chown -R woodpecker-nix:woodpecker-nix "${storeRealDir}" "${upperDir}" "${workDir}" "${storeMountDir}" 2>/dev/null || true
+
+              echo ">>> Compaction: remounting overlay and restarting daemon"
+              systemctl start woodpecker-nix-mount.service || true
+              systemctl start woodpecker-nix-daemon.service || true
+            '';
+          };
+
+          woodpecker-nix-healthcheck = mkIf (cfg.isolatedStore.enable && overlayEnabled) {
+            description = "Verify the overlay-backed Woodpecker CI store remains responsive";
+            after = [
+              "woodpecker-nix-daemon.service"
+              "woodpecker-nix-mount.service"
+            ];
+            requires = [ "woodpecker-nix-daemon.service" ];
+
+            serviceConfig = {
+              Type = "oneshot";
+              User = "root";
+              Group = "root";
+              NoNewPrivileges = true;
+              ProtectClock = true;
+              ProtectHostname = true;
+              ProtectKernelModules = true;
+              ProtectKernelLogs = true;
+              ProtectKernelTunables = true;
+              RestrictRealtime = true;
+              RestrictSUIDSGID = true;
+              LockPersonality = true;
+              PrivateDevices = true;
+              PrivateTmp = true;
+              ProtectHome = true;
+              ProtectSystem = "strict";
+              RestrictNamespaces = true;
+              CapabilityBoundingSet = [
+                "CAP_SYS_ADMIN"
+                "CAP_CHOWN"
+                "CAP_DAC_OVERRIDE"
+                "CAP_FOWNER"
+              ];
+              AmbientCapabilities = [
+                "CAP_SYS_ADMIN"
+                "CAP_CHOWN"
+                "CAP_DAC_OVERRIDE"
+                "CAP_FOWNER"
+              ];
+              SystemCallFilter = [
+                "@system-service"
+                "@mount"
+              ];
+              SystemCallArchitectures = "native";
+              SystemCallErrorNumber = "EPERM";
+              MemoryDenyWriteExecute = true;
+              ReadWritePaths = [ stateDir ];
+            };
+
+            path = [
+              pkgs.coreutils
+              pkgs.util-linux
+            ];
+
+            script = ''
+              set -euo pipefail
+              CHECK_PATH="${storeMountDir}/${runtimeStorePathName}"
+              if stat "$CHECK_PATH" >/dev/null 2>&1; then
+                exit 0
+              fi
+              echo ">>> Healthcheck: overlay became stale; remounting store"
+              systemctl stop woodpecker-nix-daemon.service || true
+              systemctl stop woodpecker-nix-mount.service || true
+              sleep 2
+              systemctl start woodpecker-nix-mount.service || true
+              systemctl start woodpecker-nix-daemon.service || true
+            '';
+          };
+        };
+
+        timers = {
+          woodpecker-nix-compact = mkIf (cfg.isolatedStore.compaction.enable && overlayEnabled) {
+            description = "Periodically compact the Woodpecker CI shared Nix store";
+            wantedBy = [ "timers.target" ];
+            after = [ "woodpecker-nix-daemon.service" ];
+            requires = [ "woodpecker-nix-daemon.service" ];
+
+            timerConfig = {
+              OnCalendar = cfg.isolatedStore.compaction.interval;
+              Persistent = true;
+              RandomizedDelaySec = "30m";
+            };
+          };
+
+          woodpecker-nix-healthcheck = mkIf (cfg.isolatedStore.enable && overlayEnabled) {
+            description = "Periodically verify the Woodpecker CI shared Nix store overlay";
+            wantedBy = [ "timers.target" ];
+            after = [ "woodpecker-nix-daemon.service" ];
+            requires = [ "woodpecker-nix-daemon.service" ];
+
+            timerConfig = {
+              OnCalendar = "*:0/5";
+              Persistent = true;
+              RandomizedDelaySec = "1m";
+            };
+          };
         };
       };
     })
@@ -793,7 +1067,11 @@ in
             ProtectSystem = "strict";
             RestrictNamespaces = true;
             CapabilityBoundingSet = "";
-            RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_INET6" ];
+            RestrictAddressFamilies = [
+              "AF_UNIX"
+              "AF_INET"
+              "AF_INET6"
+            ];
             SystemCallFilter = [ "@system-service" ];
             SystemCallArchitectures = "native";
             SystemCallErrorNumber = "EPERM";
@@ -801,7 +1079,11 @@ in
             ReadWritePaths = [ stateDir ];
           };
 
-          path = [ cfg.isolatedStore.package pkgs.coreutils pkgs.gitMinimal ];
+          path = [
+            cfg.isolatedStore.package
+            pkgs.coreutils
+            pkgs.gitMinimal
+          ];
 
           script = ''
             set -euo pipefail
@@ -816,8 +1098,8 @@ in
               echo ">>> Cloning $entry to $clone_dir ..."
               nix flake clone "$entry" --dest "$clone_dir"
 
-              echo ">>> Archiving root flake in $clone_dir ..."
-              (cd "$clone_dir" && nix flake archive)
+              echo ">>> Locking $entry ..."
+              nix flake lock --override-input devenv-root "file+file:///dev/null" "$entry"
 
               find "$clone_dir" -maxdepth 3 -name flake.nix | while IFS= read -r flake_file; do
                 flake_dir=$(dirname "$flake_file")
@@ -825,8 +1107,8 @@ in
                 [ "$rel_dir" = "." ] && continue
                 [ -f "$flake_dir/flake.lock" ] || continue
 
-                echo ">>> Archiving subflake in $flake_dir ..."
-                (cd "$flake_dir" && nix flake archive)
+                echo ">>> Locking $entry?dir=$rel_dir ..."
+                nix flake lock --override-input devenv-root "file+file:///dev/null" "$entry?dir=$rel_dir"
               done
 
               rm -rf "$clone_dir"
@@ -838,18 +1120,21 @@ in
       };
     })
 
-    (mkIf (cfg.enable && cfg.cache == "git" && cfg.cachePopulate != [ ] && cfg.cachePopulateInterval != null) {
-      systemd.timers.woodpecker-nix-populate-cache = {
-        description = "Periodically populate Woodpecker CI gitv3 cache";
-        wantedBy = [ "timers.target" ];
-        after = [ "woodpecker-nix-daemon.service" ];
-        requires = [ "woodpecker-nix-daemon.service" ];
-        timerConfig = {
-          OnCalendar = cfg.cachePopulateInterval;
-          Persistent = true;
+    (mkIf
+      (cfg.enable && cfg.cache == "git" && cfg.cachePopulate != [ ] && cfg.cachePopulateInterval != null)
+      {
+        systemd.timers.woodpecker-nix-populate-cache = {
+          description = "Periodically populate Woodpecker CI gitv3 cache";
+          wantedBy = [ "timers.target" ];
+          after = [ "woodpecker-nix-daemon.service" ];
+          requires = [ "woodpecker-nix-daemon.service" ];
+          timerConfig = {
+            OnCalendar = cfg.cachePopulateInterval;
+            Persistent = true;
+          };
         };
-      };
-    })
+      }
+    )
 
     (mkIf (cfg.enable && cfg.isolatedStore.enable && cfg.isolatedStore.gc.enable) {
       systemd = {
@@ -914,18 +1199,23 @@ in
             LAST_GC_FILE="$STATE_DIR/.last-gc"
             STORE_SIZE_FILE="$STATE_DIR/.store-size"
 
-            # --- Size gate ---
             if [ -f "$STORE_SIZE_FILE" ]; then
-              CURRENT_SIZE=$(cat "$STORE_SIZE_FILE")
+              read -r CURRENT_REAL_SIZE CURRENT_UPPER_SIZE < "$STORE_SIZE_FILE"
+              if [ -z "$CURRENT_UPPER_SIZE" ]; then
+                CURRENT_REAL_SIZE=$(cat "$STORE_SIZE_FILE")
+                CURRENT_UPPER_SIZE=0
+              fi
             else
-              CURRENT_SIZE=0
+              CURRENT_REAL_SIZE=0
+              CURRENT_UPPER_SIZE=0
             fi
 
+            CURRENT_SIZE=$(( CURRENT_REAL_SIZE + CURRENT_UPPER_SIZE ))
             SIZE_HUMAN=$(( CURRENT_SIZE / 1024 / 1024 ))
             THRESHOLD_HUMAN=$(( SIZE_THRESHOLD_BYTES / 1024 / 1024 ))
 
             if [ "$CURRENT_SIZE" -lt "$SIZE_THRESHOLD_BYTES" ]; then
-              echo ">>> GC: Store size (''${SIZE_HUMAN}MB) below threshold (''${THRESHOLD_HUMAN}MB). Skipping."
+              echo ">>> GC: Store size (''${SIZE_HUMAN}MB; store-real=''${CURRENT_REAL_SIZE}B, upper=''${CURRENT_UPPER_SIZE}B) below threshold (''${THRESHOLD_HUMAN}MB). Skipping."
               exit 0
             fi
 
@@ -951,12 +1241,12 @@ in
                 cfg.isolatedStore.gc.maxFreed != null
               ) ''--max-freed "${cfg.isolatedStore.gc.maxFreed}"''}
 
-            # Record GC timestamp
             date +%s > "$LAST_GC_FILE"
 
             # Update store size cache after GC
-            NEW_SIZE=$(du -sb "$STATE_DIR/nix/store" 2>/dev/null | awk '{print $1}' || echo 0)
-            echo "$NEW_SIZE" > "$STORE_SIZE_FILE"
+            NEW_REAL_SIZE=$(du -sb "$STATE_DIR/nix/store-real" 2>/dev/null | awk '{print $1}' || echo 0)
+            NEW_UPPER_SIZE=$(du -sb "$UPPER_DIR" 2>/dev/null | awk '{print $1}' || echo 0)
+            echo "$NEW_REAL_SIZE $NEW_UPPER_SIZE" > "$STORE_SIZE_FILE"
 
             echo ">>> GC: Complete."
           '';
@@ -1004,6 +1294,8 @@ in
                 "JOURNAL=${stateDir}/propagation-journal"
                 "STORE_SIZE_FILE=${stateDir}/.store-size"
                 "NIX_REMOTE=unix://${stateDir}/nix/var/nix/daemon-socket/socket"
+                "PROPAGATION_MODE=${cfg.isolatedStore.propagation.mode}"
+                "PROMOTE_STABLE_AFTER=${cfg.isolatedStore.propagation.promoteStableAfter}"
               ];
               NoNewPrivileges = true;
               ProtectClock = true;
@@ -1036,10 +1328,41 @@ in
                 }
 
                 update_store_size() {
-                  local size_bytes
-                  size_bytes=$(du -sb "$STATE_DIR/nix/store" 2>/dev/null | awk '{print $1}' || echo 0)
-                  echo "$size_bytes" > "$STORE_SIZE_FILE"
-                  log "Store size: $(( size_bytes / 1024 / 1024 )) MB"
+                  local real_bytes upper_bytes
+                  real_bytes=$(du -sb "$STORE_REAL_DIR" 2>/dev/null | awk '{print $1}' || echo 0)
+                  upper_bytes=$(du -sb "$UPPER_DIR" 2>/dev/null | awk '{print $1}' || echo 0)
+                  echo "$real_bytes $upper_bytes" > "$STORE_SIZE_FILE"
+                  log "Store size: store-real=''${real_bytes}B upper=''${upper_bytes}B"
+                }
+
+                promote_stable_path() {
+                  local store_dir="$1"
+                  local dir_name
+                  dir_name=$(basename "$store_dir")
+                  local dest="$STORE_REAL_DIR/$dir_name"
+                  local mtime_epoch
+                  local cutoff_epoch
+                  mtime_epoch=$(stat -c %Y "$store_dir")
+                  cutoff_epoch=$(date -d "$PROMOTE_STABLE_AFTER ago" +%s 2>/dev/null || true)
+
+                  if [ -z "$cutoff_epoch" ]; then
+                    log "Promotion skipped for $dir_name: unable to parse threshold $PROMOTE_STABLE_AFTER"
+                    return 0
+                  fi
+
+                  if [ "$mtime_epoch" -gt "$cutoff_epoch" ]; then
+                    return 0
+                  fi
+
+                  if [ -e "$dest" ]; then
+                    log "Promoting $dir_name: lower layer already has it; removing upper copy"
+                    rm -rf "$store_dir"
+                    return 0
+                  fi
+
+                  log "Promoting stable path $dir_name into store-real"
+                  cp -a "$store_dir" "$STORE_REAL_DIR/"
+                  rm -rf "$store_dir"
                 }
 
                 scan_new_paths() {
@@ -1085,6 +1408,9 @@ in
                       log "NEW: $dir_name (dir-size: ''${dir_size} bytes)"
                       echo "$(date -Iseconds) $dir_name $dir_size" >> "$JOURNAL"
                       new_count=$(( new_count + 1 ))
+                      if [ "$PROPAGATION_MODE" = "promote" ]; then
+                        promote_stable_path "$store_dir"
+                      fi
                     fi
                   done < <(find "$UPPER_DIR" -maxdepth 1 -mindepth 1 -type d 2>/dev/null)
 
@@ -1095,11 +1421,12 @@ in
                 log "Upper dir: $UPPER_DIR"
                 log "Store real dir: $STORE_REAL_DIR"
                 log "Journal: $JOURNAL"
+                log "Mode: $PROPAGATION_MODE"
 
                 update_store_size
                 scan_new_paths
 
-                log "Propagation audit complete. Exiting."
+                log "Propagation ''${PROPAGATION_MODE} complete. Exiting."
               '';
             };
           };
