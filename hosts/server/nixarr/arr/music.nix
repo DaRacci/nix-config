@@ -26,6 +26,9 @@
 
   systemd.services.lidarr = {
     after = [ "wg.service" ];
+    path = [
+      pkgs.nodejs-slim # Required for Tuberify YT Token Refresh
+    ];
     serviceConfig = {
       Restart = "on-failure";
       RestartSec = "10s";
