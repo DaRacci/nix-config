@@ -3,9 +3,9 @@
     "devenv-root": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-bGAkZVLthP0EWeDLq/pUR+mTYjWyUZsr/uoUvRJDylg=",
+        "narHash": "sha256-d6xi4mKdjkX2JFicDIv5niSzpyI0m/Hnm8GGAIU04kY=",
         "type": "file",
-        "url": "file:///persist/nix-config/.devenv/root"
+        "url": "file:///dev/null"
       },
       "original": {
         "type": "file",
