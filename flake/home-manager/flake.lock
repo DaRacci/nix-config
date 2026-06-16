@@ -474,6 +474,26 @@
         "type": "github"
       }
     },
+    "noctalia": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1781578452,
+        "narHash": "sha256-dVnQMGUcRJxrrGU5P2wBix9mxTcWjpiBs3N0/uwhR5A=",
+        "owner": "noctalia-dev",
+        "repo": "noctalia",
+        "rev": "b38bbc31460bb7b17ffe771b4267bde0ad6250a5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "noctalia-dev",
+        "repo": "noctalia",
+        "type": "github"
+      }
+    },
     "quickshell": {
       "inputs": {
         "nixpkgs": [
@@ -531,6 +551,7 @@
         "nix-index-database": "nix-index-database",
         "nix4vscode": "nix4vscode",
         "nixpkgs": "nixpkgs",
+        "noctalia": "noctalia",
         "skills-skill-creator": "skills-skill-creator",
         "skills-systematic-debugging": "skills-systematic-debugging",
         "sops-nix": "sops-nix",

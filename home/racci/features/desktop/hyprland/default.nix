@@ -107,11 +107,63 @@ with lib;
       "SUPER+Q" = {
         action = [ "killactive" ];
       };
-      "SUPER+SPACE" = {
+      "SUPER+SHIFT+F" = {
         action = [ "fullscreen" ];
       };
       "SUPER+SHIFT+SPACE" = {
         action = [ "togglefloating" ];
+      };
+
+      # Noctalia launcher/control-center/settings
+      "SUPER+SPACE" = {
+        action = [
+          "exec"
+          "noctalia msg panel-toggle launcher"
+        ];
+      };
+      "SUPER+S" = {
+        action = [
+          "exec"
+          "noctalia msg panel-toggle control-center"
+        ];
+      };
+      "SUPER+comma" = {
+        action = [
+          "exec"
+          "noctalia msg settings-toggle"
+        ];
+      };
+
+      # Volume & Brightness via Noctalia IPC
+      XF86AudioRaiseVolume = {
+        action = [
+          "exec"
+          "noctalia msg volume-up"
+        ];
+      };
+      XF86AudioLowerVolume = {
+        action = [
+          "exec"
+          "noctalia msg volume-down"
+        ];
+      };
+      XF86AudioMute = {
+        action = [
+          "exec"
+          "noctalia msg volume-mute"
+        ];
+      };
+      XF86MonBrightnessUp = {
+        action = [
+          "exec"
+          "noctalia msg brightness-up"
+        ];
+      };
+      XF86MonBrightnessDown = {
+        action = [
+          "exec"
+          "noctalia msg brightness-down"
+        ];
       };
     };
 

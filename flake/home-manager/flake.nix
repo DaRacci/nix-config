@@ -56,6 +56,10 @@
       url = "github:caelestia-dots/cli";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    noctalia = {
+      url = "github:noctalia-dev/noctalia";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     bash-env-json = {
       url = "github:tesujimath/bash-env-json";
       inputs = {

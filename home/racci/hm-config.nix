@@ -8,6 +8,8 @@
 
   home.packages = [ inputs.nix-alien.packages.${pkgs.stdenv.hostPlatform.system}.nix-alien ];
 
+  sops.secrets.LOCATION = { };
+
   # nixput = {
   #   enable = false;
   #   keybinds = {
@@ -17,6 +19,12 @@
   #     SelectLine = "Ctrl+L";
   #   };
   # };
+
+  core.profile = {
+    avatar.path = "/home/racci/.face";
+    wallpaper.directory = "/home/racci/Pictures/Wallpapers";
+    location.secret = "LOCATION";
+  };
 
   dconf.settings = {
     "org/virt-manager/virt-manager/connections" = {

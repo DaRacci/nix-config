@@ -53,7 +53,7 @@
     };
 
     "org/gnome/shell/extensions/azwallpaper" = {
-      slideshow-directory = "/home/${config.home.username}/Pictures/Wallpapers";
+      slideshow-directory = config.core.profile.wallpaper.directory;
     };
 
     "org/gnome/shell/extensions/clipboard-indicator" = {

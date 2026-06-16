@@ -77,6 +77,7 @@ let
     id: value:
     {
       workspace = id;
+      persistent = true;
     }
     // (lib.optionalAttrs (value.name != null) {
       default_name = value.name;

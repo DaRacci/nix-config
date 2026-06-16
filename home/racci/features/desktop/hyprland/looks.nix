@@ -56,8 +56,8 @@ with lib;
   wayland.windowManager.hyprland.settings = {
     config = {
       general = {
-        gaps_in = 4;
-        gaps_out = 5;
+        gaps_in = 5;
+        gaps_out = 10;
         gaps_workspaces = 50;
         border_size = 2;
       };
@@ -68,14 +68,16 @@ with lib;
         fullscreen_opacity = 1;
 
         rounding = 20;
+        rounding_power = 2;
 
         blur = {
           enabled = true;
           xray = true;
           special = true;
           new_optimizations = true;
-          size = 14;
-          passes = 4;
+          size = 3;
+          passes = 2;
+          vibrancy = 0.1696;
           brightness = 1;
           noise = 0.01;
           contrast = 1;
@@ -84,8 +86,9 @@ with lib;
 
         shadow = {
           enabled = true;
-          range = 20;
-          render_power = 4;
+          range = 4;
+          render_power = 3;
+          color = mkForce "rgba(1a1a1aee)";
           offset = "0 2";
         };
 
@@ -228,13 +231,6 @@ with lib;
         speed = 4;
         bezier = "easeOutCubic";
         style = "fade";
-      }
-      {
-        leaf = "layers";
-        enabled = true;
-        speed = 6;
-        bezier = "easeOutCubic";
-        style = "slide top";
       }
     ];
 

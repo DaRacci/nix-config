@@ -43,12 +43,12 @@ in
           "-1"
         ];
 
-        #region Graveyard
-        "SUPER+SHIFT+S" = [
+        #region Special workspace (remapped from SUPER+S / SUPER+SHIFT+S)
+        "SUPER+grave" = [ "togglespecialworkspace" ];
+        "SUPER+SHIFT+grave" = [
           "movetoworkspace"
           "special"
         ];
-        "SUPER+S" = [ "togglespecialworkspace" ];
         #endregion
 
         "CTRL+ALT+DELETE" = [
@@ -56,19 +56,7 @@ in
           "sh -c '${lib.getExe pkgs.zenity} --question --title=\"Exit Hyprland?\" --text=\"Are you sure you want to exit Hyprland?\" --ok-label=\"Exit\" --cancel-label=\"Cancel\" && ${lib.getExe pkgs.hyprshutdown} --post-cmd \"uwsm exit\"'"
         ];
 
-        #region Media
-        XF86AudioRaiseVolume = [
-          "exec"
-          "${lib.getExe' pkgs.wireplumber "wpctl"} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"
-        ];
-        XF86AudioLowerVolume = [
-          "exec"
-          "${lib.getExe' pkgs.wireplumber "wpctl"} set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-"
-        ];
-        XF86AudioMute = [
-          "exec"
-          "${lib.getExe' pkgs.wireplumber "wpctl"} set-mute @DEFAULT_AUDIO_SINK@ toggle"
-        ];
+        #region Media (mic only; volume moved to default.nix via Noctalia IPC)
         XF86AudioMicMute = [
           "exec"
           "${lib.getExe' pkgs.wireplumber "wpctl"} set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
@@ -115,9 +103,7 @@ in
         lib.mergeAttrsList
       ])
       #endregion
-      #region Media
 
-      #endregion
       ;
 
       submaps = {

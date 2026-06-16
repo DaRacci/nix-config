@@ -28,7 +28,7 @@ The camelCase custom module API remains consistent in Nix.
 
 ### `default.nix`
 
-Entry point that imports all sub-modules under `custom-settings`.
+Entry point that imports all sub-modules under `custom-settings`. Also imports `noctalia.nix` which adds Noctalia desktop shell integration (see below).
 
 ### `bind.nix`
 
@@ -136,6 +136,35 @@ custom-settings.permission = {
 ### `slideIn.nix`
 
 Defines `custom-settings.slideIn` — a list of edge-sliding popup windows. Each entry configures a keybind, executable, window class, position (`left`/`right`/`top`/`bottom`/`edge`/`side`), and optional window rules. Uses `hdrop` for dropdown-style window management.
+
+### `noctalia.nix`
+
+Integrates the [Noctalia](https://github.com/noctaliawm/noctalia) desktop shell as a Hyprland companion. Requires the `noctalia` flake input (added in `flake/home-manager/flake.nix`).
+
+The module:
+
+- Enables `programs.noctalia` and `systemd`, pins `package` from `inputs.noctalia.packages`, and applies a Hyprland layer blur rule for Noctalia windows.
+- Mirrors a full exported Noctalia v5 config as a typed Nix attrset (`noctaliaSettings`), covering bar layouts with monitor overrides, shell panel/screen corners/screenshot/session actions, theme (builtin "Noctalia" with community palette "Tokyo Night Moon"), wallpaper (directory, default/last/monitor paths, automation), calendar, control-center shortcuts, desktop/lockscreen widgets, notification layer, plugin settings, widget config, brightness, and more.
+- Does **not** declare top-level `colors` or `plugins` HM options, and does **not** manage raw JSON files directly.
+- Persists `~/.local/share/noctalia` via `user.persistence.directories`.
+- Reads `core.profile.avatar.path` → `shell.avatar_path` and `core.profile.wallpaper.directory` → `wallpaper.directory`. Wallpaper fill mode is hardcoded to `crop` (not a profile option).
+- Location driven by `core.profile.location.secret` (SOPS secret name). Two modes:
+  - **Normal** (`secret == null`): sets `programs.noctalia.settings` with build-time validation. No location block.
+  - **Secret** (`secret != null`): base TOML generated at build time; activation copies it to `~/.config/noctalia/config.toml` and appends `[location] address` from decrypted `sops.secrets.<name>.path`. Clear text never in repo or Nix store.
+
+The user-side Hyprland config (`home/racci/features/desktop/hyprland/`) pairs with this module via Noctalia IPC keybinds:
+
+| Binding                               | Action                                                                 |
+| ------------------------------------- | ---------------------------------------------------------------------- |
+| `SUPER+SPACE` → `SUPER+SHIFT+F`       | fullscreen (displaced by Noctalia launcher bind)                       |
+| `SUPER+S` → `SUPER+grave`             | special workspace toggle (displaced by Noctalia control center bind)   |
+| `SUPER+SHIFT+S` → `SUPER+SHIFT+grave` | move window to special workspace (displaced by Noctalia settings bind) |
+| `SUPER+comma`                         | Noctalia settings                                                      |
+| Audio/brightness keys                 | `noctalia msg ...` dispatchers                                         |
+
+Workspace rules in the user config now set `persistent = true` for defined workspaces, ensuring they are always available regardless of Noctalia lifecycle.
+
+Look settings are tuned toward Noctalia documentation recommendations: `gaps_in = 5`, `gaps_out = 10`, `rounding_power = 2`, shadow range/render/color tuned, and blur size/passes/vibrancy adjusted.
 
 ### `types.nix`
 
