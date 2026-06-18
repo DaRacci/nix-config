@@ -76,7 +76,6 @@ in
           autoStart = false;
           openFirewall = true;
           capSysAdmin = true;
-          port = 47989;
         };
 
         networking.firewall = {
