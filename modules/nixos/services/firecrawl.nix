@@ -187,6 +187,16 @@ in
       '';
     };
 
+    nuqRabbitMQUrl = mkOption {
+      type = nullOr str;
+      default = null;
+      description = ''
+        RabbitMQ URL exported as NUQ_RABBITMQ_URL.
+        Only needed when external RabbitMQ is required for features
+        that depend on it (e.g. webhook queue). No default.
+      '';
+    };
+
     openrouter = {
       enable = mkEnableOption "OpenRouter integration for Firecrawl AI models";
 
@@ -266,6 +276,9 @@ in
         // optionalAttrs (cfg.playwright.browsersPath != null) {
           PLAYWRIGHT_BROWSERS_PATH = "${cfg.playwright.browsersPath}";
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1";
+        }
+        // optionalAttrs (cfg.nuqRabbitMQUrl != null) {
+          NUQ_RABBITMQ_URL = cfg.nuqRabbitMQUrl;
         }
       );
 

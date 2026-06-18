@@ -5,6 +5,56 @@ Generic Firecrawl service wrapper with hardened systemd sandboxing.
 - **Entry point**: `modules/nixos/services/firecrawl.nix`
 - **Package**: `pkgs.firecrawl`
 
+## Package
+
+Firecrawl is **built from source** via `pkgs/firecrawl/default.nix` — no Docker image involved. The build uses the v2.10.25 GitHub release tag and compiles three languages:
+
+- **Go** — builds `libhtml-to-markdown.so` (shared library, FFI-loaded by Node.js via `koffi`)
+- **Rust** — builds the `firecrawl-rs` napi-rs native addon (cdylib, loaded as `firecrawl-rs.linux-x64-gnu.node` with a generated `index.js` loader)
+- **TypeScript** — the main application server, compiled via `pnpm run build` from `apps/api/`
+
+### Build Dependencies
+
+| Language   | Toolchain                                | Output                                                       |
+| ---------- | ---------------------------------------- | ------------------------------------------------------------ |
+| Go         | `go`                                     | `sharedLibs/go-html-to-md/libhtml-to-markdown.so`            |
+| Rust       | `rustPlatform` (`fetchCargoVendor`)      | `native/firecrawl-rs.linux-x64-gnu.node` + `native/index.js` |
+| TypeScript | `nodejs_22`, `pnpm_10` (`fetchPnpmDeps`) | `dist/`, `node_modules/`                                     |
+
+### Runtime Closure
+
+The package produces a wrapper at `bin/firecrawl` that runs:
+
+```
+FIRECRAWL_DISABLE_CONTAINER_MANAGEMENT=1 \
+node dist/src/harness.js --start-docker
+```
+
+The wrapper sets `FIRECRAWL_DISABLE_CONTAINER_MANAGEMENT=1` to bypass
+upstream container management, letting Firecrawl run natively on NixOS
+without Docker / Podman or a fake RabbitMQ URL.
+
+The runtime output (`$out/lib/firecrawl/`) contains:
+
+- `dist/` — compiled TypeScript
+- `node_modules/` — pruned production dependencies
+- `native/` — Rust napi addon (`.node` + `index.js` loader)
+- `sharedLibs/go-html-to-md/` — Go shared library (`.so`)
+- `package.json`, `pnpm-lock.yaml`
+
+### FoundationDB
+
+FoundationDB is **optional**. Firecrawl's default queue backend uses PostgreSQL, so FDB is not required. This build does not include FoundationDB.
+
+### Playwright
+
+Playwright is a **separate service dependency**. The Firecrawl package itself does not bundle browser binaries. See [Playwright Browsers](#playwright-browsers) below for configuration.
+
+### Availability
+
+- **Visibility**: private to this repository (not submitted to nixpkgs)
+- **Platforms**: `x86_64-linux` only — the Rust napi-rs build targets `linux-x64-gnu` and does not include `aarch64-linux`
+
 ## Special Options
 
 - `services.firecrawl.enable`: Enable Firecrawl.
@@ -21,6 +71,7 @@ Generic Firecrawl service wrapper with hardened systemd sandboxing.
 - `services.firecrawl.redisUrl`: Override Redis URL. When null, derived from repo DB module or `redis://127.0.0.1:6379`.
 - `services.firecrawl.redisRateLimitUrl`: Override Redis rate-limit URL. When null, derived from repo DB module or `redis://127.0.0.1:6379`.
 - `services.firecrawl.databaseUrl`: Override Postgres `DATABASE_URL`. When null, built from repo DB module.
+- `services.firecrawl.nuqRabbitMQUrl`: Optional RabbitMQ URL exported as NUQ_RABBITMQ_URL. Needed for features that require external RabbitMQ (e.g. webhook queue). No default.
 
 ### OpenRouter Options (`services.firecrawl.openrouter.*`)
 
