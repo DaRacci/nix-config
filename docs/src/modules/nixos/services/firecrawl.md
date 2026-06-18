@@ -7,7 +7,7 @@ Generic Firecrawl service wrapper with hardened systemd sandboxing.
 
 ## Package
 
-Firecrawl is **built from source** via `pkgs/firecrawl/default.nix` — no Docker image involved. The build uses the v2.10.25 GitHub release tag and compiles three languages:
+Firecrawl is **built from source** via `pkgs/firecrawl/default.nix` — no Docker image involved. The build compiles three languages:
 
 - **Go** — builds `libhtml-to-markdown.so` (shared library, FFI-loaded by Node.js via `koffi`)
 - **Rust** — builds the `firecrawl-rs` napi-rs native addon (cdylib, loaded as `firecrawl-rs.linux-x64-gnu.node` with a generated `index.js` loader)
@@ -48,41 +48,23 @@ FoundationDB is **optional**. Firecrawl's default queue backend uses PostgreSQL,
 
 ### Playwright
 
-Playwright is a **separate service dependency**. The Firecrawl package itself does not bundle browser binaries. See [Playwright Browsers](#playwright-browsers) below for configuration.
+The package wrapper exports Nix-managed Playwright browser environment
+variables (`PLAYWRIGHT_BROWSERS_PATH`, `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`)
+for direct use via `nix run .#firecrawl`. The package itself does not
+bundle browser binaries — Playwright is a **separate service dependency**.
+
+For systemd service overrides, see [Playwright Browsers](#playwright-browsers) below.
+The module option `services.firecrawl.playwright.browsersPath` can be set
+to `null` to let Playwright manage its own browsers.
 
 ### Availability
 
-- **Visibility**: private to this repository (not submitted to nixpkgs)
+- **Visibility**: private to this repository
 - **Platforms**: `x86_64-linux` only — the Rust napi-rs build targets `linux-x64-gnu` and does not include `aarch64-linux`
 
 ## Special Options
 
-- `services.firecrawl.enable`: Enable Firecrawl.
-- `services.firecrawl.package`: Override package providing Firecrawl binary.
-- `services.firecrawl.host`: Bind address.
-- `services.firecrawl.port`: Listen port.
-- `services.firecrawl.openFirewall`: Open firewall for listen port.
-- `services.firecrawl.apiKeyFile`: Compatibility option — generally not needed. The Firecrawl server does not enforce auth from this value. It is loaded via `LoadCredential` for downstream consumers that share the same process environment, but the preferred pattern is for consumers (e.g., ai-agent) to reference the secret directly.
-- `services.firecrawl.bullAuthKeyFile`: Optional secret file for queue admin UI auth.
-- `services.firecrawl.environment`: Extra environment vars rendered via `sops.templates`.
-- `services.firecrawl.extraArgs`: Extra args for service command.
-- `services.firecrawl.numWorkersPerQueue`: Worker count per queue (default: 8).
-- `services.firecrawl.useDbAuthentication`: Enable DB authentication.
-- `services.firecrawl.redisUrl`: Override Redis URL. When null, derived from repo DB module or `redis://127.0.0.1:6379`.
-- `services.firecrawl.redisRateLimitUrl`: Override Redis rate-limit URL. When null, derived from repo DB module or `redis://127.0.0.1:6379`.
-- `services.firecrawl.databaseUrl`: Override Postgres `DATABASE_URL`. When null, built from repo DB module.
-- `services.firecrawl.nuqRabbitMQUrl`: Optional RabbitMQ URL exported as NUQ_RABBITMQ_URL. Needed for features that require external RabbitMQ (e.g. webhook queue). No default.
-
-### OpenRouter Options (`services.firecrawl.openrouter.*`)
-
-- `services.firecrawl.openrouter.enable`: Enable OpenRouter integration. Loads `OPENROUTER_API_KEY` via `LoadCredential`.
-- `services.firecrawl.openrouter.apiKeyFile`: Path to file containing the OpenRouter API key. Required when `enable = true`.
-- `services.firecrawl.openrouter.modelName`: Optional `MODEL_NAME` override (default: Firecrawl upstream default).
-- `services.firecrawl.openrouter.modelEmbeddingName`: Optional `MODEL_EMBEDDING_NAME` override (default: Firecrawl upstream default).
-
-### Playwright Options (`services.firecrawl.playwright.*`)
-
-- `services.firecrawl.playwright.browsersPath`: Path to Playwright browsers. Defaults to `pkgs.playwright-driver.browsers` (Nix-managed). Set to `null` to let Playwright manage its own browsers. Exported as `PLAYWRIGHT_BROWSERS_PATH` with `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`.
+{{#include ../../../../generated/services-firecrawl-options.md}}
 
 ## Auth Model
 
@@ -96,31 +78,66 @@ For public exposure, use **Kanidm OAuth2 at the reverse proxy layer**. The proxy
 
 There is **no unsecured public endpoint**. All external requests go through Kanidm authentication before reaching the Firecrawl backend.
 
-## OpenRouter Configuration
+## Smoke Test
 
-Firecrawl uses `OPENROUTER_API_KEY` for LLM-powered extraction features. The key is loaded via `LoadCredential` through the module's `openrouter` options:
+Ad-hoc validation helper that starts temporary PostgreSQL (with NUQ schema loaded),
+Redis, RabbitMQ, an HTTP fixture, and the full `firecrawl` harness on high ports.
+Performs liveness/readiness checks and real `POST /v1/scrape` and `POST /v2/scrape`
+requests against the local fixture, asserting the scraped markdown contains the expected
+fixture text. Also validates that unauthenticated / bogus-key requests succeed (auth is
+not enforced server-side):
 
-```nix
-services.firecrawl.openrouter = {
-  enable = true;
-  apiKeyFile = config.sops.secrets."AI_AGENT/OPENROUTER_API_KEY".path;
-  # optional model overrides:
-  # modelName = "openai/gpt-4o";
-  # modelEmbeddingName = "openai/text-embedding-3-small";
-};
+```bash
+nix run .#firecrawl-smoke-test
 ```
 
-This **reuses the existing `AI_AGENT/OPENROUTER_API_KEY` secret** declared in `hosts/server/nixai/secrets.yaml`. No duplicate secret needed.
+### Infrastructure
 
-## Playwright Browsers
+| Service    | Role                                 |
+| ---------- | ------------------------------------ |
+| PostgreSQL | Main DB + NUQ queue tables           |
+| Redis      | Queue locking / rate limiting        |
+| RabbitMQ   | NUQ prefetch + job listener exchange |
+| HTTP       | Local fixture page to scrape         |
 
-Firecrawl requires Playwright browsers for web scraping. The module defaults `services.firecrawl.playwright.browsersPath` to `pkgs.playwright-driver.browsers`, which exports `PLAYWRIGHT_BROWSERS_PATH` and sets `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`. No additional configuration needed for standard NixOS setups.
+### Key env vars set by the test
 
-Override only if you need custom browser paths:
+| Variable                 | Purpose                       |
+| ------------------------ | ----------------------------- |
+| `DATABASE_URL`           | Postgres connection           |
+| `NUQ_DATABASE_URL`       | Same as `DATABASE_URL`        |
+| `REDIS_URL`              | Queue Redis                   |
+| `REDIS_RATE_LIMIT_URL`   | Rate-limit Redis              |
+| `NUQ_RABBITMQ_URL`       | RabbitMQ for NUQ              |
+| `TEST_SUITE_SELF_HOSTED` | Accept localhost URLs         |
+| `ALLOW_LOCAL_WEBHOOKS`   | Allow local webhook listeners |
+| `USE_DB_AUTHENTICATION`  | Skip public-schema auth       |
+| `DISABLE_BLOCKLIST`      | Accept any URL                |
 
-```nix
-services.firecrawl.playwright.browsersPath = "/custom/browser/path";
-```
+### NUQ schema loading
+
+The NUQ PostgreSQL schema is loaded from `${firecrawl}/share/firecrawl/nuq.sql`.
+Lines that require `pg_cron` (`CREATE EXTENSION pg_cron`, `SELECT cron.schedule(...)`)
+and `ALTER SYSTEM` tuning directives are filtered out — these need
+`shared_preload_libraries` and global config not available on a transient instance.
+
+### Validation sequence
+
+1. Start PostgreSQL, load NUQ schema
+1. Start Redis
+1. Start RabbitMQ with `guest:guest@127.0.0.1:<port>`
+1. Start Python HTTP server serving a fixture page with known text
+1. Start packaged `firecrawl` binary (full harness) with all env vars above
+1. Wait for `/v0/health/liveness` → `{"status":"ok"}`
+1. Wait for `/v0/health/readiness` → `{"status":"ok"}`
+1. `POST /v1/scrape` with fixture URL, `formats:["markdown"]`
+1. `POST /v2/scrape` with same fixture URL, `formats:["markdown"]`
+1. `POST /v2/scrape` without auth header, assert `success=true`
+1. `POST /v2/scrape` with `Authorization: Bearer fake-key-12345`, assert `success=true`
+1. Assert `success=true` and markdown contains `Hello from Firecrawl smoke test`
+1. Cleanup all processes and temp directory
+
+Exits zero on pass, non-zero with diagnostic output on failure.
 
 ## Secrets Management
 
@@ -165,14 +182,6 @@ Setting `redisUrl` or `redisRateLimitUrl` manually is only needed when the modul
 
 Firecrawl looks up `DATABASE_URL` from its config on disk; declare `server.database.postgres.firecrawl` so the IO Host provisions the role and database.
 
-## Operational Notes
-
-Service runs as `DynamicUser` with strict sandboxing, state in `/var/lib/firecrawl`, and no public port unless `openFirewall` is set.
-
-## Host Wiring (`nixai`)
-
-`nixai` enables Firecrawl with `REDIS/PASSWORD` and `FIRECRAWL/BULL_AUTH_KEY` secrets, keeps it bound to `127.0.0.1`, and exposes it publicly via Kanidm-authenticated reverse proxy.
-
 ### Public Exposure Pattern
 
 ```nix
@@ -192,17 +201,6 @@ server.proxy.virtualHosts.firecrawl = {
 - `kanidm.allowGroups` — restricts access to members of `cloud@auth.racci.dev`
 - Reverse proxy targets localhost (`127.0.0.1:3002`) — Firecrawl itself never binds publicly
 - The OAuth2 client secret is provisioned by the repo's `kanidm.nix` extension module from `KANIDM/OAUTH2/FIRECRAWL_SECRET`
-
-### OpenRouter Wiring
-
-```nix
-services.firecrawl.openrouter = {
-  enable = true;
-  apiKeyFile = config.sops.secrets."AI_AGENT/OPENROUTER_API_KEY".path;
-};
-```
-
-The key is loaded via `LoadCredential` and exported as `OPENROUTER_API_KEY`. Reuses the existing `AI_AGENT/OPENROUTER_API_KEY` secret — no duplicate declaration needed.
 
 ### Local Consumer Access
 

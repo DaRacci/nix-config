@@ -31,6 +31,7 @@
   pyarlo = pkgs.python3Packages.callPackage ./python/pyarlo.nix { };
 
   firecrawl = pkgs.callPackage ./firecrawl { };
+  firecrawl-smoke-test = pkgs.callPackage ./firecrawl/smoke-test.nix { };
 
   # Scripts n stuff
   new-host = pkgs.callPackage ./helpers/new-host.nix { };

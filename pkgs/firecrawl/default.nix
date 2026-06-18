@@ -9,6 +9,8 @@
   rustPlatform,
   go,
   makeWrapper,
+  playwright-driver,
+  pax-utils,
   ...
 }:
 
@@ -132,14 +134,7 @@ let
         throw new Error('Failed to load native binding')
       }
 
-      const { crawl, map, scrape, extract, search, checkRecommendedNodes } = nativeBinding
-
-      module.exports.crawl = crawl
-      module.exports.map = map
-      module.exports.scrape = scrape
-      module.exports.extract = extract
-      module.exports.search = search
-      module.exports.checkRecommendedNodes = checkRecommendedNodes
+      module.exports = nativeBinding
       NODELOADER
       runHook postInstall
     '';
@@ -194,7 +189,6 @@ let
       export GOMODCACHE=$TMPDIR/gomod
       export HOME=$TMPDIR
       mkdir -p $GOPATH $GOMODCACHE
-      # Pre-downloaded go module (fetched via buildGoModule)
       cp -r ${goModules}/cache $GOMODCACHE/cache
       chmod -R u+w $GOMODCACHE
       runHook postConfigure
@@ -223,7 +217,6 @@ let
   };
 
   # Main Firecrawl Node.js application
-  # pnpm root is apps/api (Firecrawl is an apps/api-focused monorepo)
   pnpmRoot = "apps/api";
 in
 stdenv.mkDerivation (finalAttrs: {
@@ -234,6 +227,7 @@ stdenv.mkDerivation (finalAttrs: {
     pnpm_10
     pnpmConfigHook
     makeWrapper
+    pax-utils
   ];
 
   inherit pnpmRoot;
@@ -328,6 +322,13 @@ stdenv.mkDerivation (finalAttrs: {
     cp package.json $out/lib/$pname/
     cp pnpm-lock.yaml $out/lib/$pname/
 
+    # Expose NUQ PostgreSQL schema for external initialization
+    mkdir -p $out/share/firecrawl
+    cp "$NIX_BUILD_TOP/$sourceRoot/apps/nuq-postgres/nuq.sql" $out/share/firecrawl/nuq.sql
+
+    # Clear executable stack on native .node addons to avoid loader rejection
+    find $out/lib/$pname -name '*.node' -type f -exec sh -c 'scanelf -qeX "$1" >/dev/null || true' _ {} \;
+
     # Create wrapper that sets up environment and runs the harness
     makeWrapper ${lib.getExe nodejs_22} $out/bin/$pname \
       --add-flags "$out/lib/$pname/dist/src/harness.js" \
@@ -335,6 +336,9 @@ stdenv.mkDerivation (finalAttrs: {
       --set-default NODE_ENV production \
       --set-default HOME /var/lib/firecrawl \
       --set-default FIRECRAWL_DISABLE_CONTAINER_MANAGEMENT 1 \
+      --set-default PLAYWRIGHT_BROWSERS_PATH ${playwright-driver.browsers} \
+      --set-default PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD 1 \
+      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ stdenv.cc.cc.lib ]}" \
       --chdir "$out/lib/$pname"
 
     runHook postInstall
