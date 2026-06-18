@@ -78,7 +78,7 @@ WiVRn is activated on-demand through systemd user socket activation instead of r
 - Steam's OpenXR runtime path resolves to the socket; activating SteamVR/OpenXR game triggers socket activation.
 - Parent dir created with `0750`, socket with `0770`.
 
-______________________________________________________________________
+---
 
 ## Operational Notes
 

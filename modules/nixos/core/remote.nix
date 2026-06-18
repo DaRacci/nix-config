@@ -18,7 +18,6 @@ let
 
   sunshine-proxy-wrapper = pkgs.writeShellScript "sunshine-proxy-wrapper" ''
     set -euo pipefail
-    systemctl --user start sunshine.service
     port=47989
     ss_bin=${pkgs.iproute2}/bin/ss
     proxy_bin=${pkgs.systemd}/lib/systemd/systemd-socket-proxyd
@@ -77,18 +76,19 @@ in
           autoStart = false;
           openFirewall = true;
           capSysAdmin = true;
+          port = 47989;
         };
 
         networking.firewall = {
           extraCommands = ''
-            iptables -t nat -A PREROUTING -p tcp --dport 47989 -j REDIRECT --to-port 48989
-            ip6tables -t nat -A PREROUTING -p tcp --dport 47989 -j REDIRECT --to-port 48989
+            iptables -t nat -A PREROUTING -p tcp -m addrtype --dst-type LOCAL --dport 47989 -j REDIRECT --to-port 48989
+            ip6tables -t nat -A PREROUTING -p tcp -m addrtype --dst-type LOCAL --dport 47989 -j REDIRECT --to-port 48989
             iptables -A nixos-fw -p tcp --dport 48989 -m conntrack --ctorigdstport 47989 -j nixos-fw-accept
             ip6tables -A nixos-fw -p tcp --dport 48989 -m conntrack --ctorigdstport 47989 -j nixos-fw-accept
           '';
           extraStopCommands = ''
-            iptables -t nat -D PREROUTING -p tcp --dport 47989 -j REDIRECT --to-port 48989 || true
-            ip6tables -t nat -D PREROUTING -p tcp --dport 47989 -j REDIRECT --to-port 48989 || true
+            iptables -t nat -D PREROUTING -p tcp -m addrtype --dst-type LOCAL --dport 47989 -j REDIRECT --to-port 48989 || true
+            ip6tables -t nat -D PREROUTING -p tcp -m addrtype --dst-type LOCAL --dport 47989 -j REDIRECT --to-port 48989 || true
             iptables -D nixos-fw -p tcp --dport 48989 -m conntrack --ctorigdstport 47989 -j nixos-fw-accept || true
             ip6tables -D nixos-fw -p tcp --dport 48989 -m conntrack --ctorigdstport 47989 -j nixos-fw-accept || true
           '';
@@ -113,7 +113,7 @@ in
           ];
           serviceConfig = {
             Type = "simple";
-            ExecStart = "${sunshine-proxy-wrapper}";
+            ExecStart = sunshine-proxy-wrapper;
             Restart = "no";
           };
         };

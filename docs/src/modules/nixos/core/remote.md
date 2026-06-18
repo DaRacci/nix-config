@@ -101,19 +101,19 @@ For hyprlang mode, the old string forms (`exec-once`, `monitor = "HEADLESS-2,dis
 - Sunshine persistence and Hyprland settings are only added when Home Manager is present in system configuration.
 - Hyprland-specific Sunshine application entries are only added when both streaming and Hyprland are enabled.
 
-______________________________________________________________________
+---
 
 ## On-Demand Activation & Idle Stop
 
 Sunshine stays on its standard port family rooted at **TCP/UDP 47989–47990+** (no port-family offset). External inbound TCP **47989** is firewall-redirected to internal proxy port **48989**. The proxy wakes Sunshine and forwards to `127.0.0.1:47989`.
 
-| Stage | What happens |
-|---|---|
-| **Firewall redirect** | `iptables` NAT prerouting rule redirects inbound TCP `:47989` to local `:48989`. A conntrack-based filter accept allows only redirected traffic into `:48989`; `:48989` is not broadly exposed. |
-| **Socket activation** | `sunshine-proxy.socket` listens on TCP `:48989`. First connection activates `sunshine-proxy.service`. |
-| **Proxy start** | `sunshine-proxy-wrapper` starts `sunshine.service`, polls until port 47989 is open, then exec-s into `systemd-socket-proxyd` forwarding to `127.0.0.1:47989`. |
-| **Active streaming** | Sunshine handles Moonlight/Sunshine client traffic on its standard port family. The proxy relays only the initial control connection transparently. Proxy `bindsTo` Sunshine — if Sunshine crashes proxy goes with it. |
-| **Idle stop** | After 300s with no connection, `systemd-socket-proxyd` exits. Sunshine has `Restart=no` and `StopWhenUnneeded=true` with no remaining active referrer, so systemd stops it. |
+| Stage                 | What happens                                                                                                                                                                                                           |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Firewall redirect** | `iptables` NAT prerouting rule redirects inbound TCP `:47989` to local `:48989`. A conntrack-based filter accept allows only redirected traffic into `:48989`; `:48989` is not broadly exposed.                        |
+| **Socket activation** | `sunshine-proxy.socket` listens on TCP `:48989`. First connection activates `sunshine-proxy.service`.                                                                                                                  |
+| **Proxy start**       | `sunshine-proxy-wrapper` starts `sunshine.service`, polls until port 47989 is open, then exec-s into `systemd-socket-proxyd` forwarding to `127.0.0.1:47989`.                                                          |
+| **Active streaming**  | Sunshine handles Moonlight/Sunshine client traffic on its standard port family. The proxy relays only the initial control connection transparently. Proxy `bindsTo` Sunshine — if Sunshine crashes proxy goes with it. |
+| **Idle stop**         | After 300s with no connection, `systemd-socket-proxyd` exits. Sunshine has `Restart=no` and `StopWhenUnneeded=true` with no remaining active referrer, so systemd stops it.                                            |
 
 ### Dependency Model
 
