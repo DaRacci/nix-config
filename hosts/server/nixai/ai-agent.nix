@@ -28,6 +28,12 @@
   services = {
     ai-agent = {
       enable = true;
+      firecrawl = {
+        enable = true;
+        # Reuse Firecrawl API key from web.nix instead of creating
+        # a separate AI_AGENT/FIRECRAWL_API_KEY secret.
+        apiKeyReference = "FIRECRAWL/API_KEY";
+      };
       dashboard = {
         enable = true;
         publicURL = "https://agent.racci.dev";

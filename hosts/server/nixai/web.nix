@@ -20,41 +20,54 @@ in
   };
 
   sops.secrets = {
+    "REDIS/PASSWORD" = { };
     "FIRECRAWL/API_KEY" = { };
     "FIRECRAWL/BULL_AUTH_KEY" = { };
   };
 
   server = {
-    database.postgres.open_webui = { };
-    database.dependentServices = [ "open-webui" ];
+    database.postgres = {
+      open_webui = { };
+      firecrawl = { };
+    };
+    database.redis = {
+      firecrawl = { };
+      firecrawl-rate-limit = { };
+    };
+    database.dependentServices = [
+      "open-webui"
+      "firecrawl"
+    ];
     dashboard.items.ai = {
       title = "Open WebUI";
       icon = "sh-open-webui";
     };
 
-    proxy.virtualHosts.ai =
-      let
-        cfg = config.services.open-webui;
-      in
-      {
-        ports = [ cfg.port ];
-        extraConfig = ''
-          reverse_proxy http://${cfg.host}:${toString cfg.port} {
-            flush_interval -1
-          }
-        '';
-      };
+    proxy.virtualHosts = {
+      ai =
+        let
+          cfg = config.services.open-webui;
+        in
+        {
+          ports = [ cfg.port ];
+          extraConfig = ''
+            reverse_proxy http://${cfg.host}:${toString cfg.port} {
+              flush_interval -1
+            }
+          '';
+        };
 
-    proxy.virtualHosts.firecrawl =
-      let
-        cfg = config.services.firecrawl;
-      in
-      {
-        ports = [ cfg.port ];
+      firecrawl = {
+        ports = [ config.services.firecrawl.port ];
+        public = true;
+        kanidm = {
+          allowGroups = [ "cloud@auth.racci.dev" ];
+        };
         extraConfig = ''
-          reverse_proxy http://${cfg.host}:${toString cfg.port}
+          reverse_proxy http://${config.services.firecrawl.host}:${toString config.services.firecrawl.port}
         '';
       };
+    };
 
   };
 
@@ -63,11 +76,10 @@ in
       enable = true;
       host = "127.0.0.1";
       openFirewall = false;
-      apiKeyFile = config.sops.secrets."FIRECRAWL/API_KEY".path;
       bullAuthKeyFile = config.sops.secrets."FIRECRAWL/BULL_AUTH_KEY".path;
-      environment = {
-        FIRECRAWL_API_KEY = sopsPlaceholder."FIRECRAWL/API_KEY";
-        BULL_AUTH_KEY = sopsPlaceholder."FIRECRAWL/BULL_AUTH_KEY";
+      openrouter = {
+        enable = true;
+        apiKeyFile = config.sops.secrets."AI_AGENT/OPENROUTER_API_KEY".path;
       };
     };
 
