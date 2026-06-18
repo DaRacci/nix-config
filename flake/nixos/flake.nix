@@ -21,8 +21,6 @@
       inputs = {
         nixpkgs.follows = "nixpkgs";
         rust-overlay.follows = "rust-overlay";
-        flake-parts.follows = "flake-parts";
-        flake-compat.follows = "";
         pre-commit.follows = "";
       };
     };
