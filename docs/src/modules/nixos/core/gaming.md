@@ -73,9 +73,9 @@ If `config.jovian.decky-loader.enable` is true, module additionally:
 WiVRn is activated on-demand through systemd user socket activation instead of running for the full session.
 
 - `systemd.user.sockets.wivrn` listens on `%t/wivrn/comp_ipc` (UNIX socket, mode `0770`).
-- Socket is `WantedBy=default.target`, so it's available all session but WiVRn itself only starts when a client connects.
+- Socket is `WantedBy=default.target`, so it's available throughout the session, but WiVRn itself only starts when a client connects.
 - Service env override: `IPC_EXIT_ON_DISCONNECT=on` — WiVRn exits after client disconnects.
-- Steam's OpenXR runtime path resolves to the socket; activating SteamVR/OpenXR game triggers socket activation.
+- Steam's OpenXR runtime path resolves to the socket; activating a SteamVR/OpenXR game triggers socket activation.
 - Parent dir created with `0750`, socket with `0770`.
 
 ---
