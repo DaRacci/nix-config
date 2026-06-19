@@ -127,7 +127,7 @@ Grafana proxies queries to Tempo on the backend.
 
 The OTLP ingestion endpoint is intended for machine-to-machine clients and requires an
 `Authorization: Bearer <token>` header on every request. The exposed OTLP/HTTP
-paths are the standard `/v1/metrics` and `/v1/logs` endpoints.
+paths are the standard `/v1/metrics`, `/v1/logs`, and `/v1/traces` endpoints.
 
 These are defined in `hosts/server/nixmon/default.nix` and collected by the IO
 primary host's Caddy configuration.

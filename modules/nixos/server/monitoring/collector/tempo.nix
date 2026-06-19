@@ -23,7 +23,7 @@ in
 
         distributor.receivers = {
           otlp = {
-            protocols.http.endpoint = "0.0.0.0:${toString cfg.collector.tempo.otlpPort}";
+            protocols.http.endpoint = "127.0.0.1:${toString cfg.collector.tempo.otlpPort}";
           };
         };
 

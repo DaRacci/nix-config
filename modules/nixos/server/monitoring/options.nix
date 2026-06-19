@@ -17,7 +17,7 @@ let
     ;
   inherit (lib.types)
     str
-    int
+    port
     ;
 
   hasPostgresDatabases =
@@ -104,7 +104,7 @@ in
         };
 
         otlpPort = mkOption {
-          type = int;
+          type = port;
           default = 4319;
           description = "Port for Tempo's OTLP HTTP receiver. Must not conflict with the Alloy OTLP receiver port (default 4318).";
         };
