@@ -129,7 +129,10 @@
     };
   };
 
-  server.proxy.virtualHosts.radarr.extraConfig = ''
-    reverse_proxy localhost:${toString config.nixarr.radarr.port}
-  '';
+  server.proxy.virtualHosts.radarr = {
+    ports = [ config.nixarr.radarr.port ];
+    extraConfig = ''
+      reverse_proxy localhost:${toString config.nixarr.radarr.port}
+    '';
+  };
 }

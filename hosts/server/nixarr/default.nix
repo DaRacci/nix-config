@@ -50,18 +50,44 @@
     seerr.enable = true;
   };
 
+  services.jellyfin = {
+    hardwareAcceleration = {
+      enable = true;
+      device = "/dev/dri/renderD128";
+    };
+
+    forceEncodingConfig = true;
+    transcoding = {
+      enableHardwareEncoding = true;
+      maxConcurrentStreams = null;
+      throttleTranscoding = true;
+      hardwareEncodingCodecs = {
+        hevc = true;
+        av1 = true;
+      };
+      hardwareDecodingCodecs = {
+        av1 = true;
+        h264 = true;
+        hevc = true;
+        vp9 = true;
+      };
+    };
+  };
+
   server = {
     dashboard.icon = "sh-mediamanager";
 
     proxy.virtualHosts = {
       jellyfin = {
         public = true;
+        ports = [ config.nixarr.jellyfin.port ];
         extraConfig = ''
-          reverse_proxy localhost:8096
+          reverse_proxy localhost:${toString config.nixarr.jellyfin.port}
         '';
       };
       seerr = {
         public = true;
+        ports = [ config.nixarr.seerr.port ];
         extraConfig = ''
           reverse_proxy localhost:${toString config.nixarr.seerr.port}
         '';

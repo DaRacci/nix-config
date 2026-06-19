@@ -71,11 +71,17 @@
   };
 
   server.proxy.virtualHosts = {
-    transmission.extraConfig = ''
-      reverse_proxy localhost:${toString config.nixarr.transmission.uiPort}
-    '';
-    sabnzbd.extraConfig = ''
-      reverse_proxy localhost:${toString config.nixarr.sabnzbd.guiPort}
-    '';
+    transmission = {
+      ports = [ config.nixarr.transmission.uiPort ];
+      extraConfig = ''
+        reverse_proxy localhost:${toString config.nixarr.transmission.uiPort}
+      '';
+    };
+    sabnzbd = {
+      ports = [ config.nixarr.sabnzbd.guiPort ];
+      extraConfig = ''
+        reverse_proxy localhost:${toString config.nixarr.sabnzbd.guiPort}
+      '';
+    };
   };
 }

@@ -76,7 +76,10 @@
     };
   };
 
-  server.proxy.virtualHosts.sonarr.extraConfig = ''
-    reverse_proxy localhost:${toString config.nixarr.sonarr.port}
-  '';
+  server.proxy.virtualHosts.sonarr = {
+    ports = [ config.nixarr.sonarr.port ];
+    extraConfig = ''
+      reverse_proxy localhost:${toString config.nixarr.sonarr.port}
+    '';
+  };
 }

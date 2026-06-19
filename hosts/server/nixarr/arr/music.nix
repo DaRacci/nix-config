@@ -37,8 +37,11 @@
     };
   };
 
-  server.proxy.virtualHosts.lidarr.extraConfig = ''
-    reverse_proxy localhost:${toString config.nixarr.lidarr.port}
-  '';
+  server.proxy.virtualHosts.lidarr = {
+    ports = [ config.nixarr.lidarr.port ];
+    extraConfig = ''
+      reverse_proxy localhost:${toString config.nixarr.lidarr.port}
+    '';
+  };
 
 }
