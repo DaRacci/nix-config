@@ -1,7 +1,7 @@
 # Server Cluster Monitoring
 
 The monitoring module provides a comprehensive observability stack for the server
-cluster using Prometheus (metrics), Loki (logs), Grafana (visualization), and
+cluster using Prometheus (metrics), Loki (logs), Tempo (traces), Grafana (visualization), and
 Grafana Alloy for authenticated OTLP ingestion.
 All components are configured as reusable NixOS modules with automatic
 cross-host discovery.
@@ -20,6 +20,7 @@ The system consists of three layers:
 1. **Collectors** (run on the monitoring primary host)
    - Prometheus for metrics aggregation with 90-day retention
    - Loki for log aggregation with 90-day retention
+   - Tempo for distributed trace storage with local storage backend
    - Alertmanager for alert routing and notifications
    - OTLP/HTTP ingestion on `otlp.<domain>` with bearer-token authentication
 
@@ -33,17 +34,18 @@ The system consists of three layers:
 ┌─────────────────────────────────────────────────────┐
 │                    nixmon (Monitoring Primary)      │
 │  ┌──────────┐  ┌──────┐  ┌─────────┐  ┌──────────┐  │
-│  │Prometheus│  │ Loki │  │ Grafana │  │Alertmgr  │  │
-│  │  :9090   │  │:3100 │  │  :3000  │  │  :9093   │  │
-│  └────┬──┬──┘  └──┬───┘  └─────────┘  └────┬─────┘  │
-│       │  │        │                        │        │
-│  ┌────┘  │   ┌────┘        ┌───────────────┘        │
-│  │ scrape│   │ push        │ webhooks               │
+│  │Prometheus│  │ Loki │  │ Tempo  │  │ Grafana │  │Alertmgr  │  │
+│  │  :9090   │  │:3100 │  │ :3200  │  │  :3000  │  │  :9093   │  │
+│  └────┬──┬──┘  └──┬───┘  └───┬───┘  └─────────┘  └────┬─────┘  │
+│       │  │        │          │                        │        │
+│  ┌────┘  │   ┌────┘          └────┐   ┌───────────────┘        │
+│  │ scrape│   │ push        traces │   │ webhooks               │
 ├──┼───────┼───┼─────────────┼────────────────────────┤
 │  ▼       ▼   ▼             ▼                        │
 │  All servers:          Home Assistant / Nextcloud   │
 │  - node_exporter :9100                              │
 │  - alloy → Loki                                     │
+│  - alloy → Tempo                                    │
 │  - OTLP/HTTP → Alloy :4318                          │
 │  - caddy metrics :2019 (if proxy configured)        │
 │  - postgres_exporter :9187 (if postgres configured) │
@@ -115,11 +117,15 @@ The module configures four virtual hosts on nixmon:
 | ---------- | --------------------- | ----------------------------- |
 | Grafana    | `grafana.<domain>`    | Public                        |
 | OTLP       | `otlp.<domain>`       | Public, bearer token required |
+| Tempo      | `tempo.<domain>`      | LAN                           |
 | Prometheus | `prometheus.<domain>` | LAN                           |
 | Loki       | `loki.<domain>`       | LAN                           |
 
-Grafana remains protected by the existing Kanidm-backed login flow. The OTLP
-ingestion endpoint is intended for machine-to-machine clients and requires an
+Grafana remains protected by the existing Kanidm-backed login flow.
+Tempo is a LAN-only service and does not expose its query API publicly;
+Grafana proxies queries to Tempo on the backend.
+
+The OTLP ingestion endpoint is intended for machine-to-machine clients and requires an
 `Authorization: Bearer <token>` header on every request. The exposed OTLP/HTTP
 paths are the standard `/v1/metrics` and `/v1/logs` endpoints.
 
@@ -154,6 +160,7 @@ modules/nixos/server/monitoring/
 │   ├── prometheus.nix       # Prometheus server + scrape targets
 │   ├── loki.nix             # Loki server + storage config
 │   ├── grafana.nix          # Grafana + Kanidm OAuth2
+│   ├── tempo.nix            # Tempo distributed tracing
 │   ├── otlp.nix             # OTLP ingestion
 │   ├── alerting.nix         # Alertmanager + alert rules
 │   └── dashboards.nix       # Dashboard provisioning
@@ -178,6 +185,7 @@ On the monitoring host (nixmon):
 ```sh
 systemctl status prometheus.service
 systemctl status loki.service
+systemctl status tempo.service
 systemctl status grafana.service
 systemctl status prometheus-alertmanager.service
 systemctl status prometheus-pve-exporter.service

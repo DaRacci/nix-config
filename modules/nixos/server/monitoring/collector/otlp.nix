@@ -13,6 +13,8 @@ let
   cfg = config.server.monitoring;
   domain = getIOPrimaryHostAttr "server.proxy.domain";
   listenAddress = "0.0.0.0";
+
+  tempoEnabled = cfg.collector.tempo.enable or false;
 in
 {
   config = mkIf (cfg.enable && cfg.collector.enable && cfg.collector.otlp.enable) {
@@ -50,6 +52,14 @@ in
           forward_to = [loki.write.default.receiver]
         }
 
+        ${if tempoEnabled then ''
+        otelcol.exporter.otlphttp "tempo" {
+          client {
+            url = "http://127.0.0.1:${toString cfg.collector.tempo.otlpPort}"
+          }
+        }
+        '' else ""}
+
         otelcol.receiver.otlp "default" {
           http {
             endpoint = "0.0.0.0:${toString cfg.collector.otlp.port}"
@@ -59,7 +69,7 @@ in
           output {
             metrics = [otelcol.exporter.prometheus.otlp.input]
             logs    = [otelcol.exporter.loki.otlp.input]
-            traces  = [ ]
+            traces  = [${if tempoEnabled then "otelcol.exporter.otlphttp.tempo.input" else ""}]
           }
         }
       '';
