@@ -292,6 +292,14 @@ in
           discord = {
             auto_thread = true;
           };
+
+          platforms.webhook = {
+            enabled = true;
+            extra = {
+              port = 8644;
+              rate_limit = 30;
+            };
+          };
         };
       };
     })
