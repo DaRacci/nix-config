@@ -52,13 +52,18 @@ in
           forward_to = [loki.write.default.receiver]
         }
 
-        ${if tempoEnabled then ''
-        otelcol.exporter.otlphttp "tempo" {
-          client {
-            url = "http://127.0.0.1:${toString cfg.collector.tempo.otlpPort}"
-          }
+        ${
+          if tempoEnabled then
+            ''
+              otelcol.exporter.otlphttp "tempo" {
+                client {
+                  url = "http://127.0.0.1:${toString cfg.collector.tempo.otlpPort}"
+                }
+              }
+            ''
+          else
+            ""
         }
-        '' else ""}
 
         otelcol.receiver.otlp "default" {
           http {

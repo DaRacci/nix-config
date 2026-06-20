@@ -8,7 +8,7 @@
   ...
 }:
 let
-  inherit (lib) mkIf toUpper;
+  inherit (lib) mkIf;
 
   cfg = config.server.monitoring;
   domain = getIOPrimaryHostAttr "server.proxy.domain";
@@ -72,8 +72,7 @@ in
       secrets."${cfg.collector.tempo.minioSecretKeySecret}" = { };
     };
 
-    systemd.services.tempo.serviceConfig.EnvironmentFile =
-      config.sops.templates.tempoEnvironment.path;
+    systemd.services.tempo.serviceConfig.EnvironmentFile = config.sops.templates.tempoEnvironment.path;
 
     server.dashboard.items.tempo = {
       title = "Tempo";
