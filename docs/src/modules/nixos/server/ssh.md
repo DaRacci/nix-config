@@ -70,7 +70,7 @@ This is particularly useful for automated scripts or troubleshooting scenarios w
 
 ### Guard Mechanism
 
-The auto-entry script uses the `SSH_NIX_SHELL` environment variable to prevent recursive shell entries. It instantiates shell file with `nix-instantiate`, realizes that derivation while registering an indirect GC root under `/nix/var/nix/gcroots/per-user/root/ssh-shell-result`, links that result into `/nix/var/nix/gcroots/per-user/root/ssh-shell`, and then execs fish from realized shell output. If that fails, system falls back to default shell, clears guard, and prints stderr message.
+The auto-entry script uses the `SSH_NIX_SHELL` environment variable to prevent recursive shell entries. It runs `nix-shell --add-root --indirect` to build and enter the environment in a single call (pinning a GC root under `/nix/var/nix/gcroots/per-user/root/ssh-shell-result`), which triggers the `shellHook` and exec's Fish. If that fails, the system falls back to the default shell, clears the guard, and prints a message to stderr.
 
 ## References
 

@@ -47,11 +47,9 @@ in
         profile_link=/nix/var/nix/gcroots/per-user/root/ssh-shell-result
 
         if shell_drv=$(nix-instantiate "${cfg.shellFile}") && \
-          shell_path=$(nix-store --add-root "$profile_link" --indirect --realise "$shell_drv" 2>/dev/null | tail -n1); then
+          nix-store --add-root "$profile_link" --indirect --realise "$shell_drv" >/dev/null; then
           ln -sfn "$profile_link" "$profile_root"
-          if [ -x "$shell_path/bin/fish" ]; then
-            exec "$shell_path/bin/fish" -C "source $shell_path"
-          fi
+          exec nix-shell "${cfg.shellFile}"
         fi
 
         echo "SSH devShell failed to start; continuing with default shell." >&2

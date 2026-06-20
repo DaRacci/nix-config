@@ -52,9 +52,10 @@ pkgs.mkShellNoCC {
     hyfetch
   ];
 
-  # Configure the interactive session. This runs when the shell starts.
+  # Configure the interactive session. Runs when nix-shell evaluates this.
+  # exec replaces the shellHook subprocess with fish, keeping it as the
+  # interactive session until the user exits.
   shellHook = ''
-    fish -C 'source ${fishInit}'
-    exit
+    exec fish -C 'source ${fishInit}'
   '';
 }
