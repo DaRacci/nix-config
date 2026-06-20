@@ -3,6 +3,9 @@
   lib,
   ...
 }:
+let
+  cfg = config.services.ai-agent;
+in
 {
   sops = {
     secrets = {
@@ -21,9 +24,27 @@
     };
   };
 
-  server.proxy.virtualHosts.agent.extraConfig = ''
+server.proxy.virtualHosts.agent = {
+  ports = [
+    cfg.apiServer.port
+    cfg.dashboard.port
+    config.services.hermes-agent.webhooks.port
+  ];
+
+  extraConfig = ''
+    redir/v1 /v1/
+    path /v1* {
+       reverse_proxy localhost:${toString config.services.ai-agent.apiServer.port}
+    }
+
+    redir /webhook /webhook/
+    path /webhook* {
+      reverse_proxy localhost:${toString config.services.ai-agent.platform.discord.port}
+    }
+
     reverse_proxy localhost:${toString config.services.ai-agent.dashboard.port}
   '';
+};
 
   services = {
     ai-agent = {
