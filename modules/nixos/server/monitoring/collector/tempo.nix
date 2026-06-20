@@ -41,7 +41,7 @@ in
         storage.trace = {
           backend = "s3";
           s3 = {
-            endpoint = "minio.${domain}:9000";
+            endpoint = "minio.${domain}:443";
             bucket = "tempo";
             insecure = false;
           };
