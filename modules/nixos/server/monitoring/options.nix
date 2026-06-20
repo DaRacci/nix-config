@@ -108,6 +108,18 @@ in
           default = 4319;
           description = "Port for Tempo's OTLP HTTP receiver. Must not conflict with the Alloy OTLP receiver port (default 4318).";
         };
+
+        minioAccessKeySecret = mkOption {
+          type = str;
+          default = "MONITORING/TEMPO/MINIO_ACCESS_KEY";
+          description = "SOPS secret path for the MinIO access key used by Tempo.";
+        };
+
+        minioSecretKeySecret = mkOption {
+          type = str;
+          default = "MONITORING/TEMPO/MINIO_SECRET_KEY";
+          description = "SOPS secret path for the MinIO secret key used by Tempo.";
+        };
       };
 
       grafana = {

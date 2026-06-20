@@ -1,4 +1,5 @@
 {
+  getIOPrimaryHostAttr,
   ...
 }:
 {
@@ -7,9 +8,10 @@
   ...
 }:
 let
-  inherit (lib) mkIf;
+  inherit (lib) mkIf toUpper;
 
   cfg = config.server.monitoring;
+  domain = getIOPrimaryHostAttr "server.proxy.domain";
 in
 {
   config = mkIf (cfg.enable && cfg.collector.enable && cfg.collector.tempo.enable) {
@@ -37,8 +39,12 @@ in
         };
 
         storage.trace = {
-          backend = "local";
-          local.path = "/var/lib/tempo/blocks";
+          backend = "s3";
+          s3 = {
+            endpoint = "minio.${domain}:9000";
+            bucket = "tempo";
+            insecure = false;
+          };
           wal.path = "/var/lib/tempo/wal";
         };
 
@@ -47,20 +53,27 @@ in
         querier = { };
 
         metrics_generator = {
-          storage.path = "/var/lib/tempo/generated";
           registry.external_labels.source = "tempo";
+          storage.path = "/var/lib/tempo/generated";
         };
       };
     };
 
-    server.storage.swfsMount.tempo = {
-      backend = "minio";
-      mountLocation = "/var/lib/tempo";
-      uid = config.users.users.tempo.uid;
-      gid = config.users.groups.tempo.gid;
-      umask = 007;
-      requiredByServices = [ "tempo" ];
+    sops = {
+      templates.tempoEnvironment = {
+        content = lib.toShellVars {
+          AWS_ACCESS_KEY_ID = config.sops.placeholder."${cfg.collector.tempo.minioAccessKeySecret}";
+          AWS_SECRET_ACCESS_KEY = config.sops.placeholder."${cfg.collector.tempo.minioSecretKeySecret}";
+        };
+        restartUnits = [ "tempo.service" ];
+      };
+
+      secrets."${cfg.collector.tempo.minioAccessKeySecret}" = { };
+      secrets."${cfg.collector.tempo.minioSecretKeySecret}" = { };
     };
+
+    systemd.services.tempo.serviceConfig.EnvironmentFile =
+      config.sops.templates.tempoEnvironment.path;
 
     server.dashboard.items.tempo = {
       title = "Tempo";

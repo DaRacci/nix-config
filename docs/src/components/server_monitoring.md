@@ -20,7 +20,7 @@ The system consists of three layers:
 1. **Collectors** (run on the monitoring primary host)
    - Prometheus for metrics aggregation with 90-day retention
    - Loki for log aggregation with 90-day retention
-   - Tempo for distributed trace storage with local storage backend
+   - Tempo for distributed trace storage with MinIO S3 bucket backend
    - Alertmanager for alert routing and notifications
    - OTLP/HTTP ingestion on `otlp.<domain>` with bearer-token authentication
 
