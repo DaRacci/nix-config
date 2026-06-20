@@ -16,6 +16,7 @@ let
     mkOption
     ;
   inherit (lib.types)
+    int
     str
     port
     ;
