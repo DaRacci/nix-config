@@ -71,10 +71,8 @@
       url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
       inputs = {
         nixpkgs.follows = "nixpkgs";
-        jovian.follows = "jovian";
         home-manager.follows = "";
         flake-schemas.follows = "";
-        rust-overlay.follows = "";
       };
     };
     crtified-nur = {

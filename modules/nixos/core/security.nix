@@ -56,7 +56,7 @@ in
       ];
     };
 
-    systemd.user.extraConfig = "DefaultLimitNOFILE=${toString cfg.userLimit}";
+    systemd.user.settings.Manager.DefaultLimitNOFILE = cfg.userLimit;
 
     boot.kernel.sysctl = {
       "fs.file-max" = toString (cfg.userLimit * 4);

@@ -18,20 +18,6 @@ This module enables baseline security features such as `sudo-rs`, TPM2 support, 
 
 ---
 
-## Behaviour
-
-When enabled, module:
-
-- sets `security.protectKernelImage = true`,
-- enables `security.polkit`,
-- disables classic `sudo` and enables `security.sudo-rs.execWheelOnly`,
-- enables `security.tpm2`,
-- sets PAM `nofile` limit for all users to `core.security.userLimit`,
-- sets `systemd.user.extraConfig = "DefaultLimitNOFILE=<limit>"`, and
-- sets kernel sysctl `fs.file-max = 65536`.
-
----
-
 ## Usage Example
 
 ```nix

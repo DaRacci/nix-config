@@ -23,7 +23,6 @@ in
 
   config = mkIf cfg.enable {
     boot = {
-      bootspec.enable = mkForce true;
       loader.systemd-boot.enable = mkForce false;
 
       lanzaboote = {
