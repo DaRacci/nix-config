@@ -73,7 +73,7 @@
         "type": "github"
       }
     },
-    "hyprlandPlugins.hy3": {
+    "hy3": {
       "flake": false,
       "locked": {
         "narHash": "sha256-zvS7CSqvJVECR9rXqt+s7/KrFPIsPrkwtFPg2urcEU4=",
@@ -167,7 +167,7 @@
         "erosanix": "erosanix",
         "flake-parts": "flake-parts",
         "flake-utils": "flake-utils",
-        "hyprlandPlugins.hy3": "hyprlandPlugins.hy3",
+        "hy3": "hy3",
         "lix": "lix",
         "mcpo": "mcpo",
         "nix2container": "nix2container",
