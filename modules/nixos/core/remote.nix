@@ -13,6 +13,7 @@ let
     mkMerge
     mkOption
     optionalAttrs
+    attrsToLuaInlineArgs
     ;
   inherit (lib.types) str submodule;
 
@@ -205,16 +206,15 @@ in
         home-manager.sharedModules = [
           {
             wayland.windowManager.hyprland = {
-              custom-settings.permission.screenCopy = [ (lib.getExe pkgs.sunshine) ];
+              custom-settings.permission.screenCopy = [ pkgs.sunshine ];
               settings = {
-                on = [
-                  {
-                    _args = [
-                      "hyprland.start"
-                      (lib.generators.mkLuaInline "function() hl.exec_cmd('hyprctl output create headless') end")
-                    ];
-                  }
-                ];
+                on = attrsToLuaInlineArgs {
+                  "hyprland.start" = ''
+                    function()
+                      hl.exec_cmd('hyprctl output create headless')
+                    end
+                  '';
+                };
                 monitor = [
                   {
                     output = "HEADLESS-2";

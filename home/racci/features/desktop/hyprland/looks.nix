@@ -88,7 +88,6 @@ with lib;
           enabled = true;
           range = 4;
           render_power = 3;
-          color = mkForce "rgba(1a1a1aee)";
           offset = "0 2";
         };
 
@@ -131,7 +130,6 @@ with lib;
       };
     };
 
-    # curve renders via _args: hl.curve(name, { type = "bezier", points = { ... } })
     curve = [
       {
         _args = [
@@ -159,7 +157,6 @@ with lib;
       }
     ];
 
-    # animation entries with Lua field names: leaf, enabled, speed, bezier, style
     animation = [
       {
         leaf = "windowsIn";
@@ -234,7 +231,6 @@ with lib;
       }
     ];
 
-    # workspace_rule for smart-gaps (separate from custom-settings windowrule)
     workspace_rule = [
       {
         workspace = "w[tv1]";

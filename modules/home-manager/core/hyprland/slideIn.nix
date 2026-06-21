@@ -11,6 +11,8 @@ let
     mkIf
     getExe
     getExe'
+    listToAttrs
+    attrsToLuaInlineArgs
     ;
   inherit (lib.types)
     str
@@ -143,44 +145,47 @@ in
 
   config = mkIf (cfg != [ ]) {
     wayland.windowManager.hyprland = {
-      settings.on = map (app: {
-        _args = [
-          "hyprland.start"
-          (lib.generators.mkLuaInline "function() hl.exec_cmd('${mkExec app}') end")
-        ];
-      }) cfg;
+      settings = {
+        on = attrsToLuaInlineArgs {
+          "hyprland.start" = ''
+            function()
+              ${map (app: ''hl.exec_cmd("${mkExec app}")'') cfg |> lib.concatStringsSep "\n"}
+            end
+          '';
+        };
 
-      custom-settings.bind =
-        cfg
-        |> map (
-          item:
-          nameValuePair item.bind [
-            "exec"
-            (builtins.concatStringsSep " " [
-              invokeScript
-              item.class
-              item.exec
-              item.position
-              (
-                if (lib.hasAttrByPath [ "size" "width" ] item.rule) && item.rule.size.width != null then
-                  item.rule.size.width
-                else if (isEdgePosition item.position) then
-                  "33%"
-                else
-                  "20%"
-              )
-              (
-                if (lib.hasAttrByPath [ "size" "height" ] item.rule) && item.rule.size.height != null then
-                  item.rule.size.height
-                else if (isEdgePosition item.position) then
-                  "33%"
-                else
-                  "98%"
-              )
-            ])
-          ]
-        )
-        |> lib.listToAttrs;
+        bind =
+          cfg
+          |> map (
+            item:
+            nameValuePair item.bind ''hl.dsp.exec_cmd("${
+              builtins.concatStringsSep " " [
+                invokeScript
+                item.class
+                item.exec
+                item.position
+                (
+                  if (lib.hasAttrByPath [ "size" "width" ] item.rule) && item.rule.size.width != null then
+                    item.rule.size.width
+                  else if (isEdgePosition item.position) then
+                    "33%"
+                  else
+                    "20%"
+                )
+                (
+                  if (lib.hasAttrByPath [ "size" "height" ] item.rule) && item.rule.size.height != null then
+                    item.rule.size.height
+                  else if (isEdgePosition item.position) then
+                    "33%"
+                  else
+                    "98%"
+                )
+              ]
+            }")''
+          )
+          |> listToAttrs
+          |> attrsToLuaInlineArgs;
+      };
     };
   };
 }

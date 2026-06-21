@@ -21,20 +21,6 @@
           };
         };
 
-        trippleMonitor = {
-          matcher = [
-            { title = "^(Assetto Corsa)$"; }
-            { title = "^(AC2)$"; }
-          ];
-          rule = {
-            float = true;
-            center = true;
-            rounding = 0;
-            opacity = 1.0;
-            size = "7680x1440";
-          };
-        };
-
         popupModal = {
           matcher = [
             { class = "^(file_progress)$"; }
@@ -80,6 +66,9 @@
           rule = {
             center = true;
             float = true;
+            pin = true;
+            stayFocused = true;
+            noCloseFor = 250;
           };
         };
 

@@ -5,7 +5,12 @@
   lib,
   ...
 }:
-with lib;
+let
+  inherit (lib)
+    pipe
+    flatten
+    ;
+in
 {
   imports = [
     "${self}/home/racci/features/desktop/common"
@@ -13,7 +18,6 @@ with lib;
 
     ./actions.nix
     ./display.nix
-    ./input.nix
     ./lock-suspend.nix
     ./looks.nix
     ./menus
@@ -62,6 +66,7 @@ with lib;
   wayland.windowManager.hyprland = {
     systemd.enable = false;
     configType = "lua";
+    custom-settings.lua.enable = true;
 
     plugins = with pkgs.hyprlandPlugins; [
       hy3
@@ -75,97 +80,6 @@ with lib;
         hypr-dynamic-cursors
       ]
       |> map (plugin: "${plugin}/lib/lib${plugin.pname}.so");
-
-    custom-settings.bind = {
-      # Media transport: no modifiers
-      XF86AudioPause = {
-        action = [
-          "exec"
-          "${getExe config.services.playerctld.package} play-pause"
-        ];
-      };
-      XF86AudioPlay = {
-        action = [
-          "exec"
-          "${getExe config.services.playerctld.package} play-pause"
-        ];
-      };
-      XF86AudioNext = {
-        action = [
-          "exec"
-          "${getExe config.services.playerctld.package} next"
-        ];
-      };
-      XF86AudioPrev = {
-        action = [
-          "exec"
-          "${getExe config.services.playerctld.package} previous"
-        ];
-      };
-
-      # Window management via custom-settings.bind
-      "SUPER+Q" = {
-        action = [ "killactive" ];
-      };
-      "SUPER+SHIFT+F" = {
-        action = [ "fullscreen" ];
-      };
-      "SUPER+SHIFT+SPACE" = {
-        action = [ "togglefloating" ];
-      };
-
-      # Noctalia launcher/control-center/settings
-      "SUPER+SPACE" = {
-        action = [
-          "exec"
-          "noctalia msg panel-toggle launcher"
-        ];
-      };
-      "SUPER+S" = {
-        action = [
-          "exec"
-          "noctalia msg panel-toggle control-center"
-        ];
-      };
-      "SUPER+comma" = {
-        action = [
-          "exec"
-          "noctalia msg settings-toggle"
-        ];
-      };
-
-      # Volume & Brightness via Noctalia IPC
-      XF86AudioRaiseVolume = {
-        action = [
-          "exec"
-          "noctalia msg volume-up"
-        ];
-      };
-      XF86AudioLowerVolume = {
-        action = [
-          "exec"
-          "noctalia msg volume-down"
-        ];
-      };
-      XF86AudioMute = {
-        action = [
-          "exec"
-          "noctalia msg volume-mute"
-        ];
-      };
-      XF86MonBrightnessUp = {
-        action = [
-          "exec"
-          "noctalia msg brightness-up"
-        ];
-      };
-      XF86MonBrightnessDown = {
-        action = [
-          "exec"
-          "noctalia msg brightness-down"
-        ];
-      };
-    };
 
     settings = {
       config = {
@@ -278,22 +192,6 @@ with lib;
           ]
         );
       #endregion
-
-      # Mouse drag/resize via direct Lua hl.bind() with _args
-      bind = [
-        {
-          _args = [
-            "SUPER + mouse:272"
-            (generators.mkLuaInline "hl.dsp.window.drag()")
-          ];
-        }
-        {
-          _args = [
-            "SUPER + mouse:273"
-            (generators.mkLuaInline "hl.dsp.window.resize()")
-          ];
-        }
-      ];
     };
   };
 }

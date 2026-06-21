@@ -4,84 +4,39 @@ This page documents the custom Hyprland Home-Manager helper modules at:
 
 - `modules/home-manager/core/hyprland/`
 
-These modules extend `wayland.windowManager.hyprland` with a typed Nix API for binds, submaps, window rules, permissions, and slide-in popups targeting the HM-native Lua configuration format.
+These modules extend `wayland.windowManager.hyprland` with a typed Nix API for window rules, permissions, slide-in popups, input defaults, and Lua config generation targeting the HM-native Lua configuration format.
 
 The repo default (set in `home/shared/desktop/hyprland/default.nix`) uses `configType = "lua"`.
 
 In Lua mode, direct `settings.*` attr names must be Lua-safe identifiers. Use underscore-style names like `exec_once`, `window_rule`, and `workspace_rule` instead of dashed hyprlang names like `exec-once`.
 
-All `custom-settings.*` entries are rendered as typed Lua config attrsets:
+The module structure is:
 
-- `custom-settings.bind` entries become `settings.bind` entries with `hl.dsp.*` dispatcher expressions.
-- `custom-settings.submaps` entries become top-level `submaps` attrsets.
-- `custom-settings.windowrule` entries become `settings.window_rule` entries.
-- `custom-settings.permission` entries set `settings.permission` directly.
-- `custom-settings.slideIn` entries generate `custom-settings.bind` entries dynamically.
-
-Old dashed forms like `exec-once` stay valid only when passed through unchanged hyprlang/string config, not as direct Lua attr names.
-
-The camelCase custom module API remains consistent in Nix.
+```
+default.nix       # Top-level importer (imports all submodules)
+├── permission.nix   # custom-settings.permission
+├── slideIn.nix      # custom-settings.slideIn
+├── windowRule.nix   # custom-settings.windowrule
+├── input.nix        # settings.config defaults (cursor, binds, input, misc)
+├── lua.nix          # custom-settings.lua (Lua config generation)
+│   └── lua/binds.lua  # Default Lua bind template with @placeholder@ substitution
+└── types.nix        # Shared type definitions
+```
 
 ---
 
 ## Module Files
 
-### `default.nix`
+### `input.nix`
 
-Entry point that imports all sub-modules under `custom-settings`. Also imports `noctalia.nix` which adds Noctalia desktop shell integration (see below).
+Sets sensible default values under `settings.config` for cursor behavior, input device settings, keyboard binds, and misc Hyprland options. This module activates automatically when the Hyprland HM module is enabled — no `custom-settings` option is involved. Override any value via `settings.config.input.*` etc.
 
-### `bind.nix`
+Default config covers:
 
-Defines `custom-settings.bind` and `custom-settings.submaps`.
-
-Attribute set keyed by key combination (e.g. `"SUPER+T"`). Each entry accepts either an action list or a submodule with:
-
-- `keybind` (auto-derived from the attr name)
-- `modifiers` — list of flags (`"locked"`, `"release"`, `"repeat"`, `"longPress"`, `"nonConsuming"`, `"transparent"`, `"ignoreMods"`)
-- `action` — dispatcher name + args (e.g. `["exec", "kitty"]`)
-
-Short form:
-
-```nix
-custom-settings.bind = {
-  "SUPER+T" = [ "exec" "kitty" ];
-  "SUPER+Q" = [ "killactive" ];
-};
-```
-
-Submodule form with modifiers:
-
-```nix
-custom-settings.bind = {
-  "SUPER+SHIFT+Q" = {
-    modifiers = [ "repeat" ];
-    action = [ "resizeactive" "0 50" ];
-  };
-};
-```
-
-**`custom-settings.submaps`**: Attribute set of submap definitions. Each submap has:
-
-- `enter` — keybind to activate the submap
-- `reset` — keybind to return to the default submap (optional)
-- `binds` — same format as `custom-settings.bind`
-
-```nix
-custom-settings.submaps = {
-  resize = {
-    enter = "SUPER+R";
-    reset = [ "SUPER" "R" ];
-    binds = {
-      "SUPER+H" = [ "movewindow" "l" ];
-      "SUPER+L" = [ "movewindow" "r" ];
-      "SUPER+K" = [ "movewindow" "u" ];
-      "SUPER+J" = [ "movewindow" "d" ];
-    };
-  };
-};
-```
-
-Known dispatchers (`exec`, `submap`, `workspace`, `movetoworkspace`, `togglespecialworkspace`, `resizeactive`, `movefocus`, `movewindow`, `killactive`, `fullscreen`, `togglefloating`) map to `hl.dsp.*` Lua API calls. Unknown or plugin-provided dispatchers fall back to `hl.dsp.exec_cmd("hyprctl dispatch ...")`.
+- `cursor` — warp behavior, hardware cursors, inactivity timeout, hide-on-key-press
+- `binds` — workspace back-and-forth, allow workspace cycles, focus method
+- `input` — keyboard layout, follow-mouse, touchpad, sensitivity, accel profile
+- `misc` — DPMS on key/mouse events
 
 ### `windowRule.nix`
 
@@ -128,14 +83,68 @@ Defines `custom-settings.permission` for screen copy and plugin permission grant
 
 ```nix
 custom-settings.permission = {
-  screenCopy = [ "firefox" "obs" ];
-  plugin = [ "hyprscroller" ];
+  screenCopy = [ pkgs.firefox pkgs.obs ];
+  plugin = [ pkgs.hyprlandPlugins.hy3 ];
 };
 ```
 
 ### `slideIn.nix`
 
 Defines `custom-settings.slideIn` — a list of edge-sliding popup windows. Each entry configures a keybind, executable, window class, position (`left`/`right`/`top`/`bottom`/`edge`/`side`), and optional window rules. Uses `hdrop` for dropdown-style window management.
+
+### `lua.nix`
+
+Defines `custom-settings.lua` — the Lua config generation subsystem. Options:
+
+- **`enable`** (boolean, default `false`) — Enable pure Lua configuration files with Nix substitution support.
+
+- **`variables`** (attrs of `nullOr str`, default `{}`) — Key-value pairs for `@placeholder@` substitution in Lua source files. Each key `foo` replaces `@foo@` in all sourced Lua modules with the given value. Some variables are pre-populated automatically (see `applicationBinds` below). Common injected values include paths to `playerctl`, `wpctl`, `zenity`, `hyprshutdown`, and `uwsm-app`.
+
+- **`luaModules`** (list of paths, default `[ ./lua/binds.lua ]`) — Lua source files to copy into the Hyprland config directory and `require` from `init.lua`. Each file undergoes `@placeholder@` substitution using the `variables` attrset. The default list includes `lua/binds.lua`.
+
+- **`applicationBinds`** (attrs of `str`, default `{}`) — Application keybinds passed into Lua generation. Each attr key is bind string (for example `"SUPER+Return"`) and each attr value is command string. Rendered into `@applicationBinds@` as Lua table entries consumed by `binds.lua`:
+
+  ```nix
+  custom-settings.lua.applicationBinds = {
+    "SUPER + Return" = "${pkgs.kitty}/bin/kitty";
+    "SUPER + E" = "${pkgs.nautilus}/bin/nautilus";
+  };
+  ```
+
+  Generated Lua iterates over those table entries and creates `hl.bind(..., hl.dsp.exec_cmd(...))` calls for each bind/command pair.
+
+#### Lua bind pattern
+
+In `lua/binds.lua`, binds use the inline Lua expression pattern via `settings.bind` with `attrsToLuaInlineArgs`. The generated Lua calls `hl.bind(...)` with first-class dispatcher functions:
+
+```lua
+hl.bind("SUPER + Q", hl.dsp.window.kill())
+hl.bind("SUPER + SHIFT + SPACE", hl.dsp.window.float({ action = "toggle" }))
+hl.bind("ALT + R", hl.dsp.submap("resize"))
+hl.define_submap("resize", function()
+  hl.bind("ESCAPE", hl.dsp.submap("reset"))
+  -- ...
+end)
+```
+
+This pattern keeps bind and submap definitions inline in Lua. Submaps are defined via `hl.define_submap(name, fn)` alongside related `hl.bind(...)` calls.
+
+### `lua/binds.lua`
+
+The default Lua bind template at `modules/home-manager/core/hyprland/lua/binds.lua`. Uses `@placeholder@` substitution for dynamic injection:
+
+| Placeholder | Source | Description |
+|---|---|---|
+| `@applicationBinds@` | `custom-settings.lua.applicationBinds` | Auto-generated Lua table of app keybinds |
+| `@playerctl@` | Auto-injected | Path to `playerctl` binary |
+| `@wpctl@` | Auto-injected | Path to `wpctl` binary |
+| `@zenity@` | Auto-injected | Path to `zenity` binary |
+| `@hyprshutdown@` | Auto-injected | Path to `hyprshutdown` binary |
+| `@uwsmApp@` | Auto-injected | Path to `uwsm-app` helper |
+| `@DEFAULT_AUDIO_SINK@` | `custom-settings.lua.variables` | Audio sink name (default `null`) |
+| `@DEFAULT_AUDIO_SOURCE@` | `custom-settings.lua.variables` | Audio source name (default `null`) |
+
+Add `@custom@` placeholders by extending `custom-settings.lua.variables`.
 
 ### `noctalia.nix`
 
@@ -166,6 +175,7 @@ Workspace rules in the user config now set `persistent = true` for defined works
 
 Look settings are tuned toward Noctalia documentation recommendations: `gaps_in = 5`, `gaps_out = 10`, `rounding_power = 2`, shadow range/render/color tuned, and blur size/passes/vibrancy adjusted.
 
+
 ### `types.nix`
 
 Shared type definitions used across the modules:
@@ -186,21 +196,6 @@ Shared type definitions used across the modules:
     configType = "lua";
 
     custom-settings = {
-      bind = {
-        "SUPER+T" = [ "exec" "kitty" ];
-        "SUPER+W" = [ "exec" "firefox" ];
-        "SUPER+Q" = [ "killactive" ];
-      };
-
-      submaps.resize = {
-        enter = "SUPER+R";
-        reset = [ "SUPER" "R" ];
-        binds = {
-          "SUPER+H" = [ "movewindow" "l" ];
-          "SUPER+L" = [ "movewindow" "r" ];
-        };
-      };
-
       windowrule."kitty-floating" = {
         matcher = [ { class = "kitty"; } ];
         rule = {
@@ -211,7 +206,15 @@ Shared type definitions used across the modules:
       };
 
       permission = {
-        screenCopy = [ "firefox" ];
+        screenCopy = [ pkgs.firefox ];
+      };
+
+      lua = {
+        enable = true;
+        applicationBinds = {
+          "SUPER + Return" = "${pkgs.kitty}/bin/kitty";
+          "SUPER + E" = "${pkgs.nautilus}/bin/nautilus";
+        };
       };
     };
   };
@@ -223,5 +226,6 @@ Shared type definitions used across the modules:
 ## Notes
 
 - All options live under `custom-settings` to avoid collision with upstream HM Hyprland options.
-- Unknown dispatchers fall back to `hyprctl dispatch` via `hl.dsp.exec_cmd`.
+- `lua.nix` auto-injects `applicationBinds`, `playerctl`, `wpctl`, `zenity`, `hyprshutdown`, and `uwsmApp` as substitution variables — no need to set those manually.
+- Unknown dispatchers in Lua raises a runtime error from Hyprland's Lua parser, not a build-time error.
 - CamelCase naming in Nix (e.g. `fullscreenState`, `idleInhibit`, `keepAspectRatio`, `noCloseFor`, `forceRgbx`, `syncFullscreen`) is translated to snake_case in the Lua output.

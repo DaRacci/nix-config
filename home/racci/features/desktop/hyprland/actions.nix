@@ -5,11 +5,13 @@
   ...
 }:
 let
+  inherit (lib) getExe concatStringsSep attrsToLuaInlineArgs;
+
   tessdata = pkgs.stdenv.mkDerivation {
     name = "tessdata-multilang";
     buildCommand = ''
       mkdir $out
-      ${lib.concatStringsSep "\n" (
+      ${concatStringsSep "\n" (
         map (lang: "cp ${lang} $out/${lang.name}") (
           with pkgs.tesseract.passthru.languages;
           [
@@ -22,7 +24,7 @@ let
     '';
   };
 
-  ocrRegion = lib.getExe (
+  ocrRegion = getExe (
     pkgs.writeShellApplication {
       name = "ocrRegion";
       runtimeInputs = [
@@ -70,7 +72,7 @@ let
     }
   );
 
-  screenshot = lib.getExe (
+  screenshot = getExe (
     pkgs.writeShellApplication {
       name = "screenshot";
       runtimeInputs = [
@@ -116,7 +118,7 @@ let
   );
 
   # TODO: Allow zooming in and out with mouse wheel
-  colourPicker = lib.getExe (
+  colourPicker = getExe (
     pkgs.writeShellApplication {
       name = "colourPicker";
       runtimeInputs = with pkgs; [
@@ -136,36 +138,26 @@ let
 in
 {
   wayland.windowManager.hyprland = {
-    custom-settings.permission.screenCopy =
-      [
-        pkgs.grim
-        pkgs.hyprpicker
-        pkgs.slurp
-      ]
-      |> map (exe: lib.getExe exe);
+    custom-settings.permission.screenCopy = [
+      pkgs.grim
+      pkgs.hyprpicker
+      pkgs.slurp
+    ];
 
-    custom-settings.bind = {
-      # OCR
-      "SUPER+SHIFT+T" = [
-        "exec"
-        "${ocrRegion}"
-      ];
+    settings.bind = attrsToLuaInlineArgs {
+      "SUPER+SHIFT+T" = ''hl.dsp.exec_cmd("${ocrRegion}")'';
+      "SUPER+SHIFT+C" = ''hl.dsp.exec_cmd("${colourPicker}")'';
+      "Print" = ''hl.dsp.exec_cmd("${screenshot} area")'';
+      "SUPER+Print" = ''hl.dsp.exec_cmd("${screenshot} output")'';
+      "CTRL+SHIFT+ALT+Delete" =
+        ''hl.dsp.exec_cmd("pkill ${pkgs.wlogout}/bin/wlogout || ${pkgs.wlogout}/bin/wlogout -p layer-shell")'';
+      "CTRL+SHIFT+SPACE" = ''hl.dsp.exec_cmd("${pkgs._1password-gui}/bin/1password --quick-access")'';
+    };
 
-      # Color Picker
-      "SUPER+SHIFT+C" = [
-        "exec"
-        "${colourPicker}"
-      ];
-
-      # Screenshot
-      "Print" = [
-        "exec"
-        "${screenshot} area"
-      ];
-      "SUPER+Print" = [
-        "exec"
-        "${screenshot} output"
-      ];
+    custom-settings.lua.applicationBinds = {
+      "SUPER+T" = "${pkgs.alacritty}/bin/alacritty";
+      "SUPER+F" = "${pkgs.firefox}/bin/firefox";
+      "SUPER+SHIFT+E" = "${pkgs.nautilus}/bin/nautilus --new-window";
     };
   };
 }

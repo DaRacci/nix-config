@@ -1,7 +1,6 @@
 {
   config,
   pkgs,
-  lib,
   ...
 }:
 {
@@ -55,10 +54,6 @@
       };
     };
 
-    custom-settings.bind."CTRL+SHIFT+SPACE" = [
-      "exec"
-      "${lib.getExe pkgs._1password-gui} --quick-access"
-    ];
   };
 
   programs.gpg.enable = true;

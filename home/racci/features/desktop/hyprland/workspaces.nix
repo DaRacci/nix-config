@@ -29,7 +29,7 @@ let
     };
     "4" = {
       name = "Social";
-      monitor = monitors.center;
+      monitor = monitors.right;
       startup = [ (lib.getExe pkgs.discord) ];
     };
     "5" = {
@@ -47,7 +47,7 @@ let
     };
     "8" = {
       name = "Gaming";
-      monitor = monitors.left;
+      monitor = monitors.center;
     };
     "9" = {
       name = "Miscellaneous";

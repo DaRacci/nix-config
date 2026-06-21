@@ -1,7 +1,6 @@
 {
   imports = [
     ./popups.nix
-    ./session.nix
     ./vicinae.nix
   ];
 

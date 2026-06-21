@@ -14,8 +14,6 @@ let
 
   cfg = config.wayland.windowManager.hyprland.custom-settings;
 
-  # --- Lua renderers ---
-
   # Ordered string from known keys, filtering null fields so partial structs don't emit junk
   compoundStr =
     keys: v:

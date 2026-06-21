@@ -13,8 +13,8 @@
     uwsm.enable = true;
     hyprland = {
       enable = true;
-      withUWSM = true;
       package = pkgs.hyprland;
+      withUWSM = true;
       portalPackage = pkgs.xdg-desktop-portal-hyprland;
     };
   };

@@ -20,7 +20,9 @@
     xwayland.enable = true;
     systemd.enable = false;
 
-    custom-settings.permission.screenCopy = [ "${portalPackage}/libexec/xdg-desktop-portal-hyprland" ];
+    custom-settings.permission.screenCopy = [
+      "${portalPackage}/libexec/.xdg-desktop-portal-hyprland-wrapped"
+    ];
   };
 
   xdg.portal = {

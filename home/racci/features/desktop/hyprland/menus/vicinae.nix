@@ -1,7 +1,11 @@
 {
   pkgs,
+  lib,
   ...
 }:
+let
+  inherit (lib) attrsToLuaInlineArgs;
+in
 {
   programs.vicinae = {
     enable = true;
@@ -66,15 +70,9 @@
     ];
   };
 
-  wayland.windowManager.hyprland.custom-settings.bind = {
-    "CTRL+ALT+SPACE" = [
-      "exec"
-      "vicinae toggle"
-    ];
-    "SUPER+V" = [
-      "exec"
-      "vicinae vicinae://extensions/vicinae/clipboard/history"
-    ];
+  wayland.windowManager.hyprland.settings.bind = attrsToLuaInlineArgs {
+    "CTRL + ALT + SPACE" = ''hl.dsp.exec_cmd("vicinae toggle")'';
+    "SUPER + V" = ''hl.dsp.exec_cmd("vicinae vicinae://extensions/vicinae/clipboard/history")'';
   };
 
   user.persistence.directories = [

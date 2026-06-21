@@ -13,7 +13,7 @@ let
 
   simpleImport = path: import path { inherit inputs lib; };
 in
-{
+rec {
   mine = {
     attrsets = simpleImport ./attrsets.nix;
     files = simpleImport ./files.nix;
@@ -36,6 +36,33 @@ in
   };
 
   builders = import ./builders { inherit inputs lib; };
+
+  /*
+    Convert a list of arguments to a lua arguments.
+
+    Each argument is processed using `lib.generators.mkLuaInline` to ensure its kept raw and properly escaped for Lua.
+    The resulting list of processed arguments is stored in the `_args` attribute of the returned attribute set.
+  */
+  recursiveLuaInline = args: {
+    _args = map lib.generators.mkLuaInline args;
+  };
+
+  /*
+    Convert attribute set to lua arguments.
+
+    Attribute name becomes quoted Lua string literal. Attribute value stays raw Lua expression.
+  */
+  attrsToLuaInlineArgs =
+    attrs:
+    let
+      processAttr = name: value: {
+        _args = [
+          (lib.generators.mkLuaInline (builtins.toJSON name))
+          (lib.generators.mkLuaInline value)
+        ];
+      };
+    in
+    lib.mapAttrs processAttr attrs |> lib.attrValues;
 
   /*
     Filters an input list to items that are not null,
