@@ -6,7 +6,10 @@
 {
   imports = [ ./features/cli ];
 
-  home.packages = [ inputs.nix-alien.packages.${pkgs.stdenv.hostPlatform.system}.nix-alien ];
+  home.packages = [
+    inputs.nix-alien.packages.${pkgs.stdenv.hostPlatform.system}.nix-alien
+    inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.desktop
+  ];
 
   sops.secrets.LOCATION = { };
 

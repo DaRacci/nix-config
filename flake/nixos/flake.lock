@@ -151,15 +151,16 @@
         "uv2nix": "uv2nix_2"
       },
       "locked": {
-        "lastModified": 1782030208,
-        "narHash": "sha256-+gEgVD13D7QMX79SDfGr6sbrQfzrijdczxfLbOaeN5w=",
-        "owner": "NousResearch",
+        "lastModified": 1781982965,
+        "narHash": "sha256-8MFMJS8tYqQ881DbMsUS6zs75+hPwqxBNz2ZRuo5VT8=",
+        "owner": "liuhao1024",
         "repo": "hermes-agent",
-        "rev": "f57ff7aef1d3d447e159511f3a3e9ed8ae0c7298",
+        "rev": "effa2e47cccc43d21750a68934f4f3c76ae696c2",
         "type": "github"
       },
       "original": {
-        "owner": "NousResearch",
+        "owner": "liuhao1024",
+        "ref": "fix/48628-lazy-deps-managed-check",
         "repo": "hermes-agent",
         "type": "github"
       }
