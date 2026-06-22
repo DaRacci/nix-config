@@ -13,7 +13,6 @@ let
     mkIf
     mkMerge
     mkOption
-    mkDefault
     mkEnableOption
     toShellVars
     concatStringsSep
@@ -372,8 +371,8 @@ in
           };
 
           memory = {
-            memory_enabled = mkDefault true;
-            user_profile_enabled = mkDefault true;
+            memory_enabled = true;
+            user_profile_enabled = true;
           };
 
           privacy.redact_pii = true;
@@ -443,12 +442,16 @@ in
 
     (mkIf (cfg.enable && cfg.memory.enable) {
       services.hermes-agent = {
+        extraPythonPackages = [
+          pkgs.mnemosyne-memory
+          pkgs.mnemosyne-hermes
+        ];
         settings = {
           memory = {
-            provider = "byterover";
-            memory_enabled = true;
+            provider = "mnemosyne";
+            memory_enabled = false;
+            user_profile_enabled = false;
           };
-          user_profile_enabled = false;
         };
       };
     })

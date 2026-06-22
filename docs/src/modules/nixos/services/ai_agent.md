@@ -90,3 +90,18 @@ The dashboard uses a **public PKCE client** (no client_secret). The client ID is
 ```
 
 The module generates a `HERMES_DASHBOARD_OIDC_ENV` environment file with the OIDC settings, which is loaded by the `hermes-dashboard` service.
+
+### Memory (Mnemosyne)
+
+Enable long-term memory with `services.ai-agent.memory.enable = true;`. This switches the memory provider from the built-in user profile (USER.md injection) to **Mnemosyne**, a local SQLite-backed memory system with semantic recall.
+
+```nix
+{ ... }: {
+  services.ai-agent = {
+    enable = true;
+    memory.enable = true;
+  };
+}
+```
+
+**Database location:** `$HERMES_HOME/mnemosyne.db` (SQLite with FTS5 hybrid ranking + vector search).
