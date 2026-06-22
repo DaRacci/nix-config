@@ -24,41 +24,42 @@ let
     nonEmptyListOf
     ;
 
-  kanidmContextOptions = _: {
-    options = {
-      authDomain = mkOption {
-        type = nullOr str;
-        default = null;
-        example = "auth.example.com";
-        description = "The domain where Kanidm is hosted. Defaults to auth.<server.proxy.domain> if not specified.";
-      };
+  commonKanidmOptions = {
+    authDomain = mkOption {
+      type = nullOr str;
+      default = null;
+      example = "auth.example.com";
+      description = ''
+        The domain where Kanidm is hosted.
+        Defaults to auth.<server.proxy.domain> if not specified.
+      '';
+    };
 
-      scopes = mkOption {
-        type = listOf str;
-        default = [
-          "openid"
-          "email"
-          "profile"
-          "groups"
-        ];
-        description = "OAuth scopes to request from Kanidm.";
-      };
+    scopes = mkOption {
+      type = listOf str;
+      default = [
+        "openid"
+        "email"
+        "profile"
+        "groups"
+      ];
+      description = "OAuth scopes to request from Kanidm.";
+    };
 
-      tokenLifetime = mkOption {
-        type = int;
-        default = 3600;
-        description = "Token lifetime in seconds for the authentication portal.";
-      };
+    tokenLifetime = mkOption {
+      type = int;
+      default = 3600;
+      description = "Token lifetime in seconds for the authentication portal.";
+    };
 
-      allowGroups = mkOption {
-        type = listOf str;
-        default = [ ];
-        example = [
-          "idm_all_persons@auth.racci.dev"
-          "admins@auth.racci.dev"
-        ];
-        description = "Default list of Kanidm groups allowed to access virtualHosts using this context.";
-      };
+    allowGroups = mkOption {
+      type = listOf str;
+      default = [ ];
+      example = [
+        "idm_all_persons@auth.racci.dev"
+        "admins@auth.racci.dev"
+      ];
+      description = "Default list of Kanidm groups allowed to access virtualHosts using this context.";
     };
   };
 in
@@ -85,7 +86,9 @@ in
           };
         }
       '';
-      type = attrsOf (submodule kanidmContextOptions);
+      type = attrsOf (submodule {
+        options = commonKanidmOptions;
+      });
     };
 
     virtualHosts = mkOption {
@@ -179,39 +182,11 @@ in
                 default = null;
                 description = "Enable Kanidm OAuth2 authentication for this virtual host.";
                 type = nullOr (submodule {
-                  options = {
+                  options = commonKanidmOptions // {
                     context = mkOption {
                       type = str;
                       default = subdomain;
                       description = "The OAuth context name for this virtual host.";
-                    };
-
-                    authDomain = mkOption {
-                      type = nullOr str;
-                      default = null;
-                      example = "auth.example.com";
-                      description = "The domain where Kanidm is hosted.";
-                    };
-
-                    scopes = mkOption {
-                      type = nullOr (listOf str);
-                      default = null;
-                      example = [
-                        "openid"
-                        "email"
-                        "profile"
-                        "groups"
-                      ];
-                      description = "OAuth scopes to request from Kanidm.";
-                    };
-
-                    allowGroups = mkOption {
-                      type = listOf str;
-                      example = [
-                        "idm_all_persons@auth.racci.dev"
-                        "admins@auth.racci.dev"
-                      ];
-                      description = "List of Kanidm groups allowed to access this virtual host.";
                     };
 
                     bypassPaths = mkOption {
@@ -222,13 +197,6 @@ in
                         "/api/webhooks/*"
                       ];
                       description = "List of path patterns that should bypass authentication.";
-                    };
-
-                    tokenLifetime = mkOption {
-                      type = nullOr int;
-                      default = null;
-                      example = 7200;
-                      description = "Token lifetime in seconds for the authentication portal.";
                     };
                   };
                 });
