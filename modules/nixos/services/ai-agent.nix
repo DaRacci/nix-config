@@ -13,6 +13,7 @@ let
     mkIf
     mkMerge
     mkOption
+    mkDefault
     mkEnableOption
     toShellVars
     concatStringsSep
@@ -213,6 +214,21 @@ in
           "youtube"
         ];
 
+        #TODO:Need a way to auto update these.
+        extraPlugins = [
+          (pkgs.fetchFromGitHub {
+            owner = "FelineStateMachine";
+            repo = "hermes-openspec";
+            rev = "3cf148b1fcc8ee7ebaff307af88cc27869fc4cfd";
+            sha256 = "sha256-5vLw5Y3Sz5DCwdc8mhUBOKWAF+i+dwAcL2sqWD96ANg=";
+          })
+        ];
+
+        environment = {
+          BASH_ENV = "/home/hermes/.bashrc";
+          HOME = "/home/hermes"; # For some reason this is getting set to /var/lib/hermes inside the container
+        };
+
         settings = {
           model = {
             base_url = "https://openrouter.ai/api/v1";
@@ -289,8 +305,8 @@ in
           };
 
           memory = {
-            memory_enabled = true;
-            user_profile_enabled = true;
+            memory_enabled = mkDefault true;
+            user_profile_enabled = mkDefault true;
           };
 
           privacy.redact_pii = true;
