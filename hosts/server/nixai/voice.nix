@@ -11,7 +11,7 @@
         uri = "tcp://0.0.0.0:10300";
         device = "auto";
         language = "auto";
-        model = "turbo";
+        model = "distil-small.en";
       };
     };
   };

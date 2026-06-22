@@ -16,6 +16,9 @@
   proton-mcp = pkgs.python3Packages.callPackage ./proton-mcp { };
   mcp-server-amazon = pkgs.callPackage ./mcp-server-amazon { };
 
+  # Wyoming STT Client for Hermes
+  wyoming-transcribe-client = pkgs.callPackage ./wyoming-transcribe-client { };
+
   # Misc
   orca-slicer-zink = pkgs.callPackage ./orca-slicer-zink { };
   huntress = pkgs.callPackage ./huntress { };

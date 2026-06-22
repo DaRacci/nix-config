@@ -36,6 +36,28 @@ services.hermes-agent.environmentFile = config.sops.templates."HERMES_ENV".path;
 }
 ```
 
+### Voice & STT
+
+Enable voice input and output with `services.ai-agent.voice.enable = true;`.
+
+#### Wyoming STT (Reuse Existing Server)
+
+Instead of running a separate Whisper instance inside the Hermes container, you can point Hermes at an existing Wyoming faster-whisper server (e.g. the one already running on nixai at port 10300):
+
+```nix
+{ ... }: {
+  services.ai-agent = {
+    enable = true;
+    voice = {
+      enable = true;
+      wyoming-stt.enable = true;
+    };
+  };
+}
+```
+
+This sets `HERMES_LOCAL_STT_COMMAND` to invoke `wyoming-transcribe`, which sends audio over the Wyoming protocol to the faster-whisper server and returns the transcript. No second Whisper process needed.
+
 ### Dashboard Service
 
 Enable the web dashboard with `services.ai-agent.dashboard.enable = true;`.

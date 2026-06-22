@@ -28,6 +28,9 @@
   services = {
     ai-agent = {
       enable = true;
+      memory.enable = true;
+      apiServer.enable = true;
+
       dashboard = {
         enable = true;
         publicURL = "https://agent.racci.dev";
@@ -39,9 +42,11 @@
           clientId = "hermes";
         };
       };
-      apiServer.enable = true;
-      voice.enable = true;
-      memory.enable = true;
+
+      voice = {
+        enable = true;
+        wyoming-stt.enable = true;
+      };
 
       platform = {
         discord = {
