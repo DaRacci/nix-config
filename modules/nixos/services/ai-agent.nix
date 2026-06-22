@@ -236,9 +236,13 @@ in
           };
 
           toolsets = [ "all" ];
-          cron.wrap_response = true;
           checkpoints.enabled = true;
           code_execution.mode = "project";
+
+          cron = {
+            script_timeout_seconds = 600;
+            wrap_response = true;
+          };
 
           agent = {
             max_turns = 150;
