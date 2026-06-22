@@ -50,4 +50,7 @@
   lix-woodpecker = pkgs.callPackage ./lix-woodpecker {
     inherit inputs;
   };
+
+  jj-desc = pkgs.callPackage ./jj-desc { };
+  jj-pre-push = pkgs.python3Packages.callPackage ./jj-pre-push { };
 }

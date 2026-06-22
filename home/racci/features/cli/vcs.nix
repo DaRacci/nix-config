@@ -3,10 +3,22 @@
   pkgs,
   ...
 }:
+let
+  jj-desc-wrapped = pkgs.writeShellScriptBin "jj-desc" ''
+    export LLM_MODEL="deepseek/deepseek-v4-flash"
+    export LLM_PROVIDER="openrouter"
+    export OPENROUTER_API_KEY="$(cat ${config.sops.secrets.OPENROUTER_API_KEY.path})"
+    exec ${pkgs.jj-desc}/bin/jj-desc "$@"
+  '';
+in
 {
+  sops.secrets.OPENROUTER_API_KEY = { };
+
   home.packages = [
     pkgs.meld
     pkgs.watchman
+    pkgs.jj-pre-push
+    jj-desc-wrapped
   ];
 
   programs = {
@@ -74,6 +86,18 @@
           immutable = "description('wip:*') | description('private:*')";
         };
 
+        aliases = {
+          push = [
+            "util"
+            "exec"
+            "--"
+            "bash"
+            "-c"
+            ''exec jj-pre-push --checker prek push "$@"''
+            ""
+          ];
+        };
+
         fsmonitor = {
           backend = "watchman";
           watchman.register-snapshot-trigger = true;
@@ -81,7 +105,47 @@
       };
     };
 
-    jjui.enable = true;
+    jjui = {
+      enable = true;
+      settings = {
+        actions = [
+          {
+            name = "jj-push";
+            lua = ''
+              jj_async("push")
+              revisions.refresh()
+            '';
+          }
+          {
+            name = "jj-push-selected";
+            lua = ''
+              jj_async("push", "-r", context.commit_id())
+              revisions.refresh()
+            '';
+          }
+        ];
+        bindings = [
+          {
+            action = "jj-push";
+            seq = [
+              "x"
+              "p"
+            ];
+            scope = "revisions";
+            desc = "jj push";
+          }
+          {
+            action = "jj-push-selected";
+            seq = [
+              "x"
+              "P"
+            ];
+            scope = "revisions";
+            desc = "jj push selected bookmark(s)";
+          }
+        ];
+      };
+    };
 
     delta = {
       enable = true;
