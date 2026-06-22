@@ -27,6 +27,10 @@
   hypr-gamemode = pkgs.callPackage ./hypr-gamemode { };
   uvtools = pkgs.callPackage ./uvtools { };
 
+  # Hermes Agent Python Plugins
+  mnemosyne-memory = pkgs.python3Packages.callPackage ./python/mnemosyne-memory.nix { };
+  mnemosyne-hermes = pkgs.python3Packages.callPackage ./python/mnemosyne-hermes.nix { };
+
   # Home Assistant Python Packages
   terminal-manager = pkgs.python3Packages.callPackage ./python/terminal-manager.nix { };
   ssh-terminal-manager = pkgs.python3Packages.callPackage ./python/ssh-terminal-manager.nix { };
