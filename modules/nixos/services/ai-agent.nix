@@ -83,7 +83,12 @@ in
     };
 
     memory = {
-      enable = mkEnableOption "long-term memory";
+      enable = mkEnableOption ''
+        long-term memory
+
+        When enabled this disables the builtin user profile and memory markdown features,
+        to nudge the agent towards using the configured long-term memory provider for all memory.
+      '';
     };
 
     apiServer = {
@@ -335,7 +340,13 @@ in
 
     (mkIf (cfg.enable && cfg.memory.enable) {
       services.hermes-agent = {
-        settings.memory.provider = "byterover";
+        settings = {
+          memory = {
+            provider = "byterover";
+            memory_enabled = true;
+          };
+          user_profile_enabled = false;
+        };
       };
     })
 
