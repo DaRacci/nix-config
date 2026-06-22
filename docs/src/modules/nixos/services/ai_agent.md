@@ -62,7 +62,7 @@ This sets `HERMES_LOCAL_STT_COMMAND` to invoke `wyoming-transcribe`, which sends
 
 Enable the web dashboard with `services.ai-agent.dashboard.enable = true;`.
 
-This adds a separate `hermes-dashboard` systemd service that runs `hermes dashboard --host 127.0.0.1 --no-open` under the `hermes` user. The dashboard stays local by default and does not open a browser.
+This adds a separate `hermes-dashboard` systemd service that runs `docker exec` into the `hermes-agent` container to serve the dashboard under the `hermes` user. Environment files configured via `services.hermes-agent.environmentFiles` are loaded by systemd's `EnvironmentFile` directive (read as root) and passed into the container via `docker exec --env-file`. The dashboard stays local by default and does not open a browser.
 
 ### OIDC Authentication
 

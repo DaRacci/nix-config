@@ -334,20 +334,24 @@ in
         description = "Hermes web dashboard";
         after = [
           "network.target"
+          "docker.service"
           "hermes-agent.service"
         ];
-        requires = [ "hermes-agent.service" ];
+        requires = [ "docker.service" ];
+        bindsTo = [ "hermes-agent.service" ];
         wantedBy = [ "multi-user.target" ];
         path = [ pkgs.docker ];
         serviceConfig = {
           Type = "simple";
           User = "hermes";
           Group = "hermes";
-          WorkingDirectory = "/var/lib/hermes";
-          ExecStart = "${config.services.hermes-agent.package}/bin/hermes dashboard --host 0.0.0.0 --no-open --port ${toString cfg.dashboard.port}";
+          EnvironmentFile = config.services.hermes-agent.environmentFiles;
+          PrivateTmp = true;
+          ExecStart = "${lib.getExe pkgs.bash} -c 'env > /tmp/hermes-dashboard.env; exec docker exec -u hermes --env-file /tmp/hermes-dashboard.env hermes-agent /data/current-package/bin/hermes dashboard --host 0.0.0.0 --no-open --port ${toString cfg.dashboard.port}'";
           Restart = "on-failure";
           RestartSec = 5;
           SupplementaryGroups = [ "docker" ];
+          ReadWritePaths = [ "/var/run/docker.sock" ];
         };
       };
 
