@@ -1,3 +1,5 @@
 {
-  "n8n": 0
+  "n8n": 0,
+  "firecrawl": 1,
+  "firecrawl-rate-limit": 2
 }

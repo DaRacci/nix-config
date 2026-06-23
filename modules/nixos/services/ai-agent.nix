@@ -105,6 +105,22 @@ in
       };
     };
 
+    firecrawl = {
+      enable = mkEnableOption "Firecrawl web extraction backend";
+
+      url = mkOption {
+        type = str;
+        default = "http://127.0.0.1:3002";
+        description = "URL of the local Firecrawl instance.";
+      };
+
+      apiKeyReference = mkOption {
+        type = str;
+        default = "AI_AGENT/FIRECRAWL_API_KEY";
+        description = "The sops secret attribute for the Firecrawl API key.";
+      };
+    };
+
     voice = {
       enable = mkEnableOption "voice input and output using the TTS and STT";
     };
@@ -351,6 +367,18 @@ in
       };
 
       services.hermes-agent.environmentFiles = [ config.sops.templates."HERMES_API_ENV".path ];
+    })
+
+    (mkIf (cfg.enable && cfg.firecrawl.enable) {
+      sops = {
+        secrets."${cfg.firecrawl.apiKeyReference}" = { };
+        templates."HERMES_FIRECRAWL_ENV".content = toShellVars {
+          FIRECRAWL_API_URL = cfg.firecrawl.url;
+          FIRECRAWL_API_KEY = config.sops.placeholder."${cfg.firecrawl.apiKeyReference}";
+        };
+      };
+
+      services.hermes-agent.environmentFiles = [ config.sops.templates."HERMES_FIRECRAWL_ENV".path ];
     })
 
     (mkIf (cfg.enable && cfg.voice.enable) {

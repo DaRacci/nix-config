@@ -4,43 +4,85 @@
   lib,
   ...
 }:
+let
+  db = config.server.database.postgres.open_webui;
+  sopsPlaceholder = config.sops.placeholder;
+
+in
 {
-  sops =
-    let
-      db = config.server.database.postgres.open_webui;
-      inherit (config.sops) placeholder;
-    in
-    {
-      templates.openweb-ui-env.content = lib.toShellVars {
-        DATABASE_URL = "postgresql://${db.user}:${
-          placeholder."POSTGRES/OPEN_WEBUI_PASSWORD"
-        }@${db.host}/${db.database}";
-      };
+  sops = {
+    templates.openweb-ui-env.content = lib.toShellVars {
+      DATABASE_URL = "postgresql://${db.user}:${
+        sopsPlaceholder."POSTGRES/OPEN_WEBUI_PASSWORD"
+
+      }@${db.host}/${db.database}";
     };
+  };
+
+  sops.secrets = {
+    "REDIS/PASSWORD" = { };
+    "FIRECRAWL/API_KEY" = { };
+    "FIRECRAWL/BULL_AUTH_KEY" = { };
+  };
 
   server = {
-    database.postgres.open_webui = { };
-    database.dependentServices = [ "open-webui" ];
+    database.postgres = {
+      open_webui = { };
+      firecrawl = { };
+    };
+    database.redis = {
+      firecrawl = { };
+      firecrawl-rate-limit = { };
+    };
+    database.dependentServices = [
+      "open-webui"
+      "firecrawl"
+    ];
     dashboard.items.ai = {
       title = "Open WebUI";
       icon = "sh-open-webui";
     };
 
-    proxy.virtualHosts.ai =
-      let
-        cfg = config.services.open-webui;
-      in
-      {
-        ports = [ cfg.port ];
+    proxy.virtualHosts = {
+      ai =
+        let
+          cfg = config.services.open-webui;
+        in
+        {
+          ports = [ cfg.port ];
+          extraConfig = ''
+            reverse_proxy http://${cfg.host}:${toString cfg.port} {
+              flush_interval -1
+            }
+          '';
+        };
+
+      firecrawl = {
+        ports = [ config.services.firecrawl.port ];
+        public = true;
+        kanidm = {
+          allowGroups = [ "cloud@auth.racci.dev" ];
+        };
         extraConfig = ''
-          reverse_proxy http://${cfg.host}:${toString cfg.port} {
-            flush_interval -1
-          }
+          reverse_proxy http://${config.services.firecrawl.host}:${toString config.services.firecrawl.port}
         '';
       };
+    };
+
   };
 
   services = {
+    firecrawl = {
+      enable = true;
+      host = "127.0.0.1";
+      openFirewall = false;
+      bullAuthKeyFile = config.sops.secrets."FIRECRAWL/BULL_AUTH_KEY".path;
+      openrouter = {
+        enable = true;
+        apiKeyFile = config.sops.secrets."AI_AGENT/OPENROUTER_API_KEY".path;
+      };
+    };
+
     open-webui = {
       enable = true;
       host = "0.0.0.0";

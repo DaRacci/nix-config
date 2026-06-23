@@ -78,6 +78,17 @@ Requesting a PostgreSQL database for a service:
 }
 ```
 
+Services may declare multiple databases in one block:
+
+```nix
+{
+  server.database.postgres = {
+    open_webui = { };
+    firecrawl = { };
+  };
+}
+```
+
 ### Redis Example (`redis.nix`)
 
 Requesting a Redis database:

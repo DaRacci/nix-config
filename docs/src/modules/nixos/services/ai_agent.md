@@ -36,6 +36,29 @@ services.hermes-agent.environmentFile = config.sops.templates."HERMES_ENV".path;
 }
 ```
 
+### Firecrawl Integration
+
+Enable Firecrawl as the web extraction backend. The module injects `FIRECRAWL_API_URL` and `FIRECRAWL_API_KEY` into the Hermes agent environment.
+
+You can reuse an existing `FIRECRAWL/API_KEY` sops secret by pointing `apiKeyReference` at it, avoiding duplicate secrets:
+
+```nix
+{ ... }: {
+  services.ai-agent = {
+    enable = true;
+    firecrawl = {
+      enable = true;
+      # Reuse secret declared elsewhere (e.g. in web.nix)
+      apiKeyReference = "FIRECRAWL/API_KEY";
+    };
+  };
+}
+```
+
+If you want a dedicated secret, omit `apiKeyReference` and it defaults to `AI_AGENT/FIRECRAWL_API_KEY`. The module will create that sops secret automatically.
+
+`url` (mapped to `FIRECRAWL_API_URL`) defaults to `http://127.0.0.1:3002` (local Firecrawl). Override if Firecrawl lives elsewhere:
+
 ### Dashboard Service
 
 Enable the web dashboard with `services.ai-agent.dashboard.enable = true;`.
