@@ -31,7 +31,6 @@ let
   singletonInputs = [
     "tabby"
     "tabby-agent"
-    (nameValuePair "hyprlandPlugins.hy3" (pkgs: pkgs.callPackage inputs.hy3 { }))
   ];
 
   isNestedName = name: lib.strings.match ".*\\..*" name != null;
