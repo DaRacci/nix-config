@@ -166,3 +166,86 @@ _: {
 3. Add new options or extend config
 4. Test affected configs
 5. Run `nix fmt` on changed files
+
+## Extending Submodules Declared in Other Modules
+
+**When you need to add new options to a submodule defined in another module** —
+without modifying the original file.
+
+### The Pattern: Declare the same option path
+
+NixOS's module system merges `attrsOf (submodule ...)` declarations from
+multiple modules. Two modules declaring the same `options.` path with
+compatible `submodule` types will have their inner `options` attrsets
+**merged additively**.
+
+```nix
+# Module A: core/options.nix — defines the submodule
+options.server.proxy.virtualHosts = mkOption {
+  type = attrsOf (submodule ({ name, ... }: {
+    options = {
+      port = mkOption { type = port; description = "Backend port."; };
+      extraConfig = mkOption { type = str; default = ""; };
+    };
+  }));
+};
+
+# Module B: extensions/kanidm.nix — injects new options WITHOUT touching A
+options.server.proxy.virtualHosts = mkOption {
+  type = attrsOf (submodule ({ name, ... }: {
+    options.kanidm = mkOption {
+      type = nullOr (submodule { ... });
+      default = null;
+    };
+  }));
+};
+```
+
+After merge, every virtualHost entry has `port`, `extraConfig`, AND `kanidm`.
+
+### Why not `imports` in the submodule?
+
+A common intuition is to have each extension set a `vhostModule` field and
+have the submodule collect them in its `imports`:
+
+```nix
+# Fails: circular dependency
+submodule ({ config, ... }: {
+  imports =
+    config.extensions
+    |> builtins.attrValues
+    |> map (ext: ext.vhostModule);
+})
+```
+
+This creates **infinite recursion** — reading `config` inside `imports`
+means the submodule type depends on config values that haven't been resolved.
+Nix detects this and throws `"infinite recursion: you probably reference
+config in imports"`.
+
+### When direct `options` merge works vs. `imports`
+
+| Approach | Works? | Use when |
+|----------|--------|----------|
+| Declare same `options.` path with `attrsOf (submodule ...)` | ✅ Yes | Adding new options to existing submodule entries |
+| Dynamic `imports` in submodule reading `config` | ❌ No | Circular — config needs submodule type, import needs config |
+| Static `imports` in submodule (no `config` access) | ✅ Yes | Importing known modules, no conditional logic |
+| Wrap the whole `config` in `mkIf` inside imported submodule | ✅ Yes | Conditional config generation (but options always declared) |
+
+### Key rules
+
+- **Both declarations must use the same outer wrapper** — both `attrsOf (submodule ...)`, not one `str` and one `submodule`.
+- **Options declared this way are always present** on the submodule — they
+  can't be gated by `enable`. Use `mkIf` in `config` to control behavior.
+- **Works for `submodule` and `submoduleWith`** — the inner `options`
+  attrsets union at type-resolution time, before config evaluation.
+- **Used by nixpkgs internally** — `systemd.services`, `nginx.virtualHosts`,
+  and others compose submodule options from multiple modules.
+
+### Read our real usage
+
+See the proxy extension registry for a complete example:
+- `modules/nixos/server/proxy/options.nix` — declares core vhost submodule
+- `modules/nixos/server/proxy/extensions/kanidm.nix` — injects `kanidm` option
+- `modules/nixos/server/proxy/extensions/dashboard.nix` — no vhost options needed
+- `modules/nixos/server/proxy/extensions/cloudflared.nix` — no vhost options needed

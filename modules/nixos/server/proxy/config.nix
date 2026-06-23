@@ -24,7 +24,13 @@ let
 
   cfg = config.server.proxy;
 
-  inherit (proxyLib) replaceLocalHost collectKanidmVirtualHosts resolveKanidmContext;
+  inherit (proxyLib)
+    replaceLocalHost
+    collectKanidmVirtualHosts
+    resolveKanidmContext
+    getExtensionsForVhost
+    getGlobalConfigFromExtensions
+    ;
 
   # Sanitise a domain name into a valid Caddy matcher name (only alphanumeric and underscores)
   sanitiseMatcherName = name: builtins.replaceStrings [ "." "-" ] [ "_" "_" ] name;
@@ -95,6 +101,85 @@ in
           assertion = emptyAllowGroupsHosts == { };
           message = "server.proxy.virtualHosts: kanidm.allowGroups cannot be empty for: ${builtins.concatStringsSep ", " (builtins.attrNames emptyAllowGroupsHosts)}";
         }
+        {
+          assertion =
+            let
+              allExtensionNames = builtins.attrNames config.server.proxy.extensions;
+              invalidRefs = builtins.concatLists (
+                builtins.attrValues config.server.proxy.virtualHosts
+                |> builtins.filter (vh: vh.extensions != null)
+                |> map (vh: builtins.filter (extName: !builtins.elem extName allExtensionNames) vh.extensions)
+              );
+            in
+            invalidRefs == [ ];
+          message = "server.proxy.virtualHosts: extension whitelist references nonexistent extensions: ${
+            let
+              allExtensionNames = builtins.attrNames config.server.proxy.extensions;
+              invalidRefs = builtins.concatLists (
+                builtins.attrValues config.server.proxy.virtualHosts
+                |> builtins.filter (vh: vh.extensions != null)
+                |> map (vh: builtins.filter (extName: !builtins.elem extName allExtensionNames) vh.extensions)
+              );
+            in
+            builtins.concatStringsSep ", " (lib.unique invalidRefs)
+          }";
+        }
+        {
+          assertion =
+            let
+              vhostsWithMultipleConsumers = builtins.filter (
+                vh:
+                let
+                  exts =
+                    if vh.extensions == null then
+                      builtins.attrValues config.server.proxy.extensions |> builtins.filter (ext: ext.enable)
+                    else
+                      builtins.filter (ext: builtins.elem ext._name vh.extensions) (
+                        builtins.attrValues config.server.proxy.extensions |> builtins.filter (ext: ext.enable)
+                      );
+                  consumers = builtins.filter (ext: ext.consumesExtraConfig) exts;
+                in
+                builtins.length consumers > 1
+              ) (builtins.attrValues config.server.proxy.virtualHosts);
+            in
+            vhostsWithMultipleConsumers == [ ];
+          message = "server.proxy.virtualHosts: vhosts have multiple extensions with consumesExtraConfig=true: ${
+            let
+              vhostsWithMultipleConsumers = builtins.filter (
+                vh:
+                let
+                  exts =
+                    if vh.extensions == null then
+                      builtins.attrValues config.server.proxy.extensions |> builtins.filter (ext: ext.enable)
+                    else
+                      builtins.filter (ext: builtins.elem ext._name vh.extensions) (
+                        builtins.attrValues config.server.proxy.extensions |> builtins.filter (ext: ext.enable)
+                      );
+                  consumers = builtins.filter (ext: ext.consumesExtraConfig) exts;
+                in
+                builtins.length consumers > 1
+              ) (builtins.attrValues config.server.proxy.virtualHosts);
+            in
+            builtins.concatStringsSep ", " (map (vh: vh._name) vhostsWithMultipleConsumers)
+          }";
+        }
+        {
+          assertion =
+            let
+              vhostsWithKanidmEmptyExtensions =
+                builtins.attrValues config.server.proxy.virtualHosts
+                |> builtins.filter (vh: vh.kanidm != null && vh.extensions == [ ]);
+            in
+            vhostsWithKanidmEmptyExtensions == [ ];
+          message = "server.proxy.virtualHosts: vhost has kanidm enabled but extensions set to [] (kanidm auth won't be generated): ${
+            let
+              vhostsWithKanidmEmptyExtensions =
+                builtins.attrValues config.server.proxy.virtualHosts
+                |> builtins.filter (vh: vh.kanidm != null && vh.extensions == [ ]);
+            in
+            builtins.concatStringsSep ", " (map (vh: vh._name) vhostsWithKanidmEmptyExtensions)
+          }";
+        }
       ];
     }
 
@@ -109,11 +194,16 @@ in
 
     (mkIf isThisIOPrimaryHost {
       services.caddy = {
-        globalConfig = ''
-          layer4 {
-            ${builtins.concatStringsSep "\n" l4Config}
-          }
-        '';
+        globalConfig =
+          let
+            extGlobalConfig = getGlobalConfigFromExtensions config;
+          in
+          ''
+            layer4 {
+              ${builtins.concatStringsSep "\n" l4Config}
+            }
+            ${extGlobalConfig}
+          '';
 
         virtualHosts = collectAllAttrsFunc "server.proxy.virtualHosts" (
           virtualHosts: hostCfg:
@@ -138,28 +228,29 @@ in
                   mode 0640 # Group access for alloy to read logs.
                 }
               '';
-              extraConfig = ''
-                import default
-                ${optionalString vh.public "import public"}
-                ${optionalString (vh.kanidm != null) ''
-                  ${optionalString (vh.kanidm.bypassPaths != [ ]) ''
-                    @bypass_auth_${
-                      builtins.replaceStrings [ "-" "." ] [ "_" "_" ] name
-                    } path ${builtins.concatStringsSep " " vh.kanidm.bypassPaths}
-                    handle @bypass_auth_${builtins.replaceStrings [ "-" "." ] [ "_" "_" ] name} {
-                      ${replaceLocalHost hostCfg.host.name vh.extraConfig}
-                    }
-                  ''}
-                  route /auth/* {
-                    authenticate with ${name}_portal
-                  }
-                  handle {
-                    authorize with ${name}_policy
-                    ${replaceLocalHost hostCfg.host.name vh.extraConfig}
-                  }
-                ''}
-                ${optionalString (vh.kanidm == null) (replaceLocalHost hostCfg.host.name vh.extraConfig)}
-              '';
+              extraConfig =
+                let
+                  resolvedExtraConfig = replaceLocalHost hostCfg.host.name vh.extraConfig;
+                  vhWithResolvedExtra = vh // {
+                    _resolvedExtraConfig = resolvedExtraConfig;
+                  };
+                  exts = getExtensionsForVhost name vhWithResolvedExtra hostCfg;
+                  extResults = map (ext: {
+                    name = ext._name;
+                    output = ext.config name vhWithResolvedExtra hostCfg;
+                    consumes = ext.consumesExtraConfig;
+                  }) exts;
+                  extOutputsStr = builtins.concatStringsSep "\n" (
+                    map (r: r.output) (builtins.filter (r: r.output != "") extResults)
+                  );
+                  anyConsumerWithOutput = builtins.any (r: r.consumes && r.output != "") extResults;
+                in
+                ''
+                  import default
+                  ${optionalString vh.public "import public"}
+                  ${extOutputsStr}
+                  ${if anyConsumerWithOutput then "" else resolvedExtraConfig}
+                '';
             }
           ) virtualHosts
         );
