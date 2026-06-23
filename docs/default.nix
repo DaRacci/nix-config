@@ -114,18 +114,25 @@ let
       }
     ];
 
+  getDirectoriesWithDefaultNix =
+    dir:
+    builtins.readDir dir
+    |> filterAttrs (name: type: type == "directory" && builtins.pathExists "${dir}/${name}/default.nix")
+    |> builtins.attrNames
+    |> map (name: "${dir}/${name}");
+
   flakeAggregateOptionsJSON = mkFlakeOptionsJSON [ "${self}/modules/flake/default.nix" ];
 
-  nixosAggregateOptionsJSON = mkNixosOptionsJSON [
-    "${self}/modules/nixos/default.nix"
-    "${self}/modules/nixos/core/default.nix"
-    "${self}/modules/nixos/server/default.nix"
-    {
-      _module.args = {
-        inherit self inputs pkgs;
-      };
-    }
-  ];
+  nixosAggregateOptionsJSON = mkNixosOptionsJSON (
+    (getDirectoriesWithDefaultNix "${self}/modules/nixos")
+    ++ [
+      {
+        _module.args = {
+          inherit self inputs pkgs;
+        };
+      }
+    ]
+  );
 
   homeManagerAggregateOptionsJSON = mkHomeManagerOptionsJSON [
     "${self}/modules/home-manager/purpose/default.nix"
