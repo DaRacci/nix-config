@@ -15,11 +15,11 @@ let
   inherit (types) str listOf;
   inherit (builtins) elem elemAt;
 
-  cfg = config.server.distributedBuilder;
+  cfg = config.server.distributedBuilds;
   thisIsBuildServer = elem config.networking.hostName cfg.builders;
 in
 {
-  options.server.distributedBuilder = {
+  options.server.distributedBuilds = {
     builderUser = mkOption {
       type = str;
       readOnly = true;

@@ -267,12 +267,7 @@ let
     discoverModules "home-manager" "${self}/modules/home-manager" mkHomeManagerModuleOptions
       homeManagerAggregateOptionsJSON;
 
-  prefixOverrides = {
-    "services.woodpecker-nix" = "services.woodpeckerNix";
-    "core.groups" = "core";
-    "server.distributed-builds" = "server.distributedBuilder";
-    "server.ssh" = "server.sshShell";
-  };
+  prefixOverrides = { };
 
   flakeModules = discoverFlakeModules;
   nixosModules = discoverNixosModules;

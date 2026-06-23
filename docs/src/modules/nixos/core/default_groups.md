@@ -2,7 +2,7 @@
 
 Applies shared extra group membership to all declared users.
 
-- **Entry point**: [groups.nix](../../../../../modules/nixos/core/groups.nix)
+- **Entry point**: [default-groups.nix](../../../../../modules/nixos/core/default-groups.nix)
 
 ---
 
@@ -14,7 +14,7 @@ This module defines `core.defaultGroups`, shared list of Unix groups appended to
 
 ## Options
 
-{{#include ../../../../generated/core-groups-options.md}}
+{{#include ../../../../generated/core-default-groups-options.md}}
 
 ---
 
