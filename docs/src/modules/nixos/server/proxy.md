@@ -127,3 +127,108 @@ Public services are routed through the Cloudflared tunnel with ID `8d42e9b2-3814
 - [Kanidm OAuth2 Documentation](https://kanidm.github.io/kanidm/master/integrations/oauth2.html)
 - [Caddy Security Plugin](https://github.com/greenpau/caddy-security)
 - [Caddy Layer 4 Plugin](https://github.com/mholt/caddy-l4)
+
+## Extension Architecture
+
+The proxy module supports a registry-based extension system. Extensions are self-contained modules that inject Caddy directives into virtual host configurations — without modifying proxy internals.
+
+### Extension Registry
+
+Extensions register themselves via `server.proxy.extensions.<name>`, an attribute set of submodules. Each extension has:
+
+| Field                 | Type                                             | Default  | Description                                                                                                               |
+| --------------------- | ------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `priority`            | `int`                                            | `100`    | Lower values = earlier Caddy config placement. Ranges: 0-49 reserved, 50-99 auth, 100-199 general, 200+ post-processing   |
+| `enable`              | `bool`                                           | `false`  | Globally enabled. Set via `mkDefault` based on detected config                                                            |
+| `consumesExtraConfig` | `bool`                                           | `false`  | When `true`, the extension embeds `vh._resolvedExtraConfig` in its output. `config.nix` skips appending raw `extraConfig` |
+| `config`              | `vhostName -> vhostAttrSet -> hostConfig -> str` | required | Per-vhost Caddy directive generator                                                                                       |
+| `globalConfig`        | `hostConfig -> str`                              | `_ → ""` | Top-level Caddy `globalConfig` directives                                                                                 |
+| `vhostModule`         | `nullOr deferredModule`                          | `null`   | Per-vhost option declarations                                                                                             |
+
+### Per-Vhost Extension Selection
+
+Each vhost has `server.proxy.virtualHosts.<name>.extensions` (default `null` = all enabled extensions). Set to a list of extension names for selective enablement, or `[]` to disable all extensions.
+
+### Config Function Signature
+
+```nix
+config :: vhostName -> vhostAttrSet -> hostConfig -> string
+```
+
+Arguments:
+
+- `vhostName` (`str`): The vhost's attribute name (e.g., `"grafana"`)
+- `vhostAttrSet`: The full vhost attribute set, including `_resolvedExtraConfig` (user's `extraConfig` with `replaceLocalHost` applied) and `_name`
+- `hostConfig`: Full host-level NixOS config
+
+The vhost attrset contains `_resolvedExtraConfig` — the user's `extraConfig` field with `localhost`/`127.0.0.1` already replaced for non-IO hosts.
+
+### GlobalConfig Function Signature
+
+```nix
+globalConfig :: hostConfig -> string
+```
+
+Called once per enabled extension on the IO primary host. Output concatenated into `services.caddy.globalConfig`, sorted by extension priority.
+
+### Auto-Enable Pattern
+
+Extensions auto-detect whether they have work to do using `mkDefault`:
+
+```nix
+server.proxy.extensions.myext.enable = mkDefault (
+  # check if any vhost uses my extension's features
+);
+```
+
+Users can force-disable with explicit `enable = false`.
+
+### Priority Ordering
+
+Extensions sort by priority ascending. Equal priorities break alphabetically by extension name. Extensions with lower priority numbers generate config earlier.
+
+### Authoring a New Extension
+
+1. Create file: `modules/nixos/server/proxy/extensions/<name>.nix`
+1. Import in `proxy/default.nix`: `(importModule ./extensions/<name>.nix { inherit proxyLib; })`
+1. Set `server.proxy.extensions.<name>` with priority, config function, etc.
+1. Declare per-vhost options via `options.server.proxy.virtualHosts` with `attrsOf (submodule ...)`
+1. Use `proxyLib` for helpers: `replaceLocalHost`, `resolveKanidmContext`, `hasAnyKanidm`
+
+Example skeleton:
+
+```nix
+{ proxyLib, ... }:
+{ config, lib, ... }:
+let
+  inherit (lib) mkOption types mkDefault;
+in
+{
+  options.server.proxy.virtualHosts = mkOption {
+    type = attrsOf (submodule ({ name, ... }: {
+      options.mycustom = mkOption {
+        type = bool;
+        default = false;
+      };
+    }));
+  };
+
+  config = {
+    server.proxy.extensions.mycustom = {
+      priority = 75;
+      config = name: vh: hostCfg:
+        if !vh.mycustom then "" else "header X-Custom on";
+      globalConfig = hostCfg: "";
+      vhostModule = null;
+    };
+  };
+}
+```
+
+### Migrated Extensions
+
+| Extension     | Priority | Purpose                                |
+| ------------- | -------- | -------------------------------------- |
+| `kanidm`      | 50       | Kanidm OAuth2 authentication per vhost |
+| `dashboard`   | 200      | Auto-generate dashboard items          |
+| `cloudflared` | 200      | Cloudflared tunnel ingress             |

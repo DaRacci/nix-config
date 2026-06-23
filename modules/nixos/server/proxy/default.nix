@@ -7,6 +7,7 @@
   ...
 }:
 {
+  config,
   lib,
   ...
 }:
@@ -90,6 +91,35 @@ let
         "::1"
       ] (builtins.genList (_: host) 6) str;
 
+  getExtensionsForVhost =
+    _vhostName: vhostAttr: _hostCfg:
+    let
+      exts = config.server.proxy.extensions or { };
+      withNames = lib.mapAttrsToList (extName: extVal: extVal // { _name = extName; }) exts;
+      enabled = builtins.filter (ext: ext.enable) withNames;
+      whitelisted =
+        if vhostAttr.extensions == null then
+          enabled
+        else
+          builtins.filter (ext: builtins.elem ext._name vhostAttr.extensions) enabled;
+      sorted = builtins.sort (
+        a: b: if a.priority == b.priority then a._name < b._name else a.priority < b.priority
+      ) whitelisted;
+    in
+    sorted;
+
+  getGlobalConfigFromExtensions =
+    hostCfg:
+    let
+      exts = config.server.proxy.extensions or { };
+      withNames = lib.mapAttrsToList (extName: extVal: extVal // { _name = extName; }) exts;
+      enabled = builtins.filter (ext: ext.enable) withNames;
+      sorted = builtins.sort (
+        a: b: if a.priority == b.priority then a._name < b._name else a.priority < b.priority
+      ) enabled;
+    in
+    map (ext: ext.globalConfig hostCfg) sorted |> builtins.concatStringsSep "\n";
+
   proxyLib = {
     inherit
       contextToEnvPrefix
@@ -98,14 +128,18 @@ let
       collectKanidmContexts
       collectKanidmVirtualHosts
       replaceLocalHost
+      getExtensionsForVhost
+      getGlobalConfigFromExtensions
       ;
   };
 in
 {
   imports = [
     (importModule ./options.nix { inherit proxyLib; })
-    (importModule ./kanidm.nix { inherit proxyLib; })
+    (importModule ./extensions/kanidm.nix { inherit proxyLib; })
+    (importModule ./extensions/dashboard.nix { inherit proxyLib; })
+    (importModule ./extensions/cloudflared.nix { inherit proxyLib; })
     (importModule ./config.nix { inherit proxyLib; })
-    (importModule ./extensions.nix { inherit proxyLib; })
+    (importModule ./kanidm-provisioning.nix { inherit proxyLib; })
   ];
 }

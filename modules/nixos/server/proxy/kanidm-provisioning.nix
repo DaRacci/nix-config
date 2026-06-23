@@ -1,6 +1,4 @@
 {
-  isThisIOPrimaryHost,
-  collectAllAttrsFunc,
   proxyLib,
   ...
 }:
@@ -11,15 +9,11 @@
 }:
 let
   inherit (lib)
-    mkDefault
     mkIf
     mkMerge
-    nameValuePair
     unique
     flatten
     ;
-
-  cfg = config.server.proxy;
 
   inherit (proxyLib) collectKanidmContexts collectKanidmVirtualHosts;
 
@@ -54,30 +48,6 @@ let
 in
 {
   config = mkMerge [
-    {
-      server.dashboard.items = builtins.mapAttrs (_name: vhCfg: {
-        title = mkDefault (lib.mine.strings.capitalise _name);
-        url = mkDefault "https://${vhCfg.baseUrl}/";
-        icon = mkDefault "sh-${_name}";
-      }) cfg.virtualHosts;
-    }
-
-    (mkIf isThisIOPrimaryHost {
-      services.cloudflared.tunnels."8d42e9b2-3814-45ea-bbb5-9056c8f017e2" =
-        let
-          publicHosts = collectAllAttrsFunc "server.proxy.virtualHosts" (
-            vh: _:
-            builtins.attrValues vh
-            |> builtins.filter (v: v.public)
-            |> map (v: nameValuePair v.baseUrl "https://${v.baseUrl}")
-            |> builtins.listToAttrs
-          );
-        in
-        mkIf ((builtins.attrValues publicHosts |> builtins.length) > 0) {
-          ingress = publicHosts;
-        };
-    })
-
     (mkIf
       (
         config.services.kanidm.server.enable

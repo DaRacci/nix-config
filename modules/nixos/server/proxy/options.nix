@@ -22,46 +22,10 @@ let
     attrsOf
     submodule
     nonEmptyListOf
+    functionTo
+    deferredModule
     ;
 
-  commonKanidmOptions = {
-    authDomain = mkOption {
-      type = nullOr str;
-      default = null;
-      example = "auth.example.com";
-      description = ''
-        The domain where Kanidm is hosted.
-        Defaults to auth.<server.proxy.domain> if not specified.
-      '';
-    };
-
-    scopes = mkOption {
-      type = listOf str;
-      default = [
-        "openid"
-        "email"
-        "profile"
-        "groups"
-      ];
-      description = "OAuth scopes to request from Kanidm.";
-    };
-
-    tokenLifetime = mkOption {
-      type = int;
-      default = 3600;
-      description = "Token lifetime in seconds for the authentication portal.";
-    };
-
-    allowGroups = mkOption {
-      type = listOf str;
-      default = [ ];
-      example = [
-        "idm_all_persons@auth.racci.dev"
-        "admins@auth.racci.dev"
-      ];
-      description = "Default list of Kanidm groups allowed to access virtualHosts using this context.";
-    };
-  };
 in
 {
   options.server.proxy = {
@@ -70,25 +34,48 @@ in
       description = "The base domain for all virtual hosts.";
     };
 
-    kanidmContexts = mkOption {
-      description = "Shared Kanidm OAuth2 context configurations.";
+    extensions = mkOption {
+      description = "Registry of proxy extensions. Each extension provides config functions that are injected into vhost Caddy blocks, sorted by priority.";
       default = { };
-      example = literalExpression ''
-        {
-          arr-services = {
-            scopes = [ "openid" "email" "profile" "groups" ];
-            tokenLifetime = 7200;
+      type = attrsOf (
+        submodule (_: {
+          options = {
+            priority = mkOption {
+              type = int;
+              default = 100;
+              description = "Lower values = earlier in Caddy config. Priority ranges: 0-49 reserved, 50-99 auth, 100-199 general, 200+ post-processing.";
+            };
+            enable = mkOption {
+              type = bool;
+              default = false;
+              description = ''
+                Whether this extension is globally enabled.
+                Each extension SHOULD auto-detect whether it has work to do and set this to `true` via `mkDefault` in its module config.
+                User can explicitly override to force-disable (higher merge priority than mkDefault).
+              '';
+            };
+            consumesExtraConfig = mkOption {
+              type = bool;
+              default = false;
+              description = "Whether this extension embeds extraConfig inside its output. When true, config.nix skips the post-extension extraConfig append for this vhost.";
+            };
+            config = mkOption {
+              type = functionTo (functionTo (functionTo str));
+              description = "Function: vhostName -> vhostAttrSet -> hostConfig -> string. Returns Caddy directives to inject, or '' for no-op. The vhostAttrSet includes the resolved extraConfig (already localhost-replaced) as `_resolvedExtraConfig`.";
+            };
+            globalConfig = mkOption {
+              type = functionTo str;
+              default = _: "";
+              description = "Function: hostConfig -> string. Returns Caddy directives to inject into the top-level globalConfig block. Only called on the IO primary host. Sorted by priority across extensions.";
+            };
+            vhostModule = mkOption {
+              type = nullOr deferredModule;
+              default = null;
+              description = "Optional module to inject into each vhost submodule. Use `options.<extensionName>` (relative to vhost scope) to declare per-vhost options.";
+            };
           };
-          admin-apps = {
-            authDomain = "auth.internal.example.com";
-            tokenLifetime = 1800;
-            allowGroups = [ "admin@auth.internal.example.com" ];
-          };
-        }
-      '';
-      type = attrsOf (submodule {
-        options = commonKanidmOptions;
-      });
+        })
+      );
     };
 
     virtualHosts = mkOption {
@@ -103,7 +90,28 @@ in
             maybePort = if (builtins.length split) > 1 then lib.toInt (builtins.elemAt split 1) else null;
           in
           {
+            # vhost-level options from extensions are merged here.
+            # Each extension declares `options.server.proxy.virtualHosts`
+            # to inject its per-vhost options. NixOS merges these declarations.
             options = {
+              _name = mkOption {
+                type = str;
+                default = name;
+                readOnly = true;
+                internal = true;
+                description = "The attribute name of this virtual host in the virtualHosts attrset.";
+              };
+
+              extensions = mkOption {
+                type = nullOr (listOf str);
+                default = null;
+                description = ''
+                  List of extension names to enable for this virtual host.
+                  When null (default), all globally enabled extensions apply.
+                  When set to a list, only those named extensions apply.
+                  Set to [] to disable all extensions for this vhost.
+                '';
+              };
               aliases = mkOption {
                 type = listOf str;
                 default = [ ];
@@ -178,29 +186,6 @@ in
                 });
               };
 
-              kanidm = mkOption {
-                default = null;
-                description = "Enable Kanidm OAuth2 authentication for this virtual host.";
-                type = nullOr (submodule {
-                  options = commonKanidmOptions // {
-                    context = mkOption {
-                      type = str;
-                      default = subdomain;
-                      description = "The OAuth context name for this virtual host.";
-                    };
-
-                    bypassPaths = mkOption {
-                      type = listOf str;
-                      default = [ ];
-                      example = [
-                        "/health"
-                        "/api/webhooks/*"
-                      ];
-                      description = "List of path patterns that should bypass authentication.";
-                    };
-                  };
-                });
-              };
             };
           }
         )
