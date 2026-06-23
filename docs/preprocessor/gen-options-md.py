@@ -49,21 +49,21 @@ def candidate_prefixes(prefix, output_path):
         if len(parts) < 2:
             return
 
-        # All-in camelCase join: my-option-name -> myOptionName
-        add(parts[0] + "".join(p.capitalize() for p in parts[1:]))
+        # Recursive: at each boundary, try -, ., and camelCase join.
+        # Generates all 3^(n-1) combinations.
+        def expand(segs):
+            if len(segs) == 1:
+                return [segs[0]]
+            results = []
+            head = segs[0]
+            for tail in expand(segs[1:]):
+                results.append(head + "-" + tail)
+                results.append(head + "." + tail)
+                results.append(head + tail[0].upper() + tail[1:])
+            return results
 
-        # Progressive: split at each dash, join left with ".", try right tail
-        # both dashed (original) and camelCase.
-        # server-distributed-builds:
-        #   server.distributed-builds
-        #   server.distributedBuilds
-        #   server.distributed.builds
-        for i in range(1, len(parts)):
-            left = ".".join(parts[:i])
-            right_dashed = "-".join(parts[i:])
-            add(left + "." + right_dashed)
-            right_camel = parts[i] + "".join(p.capitalize() for p in parts[i + 1 :])
-            add(left + "." + right_camel)
+        for v in expand(parts):
+            add(v)
 
     add_variants(prefix)
 
