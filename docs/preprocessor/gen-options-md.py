@@ -46,8 +46,24 @@ def candidate_prefixes(prefix, output_path):
         add(value.replace("-", "."))
 
         parts = value.split("-")
+        if len(parts) < 2:
+            return
+
+        # All-in camelCase join: my-option-name -> myOptionName
+        add(parts[0] + "".join(p.capitalize() for p in parts[1:]))
+
+        # Progressive: split at each dash, join left with ".", try right tail
+        # both dashed (original) and camelCase.
+        # server-distributed-builds:
+        #   server.distributed-builds
+        #   server.distributedBuilds
+        #   server.distributed.builds
         for i in range(1, len(parts)):
-            add(".".join(parts[:i]) + "-" + "-".join(parts[i:]))
+            left = ".".join(parts[:i])
+            right_dashed = "-".join(parts[i:])
+            add(left + "." + right_dashed)
+            right_camel = parts[i] + "".join(p.capitalize() for p in parts[i + 1 :])
+            add(left + "." + right_camel)
 
     add_variants(prefix)
 
@@ -108,8 +124,14 @@ def main():
 
         lines.append("---\n")
 
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines) + "\n")
+    if not lines:
+        print(
+            f"Warning: no options found for prefixes {prefixes} in {options_path}",
+            file=sys.stderr,
+        )
+    else:
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines) + "\n")
 
 
 if __name__ == "__main__":
