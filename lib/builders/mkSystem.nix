@@ -12,7 +12,12 @@
   ...
 }:
 let
-  inherit (builtins) pathExists attrValues filter;
+  inherit (builtins)
+    pathExists
+    attrValues
+    filter
+    removeAttrs
+    ;
   inherit (lib)
     mkDefault
     mkBefore
@@ -37,7 +42,8 @@ nixosSystem rec {
   inherit pkgs lib system;
 
   modules =
-    (attrValues (import "${self}/modules/nixos"))
+    (attrValues (removeAttrs (import "${self}/modules/nixos") [ "ai" ]))
+    ++ optional (deviceType == "server") (import "${self}/modules/nixos").ai
     ++ (usersWithRoot |> map osConfigPath |> filter pathExists) # Include each user's os-config.nix if it exists
     ++ [
       hostDirectory

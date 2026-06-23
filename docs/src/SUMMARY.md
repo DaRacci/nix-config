@@ -58,6 +58,8 @@
   - [Proxy](modules/nixos/server/proxy.md)
   - [SSH](modules/nixos/server/ssh.md)
 - [Flake Allocations](modules/flake/allocations.md)
+- [AI](modules/nixos/ai/overview.md)
+  - [Mnemosyne](modules/nixos/ai/mnemosyne.md)
 
 # Home-Manager Modules
 
