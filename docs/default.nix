@@ -279,6 +279,8 @@ let
 
 in
 rec {
+  inherit moduleOptionsJSON allModules;
+
   search = pkgs.callPackage ./search.nix {
     inherit
       self
@@ -288,8 +290,6 @@ rec {
       ;
     lib = pkgs.lib;
   };
-
-  inherit moduleOptionsJSON allModules;
 
   docs = pkgs.callPackage ./site.nix {
     inherit
