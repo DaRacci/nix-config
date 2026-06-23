@@ -18,7 +18,3 @@ enable = true
 command = "mdbook-rewrite-links"
 git-branch = "master"
 renderers = ["html"]
-
-
-[preprocessor.gitinfo]
-branch = "master"

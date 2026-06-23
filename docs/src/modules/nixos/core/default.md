@@ -34,7 +34,7 @@ Bluetooth baseline unblocks rfkill during activation and persists `/var/lib/blue
 - [Display Manager](display_manager.md)
 - [Gaming](gaming.md)
 - [Generators](generators.md)
-- [Groups](groups.md)
+- [Default Groups](default_groups.md)
 - [Locale](locale.md)
 - [Nix](nix.md)
 - [OpenSSH](openssh.md)

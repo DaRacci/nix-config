@@ -8,9 +8,9 @@ The SSH submodule enhances administrative access by providing a session-only env
 
 ## Options
 
-{{#include ../../../../generated/server-ssh-options.md}}
+{{#include ../../../../generated/server-ssh-shell-options.md}}
 
-### Auto-entry Logic (`ssh/default.nix`)
+### Auto-entry Logic (`ssh-shell/default.nix`)
 
 The module creates an indirect GC root for the SSH shell at login time by instantiating shell expression to derivation, then realizing it with `nix-store --add-root --indirect --realise`. This keeps realized shell alive across upgrades without referencing `config.system.build.toplevel` during system evaluation.
 
@@ -24,7 +24,7 @@ The module modifies `/etc/bashrc` to detect interactive root logins via SSH. It 
 
 The module also configures OpenSSH to accept the `NIX_SKIP_SHELL` environment variable from clients, allowing remote users to bypass the auto-shell entry when necessary.
 
-### Session Environment (`ssh/shell.nix`)
+### Session Environment (`ssh-shell/shell.nix`)
 
 The default session shell is a `nix-shell` environment containing:
 

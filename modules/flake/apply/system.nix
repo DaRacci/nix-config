@@ -19,7 +19,7 @@ mkMerge [
     server = {
       ioPrimaryHost = allocations.server.ioPrimaryCoordinator;
       monitoringPrimaryHost = allocations.server.monitoringPrimaryHost;
-      distributedBuilder.builders = allocations.server.distributedBuilders;
+      distributedBuilds.builders = allocations.server.distributedBuilders;
     };
   })
 ]
