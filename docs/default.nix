@@ -18,6 +18,30 @@ let
     concatLists
     ;
 
+  # Stubs for server module helpers so individual evaluation works in docs context.
+  # Server sub-modules use curried args like `isThisIOPrimaryHost`, `collectAllAttrs`,
+  # `importModule` etc. that normally come from `server/default.nix` which can't be
+  # evaluated standalone (needs host config). These stubs let individual files resolve.
+  serverHelpers = lib.fix (self: {
+    isIOPrimaryHost = _: true;
+    isThisIOPrimaryHost = false;
+    isMonitoringPrimaryHost = _: true;
+    isThisMonitoringPrimaryHost = false;
+    primaryIOHostConfig = { };
+    getIOPrimaryHostAttr = _: { };
+    getAllAttrs = _: [ ];
+    getAllAttrsFunc = _: _: [ ];
+    getOtherAttrs = _: [ ];
+    getOtherAttrsFunc = _: _: [ ];
+    collectAllAttrs = _: { };
+    collectAllAttrsFunc = _: _: { };
+    collectOtherAttrs = _: { };
+    collectOtherAttrsFunc = _: _: { };
+    getOthersWhere = _: [ ];
+    serverConfigurations = [ ];
+    importModule = path: inherits: import path (self // inherits);
+  });
+
   # Build minimal module evaluations suitable for options documentation.
   # Keep specialArgs aligned with normal module loading so recursive scans can
   # evaluate modules that expect repository-level args.
@@ -39,7 +63,8 @@ let
         hostDirectory = "${self}/hosts";
         importExternals = false;
         users = [ ];
-      };
+      }
+      // serverHelpers;
     };
 
   mkHomeManagerOptionsJSON =
@@ -64,7 +89,6 @@ let
   mkNixosModuleOptions =
     path:
     mkNixosOptionsJSON [
-
       "${self}/modules/nixos/default.nix"
       path
       {
@@ -93,8 +117,9 @@ let
   flakeAggregateOptionsJSON = mkFlakeOptionsJSON [ "${self}/modules/flake/default.nix" ];
 
   nixosAggregateOptionsJSON = mkNixosOptionsJSON [
-
     "${self}/modules/nixos/default.nix"
+    "${self}/modules/nixos/core/default.nix"
+    "${self}/modules/nixos/server/default.nix"
     {
       _module.args = {
         inherit self inputs pkgs;
@@ -179,6 +204,10 @@ let
               ""
             else if lib.hasSuffix "/default.nix" relPath then
               lib.removeSuffix "/default.nix" relPath
+            else if relPath == "options.nix" then
+              ""
+            else if lib.hasSuffix "/options.nix" relPath then
+              lib.removeSuffix "/options.nix" relPath
             else
               lib.removeSuffix ".nix" relPath;
         in
@@ -203,7 +232,7 @@ let
 
         in
         {
-          name = discoveredPrefix;
+          name = if discoveredPrefix == "" then category else "${category}.${discoveredPrefix}";
           value = {
             path = module.fullPath;
             inherit
@@ -214,21 +243,35 @@ let
               ;
           };
         };
+
+      moduleFiles = findModuleFilesRec moduleDir "";
+      # When a directory has both default.nix and options.nix, both map to the
+      # same prefix (options.nix, like default.nix, is stripped).  Drop the
+      # default.nix entry so options.nix takes precedence.
+      optionsNixDirs = builtins.filter (d: d != "") (
+        map (m: dirOf m.relPath) (builtins.filter (m: lib.hasSuffix "/options.nix" m.relPath) moduleFiles)
+      );
+      dedupedFiles = builtins.filter (
+        m: !m.isDefault || !builtins.elem (dirOf m.relPath) optionsNixDirs
+      ) moduleFiles;
     in
-    builtins.listToAttrs (map moduleToEntry (findModuleFilesRec moduleDir ""));
+    builtins.listToAttrs (map moduleToEntry dedupedFiles);
 
   discoverFlakeModules =
     discoverModules "flake" "${self}/modules/flake" mkFlakeModuleOptions
       flakeAggregateOptionsJSON;
   discoverNixosModules =
-
-    discoverModules "nixos" "${self}/modules/nixos" mkNixosModuleOptions nixosAggregateOptionsJSON;
+    discoverModules "nixos" "${self}/modules/nixos" mkNixosModuleOptions
+      nixosAggregateOptionsJSON;
   discoverHomeManagerModules =
     discoverModules "home-manager" "${self}/modules/home-manager" mkHomeManagerModuleOptions
       homeManagerAggregateOptionsJSON;
 
   prefixOverrides = {
     "services.woodpecker-nix" = "services.woodpeckerNix";
+    "core.groups" = "core";
+    "server.distributed-builds" = "server.distributedBuilder";
+    "server.ssh" = "server.sshShell";
   };
 
   flakeModules = discoverFlakeModules;

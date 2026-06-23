@@ -12,7 +12,7 @@ in
       path = mkOption {
         type = types.str;
         default = "${config.home.homeDirectory}/.face";
-        defaultText = literalExpression ''''${config.home.homeDirectory}/.face'';
+        defaultText = literalExpression "\${config.home.homeDirectory}/.face";
         description = "Path to user avatar image.";
       };
     };
@@ -21,7 +21,7 @@ in
       directory = mkOption {
         type = types.str;
         default = "${config.home.homeDirectory}/Pictures/Wallpapers";
-        defaultText = literalExpression ''''${config.home.homeDirectory}/Pictures/Wallpapers'';
+        defaultText = literalExpression "\${config.home.homeDirectory}/Pictures/Wallpapers";
         description = "Path to wallpaper image directory.";
       };
     };
