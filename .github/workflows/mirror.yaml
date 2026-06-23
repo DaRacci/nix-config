@@ -4,6 +4,7 @@ on: [push, delete]
 
 jobs:
   mirror:
+    if: github.repository == 'DaRacci/nix-config'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout full repo
