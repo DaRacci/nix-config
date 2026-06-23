@@ -24,27 +24,27 @@ in
     };
   };
 
-server.proxy.virtualHosts.agent = {
-  ports = [
-    cfg.apiServer.port
-    cfg.dashboard.port
-    config.services.hermes-agent.webhooks.port
-  ];
+  server.proxy.virtualHosts.agent = {
+    ports = [
+      cfg.apiServer.port
+      cfg.dashboard.port
+      config.services.ai-agent.platform.webhook.port
+    ];
 
-  extraConfig = ''
-    redir/v1 /v1/
-    path /v1* {
-       reverse_proxy localhost:${toString config.services.ai-agent.apiServer.port}
-    }
+    extraConfig = ''
+      redir/v1 /v1/
+      path /v1* {
+         reverse_proxy localhost:${toString config.services.ai-agent.apiServer.port}
+      }
 
-    redir /webhook /webhook/
-    path /webhook* {
-      reverse_proxy localhost:${toString config.services.ai-agent.platform.discord.port}
-    }
+      redir /webhook /webhook/
+      path /webhook* {
+        reverse_proxy localhost:${toString config.services.ai-agent.platform.webhook.port}
+      }
 
-    reverse_proxy localhost:${toString config.services.ai-agent.dashboard.port}
-  '';
-};
+      reverse_proxy localhost:${toString config.services.ai-agent.dashboard.port}
+    '';
+  };
 
   services = {
     ai-agent = {

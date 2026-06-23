@@ -162,6 +162,14 @@ in
           description = "The URL for the Home Assistant instance, including the scheme.";
         };
       };
+
+      webhook = {
+        port = mkOption {
+          type = int;
+          default = 8654;
+          description = "The port for the webhook listener to listen on.";
+        };
+      };
     };
 
     models = {
@@ -337,7 +345,7 @@ in
           platforms.webhook = {
             enabled = true;
             extra = {
-              port = 8644;
+              port = cfg.platform.webhook.port;
               rate_limit = 30;
             };
           };
