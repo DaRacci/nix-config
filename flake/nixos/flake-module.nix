@@ -59,7 +59,11 @@ in
       mkSystem hostName {
         inherit self inputs;
         inherit (config) allocations;
-        deviceType = hostsByType |> filterAttrs (_: v: elem hostName v) |> attrNames |> head;
+        deviceType =
+          hostsByType
+          |> filterAttrs (_: v: elem hostName v)
+          |> attrNames
+          |> head;
         deviceUsers = userHosts |> filterAttrs (_: v: elem hostName v) |> attrNames;
       }
     );

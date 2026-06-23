@@ -33,7 +33,11 @@ let
       let
         vhsUsingContext = lib.filterAttrs (_: vh: vh.kanidm.context == contextName) virtualHosts;
         vhList = builtins.attrValues vhsUsingContext;
-        allGroups = vhList |> map (vh: vh.kanidm.allowGroups) |> flatten |> unique;
+        allGroups =
+          vhList
+          |> map (vh: vh.kanidm.allowGroups)
+          |> flatten
+          |> unique;
         groupsWithoutDomain = allGroups |> map (g: builtins.head (lib.splitString "@" g));
       in
       ctx
