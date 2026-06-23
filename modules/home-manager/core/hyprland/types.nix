@@ -96,12 +96,12 @@ rec {
         type = nullOr (submodule {
           options = {
             internal = mkOption {
-              type = either (enum [ "*" ]) ints.between 0 3;
+              type = either (enum [ "*" ]) (ints.between 0 3);
               default = null;
               description = "Set the internal fullscreen state. internal can be * - any, 0 - none, 1 - maximize, 2 - fullscreen, 3 - maximize and fullscreen.";
             };
             client = mkOption {
-              type = either (enum [ "*" ]) ints.between 0 3;
+              type = either (enum [ "*" ]) (ints.between 0 3);
               default = null;
               description = "Set the client fullscreen state. client can be * - any, 0 - none, 1 - maximize, 2 - fullscreen, 3 - maximize and fullscreen.";
             };
@@ -514,12 +514,12 @@ rec {
         type = nullOr (submodule {
           options = {
             internal = mkOption {
-              type = nullOr (either (enum [ "*" ]) ints.between 0 3);
+              type = nullOr (either (enum [ "*" ]) (ints.between 0 3));
               default = null;
               description = "The internal fullscreen state, * - any, 0 - none, 1 - maximize, 2 - fullscreen, 3 - maximize and fullscreen.";
             };
             client = mkOption {
-              type = nullOr (either (enum [ "*" ]) ints.between 0 3);
+              type = nullOr (either (enum [ "*" ]) (ints.between 0 3));
               default = null;
               description = "The client fullscreen state, * - any, 0 - none, 1 - maximize, 2 - fullscreen, 3 - maximize and fullscreen.";
             };

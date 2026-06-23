@@ -133,16 +133,16 @@ This pattern keeps bind and submap definitions inline in Lua. Submaps are define
 
 The default Lua bind template at `modules/home-manager/core/hyprland/lua/binds.lua`. Uses `@placeholder@` substitution for dynamic injection:
 
-| Placeholder | Source | Description |
-|---|---|---|
-| `@applicationBinds@` | `custom-settings.lua.applicationBinds` | Auto-generated Lua table of app keybinds |
-| `@playerctl@` | Auto-injected | Path to `playerctl` binary |
-| `@wpctl@` | Auto-injected | Path to `wpctl` binary |
-| `@zenity@` | Auto-injected | Path to `zenity` binary |
-| `@hyprshutdown@` | Auto-injected | Path to `hyprshutdown` binary |
-| `@uwsmApp@` | Auto-injected | Path to `uwsm-app` helper |
-| `@DEFAULT_AUDIO_SINK@` | `custom-settings.lua.variables` | Audio sink name (default `null`) |
-| `@DEFAULT_AUDIO_SOURCE@` | `custom-settings.lua.variables` | Audio source name (default `null`) |
+| Placeholder              | Source                                 | Description                              |
+| ------------------------ | -------------------------------------- | ---------------------------------------- |
+| `@applicationBinds@`     | `custom-settings.lua.applicationBinds` | Auto-generated Lua table of app keybinds |
+| `@playerctl@`            | Auto-injected                          | Path to `playerctl` binary               |
+| `@wpctl@`                | Auto-injected                          | Path to `wpctl` binary                   |
+| `@zenity@`               | Auto-injected                          | Path to `zenity` binary                  |
+| `@hyprshutdown@`         | Auto-injected                          | Path to `hyprshutdown` binary            |
+| `@uwsmApp@`              | Auto-injected                          | Path to `uwsm-app` helper                |
+| `@DEFAULT_AUDIO_SINK@`   | `custom-settings.lua.variables`        | Audio sink name (default `null`)         |
+| `@DEFAULT_AUDIO_SOURCE@` | `custom-settings.lua.variables`        | Audio source name (default `null`)       |
 
 Add `@custom@` placeholders by extending `custom-settings.lua.variables`.
 
@@ -174,7 +174,6 @@ The user-side Hyprland config (`home/racci/features/desktop/hyprland/`) pairs wi
 Workspace rules in the user config now set `persistent = true` for defined workspaces, ensuring they are always available regardless of Noctalia lifecycle.
 
 Look settings are tuned toward Noctalia documentation recommendations: `gaps_in = 5`, `gaps_out = 10`, `rounding_power = 2`, shadow range/render/color tuned, and blur size/passes/vibrancy adjusted.
-
 
 ### `types.nix`
 

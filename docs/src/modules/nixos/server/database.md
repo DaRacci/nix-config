@@ -25,6 +25,12 @@ This submodule automates:
 - `server.database.host`: Centralized host address for database connections (in `default.nix`).
 - `server.database.dependentServices`: Lifecycle coordination for dependent services (in `guardian.nix`).
 
+## Options
+
+{{#include ../../../../generated/server-database-options.md}}
+{{#include ../../../../generated/server-database-postgres-options.md}}
+{{#include ../../../../generated/server-database-redis-options.md}}
+
 ## Key Options and Behaviors
 
 ### Connection Management

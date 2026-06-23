@@ -4,7 +4,7 @@
 
 ## Options
 
-{{#include ../../../generated/programs-list-ephemeral-options.md}}
+{{#include ../../../../generated/programs-list-ephemeral-options.md}}
 
 ## Usage
 

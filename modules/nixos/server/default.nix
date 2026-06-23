@@ -184,7 +184,7 @@ in
     (importModule ./network.nix { })
     (importModule ./proxy { })
 
-    ./ssh
+    ./ssh-shell
     ./storage
     ./distributed-builds.nix
   ];

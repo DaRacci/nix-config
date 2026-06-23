@@ -75,13 +75,6 @@
       type = "file";
     };
 
-    #TODO:https://github.com/NixOS/nixpkgs/pull/521651
-    "hyprlandPlugins.hy3" = {
-      url = "https://github.com/r-ryantm/nixpkgs/raw/fc4ff99d24ee5dfa1a9f001118d14727fcc7e6ca/pkgs/applications/window-managers/hyprwm/hyprland-plugins/hy3.nix";
-      flake = false;
-      type = "file";
-    };
-
     # Misc Flake Inputs for other Inputs
     systems.url = "github:nix-systems/default";
     flake-utils = {

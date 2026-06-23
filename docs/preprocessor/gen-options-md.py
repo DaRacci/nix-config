@@ -46,8 +46,24 @@ def candidate_prefixes(prefix, output_path):
         add(value.replace("-", "."))
 
         parts = value.split("-")
-        for i in range(1, len(parts)):
-            add(".".join(parts[:i]) + "-" + "-".join(parts[i:]))
+        if len(parts) < 2:
+            return
+
+        # Recursive: at each boundary, try -, ., and camelCase join.
+        # Generates all 3^(n-1) combinations.
+        def expand(segs):
+            if len(segs) == 1:
+                return [segs[0]]
+            results = []
+            head = segs[0]
+            for tail in expand(segs[1:]):
+                results.append(head + "-" + tail)
+                results.append(head + "." + tail)
+                results.append(head + tail[0].upper() + tail[1:])
+            return results
+
+        for v in expand(parts):
+            add(v)
 
     add_variants(prefix)
 
@@ -108,8 +124,14 @@ def main():
 
         lines.append("---\n")
 
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines) + "\n")
+    if not lines:
+        print(
+            f"Warning: no options found for prefixes {prefixes} in {options_path}",
+            file=sys.stderr,
+        )
+    else:
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines) + "\n")
 
 
 if __name__ == "__main__":

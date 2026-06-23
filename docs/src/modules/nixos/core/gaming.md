@@ -15,9 +15,6 @@ This module configures desktop gaming stack around Steam, 32-bit graphics suppor
 ## Options
 
 {{#include ../../../../generated/purpose-gaming-options.md}}
-
-{{#include ../../../../generated/purpose-gaming-gamemode-options.md}}
-
 {{#include ../../../../generated/purpose-gaming-minecraft-options.md}}
 {{#include ../../../../generated/purpose-gaming-modding-options.md}}
 {{#include ../../../../generated/purpose-gaming-osu-options.md}}

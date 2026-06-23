@@ -29,7 +29,7 @@ in
     ./display-manager.nix
     ./gaming.nix
     ./generators.nix
-    ./groups.nix
+    ./default-groups.nix
     ./locale.nix
     ./nix.nix
     ./openssh.nix

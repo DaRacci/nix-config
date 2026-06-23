@@ -100,7 +100,11 @@ in
 
     (mkIf (!isThisIOPrimaryHost) {
       server.network.openPortsForSubnet.tcp =
-        cfg.virtualHosts |> builtins.attrValues |> map (vh: vh.ports) |> flatten |> unique;
+        cfg.virtualHosts
+        |> builtins.attrValues
+        |> map (vh: vh.ports)
+        |> flatten
+        |> unique;
     })
 
     (mkIf isThisIOPrimaryHost {

@@ -73,18 +73,6 @@
         "type": "github"
       }
     },
-    "hyprlandPlugins.hy3": {
-      "flake": false,
-      "locked": {
-        "narHash": "sha256-zvS7CSqvJVECR9rXqt+s7/KrFPIsPrkwtFPg2urcEU4=",
-        "type": "file",
-        "url": "https://github.com/r-ryantm/nixpkgs/raw/fc4ff99d24ee5dfa1a9f001118d14727fcc7e6ca/pkgs/applications/window-managers/hyprwm/hyprland-plugins/hy3.nix"
-      },
-      "original": {
-        "type": "file",
-        "url": "https://github.com/r-ryantm/nixpkgs/raw/fc4ff99d24ee5dfa1a9f001118d14727fcc7e6ca/pkgs/applications/window-managers/hyprwm/hyprland-plugins/hy3.nix"
-      }
-    },
     "lix": {
       "flake": false,
       "locked": {
@@ -167,7 +155,6 @@
         "erosanix": "erosanix",
         "flake-parts": "flake-parts",
         "flake-utils": "flake-utils",
-        "hyprlandPlugins.hy3": "hyprlandPlugins.hy3",
         "lix": "lix",
         "mcpo": "mcpo",
         "nix2container": "nix2container",
