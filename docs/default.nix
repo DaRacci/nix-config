@@ -185,7 +185,11 @@ let
         builtins.replaceStrings [ "/" ] [ "." ] withoutDefault;
 
       normalizePrefix =
-        prefix: prefix |> lib.splitString "." |> map lib.strings.toCamelCase |> lib.concatStringsSep ".";
+        prefix:
+        prefix
+        |> lib.splitString "."
+        |> map lib.strings.toCamelCase
+        |> lib.concatStringsSep ".";
 
       prefixToOutputName = prefix: builtins.replaceStrings [ "." ] [ "-" ] prefix;
 
