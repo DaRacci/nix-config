@@ -26,6 +26,7 @@
         ports = [ l4.listenPort ];
         l4 = {
           listenPort = 10300;
+          protocol = "tcp";
           config = ''
             route {
               proxy localhost:${toString l4.listenPort}
@@ -38,6 +39,7 @@
         ports = [ l4.listenPort ];
         l4 = {
           listenPort = 10200;
+          protocol = "tcp";
           config = ''
             route {
               proxy localhost:${toString l4.listenPort}

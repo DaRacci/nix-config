@@ -41,6 +41,37 @@ let
   emptyAllowGroupsHosts =
     collectKanidmVirtualHosts
     |> lib.filterAttrs (name: vh: (resolveKanidmContext name vh).allowGroups == [ ]);
+
+  allExtensionNames = builtins.attrNames config.server.proxy.extensions;
+
+  enabledExtensions =
+    lib.mapAttrsToList (_name: extVal: extVal // { inherit _name; }) config.server.proxy.extensions
+    |> builtins.filter (ext: ext.enable);
+
+  invalidExtensionRefs = builtins.concatLists (
+    builtins.attrValues config.server.proxy.virtualHosts
+    |> builtins.filter (vh: vh.extensions != null)
+    |> map (vh: builtins.filter (extName: !builtins.elem extName allExtensionNames) vh.extensions)
+  );
+
+  vhostsWithMultipleConsumers = builtins.filter (
+    vh:
+    let
+      exts =
+        if vh.extensions == null then
+          enabledExtensions
+        else
+          builtins.filter (ext: builtins.elem ext._name vh.extensions) enabledExtensions;
+      consumers = builtins.filter (ext: ext.consumesExtraConfig) exts;
+    in
+    builtins.length consumers > 1
+  ) (builtins.attrValues config.server.proxy.virtualHosts);
+
+  vhostsWithKanidmMissingExt =
+    builtins.attrValues config.server.proxy.virtualHosts
+    |> builtins.filter (
+      vh: vh.kanidm != null && vh.extensions != null && !builtins.elem "kanidm" vh.extensions
+    );
 in
 {
   config = mkMerge [
@@ -51,82 +82,19 @@ in
           message = "server.proxy.virtualHosts: kanidm.allowGroups cannot be empty for: ${builtins.concatStringsSep ", " (builtins.attrNames emptyAllowGroupsHosts)}";
         }
         {
-          assertion =
-            let
-              allExtensionNames = builtins.attrNames config.server.proxy.extensions;
-              invalidRefs = builtins.concatLists (
-                builtins.attrValues config.server.proxy.virtualHosts
-                |> builtins.filter (vh: vh.extensions != null)
-                |> map (vh: builtins.filter (extName: !builtins.elem extName allExtensionNames) vh.extensions)
-              );
-            in
-            invalidRefs == [ ];
-          message = "server.proxy.virtualHosts: extension whitelist references nonexistent extensions: ${
-            let
-              allExtensionNames = builtins.attrNames config.server.proxy.extensions;
-              invalidRefs = builtins.concatLists (
-                builtins.attrValues config.server.proxy.virtualHosts
-                |> builtins.filter (vh: vh.extensions != null)
-                |> map (vh: builtins.filter (extName: !builtins.elem extName allExtensionNames) vh.extensions)
-              );
-            in
-            builtins.concatStringsSep ", " (lib.unique invalidRefs)
-          }";
+          assertion = invalidExtensionRefs == [ ];
+          message = "server.proxy.virtualHosts: extension whitelist references nonexistent extensions: ${builtins.concatStringsSep ", " (lib.unique invalidExtensionRefs)}";
         }
         {
-          assertion =
-            let
-              vhostsWithMultipleConsumers = builtins.filter (
-                vh:
-                let
-                  exts =
-                    if vh.extensions == null then
-                      builtins.attrValues config.server.proxy.extensions |> builtins.filter (ext: ext.enable)
-                    else
-                      builtins.filter (ext: builtins.elem ext._name vh.extensions) (
-                        builtins.attrValues config.server.proxy.extensions |> builtins.filter (ext: ext.enable)
-                      );
-                  consumers = builtins.filter (ext: ext.consumesExtraConfig) exts;
-                in
-                builtins.length consumers > 1
-              ) (builtins.attrValues config.server.proxy.virtualHosts);
-            in
-            vhostsWithMultipleConsumers == [ ];
+          assertion = vhostsWithMultipleConsumers == [ ];
           message = "server.proxy.virtualHosts: vhosts have multiple extensions with consumesExtraConfig=true: ${
-            let
-              vhostsWithMultipleConsumers = builtins.filter (
-                vh:
-                let
-                  exts =
-                    if vh.extensions == null then
-                      builtins.attrValues config.server.proxy.extensions |> builtins.filter (ext: ext.enable)
-                    else
-                      builtins.filter (ext: builtins.elem ext._name vh.extensions) (
-                        builtins.attrValues config.server.proxy.extensions |> builtins.filter (ext: ext.enable)
-                      );
-                  consumers = builtins.filter (ext: ext.consumesExtraConfig) exts;
-                in
-                builtins.length consumers > 1
-              ) (builtins.attrValues config.server.proxy.virtualHosts);
-            in
             builtins.concatStringsSep ", " (map (vh: vh._name) vhostsWithMultipleConsumers)
           }";
         }
         {
-          assertion =
-            let
-              vhostsWithKanidmEmptyExtensions =
-                builtins.attrValues config.server.proxy.virtualHosts
-                |> builtins.filter (vh: vh.kanidm != null && vh.extensions == [ ]);
-            in
-            vhostsWithKanidmEmptyExtensions == [ ];
-          message = "server.proxy.virtualHosts: vhost has kanidm enabled but extensions set to [] (kanidm auth won't be generated): ${
-            let
-              vhostsWithKanidmEmptyExtensions =
-                builtins.attrValues config.server.proxy.virtualHosts
-                |> builtins.filter (vh: vh.kanidm != null && vh.extensions == [ ]);
-            in
-            builtins.concatStringsSep ", " (map (vh: vh._name) vhostsWithKanidmEmptyExtensions)
+          assertion = vhostsWithKanidmMissingExt == [ ];
+          message = "server.proxy.virtualHosts: vhost has kanidm enabled but extensions doesn't include kanidm: ${
+            builtins.concatStringsSep ", " (map (vh: vh._name) vhostsWithKanidmMissingExt)
           }";
         }
       ];

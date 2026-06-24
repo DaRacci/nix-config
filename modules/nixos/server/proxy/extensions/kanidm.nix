@@ -173,7 +173,8 @@ let
         groups = groupsWithoutDomain;
         inherit (ctx) scopes;
       }
-    ) contexts;
+    ) contexts
+    |> lib.filterAttrs (_: ctx: builtins.length (builtins.attrValues ctx.virtualHosts) > 0);
 in
 {
   options = {
@@ -280,6 +281,8 @@ in
               value = {
                 owner = "kanidm";
                 group = "kanidm";
+                mode = "0400";
+                restartUnits = [ "kanidm-unixd.service" ];
               };
             }) (builtins.attrNames kanidmContextsWithVirtualHosts)
           )

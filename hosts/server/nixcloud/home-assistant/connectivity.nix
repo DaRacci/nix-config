@@ -143,6 +143,7 @@ in
         ports = [ l4.listenPort ];
         l4 = {
           listenPort = 1883;
+          protocol = "tcp";
           config = ''
             route {
               proxy localhost:${toString l4.listenPort}
