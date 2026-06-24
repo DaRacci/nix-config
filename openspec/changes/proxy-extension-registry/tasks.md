@@ -49,3 +49,36 @@
 - [x] 6.3 Build nixcloud configuration to verify no regressions
 - [x] 6.4 Update `docs/src/modules/nixos/server/proxy.md` with extension architecture section, API reference (`config` function signature, `globalConfig` function signature, `_resolvedExtraConfig`, `consumesExtraConfig`, `_name`, `vhostModule` for option injection, auto-enable pattern), priority ranges, and authoring guide
 - [x] 6.5 Run `nix fmt .` and `nix flake check` to confirm everything passes
+
+## 7. Migrate L4 to Extension
+
+- [ ] 7.1 Create `modules/nixos/server/proxy/extensions/l4.nix` that:
+  - Declares per-vhost `options.server.proxy.virtualHosts` as `attrsOf (submodule ...)` with `options.l4` (nullOr submodule with listenPort: port, config: str default "")
+  - Registers `server.proxy.extensions.l4` with priority 10, consumesExtraConfig=false
+  - Sets `enable = mkDefault` (checks all hosts via getAllAttrsFunc: any vhost has l4 != null)
+  - `config` function returns `""`
+  - `globalConfig` function: collects L4 entries via collectAllAttrsFunc, applies replaceLocalHost to config strings, groups by listenPort, generates layer4 {} block (single-entry-per-port uses named format, multi-entry uses matcher-based routing)
+  - Module `config` block: when isThisIOPrimaryHost and extension enabled, opens firewall TCP/UDP ports for unique listenPorts
+
+- [ ] 7.2 Import L4 extension in `proxy/default.nix`: `(importModule ./extensions/l4.nix { inherit proxyLib; })`
+
+- [ ] 7.3 Remove `l4` option declaration from `options.nix` (lines 168-184: the l4 mkOption block in vhost submodule options)
+
+- [ ] 7.4 Remove `l4Config` let-binding from `config.nix` (lines 45-90: the entire l4Config = let ... in ... block)
+
+- [ ] 7.5 Remove `layer4 {}` block wrapping from `config.nix` globalConfig (line 202: remove `layer4 { ... }` wrapping, leaving only `${extGlobalConfig}`)
+
+- [ ] 7.6 Remove L4 firewall port handling from `config.nix` (lines 270-285: the l4Ports let binding and allowedTCPPorts/allowedUDPPorts assignments)
+
+- [ ] 7.7 Remove the now-unused `hasSuffix` and `sanitiseMatcherName` from `config.nix` if they were only used by L4 logic (check: sanitiseMatcherName is L4-only, hasSuffix is still used for ACME certs)
+
+- [ ] 7.8 Build nixio configuration to verify no regressions: `nix build .#nixosConfigurations.nixio.config.system.build.toplevel`
+
+- [ ] 7.9 Build nixcloud configuration to verify no regressions: `nix build .#nixosConfigurations.nixcloud.config.system.build.toplevel`
+
+- [ ] 7.10 Run `nix fmt .` on all changed files
+
+- [ ] 7.11 Update `docs/src/modules/nixos/server/proxy.md`:
+  - Add L4 to the "Migrated Extensions" table: `| l4 | 10 | L4 TCP/UDP forwarding (layer4 Caddy block + firewall ports) |`
+  - Update the "config.nix — Caddy Integration" section: remove L4 mention, note that L4 is now an extension
+  - Update "Layer 4 Forwarding" section: note it's managed by the L4 extension

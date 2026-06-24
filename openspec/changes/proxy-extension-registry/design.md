@@ -6,9 +6,11 @@ The proxy module (`modules/nixos/server/proxy/`) currently has five files:
 |------|------|
 | `default.nix` | Helpers (`proxyLib`), imports sub-modules |
 | `options.nix` | `server.proxy` option tree (domain, vhosts, kanidmContexts) |
-| `config.nix` | Caddy vhost generation, ACME, L4 config — hardcodes Kanidm auth inside `extraConfig` |
+| `config.nix` | Caddy vhost generation, ACME — hardcodes Kanidm auth inside `extraConfig` |
 | `kanidm.nix` | Global `security` block (identity providers, portals, policies) |
 | `extensions.nix` | Dashboard items, Cloudflared tunnels, Kanidm provisioning (sops + oauth2 systems) |
+
+**Post-L4-extension**: L4 config (layer4 globalConfig block, firewall ports) moves to extensions/l4.nix. config.nix no longer contains L4 logic.
 
 The key problem: `config.nix` directly checks `vh.kanidm != null` and generates auth directives inline. Any new cross-cutting vhost concern (rate limiting, crowdsec, WAF) would require editing `config.nix` — violating open/closed principle.
 
@@ -40,11 +42,15 @@ The extension's `config` function must receive `vh.extraConfig` (with `replaceLo
 - Migrate dashboard and Cloudflared wiring from `extensions.nix` into separate extensions
 - Retire `kanidm.nix` — its global security block moves into the kanidm extension's `globalConfig`
 - Keep existing vhost option shapes unchanged (no downstream host config edits)
+- Migrate L4 (layer4 Caddy config + firewall ports) from config.nix into a self-registered extension
 
 **Non-Goals:**
 - Add new extensions beyond the three migrated ones (framework only)
 - Allow extensions to modify proxy options — they only read vhost/host attrs and return strings
 - Support extension dependencies or ordering constraints beyond numeric priority
+
+**Non-Goals:**
+- Change L4 behavior or routing logic — pure extraction, no functional changes
 
 ## Decisions
 
@@ -246,6 +252,38 @@ Note: `vhostModule` declares `options.kanidm` (NOT `options.server.proxy.virtual
 
 After migration, `extensions.nix` keeps only Kanidm provisioning (sops secrets, oauth2 systems). The file is renamed to `kanidm-provisioning.nix` for clarity.
 
+### Decision 11: L4 extension — pure extraction, priority 10
+
+The L4 config generation in `config.nix` (lines 45-90) and L4 vhost options in `options.nix` (lines 168-184) migrate to a new extension `extensions/l4.nix`. No behavioral changes — the generated Caddy config is byte-identical before and after migration.
+
+**Extension shape:**
+```nix
+server.proxy.extensions.l4 = {
+  priority = 10;           # System-level, runs before all HTTP extensions
+  consumesExtraConfig = false;  # L4 doesn't touch HTTP extraConfig
+  enable = mkDefault (any vhost has l4 != null);  # Auto-enable pattern
+  config = name: vh: hostCfg: "";  # No per-vhost HTTP config injection
+  globalConfig = hostCfg: /* layer4 { ... } block */;
+  vhostModule = { options.l4 = mkOption { type = nullOr (submodule { ... }); }; };
+};
+```
+
+**How L4 differs from HTTP extensions:**
+- L4 `config` function returns `""` — L4 has no per-vhost HTTP Caddy directives
+- L4 `globalConfig` generates the entire `layer4 {}` block (not just directives to concatenate) — this is the primary output
+- L4 also manages `networking.firewall` ports via its module `config` block (not via extension functions) — same pattern dashboard uses for `server.dashboard.items`
+
+**Migration steps:**
+1. Create `extensions/l4.nix` with the extension registration, vhost option declaration, globalConfig function (collecting L4 entries via `collectAllAttrsFunc`, grouping by port), and firewall `config` block
+2. Import it in `proxy/default.nix`: `(importModule ./extensions/l4.nix { inherit proxyLib; })`
+3. Remove `l4` option from `options.nix` vhost submodule
+4. Remove `l4Config` let-binding, `layer4 {}` block wrapping, and firewall L4 port handling from `config.nix`
+5. Verify existing hosts (nixai, nixcloud) produce identical Caddy `layer4 {}` blocks
+
+**Dependencies:** The extension module receives `isThisIOPrimaryHost`, `collectAllAttrsFunc`, `getAllAttrsFunc`, and `replaceLocalHost` as top-level parameters (same as cloudflared extension). The `globalConfig` function closes over `collectAllAttrsFunc` and `replaceLocalHost` to traverse hosts and resolve addresses.
+
+**Risk:** `getAllAttrsFunc` and `collectAllAttrsFunc` traverse all host configs — this is the same pattern used by existing extensions (kanidm's `hasAnyKanidm`, cloudflared's `getAllAttrsFunc` for public hosts). No new risk.
+
 ## Component Diagram
 
 ```mermaid
@@ -260,13 +298,16 @@ graph TD
         E_KAN[extensions/kanidm.nix<br/>Auth directives + security block]
         E_DASH[extensions/dashboard.nix<br/>Dashboard items]
         E_CF[extensions/cloudflared.nix<br/>Cloudflared tunnels]
+        E_L4[extensions/l4.nix<br/>L4 TCP/UDP forwarding]
     end
 
     OPT -->|option tree| CFG
     DEF -->|imports| E_KAN
     DEF -->|imports| E_DASH
     DEF -->|imports| E_CF
+    DEF -->|imports| E_L4
     E_KAN -->|registers in server.proxy.extensions| OPT
+    E_L4 -->|registers in server.proxy.extensions| OPT
     E_DASH -->|registers in server.proxy.extensions| OPT
     E_CF -->|registers in server.proxy.extensions| OPT
     CFG -->|proxyLib.getExtensionsForVhost| OPT
@@ -314,3 +355,4 @@ sequenceDiagram
 - **Risk**: `extensions.nix` currently handles Kanidm provisioning (sops secrets, oauth2 systems). Moving dashboard/cloudflared out but leaving provisioning in creates fragmentation. → **Mitigation**: Rename `extensions.nix` to `kanidm-provisioning.nix`; only Kanidm provisioning remains in it.
 - **Risk**: `functionTo` merge is silent function composition — if two modules set the same extension's `config`, the merged result is garbage (first function's string output is passed as vhost attrset to second). → **Mitigation**: In-tree extensions are set once; document that `functionTo` merging is undefined for this use case. An assertion detects duplicate extension registrations.
 - **Risk**: Dashboard extension's `config` function is called for every vhost but always returns `""` — wasted computation. → **Accepted**: Pragmatic reuse of the registry for system-level extensions that happen to not generate per-vhost Caddy config. The cost is negligible.
+- **Trade-off**: L4 extension has an empty per-vhost `config` function (always returns `""`) because L4 config goes into the `layer4 {}` global block, not individual HTTP vhost blocks. → **Accepted**: The extension still uses per-vhost options (`l4.listenPort`, `l4.config`) for configuration; the `config` function is the wrong injection point for L4. The `globalConfig` function is the correct mechanism.
