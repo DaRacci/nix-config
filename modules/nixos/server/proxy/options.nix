@@ -164,24 +164,6 @@ in
                 default = "";
                 description = "Configuration to be placed in the caddy virtualHost extraConfig.";
               };
-
-              l4 = mkOption {
-                default = null;
-                type = nullOr (submodule {
-                  options = {
-                    listenPort = mkOption {
-                      type = port;
-                      description = "Port to listen on for L4 traffic.";
-                    };
-
-                    config = mkOption {
-                      type = str;
-                      default = "";
-                      description = "Configuration for the L4 plugin.";
-                    };
-                  };
-                });
-              };
             };
           }
         )

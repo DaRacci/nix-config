@@ -192,9 +192,13 @@ virtualHosts.<name>.extensions = mkOption {
 
 Dashboard: `extensions/dashboard.nix` sets `server.proxy.extensions.dashboard = { priority = 200; config = ... }` — the config function returns `""` (it's a vhost-iterated no-op). The dashboard actually operates on `server.dashboard.items` in its module config (not the config function).
 
-Cloudflared: `extensions/cloudflared.nix` similarly operates on `services.cloudflared.tunnels` from its module config, returns `""` from its config function.
+Cloudflared: `extensions/cloudflared.nix` fully owns the `public` vhost option. It:
+- Declares `public` option via `vhostModule` (moved from `options.nix` vhost submodule — no user-facing change)
+- Returns `import public` from its `config` function when `vh.public == true` (moved from `config.nix` line 191)
+- Sets `services.cloudflared.tunnels` ingress from its module config for vhosts with `public == true` (moved from `extensions.nix`)
+- Auto-enables via `mkDefault` when any vhost has `public == true`
 
-These are extensions in the registry sense (enabled/disabled, prioritized) even though their `config` function returns empty string. Their module config sets system-level options (`server.dashboard.items`, `services.cloudflared`) that don't go into the vhost Caddy block. Priority is irrelevant for them but included for consistency.
+These are extensions in the registry sense (enabled/disabled, prioritized) even though dashboard's `config` function returns empty string. Cloudflared's config function returns `import public` — a single Caddy import directive.
 
 ### Decision 8: Single consumer of extraConfig
 

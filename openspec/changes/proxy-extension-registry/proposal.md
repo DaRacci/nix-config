@@ -12,7 +12,7 @@ The proxy module currently hardcodes Kanidm auth into the virtual host rendering
   3. Call each extension's `config` function.
   4. Concatenate results into the vhost's Caddy block (before user `extraConfig` so users can override).
 - **BREAKING**: Kanidm auth logic moves out of `config.nix` into a new proxy extension `modules/nixos/server/proxy/extensions/kanidm.nix` that registers itself. Existing `kanidm` options on vhosts remain unchanged; only the wiring moves. The `kanidm.nix` global security block is retired — its logic moves into the extension's `globalConfig` function.
-- **BREAKING**: Dashboard and Cloudflared wiring in `extensions.nix` split into separate extension files (no user-facing option changes, internal restructure only).
+- **BREAKING**: Dashboard and Cloudflared wiring in `extensions.nix` split into separate extension files. `public` vhost option and `import public` Caddy snippet move to the Cloudflared extension (their actual domain) — no user-facing option shape changes, internal restructure only.
 - Add `globalConfig` function to each extension (signature: `hostConfig -> string`) for injecting directives into the top-level Caddy `globalConfig` block (sorted by priority).
 - Each extension auto-manages its `enable` state via `mkDefault` based on whether its relevant configuration exists (e.g., kanidm auto-enables only when vhosts have `kanidm != null`).
 - Docs updated to describe extension API and how to write new extensions.
