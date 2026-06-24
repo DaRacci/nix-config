@@ -282,7 +282,7 @@ in
                 owner = "kanidm";
                 group = "kanidm";
                 mode = "0400";
-                restartUnits = [ "kanidm-unixd.service" ];
+                restartUnits = [ "kanidm.service" ];
               };
             }) (builtins.attrNames kanidmContextsWithVirtualHosts)
           )
