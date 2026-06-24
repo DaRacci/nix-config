@@ -42,6 +42,14 @@ in
                 type = port;
                 description = "Port to listen on for L4 traffic.";
               };
+              protocol = mkOption {
+                type = types.enum [
+                  "tcp"
+                  "udp"
+                ];
+                default = "tcp";
+                description = "Protocol for L4 listener.";
+              };
               config = mkOption {
                 type = str;
                 default = "";
@@ -69,20 +77,20 @@ in
           _name: _vh: _hostCfg:
           "";
         globalConfig =
-          hostCfg:
+          _hostCfg:
           let
             sanitiseMatcherName = name: builtins.replaceStrings [ "." "-" ] [ "_" "_" ] name;
 
             allL4Entries =
               collectAllAttrsFunc "server.proxy.virtualHosts" (
-                virtualHosts: _:
+                virtualHosts: vhostHostCfg:
                 virtualHosts
                 |> builtins.attrValues
                 |> builtins.filter (vh: vh.l4 != null)
                 |> map (vh: {
                   inherit (vh) baseUrl;
                   port = vh.l4.listenPort;
-                  config = replaceLocalHost hostCfg.host.name vh.l4.config;
+                  config = replaceLocalHost vhostHostCfg.host.name vh.l4.config;
                 })
               )
               |> flatten;
@@ -132,19 +140,24 @@ in
     (mkIf isThisIOPrimaryHost {
       networking.firewall =
         let
-          l4Ports =
+          l4Entries =
             collectAllAttrsFunc "server.proxy.virtualHosts" (
               virtualHosts: _:
               builtins.attrValues virtualHosts
               |> builtins.filter (vh: vh.l4 != null)
-              |> map (vh: vh.l4.listenPort)
+              |> map (vh: {
+                port = vh.l4.listenPort;
+                protocol = vh.l4.protocol;
+              })
             )
             |> flatten
             |> unique;
+          tcpPorts = builtins.filter (e: e.protocol == "tcp") l4Entries |> map (e: e.port) |> unique;
+          udpPorts = builtins.filter (e: e.protocol == "udp") l4Entries |> map (e: e.port) |> unique;
         in
         {
-          allowedTCPPorts = l4Ports;
-          allowedUDPPorts = l4Ports;
+          allowedTCPPorts = tcpPorts;
+          allowedUDPPorts = udpPorts;
         };
     })
   ];
