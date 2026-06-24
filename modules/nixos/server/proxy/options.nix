@@ -90,9 +90,6 @@ in
             maybePort = if (builtins.length split) > 1 then lib.toInt (builtins.elemAt split 1) else null;
           in
           {
-            # vhost-level options from extensions are merged here.
-            # Each extension declares `options.server.proxy.virtualHosts`
-            # to inject its per-vhost options. NixOS merges these declarations.
             options = {
               _name = mkOption {
                 type = str;
@@ -185,7 +182,6 @@ in
                   };
                 });
               };
-
             };
           }
         )

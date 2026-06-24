@@ -246,6 +246,6 @@ config in imports"`.
 
 See the proxy extension registry for a complete example:
 - `modules/nixos/server/proxy/options.nix` — declares core vhost submodule
-- `modules/nixos/server/proxy/extensions/kanidm.nix` — injects `kanidm` option
+- `modules/nixos/server/proxy/extensions/kanidm.nix` — injects `kanidm` option + owns all kanidm logic (auth, globalConfig, provisioning)
 - `modules/nixos/server/proxy/extensions/dashboard.nix` — no vhost options needed
 - `modules/nixos/server/proxy/extensions/cloudflared.nix` — no vhost options needed
