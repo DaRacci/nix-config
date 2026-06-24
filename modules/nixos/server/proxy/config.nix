@@ -32,62 +32,12 @@ let
     getGlobalConfigFromExtensions
     ;
 
-  # Sanitise a domain name into a valid Caddy matcher name (only alphanumeric and underscores)
-  sanitiseMatcherName = name: builtins.replaceStrings [ "." "-" ] [ "_" "_" ] name;
-
   noAcmeCertsDomains =
     collectAllAttrs "server.proxy.virtualHosts"
     |> builtins.attrValues
     |> builtins.filter (vh: !vh.useAcmeCerts)
     |> map (vh: [ vh.baseUrl ] ++ vh.aliases)
     |> flatten;
-
-  # Generate L4 config, grouping entries that share the same port into a single listener
-  l4Config =
-    let
-      allL4Entries =
-        collectAllAttrsFunc "server.proxy.virtualHosts" (
-          virtualHosts: hostCfg:
-          virtualHosts
-          |> builtins.attrValues
-          |> builtins.filter (vh: vh.l4 != null)
-          |> map (vh: {
-            inherit (vh) baseUrl;
-            port = vh.l4.listenPort;
-            config = replaceLocalHost hostCfg.host.name vh.l4.config;
-          })
-        )
-        |> flatten;
-
-      groupedByPort = builtins.groupBy (entry: toString entry.port) allL4Entries;
-    in
-    builtins.attrValues (
-      builtins.mapAttrs (
-        port: entries:
-        if builtins.length entries == 1 then
-          let
-            entry = builtins.head entries;
-          in
-          ''
-            ${entry.baseUrl}:${port} {
-              ${entry.config}
-            }
-          ''
-        else
-          ''
-            :${port} {
-              ${builtins.concatStringsSep "\n" (
-                map (entry: ''
-                  @${sanitiseMatcherName entry.baseUrl} http host ${entry.baseUrl}
-                  route @${sanitiseMatcherName entry.baseUrl} {
-                    ${entry.config}
-                  }
-                '') entries
-              )}
-            }
-          ''
-      ) groupedByPort
-    );
 
   emptyAllowGroupsHosts =
     collectKanidmVirtualHosts
@@ -194,16 +144,7 @@ in
 
     (mkIf isThisIOPrimaryHost {
       services.caddy = {
-        globalConfig =
-          let
-            extGlobalConfig = getGlobalConfigFromExtensions config;
-          in
-          ''
-            layer4 {
-              ${builtins.concatStringsSep "\n" l4Config}
-            }
-            ${extGlobalConfig}
-          '';
+        globalConfig = getGlobalConfigFromExtensions config;
 
         virtualHosts = collectAllAttrsFunc "server.proxy.virtualHosts" (
           virtualHosts: hostCfg:
@@ -267,22 +208,6 @@ in
           }
         );
 
-      networking.firewall =
-        let
-          l4Ports =
-            collectAllAttrsFunc "server.proxy.virtualHosts" (
-              virtualHosts: _:
-              builtins.attrValues virtualHosts
-              |> builtins.filter (vh: vh.l4 != null)
-              |> map (vh: vh.l4.listenPort)
-            )
-            |> flatten
-            |> unique;
-        in
-        {
-          allowedTCPPorts = l4Ports;
-          allowedUDPPorts = l4Ports;
-        };
     })
   ];
 }

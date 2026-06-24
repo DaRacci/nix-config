@@ -46,6 +46,8 @@ server.proxy.virtualHosts.grafana = {
 
 Handles the generation of `services.caddy.virtualHosts` and ACME certificate requests.
 
+> **Note:** L4 (TCP/UDP) forwarding is handled by the `l4` extension, not by config.nix. See [Layer 4 Forwarding](#layer-4-forwarding).
+
 ```nix
 # Generated Caddy block for a vhost with Kanidm
 grafana.example.com {
@@ -118,9 +120,7 @@ These are automatically managed if Kanidm provisioning is enabled on the same ho
 
 ### Layer 4 Forwarding
 
-L4 forwarding uses the `caddy.layer4` plugin. It is primarily used for non-HTTP traffic like database connections or SSH.
-
-Public services are routed through the Cloudflared tunnel with ID `8d42e9b2-3814-45ea-bbb5-9056c8f017e2`. Ensure this tunnel is correctly configured on the IO host.
+L4 forwarding uses the `caddy.layer4` plugin for non-HTTP traffic like database connections or SSH. Managed by the `l4` extension (`modules/nixos/server/proxy/extensions/l4.nix`), which auto-enables when any vhost has `l4 != null`.
 
 ## References
 
@@ -227,8 +227,9 @@ in
 
 ### Migrated Extensions
 
-| Extension     | Priority | Purpose                                |
-| ------------- | -------- | -------------------------------------- |
-| `kanidm`      | 50       | Kanidm OAuth2 authentication per vhost |
-| `dashboard`   | 200      | Auto-generate dashboard items          |
-| `cloudflared` | 200      | Cloudflared tunnel ingress             |
+| Extension     | Priority | Purpose                                                     |
+| ------------- | -------- | ----------------------------------------------------------- |
+| `l4`          | 10       | L4 TCP/UDP forwarding (layer4 Caddy block + firewall ports) |
+| `kanidm`      | 50       | Kanidm OAuth2 authentication per vhost                      |
+| `dashboard`   | 200      | Auto-generate dashboard items                               |
+| `cloudflared` | 200      | Cloudflared tunnel ingress                                  |
