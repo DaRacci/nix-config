@@ -1,21 +1,20 @@
 ## 1. Extension Registry Foundation
 
-- [x] 1.1 Add `server.proxy.extensions` option in `options.nix` (attrsOf submodule with priority, enable, consumesExtraConfig, config, globalConfig, vhostModule)
-- [x] 1.2 Update vhost submodule in `options.nix` to collect `vhostModule` from all enabled extensions and include them in its `imports`
-- [x] 1.3 Add `_name` read-only option to the vhost submodule in `options.nix`
-- [x] 1.4 Add `server.proxy.virtualHosts.<name>.extensions` option in `options.nix` (nullOr listOf str, default null)
-- [x] 1.5 Create `modules/nixos/server/proxy/extensions/` directory
-- [x] 1.6 Add `getExtensionsForVhost` function to `proxyLib` in `default.nix`: filters by vhost whitelist, filters by enable, sorts by priority (ascending, alphabetical tie-break), returns sorted list
-- [x] 1.7 Add `getGlobalConfigFromExtensions` function to `proxyLib`: collects `globalConfig` from all enabled extensions, sorted by priority, concatenated
-- [x] 1.8 Add assertion: vhost whitelist names must exist in the registry (error if nonexistent extension name referenced)
-- [x] 1.9 Add assertion: at most one extension with `consumesExtraConfig = true` per vhost
-- [x] 1.10 Add assertion: vhost with `kanidm != null` and `extensions = []` raises a warning
+- [x] 1.1 Add `server.proxy.extensions` option in `options.nix` (attrsOf submodule with priority, enable, consumesExtraConfig, config, globalConfig)
+- [x] 1.2 Add `_name` read-only option to the vhost submodule in `options.nix`
+- [x] 1.3 Add `server.proxy.virtualHosts.<name>.extensions` option in `options.nix` (nullOr listOf str, default null)
+- [x] 1.4 Create `modules/nixos/server/proxy/extensions/` directory
+- [x] 1.5 Add `getExtensionsForVhost` function to `proxyLib` in `default.nix`: filters by vhost whitelist, filters by enable, sorts by priority (ascending, alphabetical tie-break), returns sorted list
+- [x] 1.6 Add `getGlobalConfigFromExtensions` function to `proxyLib`: collects `globalConfig` from all enabled extensions, sorted by priority, concatenated
+- [x] 1.7 Add assertion: vhost whitelist names must exist in the registry (error if nonexistent extension name referenced)
+- [x] 1.8 Add assertion: at most one extension with `consumesExtraConfig = true` per vhost
+- [x] 1.9 Add assertion: vhost with `kanidm != null` and `extensions = []` raises a warning
 
 ## 2. Migrate Kanidm to Extension (vhost options + config + globalConfig)
 
-- [x] 2.1 Move `kanidm` option declaration from `options.nix` vhost submodule into `vhostModule` set by `extensions/kanidm.nix` (options path relative: `options.kanidm`)
-- [x] 2.2 Move `kanidmContexts` option declaration from `options.nix` into `extensions/kanidm.nix`'s own `options` block
-- [x] 2.3 Create `modules/nixos/server/proxy/extensions/kanidm.nix` that registers `server.proxy.extensions.kanidm` with: priority 50, consumesExtraConfig=true, `enable = mkDefault proxyLib.hasAnyKanidm`, config function returning auth directives or "", globalConfig function returning the `security { ... }` block (identity providers, portals, policies), vhostModule declaring `options.kanidm`
+- [x] 2.1 Move `kanidm` option declaration from `options.nix` vhost submodule into `options` block of `extensions/kanidm.nix` (full path: `options.server.proxy.virtualHosts.<name>.kanidm`)
+- [x] 2.2 Move `kanidmContexts` option declaration from `options.nix` into `extensions/kanidm.nix`'s `options` block (full path: `options.server.proxy.kanidmContexts`)
+- [x] 2.3 Create `modules/nixos/server/proxy/extensions/kanidm.nix` that registers `server.proxy.extensions.kanidm` with: priority 50, consumesExtraConfig=true, `enable = mkDefault proxyLib.hasAnyKanidm`, config function returning auth directives or "", globalConfig function returning the `security { ... }` block (identity providers, portals, policies)
 - [x] 2.4 The kanidm extension's config function (name -> vh -> hostCfg) uses `resolveKanidmContext` from proxyLib, returns `""` when `vh.kanidm == null`
 - [x] 2.5 When `vh.kanidm != null`: config function generates bypass handle + auth handle structure, wrapping `vh._resolvedExtraConfig` inside both handles, using `vh._name` for portal/policy references
 - [x] 2.6 Move the security block generation logic from `kanidm.nix` into the kanidm extension's `globalConfig` function
@@ -27,17 +26,17 @@
 
 ## 3. Migrate Dashboard to Extension
 
-- [x] 3.1 Create `modules/nixos/server/proxy/extensions/dashboard.nix` that: registers `server.proxy.extensions.dashboard` with priority 200, sets `enable = mkDefault (cfg.virtualHosts != {})`, config function returns `""`, globalConfig returns `""`, vhostModule = null
+- [x] 3.1 Create `modules/nixos/server/proxy/extensions/dashboard.nix` that: registers `server.proxy.extensions.dashboard` with priority 200, sets `enable = mkDefault (cfg.virtualHosts != {})`, config function returns `""`, globalConfig returns `""`
 - [x] 3.2 Move `server.dashboard.items` generation from `extensions.nix` to dashboard extension's module config block
 - [x] 3.3 Import dashboard extension in `proxy/default.nix`
 
 ## 4. Migrate Cloudflared to Extension
 
-- [ ] 4.1 Create `modules/nixos/server/proxy/extensions/cloudflared.nix` that: registers `server.proxy.extensions.cloudflared` with priority 200, sets `enable = mkDefault (any vhost has public == true)`, config function returns `"import public"` when `vh.public`, globalConfig returns `""`, vhostModule declares `options.public`
-- [ ] 4.2 Move `public` option declaration from `options.nix` vhost submodule into cloudflared extension's `vhostModule`
-- [ ] 4.3 Move `services.cloudflared.tunnels` ingress generation from `extensions.nix` to cloudflared extension's module config block
+- [ ] 4.1 Create `modules/nixos/server/proxy/extensions/cloudflared.nix` that: registers `server.proxy.extensions.cloudflared` with priority 200, sets `enable = mkDefault (any vhost has public == true)`, config function returns `"import public"` when `vh.public`, globalConfig returns `""`
+- [ ] 4.2 Declare `public` option in cloudflared extension's `options` block (full path: `options.server.proxy.virtualHosts.<name>.public`), remove from `options.nix`
+- [x] 4.3 Move `services.cloudflared.tunnels` ingress generation from `extensions.nix` to cloudflared extension's module config block
 - [ ] 4.4 Remove `import public` line from `config.nix` vhost extraConfig generation (now handled by cloudflared extension's config function)
-- [ ] 4.5 Import cloudflared extension in `proxy/default.nix`
+- [x] 4.5 Import cloudflared extension in `proxy/default.nix`
 
 ## 5. Clean up Original extensions.nix
 
@@ -46,11 +45,11 @@
 
 ## 6. Validate and Document
 
-- [x] 6.1 Run `nix fmt .` on all changed files
-- [x] 6.2 Build nixio configuration to verify no regressions
-- [x] 6.3 Build nixcloud configuration to verify no regressions
-- [x] 6.4 Update `docs/src/modules/nixos/server/proxy.md` with extension architecture section, API reference (`config` function signature, `globalConfig` function signature, `_resolvedExtraConfig`, `consumesExtraConfig`, `_name`, `vhostModule` for option injection, auto-enable pattern), priority ranges, and authoring guide
-- [x] 6.5 Run `nix fmt .` and `nix flake check` to confirm everything passes
+- [ ] 6.1 Run `nix fmt .` on all changed files
+- [ ] 6.2 Build nixio configuration to verify no regressions
+- [ ] 6.3 Build nixcloud configuration to verify no regressions
+- [x] 6.4 Update `docs/src/modules/nixos/server/proxy.md` with extension architecture section, API reference (`config` function signature, `globalConfig` function signature, `_resolvedExtraConfig`, `consumesExtraConfig`, `_name`, native options merging pattern, auto-enable pattern), priority ranges, and authoring guide
+- [ ] 6.5 Run `nix fmt .` and `nix flake check` to confirm everything passes
 
 ## 7. Migrate L4 to Extension
 
