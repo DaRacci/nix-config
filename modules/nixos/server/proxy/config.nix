@@ -72,6 +72,12 @@ let
     |> builtins.filter (
       vh: vh.kanidm != null && vh.extensions != null && !builtins.elem "kanidm" vh.extensions
     );
+
+  vhostsWithKanidmExtDisabled =
+    builtins.attrValues config.server.proxy.virtualHosts
+    |> builtins.filter (
+      vh: vh.kanidm != null && !(config.server.proxy.extensions.kanidm.enable or false)
+    );
 in
 {
   config = mkMerge [
@@ -95,6 +101,12 @@ in
           assertion = vhostsWithKanidmMissingExt == [ ];
           message = "server.proxy.virtualHosts: vhost has kanidm enabled but extensions doesn't include kanidm: ${
             builtins.concatStringsSep ", " (map (vh: vh._name) vhostsWithKanidmMissingExt)
+          }";
+        }
+        {
+          assertion = vhostsWithKanidmExtDisabled == [ ];
+          message = "server.proxy.virtualHosts: vhost has kanidm enabled but the kanidm extension is disabled: ${
+            builtins.concatStringsSep ", " (map (vh: vh._name) vhostsWithKanidmExtDisabled)
           }";
         }
       ];
