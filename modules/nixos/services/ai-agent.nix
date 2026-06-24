@@ -173,6 +173,12 @@ in
     };
 
     models = {
+      provider = mkOption {
+        type = str;
+        default = "openrouter";
+        description = "The model provider to use.";
+      };
+
       primary = mkOption {
         type = str;
         default = "deepseek/deepseek-v4-flash";
@@ -191,19 +197,29 @@ in
         description = ''
           The model to use for compression of context, summorisation and similar tasks that don't require reasoning.
           This model still needs a decently sized context window to be effective.
+
+          Used for auxilary models:
         '';
       };
 
       simpleton = mkOption {
         type = str;
         default = "stepfun/step-3.5-flash";
-        description = "The simpleton model to delegate tasks to that require less reasoning, basic understanding and small context windows.";
+        description = ''
+          The simpleton model to delegate tasks to that require less reasoning, basic understanding and small context windows.
+
+          Used for auxilary models:
+        '';
       };
 
       brains = mkOption {
         type = str;
         default = "deepseek/deepseek-v4-pro";
-        description = "The smartest model to use for complex reasoning and decision-making tasks.";
+        description = ''
+          The smartest model to use for complex reasoning and decision-making tasks.
+
+          Used for auxilary models:
+        '';
       };
     };
   };
@@ -252,6 +268,16 @@ in
             wrap_response = true;
           };
 
+          curator = {
+            enabled = true;
+            interval_hours = 24 * 7;
+            min_idle_hours = 2;
+            stale_after_days = 30;
+            archive_after_days = 90;
+            consolidate = true;
+            prune_builtins = true;
+          };
+
           agent = {
             max_turns = 150;
             gateway_timeout = 1800;
@@ -265,12 +291,41 @@ in
           };
 
           auxiliary = {
-            approval.model = cfg.models.simpleton;
-            compression.model = cfg.models.compression;
-            curator.model = cfg.models.simpleton;
-            session_search.model = cfg.models.simpleton;
-            title_generation.model = cfg.models.compression;
-            auxiliary.triage_specifier = cfg.models.brains;
+            approval = {
+              inherit (cfg.models) provider;
+              model = cfg.models.simpleton;
+            };
+            compression = {
+              inherit (cfg.models) provider;
+              model = cfg.models.compression;
+            };
+            curator = {
+              inherit (cfg.models) provider;
+              model = cfg.models.simpleton;
+            };
+            session_search = {
+              inherit (cfg.models) provider;
+              model = cfg.models.simpleton;
+            };
+            title_generation = {
+              inherit (cfg.models) provider;
+              model = cfg.models.compression;
+            };
+            triage_specifier = {
+              inherit (cfg.models) provider;
+              model = cfg.models.brains;
+            };
+            vision = {
+              inherit (cfg.models) provider;
+              model = cfg.models.vision;
+            };
+          };
+
+          delegation = {
+            max_concurrent_children = 24;
+            max_spawn_depth = 3;
+            model = cfg.models.primary;
+            provider = "openrouter";
           };
 
           terminal = {
