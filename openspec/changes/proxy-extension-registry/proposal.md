@@ -16,6 +16,11 @@ The proxy module currently hardcodes Kanidm auth into the virtual host rendering
 - Add `globalConfig` function to each extension (signature: `hostConfig -> string`) for injecting directives into the top-level Caddy `globalConfig` block (sorted by priority).
 - Each extension auto-manages its `enable` state via `mkDefault` based on whether its relevant configuration exists (e.g., kanidm auto-enables only when vhosts have `kanidm != null`).
 - Docs updated to describe extension API and how to write new extensions.
+- Add L4 extension `modules/nixos/server/proxy/extensions/l4.nix` that self-registers with priority 10 (reserved system range). Extracts the `layer4 {}` Caddy globalConfig block and firewall port openings from `config.nix` into the extension module.
+- Move `l4` vhost option declaration from `options.nix` into the L4 extension's `vhostModule` (declaring `options.l4` on virtualHosts submodule).
+- Remove `l4Config` generation logic from `config.nix` — L4 `globalConfig` function now handles it via `collectAllAttrsFunc`.
+- Remove firewall L4 port logic from `config.nix` — L4 extension's module `config` block now handles `networking.firewall`.
+- L4 extension auto-enables via `mkDefault` when any vhost has `l4 != null`.
 
 ## Capabilities
 
@@ -24,6 +29,7 @@ The proxy module currently hardcodes Kanidm auth into the virtual host rendering
 - `proxy-extension-registry`: Global registry of named extensions with priority ordering and a config generator function.
 - `proxy-vhost-extension-selection`: Per-vhost opt-in/out of registered extensions via a whitelist.
 - `proxy-extension-authoring`: Module authors can add files to `modules/nixos/server/proxy/extensions/` that register themselves, with no changes to proxy internals.
+- `proxy-l4-extension`: Layer 4 (TCP/UDP) Caddy config migrated into a self-contained extension with its own vhost options, globalConfig generation, and firewall port management.
 
 ### Modified Capabilities
 
