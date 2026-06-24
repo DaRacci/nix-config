@@ -137,12 +137,6 @@ in
                 '';
               };
 
-              public = mkOption {
-                type = bool;
-                default = false;
-                description = "When enabled this service will be accessible to the public via Cloudflared Tunnels.";
-              };
-
               baseUrl = mkOption {
                 type = str;
                 default = "${subdomain}.${getIOPrimaryHostAttr "server.proxy.domain"}";

@@ -18,7 +18,6 @@ let
     mkIf
     mkMerge
     nameValuePair
-    optionalString
     unique
     ;
 
@@ -188,7 +187,6 @@ in
                 in
                 ''
                   import default
-                  ${optionalString vh.public "import public"}
                   ${extOutputsStr}
                   ${if anyConsumerWithOutput then "" else resolvedExtraConfig}
                 '';
