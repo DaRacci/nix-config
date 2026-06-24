@@ -140,6 +140,5 @@ in
     (importModule ./extensions/dashboard.nix { inherit proxyLib; })
     (importModule ./extensions/cloudflared.nix { inherit proxyLib; })
     (importModule ./config.nix { inherit proxyLib; })
-    (importModule ./kanidm-provisioning.nix { inherit proxyLib; })
   ];
 }
