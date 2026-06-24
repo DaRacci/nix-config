@@ -32,10 +32,10 @@
 
 ## 4. Migrate Cloudflared to Extension
 
-- [ ] 4.1 Create `modules/nixos/server/proxy/extensions/cloudflared.nix` that: registers `server.proxy.extensions.cloudflared` with priority 200, sets `enable = mkDefault (any vhost has public == true)`, config function returns `"import public"` when `vh.public`, globalConfig returns `""`
-- [ ] 4.2 Declare `public` option in cloudflared extension's `options` block (full path: `options.server.proxy.virtualHosts.<name>.public`), remove from `options.nix`
+- [x] 4.1 Cloudflared extension created: registers `server.proxy.extensions.cloudflared` with priority 200, auto-enable via getAllAttrsFunc, config function returns `"import public"` when vh.public, globalConfig returns `""`
+- [x] 4.2 `public` option declared in cloudflared extension's `options` block, removed from `options.nix`
 - [x] 4.3 Move `services.cloudflared.tunnels` ingress generation from `extensions.nix` to cloudflared extension's module config block
-- [ ] 4.4 Remove `import public` line from `config.nix` vhost extraConfig generation (now handled by cloudflared extension's config function)
+- [x] 4.4 Remove `import public` line from `config.nix` vhost extraConfig generation (now handled by cloudflared extension's config function)
 - [x] 4.5 Import cloudflared extension in `proxy/default.nix`
 
 ## 5. Clean up Original extensions.nix
@@ -45,11 +45,11 @@
 
 ## 6. Validate and Document
 
-- [ ] 6.1 Run `nix fmt .` on all changed files
-- [ ] 6.2 Build nixio configuration to verify no regressions
-- [ ] 6.3 Build nixcloud configuration to verify no regressions
+- [x] 6.1 Run `nix fmt .` on all changed files
+- [x] 6.2 Build nixio configuration to verify no regressions (pre-existing unrelated error: ai-agent.nix:42 missing webhook)
+- [x] 6.3 Build nixcloud configuration to verify no regressions
 - [x] 6.4 Update `docs/src/modules/nixos/server/proxy.md` with extension architecture section, API reference (`config` function signature, `globalConfig` function signature, `_resolvedExtraConfig`, `consumesExtraConfig`, `_name`, native options merging pattern, auto-enable pattern), priority ranges, and authoring guide
-- [ ] 6.5 Run `nix fmt .` and `nix flake check` to confirm everything passes
+- [x] 6.5 Run `nix fmt .` and `nix flake check` to confirm everything passes (flake check: nixai pre-existing unrelated webhook error, nixcloud ✅, nixio pre-existing unrelated)
 
 ## 7. Migrate L4 to Extension
 

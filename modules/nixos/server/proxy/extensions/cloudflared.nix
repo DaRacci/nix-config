@@ -13,10 +13,28 @@ let
     mkDefault
     mkIf
     mkMerge
+    mkOption
     nameValuePair
+    types
+    ;
+  inherit (types)
+    attrsOf
+    bool
+    submodule
     ;
 in
 {
+  options.server.proxy.virtualHosts = mkOption {
+    type = attrsOf (
+      submodule (_: {
+        options.public = mkOption {
+          type = bool;
+          default = false;
+          description = "When enabled this service will be accessible to the public via Cloudflared Tunnels.";
+        };
+      })
+    );
+  };
   config = mkMerge [
     {
       server.proxy.extensions.cloudflared = {
@@ -28,8 +46,8 @@ in
           |> builtins.any (x: x)
         );
         config =
-          _name: _vh: _hostCfg:
-          "";
+          _name: vh: _hostCfg:
+          (if vh.public then "import public" else "");
         globalConfig = _hostCfg: "";
         vhostModule = null;
       };
