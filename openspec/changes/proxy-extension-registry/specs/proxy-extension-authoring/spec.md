@@ -23,11 +23,11 @@ The system SHALL support adding new extension files to `modules/nixos/server/pro
 
 ### Requirement: Extension declares vhost-level options
 
-An extension SHALL declare its per-vhost options by setting `vhostModule` to a module with `options.<extensionName>` (relative to vhost submodule scope).
+An extension SHALL declare per-vhost options in its own module's `options` block using the full option path `options.server.proxy.virtualHosts.<name>.<extensionName>`. NixOS module merging SHALL make these available on every vhost submodule — no special injection mechanism required.
 
 #### Scenario: Declaring vhost options for an extension
 
-- **WHEN** the kanidm extension sets `vhostModule` to a module with `options.kanidm`
+- **WHEN** the kanidm extension declares `options.server.proxy.virtualHosts.<name>.kanidm = { ... }` in its module
 - **THEN** the extension's `config` function can read `vh.kanidm.bypassPaths`, `vh.kanidm.allowGroups`, etc. from the vhost attrset
 
 ### Requirement: Extension declares top-level proxy options

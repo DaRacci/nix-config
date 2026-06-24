@@ -128,15 +128,15 @@ The system SHALL call each enabled extension's `globalConfig` function (signatur
 
 ### Requirement: Vhost extension module injection
 
-The vhost submodule in `options.nix` SHALL collect non-null `vhostModule` values from all enabled extensions in `server.proxy.extensions` and include them in its `imports` list. Extensions SHALL set `vhostModule` to a module declaring per-vhost options (relative path, e.g. `options.<extensionName>`).
+Extension files SHALL declare per-vhost options directly in their own `options` block using the full option path `options.server.proxy.virtualHosts.<name>.<extensionName>`. The NixOS module system SHALL merge these into the vhost submodule's option tree natively — no special injection mechanism is required.
 
 #### Scenario: Extension declares vhost-level options
 
-- **WHEN** the kanidm extension sets `vhostModule = { options.kanidm = { ... } }`
+- **WHEN** the kanidm extension's module declares `options.server.proxy.virtualHosts.<name>.kanidm = { ... }`
 - **THEN** the `kanidm` option appears on every vhost submodule
 - **AND** vhosts can set `server.proxy.virtualHosts.myapp.kanidm = { ... }`
 
 #### Scenario: Multiple extensions declare vhost options
 
-- **WHEN** extensions "kanidm" and "crowdsec" each set `vhostModule` with their options
+- **WHEN** extensions "kanidm" and "crowdsec" each declare vhost options in their `options` blocks
 - **THEN** both `kanidm` and `crowdsec` options appear on every vhost submodule
