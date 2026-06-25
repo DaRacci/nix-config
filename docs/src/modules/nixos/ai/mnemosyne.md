@@ -31,7 +31,7 @@ graph TB
 
 ## Options
 
-{{#include ../../../../generated/ai-mnemosyne-options.md}}
+{{#include ../../../../generated/ai-services-mnemosyne-options.md}}
 
 ## Usage Examples
 
