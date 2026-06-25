@@ -15,6 +15,7 @@
   mcp-sequential-thinking = pkgs.python3Packages.callPackage ./mcp-sequential-thinking { };
   proton-mcp = pkgs.python3Packages.callPackage ./proton-mcp { };
   mcp-server-amazon = pkgs.callPackage ./mcp-server-amazon { };
+  code-review-graph = pkgs.python3Packages.callPackage ./code-review-graph { };
 
   # Wyoming STT Client for Hermes
   wyoming-transcribe-client = pkgs.callPackage ./wyoming-transcribe-client { };
