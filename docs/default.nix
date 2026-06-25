@@ -148,7 +148,7 @@ let
   ];
 
   discoverModules =
-    category: moduleDir: mkFn: aggregateJSON:
+    category: moduleDir: mkFn: aggregateJSON: namespaceFolders:
 
     let
       fileLooksLikeModule =
@@ -235,7 +235,14 @@ let
           discoveredPrefix = pathToPrefix module.relPath;
           prefix = prefixOverrides.${discoveredPrefix} or (normalizePrefix discoveredPrefix);
           outputName = prefixToOutputName discoveredPrefix;
-          json = if module.isDefault || module.isCurriedHelper then aggregateJSON else mkFn module.fullPath;
+          isInNamespace =
+            namespaceFolders != [ ]
+            && builtins.elem (builtins.head (lib.splitString "/" module.relPath)) namespaceFolders;
+          json =
+            if module.isDefault || module.isCurriedHelper || isInNamespace then
+              aggregateJSON
+            else
+              mkFn module.fullPath;
 
         in
         {
@@ -265,14 +272,15 @@ let
     builtins.listToAttrs (map moduleToEntry dedupedFiles);
 
   discoverFlakeModules =
-    discoverModules "flake" "${self}/modules/flake" mkFlakeModuleOptions
-      flakeAggregateOptionsJSON;
+    discoverModules "flake" "${self}/modules/flake" mkFlakeModuleOptions flakeAggregateOptionsJSON
+      [ ];
   discoverNixosModules =
-    discoverModules "nixos" "${self}/modules/nixos" mkNixosModuleOptions
-      nixosAggregateOptionsJSON;
+    discoverModules "nixos" "${self}/modules/nixos" mkNixosModuleOptions nixosAggregateOptionsJSON
+      [ "ai" ];
   discoverHomeManagerModules =
     discoverModules "home-manager" "${self}/modules/home-manager" mkHomeManagerModuleOptions
-      homeManagerAggregateOptionsJSON;
+      homeManagerAggregateOptionsJSON
+      [ ];
 
   prefixOverrides = { };
 

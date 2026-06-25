@@ -11,6 +11,11 @@ import json
 import sys
 from pathlib import Path
 
+# Directories that group modules by topic rather than contributing to the
+# NixOS option path.  When the derived prefix starts with one of these,
+# also try the prefix without it (e.g. "ai.mnemosyne" → "mnemosyne").
+NAMESPACE_FOLDERS = {"ai"}
+
 
 def render_value(val):
     """Collapse a NixOS literalExpression / literalMD / plain value to a string."""
@@ -66,6 +71,13 @@ def candidate_prefixes(prefix, output_path):
             add(v)
 
     add_variants(prefix)
+
+    # Strip known namespace folders (e.g. "ai.") so that `ai/mnemosyne.nix`
+    # also tries a bare `mnemosyne` / `services.mnemosyne` prefix.
+    first_segment = prefix.split(".", 1)[0]
+    if first_segment in NAMESPACE_FOLDERS and prefix != first_segment:
+        without_ns = prefix.removeprefix(first_segment + ".")
+        add_variants(without_ns)
 
     stem = Path(output_path).stem
     if stem.endswith("-options"):
