@@ -42,6 +42,6 @@ buildPythonPackage rec {
     description = "MCP server variant of mnemosyne-memory — SQLite-backed memory provider with semantic recall for LLM agents";
     homepage = "https://pypi.org/project/mnemosyne-memory/";
     license = lib.licenses.mit;
-    maintainers = with lib.maintainers; [ ];
+    maintainers = [ lib.maintainers.Racci ];
   };
 }
