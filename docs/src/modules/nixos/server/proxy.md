@@ -1,6 +1,6 @@
 # Proxy Submodule
 
-The Proxy submodule provides a unified interface for exposing internal services through Caddy. It handles virtual host configuration, automatic SSL via ACME, OAuth2 authentication with Kanidm, and public exposure through Cloudflared tunnels.
+The Proxy submodule provides a unified interface for exposing internal services through Caddy. It handles virtual host configuration, automatic SSL via ACME, OAuth2 authentication with Kanidm, static API key authentication, and public exposure through Cloudflared tunnels.
 
 ## Purpose
 
@@ -225,11 +225,52 @@ in
 }
 ```
 
+### API Key Auth Extension
+
+The `api-key-auth` extension provides static API key authentication for virtual hosts. When enabled, requests must include a valid `Req-API-Key` header matching a securely generated secret.
+
+```nix
+server.proxy.virtualHosts.myservice = {
+  requireApiKey = {
+    enable = true;
+    bypassPaths = [ "/health" "/metrics" ];  # paths that skip auth
+  };
+  extraConfig = "reverse_proxy localhost:8080";
+};
+```
+
+Generated Caddy config per vhost:
+
+```
+@myservice_apikey_key {
+    header Req-API-Key {env.API_KEY_MYSERVICE}
+}
+route /auth/apikey/* {
+    authorize with myservice_apikey_authorizer
+}
+handle {
+    authorize with myservice_apikey_authorizer
+    reverse_proxy localhost:8080
+}
+```
+
+Global caddy-security config:
+
+```
+order authorize before reverse_proxy
+authorize with myservice_apikey_authorizer {
+    with @myservice_apikey_key
+}
+```
+
+Secrets auto-generated via sops at `PROXY_AUTH/<VHOST_NAME>_API_KEY`, injected via systemd `LoadCredential`. Mutual exclusivity with Kanidm on the same vhost is enforced by the existing `consumesExtraConfig` assertion.
+
 ### Migrated Extensions
 
-| Extension     | Priority | Purpose                                                     |
-| ------------- | -------- | ----------------------------------------------------------- |
-| `l4`          | 10       | L4 TCP/UDP forwarding (layer4 Caddy block + firewall ports) |
-| `kanidm`      | 50       | Kanidm OAuth2 authentication per vhost                      |
-| `dashboard`   | 200      | Auto-generate dashboard items                               |
-| `cloudflared` | 200      | Cloudflared tunnel ingress                                  |
+| Extension      | Priority | Purpose                                                     |
+| -------------- | -------- | ----------------------------------------------------------- |
+| `l4`           | 10       | L4 TCP/UDP forwarding (layer4 Caddy block + firewall ports) |
+| `kanidm`       | 50       | Kanidm OAuth2 authentication per vhost                      |
+| `api-key-auth` | 50       | Static API key authentication per vhost (with bypass paths) |
+| `dashboard`    | 200      | Auto-generate dashboard items                               |
+| `cloudflared`  | 200      | Cloudflared tunnel ingress                                  |

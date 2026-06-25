@@ -37,7 +37,7 @@ in
     }
     // (
       config.services.kanidm.provision.systems.oauth2
-      |> lib.filterAttrs (_: client: !(client.public or false))
+      |> lib.filterAttrs (_: client: !client.public)
       |> mapAttrs' (
         clientId: _: nameValuePair "KANIDM/OAUTH2/${toUpper clientId}_SECRET" kanidmPermissions
       )

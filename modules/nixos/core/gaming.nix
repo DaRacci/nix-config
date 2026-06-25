@@ -215,7 +215,7 @@ in
               '';
             in
             {
-              config = lib.mkIf (osConfig != null && (osConfig.jovian.decky-loader.enable or false)) {
+              config = lib.mkIf (osConfig != null && osConfig.jovian.decky-loader.enable) {
                 systemd.user.services.decky-loader-steam-watch = {
                   Unit = {
                     Description = "Manage decky-loader lifecycle with Steam";

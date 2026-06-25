@@ -137,6 +137,7 @@ in
   imports = [
     (importModule ./options.nix { inherit proxyLib; })
     (importModule ./extensions/kanidm.nix { inherit proxyLib; })
+    (importModule ./extensions/api-key-auth.nix { inherit proxyLib; })
     (importModule ./extensions/dashboard.nix { inherit proxyLib; })
     (importModule ./extensions/cloudflared.nix { inherit proxyLib; })
     (importModule ./extensions/l4.nix { inherit proxyLib; })

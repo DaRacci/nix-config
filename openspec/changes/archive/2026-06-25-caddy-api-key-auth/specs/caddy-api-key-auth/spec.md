@@ -79,9 +79,12 @@ The extension's per-vhost `config` function SHALL emit a named Caddy matcher `@<
 - **AND** two separate `authorize` blocks exist: `radarr_apikey_authorizer` and `sonarr_apikey_authorizer`
 - **AND** each authorize block references its own matcher: `with @radarr_apikey_key` and `with @sonarr_apikey_key`
 
-### Requirement: Caddy authorize block references named matcher
+#### Scenario: Authorize block uses named matcher reference syntax
 
-The extension's `globalConfig` function SHALL generate a caddy-security `authorize` block per api-key vhost that references the named Caddy matcher (`@<name>_apikey_key`) defined in the per-vhost `config` function. The `with` directive inside the authorize block SHALL use named matcher reference syntax (`with @<matcher>`) rather than inline header matcher syntax.
+- **GIVEN** a virtual host `radarr` with `requireApiKey.enable = true`
+- **WHEN** the configuration is built
+- **THEN** the global config `authorize` block SHALL reference the named matcher using `with @radarr_apikey_key` syntax
+- **AND** SHALL NOT use inline header matcher syntax (e.g., `with http.request.header.Req-API-Key`)
 
 ### Requirement: Secret loaded via systemd LoadCredential
 

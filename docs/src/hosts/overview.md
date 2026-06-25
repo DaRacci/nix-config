@@ -43,7 +43,7 @@ Global options still shared across all hosts remain in `hosts/shared/global/`.
 
 When `jovian.decky-loader.enable = true` is set on host with `core.gaming.enable = true`, [Decky Loader](https://github.com/SteamDeckHomebrew/decky-loader) is **not** started automatically at boot. Instead it is managed in lock-step with Steam desktop application:
 
-- **`modules/nixos/core/gaming.nix`** — overrides Jovian-provided `decky-loader.service` to remove it from `multi-user.target`, suppresses noisy CSS_Loader health-check log spam via `LogFilterPatterns`, and adds polkit rule that permits only configured Steam user in active local session to start/stop system service without password prompt. All of this is behind `lib.mkIf (config.jovian.decky-loader.enable or false)` guard, so it is no-op on machines without Jovian.
+- **`modules/nixos/core/gaming.nix`** — overrides Jovian-provided `decky-loader.service` to remove it from `multi-user.target`, suppresses noisy CSS_Loader health-check log spam via `LogFilterPatterns`, and adds polkit rule that permits only configured Steam user in active local session to start/stop system service without password prompt. All of this is behind `lib.mkIf (config.jovian.decky-loader.enable)` guard, so it is no-op on machines without Jovian.
 
 - **Home-Manager shared module injected by `modules/nixos/core/gaming.nix`** — defines `decky-loader-steam-watch` systemd user service, active for duration of graphical session. It polls `~/.steam/steam.pid` every 3 seconds to detect Steam starting, then starts `decky-loader.service`, and uses `tail --pid` to block until Steam exits before stopping it again. Service is only enabled when `osConfig.jovian.decky-loader.enable` is true.
 

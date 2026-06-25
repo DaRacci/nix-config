@@ -75,9 +75,7 @@ let
 
   vhostsWithKanidmExtDisabled =
     builtins.attrValues config.server.proxy.virtualHosts
-    |> builtins.filter (
-      vh: vh.kanidm != null && !(config.server.proxy.extensions.kanidm.enable or false)
-    );
+    |> builtins.filter (vh: vh.kanidm != null && !config.server.proxy.extensions.kanidm.enable);
 in
 {
   config = mkMerge [
