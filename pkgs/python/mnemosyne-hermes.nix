@@ -40,6 +40,6 @@ buildPythonPackage rec {
     description = "Hermes Agent plugin wrapping Mnemosyne memory provider";
     homepage = "https://pypi.org/project/mnemosyne-hermes/";
     license = lib.licenses.mit;
-    maintainers = with lib.maintainers; [ racci ];
+    maintainers = [ lib.maintainers.racci ];
   };
 }

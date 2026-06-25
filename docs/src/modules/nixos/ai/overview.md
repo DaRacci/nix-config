@@ -22,7 +22,7 @@ The `ai/` tree manages standalone services that an AI agent might consume, while
   ai.enable = true;
   services.mnemosyne = {
     enable = true;
-    syncServer.enable = true;
+    server.sync.enable = true;
   };
 }
 ```
