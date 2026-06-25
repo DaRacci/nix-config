@@ -24,9 +24,6 @@ let
     ;
 
   cfg = config.services.mnemosyne;
-
-  svcSyncServer = "mnemosyne-sync-server";
-  svcMcpServer = "mnemosyne-mcp-server";
 in
 {
   options.services.mnemosyne = {
@@ -38,79 +35,85 @@ in
       description = "Data directory for Mnemosyne state.";
     };
 
-    syncServer = {
-      enable = mkEnableOption "Mnemosyne sync server";
+    server = {
+      sync = {
+        enable = mkEnableOption "Mnemosyne sync server";
 
-      host = mkOption {
-        type = str;
-        default = "127.0.0.1";
-        description = "Host address for the sync server to listen on.";
+        host = mkOption {
+          type = str;
+          default = "127.0.0.1";
+          description = "Host address for the sync server to listen on.";
+        };
+
+        port = mkOption {
+          type = port;
+          default = 8765;
+          description = "Port for the sync server to listen on.";
+        };
       };
 
-      port = mkOption {
-        type = port;
-        default = 8765;
-        description = "Port for the sync server to listen on.";
+      mcp = {
+        enable = mkEnableOption "Mnemosyne MCP server";
+
+        host = mkOption {
+          type = str;
+          default = "127.0.0.1";
+          description = "Host address for the MCP server to listen on.";
+        };
+
+        port = mkOption {
+          type = port;
+          default = 8766;
+          description = "Port for the MCP server to listen on.";
+        };
       };
     };
 
-    mcpServer = {
-      enable = mkEnableOption "Mnemosyne MCP server";
+    client = {
+      sync = mkOption {
+        description = "Sync client profiles for periodic sync to remote servers.";
+        default = { };
+        type = attrsOf (
+          submodule (_: {
+            options = {
+              enable = mkEnableOption "this sync client profile";
 
-      host = mkOption {
-        type = str;
-        default = "127.0.0.1";
-        description = "Host address for the MCP server to listen on.";
-      };
+              remote = mkOption {
+                type = str;
+                description = "Sync server URL (e.g. http://sync.example.com).";
+              };
 
-      port = mkOption {
-        type = port;
-        default = 8766;
-        description = "Port for the MCP server to listen on.";
+              interval = mkOption {
+                type = str;
+                default = "*:0/10";
+                description = "Systemd OnCalendar interval for sync. Default runs every 10 minutes.";
+              };
+
+              container = mkOption {
+                type = str;
+                default = "hermes-agent";
+                description = "Docker container name to exec the sync command in.";
+              };
+
+              user = mkOption {
+                type = str;
+                default = "hermes";
+                description = "User to exec the sync command as inside the container.";
+              };
+
+              apiKeyFile = mkOption {
+                type = nullOr path;
+                default = null;
+                description = "Path to a file containing the API key for authenticating to a Caddy reverse proxy with requireApiKey enabled.";
+              };
+            };
+          })
+        );
       };
     };
 
-    syncClients = mkOption {
-      description = "Sync client profiles for periodic sync to remote servers.";
-      default = { };
-      type = attrsOf (
-        submodule (_client: {
-          options = {
-            remote = mkOption {
-              type = str;
-              description = "Sync server URL (e.g. http://sync.example.com:8765).";
-            };
-
-            interval = mkOption {
-              type = str;
-              default = "*:0/10";
-              description = "Systemd OnCalendar interval for sync. Default runs every 10 minutes.";
-            };
-
-            container = mkOption {
-              type = str;
-              default = "hermes-agent";
-              description = "Docker container name to exec the sync command in.";
-            };
-
-            user = mkOption {
-              type = str;
-              default = "hermes";
-              description = "User to exec the sync command as inside the container.";
-            };
-
-            apiKeyFile = mkOption {
-              type = nullOr path;
-              default = null;
-              description = "Path to a file containing the API key for authenticating to a Caddy reverse proxy with requireApiKey enabled.";
-            };
-          };
-        })
-      );
-    };
-
-    proxy = {
-      enable = mkEnableOption "reverse proxy for Mnemosyne servers";
+    caddy = {
+      enable = mkEnableOption "Caddy reverse proxy for Mnemosyne servers";
 
       requireApiKey = mkOption {
         type = bool;
@@ -139,27 +142,27 @@ in
     (mkIf cfg.enable {
       systemd.services = mkMerge (
         [
-          (mkIf cfg.syncServer.enable {
-            "${svcSyncServer}" = {
+          (mkIf cfg.server.sync.enable {
+            "mnemosyne-sync-server" = {
               description = "Mnemosyne Sync Server";
               wantedBy = [ "multi-user.target" ];
               serviceConfig = {
                 DynamicUser = true;
                 StateDirectory = lib.lists.last (lib.splitString "/" cfg.dataDir);
-                ExecStart = "${lib.getExe pkgs.mnemosyne-memory} sync serve --host ${cfg.syncServer.host} --port ${toString cfg.syncServer.port}";
+                ExecStart = "${lib.getExe pkgs.mnemosyne-memory} sync serve --host ${cfg.server.sync.host} --port ${toString cfg.server.sync.port}";
                 Environment = "MNEMOSYNE_DATA_DIR=${cfg.dataDir}";
                 Restart = "on-failure";
               };
             };
           })
-          (mkIf cfg.mcpServer.enable {
-            "${svcMcpServer}" = {
+          (mkIf cfg.server.mcp.enable {
+            "mnemosyne-mcp-server" = {
               description = "Mnemosyne MCP Server";
               wantedBy = [ "multi-user.target" ];
               serviceConfig = {
                 DynamicUser = true;
                 StateDirectory = lib.lists.last (lib.splitString "/" cfg.dataDir);
-                ExecStart = "${lib.getExe pkgs.mnemosyne-mcp} mcp --transport sse --host ${cfg.mcpServer.host} --port ${toString cfg.mcpServer.port}";
+                ExecStart = "${lib.getExe pkgs.mnemosyne-mcp} mcp --transport sse --host ${cfg.server.mcp.host} --port ${toString cfg.server.mcp.port}";
                 Environment = "MNEMOSYNE_DATA_DIR=${cfg.dataDir}";
                 Restart = "on-failure";
               };
@@ -169,13 +172,13 @@ in
         ++ map (
           clientName:
           let
-            client = cfg.syncClients.${clientName};
+            client = cfg.client.sync.${clientName};
             svcName = "mnemosyne-sync-client-${clientName}";
             apiKeyFlag = optionalString (
               client.apiKeyFile != null
             ) " -H \"Req-API-Key: $(cat %d/mnemosyne-sync-api-key-${clientName})\"";
           in
-          mkIf (builtins.hasAttr clientName cfg.syncClients) {
+          mkIf client.enable {
             "${svcName}" = {
               description = "Mnemosyne sync client — ${clientName}";
               after = [ "docker.service" ];
@@ -189,43 +192,44 @@ in
               };
             };
           }
-        ) (builtins.attrNames cfg.syncClients)
+        ) (builtins.attrNames cfg.client.sync)
       );
 
       systemd.timers = mkMerge (
         map (
           clientName:
           let
+            client = cfg.client.sync.${clientName};
             timerName = "mnemosyne-sync-client-${clientName}";
           in
-          mkIf (builtins.hasAttr clientName cfg.syncClients) {
+          mkIf client.enable {
             "${timerName}" = {
               description = "Mnemosyne sync timer — ${clientName}";
               wantedBy = [ "timers.target" ];
               timerConfig = {
-                OnCalendar = cfg.syncClients.${clientName}.interval;
+                OnCalendar = client.interval;
               };
             };
           }
-        ) (builtins.attrNames cfg.syncClients)
+        ) (builtins.attrNames cfg.client.sync)
       );
     })
 
     (mkIf (cfg.enable && cfg.caddy.enable && config.host.device.role == "server") {
       server.proxy.virtualHosts = mkMerge [
-        (optionalAttrs (cfg.syncServer.enable && cfg.caddy.syncSubdomain != null) {
+        (optionalAttrs (cfg.server.sync.enable && cfg.caddy.syncSubdomain != null) {
           "${cfg.caddy.syncSubdomain}" = {
-            ports = [ cfg.syncServer.port ];
-            extraConfig = "reverse_proxy ${cfg.syncServer.host}:${toString cfg.syncServer.port}";
+            ports = [ cfg.server.sync.port ];
+            extraConfig = "reverse_proxy ${cfg.server.sync.host}:${toString cfg.server.sync.port}";
             requireApiKey = {
               enable = cfg.caddy.requireApiKey;
             };
           };
         })
-        (optionalAttrs (cfg.mcpServer.enable && cfg.caddy.mcpSubdomain != null) {
+        (optionalAttrs (cfg.server.mcp.enable && cfg.caddy.mcpSubdomain != null) {
           "${cfg.caddy.mcpSubdomain}" = {
-            ports = [ cfg.mcpServer.port ];
-            extraConfig = "reverse_proxy ${cfg.mcpServer.host}:${toString cfg.mcpServer.port}";
+            ports = [ cfg.server.mcp.port ];
+            extraConfig = "reverse_proxy ${cfg.server.mcp.host}:${toString cfg.server.mcp.port}";
             requireApiKey = {
               enable = cfg.caddy.requireApiKey;
             };

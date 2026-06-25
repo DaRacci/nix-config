@@ -42,7 +42,7 @@ graph TB
   ai.enable = true;
   services.mnemosyne = {
     enable = true;
-    syncServer.enable = true;
+    server.sync.enable = true;
   };
 }
 ```
@@ -54,7 +54,8 @@ graph TB
   ai.enable = true;
   services.mnemosyne = {
     enable = true;
-    syncClients.hermes = {
+    client.sync.hermes = {
+      enable = true;
       remote = "http://sync.example.com:8765";
       interval = "15min";
     };
@@ -69,17 +70,18 @@ graph TB
   ai.enable = true;
   services.mnemosyne = {
     enable = true;
-    syncServer = {
+    server.sync = {
       enable = true;
       host = "127.0.0.1";
       port = 8765;
     };
-    mcpServer = {
+    server.mcp = {
       enable = true;
       host = "127.0.0.1";
       port = 8766;
     };
-    syncClients.hermes = {
+    client.sync.hermes = {
+      enable = true;
       remote = "http://127.0.0.1:8765";
       interval = "10min";
     };
@@ -99,3 +101,4 @@ graph TB
 - Sync protocol is plain HTTP with delta-based bidirectional sync.
 - Sync interval default is 10 minutes.
 - `syncSubdomain` and `mcpSubdomain` are subdomain names only. The full domain is formed as `<subdomain>.<server.proxy.domain>` via the Caddy reverse proxy integration.
+- Enable API key auth via `caddy.requireApiKey = true`. Secrets auto-generated at `PROXY_AUTH/<SUBDOMAIN>_API_KEY`. Client profiles set `apiKeyFile` to inject the `Req-API-Key` header.
