@@ -11,9 +11,12 @@ let
     mkOption
     mkMerge
     optionalAttrs
+    optionalString
     ;
   inherit (lib.types)
+    bool
     str
+    path
     port
     nullOr
     attrsOf
@@ -71,7 +74,7 @@ in
       description = "Sync client profiles for periodic sync to remote servers.";
       default = { };
       type = attrsOf (
-        submodule (_: {
+        submodule (_client: {
           options = {
             remote = mkOption {
               type = str;
@@ -95,13 +98,28 @@ in
               default = "hermes";
               description = "User to exec the sync command as inside the container.";
             };
+
+            apiKeyFile = mkOption {
+              type = nullOr path;
+              default = null;
+              description = "Path to a file containing the API key for authenticating to a Caddy reverse proxy with requireApiKey enabled.";
+            };
           };
         })
       );
     };
 
-    caddy = {
-      enable = mkEnableOption "Caddy reverse proxy for Mnemosyne servers";
+    proxy = {
+      enable = mkEnableOption "reverse proxy for Mnemosyne servers";
+
+      requireApiKey = mkOption {
+        type = bool;
+        default = true;
+        description = ''
+          Enable API key authentication on the reverse proxy vhosts.
+          Secrets are auto-generated via the api-key-auth proxy extension.
+        '';
+      };
 
       syncSubdomain = mkOption {
         type = nullOr str;
@@ -148,10 +166,14 @@ in
             };
           })
         ]
-        ++ builtins.map (
+        ++ map (
           clientName:
           let
+            client = cfg.syncClients.${clientName};
             svcName = "mnemosyne-sync-client-${clientName}";
+            apiKeyFlag = optionalString (
+              client.apiKeyFile != null
+            ) " -H \"Req-API-Key: $(cat %d/mnemosyne-sync-api-key-${clientName})\"";
           in
           mkIf (builtins.hasAttr clientName cfg.syncClients) {
             "${svcName}" = {
@@ -160,9 +182,10 @@ in
               wants = [ "docker.service" ];
               serviceConfig = {
                 Type = "oneshot";
-                ExecStart = "${lib.getExe pkgs.docker} exec -u ${cfg.syncClients.${clientName}.user} ${
-                  cfg.syncClients.${clientName}.container
-                } mnemosyne sync --remote ${cfg.syncClients.${clientName}.remote}";
+                LoadCredential = mkIf (client.apiKeyFile != null) [
+                  "mnemosyne-sync-api-key-${clientName}:${client.apiKeyFile}"
+                ];
+                ExecStart = "${lib.getExe pkgs.docker} exec -u ${client.user} ${client.container} mnemosyne sync --remote ${client.remote}${apiKeyFlag}";
               };
             };
           }
@@ -170,7 +193,7 @@ in
       );
 
       systemd.timers = mkMerge (
-        builtins.map (
+        map (
           clientName:
           let
             timerName = "mnemosyne-sync-client-${clientName}";
@@ -194,12 +217,18 @@ in
           "${cfg.caddy.syncSubdomain}" = {
             ports = [ cfg.syncServer.port ];
             extraConfig = "reverse_proxy ${cfg.syncServer.host}:${toString cfg.syncServer.port}";
+            requireApiKey = {
+              enable = cfg.caddy.requireApiKey;
+            };
           };
         })
         (optionalAttrs (cfg.mcpServer.enable && cfg.caddy.mcpSubdomain != null) {
           "${cfg.caddy.mcpSubdomain}" = {
             ports = [ cfg.mcpServer.port ];
             extraConfig = "reverse_proxy ${cfg.mcpServer.host}:${toString cfg.mcpServer.port}";
+            requireApiKey = {
+              enable = cfg.caddy.requireApiKey;
+            };
           };
         })
       ];
