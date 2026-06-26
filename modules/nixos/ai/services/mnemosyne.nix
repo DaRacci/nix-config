@@ -175,9 +175,9 @@ in
               serviceConfig = mkMerge [
                 (mkIf (cfg.server.sync.container == null) {
                   DynamicUser = true;
-                  StateDirectory = lib.lists.last (lib.splitString "/" cfg.dataDir);
+                  StateDirectory = "${lib.removePrefix "/var/lib/" cfg.dataDir}/sync";
                   ExecStart = "${lib.getExe pkgs.mnemosyne-memory} sync serve --host ${cfg.server.sync.host} --port ${toString cfg.server.sync.port}";
-                  Environment = "MNEMOSYNE_DATA_DIR=${cfg.dataDir}";
+                  Environment = "MNEMOSYNE_DATA_DIR=${cfg.dataDir}/sync";
                 })
                 (mkIf (cfg.server.sync.container != null) {
                   ExecStart = "${lib.getExe pkgs.docker} exec -u ${cfg.server.sync.user} ${cfg.server.sync.container} mnemosyne sync serve --host ${cfg.server.sync.host} --port ${toString cfg.server.sync.port}";
@@ -197,9 +197,9 @@ in
               serviceConfig = mkMerge [
                 (mkIf (cfg.server.mcp.container == null) {
                   DynamicUser = true;
-                  StateDirectory = lib.lists.last (lib.splitString "/" cfg.dataDir);
-                  ExecStart = "${lib.getExe pkgs.mnemosyne-mcp} mcp --transport sse --host ${cfg.server.mcp.host} --port ${toString cfg.server.mcp.port}";
-                  Environment = "MNEMOSYNE_DATA_DIR=${cfg.dataDir}";
+                  StateDirectory = "${lib.removePrefix "/var/lib/" cfg.dataDir}/mcp";
+                  ExecStart = "${lib.getExe pkgs.mnemosyne-memory} mcp --transport sse --host ${cfg.server.mcp.host} --port ${toString cfg.server.mcp.port}";
+                  Environment = "MNEMOSYNE_DATA_DIR=${cfg.dataDir}/mcp";
                 })
                 (mkIf (cfg.server.mcp.container != null) {
                   ExecStart = "${lib.getExe pkgs.docker} exec -u ${cfg.server.mcp.user} ${cfg.server.mcp.container} mnemosyne-mcp mcp --transport sse --host ${cfg.server.mcp.host} --port ${toString cfg.server.mcp.port}";
@@ -230,7 +230,7 @@ in
                 LoadCredential = mkIf (client.apiKeyFile != null) [
                   "mnemosyne-sync-api-key-${clientName}:${client.apiKeyFile}"
                 ];
-                ExecStart = "${lib.getExe pkgs.docker} exec -u ${client.user} ${client.container} mnemosyne sync --remote ${client.remote}${apiKeyFlag}";
+                ExecStart = "${lib.getExe pkgs.bash} -c \"${lib.getExe pkgs.docker} exec -u ${client.user} ${client.container} mnemosyne sync --remote ${client.remote}${apiKeyFlag}\"";
               };
             };
           }
