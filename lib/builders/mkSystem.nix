@@ -37,13 +37,15 @@ let
 
   userDirectory = username: "${self}/home/${username}";
   osConfigPath = username: "${userDirectory username}/os-config.nix";
+
+  allModules = import "${self}/modules/nixos";
 in
 nixosSystem rec {
   inherit pkgs lib system;
 
   modules =
-    (attrValues (removeAttrs (import "${self}/modules/nixos") [ "ai" ]))
-    ++ optional (deviceType == "server") (import "${self}/modules/nixos").ai
+    (attrValues (removeAttrs allModules [ "ai" ]))
+    ++ optional (deviceType == "server") allModules.ai
     ++ (usersWithRoot |> map osConfigPath |> filter pathExists) # Include each user's os-config.nix if it exists
     ++ [
       hostDirectory

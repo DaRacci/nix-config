@@ -104,4 +104,4 @@ Enable long-term memory with `services.ai-agent.memory.enable = true;`. This swi
 }
 ```
 
-**Database location:** `$HERMES_HOME/mnemosyne.db` (SQLite with FTS5 hybrid ranking + vector search).
+**Database location:** `/home/hermes/mnemosyne.db` (SQLite with FTS5 hybrid ranking + vector search).
