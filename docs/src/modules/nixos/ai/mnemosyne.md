@@ -39,7 +39,6 @@ graph TB
 
 ```nix
 {
-  ai.enable = true;
   services.mnemosyne = {
     enable = true;
     server.sync.enable = true;
@@ -51,13 +50,12 @@ graph TB
 
 ```nix
 {
-  ai.enable = true;
   services.mnemosyne = {
     enable = true;
     client.sync.hermes = {
       enable = true;
       remote = "http://sync.example.com:8765";
-      interval = "15min";
+      interval = "*:0/15";
     };
   };
 }
@@ -67,7 +65,6 @@ graph TB
 
 ```nix
 {
-  ai.enable = true;
   services.mnemosyne = {
     enable = true;
     server.sync = {
@@ -83,7 +80,7 @@ graph TB
     client.sync.hermes = {
       enable = true;
       remote = "http://127.0.0.1:8765";
-      interval = "10min";
+      interval = "*:0/10";
     };
     caddy = {
       enable = true;
