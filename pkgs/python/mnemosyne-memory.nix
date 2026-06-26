@@ -4,6 +4,8 @@
   fetchPypi,
   setuptools,
   fastembed,
+  mcp,
+  anyio,
 }:
 
 buildPythonPackage rec {
@@ -21,40 +23,29 @@ buildPythonPackage rec {
 
   passthru.optional-dependencies = {
     embeddings = [ fastembed ];
-    all = [ fastembed ];
+    mcp = [
+      mcp
+      anyio
+    ];
+    all = [
+      fastembed
+      mcp
+      anyio
+    ];
   };
+
+  # init_db() runs at module import; wrapPythonPrograms triggers it
+  preFixup = ''
+    export HOME=$(mktemp -d)
+  '';
 
   pythonImportsCheck = [ "mnemosyne" ];
 
-  passthru.withAll = buildPythonPackage {
-    pname = "mnemosyne-memory-all";
-    inherit version;
-    pyproject = true;
-
-    src = fetchPypi {
-      pname = "mnemosyne_memory";
-      inherit version;
-      hash = "sha256-Lem29U7XcXMAEc/FcJM3WtF+HDKwXG89Ze2LI7xy1bM=";
-    };
-
-    build-system = [ setuptools ];
-
-    propagatedBuildInputs = [ fastembed ];
-
-    pythonImportsCheck = [ "mnemosyne" "fastembed" ];
-
-    meta = {
-      description = "mnemosyne-memory with all available optional features (embeddings via fastembed; ctransformers not in nixpkgs)";
-      homepage = "https://pypi.org/project/mnemosyne-memory/";
-      license = lib.licenses.mit;
-      maintainers = [ lib.maintainers.racci ];
-    };
-  };
-
   meta = {
-    description = "SQLite-backed memory provider with semantic recall for LLM agents";
+    description = "SQLite-backed memory provider with semantic recall for LLM agents, with optional MCP server dependencies";
     homepage = "https://pypi.org/project/mnemosyne-memory/";
     license = lib.licenses.mit;
     maintainers = [ lib.maintainers.racci ];
+    mainProgram = "mnemosyne";
   };
 }
