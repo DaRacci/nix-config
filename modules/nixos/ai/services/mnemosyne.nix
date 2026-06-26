@@ -50,6 +50,18 @@ in
           default = 8765;
           description = "Port for the sync server to listen on.";
         };
+
+        container = mkOption {
+          type = nullOr str;
+          default = null;
+          description = "Docker container to run the sync server inside. If null, the server runs natively on the host.";
+        };
+
+        user = mkOption {
+          type = str;
+          default = "mnemosyne";
+          description = "User to run the server as inside the container.";
+        };
       };
 
       mcp = {
@@ -65,6 +77,18 @@ in
           type = port;
           default = 8766;
           description = "Port for the MCP server to listen on.";
+        };
+
+        container = mkOption {
+          type = nullOr str;
+          default = null;
+          description = "Docker container to run the MCP server inside. If null, the server runs natively on the host.";
+        };
+
+        user = mkOption {
+          type = str;
+          default = "mnemosyne";
+          description = "User to run the server as inside the container.";
         };
       };
     };
@@ -146,26 +170,44 @@ in
             "mnemosyne-sync-server" = {
               description = "Mnemosyne Sync Server";
               wantedBy = [ "multi-user.target" ];
-              serviceConfig = {
-                DynamicUser = true;
-                StateDirectory = lib.lists.last (lib.splitString "/" cfg.dataDir);
-                ExecStart = "${lib.getExe pkgs.mnemosyne-memory} sync serve --host ${cfg.server.sync.host} --port ${toString cfg.server.sync.port}";
-                Environment = "MNEMOSYNE_DATA_DIR=${cfg.dataDir}";
-                Restart = "on-failure";
-              };
+              after = mkIf (cfg.server.sync.container != null) [ "docker.service" ];
+              wants = mkIf (cfg.server.sync.container != null) [ "docker.service" ];
+              serviceConfig = mkMerge [
+                (mkIf (cfg.server.sync.container == null) {
+                  DynamicUser = true;
+                  StateDirectory = lib.lists.last (lib.splitString "/" cfg.dataDir);
+                  ExecStart = "${lib.getExe pkgs.mnemosyne-memory} sync serve --host ${cfg.server.sync.host} --port ${toString cfg.server.sync.port}";
+                  Environment = "MNEMOSYNE_DATA_DIR=${cfg.dataDir}";
+                })
+                (mkIf (cfg.server.sync.container != null) {
+                  ExecStart = "${lib.getExe pkgs.docker} exec -u ${cfg.server.sync.user} ${cfg.server.sync.container} mnemosyne sync serve --host ${cfg.server.sync.host} --port ${toString cfg.server.sync.port}";
+                })
+                {
+                  Restart = "on-failure";
+                }
+              ];
             };
           })
           (mkIf cfg.server.mcp.enable {
             "mnemosyne-mcp-server" = {
               description = "Mnemosyne MCP Server";
               wantedBy = [ "multi-user.target" ];
-              serviceConfig = {
-                DynamicUser = true;
-                StateDirectory = lib.lists.last (lib.splitString "/" cfg.dataDir);
-                ExecStart = "${lib.getExe pkgs.mnemosyne-mcp} mcp --transport sse --host ${cfg.server.mcp.host} --port ${toString cfg.server.mcp.port}";
-                Environment = "MNEMOSYNE_DATA_DIR=${cfg.dataDir}";
-                Restart = "on-failure";
-              };
+              after = mkIf (cfg.server.mcp.container != null) [ "docker.service" ];
+              wants = mkIf (cfg.server.mcp.container != null) [ "docker.service" ];
+              serviceConfig = mkMerge [
+                (mkIf (cfg.server.mcp.container == null) {
+                  DynamicUser = true;
+                  StateDirectory = lib.lists.last (lib.splitString "/" cfg.dataDir);
+                  ExecStart = "${lib.getExe pkgs.mnemosyne-mcp} mcp --transport sse --host ${cfg.server.mcp.host} --port ${toString cfg.server.mcp.port}";
+                  Environment = "MNEMOSYNE_DATA_DIR=${cfg.dataDir}";
+                })
+                (mkIf (cfg.server.mcp.container != null) {
+                  ExecStart = "${lib.getExe pkgs.docker} exec -u ${cfg.server.mcp.user} ${cfg.server.mcp.container} mnemosyne-mcp mcp --transport sse --host ${cfg.server.mcp.host} --port ${toString cfg.server.mcp.port}";
+                })
+                {
+                  Restart = "on-failure";
+                }
+              ];
             };
           })
         ]
