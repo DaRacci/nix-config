@@ -16,7 +16,6 @@ let
     pathExists
     attrValues
     filter
-    removeAttrs
     ;
   inherit (lib)
     mkDefault
@@ -44,8 +43,7 @@ nixosSystem rec {
   inherit pkgs lib system;
 
   modules =
-    (attrValues (removeAttrs allModules [ "ai" ]))
-    ++ optional (deviceType == "server") allModules.ai
+    (attrValues allModules)
     ++ (usersWithRoot |> map osConfigPath |> filter pathExists) # Include each user's os-config.nix if it exists
     ++ [
       hostDirectory
@@ -120,7 +118,7 @@ nixosSystem rec {
     ));
 
   specialArgs = {
-    inherit self hostDirectory;
+    inherit self hostDirectory deviceType;
     inherit (self) inputs outputs;
     users = deviceUsers;
     importExternals = true;
