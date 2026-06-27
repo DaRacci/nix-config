@@ -19,7 +19,6 @@ The `ai/` tree manages standalone services that an AI agent might consume, while
 
 ```nix
 {
-  ai.enable = true;
   services.mnemosyne = {
     enable = true;
     server.sync.enable = true;
@@ -27,4 +26,4 @@ The `ai/` tree manages standalone services that an AI agent might consume, while
 }
 ```
 
-The top-level `ai.enable` gates the entire tree. Individual services toggle independently via their own `services.<name>.enable` options.
+The `ai/` module tree is loaded on all device types by `mkSystem`.
