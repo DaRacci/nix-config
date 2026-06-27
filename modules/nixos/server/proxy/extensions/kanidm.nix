@@ -1,5 +1,6 @@
 {
   proxyLib,
+  getAllAttrsFunc,
   ...
 }:
 {
@@ -225,7 +226,12 @@ in
     server.proxy.extensions.kanidm = {
       priority = 50;
       consumesExtraConfig = true;
-      enable = mkDefault true;
+      enable = mkDefault (
+        getAllAttrsFunc "server.proxy.virtualHosts" (
+          virtualHosts: _: virtualHosts |> builtins.attrValues |> builtins.any (vh: vh.kanidm != null)
+        )
+        |> builtins.any (x: x)
+      );
 
       config =
         name: vh: _hostCfg:

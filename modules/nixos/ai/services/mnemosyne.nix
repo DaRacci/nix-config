@@ -2,6 +2,7 @@
   config,
   pkgs,
   lib,
+  deviceType ? null,
   ...
 }:
 let
@@ -10,7 +11,6 @@ let
     mkEnableOption
     mkOption
     mkMerge
-    optionalAttrs
     optionalString
     ;
   inherit (lib.types)
@@ -162,6 +162,8 @@ in
     };
   };
 
+  imports = lib.optionals (deviceType == "server") [ ./mnemosyne-caddy.nix ];
+
   config = mkMerge [
     (mkIf cfg.enable {
       systemd.services = mkMerge (
@@ -255,29 +257,6 @@ in
           }
         ) (builtins.attrNames cfg.client.sync)
       );
-    })
-
-    (mkIf (cfg.enable && cfg.caddy.enable && config.host.device.role == "server") {
-      server.proxy.virtualHosts = mkMerge [
-        (optionalAttrs (cfg.server.sync.enable && cfg.caddy.syncSubdomain != null) {
-          "${cfg.caddy.syncSubdomain}" = {
-            ports = [ cfg.server.sync.port ];
-            extraConfig = "reverse_proxy ${cfg.server.sync.host}:${toString cfg.server.sync.port}";
-            requireApiKey = {
-              enable = cfg.caddy.requireApiKey;
-            };
-          };
-        })
-        (optionalAttrs (cfg.server.mcp.enable && cfg.caddy.mcpSubdomain != null) {
-          "${cfg.caddy.mcpSubdomain}" = {
-            ports = [ cfg.server.mcp.port ];
-            extraConfig = "reverse_proxy ${cfg.server.mcp.host}:${toString cfg.server.mcp.port}";
-            requireApiKey = {
-              enable = cfg.caddy.requireApiKey;
-            };
-          };
-        })
-      ];
     })
   ];
 }
