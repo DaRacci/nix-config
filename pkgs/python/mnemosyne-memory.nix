@@ -1,37 +1,38 @@
 {
   lib,
   buildPythonPackage,
-  fetchPypi,
+  fetchFromGitHub,
   setuptools,
   fastembed,
   mcp,
   anyio,
+  cryptography,
 }:
 
-buildPythonPackage rec {
+buildPythonPackage (attrs: {
   pname = "mnemosyne-memory";
-  version = "3.1.0";
+  version = "3.10.1";
   pyproject = true;
 
-  src = fetchPypi {
-    pname = "mnemosyne_memory";
-    inherit version;
-    hash = "sha256-Lem29U7XcXMAEc/FcJM3WtF+HDKwXG89Ze2LI7xy1bM=";
+  src = fetchFromGitHub {
+    owner = "mnemosyne-oss";
+    repo = "mnemosyne";
+    rev = "v${attrs.version}";
+    hash = "sha256-hpNnKc8ZNbqcy9X4Yu/4zMGEW7TCyT9aEfRv03ffuig=";
   };
 
   build-system = [ setuptools ];
 
   passthru.optional-dependencies = {
     embeddings = [ fastembed ];
+    sync = [ cryptography ];
     mcp = [
       mcp
       anyio
     ];
-    all = [
-      fastembed
-      mcp
-      anyio
-    ];
+    all =
+      with attrs.passthru;
+      optional-dependencies.embeddings ++ optional-dependencies.mcp ++ optional-dependencies.sync;
   };
 
   # init_db() runs at module import; wrapPythonPrograms triggers it
@@ -48,4 +49,4 @@ buildPythonPackage rec {
     maintainers = [ lib.maintainers.racci ];
     mainProgram = "mnemosyne";
   };
-}
+})
