@@ -27,7 +27,7 @@ let
 
   cfg = config.services.mnemosyne;
 
-  hasSync = cfg.server.sync.enable;
+  hasSync = cfg.server.sync.enable || cfg.client.sync != [ ];
   hasMcp = cfg.server.mcp.enable;
 
   package = pkgs.mnemosyne-memory.overridePythonAttrs (base: {
@@ -61,6 +61,13 @@ let
         serviceConfig = {
           StateDirectory = "${removePrefix "/var/lib/" cfg.dataDir}/${type}";
           Environment = "MNEMOSYNE_DATA_DIR=${cfg.dataDir}/${type}";
+        };
+      })
+
+      (mkIf (cfg.container != null) {
+        serviceConfig = {
+          SupplementaryGroups = [ "docker" ];
+          ReadWritePaths = [ "/var/run/docker.sock" ];
         };
       })
 
@@ -167,7 +174,7 @@ in
         };
 
         serviceConfig = {
-          ExecStart = mkCommand "${lib.getExe package} sync-serve";
+          ExecStart = mkCommand "${lib.getExe package} sync-serve" cfg.server.sync;
           LoadCredential = optional (
             cfg.server.sync.apiKeyFile != null
           ) "mnemosyne-sync-api-key:${cfg.server.sync.apiKeyFile}";
