@@ -3,7 +3,12 @@
   ...
 }:
 {
-  sops.secrets.MNEMOSYNE_SYNC_KEY = { };
+  sops.secrets.MNEMOSYNE_SYNC_KEY = {
+    restartUnits = [
+      "mnemosyne-sync-server.service"
+      "mnemosyne-sync-client-hermes.service"
+    ];
+  };
 
   server.proxy.virtualHosts."mnemosyne.racci.dev" = {
     ports = [ config.services.mnemosyne.server.sync.port ];
@@ -30,11 +35,6 @@
       container = "hermes-agent";
       user = "hermes";
       apiKeyFile = config.sops.secrets.MNEMOSYNE_SYNC_KEY.path;
-    };
-
-    caddy = {
-      enable = true;
-      syncSubdomain = "sync";
     };
   };
 }
