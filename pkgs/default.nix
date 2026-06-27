@@ -30,7 +30,10 @@
   # Hermes Agent Python Plugins
   mnemosyne-memory = pkgs.python3Packages.callPackage ./python/mnemosyne-memory.nix { };
   mnemosyne-hermes = pkgs.python3Packages.callPackage ./python/mnemosyne-hermes.nix { };
-  mnemosyne-mcp = pkgs.mnemosyne-memory;
+  mnemosyne-mcp = pkgs.mnemosyne-memory.overridePythonAttrs (old: {
+    propagatedBuildInputs =
+      (old.propagatedBuildInputs or [ ]) ++ old.passthru.optional-dependencies.mcp or [ ];
+  });
 
   # Home Assistant Python Packages
   terminal-manager = pkgs.python3Packages.callPackage ./python/terminal-manager.nix { };
