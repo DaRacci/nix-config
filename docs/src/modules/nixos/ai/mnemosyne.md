@@ -61,41 +61,9 @@ graph TB
 }
 ```
 
-### Full stack with Caddy
-
-```nix
-{
-  services.mnemosyne = {
-    enable = true;
-    server.sync = {
-      enable = true;
-      host = "127.0.0.1";
-      port = 8765;
-    };
-    server.mcp = {
-      enable = true;
-      host = "127.0.0.1";
-      port = 8766;
-    };
-    client.sync.hermes = {
-      enable = true;
-      remote = "http://127.0.0.1:8765";
-      interval = "*:0/10";
-    };
-    caddy = {
-      enable = true;
-      syncSubdomain = "sync";
-      mcpSubdomain = "mnemosyne-mcp";
-    };
-  };
-}
-```
-
 ## Notes
 
 - Sync server uses `mnemosyne sync serve` with stdlib HTTP — no extra Python dependencies.
 - MCP server adds `mcp` and `anyio` dependencies (via `pkgs.mnemosyne-mcp`).
 - Sync protocol is plain HTTP with delta-based bidirectional sync.
 - Sync interval default is 10 minutes.
-- `syncSubdomain` and `mcpSubdomain` are subdomain names only. The full domain is formed as `<subdomain>.<server.proxy.domain>` via the Caddy reverse proxy integration.
-- Enable API key auth via `caddy.requireApiKey = true`. Secrets auto-generated at `PROXY_AUTH/<SUBDOMAIN>_API_KEY`. Client profiles set `apiKeyFile` to inject the `Req-API-Key` header.

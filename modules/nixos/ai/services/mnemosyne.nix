@@ -2,7 +2,6 @@
   config,
   pkgs,
   lib,
-  deviceType ? null,
   ...
 }:
 let
@@ -13,13 +12,11 @@ let
     mkMerge
     optional
     optionals
-    optionalString
     removePrefix
     mapAttrs'
     nameValuePair
     ;
   inherit (lib.types)
-    bool
     str
     path
     port
@@ -35,8 +32,8 @@ let
 
   package = pkgs.mnemosyne-memory.overridePythonAttrs (base: {
     dependencies =
-      (optionals hasMcp base.optional-dependencies.mcp)
-      ++ (optionals hasSync base.optional-dependencies.sync);
+      (optionals hasMcp base.passthru.optional-dependencies.mcp)
+      ++ (optionals hasSync base.passthru.optional-dependencies.sync);
   });
 
   mkCommand =
@@ -157,25 +154,7 @@ in
         );
       };
     };
-
-    caddy = {
-      enable = mkEnableOption "Caddy reverse proxy for Mnemosyne servers";
-
-      syncSubdomain = mkOption {
-        type = nullOr str;
-        default = null;
-        description = "Subdomain for the sync server reverse proxy (e.g. 'sync' → sync.<domain>).";
-      };
-
-      mcpSubdomain = mkOption {
-        type = nullOr str;
-        default = null;
-        description = "Subdomain for the MCP server reverse proxy (e.g. 'sync-mcp' → sync-mcp.<domain>).";
-      };
-    };
   };
-
-  imports = optionals (deviceType == "server") [ ./mnemosyne-caddy.nix ];
 
   config = mkMerge [
     (mkIf (cfg.enable && cfg.server.sync.enable) {
