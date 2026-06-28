@@ -27,7 +27,7 @@ let
 
   cfg = config.services.mnemosyne;
 
-  hasSync = cfg.server.sync.enable || cfg.client.sync != [ ];
+  hasSync = cfg.server.sync.enable || cfg.client.sync != { };
   hasMcp = cfg.server.mcp.enable;
 
   package = pkgs.mnemosyne-memory.overridePythonAttrs (base: {
