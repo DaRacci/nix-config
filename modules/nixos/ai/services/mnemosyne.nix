@@ -12,6 +12,7 @@ let
     mkMerge
     optional
     optionals
+    optionalString
     removePrefix
     mapAttrs'
     nameValuePair
@@ -36,12 +37,22 @@ let
       ++ (optionals hasSync base.passthru.optional-dependencies.sync);
   });
 
+  dockerPreExecSecret =
+    cfgAttr:
+    mkIf (cfgAttr ? apiKeyFile && cfgAttr.apiKeyFile != null && cfgAttr.container != null) (
+      pkgs.writeShellScript "mnemosyne-docker-pre-exec-secret-${cfgAttr.container}" ''
+        ${lib.getExe pkgs.docker} exec -u root ${cfgAttr.container} bash -c "mkdir -p $(dirname $MNEMOSYNE_SYNC_KEY_FILE) && chown ${cfgAttr.user}:${cfgAttr.user} $(dirname $MNEMOSYNE_SYNC_KEY_FILE) && chmod 700 $(dirname $MNEMOSYNE_SYNC_KEY_FILE)";
+        ${lib.getExe pkgs.docker} cp "$MNEMOSYNE_SYNC_KEY_FILE" "${cfgAttr.container}:$MNEMOSYNE_SYNC_KEY_FILE";
+        ${lib.getExe pkgs.docker} exec -u root ${cfgAttr.container} bash -c "chown ${cfgAttr.user}:${cfgAttr.user} $MNEMOSYNE_SYNC_KEY_FILE && chmod 600 $MNEMOSYNE_SYNC_KEY_FILE";
+      ''
+    );
+
   mkCommand =
     cmd: cfg:
     if cfg.container == null then
       cmd
     else
-      "${lib.getExe pkgs.bash} -c \"${lib.getExe pkgs.docker} exec --env-file <(env) -u ${cfg.user} ${cfg.container} ${cmd}\"";
+      "${lib.getExe pkgs.bash} -c \"${lib.getExe pkgs.docker} exec -u ${cfg.user} ${cfg.container} ${cmd}\"";
 
   mkService =
     type: cfgAttr: ext:
@@ -64,7 +75,7 @@ let
         };
       })
 
-      (mkIf (cfg.container != null) {
+      (mkIf (cfgAttr.container != null) {
         serviceConfig = {
           SupplementaryGroups = [ "docker" ];
           ReadWritePaths = [ "/var/run/docker.sock" ];
@@ -94,7 +105,7 @@ let
   };
 
   serverOptions =
-    type: listenPort:
+    type: listenPort: ext:
     (containerOptions "${type} server")
     // {
       enable = mkEnableOption "Mnemosyne ${type} server";
@@ -110,13 +121,8 @@ let
         default = listenPort;
         description = "Port for the ${type} server to listen on.";
       };
-
-      apiKeyFile = mkOption {
-        type = nullOr path;
-        default = null;
-        description = "Runtime path to a file containing the API key for authentication.";
-      };
-    };
+    }
+    // ext;
 in
 {
   options.services.mnemosyne = {
@@ -129,8 +135,14 @@ in
     };
 
     server = {
-      sync = serverOptions "sync" 8765;
-      mcp = serverOptions "mcp" 8766;
+      sync = serverOptions "sync" 8765 {
+        apiKeyFile = mkOption {
+          type = nullOr path;
+          default = null;
+          description = "Runtime path to a file containing the API key for authentication.";
+        };
+      };
+      mcp = serverOptions "mcp" 8766 { };
     };
 
     client = {
@@ -167,14 +179,14 @@ in
     (mkIf (cfg.enable && cfg.server.sync.enable) {
       systemd.services.mnemosyne-sync-server = mkService "sync" cfg.server.sync {
         description = "Mnemosyne Sync Server";
+
         environment = {
-          PORT = toString cfg.server.sync.port;
-          HOST = cfg.server.sync.host;
-          API_KEY = mkIf (cfg.server.sync.apiKeyFile != null) "%d/mnemosyne-sync-api-key";
+          MNEMOSYNE_SYNC_KEY_FILE = mkIf (cfg.server.sync.apiKeyFile != null) "%d/mnemosyne-sync-api-key";
         };
 
         serviceConfig = {
-          ExecStart = mkCommand "${lib.getExe package} sync-serve" cfg.server.sync;
+          ExecStartPre = dockerPreExecSecret cfg.server.mcp;
+          ExecStart = mkCommand "${lib.getExe package} sync-serve --host \"${cfg.server.sync.host}\" --port \"${toString cfg.server.sync.port}\"" cfg.server.sync;
           LoadCredential = optional (
             cfg.server.sync.apiKeyFile != null
           ) "mnemosyne-sync-api-key:${cfg.server.sync.apiKeyFile}";
@@ -185,18 +197,7 @@ in
     (mkIf (cfg.enable && cfg.server.mcp.enable) {
       systemd.services.mnemosyne-mcp-server = mkService "mcp" cfg.server.mcp {
         description = "Mnemosyne MCP Server";
-        environment = {
-          PORT = toString cfg.server.mcp.port;
-          HOST = cfg.server.mcp.host;
-          API_KEY = mkIf (cfg.server.mcp.apiKeyFile != null) "%d/mnemosyne-mcp-api-key";
-        };
-
-        serviceConfig = {
-          ExecStart = mkCommand "${lib.getExe package} mcp --transport sse" cfg.server.mcp;
-          LoadCredential = optional (
-            cfg.server.mcp.apiKeyFile != null
-          ) "mnemosyne-mcp-api-key:${cfg.server.mcp.apiKeyFile}";
-        };
+        serviceConfig.ExecStart = mkCommand "${lib.getExe package} mcp --transport  --host \"${cfg.server.mcp.host}\" --port \"${toString cfg.server.mcp.port}\"" cfg.server.mcp;
       };
     })
 
@@ -210,16 +211,16 @@ in
               description = "Mnemosyne sync client (${name})";
 
               environment = {
-                REMOTE = cfg.remote;
-                API_KEY = mkIf (cfg.apiKeyFile != null) "%d/mnemosyne-sync-api-key-${name}";
+                MNEMOSYNE_SYNC_KEY_FILE = mkIf (cfg.apiKeyFile != null) "%d/mnemosyne-sync-api-key-${name}";
               };
 
               serviceConfig = {
                 Type = "oneshot";
+                ExecStartPre = dockerPreExecSecret cfg;
+                ExecStart = mkCommand "${lib.getExe package} sync --remote \"${cfg.remote}\"" cfg;
                 LoadCredential = optional (
                   cfg.apiKeyFile != null
                 ) "mnemosyne-sync-api-key-${name}:${cfg.apiKeyFile}";
-                ExecStart = mkCommand "${lib.getExe package} sync" cfg;
               };
             }
           )

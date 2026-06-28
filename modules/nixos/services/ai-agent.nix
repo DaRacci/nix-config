@@ -446,6 +446,11 @@ in
           pkgs.mnemosyne-memory
           pkgs.mnemosyne-hermes
         ];
+
+        environment = {
+          MNEMOSYNE_HOST_LLM_ENABLED = true;
+        };
+
         settings = {
           memory = {
             provider = "mnemosyne";
@@ -454,6 +459,11 @@ in
           };
         };
       };
+
+      systemd.services.hermes-agent.postStart = ''
+        export HERMES_HOME="/var/lib/hermes/.hermes"
+        ${lib.getExe pkgs.mnemosyne-hermes} install --force 2> /dev/null
+      '';
     })
 
     (mkIf (cfg.enable && cfg.apiServer.enable) {

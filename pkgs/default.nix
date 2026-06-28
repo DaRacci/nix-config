@@ -29,8 +29,8 @@
   uvtools = pkgs.callPackage ./uvtools { };
 
   # Hermes Agent Python Plugins
-  mnemosyne-memory = pkgs.python3Packages.callPackage ./python/mnemosyne-memory.nix { };
-  mnemosyne-hermes = pkgs.python3Packages.callPackage ./python/mnemosyne-hermes.nix { };
+  mnemosyne-memory = pkgs.python312Packages.callPackage ./python/mnemosyne-memory.nix { };
+  mnemosyne-hermes = pkgs.python312Packages.callPackage ./python/mnemosyne-hermes.nix { };
   mnemosyne-memory-all = pkgs.mnemosyne-memory.overridePythonAttrs (old: {
     dependencies = old.passthru.optional-dependencies.all;
   });
