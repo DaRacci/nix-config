@@ -1,23 +1,27 @@
-## 1. CI harness and evaluation plumbing
+## 1. Flake test attribute and harness plumbing
 
-- [ ] 1.1 Expose `vm-test-<host>` checks for all server hosts from the CI flake partition using `pkgs.testers.runNixOSTest`
-- [ ] 1.2 Ensure host discovery for the harness is derived from repository host data rather than static hostname wiring
-- [ ] 1.3 Verify the CI checks output lists every server VM test attribute
+- [ ] 1.1 Add `nixosTestConfigurations` to `flake/default.nix`'s `partitionedAttrs` under the `nixos` partition, and register entries in `flake/nixos/flake-module.nix`
+- [ ] 1.2 Create `tests/builder.nix` — a builder function accepting hostnames (auto-discovered mode) and scenario files (explicit mode), leaving `tests/default.nix` unchanged
+- [ ] 1.3 Wire host discovery from `tests/mkNode.nix` into the new builder so each server host produces a `nixosTestConfigurations.<host>` entry
+- [ ] 1.4 Verify `nix eval .#nixosTestConfigurations --apply 'builtins.attrNames'` lists all server hosts
 
-## 2. VM compatibility and secret handling
+## 2. VM test profile and deterministic secrets
 
-- [ ] 2.1 Add a test-only VM profile that replaces or disables Proxmox LXC-specific behavior for test nodes only
-- [ ] 2.2 Add a test-only secret generation module that provides dummy runtime secret files at the paths expected by sops consumers
-- [ ] 2.3 Verify representative VM evaluations succeed without proxmox-lxc or missing-sops-key errors
+- [ ] 2.1 Create `tests/profiles/vm-test.nix` — disables services needing real API keys (Tailscale, MCPO, OAuth-based), GPU services (ollama), sets `proxmoxLXC.manageNetwork = false` + `manageHostName = false`
+- [ ] 2.2 Add deterministic sops secret generation via `systemd.tmpfiles.rules`: create `f <path> <mode> <user> <group> - test-${builtins.hashString "sha256" "<name>"}` for every declared secret; escape sops-nix key-source assertion by setting `sops.age.keyFile = "/dev/null"`; for binary-format secrets, write hex-encoded hash content; clear `sops.age.sshKeyPaths`, set `sops.validateSopsFiles = false`
+- [ ] 2.3 Verify representative host configs evaluate with VM profile applied (`nix eval .#nixosTestConfigurations.nixserv.config.system.build.toplevel` — should not error)
+- [ ] 2.4 Document the disabled-services policy in the test profile comments and in the docs spec
 
-## 3. Baseline and service-aware test modules
+## 3. Auto-discovered and explicit scenario test modules
 
-- [ ] 3.1 Add a baseline VM test module that validates boot readiness, SSH, firewall state, journald persistence, and failed-unit handling
-- [ ] 3.2 Add service-aware test selection for proxy, postgres, monitoring collector, and tailscale based on evaluated host configuration
-- [ ] 3.3 Add test-only local service enablement where single-host VM validation requires local dependencies
+- [ ] 3.1 Build an auto-discovery harness that reads `server.tests.units` from evaluated host config and generates per-host testScript with baseline assertions (boot, SSH, firewall, journald, no failed units)
+- [ ] 3.2 Support explicit test scenarios: files under `tests/scenarios/<name>/test.nix` that define NixOS nodes + testScript; wire them into `nixosTestConfigurations.<scenario-name>`
+- [ ] 3.3 Add a representative scenario (e.g., `tests/scenarios/postgres-backup/test.nix`) as a template for scenario authoring
+- [ ] 3.4 Validate that auto-discovered tests from `server.tests.units` run inside the VM harness for at least one representative host
 
-## 4. PR-gated CI integration and docs
+## 4. PR-gated CI integration and documentation
 
-- [ ] 4.1 Add a PR-only Woodpecker VM test workflow for KVM-capable runners that builds per-host VM test checks
-- [ ] 4.2 Add `docs/src/development/vm_integration_tests.md` and link it from `docs/src/SUMMARY.md`
-- [ ] 4.3 Verify representative `nix eval` and `nix build` commands for VM tests and confirm docs are linked
+- [ ] 4.1 Add `.woodpecker/test-vm.yaml` — PR-only workflow, KVM-capable runners, builds `nixosTestConfigurations.*` targets
+- [ ] 4.2 Add `docs/src/development/vm_integration_tests.md` covering: architecture, VM profile policy, scenario authoring, local execution, CI behavior
+- [ ] 4.3 Link new doc from `docs/src/SUMMARY.md` under Development section
+- [ ] 4.4 Verify the Woodpecker workflow triggers correctly on PR events and the doc links resolve
