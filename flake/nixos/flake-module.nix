@@ -89,6 +89,7 @@ in
               allocations
               hostName
               ;
+            testUnits = self.nixosConfigurations.${hostName}.config.server.tests.units or { };
           })
         ) serverHosts
       )
@@ -107,7 +108,9 @@ in
                   pkgs
                   lib
                   ;
-                scenario = import "${scenariosDir}/${scenarioName}/test.nix";
+                scenario = (import "${scenariosDir}/${scenarioName}/test.nix") // {
+                  name = scenarioName;
+                };
               })
             ) (builtins.attrNames (builtins.readDir scenariosDir))
           )
