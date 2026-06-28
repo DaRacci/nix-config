@@ -86,7 +86,6 @@ in
               self
               pkgs
               lib
-              inputs
               allocations
               hostName
               ;
@@ -107,7 +106,6 @@ in
                   self
                   pkgs
                   lib
-                  inputs
                   ;
                 scenario = import "${scenariosDir}/${scenarioName}/test.nix";
               })

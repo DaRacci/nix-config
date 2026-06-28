@@ -113,40 +113,40 @@ allocations.server.monitoringPrimaryHost = "nixmon";
 ```nix
 server.monitoring = {
   enable = true;  # Default: true for all servers
-  
+
   retention = {
     metrics = "90d";  # Prometheus retention
     logs = "90d";     # Loki retention
   };
-  
+
   exporters = {
     node.enable = true;         # Default: true
     caddy.enable = <auto>;      # Auto-enabled if server.proxy enabled
     postgres.enable = <auto>;   # Auto-enabled if postgres configured
     redis.enable = <auto>;      # Auto-enabled if redis configured
   };
-  
+
   logs = {
     enable = true;  # Default: true (runs promtail)
   };
-  
+
   collector = {
     enable = <auto>;  # Auto-enabled on monitoringPrimaryHost
-    
+
     domain = "racci.dev";  # Base domain for subdomains
-    
+
     grafana = {
       kanidm = {
         enable = true;  # Use Kanidm OAuth
         authDomain = "auth.racci.dev";
       };
     };
-    
+
     alerting = {
       homeAssistant.enable = true;
       nextcloudTalk.enable = true;
     };
-    
+
     proxmox = {
       enable = true;
       apiUrl = <from-secret>;
@@ -173,11 +173,11 @@ MONITORING:
     API_URL: "https://proxmox-host:8006/api2/json"
     TOKEN_ID: "monitoring@pve!prometheus"
     TOKEN_SECRET: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-  
+
   # Home Assistant webhook
   HOME_ASSISTANT:
     WEBHOOK_URL: "https://hassio.racci.dev/api/webhook/prometheus_alerts"
-  
+
   # Nextcloud Talk bot
   NEXTCLOUD_TALK:
     WEBHOOK_URL: "https://nc.racci.dev/ocs/v2.php/apps/spreed/api/v1/bot/{token}/message"

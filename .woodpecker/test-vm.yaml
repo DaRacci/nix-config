@@ -1,11 +1,8 @@
-# VM Integration Test Workflow
-# Runs on pull_request events only, on KVM-capable runners.
-# Builds nixosTestConfigurations.* targets for ALL server hosts.
-# Affected-host selection (building only hosts changed by a PR)
-# is deferred to a future iteration.
+# PR-only, KVM.
+# Build nixosTestConfigurations.* for all server hosts.
+# TODO: affected-host build (PR-changed only).
 #
-# This workflow is independent of check.yaml — failures here
-# do not affect the check.yaml status.
+# Independent of check.yaml.
 
 labels:
   platform: linux/amd64

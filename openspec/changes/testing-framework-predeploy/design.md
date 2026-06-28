@@ -186,22 +186,22 @@ This produces runtime files at the expected paths (`/run/secrets/<name>` by defa
 
 ## Risks / Trade-offs
 
-**[KVM availability]** → VM test throughput and reliability depend on Woodpecker runners exposing `/dev/kvm`. Without KVM, tests will be extremely slow or may hang.  
+**[KVM availability]** → VM test throughput and reliability depend on Woodpecker runners exposing `/dev/kvm`. Without KVM, tests will be extremely slow or may hang.
 *Mitigation:* Gate the workflow with a `kvm: true` runner label. Document the requirement. Fail fast if `/dev/kvm` is unavailable.
 
-**[LXC mismatch (minimal)]** → The VM test profile overrides `proxmoxLXC.manageNetwork` and `proxmoxLXC.manageHostName` to false. Remaining LXC-specific behavior (e.g., `core.generators.proxmoxLXC.enable`) may still eval but should not block boot.  
+**[LXC mismatch (minimal)]** → The VM test profile overrides `proxmoxLXC.manageNetwork` and `proxmoxLXC.manageHostName` to false. Remaining LXC-specific behavior (e.g., `core.generators.proxmoxLXC.enable`) may still eval but should not block boot.
 *Mitigation:* Centralize overrides in `tests/profiles/vm-test.nix` and expand incrementally as incompatibilities are discovered. The impact is minimal because the overrides target the specific options known to conflict with QEMU.
 
-**[Secret fidelity gap]** → Deterministic tmpfiles-based secrets validate path wiring, not real secret values. A module that reads a secret and uses it for a cryptographic operation will get a garbage value in the VM.  
+**[Secret fidelity gap]** → Deterministic tmpfiles-based secrets validate path wiring, not real secret values. A module that reads a secret and uses it for a cryptographic operation will get a garbage value in the VM.
 *Mitigation:* Treat this framework as pre-deploy structural validation, not a substitute for runtime production secret correctness. Services that require real secrets to function are in the DISABLED category and won't be tested.
 
-**[Service coverage gap]** → Because API-key-dependent services (Tailscale, MCPO, OAuth) are disabled, they are not tested in VMs.  
+**[Service coverage gap]** → Because API-key-dependent services (Tailscale, MCPO, OAuth) are disabled, they are not tested in VMs.
 *Mitigation:* Accept as a documented gap. These services are exercised by other means (integration tests on real infra, manual validation). The auto-discovered `server.tests.units` may still contain useful config-level assertions for these services that run without the service being enabled (e.g., "validate that the config file would be syntactically correct").
 
-**[Build time]** → VM tests are expensive to build. Adding one per host plus scenarios significantly increases CI build time.  
+**[Build time]** → VM tests are expensive to build. Adding one per host plus scenarios significantly increases CI build time.
 *Mitigation:* Use `nix-fast-build` or similar caching strategies. The Woodpecker workflow is PR-only, not on every push. Consider affected-host selection in a future iteration.
 
-**[mkForce collision]** → The VM test profile uses `mkForce false` on `services.tailscale.enable`, `services.mcpo.enable`, and `services.ollama.enable`. If any other module applies `mkForce` to the same options, evaluation will fail with a collision error.  
+**[mkForce collision]** → The VM test profile uses `mkForce false` on `services.tailscale.enable`, `services.mcpo.enable`, and `services.ollama.enable`. If any other module applies `mkForce` to the same options, evaluation will fail with a collision error.
 *Mitigation:* Document this constraint; no current module in the codebase conflicts.
 
 ## Migration Plan
