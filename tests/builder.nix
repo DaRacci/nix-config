@@ -9,15 +9,16 @@
   hostName ? null,
   allocations ? null,
   scenario ? null,
+  testUnits ? { },
 }:
 assert (hostName != null) != (scenario != null);
 let
   inherit (lib)
+    mapAttrsToList
     nameValuePair
     listToAttrs
     ;
   inherit (builtins)
-    mapAttrsToList
     attrNames
     concatStringsSep
     ;
@@ -55,6 +56,12 @@ if hostName != null then
 
       with subtest("${hostName} baseline"):
         ${baselineAssertions hostName}
+
+      ${concatStringsSep "\n" (
+        mapAttrsToList (name: unit: ''
+          with subtest("${hostName} ${name}"):
+              ${unit.testScript}'') testUnits
+      )}
     '';
   }
 else
