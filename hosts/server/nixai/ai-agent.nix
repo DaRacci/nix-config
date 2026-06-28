@@ -25,6 +25,8 @@ in
   };
 
   server.proxy.virtualHosts.agent = {
+    public = true;
+
     ports = [
       cfg.apiServer.port
       cfg.dashboard.port
@@ -32,17 +34,41 @@ in
     ];
 
     extraConfig = ''
-      redir/v1 /v1/
-      path /v1* {
-         reverse_proxy localhost:${toString config.services.ai-agent.apiServer.port}
-      }
-
+      redir /v1 /v1/
       redir /webhook /webhook/
-      path /webhook* {
-        reverse_proxy localhost:${toString config.services.ai-agent.platform.webhook.port}
+
+      @apiRequest {
+        path /v1*
+        method POST
+        header Authorization *
+        client_ip private_ranges
       }
 
-      reverse_proxy localhost:${toString config.services.ai-agent.dashboard.port}
+      handle @apiRequest {
+        reverse_proxy localhost:${toString config.services.ai-agent.apiServer.port}
+      }
+
+      @webhookRequest {
+        path /webhook*
+        method POST
+      }
+
+      handle @webhookRequest {
+          reverse_proxy localhost:${toString config.services.ai-agent.platform.webhook.port}
+      }
+
+      @remainingWebhookOrApiRequest {
+        path /webhook*
+        path /v1*
+      }
+
+      handle @remainingWebhookOrApiRequest {
+        respond "Unauthorized" 401
+      }
+
+      handle {
+        reverse_proxy localhost:${toString config.services.ai-agent.dashboard.port}
+      }
     '';
   };
 

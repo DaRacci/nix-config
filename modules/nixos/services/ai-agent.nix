@@ -448,7 +448,7 @@ in
         ];
 
         environment = {
-          MNEMOSYNE_HOST_LLM_ENABLED = true;
+          MNEMOSYNE_HOST_LLM_ENABLED = "true";
         };
 
         settings = {
