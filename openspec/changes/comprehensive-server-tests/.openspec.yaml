@@ -1,0 +1,11 @@
+id: comprehensive-server-tests
+title: Comprehensive VM Integration Tests
+status: proposed
+author: agent
+created: 2026-06-28
+depends:
+  - testing-framework-predeploy
+summary: >
+  Fill test coverage gaps across all 7 server hosts. Add per-host service tests
+  via server.tests.units, cross-service scenario tests, infrastructure tests,
+  and security tests. Phase 1 covers critical paths.
