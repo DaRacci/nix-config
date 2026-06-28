@@ -24,7 +24,12 @@ in
     { pkgs, ... }:
     {
       checks.cluster = import "${self}/tests" {
-        inherit self pkgs lib clusterHosts;
+        inherit
+          self
+          pkgs
+          lib
+          clusterHosts
+          ;
         inherit (config.partitions.nixos.module) allocations;
       };
     };

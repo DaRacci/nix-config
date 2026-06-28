@@ -46,6 +46,7 @@
 
   partitionedAttrs = {
     nixosConfigurations = "nixos";
+    nixosTestConfigurations = "nixos";
     homeConfigurations = "home-manager";
     githubActions = "ci";
     checks = "ci";

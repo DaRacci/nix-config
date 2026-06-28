@@ -25,6 +25,7 @@ let
 
   hostsByType = getHostsByType self;
   hostNames = hostsByType |> attrValues |> flatten;
+  serverHosts = hostsByType.server or [ ];
 
   userHosts =
     readDirNoCommons "${self}/home"
@@ -67,5 +68,53 @@ in
         deviceUsers = userHosts |> filterAttrs (_: v: elem hostName v) |> attrNames;
       }
     );
+
+    nixosTestConfigurations =
+      let
+        builder = import "${self}/tests/builder.nix";
+        inherit (config.partitions.nixos.module) allocations;
+
+        # Build per-system pkgs — need a pkgs instance for the builder
+        pkgs = lib.builders.mkPkgs { system = "x86_64-linux"; };
+      in
+      # Auto-discovered: one entry per server host
+      builtins.listToAttrs (
+        builtins.map (
+          hostName:
+          lib.nameValuePair hostName (builder {
+            inherit
+              self
+              pkgs
+              lib
+              inputs
+              allocations
+              hostName
+              ;
+          })
+        ) serverHosts
+      )
+      # Explicit scenarios: one entry per scenario directory
+      // (
+        let
+          scenariosDir = "${self}/tests/scenarios";
+        in
+        if builtins.pathExists scenariosDir then
+          builtins.listToAttrs (
+            builtins.map (
+              scenarioName:
+              lib.nameValuePair scenarioName (builder {
+                inherit
+                  self
+                  pkgs
+                  lib
+                  inputs
+                  ;
+                scenario = import "${scenariosDir}/${scenarioName}/test.nix";
+              })
+            ) (builtins.attrNames (builtins.readDir scenariosDir))
+          )
+        else
+          { }
+      );
   };
 }

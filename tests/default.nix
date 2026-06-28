@@ -8,15 +8,21 @@
 }:
 let
   inherit (lib) nameValuePair listToAttrs;
-
-  testLib = import ./lib.nix;
 in
 pkgs.testers.runNixOSTest {
   name = "cluster";
 
-  nodes = clusterHosts |> map (hostName: nameValuePair hostName (import ./mkNode.nix {
-    inherit self allocations hostName;
-  })) |> listToAttrs;
+  nodes =
+    clusterHosts
+    |> map (
+      hostName:
+      nameValuePair hostName (
+        import ./mkNode.nix {
+          inherit self allocations hostName;
+        }
+      )
+    )
+    |> listToAttrs;
 
   testScript = ''
     start_all()
