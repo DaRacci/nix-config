@@ -59,6 +59,49 @@
     '';
   };
 
+  server.tests.units = {
+    postgres-connect = {
+      testScript = ''
+        nixio.wait_for_unit("postgresql.service")
+        nixio.wait_for_open_port(5432)
+        nixio.succeed("sudo -u postgres psql -c 'SELECT 1'")
+        nixio.succeed("sudo -u postgres pg_isready")
+      '';
+    };
+
+    redis-ping = {
+      testScript = ''
+        nixio.wait_for_unit("redis.service")
+        nixio.wait_for_open_port(6379)
+        nixio.succeed("redis-cli PING")
+        nixio.succeed("redis-cli SET test_key test_value")
+        nixio.succeed("redis-cli GET test_key | grep test_value")
+      '';
+    };
+
+    pgadmin = {
+      testScript = ''
+        nixio.wait_for_unit("pgadmin.service")
+        nixio.succeed("curl -s -o /dev/null -w '%{http_code}' http://localhost:5050/login | grep -E '200|302'")
+      '';
+    };
+    postgres-exporter = {
+      testScript = ''
+        nixio.succeed("systemctl show postgres-exporter.service | grep -i loadstate")
+      '';
+    };
+    redis-exporter = {
+      testScript = ''
+        nixio.succeed("systemctl show redis-exporter.service | grep -i loadstate")
+      '';
+    };
+    postgresql-backup = {
+      testScript = ''
+        nixio.succeed("systemctl show postgresql-backup.service | grep -i loadstate")
+      '';
+    };
+  };
+
   services = {
     couchdb = {
       enable = false;

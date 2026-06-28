@@ -630,5 +630,11 @@
         reverse_proxy http://${config.services.searx.settings.server.bind_address}:${toString config.services.searx.settings.server.port}
       '';
     };
+
+    tests.units.searxng = {
+      testScript = ''
+        nixcloud.succeed("systemctl show searxng.service | grep -i loadstate")
+      '';
+    };
   };
 }

@@ -6,46 +6,38 @@
 # See docs/src/development/vm_integration_tests.md for guidance.
 {
   nodes = {
-    postgres-server = _: {
+    pg_server = _: {
       services.postgresql = {
         enable = true;
         ensureDatabases = [ "testdb" ];
         ensureUsers = [
-          {
-            name = "testuser";
-            ensureDBOwnership = true;
-            ensurePermissions = {
-              "DATABASE testdb" = "ALL PRIVILEGES";
-            };
-          }
+          { name = "testuser"; }
         ];
         authentication = ''
           local all all trust
           host all all all trust
         '';
-        settings = {
-          listen_addresses = "'*'";
-        };
+        enableTCPIP = true;
       };
       networking.firewall.allowedTCPPorts = [ 5432 ];
     };
 
-    postgres-client = { pkgs, ... }: {
+    pg_client = { pkgs, ... }: {
       environment.systemPackages = [ pkgs.postgresql ];
     };
   };
 
   testScript = ''
     with subtest("postgres accepts connections"):
-      postgres-client.wait_for_unit("multi-user.target")
-      postgres-client.succeed(
-          "psql -h postgres-server -U testuser -d testdb -c 'SELECT 1'"
+      pg_client.wait_for_unit("multi-user.target")
+      pg_client.succeed(
+          "psql -h pg_server -U testuser -d testdb -c 'SELECT 1'"
       )
 
     with subtest("pg_dump completes without errors"):
-      postgres-client.succeed(
-          "pg_dump -h postgres-server -U testuser testdb > /tmp/dump.sql"
+      pg_client.succeed(
+          "pg_dump -h pg_server -U testuser testdb > /tmp/dump.sql"
       )
-      postgres-client.succeed("test -s /tmp/dump.sql")
+      pg_client.succeed("test -s /tmp/dump.sql")
   '';
 }

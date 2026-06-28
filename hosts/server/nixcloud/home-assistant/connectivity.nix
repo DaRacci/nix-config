@@ -131,6 +131,31 @@ in
     };
   };
 
+  server.tests.units = {
+    mosquitto = {
+      testScript = ''
+        nixcloud.succeed("systemctl show mosquitto.service | grep -i loadstate")
+      '';
+    };
+    esphome = {
+      testScript = ''
+        nixcloud.succeed("systemctl show esphome-dashboard.service | grep -i loadstate")
+      '';
+    };
+
+    zigbee2mqtt = {
+      testScript = ''
+        nixcloud.succeed("systemctl show zigbee2mqtt.service | grep -i loadstate")
+      '';
+    };
+
+    matter-server = {
+      testScript = ''
+        nixcloud.succeed("systemctl show matter-server.service | grep -i loadstate")
+      '';
+    };
+  };
+
   server = {
     dashboard.items = {
       esphome.title = "ESPHome";

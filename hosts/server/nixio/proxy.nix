@@ -129,6 +129,24 @@ _:
     };
   };
 
+  server.tests.units.caddy = {
+    testScript = ''
+      nixio.succeed("systemctl show caddy.service | grep -i loadstate")
+    '';
+  };
+
+  server.tests.units.upgrade-status = {
+    testScript = ''
+      nixio.succeed("systemctl show upgrade-status.service | grep -i loadstate")
+    '';
+  };
+
+  server.tests.units.hacompanion = {
+    testScript = ''
+      nixio.succeed("systemctl show hacompanion.service | grep -i loadstate")
+    '';
+  };
+
   networking.firewall.allowedTCPPorts = [
     80
     443

@@ -51,4 +51,30 @@ in
       }
     '';
   };
+
+  server.tests.units = {
+    minio = {
+      testScript = ''
+        nixio.succeed("systemctl show minio.service | grep -i loadstate")
+      '';
+    };
+
+    seaweedfs-master = {
+      testScript = ''
+        nixio.succeed("systemctl show seaweedfs-master.service | grep -i loadstate")
+      '';
+    };
+
+    seaweedfs-volume = {
+      testScript = ''
+        nixio.succeed("systemctl show seaweedfs-volume.service | grep -i loadstate")
+      '';
+    };
+
+    seaweedfs-filer = {
+      testScript = ''
+        nixio.succeed("systemctl show seaweedfs-filer.service | grep -i loadstate")
+      '';
+    };
+  };
 }

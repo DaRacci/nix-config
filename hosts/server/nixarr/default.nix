@@ -77,6 +77,62 @@
   server = {
     dashboard.icon = "sh-mediamanager";
 
+    tests.units = {
+      jellyfin = {
+        testScript = ''
+          nixarr.succeed("systemctl show jellyfin.service | grep -i loadstate")
+        '';
+      };
+
+      seerr = {
+        testScript = ''
+          nixarr.succeed("systemctl show seerr.service | grep -i loadstate")
+        '';
+      };
+
+      samba = {
+        testScript = ''
+          nixarr.succeed("systemctl show samba.service | grep -i loadstate")
+        '';
+      };
+
+      wireguard = {
+        testScript = ''
+          nixarr.succeed("systemctl show wg.service | grep -i loadstate")
+        '';
+      };
+
+      sonarr = {
+        testScript = ''
+          nixarr.succeed("systemctl show sonarr.service | grep -i loadstate")
+        '';
+      };
+
+      radarr = {
+        testScript = ''
+          nixarr.succeed("systemctl show radarr.service | grep -i loadstate")
+        '';
+      };
+
+      lidarr = {
+        testScript = ''
+          nixarr.succeed("systemctl show lidarr.service | grep -i loadstate")
+        '';
+      };
+
+      prowlarr = {
+        testScript = ''
+          nixarr.succeed("systemctl show prowlarr.service | grep -i loadstate")
+        '';
+      };
+
+      bazarr = {
+        testScript = ''
+          nixarr.succeed("systemctl show bazarr.service | grep -i loadstate")
+        '';
+      };
+    };
+
     proxy.virtualHosts = {
       jellyfin = {
         public = true;

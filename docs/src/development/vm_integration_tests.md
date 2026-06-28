@@ -171,6 +171,29 @@ List all available test targets:
 nix eval .#nixosTestConfigurations --apply 'builtins.attrNames'
 ```
 
+### Filtering Specific Tests
+
+When debugging a single unit test, set `testFilter` to run only matching tests
+instead of all `server.tests.units.*` entries for that host:
+
+```bash
+nix build .#nixosTestConfigurations.<host> \
+  --override-input . '/path/to/this/repo?testFilter=postgres-connect'
+```
+
+Or by editing the flake-module locally:
+
+```nix
+builder {
+  # ...
+  testFilter = [ "postgres-connect" ];
+}
+```
+
+`testFilter` is null by default (all tests run). When set to a list of strings,
+only unit tests whose names appear in the list execute. Non-matching names are
+silently skipped — baseline assertions still run.
+
 ### Requirements
 
 - **`/dev/kvm`**: QEMU tests require KVM acceleration. Without it, tests are
@@ -209,3 +232,129 @@ When a service is disabled by the VM test profile (e.g., `services.tailscale`),
 its `server.tests.units` entries are silently skipped in per-host VM tests.
 Disabled services cannot run, so their tests cannot pass. These services are
 exercised by other means (integration tests on real infrastructure, manual validation).
+
+### Per-Service Test Patterns
+
+Component tests follow a layered testing strategy. The pattern varies by service type:
+
+#### HTTP Services (caddy, dashy, grafana, etc.)
+
+```nix
+server.tests.units.minio = {
+  testScript = ''
+    nixio.succeed("curl -s http://localhost:9000/minio/health/live | grep -q 'ok'")
+  '';
+};
+```
+
+#### Database Services (postgresql, redis, elasticsearch)
+
+```nix
+server.tests.units.postgres-connect = {
+  testScript = ''
+    nixio.succeed("psql -U postgres -c 'SELECT 1'")
+  '';
+};
+```
+
+For QEMU tests, use trust authentication — `vm-test.nix` injects `host all all all trust`.
+
+#### Systemd Units Only (services that can't start in QEMU)
+
+```nix
+server.tests.units.clamav = {
+  testScript = ''
+    nixcloud.succeed("systemctl show clamav-daemon.service | grep -i loadstate")
+  '';
+};
+```
+
+Services needing external credentials (Cloudflare, GitHub tokens, OAuth), GPU access, or hardware passthrough can't fully start in QEMU. Verify unit definition exists instead.
+
+#### Kernel/System Configs
+
+```nix
+server.tests.units.kernel-forwarding = {
+  testScript = ''
+    nixio.succeed("sysctl net.ipv4.ip_forward | grep '= 1'")
+  '';
+};
+```
+
+### Coverage Matrix
+
+| Host          | Category       | Test Units | Covered Services                                                                                                                                                                                                                |
+| ------------- | -------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| nixio         | IO Primary     | 10         | postgres, redis, caddy, minio, adguard, dashy, baseline, postgres-exporter, redis-exporter, pgadmin, seaweedfs×3, postgresql-backup, kernel-forwarding, upgrade-status, hacompanion                                             |
+| nixmon        | Monitoring     | 7          | prometheus, loki, grafana, alertmanager, uptime-kuma, node-exporter, alloy                                                                                                                                                      |
+| nixcloud      | Cloud/Media    | 14         | kanidm, nextcloud, immich, home-assistant, mosquitto, esphome, navidrome, searxng, homebox, elasticsearch, clamav, imaginary, immich-redis, zigbee2mqtt, matter-server, avahi, notify-push                                      |
+| nixdev        | Development    | 7          | woodpecker-server, woodpecker-agent, n8n, coder, docker, docker-registry, github-runners                                                                                                                                        |
+| nixai         | AI             | 5          | open-webui, ai-agent-api, ai-agent-dashboard, wyoming-piper, wyoming-whisper                                                                                                                                                    |
+| nixarr        | Media/Arr      | 8          | jellyfin, seerr, wireguard, sonarr, radarr, prowlarr, flaresolverr, transmission, sabnzbd, lidarr, readarr, bazarr                                                                                                              |
+| nixserv       | Cache          | 2          | atticd, atticd-config                                                                                                                                                                                                           |
+| **Scenarios** | **Cross-host** | **12**     | postgres-backup, postgres-remote-connect, redis-remote-connect, storage-mount, distributed-builds, monitoring-scrape, proxy-routing, firewall-port-audit, database-backup-chain, ssh-hardening, io-guardian, pgvector-extension |
+
+### Scenario Authoring Guidance
+
+Scenarios define self-contained NixOS nodes. Each node must work without external infrastructure.
+
+#### Naming
+
+- Directory name under `tests/scenarios/<name>/` becomes the `nixosTestConfigurations.<name>` entry automatically
+- Use kebab-case: `postgres-remote-connect`, `database-backup-chain`
+
+#### Self-Contained Rule
+
+Every service, secret, and dependency must be defined within the scenario nodes:
+
+- **PostgreSQL**: Use trust authentication (`host all all all trust`) — no sops secrets
+- **Firewall**: Open ports explicitly with `networking.firewall.allowedTCPPorts`
+- **DNS**: Use NixOS test driver hostnames (node names resolve automatically)
+- **Secrets**: Avoid sops. Use inline configs, empty passwords, or trust auth
+
+#### Node Structure
+
+```nix
+{
+  nodes = {
+    server-node = { pkgs, ... }: {
+      services.openssh.enable = true;  # baseline needs sshd
+      services.postgresql = {
+        enable = true;
+        enableTCPIP = true;
+        authentication = ''
+          local all all trust
+          host all all all trust
+        '';
+      };
+      networking.firewall.allowedTCPPorts = [ 5432 ];
+    };
+    client-node = { pkgs, ... }: {
+      environment.systemPackages = [ pkgs.postgresql ];
+    };
+  };
+  testScript = ''
+    start_all()
+    # subtests here
+  '';
+}
+```
+
+#### What NOT to do
+
+- **Don't set `name`** — flake-module injects it from directory name
+- **Don't import `vm-test.nix`** — builder handles that automatically
+- **Don't reference `config.sops.secrets`** — no real secrets available
+- **Don't use Cloudflare plugins in Caddy** — no API tokens
+- **Don't expect GPU-accelerated services** — no GPU in QEMU
+
+#### Multi-node Communication
+
+Nodes communicate via their NixOS test driver hostnames (the keys in `nodes`):
+
+```nix
+# client-node reaches server-node:
+client-node.succeed("psql -h server-node -U testuser -d testdb -c 'SELECT 1'")
+```
+
+IP assignment and DNS are handled automatically by the test driver. No manual IP configuration needed.

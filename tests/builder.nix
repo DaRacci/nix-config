@@ -10,6 +10,7 @@
   allocations ? null,
   scenario ? null,
   testUnits ? { },
+  testFilter ? null,
 }:
 assert (hostName != null) != (scenario != null);
 let
@@ -21,7 +22,11 @@ let
   inherit (builtins)
     attrNames
     concatStringsSep
+    elem
     ;
+
+  filteredTestUnits =
+    if testFilter == null then testUnits else lib.filterAttrs (name: _: elem name testFilter) testUnits;
 
   vmTestProfile = import ./profiles/vm-test.nix;
 
@@ -42,6 +47,13 @@ if hostName != null then
   pkgs.testers.runNixOSTest {
     name = hostName;
 
+    node.specialArgs = {
+      inherit self;
+      hostDirectory = "${self}/hosts/server/${hostName}";
+      users = [ ];
+      importExternals = false;
+    };
+
     nodes.${hostName} =
       { ... }:
       {
@@ -60,7 +72,7 @@ if hostName != null then
       ${concatStringsSep "\n" (
         mapAttrsToList (name: unit: ''
           with subtest("${hostName} ${name}"):
-              ${unit.testScript}'') testUnits
+              ${unit.testScript}'') filteredTestUnits
       )}
     '';
   }

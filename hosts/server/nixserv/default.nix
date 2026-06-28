@@ -39,6 +39,20 @@ in
         reverse_proxy http://127.0.0.1:8080
       '';
     };
+
+    tests.units = {
+      atticd = {
+        testScript = ''
+          nixserv.succeed("systemctl show atticd.service | grep -i loadstate")
+        '';
+      };
+
+      atticd-config = {
+        testScript = ''
+          nixserv.succeed("systemctl cat atticd.service | grep -q nixio")
+        '';
+      };
+    };
   };
 
   environment.systemPackages = with pkgs; [ attic-client ];

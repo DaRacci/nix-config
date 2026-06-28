@@ -90,4 +90,18 @@
     "f ${config.services.home-assistant.configDir}/automations.yaml 0755 hass hass"
     "f ${config.services.home-assistant.configDir}/scenes.yaml 0755 hass hass"
   ];
+
+  server.tests.units = {
+    home-assistant = {
+      testScript = ''
+        nixcloud.succeed("systemctl show home-assistant.service | grep -i loadstate")
+      '';
+    };
+
+    avahi = {
+      testScript = ''
+        nixcloud.succeed("systemctl show avahi-daemon.service | grep -i loadstate")
+      '';
+    };
+  };
 }

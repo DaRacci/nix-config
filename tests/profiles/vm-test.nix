@@ -90,10 +90,37 @@ in
   options.sops.placeholder = lib.mkOption {
     type = lib.types.attrsOf lib.types.str;
     default = { };
-    readonly = true;
+    readOnly = true;
+  };
+
+  # Stub options for services that are force-disabled below but whose module
+  # may not be imported in scenario tests.
+  options.services.mcpo = lib.mkOption {
+    type = lib.types.submodule {
+      options.enable = lib.mkEnableOption "mcpo service";
+    };
+    default = { };
+  };
+
+  # Declare proxmoxLXC options so mkForce works on all hosts
+  # (option only exists on hosts importing generators.nix).
+  options.services.seaweedfs = lib.mkOption {
+    type = lib.types.attrsOf lib.types.unspecified;
+    default = { };
+  };
+
+  options.proxmoxLXC = lib.mkOption {
+    type = lib.types.attrsOf lib.types.unspecified;
+    default = { };
+    internal = true;
   };
 
   config = {
+    sops.secrets.SSH_PRIVATE_KEY = { };
+
+    # --- ENABLED: required by baseline assertions ---
+    services.openssh.enable = true;
+
     # --- DISABLED: needs real external credentials ---
     services.tailscale.enable = lib.mkForce false; # Needs real auth key / OAuth client.
     services.mcpo.enable = lib.mkForce false; # Needs GitHub, AniList tokens.
@@ -104,6 +131,22 @@ in
     # --- OVERRIDDEN: conflicts with QEMU test driver ---
     proxmoxLXC.manageNetwork = lib.mkForce false;
     proxmoxLXC.manageHostName = lib.mkForce false;
+
+    # --- POSTGRESQL: disable JIT (needs LLVM at runtime), add trust auth ---
+    services.postgresql = {
+      enableJIT = lib.mkForce false;
+      authentication = lib.mkOverride 1500 ''
+        local all all trust
+        host all all 127.0.0.1/32 trust
+        host all all ::1/128 trust
+      '';
+    };
+
+    systemd.services.caddy.after = lib.mkForce [ "network.target" ];
+    systemd.services.caddy.wants = lib.mkForce [ ];
+
+    # --- PGADMIN: skip initial password file (use default login) ---
+    services.pgadmin.initialPasswordFile = lib.mkForce null;
 
     # --- DETERMINISTIC SECRETS ---
     # Writes each declared secret at its path with content derived from

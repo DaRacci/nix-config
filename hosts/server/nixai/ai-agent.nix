@@ -7,6 +7,20 @@ let
   cfg = config.services.ai-agent;
 in
 {
+  server.tests.units = {
+    ai-agent-api = {
+      testScript = ''
+        nixai.succeed("systemctl show ai-agent-api.service | grep -i loadstate")
+      '';
+    };
+
+    ai-agent-dashboard = {
+      testScript = ''
+        nixai.succeed("systemctl show ai-agent-dashboard.service | grep -i loadstate")
+      '';
+    };
+  };
+
   sops = {
     secrets = {
       "AI_AGENT/AZURE_FOUNDRY_API_KEY" = { };
