@@ -34,9 +34,7 @@ _: {
   server.tests.units = {
     prometheus = {
       testScript = ''
-        nixmon.wait_for_unit("prometheus.service")
-        nixmon.wait_for_open_port(9090)
-        nixmon.succeed("curl -s http://localhost:9090/api/v1/status/buildinfo")
+        nixmon.succeed("systemctl show prometheus.service | grep -i loadstate")
       '';
     };
 

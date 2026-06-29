@@ -229,19 +229,19 @@ in
 
     server.proxy.virtualHosts =
       {
-        seaweedfs = cfg.master // {
+        seaweedfs = cfg.master or {} // {
           service = "master";
           withGrpc = true;
         };
-        "filer.seaweedfs" = cfg.filer // {
+        "filer.seaweedfs" = cfg.filer or {} // {
           service = "filer";
           withGrpc = true;
         };
-        "s3.seaweedfs" = cfg.filer.s3 // {
+        "s3.seaweedfs" = cfg.filer.s3 or {} // {
           service = "filer";
           withGrpc = false;
         };
-        "volume.seaweedfs" = cfg.volume // {
+        "volume.seaweedfs" = cfg.volume or {} // {
           service = "volume";
           withGrpc = true;
         };
@@ -286,14 +286,14 @@ in
       };
 
       seaweedfs-webdav = lib.mkForce {
-        "${cfg.filer.webdav.cacheDir}".d = {
+        "${cfg.filer.webdav.cacheDir or "/var/lib/seaweedfs/webdav-cache"}".d = {
           mode = "0755";
           user = "seaweedfs";
           group = "seaweedfs";
         };
       };
     }
-    // (lib.optionalAttrs (cfg.filer.tomlConfig != null) {
+    // (lib.optionalAttrs (cfg.filer.tomlConfig or null != null) {
       seaweedfs-config = {
         "${baseDir}/.seaweedfs".d = {
           mode = "0755";
@@ -319,14 +319,17 @@ in
     })
     // (
       {
-        seaweedfs-master = cfg.master // {
+        seaweedfs-master = cfg.master or {} // {
           security = "master";
+          dataDir = "${baseDir}/master";
         };
-        seaweedfs-volume = cfg.volume // {
+        seaweedfs-volume = cfg.volume or {} // {
           security = "master";
+          dataDir = "${baseDir}/volume";
         };
-        seaweedfs-filer = cfg.filer // {
+        seaweedfs-filer = cfg.filer or {} // {
           security = "filer";
+          dataDir = "${baseDir}/filer";
         };
         seaweedfs-admin = {
           security = "master";

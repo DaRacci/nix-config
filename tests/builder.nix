@@ -4,6 +4,7 @@
 # Explicit: scenario-defined nodes, baseline on all + scenario testScript.
 {
   self,
+  inputs,
   pkgs,
   lib,
   hostName ? null,
@@ -48,7 +49,8 @@ if hostName != null then
     name = hostName;
 
     node.specialArgs = {
-      inherit self;
+      inherit self inputs;
+      inherit (self) outputs;
       hostDirectory = "${self}/hosts/server/${hostName}";
       users = [ ];
       importExternals = false;
@@ -60,6 +62,7 @@ if hostName != null then
         imports = [
           hostNodeModule
           vmTestProfile
+          inputs.disko.nixosModules.disko
         ];
       };
 

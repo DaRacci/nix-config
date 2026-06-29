@@ -82,15 +82,16 @@ in
         builtins.map (
           hostName:
           lib.nameValuePair hostName (builder {
-            inherit
-              self
-              pkgs
-              lib
-              allocations
-              hostName
-              ;
-            testUnits = self.nixosConfigurations.${hostName}.config.server.tests.units or { };
-          })
+                      inherit
+                        self
+                        inputs
+                        pkgs
+                        lib
+                        allocations
+                        hostName
+                        ;
+                      testUnits = self.nixosConfigurations.${hostName}.config.server.tests.units or { };
+                    })
         ) serverHosts
       )
       # Explicit scenarios: one entry per scenario directory

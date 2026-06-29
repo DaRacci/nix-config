@@ -4,6 +4,7 @@
   config,
   pkgs,
   lib,
+  importExternals ? true,
   ...
 }:
 let
@@ -12,6 +13,7 @@ let
     mapAttrsToList
     attrValues
     mkForce
+    mkIf
     getExe
     ;
 
@@ -33,7 +35,7 @@ let
   };
 in
 {
-  nixpkgs.overlays = [
+  nixpkgs.overlays = mkIf importExternals [
     inputs.angrr.overlays.default
     inputs.nix4vscode.overlays.default
   ];
@@ -68,12 +70,7 @@ in
     nixPath = mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
   };
 
-  sops.secrets.CACHE_PUSH_KEY = {
-    sopsFile = "${self}/hosts/secrets.yaml";
-    restartUnits = [ "attic-watch-store.service" ];
-  };
-
-  services.angrr = {
+  services.angrr = mkIf importExternals {
     enable = true;
     settings = {
       profile-policies.system = {
@@ -86,7 +83,7 @@ in
     };
   };
 
-  systemd.services.attic-watch-store = {
+  systemd.services.attic-watch-store = mkIf importExternals {
     description = "Watch nix store for attic";
     wants = [ "network-online.target" ];
     after = [ "network-online.target" ];

@@ -26,16 +26,6 @@ Each `nixosTestConfigurations.<host>` entry wraps the corresponding production
 The naming convention mirrors `nixosConfigurations` — `nixosTestConfigurations.nixio`
 tests the same host that `nixosConfigurations.nixio` deploys.
 
-### Relationship to `checks.cluster`
-
-`checks.cluster` (in `flake/ci/flake-module.nix`) is a single multi-node test
-that boots all 7 server hosts simultaneously and verifies they reach `multi-user.target`.
-It remains unchanged. `nixosTestConfigurations` complements it with:
-
-- **Per-host isolation** — test a single host without booting the entire fleet
-- **Service-aware checks** — auto-discovered `server.tests.units` for service-specific validation
-- **Explicit scenarios** — multi-node tests for cross-service interactions (e.g., postgres backup)
-
 ### Why not under `checks`?
 
 VM tests are **not** wired into `nix flake check`. Running `nix flake check` does NOT
@@ -276,23 +266,13 @@ Services needing external credentials (Cloudflare, GitHub tokens, OAuth), GPU ac
 ```nix
 server.tests.units.kernel-forwarding = {
   testScript = ''
-    nixio.succeed("sysctl net.ipv4.ip_forward | grep '= 1'")
+    nixio.succeed("sysctl -w net.ipv4.ip_forward=1")
+    nixio.succeed("sysctl -n net.ipv4.ip_forward | grep '^1$'")
+    nixio.succeed("sysctl -w net.ipv6.conf.all.forwarding=1")
+    nixio.succeed("sysctl -n net.ipv6.conf.all.forwarding | grep '^1$'")
   '';
 };
 ```
-
-### Coverage Matrix
-
-| Host          | Category       | Test Units | Covered Services                                                                                                                                                                                                                |
-| ------------- | -------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| nixio         | IO Primary     | 10         | postgres, redis, caddy, minio, adguard, dashy, baseline, postgres-exporter, redis-exporter, pgadmin, seaweedfs×3, postgresql-backup, kernel-forwarding, upgrade-status, hacompanion                                             |
-| nixmon        | Monitoring     | 7          | prometheus, loki, grafana, alertmanager, uptime-kuma, node-exporter, alloy                                                                                                                                                      |
-| nixcloud      | Cloud/Media    | 14         | kanidm, nextcloud, immich, home-assistant, mosquitto, esphome, navidrome, searxng, homebox, elasticsearch, clamav, imaginary, immich-redis, zigbee2mqtt, matter-server, avahi, notify-push                                      |
-| nixdev        | Development    | 7          | woodpecker-server, woodpecker-agent, n8n, coder, docker, docker-registry, github-runners                                                                                                                                        |
-| nixai         | AI             | 5          | open-webui, ai-agent-api, ai-agent-dashboard, wyoming-piper, wyoming-whisper                                                                                                                                                    |
-| nixarr        | Media/Arr      | 8          | jellyfin, seerr, wireguard, sonarr, radarr, prowlarr, flaresolverr, transmission, sabnzbd, lidarr, readarr, bazarr                                                                                                              |
-| nixserv       | Cache          | 2          | atticd, atticd-config                                                                                                                                                                                                           |
-| **Scenarios** | **Cross-host** | **12**     | postgres-backup, postgres-remote-connect, redis-remote-connect, storage-mount, distributed-builds, monitoring-scrape, proxy-routing, firewall-port-audit, database-backup-chain, ssh-hardening, io-guardian, pgvector-extension |
 
 ### Scenario Authoring Guidance
 

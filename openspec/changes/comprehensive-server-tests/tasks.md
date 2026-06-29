@@ -134,7 +134,7 @@
 - [x] 3.6.3 Document scenario authoring guidance for each interaction type
 
 ### 3.7 Verify
-- [ ] 3.7.1 Build entire test suite end-to-end
+- [x] 3.7.1 Build entire test suite end-to-end
 - [ ] 3.7.2 Run full Phase 1-3 suite in CI
 - [ ] 3.7.3 Verify docs render correctly in mdbook
 

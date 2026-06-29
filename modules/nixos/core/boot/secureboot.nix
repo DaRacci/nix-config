@@ -9,6 +9,7 @@ let
   inherit (lib)
     mkIf
     mkForce
+    mkMerge
     mkEnableOption
     optional
     ;
@@ -21,17 +22,19 @@ in
     enable = mkEnableOption "enable secureboot";
   };
 
-  config = mkIf cfg.enable {
-    boot = {
-      loader.systemd-boot.enable = mkForce false;
+  config = mkMerge (
+    optional importExternals (mkIf cfg.enable {
+      boot = {
+        loader.systemd-boot.enable = mkForce false;
 
-      lanzaboote = {
-        enable = true;
-        pkiBundle = "/var/lib/sbctl";
-        autoGenerateKeys.enable = true;
+        lanzaboote = {
+          enable = true;
+          pkiBundle = "/var/lib/sbctl";
+          autoGenerateKeys.enable = true;
+        };
       };
-    };
 
-    host.persistence.directories = [ "/var/lib/sbctl" ];
-  };
+      host.persistence.directories = [ "/var/lib/sbctl" ];
+    })
+  );
 }

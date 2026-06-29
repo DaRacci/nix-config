@@ -3,6 +3,7 @@
 # generates deterministic secrets. Injected into every test node.
 {
   config,
+  pkgs,
   lib,
   ...
 }:
@@ -81,6 +82,18 @@ in
             type = lib.types.listOf lib.types.str;
             default = [ ];
           };
+          owner = lib.mkOption {
+            type = lib.types.str;
+            default = "root";
+          };
+          group = lib.mkOption {
+            type = lib.types.str;
+            default = "root";
+          };
+          mode = lib.mkOption {
+            type = lib.types.str;
+            default = "0400";
+          };
         };
       })
     );
@@ -93,19 +106,16 @@ in
     readOnly = true;
   };
 
-  # Stub options for services that are force-disabled below but whose module
-  # may not be imported in scenario tests.
-  options.services.mcpo = lib.mkOption {
-    type = lib.types.submodule {
-      options.enable = lib.mkEnableOption "mcpo service";
-    };
-    default = { };
-  };
-
-  # Declare proxmoxLXC options so mkForce works on all hosts
-  # (option only exists on hosts importing generators.nix).
+  # Stubs for services whose option declarations come from external flake inputs
+  # (importExternals = false in test context).
   options.services.seaweedfs = lib.mkOption {
-    type = lib.types.attrsOf lib.types.unspecified;
+    type = lib.types.submodule {
+      freeformType = lib.types.attrsOf lib.types.unspecified;
+      options = {
+        enable = lib.mkEnableOption "seaweedfs";
+        package = lib.mkOption { type = lib.types.package; default = pkgs.hello; };
+      };
+    };
     default = { };
   };
 
@@ -116,10 +126,29 @@ in
   };
 
   config = {
-    sops.secrets.SSH_PRIVATE_KEY = { };
+    sops.secrets.SSH_PRIVATE_KEY = { path = lib.mkForce "/run/secrets/SSH_PRIVATE_KEY"; };
 
     # --- ENABLED: required by baseline assertions ---
-    services.openssh.enable = true;
+    # --- BOOT: mkForce disable systemd-boot (VM uses init-script builder) ---
+    boot.loader.systemd-boot.enable = lib.mkForce false;
+
+    # Ensure initrd is built for qemu-vm
+    boot.initrd.enable = true;
+
+    services.openssh = {
+      enable = true;
+      # Override production hostKeys — production maps SSH_PRIVATE_KEY to
+      # /etc/ssh/ssh_host_ed25519_key. Writing deterministic content there
+      # produces an invalid key. Let sshd auto-generate host keys.
+      hostKeys = lib.mkForce [
+        { type = "ed25519"; path = "/etc/ssh/ssh_host_ed25519_key"; }
+        { type = "rsa"; bits = 4096; path = "/etc/ssh/ssh_host_rsa_key"; }
+      ];
+      settings = {
+        PermitRootLogin = lib.mkForce "yes";
+        PasswordAuthentication = lib.mkForce true;
+      };
+    };
 
     # --- DISABLED: needs real external credentials ---
     services.tailscale.enable = lib.mkForce false; # Needs real auth key / OAuth client.
@@ -127,10 +156,6 @@ in
 
     # --- DISABLED: needs GPU ---
     services.ollama.enable = lib.mkForce false; # No GPU in QEMU.
-
-    # --- OVERRIDDEN: conflicts with QEMU test driver ---
-    proxmoxLXC.manageNetwork = lib.mkForce false;
-    proxmoxLXC.manageHostName = lib.mkForce false;
 
     # --- POSTGRESQL: disable JIT (needs LLVM at runtime), add trust auth ---
     services.postgresql = {
@@ -146,7 +171,12 @@ in
     systemd.services.caddy.wants = lib.mkForce [ ];
 
     # --- PGADMIN: skip initial password file (use default login) ---
-    services.pgadmin.initialPasswordFile = lib.mkForce null;
+    services.pgadmin.initialPasswordFile = lib.mkForce "/dev/null";
+
+    # --- OVERRIDDEN: conflicts with QEMU test driver ---
+    # proxmoxLXC is declared by hosts/server/shared (not imported),
+    # services.seaweedfs and services.mcpo are declared by modules/nixos.
+    # QEMU test driver may override networking/hostname at runtime.
 
     # --- DETERMINISTIC SECRETS ---
     # Writes each declared secret at its path with content derived from
@@ -156,8 +186,8 @@ in
       let
         content = "test-${hashString "sha256" name}";
       in
-      "f ${secret.path} ${secret.mode} ${secret.owner} ${secret.group} - ${content}"
-    ) config.sops.secrets;
+      "f+ ${secret.path} ${secret.mode} ${secret.owner} ${secret.group} - ${content}"
+    ) (lib.filterAttrs (name: _: name != "SSH_PRIVATE_KEY") config.sops.secrets);
   };
 
 }

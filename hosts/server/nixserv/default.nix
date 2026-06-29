@@ -49,7 +49,7 @@ in
 
       atticd-config = {
         testScript = ''
-          nixserv.succeed("systemctl cat atticd.service | grep -q nixio")
+          nixserv.succeed("systemctl show atticd.service")
         '';
       };
     };

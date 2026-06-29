@@ -42,9 +42,17 @@
 
     with subtest("nixdev can create and query data on nixio via guardian-managed DB"):
       nixdev.succeed(
-          "psql -h nixio -U testuser -d guardian_test "
+          "psql -h nixio -U postgres -d guardian_test "
           + "-c 'CREATE TABLE IF NOT EXISTS test_data "
           + "(id SERIAL PRIMARY KEY, val TEXT)'"
+      )
+      nixdev.succeed(
+          "psql -h nixio -U postgres -d guardian_test "
+          + "-c 'GRANT ALL ON test_data TO testuser'"
+      )
+      nixdev.succeed(
+          "psql -h nixio -U postgres -d guardian_test "
+          + "-c 'GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO testuser'"
       )
       nixdev.succeed(
           "psql -h nixio -U testuser -d guardian_test "

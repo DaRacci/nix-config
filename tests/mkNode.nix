@@ -10,31 +10,19 @@
       deviceType = "server";
     })
     "${self}/modules/nixos/core/host/device.nix"
+  ]
+  # Import production module tree so services get provisioned
+  # NOTE: do NOT import hosts/server/shared — it pulls profiles/headless.nix
+  # which requires kernel config unavailable in QEMU test context.
+  ++ (builtins.attrValues (import "${self}/modules/nixos"))
+  ++ [
+    "${self}/modules/nixos/server"
+    "${self}/hosts/server/${hostName}"
   ];
 
   options = {
     host.name = lib.mkOption { type = lib.types.str; };
     host.system = lib.mkOption { type = lib.types.nullOr lib.types.str; };
-    server.ioPrimaryHost = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-    };
-    server.monitoringPrimaryHost = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-    };
-    server.distributedBuilds.builders = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ ];
-    };
-    server.tests = lib.mkOption {
-      type = lib.types.attrsOf lib.types.unspecified;
-      default = { };
-    };
-    server.enable = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-    };
   };
 
   config = {
