@@ -34,12 +34,16 @@ let
 
   hasAnyApiKey =
     getAllAttrsFunc "server.proxy.virtualHosts" (
-      virtualHosts: _: virtualHosts |> builtins.attrValues |> builtins.any (vh: vh.requireApiKey != null && vh.requireApiKey.enable)
+      virtualHosts: _:
+      virtualHosts
+      |> builtins.attrValues
+      |> builtins.any (vh: vh.requireApiKey != null && vh.requireApiKey.enable)
     )
     |> builtins.any (x: x);
 
   collectApiKeyVirtualHosts = collectAllAttrsFunc "server.proxy.virtualHosts" (
-    virtualHosts: _: virtualHosts |> lib.filterAttrs (_: vh: vh.requireApiKey != null && vh.requireApiKey.enable)
+    virtualHosts: _:
+    virtualHosts |> lib.filterAttrs (_: vh: vh.requireApiKey != null && vh.requireApiKey.enable)
   );
 in
 {

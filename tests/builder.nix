@@ -53,7 +53,7 @@ if hostName != null then
       inherit (self) outputs;
       hostDirectory = "${self}/hosts/server/${hostName}";
       users = [ ];
-      importExternals = false;
+      importExternals = true;
     };
 
     nodes.${hostName} =

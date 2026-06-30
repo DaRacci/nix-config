@@ -41,22 +41,23 @@ in
   };
 
   config = mkMerge (
-    []
-    ++ optionals importExternals [ (mkIf cfg.enable {
-      sops = {
-        defaultSopsFile = cfg.hostSecretsFile;
-        age.sshKeyPaths = [
-          "${config.host.persistence.root}/etc/ssh/ssh_host_ed25519_key"
-        ]
-        ++ (map getKeyPath keys);
+    optionals importExternals [
+      (mkIf cfg.enable {
+        sops = {
+          defaultSopsFile = cfg.hostSecretsFile;
+          age.sshKeyPaths = [
+            "${config.host.persistence.root}/etc/ssh/ssh_host_ed25519_key"
+          ]
+          ++ (map getKeyPath keys);
 
-        secrets = {
-          SSH_PRIVATE_KEY = {
-            path = "/etc/ssh/ssh_host_ed25519_key";
-            restartUnits = [ "sshd.service" ];
+          secrets = {
+            SSH_PRIVATE_KEY = {
+              path = "/etc/ssh/ssh_host_ed25519_key";
+              restartUnits = [ "sshd.service" ];
+            };
           };
         };
-      };
-    }) ]
+      })
+    ]
   );
 }

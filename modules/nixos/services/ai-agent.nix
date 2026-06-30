@@ -226,8 +226,7 @@ in
   };
 
   config = mkMerge (
-    []
-    ++ optionals importExternals [
+    optionals importExternals [
       (mkIf cfg.enable {
         services.hermes-agent = {
           enable = true;
@@ -328,7 +327,9 @@ in
               container_persistent = true;
               persistent_shell = true;
             };
-            compression = { enabled = true; };
+            compression = {
+              enabled = true;
+            };
             browser = {
               record_sessions = true;
               engine = "auto";
@@ -376,7 +377,9 @@ in
               cron_mode = "deny";
               mcp_reload_confirm = true;
             };
-            discord = { auto_thread = true; };
+            discord = {
+              auto_thread = true;
+            };
             platforms.webhook = {
               enabled = true;
               extra = {
@@ -449,7 +452,9 @@ in
 
       (mkIf (cfg.enable && cfg.voice.enable) {
         services.hermes-agent.settings = {
-          voice = { auto_tts = true; };
+          voice = {
+            auto_tts = true;
+          };
           stt = {
             provider = "local";
             local.model = "large-v3";

@@ -38,7 +38,14 @@
     ))
     (builtins.mapAttrs (
       _: value:
-      removeAttrs value [ "sopsFileHash" "gid" "uid" "name" "reloadUnits" "templateFile" ]
+      removeAttrs value [
+        "sopsFileHash"
+        "gid"
+        "uid"
+        "name"
+        "reloadUnits"
+        "templateFile"
+      ]
       // {
         sopsFile = config.sops.defaultSopsFile;
         # Update owner and groups because it will always be only postgres on this server.
@@ -62,13 +69,13 @@
   server.tests.units = {
     postgres-connect = {
       testScript = ''
-        nixio.succeed("systemctl show postgresql.service | grep -i loadstate")
+        nixio.succeed("sudo -u postgres psql -c 'SELECT 1'")
       '';
     };
 
     redis-ping = {
       testScript = ''
-        nixio.succeed("systemctl show redis.service | grep -i loadstate")
+        nixio.succeed("redis-cli PING")
       '';
     };
 

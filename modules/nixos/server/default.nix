@@ -71,9 +71,12 @@ let
   getAllAttrsFunc =
     attrPath: func:
     serverConfigurations
-    |> map (cfg:
-      let val = attrByPath (splitString "." attrPath) null cfg;
-      in if val == null then null else func val cfg
+    |> map (
+      cfg:
+      let
+        val = attrByPath (splitString "." attrPath) null cfg;
+      in
+      if val == null then null else func val cfg
     )
     |> filterEmpty;
 

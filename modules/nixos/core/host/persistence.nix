@@ -215,7 +215,8 @@ in
   imports = optional importExternals inputs.impermanence.nixosModules.impermanence;
 
   config = mkMerge (
-    [ (mkIf cfg.enable {
+    [
+      (mkIf cfg.enable {
         programs.fuse.userAllowOther = true;
 
         system.activationScripts.persistent-dirs.text =
@@ -232,40 +233,42 @@ in
           concatLines (map mkHomePersist users);
       })
     ]
-    ++ optional importExternals (mkIf cfg.enable {
-      environment.persistence."/persist" = {
-        hideMounts = true;
+    ++ optional importExternals (
+      mkIf cfg.enable {
+        environment.persistence."/persist" = {
+          hideMounts = true;
 
-        directories = [
-          "/var/lib/systemd"
-          "/var/lib/nixos"
-          "/var/log"
-          "/etc/NetworkManager/system-connections"
-        ]
-        ++ cfg.directories;
+          directories = [
+            "/var/lib/systemd"
+            "/var/lib/nixos"
+            "/var/log"
+            "/etc/NetworkManager/system-connections"
+          ]
+          ++ cfg.directories;
 
-        files = [
-          "/etc/machine-id"
-          {
-            file = "/etc/nix/id_rsa";
-            parentDirectory = {
-              mode = "u=rwx,g=rx,o=rx";
-            };
-          }
-        ]
-        ++ cfg.files;
-
-        users = lib.pipe (attrNames (config.home-manager.users or { })) [
-          (filter (user: config.home-manager.users.${user}.user.persistence.enable))
-          (map (
-            user:
-            nameValuePair user {
-              inherit (config.home-manager.users.${user}.user.persistence) files directories;
+          files = [
+            "/etc/machine-id"
+            {
+              file = "/etc/nix/id_rsa";
+              parentDirectory = {
+                mode = "u=rwx,g=rx,o=rx";
+              };
             }
-          ))
-          lib.listToAttrs
-        ];
-      };
-    })
+          ]
+          ++ cfg.files;
+
+          users = lib.pipe (attrNames (config.home-manager.users or { })) [
+            (filter (user: config.home-manager.users.${user}.user.persistence.enable))
+            (map (
+              user:
+              nameValuePair user {
+                inherit (config.home-manager.users.${user}.user.persistence) files directories;
+              }
+            ))
+            lib.listToAttrs
+          ];
+        };
+      }
+    )
   );
 }

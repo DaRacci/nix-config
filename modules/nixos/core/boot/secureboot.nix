@@ -23,18 +23,20 @@ in
   };
 
   config = mkMerge (
-    optional importExternals (mkIf cfg.enable {
-      boot = {
-        loader.systemd-boot.enable = mkForce false;
+    optional importExternals (
+      mkIf cfg.enable {
+        boot = {
+          loader.systemd-boot.enable = mkForce false;
 
-        lanzaboote = {
-          enable = true;
-          pkiBundle = "/var/lib/sbctl";
-          autoGenerateKeys.enable = true;
+          lanzaboote = {
+            enable = true;
+            pkiBundle = "/var/lib/sbctl";
+            autoGenerateKeys.enable = true;
+          };
         };
-      };
 
-      host.persistence.directories = [ "/var/lib/sbctl" ];
-    })
+        host.persistence.directories = [ "/var/lib/sbctl" ];
+      }
+    )
   );
 }

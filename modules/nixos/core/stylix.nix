@@ -27,13 +27,14 @@ in
   imports = optional importExternals inputs.stylix.nixosModules.stylix;
 
   config = mkMerge (
-    []
-    ++ optionals importExternals [ (mkIf cfg.enable {
-      stylix = {
-        enable = true;
-        polarity = "dark";
-        base16Scheme = "${inputs.stylix.inputs.tinted-schemes}/base16/tokyo-night-dark.yaml";
-      };
-    }) ]
+    optionals importExternals [
+      (mkIf cfg.enable {
+        stylix = {
+          enable = true;
+          polarity = "dark";
+          base16Scheme = "${inputs.stylix.inputs.tinted-schemes}/base16/tokyo-night-dark.yaml";
+        };
+      })
+    ]
   );
 }
