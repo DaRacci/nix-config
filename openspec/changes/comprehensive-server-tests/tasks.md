@@ -42,7 +42,7 @@
 - [x] 1.6.2 Add `server.tests.units.seerr` to `hosts/server/nixarr/default.nix` — HTTP GET localhost port
 
 ### 1.7 Cross-host scenarios
-- [x] 1.7.1 Create `tests/scenarios/postgres-remote-connect/test.nix` — nixio + non-IO host, remote PG connect
+- [x] 1.7.1 Create `tests/scenarios/postgres-remote-connect/test.nix` — **REMOVED** (tested upstream pg, not custom logic)
 - [x] 1.7.2 Create `tests/scenarios/redis-remote-connect/test.nix` — nixio + non-IO host, remote Redis PING
 
 ### 1.8 Verify
@@ -80,11 +80,11 @@
 - [x] 2.4.2 Add `server.tests.units.wyoming-whisper` — TCP socket :10300
 
 ### 2.5 Infrastructure test suites
-- [x] 2.5.1 Create `tests/scenarios/storage-mount/test.nix` — FUSE mount point + writability
-- [x] 2.5.2 Create `tests/scenarios/distributed-builds/test.nix` — builder user + SSH keys + ping-store
+- [x] 2.5.1 Create `tests/scenarios/storage-mount/test.nix` — **REMOVED** (tested upstream mount behavior, not custom logic)
+- [x] 2.5.2 Create `tests/scenarios/distributed-builds/test.nix` — **REMOVED** (tested upstream sshd baseline, not custom logic)
 
 ### 2.6 Cross-host scenarios
-- [x] 2.6.1 Create `tests/scenarios/monitoring-scrape/test.nix` — nixmon + nixio, prometheus scrape + loki push
+- [x] 2.6.1 Create `tests/scenarios/monitoring-scrape/test.nix` — **REMOVED** (tested upstream prometheus/nixpkgs exporter behavior)
 - [x] 2.6.2 Create `tests/scenarios/proxy-routing/test.nix` — nixio caddy → nixcloud backend
 
 ### 2.7 Security suite — firewall-port-audit
@@ -124,9 +124,9 @@
 - [x] 3.4.4 Add `server.tests.units.hacompanion` to nixio — systemd unit exists
 
 ### 3.5 Security suite — ssh-hardening
-- [x] 3.5.1 Create `tests/scenarios/ssh-hardening/test.nix` — sshd config assertions
+- [x] 3.5.1 Create `tests/scenarios/ssh-hardening/test.nix` — **REMOVED** (tested upstream openssh settings, not custom logic)
 - [x] 3.5.2 Create `tests/scenarios/io-guardian/test.nix` — nixio + non-IO host, guardian port 9876
-- [x] 3.5.3 Create `tests/scenarios/pgvector-extension/test.nix` — nixio + nixcloud, pgvector installed
+- [x] 3.5.3 Create `tests/scenarios/pgvector-extension/test.nix` — **REMOVED** (tested upstream pgvector plugin, not custom logic)
 
 ### 3.6 Documentation
 - [x] 3.6.1 Update `docs/src/development/vm_integration_tests.md` with per-service test patterns
@@ -137,6 +137,17 @@
 - [x] 3.7.1 Build entire test suite end-to-end
 - [ ] 3.7.2 Run full Phase 1-3 suite in CI
 - [ ] 3.7.3 Verify docs render correctly in mdbook
+
+## Cleanup: Remove useless scenarios
+- [x] 4.1 Delete `tests/scenarios/postgres-backup/` — tests upstream pg_dump, not custom logic
+- [x] 4.2 Delete `tests/scenarios/ssh-hardening/` — tests upstream openssh settings
+- [x] 4.3 Delete `tests/scenarios/postgres-remote-connect/` — tests upstream postgresql networking
+- [x] 4.4 Delete `tests/scenarios/pgvector-extension/` — tests upstream pgvector plugin
+- [x] 4.5 Delete `tests/scenarios/monitoring-scrape/` — tests upstream prometheus/node_exporter
+- [x] 4.6 Delete `tests/scenarios/distributed-builds/` — just checks sshd isactive
+- [x] 4.7 Delete `tests/scenarios/storage-mount/` — just checks if mount units exist
+- [x] 4.8 Update `openspec/` design docs to reflect testing philosophy (scenarios test custom logic only)
+- [x] 4.9 Update `docs/src/development/vm_integration_tests.md` to remove outdated scenario examples
 
 ## CI Impact
 

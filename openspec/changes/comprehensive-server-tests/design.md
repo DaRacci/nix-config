@@ -26,6 +26,40 @@
 
 Non-IO hosts connect to nixio for postgres and redis via `server.database.host`. The IO guardian protocol coordinates database availability.
 
+## Testing Philosophy
+
+### Scenarios test custom logic only
+
+Scenario tests exist to validate **custom modules and logic from this repository** —
+not upstream nixpkgs module behavior. nixpkgs modules (postgresql, openssh,
+prometheus, pgvector, etc.) are assumed correct; their behavior is tested by
+nixpkgs upstream, not by this repo.
+
+**In scope for scenarios:**
+- `database-backup-chain/` — io-guardian managed cross-host pg_dump
+- `firewall-port-audit/` — custom networking module
+- `io-guardian/` — custom io-guardian module
+- `proxy-routing/` — custom proxy/caddy TLS routing
+- `redis-remote-connect/` — custom redis module
+
+**Out of scope:**
+- Basic service existence checks (trivial "is active/is mounted")
+- Upstream module functionality (postgres remote connect, sshd hardening, etc.)
+- Service scraping (prometheus upstream)
+
+### Host-level VM tests validate custom modules in production configs
+
+Auto-discovered per-host VM tests (`nixosTestConfigurations.<host>`) wrap real
+production configurations. Their purpose is integration testing — validating that
+**this repo's custom modules** work correctly when composed with real host configs.
+They are not unit tests for nixpkgs services.
+
+### Sops secrets are auto-discovered
+
+The VM test profile auto-discovers all `config.sops.secrets` entries and generates
+deterministic dummy files. No manual secret name maintenance is needed —
+if a module declares a sops secret, it gets a test value automatically.
+
 ## Test Architecture
 
 ```
@@ -176,59 +210,34 @@ server.tests.units.postgres-connect = {
 
 ## Cross-Service Scenarios
 
-### 1. Scenario: `postgres-remote-connect`
-- **Nodes**: nixio (postgres primary) + any non-IO host (e.g., nixdev)
-- **Asserts**: non-IO host reaches nixio:5432, authenticates, runs SELECT 1
-- **Cost**: 2 VMs, ~8min build
-- **Phase**: 1
-
-### 2. Scenario: `redis-remote-connect`
+### 1. Scenario: `redis-remote-connect`
 - **Nodes**: nixio (redis primary) + any non-IO host
 - **Asserts**: non-IO host reaches nixio:6379, PONG response
 - **Cost**: 2 VMs, ~8min
 - **Phase**: 1
 
-### 3. Scenario: `monitoring-scrape`
-- **Nodes**: nixmon (collector) + nixio (exporter target)
-- **Asserts**: nixmon prometheus scrapes node/caddy/postgres metrics from nixio; loki receives logs
-- **Cost**: 2 VMs, ~10min
-- **Phase**: 2
-
-### 4. Scenario: `proxy-routing`
+### 2. Scenario: `proxy-routing`
 - **Nodes**: nixio (caddy reverse proxy) + nixcloud (nextcloud backend)
 - **Asserts**: HTTP request through caddy on nixio reaches nextcloud on nixcloud
 - **Cost**: 2 VMs, ~8min
 - **Phase**: 2
 
-### 5. Scenario: `database-backup-chain`
+### 3. Scenario: `database-backup-chain`
 - **Nodes**: nixio (postgres+minio) + nixcloud (nextcloud reliant on DB)
 - **Asserts**: pg_dumpall succeeds, dump lands in minio bucket, s3fs mountable
 - **Cost**: 2 VMs, ~10min
 - **Phase**: 3
 
-### 6. Scenario: `io-guardian-coordination`
+### 4. Scenario: `io-guardian-coordination`
 - **Nodes**: nixio (coordinator) + one non-IO host
 - **Asserts**: io-database-coordinator service active on nixio, port 9876 reachable, non-IO wait script completes
 - **Cost**: 2 VMs, ~8min
 - **Phase**: 3
 
-### 7. Scenario: `pgvector-extension`
-- **Nodes**: nixio (postgres) + nixcloud
-- **Asserts**: pgvector extension installed on cluster database
-- **Cost**: 2 VMs, ~8min
-- **Phase**: 3
+## Infrastructure Tests (removed)
 
-## Infrastructure Tests
-
-### `storage-mount`
-- **Host**: nixio (minio host) or any host with `swfsMount`
-- **Asserts**: FUSE mountpoint exists, directory writable, health check timer active
-- **Phase**: 2
-
-### `distributed-builds`
-- **Host**: all hosts with `server.distributedBuilds` enabled
-- **Asserts**: builder user exists, SSH authorized_keys present, `nix ping-store` works
-- **Phase**: 2
+- ~~`storage-mount`~~ — removed: tested upstream s3fs/swfs mount unit existence, not custom logic
+- ~~`distributed-builds`~~ — removed: tested upstream sshd baseline behavior, not custom logic
 
 ## Security Tests
 
@@ -237,10 +246,8 @@ server.tests.units.postgres-connect = {
 - **Asserts**: Ports returned by `ss -tlnp` match allowedTCPPorts in config. No unexpected listeners.
 - **Phase**: 2
 
-### `ssh-hardening`
-- **Host**: every host
-- **Asserts**: `PasswordAuthentication no`, root login key-only, banner set
-- **Phase**: 3
+### `ssh-hardening` (removed)
+- ~~Assertions for PasswordAuthentication, root login, banner~~ — removed: tests upstream openssh settings, not custom logic
 
 ## VM Profile Limitations
 

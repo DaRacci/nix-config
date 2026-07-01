@@ -16,7 +16,7 @@ flake.nix
 └── nixosTestConfigurations/   # VM test derivations
     ├── nixio              # Auto-discovered per-host test
     ├── nixai              # Auto-discovered per-host test
-    └── postgres-backup    # Explicit scenario test
+    └── proxy-routing       # Explicit scenario test
 ```
 
 ### Relationship to `nixosConfigurations`
@@ -32,6 +32,28 @@ VM tests are **not** wired into `nix flake check`. Running `nix flake check` doe
 execute VM tests. VM tests are expensive (QEMU boot per host) and would slow down local
 development. They execute only in CI via a separate Woodpecker workflow
 (`.woodpecker/test-vm.yaml`) on pull request events.
+
+## Testing Philosophy
+
+Scenario tests exist to validate **custom modules and logic from this repository** —
+not upstream nixpkgs module behavior. nixpkgs modules (postgresql, openssh,
+prometheus, pgvector, etc.) are assumed correct; their behavior is tested by
+nixpkgs upstream, not by this repo.
+
+**Scenarios test custom logic only.** Examples of valid scenarios:
+
+- `database-backup-chain/` — io-guardian managed cross-host pg_dump
+- `firewall-port-audit/` — custom networking module
+- `io-guardian/` — custom io-guardian module
+- `proxy-routing/` — custom proxy/caddy TLS routing
+- `redis-remote-connect/` — custom redis module
+
+Auto-discovered per-host VM tests validate that **this repo's custom modules** work
+correctly when composed with real production configurations. They are not unit tests
+for nixpkgs services.
+
+Sops secrets are auto-discovered from `config.sops.secrets` — no manual secret name
+maintenance is needed.
 
 ## Two Test Authoring Modes
 
@@ -57,33 +79,29 @@ function receives the node's evaluated NixOS config as its argument.
 
 ### 2. Explicit Scenario Tests
 
-For cross-service or multi-node interactions, create a scenario file under
-`tests/scenarios/<name>/test.nix`. Each scenario defines arbitrary NixOS nodes
-and a `testScript`. The directory name becomes the `nixosTestConfigurations.<name>`
-entry.
+For cross-service or multi-node interactions testing custom repository logic, create a
+scenario file under `tests/scenarios/<name>/test.nix`. Each scenario defines arbitrary
+NixOS nodes and a `testScript`. The directory name becomes the
+`nixosTestConfigurations.<name>` entry.
 
-Example (`tests/scenarios/postgres-backup/test.nix`):
+Example (`tests/scenarios/proxy-routing/test.nix`):
 
 ```nix
 {
   nodes = {
-    postgres-server = { pkgs, ... }: {
-      services.postgresql = {
-        enable = true;
-        ensureDatabases = [ "testdb" ];
-        ensureUsers = [ { name = "testuser"; ensureDBOwnership = true; } ];
-      };
-    };
-    postgres-client = { pkgs, ... }: {
-      environment.systemPackages = [ pkgs.postgresql ];
-    };
+    nixio = { ... };     # caddy reverse proxy
+    nixcloud = { ... };  # nextcloud backend
   };
 
   testScript = ''
-    postgres-client.wait_for_unit("multi-user.target")
-    postgres-client.succeed(
-        "psql -h postgres-server -U testuser -d testdb -c 'SELECT 1'"
-    )
+    nixio.wait_for_unit("caddy.service")
+    nixcloud.wait_for_unit("phpfpm-nextcloud.service")
+
+    with subtest("proxy routes to backend"):
+      out = nixio.succeed(
+          "curl -sf -H 'Host: nc.racci.dev' http://nixcloud/"
+      )
+      assert "Nextcloud" in out, "proxy did not route to nextcloud"
   '';
 }
 ```
@@ -276,12 +294,24 @@ server.tests.units.kernel-forwarding = {
 
 ### Scenario Authoring Guidance
 
-Scenarios define self-contained NixOS nodes. Each node must work without external infrastructure.
+Scenarios define self-contained NixOS nodes testing custom repository logic. Each node must work without external infrastructure.
 
 #### Naming
 
 - Directory name under `tests/scenarios/<name>/` becomes the `nixosTestConfigurations.<name>` entry automatically
-- Use kebab-case: `postgres-remote-connect`, `database-backup-chain`
+- Use kebab-case: `redis-remote-connect`, `database-backup-chain`
+
+#### Custom Logic Rule
+
+Scenarios MUST test custom modules from this repository, not upstream nixpkgs behavior.
+A scenario that merely asserts "postgresql responds on port 5432" or "sshd has
+PasswordAuthentication no" adds no value — that is nixpkgs upstream's responsibility.
+
+Valid scenario scope:
+
+- Cross-host interaction orchestrated by custom modules (io-guardian, proxy-routing)
+- Custom module behavior (firewall-port-audit, database-backup-chain)
+- Custom service integration (redis-remote-connect with repo's redis module)
 
 #### Self-Contained Rule
 
@@ -327,6 +357,7 @@ Every service, secret, and dependency must be defined within the scenario nodes:
 - **Don't reference `config.sops.secrets`** — no real secrets available
 - **Don't use Cloudflare plugins in Caddy** — no API tokens
 - **Don't expect GPU-accelerated services** — no GPU in QEMU
+- **Don't test upstream nixpkgs behavior** — scenario tests are for custom logic only
 
 #### Multi-node Communication
 

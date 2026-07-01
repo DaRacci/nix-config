@@ -120,9 +120,13 @@ This is a cross-cutting Nix change touching flake outputs, test-only modules, Ni
 **Choice:**
 
 - **Auto-discovered:** For each host in `nixosTestConfigurations.<host>`, harvest `config.server.tests.units` from the evaluated config. These are the same test function hooks already in the codebase. The existing `server.tests` module (`modules/nixos/server/tests.nix`) is the source of truth — no migration needed.
-- **Explicit scenarios:** Files under `tests/scenarios/` that define a small NixOS configuration + test script. Example: `tests/scenarios/postgres-backup.nix` defines 2 nodes (server + client) with minimal configs and a testScript verifying backup replication. Output: `nixosTestConfigurations.<scenario-name>`.
+- **Explicit scenarios:** Files under `tests/scenarios/<name>/test.nix` that define NixOS nodes + test script.
 
-**Rationale:** Auto-discovery keeps the framework host-agnostic and avoids brittle hostname lists. Explicit scenarios fill the gap for multi-node or cross-cutting behavior that isn't captured by per-host unit tests.
+**Rationale:** Auto-discovery keeps the framework host-agnostic and avoids brittle hostname lists. Explicit scenarios fill the gap for multi-node or cross-cutting custom logic that isn't captured by per-host unit tests.
+
+**Testing philosophy — custom logic only:** Scenarios exist only to validate **this repo's custom modules**, not upstream nixpkgs behavior. nixpkgs services (postgresql, openssh, prometheus, pgvector) are assumed correct. A scenario that tests basic upstream functionality (e.g., "does postgresql accept connections?") provides no value and should not be added. Keep: `database-backup-chain`, `firewall-port-audit`, `io-guardian`, `proxy-routing`, `redis-remote-connect`. Delete any scenario testing nixpkgs baseline behavior.
+
+**Sops secrets are auto-discovered:** The VM test profile reads `config.sops.secrets` and generates deterministic dummy files for every entry. No manual secret name maintenance is needed — if a module declares a secret, it gets a test value.
 
 **Alternatives considered:**
 
