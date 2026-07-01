@@ -10,7 +10,6 @@ let
   inherit (lib)
     types
     optional
-    optionals
     mkIf
     mkMerge
     mkOption
@@ -225,335 +224,333 @@ in
     };
   };
 
-  config = mkMerge (
-    optionals importExternals [
-      (mkIf cfg.enable {
-        services.hermes-agent = {
-          enable = true;
-          container.enable = true;
+  config = mkMerge [
+    (mkIf cfg.enable {
+      services.hermes-agent = {
+        enable = true;
+        container.enable = true;
 
-          extraDependencyGroups = [
-            "acp"
-            "homeassistant"
-            "messaging"
-            "voice"
-            "youtube"
-          ];
+        extraDependencyGroups = [
+          "acp"
+          "homeassistant"
+          "messaging"
+          "voice"
+          "youtube"
+        ];
 
-          extraPlugins = [
-            (pkgs.fetchFromGitHub {
-              owner = "FelineStateMachine";
-              repo = "hermes-openspec";
-              rev = "3cf148b1fcc8ee7ebaff307af88cc27869fc4cfd";
-              sha256 = "sha256-5vLw5Y3Sz5DCwdc8mhUBOKWAF+i+dwAcL2sqWD96ANg=";
-            })
-          ];
+        extraPlugins = [
+          (pkgs.fetchFromGitHub {
+            owner = "FelineStateMachine";
+            repo = "hermes-openspec";
+            rev = "3cf148b1fcc8ee7ebaff307af88cc27869fc4cfd";
+            sha256 = "sha256-5vLw5Y3Sz5DCwdc8mhUBOKWAF+i+dwAcL2sqWD96ANg=";
+          })
+        ];
 
-          environment = {
-            BASH_ENV = "/home/hermes/.bashrc";
-            HOME = "/home/hermes";
+        environment = {
+          BASH_ENV = "/home/hermes/.bashrc";
+          HOME = "/home/hermes";
+        };
+
+        settings = {
+          model = {
+            base_url = "https://openrouter.ai/api/v1";
+            default = cfg.models.primary;
           };
-
-          settings = {
-            model = {
-              base_url = "https://openrouter.ai/api/v1";
-              default = cfg.models.primary;
-            };
-            toolsets = [ "all" ];
-            checkpoints.enabled = true;
-            code_execution.mode = "project";
-            cron = {
-              script_timeout_seconds = 600;
-              wrap_response = true;
-            };
-            curator = {
-              enabled = true;
-              interval_hours = 24 * 7;
-              min_idle_hours = 2;
-              stale_after_days = 30;
-              archive_after_days = 90;
-              consolidate = true;
-              prune_builtins = true;
-            };
-            agent = {
-              max_turns = 150;
-              gateway_timeout = 1800;
-              restart_drain_timeout = 180;
-              api_max_retries = 3;
-              tool_use_enforcement = "auto";
-              gateway_timeout_warning = 900;
-              gateway_notify_interval = 180;
-              gateway_auto_continue_freshness = 3600;
-              image_input_mode = "auto";
-            };
-            auxiliary = {
-              approval = {
-                inherit (cfg.models) provider;
-                model = cfg.models.simpleton;
-              };
-              compression = {
-                inherit (cfg.models) provider;
-                model = cfg.models.compression;
-              };
-              curator = {
-                inherit (cfg.models) provider;
-                model = cfg.models.simpleton;
-              };
-              session_search = {
-                inherit (cfg.models) provider;
-                model = cfg.models.simpleton;
-              };
-              title_generation = {
-                inherit (cfg.models) provider;
-                model = cfg.models.compression;
-              };
-              triage_specifier = {
-                inherit (cfg.models) provider;
-                model = cfg.models.brains;
-              };
-              vision = {
-                inherit (cfg.models) provider;
-                model = cfg.models.vision;
-              };
-            };
-            delegation = {
-              max_concurrent_children = 24;
-              max_spawn_depth = 3;
-              model = cfg.models.primary;
-              provider = "openrouter";
-            };
-            terminal = {
-              backend = "local";
-              container_persistent = true;
-              persistent_shell = true;
+          toolsets = [ "all" ];
+          checkpoints.enabled = true;
+          code_execution.mode = "project";
+          cron = {
+            script_timeout_seconds = 600;
+            wrap_response = true;
+          };
+          curator = {
+            enabled = true;
+            interval_hours = 24 * 7;
+            min_idle_hours = 2;
+            stale_after_days = 30;
+            archive_after_days = 90;
+            consolidate = true;
+            prune_builtins = true;
+          };
+          agent = {
+            max_turns = 150;
+            gateway_timeout = 1800;
+            restart_drain_timeout = 180;
+            api_max_retries = 3;
+            tool_use_enforcement = "auto";
+            gateway_timeout_warning = 900;
+            gateway_notify_interval = 180;
+            gateway_auto_continue_freshness = 3600;
+            image_input_mode = "auto";
+          };
+          auxiliary = {
+            approval = {
+              inherit (cfg.models) provider;
+              model = cfg.models.simpleton;
             };
             compression = {
-              enabled = true;
+              inherit (cfg.models) provider;
+              model = cfg.models.compression;
             };
-            browser = {
-              record_sessions = true;
-              engine = "auto";
-              dialog_policy = "must_respond";
-              dialog_timeout_s = 300;
+            curator = {
+              inherit (cfg.models) provider;
+              model = cfg.models.simpleton;
             };
-            web = {
-              search_backend = "searxng";
-              extract_backend = "firecrawl";
+            session_search = {
+              inherit (cfg.models) provider;
+              model = cfg.models.simpleton;
             };
-            display = {
-              resume_display = "full";
-              busy_input_mode = "steer";
-              tui_auto_resume_recent = true;
-              bell_on_complete = true;
-              show_reasoning = true;
-              streaming = true;
-              final_response_markdown = "strip";
-              persistent_output = true;
-              inline_diffs = true;
-              show_cost = true;
-              skin = "mono";
-              language = "en";
-              tool_progress = "all";
+            title_generation = {
+              inherit (cfg.models) provider;
+              model = cfg.models.compression;
             };
-            streaming = {
-              enabled = true;
-              transport = "edit";
+            triage_specifier = {
+              inherit (cfg.models) provider;
+              model = cfg.models.brains;
             };
-            memory = {
-              memory_enabled = mkDefault true;
-              user_profile_enabled = mkDefault true;
-            };
-            privacy.redact_pii = true;
-            security = {
-              redact_secrets = true;
-              tirith_enabled = true;
-              tirith_path = "tirith";
-              tirith_timeout = 5;
-              tirith_fail_open = true;
-            };
-            approvals = {
-              mode = "smart";
-              timeout = 60;
-              cron_mode = "deny";
-              mcp_reload_confirm = true;
-            };
-            discord = {
-              auto_thread = true;
-            };
-            platforms.webhook = {
-              enabled = true;
-              extra = {
-                port = cfg.platform.webhook.port;
-                rate_limit = 30;
-              };
+            vision = {
+              inherit (cfg.models) provider;
+              model = cfg.models.vision;
             };
           };
-        };
-      })
-
-      (mkIf (cfg.enable && cfg.dashboard.enable) {
-        services.hermes-agent.settings.dashboard = {
-          public_url = cfg.dashboard.publicURL;
-        };
-
-        systemd.services.hermes-dashboard = {
-          description = "Hermes web dashboard";
-          after = [
-            "network.target"
-            "docker.service"
-            "hermes-agent.service"
-          ];
-          requires = [ "docker.service" ];
-          bindsTo = [ "hermes-agent.service" ];
-          wantedBy = [ "multi-user.target" ];
-          path = [ pkgs.docker ];
-          serviceConfig = {
-            Type = "simple";
-            User = "hermes";
-            Group = "hermes";
-            EnvironmentFile = config.services.hermes-agent.environmentFiles;
-            PrivateTmp = true;
-            ExecStart = "${lib.getExe pkgs.bash} -c 'env > /tmp/hermes-dashboard.env; exec docker exec -u hermes --env-file /tmp/hermes-dashboard.env hermes-agent /data/current-package/bin/hermes dashboard --host 0.0.0.0 --no-open --port ${toString cfg.dashboard.port}'";
-            Restart = "on-failure";
-            RestartSec = 5;
-            SupplementaryGroups = [ "docker" ];
-            ReadWritePaths = [ "/var/run/docker.sock" ];
+          delegation = {
+            max_concurrent_children = 24;
+            max_spawn_depth = 3;
+            model = cfg.models.primary;
+            provider = "openrouter";
           };
-        };
-
-        networking.firewall.allowedTCPPorts = [ cfg.dashboard.port ];
-      })
-
-      (mkIf (cfg.enable && cfg.memory.enable) {
-        services.hermes-agent = {
-          settings = {
-            memory = {
-              provider = "byterover";
-              memory_enabled = true;
-            };
-            user_profile_enabled = false;
+          terminal = {
+            backend = "local";
+            container_persistent = true;
+            persistent_shell = true;
           };
-        };
-      })
-
-      (mkIf (cfg.enable && cfg.apiServer.enable) {
-        sops = {
-          secrets."${cfg.apiServer.tokenReference}" = { };
-          templates."HERMES_API_ENV".content = lib.toShellVars {
-            API_SERVER_ENABLED = "true";
-            API_SERVER_HOST = cfg.apiServer.host;
-            API_SERVER_PORT = toString cfg.apiServer.port;
-            API_SERVER_KEY = config.sops.placeholder."${cfg.apiServer.tokenReference}";
+          compression = {
+            enabled = true;
           };
-        };
-
-        services.hermes-agent.environmentFiles = [ config.sops.templates."HERMES_API_ENV".path ];
-      })
-
-      (mkIf (cfg.enable && cfg.voice.enable) {
-        services.hermes-agent.settings = {
-          voice = {
-            auto_tts = true;
+          browser = {
+            record_sessions = true;
+            engine = "auto";
+            dialog_policy = "must_respond";
+            dialog_timeout_s = 300;
           };
-          stt = {
-            provider = "local";
-            local.model = "large-v3";
+          web = {
+            search_backend = "searxng";
+            extract_backend = "firecrawl";
           };
-          tts = {
-            provider = "neutts";
-            neutts = {
-              ref_audio = "";
-              ref_text = "";
-              model = "neuphonic/neutts-air-q4-gguf";
-              device = "gpu";
-            };
+          display = {
+            resume_display = "full";
+            busy_input_mode = "steer";
+            tui_auto_resume_recent = true;
+            bell_on_complete = true;
+            show_reasoning = true;
+            streaming = true;
+            final_response_markdown = "strip";
+            persistent_output = true;
+            inline_diffs = true;
+            show_cost = true;
+            skin = "mono";
+            language = "en";
+            tool_progress = "all";
           };
-        };
-      })
-
-      (mkIf (cfg.enable && cfg.voice.enable && cfg.voice.wyoming-stt.enable) {
-        services.hermes-agent = {
-          environment = {
-            HERMES_LOCAL_STT_COMMAND =
-              let
-                cmd = "${
-                  inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.wyoming-transcribe-client
-                }/bin/wyoming-transcribe";
-              in
-              "${cmd} {input_path} --output-dir {output_dir} --model {model} --language {language} --host ${cfg.voice.wyoming-stt.host} --port ${toString cfg.voice.wyoming-stt.port}";
+          streaming = {
+            enabled = true;
+            transport = "edit";
           };
-        };
-      })
-
-      (mkIf (cfg.enable && cfg.platform.discord.enable) {
-        sops = {
-          secrets."${cfg.platform.discord.tokenReference}" = { };
-          templates."HERMES_DISCORD_ENV".content = toShellVars {
-            DISCORD_BOT_TOKEN = config.sops.placeholder."${cfg.platform.discord.tokenReference}";
-            DISCORD_ALLOWED_USERS = concatStringsSep " " cfg.platform.discord.allowedUsers;
-            DISCORD_HOME_CHANNEL = cfg.platform.discord.homeChannel;
+          memory = {
+            memory_enabled = mkDefault true;
+            user_profile_enabled = mkDefault true;
           };
-        };
-
-        services.hermes-agent = {
-          environmentFiles = [ config.sops.templates."HERMES_DISCORD_ENV".path ];
-          settings.discord = {
+          privacy.redact_pii = true;
+          security = {
+            redact_secrets = true;
+            tirith_enabled = true;
+            tirith_path = "tirith";
+            tirith_timeout = 5;
+            tirith_fail_open = true;
+          };
+          approvals = {
+            mode = "smart";
+            timeout = 60;
+            cron_mode = "deny";
+            mcp_reload_confirm = true;
+          };
+          discord = {
             auto_thread = true;
-            require_mention = true;
           };
-        };
-      })
-
-      (mkIf (cfg.enable && cfg.platform.hassio.enable) {
-        assertions = [
-          {
-            assertion = cfg.platform.hassio.tokenReference != null;
-            message = "Home Assistant token reference must be specified when Home Assistant platform is enabled.";
-          }
-          {
-            assertion = cfg.platform.hassio.url != null;
-            message = "Home Assistant URL must be specified when Home Assistant platform is enabled.";
-          }
-        ];
-
-        sops = {
-          secrets."${cfg.platform.hassio.tokenReference}" = { };
-          templates."HERMES_HASSIO_ENV".content = toShellVars {
-            HASS_TOKEN = config.sops.placeholder."${cfg.platform.hassio.tokenReference}";
-            HASS_URL = cfg.platform.hassio.url;
-          };
-        };
-      })
-
-      (mkIf (cfg.enable && cfg.dashboard.enable && cfg.dashboard.oidc.enable) {
-        assertions = [
-          {
-            assertion = cfg.dashboard.oidc.issuer != null;
-            message = "OIDC issuer must be specified when OIDC authentication is enabled.";
-          }
-          {
-            assertion = cfg.dashboard.oidc.clientId != null;
-            message = "OIDC client ID must be specified when OIDC authentication is enabled.";
-          }
-        ];
-
-        sops.templates."HERMES_DASHBOARD_OIDC_ENV".content = toShellVars {
-          HERMES_DASHBOARD_OIDC_ISSUER = cfg.dashboard.oidc.issuer;
-          HERMES_DASHBOARD_OIDC_CLIENT_ID = cfg.dashboard.oidc.clientId;
-          HERMES_DASHBOARD_OIDC_SCOPES = concatStringsSep " " cfg.dashboard.oidc.scopes;
-        };
-
-        services.hermes-agent = {
-          environmentFiles = [ config.sops.templates."HERMES_DASHBOARD_OIDC_ENV".path ];
-          settings.dashboard.oauth = {
-            inherit (cfg.dashboard.oidc) provider;
-            "${cfg.dashboard.oidc.provider}" = {
-              inherit (cfg.dashboard.oidc) issuer scopes;
-              client_id = cfg.dashboard.oidc.clientId;
+          platforms.webhook = {
+            enabled = true;
+            extra = {
+              port = cfg.platform.webhook.port;
+              rate_limit = 30;
             };
           };
         };
-      })
-    ]
-  );
+      };
+    })
+
+    (mkIf (cfg.enable && cfg.dashboard.enable) {
+      services.hermes-agent.settings.dashboard = {
+        public_url = cfg.dashboard.publicURL;
+      };
+
+      systemd.services.hermes-dashboard = {
+        description = "Hermes web dashboard";
+        after = [
+          "network.target"
+          "docker.service"
+          "hermes-agent.service"
+        ];
+        requires = [ "docker.service" ];
+        bindsTo = [ "hermes-agent.service" ];
+        wantedBy = [ "multi-user.target" ];
+        path = [ pkgs.docker ];
+        serviceConfig = {
+          Type = "simple";
+          User = "hermes";
+          Group = "hermes";
+          EnvironmentFile = config.services.hermes-agent.environmentFiles;
+          PrivateTmp = true;
+          ExecStart = "${lib.getExe pkgs.bash} -c 'env > /tmp/hermes-dashboard.env; exec docker exec -u hermes --env-file /tmp/hermes-dashboard.env hermes-agent /data/current-package/bin/hermes dashboard --host 0.0.0.0 --no-open --port ${toString cfg.dashboard.port}'";
+          Restart = "on-failure";
+          RestartSec = 5;
+          SupplementaryGroups = [ "docker" ];
+          ReadWritePaths = [ "/var/run/docker.sock" ];
+        };
+      };
+
+      networking.firewall.allowedTCPPorts = [ cfg.dashboard.port ];
+    })
+
+    (mkIf (cfg.enable && cfg.memory.enable) {
+      services.hermes-agent = {
+        settings = {
+          memory = {
+            provider = "byterover";
+            memory_enabled = true;
+          };
+          user_profile_enabled = false;
+        };
+      };
+    })
+
+    (mkIf (cfg.enable && cfg.apiServer.enable) {
+      sops = {
+        secrets."${cfg.apiServer.tokenReference}" = { };
+        templates."HERMES_API_ENV".content = lib.toShellVars {
+          API_SERVER_ENABLED = "true";
+          API_SERVER_HOST = cfg.apiServer.host;
+          API_SERVER_PORT = toString cfg.apiServer.port;
+          API_SERVER_KEY = config.sops.placeholder."${cfg.apiServer.tokenReference}";
+        };
+      };
+
+      services.hermes-agent.environmentFiles = [ config.sops.templates."HERMES_API_ENV".path ];
+    })
+
+    (mkIf (cfg.enable && cfg.voice.enable) {
+      services.hermes-agent.settings = {
+        voice = {
+          auto_tts = true;
+        };
+        stt = {
+          provider = "local";
+          local.model = "large-v3";
+        };
+        tts = {
+          provider = "neutts";
+          neutts = {
+            ref_audio = "";
+            ref_text = "";
+            model = "neuphonic/neutts-air-q4-gguf";
+            device = "gpu";
+          };
+        };
+      };
+    })
+
+    (mkIf (cfg.enable && cfg.voice.enable && cfg.voice.wyoming-stt.enable) {
+      services.hermes-agent = {
+        environment = {
+          HERMES_LOCAL_STT_COMMAND =
+            let
+              cmd = "${
+                inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.wyoming-transcribe-client
+              }/bin/wyoming-transcribe";
+            in
+            "${cmd} {input_path} --output-dir {output_dir} --model {model} --language {language} --host ${cfg.voice.wyoming-stt.host} --port ${toString cfg.voice.wyoming-stt.port}";
+        };
+      };
+    })
+
+    (mkIf (cfg.enable && cfg.platform.discord.enable) {
+      sops = {
+        secrets."${cfg.platform.discord.tokenReference}" = { };
+        templates."HERMES_DISCORD_ENV".content = toShellVars {
+          DISCORD_BOT_TOKEN = config.sops.placeholder."${cfg.platform.discord.tokenReference}";
+          DISCORD_ALLOWED_USERS = concatStringsSep " " cfg.platform.discord.allowedUsers;
+          DISCORD_HOME_CHANNEL = cfg.platform.discord.homeChannel;
+        };
+      };
+
+      services.hermes-agent = {
+        environmentFiles = [ config.sops.templates."HERMES_DISCORD_ENV".path ];
+        settings.discord = {
+          auto_thread = true;
+          require_mention = true;
+        };
+      };
+    })
+
+    (mkIf (cfg.enable && cfg.platform.hassio.enable) {
+      assertions = [
+        {
+          assertion = cfg.platform.hassio.tokenReference != null;
+          message = "Home Assistant token reference must be specified when Home Assistant platform is enabled.";
+        }
+        {
+          assertion = cfg.platform.hassio.url != null;
+          message = "Home Assistant URL must be specified when Home Assistant platform is enabled.";
+        }
+      ];
+
+      sops = {
+        secrets."${cfg.platform.hassio.tokenReference}" = { };
+        templates."HERMES_HASSIO_ENV".content = toShellVars {
+          HASS_TOKEN = config.sops.placeholder."${cfg.platform.hassio.tokenReference}";
+          HASS_URL = cfg.platform.hassio.url;
+        };
+      };
+    })
+
+    (mkIf (cfg.enable && cfg.dashboard.enable && cfg.dashboard.oidc.enable) {
+      assertions = [
+        {
+          assertion = cfg.dashboard.oidc.issuer != null;
+          message = "OIDC issuer must be specified when OIDC authentication is enabled.";
+        }
+        {
+          assertion = cfg.dashboard.oidc.clientId != null;
+          message = "OIDC client ID must be specified when OIDC authentication is enabled.";
+        }
+      ];
+
+      sops.templates."HERMES_DASHBOARD_OIDC_ENV".content = toShellVars {
+        HERMES_DASHBOARD_OIDC_ISSUER = cfg.dashboard.oidc.issuer;
+        HERMES_DASHBOARD_OIDC_CLIENT_ID = cfg.dashboard.oidc.clientId;
+        HERMES_DASHBOARD_OIDC_SCOPES = concatStringsSep " " cfg.dashboard.oidc.scopes;
+      };
+
+      services.hermes-agent = {
+        environmentFiles = [ config.sops.templates."HERMES_DASHBOARD_OIDC_ENV".path ];
+        settings.dashboard.oauth = {
+          inherit (cfg.dashboard.oidc) provider;
+          "${cfg.dashboard.oidc.provider}" = {
+            inherit (cfg.dashboard.oidc) issuer scopes;
+            client_id = cfg.dashboard.oidc.clientId;
+          };
+        };
+      };
+    })
+  ];
 }

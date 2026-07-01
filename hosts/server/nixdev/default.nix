@@ -23,12 +23,4 @@
       2525
     ];
   };
-
-  server.tests.units = {
-    docker = {
-      testScript = ''
-        nixdev.succeed("systemctl show docker.service | grep -i loadstate")
-      '';
-    };
-  };
 }

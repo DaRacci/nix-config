@@ -70,7 +70,7 @@ in
     nixPath = mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
   };
 
-  services.angrr = mkIf importExternals {
+  services.angrr = {
     enable = true;
     settings = {
       profile-policies.system = {
@@ -83,7 +83,7 @@ in
     };
   };
 
-  systemd.services.attic-watch-store = mkIf importExternals {
+  systemd.services.attic-watch-store = {
     description = "Watch nix store for attic";
     wants = [ "network-online.target" ];
     after = [ "network-online.target" ];

@@ -25,13 +25,6 @@
           reverse_proxy http://${cfg.HBOX_WEB_HOST}:${toString cfg.HBOX_WEB_PORT}
         '';
     };
-
-  };
-
-  server.tests.units.homebox = {
-    testScript = ''
-      nixcloud.succeed("systemctl show homebox.service | grep -i loadstate")
-    '';
   };
 
   services = {

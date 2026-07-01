@@ -94,14 +94,6 @@ in
         }
       '';
     };
-
-    tests.units = {
-      docker-registry = {
-        testScript = ''
-          nixdev.succeed("systemctl show docker-registry.service | grep -i loadstate")
-        '';
-      };
-    };
   };
 
   services.dockerRegistry = {

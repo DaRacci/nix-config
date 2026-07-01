@@ -49,9 +49,9 @@
     nixosTestConfigurations = "nixos";
     homeConfigurations = "home-manager";
     githubActions = "ci";
-    checks = "ci";
   }
   // (lib.genAttrs [
+    "ci"
     "devShells"
     "formatter"
   ] (_: "dev"));

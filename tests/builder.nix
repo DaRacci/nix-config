@@ -24,6 +24,7 @@ let
     attrNames
     concatStringsSep
     elem
+    isFunction
     ;
 
   filteredTestUnits =
@@ -66,18 +67,28 @@ if hostName != null then
         ];
       };
 
-    testScript = ''
-      start_all()
+    testScript =
+      { nodes, ... }:
+      let
+        nodeCfg = nodes.${hostName}.config;
+        formatUnit =
+          name: unit:
+          let
+            script = if isFunction unit.testScript then unit.testScript nodeCfg else unit.testScript;
+          in
+          ''
+            with subtest("${hostName} ${name}"):
+                ${script}'';
+      in
+      ''
+        start_all()
 
-      with subtest("${hostName} baseline"):
-        ${baselineAssertions hostName}
+        with subtest("${hostName} baseline"):
+          ${baselineAssertions hostName}
 
-      ${concatStringsSep "\n" (
-        mapAttrsToList (name: unit: ''
-          with subtest("${hostName} ${name}"):
-              ${unit.testScript}'') filteredTestUnits
-      )}
-    '';
+        ${concatStringsSep "
+" (mapAttrsToList formatUnit filteredTestUnits)}
+      '';
   }
 else
   pkgs.testers.runNixOSTest {

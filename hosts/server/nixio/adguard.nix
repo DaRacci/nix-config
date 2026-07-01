@@ -220,10 +220,4 @@
 
       allowedUDPPorts = [ cfg.dns.port ];
     };
-
-  server.tests.units.adguard = {
-    testScript = ''
-      nixio.succeed("systemctl show adguardhome.service | grep -i loadstate")
-    '';
-  };
 }

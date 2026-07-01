@@ -73,35 +73,36 @@ in
       let
         builder = import "${self}/tests/builder.nix";
         inherit (config.partitions.nixos.module) allocations;
-
-        # Build per-system pkgs — need a pkgs instance for the builder
-        pkgs = lib.builders.mkPkgs { system = "x86_64-linux"; };
       in
-      # Auto-discovered: one entry per server host
       builtins.listToAttrs (
-        builtins.map (
+        map (
           hostName:
+          let
+            hostSystem =
+              self.nixosConfigurations.${hostName}.config.nixpkgs.hostPlatform
+                or self.nixosConfigurations.${hostName}.pkgs.stdenv.hostPlatform.system;
+            hostPkgs = lib.builders.mkPkgs { system = hostSystem; };
+          in
           lib.nameValuePair hostName (builder {
             inherit
               self
               inputs
-              pkgs
               lib
               allocations
               hostName
               ;
+            pkgs = hostPkgs;
             testUnits = self.nixosConfigurations.${hostName}.config.server.tests.units or { };
           })
         ) serverHosts
       )
-      # Explicit scenarios: one entry per scenario directory
       // (
         let
           scenariosDir = "${self}/tests/scenarios";
         in
         if builtins.pathExists scenariosDir then
           builtins.listToAttrs (
-            builtins.map (
+            map (
               scenarioName:
               lib.nameValuePair scenarioName (builder {
                 inherit
@@ -113,7 +114,7 @@ in
                   name = scenarioName;
                 };
               })
-            ) (builtins.attrNames (builtins.readDir scenariosDir))
+            ) (builtins.attrNames (lib.filterAttrs (_: v: v == "directory") (builtins.readDir scenariosDir)))
           )
         else
           { }

@@ -10,13 +10,13 @@ VM tests are in the top-level flake attribute `nixosTestConfigurations`, paralle
 to `nixosConfigurations`. Each entry is a NixOS VM test derivation built with
 `pkgs.testers.runNixOSTest`.
 
-```
+```text
 flake.nix
-├── nixosConfigurations/   # Production host configs (nixio, nixai, ...)
-└── nixosTestConfigurations/   # VM test derivations
-    ├── nixio              # Auto-discovered per-host test
-    ├── nixai              # Auto-discovered per-host test
-    └── proxy-routing       # Explicit scenario test
+├── nixosConfigurations/      # Production host configs (nixio, nixai, ...)
+└── nixosTestConfigurations/  # VM test derivations
+    ├── nixio                 # Auto-discovered per-host test
+    ├── nixai                 # Auto-discovered per-host test
+    └── proxy-routing         # Explicit scenario test
 ```
 
 ### Relationship to `nixosConfigurations`
@@ -230,9 +230,10 @@ VM tests execute in a separate Woodpecker workflow (`.woodpecker/test-vm.yaml`):
      with a `test.nix` file.
 1. The test appears automatically in `nixosTestConfigurations` — no registration needed.
 1. Run locally to verify:
-   ```bash
-   nix build .#nixosTestConfigurations.<name>
-   ```
+
+```bash
+  nix build .#nixosTestConfigurations.<name>
+```
 
 ### Disabled Service Tests
 
@@ -266,31 +267,6 @@ server.tests.units.postgres-connect = {
 ```
 
 For QEMU tests, use trust authentication — `vm-test.nix` injects `host all all all trust`.
-
-#### Systemd Units Only (services that can't start in QEMU)
-
-```nix
-server.tests.units.clamav = {
-  testScript = ''
-    nixcloud.succeed("systemctl show clamav-daemon.service | grep -i loadstate")
-  '';
-};
-```
-
-Services needing external credentials (Cloudflare, GitHub tokens, OAuth), GPU access, or hardware passthrough can't fully start in QEMU. Verify unit definition exists instead.
-
-#### Kernel/System Configs
-
-```nix
-server.tests.units.kernel-forwarding = {
-  testScript = ''
-    nixio.succeed("sysctl -w net.ipv4.ip_forward=1")
-    nixio.succeed("sysctl -n net.ipv4.ip_forward | grep '^1$'")
-    nixio.succeed("sysctl -w net.ipv6.conf.all.forwarding=1")
-    nixio.succeed("sysctl -n net.ipv6.conf.all.forwarding | grep '^1$'")
-  '';
-};
-```
 
 ### Scenario Authoring Guidance
 

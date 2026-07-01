@@ -1,7 +1,5 @@
 # PR-only, KVM.
-# Build nixosTestConfigurations.* for all server hosts.
-# TODO: affected-host build (PR-changed only).
-#
+# Build nixosTestConfigurations.* for affected server/scenario hosts.
 # Independent of check.yaml.
 
 labels:
@@ -25,8 +23,17 @@ steps:
   - name: Run VM tests
     image: registry.racci.dev/lix-woodpecker:latest
     commands: |
-      for host in $(nix eval .#nixosTestConfigurations --apply 'builtins.attrNames' --json | jq -r '.[]'); do
+      affected_hosts=$(git diff --name-only "origin/${CI_COMMIT_TARGET_BRANCH:-main}...HEAD" 2>/dev/null | grep -oP '(?<=^hosts/server/)[^/]+' | sort -u)
+      affected_scenarios=$(git diff --name-only "origin/${CI_COMMIT_TARGET_BRANCH:-main}...HEAD" 2>/dev/null | grep -oP '(?<=^tests/scenarios/)[^/]+' | sort -u)
+      if [ -z "$affected_hosts" ] && [ -z "$affected_scenarios" ]; then
+        hosts=$(nix eval .#nixosTestConfigurations --apply 'builtins.attrNames' --json | jq -r '.[]')
+      else
+        hosts=$(printf '%s\n%s' "$affected_hosts" "$affected_scenarios" | sort -u)
+      fi
+      failed=0
+      for host in $hosts; do
         echo "::group::VM test: $host"
-        nix build ".#nixosTestConfigurations.$host" --no-link -L || echo "FAILED: $host"
+        nix build ".#nixosTestConfigurations.$host" --no-link -L || { failed=1; echo "FAILED: $host"; }
         echo "::endgroup::"
       done
+      exit $failed

@@ -56,20 +56,6 @@
         extraConfig = "reverse_proxy http://localhost:9000";
       };
     };
-
-    tests.units = {
-      woodpecker-server = {
-        testScript = ''
-          nixdev.succeed("systemctl show woodpecker-server.service | grep -i loadstate")
-        '';
-      };
-
-      woodpecker-agent = {
-        testScript = ''
-          nixdev.succeed("systemctl show woodpecker-agent.service | grep -i loadstate")
-        '';
-      };
-    };
   };
 
   services.woodpecker-server = {

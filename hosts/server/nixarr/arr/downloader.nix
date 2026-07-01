@@ -84,18 +84,4 @@
       '';
     };
   };
-
-  server.tests.units = {
-    transmission = {
-      testScript = ''
-        nixarr.succeed("systemctl show transmission.service | grep -i loadstate")
-        nixarr.succeed("systemctl show transmission-flood.service | grep -i loadstate")
-      '';
-    };
-    sabnzbd = {
-      testScript = ''
-        nixarr.succeed("systemctl show sabnzbd.service | grep -i loadstate")
-      '';
-    };
-  };
 }

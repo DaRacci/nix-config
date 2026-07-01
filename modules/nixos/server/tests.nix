@@ -5,20 +5,18 @@
   ...
 }:
 let
-  inherit (lib) types mkOption mkEnableOption;
+  inherit (lib) types mkOption;
   inherit (types)
     submodule
     attrsOf
     either
-    str
     functionTo
+    str
     ;
 in
 {
   options = {
     server.tests = {
-      enable = mkEnableOption "Enable testing of this machine in the cluster tests";
-
       units = mkOption {
         default = { };
         type = attrsOf (
