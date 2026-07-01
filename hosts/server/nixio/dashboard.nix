@@ -58,4 +58,10 @@
       '';
     };
   };
+
+  server.tests.units.dashy = {
+    testScript = ''
+      nixio.succeed("systemctl show dashy.service | grep -i loadstate")
+    '';
+  };
 }

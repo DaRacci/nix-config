@@ -180,7 +180,7 @@
           let
             mkFilter = name: fileId: {
               enabled = true;
-              url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_${builtins.toString fileId}.txt";
+              url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_${toString fileId}.txt";
               inherit name;
               id = fileId;
             };
@@ -220,4 +220,10 @@
 
       allowedUDPPorts = [ cfg.dns.port ];
     };
+
+  server.tests.units.adguard = {
+    testScript = ''
+      nixio.succeed("systemctl show adguardhome.service | grep -i loadstate")
+    '';
+  };
 }

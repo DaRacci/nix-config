@@ -33,6 +33,14 @@
         reverse_proxy http://${config.services.coder.listenAddress}
       '';
     };
+
+    tests.units = {
+      coder = {
+        testScript = ''
+          nixdev.succeed("systemctl show coder.service | grep -i loadstate")
+        '';
+      };
+    };
   };
 
   services.coder = {
@@ -51,5 +59,6 @@
         inherit (db) host database;
         username = db.user;
       };
+
   };
 }

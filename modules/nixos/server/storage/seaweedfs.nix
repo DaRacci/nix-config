@@ -293,7 +293,7 @@ in
         };
       };
     }
-    // (lib.optionalAttrs (cfg.filer.tomlConfig != null) {
+    // (lib.optionalAttrs (cfg.filer.tomlConfig or null != null) {
       seaweedfs-config = {
         "${baseDir}/.seaweedfs".d = {
           mode = "0755";

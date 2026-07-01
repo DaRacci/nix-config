@@ -212,6 +212,12 @@ in
           }
         '';
     };
+
+    tests.units.kanidm = {
+      testScript = ''
+        nixcloud.succeed("systemctl show kanidm.service | grep -i loadstate")
+      '';
+    };
   };
 
   systemd.services.kanidm = {

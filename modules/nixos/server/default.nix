@@ -71,7 +71,13 @@ let
   getAllAttrsFunc =
     attrPath: func:
     serverConfigurations
-    |> map (cfg: func (attrByPath (splitString "." attrPath) null cfg) cfg)
+    |> map (
+      cfg:
+      let
+        val = attrByPath (splitString "." attrPath) null cfg;
+      in
+      if val == null then null else func val cfg
+    )
     |> filterEmpty;
 
   /*
@@ -187,6 +193,7 @@ in
     ./ssh-shell
     ./storage
     ./distributed-builds.nix
+    ./tests.nix
   ];
 
   options.server = {

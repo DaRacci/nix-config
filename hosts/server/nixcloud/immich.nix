@@ -50,6 +50,20 @@ in
         ];
       };
     };
+
+    tests.units = {
+      immich = {
+        testScript = ''
+          nixcloud.succeed("systemctl show immich-server.service | grep -i loadstate")
+        '';
+      };
+
+      immich-redis = {
+        testScript = ''
+          nixcloud.succeed("systemctl show redis-immich.service | grep -i loadstate")
+        '';
+      };
+    };
   };
 
   services = {

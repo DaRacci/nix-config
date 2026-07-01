@@ -46,11 +46,12 @@
 
   partitionedAttrs = {
     nixosConfigurations = "nixos";
+    nixosTestConfigurations = "nixos";
     homeConfigurations = "home-manager";
     githubActions = "ci";
+    checks = "ci";
   }
   // (lib.genAttrs [
-    "checks"
     "devShells"
     "formatter"
   ] (_: "dev"));

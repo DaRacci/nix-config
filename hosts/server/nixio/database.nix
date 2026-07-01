@@ -38,7 +38,14 @@
     ))
     (builtins.mapAttrs (
       _: value:
-      (removeAttrs value [ "sopsFileHash" ])
+      removeAttrs value [
+        "sopsFileHash"
+        "gid"
+        "uid"
+        "name"
+        "reloadUnits"
+        "templateFile"
+      ]
       // {
         sopsFile = config.sops.defaultSopsFile;
         # Update owner and groups because it will always be only postgres on this server.
@@ -57,6 +64,41 @@
     proxy.virtualHosts.pgadmin.extraConfig = ''
       reverse_proxy http://localhost:${toString config.services.pgadmin.port}
     '';
+  };
+
+  server.tests.units = {
+    postgres-connect = {
+      testScript = ''
+        nixio.succeed("sudo -u postgres psql -c 'SELECT 1'")
+      '';
+    };
+
+    redis-ping = {
+      testScript = ''
+        nixio.succeed("redis-cli PING")
+      '';
+    };
+
+    pgadmin = {
+      testScript = ''
+        nixio.succeed("systemctl show pgadmin.service | grep -i loadstate")
+      '';
+    };
+    postgres-exporter = {
+      testScript = ''
+        nixio.succeed("systemctl show postgres-exporter.service | grep -i loadstate")
+      '';
+    };
+    redis-exporter = {
+      testScript = ''
+        nixio.succeed("systemctl show redis-exporter.service | grep -i loadstate")
+      '';
+    };
+    postgresql-backup = {
+      testScript = ''
+        nixio.succeed("systemctl show postgresql-backup.service | grep -i loadstate")
+      '';
+    };
   };
 
   services = {

@@ -26,4 +26,10 @@
       allowGroups = [ "sysadmin@auth.racci.dev" ];
     };
   };
+
+  server.tests.units.flaresolverr = {
+    testScript = ''
+      nixarr.succeed("systemctl show flaresolverr.service | grep -i loadstate")
+    '';
+  };
 }

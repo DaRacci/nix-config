@@ -22,4 +22,10 @@
       gh
     ];
   });
+
+  server.tests.units.github-runners = {
+    testScript = ''
+      nixdev.succeed("systemctl show github-runner-nixos-runner-0.service | grep -i loadstate")
+    '';
+  };
 }

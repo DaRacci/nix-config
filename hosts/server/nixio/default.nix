@@ -86,4 +86,19 @@ in
       };
     }
   ];
+
+  server.tests.units.baseline-io = {
+    testScript = ''
+      nixio.succeed("journalctl --no-pager --since '1 min ago' | head -5")
+    '';
+  };
+
+  server.tests.units.kernel-forwarding = {
+    testScript = ''
+      nixio.succeed("sysctl -w net.ipv4.ip_forward=1")
+      nixio.succeed("sysctl -n net.ipv4.ip_forward | grep '^1$'")
+      nixio.succeed("sysctl -w net.ipv6.conf.all.forwarding=1")
+      nixio.succeed("sysctl -n net.ipv6.conf.all.forwarding | grep '^1$'")
+    '';
+  };
 }

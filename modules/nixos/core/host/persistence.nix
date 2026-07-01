@@ -8,6 +8,7 @@
 let
   inherit (lib)
     mkIf
+    mkMerge
     mkEnableOption
     mkOption
     mkDefault
@@ -127,11 +128,6 @@ let
           mounted drives.
         '';
       };
-      # Save the default permissions at the level the
-      # directory resides. This used when creating its
-      # parent directories, giving them reasonable
-      # default permissions unaffected by the
-      # directory's own.
       defaultPerms = mapAttrs (_: x: x // { internal = true; }) dirPermsOpts;
       dirPath = mkOption {
         type = path;
@@ -218,71 +214,61 @@ in
 
   imports = optional importExternals inputs.impermanence.nixosModules.impermanence;
 
-  config = mkIf cfg.enable {
-    programs.fuse.userAllowOther = true;
+  config = mkMerge (
+    [
+      (mkIf cfg.enable {
+        programs.fuse.userAllowOther = true;
 
-    system.activationScripts.persistent-dirs.text =
-      let
-        mkHomePersist =
-          user:
-          optionalString user.createHome ''
-            mkdir -p /persist/${user.home}
-            chown ${user.name}:${user.group} /persist/${user.home}
-            chmod ${user.homeMode} /persist/${user.home}
-          '';
-        users = builtins.attrValues config.users.users;
-      in
-      concatLines (map mkHomePersist users);
+        system.activationScripts.persistent-dirs.text =
+          let
+            mkHomePersist =
+              user:
+              optionalString user.createHome ''
+                mkdir -p /persist/${user.home}
+                chown ${user.name}:${user.group} /persist/${user.home}
+                chmod ${user.homeMode} /persist/${user.home}
+              '';
+            users = builtins.attrValues config.users.users;
+          in
+          concatLines (map mkHomePersist users);
+      })
+    ]
+    ++ optional importExternals (
+      mkIf cfg.enable {
+        environment.persistence."/persist" = {
+          hideMounts = true;
 
-    environment.persistence."/persist" = {
-      hideMounts = true;
+          directories = [
+            "/var/lib/systemd"
+            "/var/lib/nixos"
+            "/var/log"
+            "/etc/NetworkManager/system-connections"
+          ]
+          ++ cfg.directories;
 
-      directories = [
-        "/var/lib/systemd"
-        "/var/lib/nixos"
-        "/var/log"
-        "/etc/NetworkManager/system-connections"
-      ]
-      ++ cfg.directories;
+          files = [
+            "/etc/machine-id"
+            {
+              file = "/etc/nix/id_rsa";
+              parentDirectory = {
+                mode = "u=rwx,g=rx,o=rx";
+              };
+            }
+          ]
+          ++ cfg.files;
 
-      files = [
-        "/etc/machine-id"
-        {
-          file = "/etc/nix/id_rsa";
-          parentDirectory = {
-            mode = "u=rwx,g=rx,o=rx";
-          };
-        }
-      ]
-      ++ cfg.files;
-
-      users = lib.pipe (attrNames config.home-manager.users) [
-        (filter (user: config.home-manager.users.${user}.user.persistence.enable))
-        (map (
-          user:
-          nameValuePair user {
-            inherit (config.home-manager.users.${user}.user.persistence) files directories;
-          }
-        ))
-        lib.listToAttrs
-      ];
-    };
-
-    # services.snapper.configs = mkIf (drive.format == "btrfs") (builtins.foldl' recursiveUpdate { }
-    #   ([{
-    #     persist = {
-    #       SUBVOLUME = "/persist";
-    #       TIMELINE_CREATE = true;
-    #       TIMELINE_CLEANUP = true;
-    #     };
-    #   }] ++ map
-    #     (user: {
-    #       "${user.name}Home" = {
-    #         SUBVOLUME = "${cfg.root}/home/${user.name}";
-    #         TIMELINE_CREATE = true;
-    #         TIMELINE_CLEANUP = true;
-    #       };
-    #     })
-    #     (builtins.filter (user: user.createHome) (builtins.attrValues config.users.users))));
-  };
+          users = lib.pipe (attrNames (config.home-manager.users or { })) [
+            (filter (user: config.home-manager.users.${user}.user.persistence.enable))
+            (map (
+              user:
+              nameValuePair user {
+                inherit (config.home-manager.users.${user}.user.persistence) files directories;
+              }
+            ))
+            lib.listToAttrs
+          ];
+        };
+      }
+    )
+  );
 }

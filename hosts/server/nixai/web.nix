@@ -40,6 +40,12 @@
       };
   };
 
+  server.tests.units.open-webui = {
+    testScript = ''
+      nixai.succeed("systemctl show open-webui.service | grep -i loadstate")
+    '';
+  };
+
   services = {
     open-webui = {
       enable = true;

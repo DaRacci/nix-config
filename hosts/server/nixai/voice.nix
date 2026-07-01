@@ -16,6 +16,20 @@
     };
   };
   server = {
+    tests.units = {
+      wyoming-piper = {
+        testScript = ''
+          nixai.succeed("systemctl show wyoming-piper.service | grep -i loadstate")
+        '';
+      };
+
+      wyoming-whisper = {
+        testScript = ''
+          nixai.succeed("systemctl show wyoming-faster-whisper.service | grep -i loadstate")
+        '';
+      };
+    };
+
     dashboard.items = {
       piper.icon = "sh-piper-tts";
       whisper.icon = "sh-openai";

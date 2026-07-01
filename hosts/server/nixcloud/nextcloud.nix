@@ -58,6 +58,38 @@ in
         ];
       };
     };
+
+    tests.units = {
+      nextcloud = {
+        testScript = ''
+          nixcloud.succeed("systemctl show phpfpm-nextcloud.service | grep -i loadstate")
+        '';
+      };
+
+      elasticsearch = {
+        testScript = ''
+          nixcloud.succeed("systemctl show elasticsearch.service | grep -i loadstate")
+        '';
+      };
+
+      clamav = {
+        testScript = ''
+          nixcloud.succeed("systemctl show clamav-daemon.service | grep -i loadstate")
+        '';
+      };
+
+      imaginary = {
+        testScript = ''
+          nixcloud.succeed("systemctl show imaginary.service | grep -i loadstate")
+        '';
+      };
+
+      notify-push = {
+        testScript = ''
+          nixcloud.succeed("systemctl show notify_push.service | grep -i loadstate")
+        '';
+      };
+    };
   };
 
   services = rec {

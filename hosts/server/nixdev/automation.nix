@@ -97,5 +97,13 @@ in
         '';
       };
     };
+
+    tests.units = {
+      n8n = {
+        testScript = ''
+          nixdev.succeed("systemctl show n8n.service | grep -i loadstate")
+        '';
+      };
+    };
   };
 }

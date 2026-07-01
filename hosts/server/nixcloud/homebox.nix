@@ -28,6 +28,12 @@
 
   };
 
+  server.tests.units.homebox = {
+    testScript = ''
+      nixcloud.succeed("systemctl show homebox.service | grep -i loadstate")
+    '';
+  };
+
   services = {
     homebox = {
       enable = true;
