@@ -1,51 +1,33 @@
-# Gaming
+# Gaming — Gaming, VR, and Steam-focused desktop features
 
-Enables gaming, VR, and Steam-focused desktop features.
+## Purpose
 
-- **Entry point**: [gaming.nix](../../../../../modules/nixos/core/gaming.nix)
+Enable a desktop gaming stack around Steam, 32-bit graphics, Android ADB tooling, and WiVRn VR streaming, plus firewall, udev, and optional Decky Loader lifecycle integration.
 
----
+## Entry Point
 
-## Overview
+- **Main file**: [gaming.nix](../../../../../modules/nixos/core/gaming.nix)
 
-This module configures desktop gaming stack around Steam, 32-bit graphics support, Android ADB tools, and WiVRn streaming. It also adds firewall rules, udev rules for common gaming devices, and optional Decky Loader lifecycle integration.
+### Options
 
----
+{{#include ../../../../generated/core-gaming-options.md}}
 
-## Options
-
-{{#include ../../../../generated/purpose-gaming-options.md}}
-{{#include ../../../../generated/purpose-gaming-minecraft-options.md}}
-{{#include ../../../../generated/purpose-gaming-modding-options.md}}
-{{#include ../../../../generated/purpose-gaming-osu-options.md}}
-{{#include ../../../../generated/purpose-gaming-roblox-options.md}}
-{{#include ../../../../generated/purpose-gaming-simulator-options.md}}
-{{#include ../../../../generated/purpose-gaming-steam-options.md}}
-{{#include ../../../../generated/purpose-gaming-vr-options.md}}
-
----
-
-## Behaviour
+## Architecture / Services / Scope
 
 When enabled, module:
 
 - adds `adbusers` to `core.defaultGroups`,
-- enables `hardware.steam-hardware`,
-- enables 32-bit graphics support,
-- installs `pkgs.android-tools`,
-- enables Steam with Steam Deck style launch arguments,
-- enables `programs.steam.extest`,
-- adds `pkgs.xwayland-run` and `pkgs.xwininfo` as Steam extra packages,
-- adds `pkgs.proton-ge-bin` as compatibility package,
+- enables `hardware.steam-hardware` and 32-bit graphics support,
+- installs `android-tools`,
+- enables Steam with Steam Deck style launch arguments, `extest`, `xwayland-run`/`xwininfo` extras, and `proton-ge-bin` compatibility,
 - opens Steam Remote Play and local transfer firewall rules,
-- enables `services.wivrn` with `highPriority`, `steam.importOXRRuntimes`, firewall access, and JSON config, and
-- installs udev rules for PlayStation controller, Oculus Quest, and tty ACM devices.
+- enables WiVRn with `highPriority`, OpenXR runtime import, firewall access, and JSON config,
+- installs udev rules for PlayStation controller, Oculus Quest, and tty ACM devices, and
+- overlays `gamescope-session` for 4K resolution and wider refresh limits.
 
-It also overlays `gamescope-session` to use 4K resolution and wider refresh limits, and opens firewall ports UDP `41492`, `9943`, `9944` plus TCP `8082`, `9943`, `9944`, and `24070`.
+Firewall ports opened: UDP `41492`, `9943`, `9944` plus TCP `8082`, `9943`, `9944`, `24070`.
 
----
-
-## Decky Loader Integration
+### Decky Loader Integration
 
 If `config.jovian.decky-loader.enable` is true, module additionally:
 
@@ -53,19 +35,7 @@ If `config.jovian.decky-loader.enable` is true, module additionally:
 - adds Polkit rule so active local user can start and stop `decky-loader.service`, and
 - when Home Manager is present, installs user service that polls Steam PID file, starts Decky Loader once Steam is running, and stops it after Steam exits.
 
----
-
-## Usage Example
-
-```nix
-{ ... }: {
-  core.gaming.enable = true;
-}
-```
-
----
-
-## WiVRn Socket Activation
+### WiVRn Socket Activation
 
 WiVRn is activated on-demand through systemd user socket activation instead of running for the full session.
 
@@ -75,10 +45,8 @@ WiVRn is activated on-demand through systemd user socket activation instead of r
 - Steam's OpenXR runtime path resolves to the socket; activating a SteamVR/OpenXR game triggers socket activation.
 - Parent dir created with `0750`, socket with `0770`.
 
----
-
-## Operational Notes
+## Operational Notes / Assumptions
 
 - Module assumes desktop-class host with graphics stack and Steam support.
-- WiVRn config uses NVENC H.265 encoder entries and enables `pkgs.wayvr` as application.
+- WiVRn config uses NVENC H.265 encoder entries and enables `wayvr` as application.
 - Some extra behavior only appears when related modules already exist, such as Jovian Decky Loader and Home Manager.

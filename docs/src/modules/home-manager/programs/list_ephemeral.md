@@ -1,20 +1,35 @@
-# Home-Manager: list-ephemeral
+# list-ephemeral — Ephemeral Path Discovery and Persistence Snippets
+
+## Purpose
 
 `list-ephemeral` is a shell utility that helps discover ephemeral paths and generate Nix snippets for persistence. It integrates with Home-Manager to supply defaults, persisted paths, and program context.
 
-## Options
+## Entry Point
+
+- **Main file**: [`modules/home-manager/programs/list-ephemeral.nix`](../../../../../modules/home-manager/programs/list-ephemeral.nix)
+- **Package**: [`pkgs/list-ephemeral`](../../../../../pkgs/list-ephemeral)
+
+## Architecture / Services / Scope
+
+##### Options
 
 {{#include ../../../../generated/programs-list-ephemeral-options.md}}
 
-## Usage
+The module writes a generated config file consumed by the TUI:
+
+- Excludes default ephemeral paths (caches, logs, Electron app state, etc.) so they never appear as persistence candidates.
+- Supplies the currently persisted files and directories from `user.persistence` / `host.persistence`, which are marked as already persisted in the UI.
+- Supplies installed program names so the TUI can filter candidates by program context.
+
+### Usage
 
 Default TUI (fzf-based with keybindings):
 
-```
+```sh
 list-ephemeral
 ```
 
-### TUI Keybindings
+#### TUI Keybindings
 
 | Key      | Action                                    |
 | -------- | ----------------------------------------- |
@@ -42,7 +57,7 @@ Trace mode (runs a command and then opens TUI with traced ephemeral paths):
 list-ephemeral trace -- <cmd> [args...]
 ```
 
-## Snippet Generation
+### Snippet Generation
 
 The TUI generates Nix snippets based on path location:
 

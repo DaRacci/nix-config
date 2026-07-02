@@ -1,49 +1,34 @@
-# SeaweedFS Evaluation
-
-SeaweedFS is currently deployed here as an evaluation-only storage service alongside MinIO. It exists to validate SeaweedFS as a possible replacement candidate without changing existing MinIO-backed workloads or the repository's migration posture.
+# SeaweedFS Evaluation — Evaluation-Only Storage Service
 
 ## Purpose
 
-The evaluation deployment provides an all-in-one SeaweedFS stack on the IO primary host so the repository can test endpoint shape, proxy integration, and service behavior in a realistic environment while keeping the current MinIO setup intact.
+SeaweedFS is deployed here as an evaluation-only storage service alongside MinIO. It exists to validate SeaweedFS as a possible replacement candidate without changing existing MinIO-backed workloads or the repository's migration posture. The evaluation deployment provides an all-in-one SeaweedFS stack on the storage primary host so the repository can test endpoint shape, proxy integration, and service behavior in a realistic environment while keeping the current MinIO setup intact.
 
-## Entry Points
+## Entry Point
 
-- `modules/nixos/server/storage/seaweedfs.nix`
-- `modules/nixos/server/storage/default.nix`
+- **Main file**: `modules/nixos/server/storage/seaweedfs.nix`
+- **Supporting file**: `modules/nixos/server/storage/default.nix`
 
-## Deployment Scope
+## Architecture / Services / Scope
 
 - **Evaluation only**: this deployment does not replace MinIO and does not perform any migration.
-- **IO primary only**: the module is gated by `config.server.ioPrimaryHost == config.networking.hostName`.
+- **Storage primary only**: the module is gated by `config.server.storagePrimaryHost == config.networking.hostName`.
 - **All-in-one topology**: the evaluation enables the SeaweedFS master, volume, filer, S3 endpoint, admin UI, and worker components on the coordinator host.
+- **Proxy surface**: endpoints are exposed through the existing `server.proxy.virtualHosts` integration instead of host-local Caddy configuration. Current surface includes the master, filer, S3-compatible, volume, and admin endpoints under the `seaweedfs.<domain>` subtree. Client-facing TLS terminates at Caddy; gRPC-backed component endpoints additionally get the backend transport settings required for SeaweedFS communication.
+- **Option surface**: the module uses the upstream `services.seaweedfs` option surface rather than introducing a repository-local `server.storage.seaweedfs.*` option tree.
 
-## Proxy Surface
+## Secrets
 
-The SeaweedFS evaluation endpoints are exposed through the existing `server.proxy.virtualHosts` integration instead of host-local Caddy configuration.
-
-Current proxy surface includes:
-
-- `seaweedfs.<domain>` for the master endpoint
-- `filer.seaweedfs.<domain>` for the filer endpoint
-- `s3.seaweedfs.<domain>` for the S3-compatible endpoint
-- `volume.seaweedfs.<domain>` for the volume endpoint
-- `admin.seaweedfs.<domain>` for the admin endpoint
-
-Client-facing TLS terminates at Caddy. For gRPC-backed component endpoints, the proxy is additionally configured with the backend transport settings required for SeaweedFS communication.
-
-## Security Material
-
-The SeaweedFS SOPS entries are separate from MinIO secrets and are used for:
+SeaweedFS SOPS entries are separate from MinIO secrets and are used for:
 
 - **mTLS between Caddy and SeaweedFS components**
 - **JWT-based inter-component authentication inside SeaweedFS**
 
-These entries live under the `SEAWEEDFS` secret tree on the IO primary host and include both JWT material and TLS certificates/keys for the SeaweedFS component set.
+These entries live under the `SEAWEEDFS` secret tree on the storage primary host and include both JWT material and TLS certificates/keys for the SeaweedFS component set.
 
-## Operational Notes
+## Operational Notes / Assumptions
 
-- The SeaweedFS module uses the upstream `services.seaweedfs` option surface rather than introducing a repository-local `server.storage.seaweedfs.*` option tree.
-- The evaluation deployment is still separate from `server.storage.swfsMount`. The new storage abstraction can use `weed mount` for SeaweedFS-backed workload mounts without changing the evaluation topology described here.
+- The evaluation deployment is separate from `server.storage.swfsMount`. The storage abstraction can use `weed mount` for SeaweedFS-backed workload mounts without changing the evaluation topology described here.
 - This deployment is intended to shake out integration details first; repository-local abstractions can be added later if SeaweedFS proves to be a good fit.
 
 ## References

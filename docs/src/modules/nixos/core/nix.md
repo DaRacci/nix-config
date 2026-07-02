@@ -2,43 +2,33 @@
 
 Defines shared Nix daemon, cache, and registry defaults.
 
-- **Entry point**: [nix.nix](../../../../../modules/nixos/core/nix.nix)
+## Purpose
 
----
+Establish global Nix configuration for every host in the flake: overlays, state version, trusted users, experimental features, binary caches, garbage collection, registry-derived `nixPath`, plus automatic uploads to the remote Attic cache.
 
-## Overview
+## Entry Point
 
-This module establishes global Nix configuration for hosts in this flake. It sets overlays, `system.stateVersion`, trusted users, experimental features, binary caches, garbage collection, and registry-derived `nixPath`.
+- **Main file**: [nix.nix](../../../../../modules/nixos/core/nix.nix)
 
-It also provisions cache push secret and `attic-watch-store` service for automatic uploads to remote Attic cache.
+## Architecture / Services / Scope
 
----
+The module applies shared baseline configuration directly (no `core.*` options). It:
 
-## Options
+- installs the `nix4vscode` overlay,
+- sets `system.stateVersion` from the `state.version` file at the flake root,
+- configures trusted users, automatic store optimisation, experimental features, substituters and trusted public keys for the project's binary caches, daily automatic GC, and a `nixPath` derived from `config.nix.registry`.
 
-This module does not define `core.*` options. It applies shared baseline configuration directly.
+It also:
 
----
+- enables `services.angrr` to retain recent system profiles, and
+- creates `systemd.services.attic-watch-store`, which waits for `network-online.target`, restarts on failure, logs into Attic using a SOPS-managed cache push key, and watches the store for uploads.
 
-## Behaviour
+## Secrets
 
-Module configures:
+The module declares the SOPS secret `CACHE_PUSH_KEY` (from `hosts/secrets.yaml`) and restarts `attic-watch-store.service` when it changes. This key authenticates automatic uploads to the remote Attic cache.
 
-- overlays from `inputs.nix4vscode`,
-- `system.stateVersion` from `state.version` file in flake root,
-- trusted Nix users `root` and `@wheel`,
-- `nix.settings.auto-optimise-store = mkForce true`,
-- experimental features `nix-command`, `flakes`, and `pipe-operator`,
-- substituters, trusted substituters, and trusted public keys for `cache.nixos.org`, `nix-community`, and `cache.racci.dev`,
-- daily automatic Nix GC, and
-- `nix.nixPath` derived from `config.nix.registry`.
+## Operational Notes / Assumptions
 
-It also enables `services.angrr` to retain recent system profiles and creates `systemd.services.attic-watch-store` that waits for `network-online.target`, restarts on failure, logs into Attic with SOPS-managed `CACHE_PUSH_KEY`, and watches store for uploads.
-
----
-
-## Operational Notes
-
-- Because module has no enable flag, this is always active and applied to all hosts.
+- Because the module has no enable flag, it is always active and applied to all hosts.
 - `attic-watch-store` depends on `sops.secrets.CACHE_PUSH_KEY` from `hosts/secrets.yaml`.
-- `services.angrr` keeps system profiles for 14 days, latest 3 generations, current system, and booted system.
+- `services.angrr` keeps a bounded set of recent system profile generations.

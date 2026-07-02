@@ -13,7 +13,7 @@ This coupling creates several problems:
 - **Scaling ceiling**: `nixio` cannot be upgraded or replaced for storage without affecting ingress. `nixcloud` cannot be upgraded for identity without affecting all applications.
 - **Config coupling**: The server module defaults (`server.ioPrimaryHost`) conflate reverse proxy, database, and storage responsibilities into a single option, making it hard to reason about which services live where.
 
-Splitting these roles onto dedicated hosts—`nixdb` (database), `nixstore` (storage), `nixauth` (identity)—lets each area evolve independently, matches the deployment to actual resource needs, and keeps the ingress layer stable while other roles rotate.
+Splitting these roles onto dedicated hosts—`nixdb` (database), `nixstor` (storage), `nixauth` (identity)—lets each area evolve independently, matches the deployment to actual resource needs, and keeps the ingress layer stable while other roles rotate.
 
 ## What Changes
 
@@ -37,7 +37,7 @@ Applications that declare `server.database.postgres.<name>` will continue to wor
 
 ### Storage host separation
 
-Move MinIO (and any related shared object storage concerns) from `nixio` to `nixstore`. The SeaweedFS evaluation deployment currently gated to `server.ioPrimaryHost` moves to `server.storagePrimaryHost` instead.
+Move MinIO (and any related shared object storage concerns) from `nixio` to `nixstor`. The SeaweedFS evaluation deployment currently gated to `server.ioPrimaryHost` moves to `server.storagePrimaryHost` instead.
 
 Storage mount helpers (`swfsMount`, bucket management) will reference the storage primary for backend service endpoints.
 
@@ -58,7 +58,7 @@ Host-local config on `nixauth` will continue to define the OAuth2 client definit
 |---------|-------------------------------------------------------|-----------------------------|
 | `nixio` | Caddy proxy, Cloudflare tunnel, dashboard, AdGuard     | PostgreSQL, pgAdmin, MinIO |
 | `nixdb` | —                                                      | PostgreSQL, pgAdmin         |
-| `nixstore` | —                                                    | MinIO, SeaweedFS evaluation |
+| `nixstor` | —                                                    | MinIO, SeaweedFS evaluation |
 | `nixauth` | —                                                     | Kanidm (from nixcloud)      |
 | `nixcloud` | Home Assistant, Homebox, Immich, Navidrome, Nextcloud, Search | Kanidm identity              |
 
@@ -130,7 +130,7 @@ The system SHALL relocate services between hosts as described in the redistribut
 
 - **WHEN** `nixdb` is configured
 - **THEN** it SHALL run PostgreSQL with all cluster databases and pgAdmin
-- **WHEN** `nixstore` is configured
+- **WHEN** `nixstor` is configured
 - **THEN** it SHALL run MinIO and the SeaweedFS evaluation deployment (when enabled)
 - **WHEN** `nixauth` is configured
 - **THEN** it SHALL run Kanidm identity via the reusable server identity module
@@ -173,7 +173,7 @@ The following existing specs are unaffected by this change:
 
 - **Re-architecting the proxy layer**: Caddy and all proxy extensions remain on `nixio`. No changes to how vhosts are defined, how extensions register, or how config is generated.
 - **Migrating application workloads**: Immich, Nextcloud, Home Assistant, Navidrome, Homebox, Search stay on `nixcloud`. No application is relocated.
-- **Changing MinIO to SeaweedFS**: The storage host separation does not mandate a storage backend migration. MinIO and SeaweedFS evaluation both move to `nixstore`.
+- **Changing MinIO to SeaweedFS**: The storage host separation does not mandate a storage backend migration. MinIO and SeaweedFS evaluation both move to `nixstor`.
 - **Refactoring the monitoring stack**: Monitoring stays on `nixmon`. No allocation or module changes to monitoring.
 - **Changing distributed build allocation**: Builders stay on `nixdev` and other assigned hosts. No changes to `distributedBuilders`.
 - **Adding new services**: This change does not introduce new software or features. It only reallocates and generalizes existing services.
@@ -186,7 +186,7 @@ The following existing specs are unaffected by this change:
 - `hosts/server/nixio/default.nix` — remove PostgreSQL, pgAdmin, and MinIO service configuration
 - `hosts/server/nixcloud/identity.nix` — move Kanidm config to the new identity module; host keeps only OAuth2 client definitions (`systems.oauth2`) and provisioning data
 - `hosts/server/nixdb/default.nix` — new host config running PostgreSQL + pgAdmin
-- `hosts/server/nixstore/default.nix` — new host config running MinIO + SeaweedFS
+- `hosts/server/nixstor/default.nix` — new host config running MinIO + SeaweedFS
 - `hosts/server/nixauth/default.nix` — new host config running Kanidm via identity module
 - `hosts/server/shared/` — verify shared configs do not assume all roles on `nixio`
 
@@ -209,7 +209,7 @@ The following existing specs are unaffected by this change:
 - `docs/modules/nixos/server/storage.md` — update to reflect storage primary host separation
 - `docs/flake/allocations.md` — update with new role allocation options
 - `docs/hosts/server/nixdb.md` — create new host documentation
-- `docs/hosts/server/nixstore.md` — create new host documentation
+- `docs/hosts/server/nixstor.md` — create new host documentation
 - `docs/hosts/server/nixauth.md` — create new host documentation
 - `docs/hosts/server/nixio.md` — update to reflect reduced service scope
 - `docs/hosts/server/nixcloud.md` — update to reflect identity removal

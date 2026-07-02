@@ -1,15 +1,19 @@
-# Storage
-
-The storage module manages persistent storage abstractions for the server fleet. Today that includes the `server.storage.swfsMount` mount abstraction and an evaluation-only SeaweedFS deployment.
+# Server Storage — Mount Abstractions and Storage Services
 
 ## Purpose
 
-This area provides:
+The storage module manages persistent storage abstractions for the server fleet. Today that includes the `server.storage.swfsMount` mount abstraction and an evaluation-only SeaweedFS deployment. This area provides:
 
 - declarative MinIO-backed and SeaweedFS-backed mounts through `server.storage.swfsMount`
-- a SeaweedFS evaluation deployment on the IO primary host
+- a SeaweedFS evaluation deployment on the storage primary host
 
-## Key Options and Behaviors
+## Entry Point
+
+- **Main file**: `modules/nixos/server/storage/default.nix`
+- **Supporting file**: `modules/nixos/server/storage/bucket.nix`
+- **Supporting file**: `modules/nixos/server/storage/seaweedfs.nix`
+
+## Architecture / Services / Scope
 
 ### swfsMount
 
@@ -32,34 +36,27 @@ The `swfsMount` option is the repository's declarative storage mount interface. 
 
 ### SeaweedFS Evaluation
 
-SeaweedFS is documented separately because it is not part of the current software filesystem workflow. The repository uses it as an evaluation deployment that runs alongside MinIO on the IO primary host and exposes its endpoint set through the existing Caddy proxy integration.
+SeaweedFS is documented separately because it is not part of the current software filesystem workflow. The repository uses it as an evaluation deployment gated by `server.storagePrimaryHost` — SeaweedFS services and their Caddy proxy rules only activate on the host designated as the storage primary. The `swfsMount` mount module itself remains role-agnostic; host placement is determined by which host runs the services.
+
+MinIO services also live on the storage primary host. The MinIO endpoint presented to mounts is served through the IO Coordinator reverse proxy, which routes to the MinIO instance on whichever host currently holds the storage primary role.
 
 See [SeaweedFS Evaluation](storage/seaweedfs.md) for details on scope, host gating, proxy behavior, and security material.
 
-#### Example
+## Secrets
 
-The following example mounts a MinIO-backed `media` bucket and sets specific ownership.
+- `S3FS_AUTH/<NAME_IN_UPPERCASE>`: MinIO backend credentials, containing `ACCESS_KEY_ID:SECRET_ACCESS_KEY`.
 
-```nix
-{
-  server.storage.swfsMount.media = {
-    backend = "minio";
-    uid = 1000;
-    gid = 1000;
-    umask = 007;
-  };
-}
-```
-
-## Operational Notes
+## Operational Notes / Assumptions
 
 - **FUSE Access**: The module enables `programs.fuse.userAllowOther = true` whenever mounts are defined so both `s3fs` and `weed mount` can expose shared FUSE mounts safely.
 - **Network Dependency**: Generated mount services depend on `network-online.target` before attempting either backend.
-- **MinIO Endpoint**: The MinIO backend defaults to `https://minio.racci.dev` unless a mount overrides the endpoint explicitly.
 - **Recovery Behavior**: The health-check timer uses `mountpoint` plus a bounded `stat` probe. On failure it lazily unmounts the path, restarts the generated mount service, and can restart configured dependent services.
 - **SeaweedFS Scope**: The SeaweedFS evaluation deployment remains separate from this abstraction. The new SeaweedFS backend only reuses `weed mount` for workload mounts and does not replace the evaluation stack.
 
 ## References
 
 - [s3fs-fuse Repository](https://github.com/s3fs-fuse/s3fs-fuse)
+
 - [SeaweedFS Evaluation](storage/seaweedfs.md)
+
+- IO Coordinator(../../../hosts/server/nixio.md)

@@ -42,20 +42,20 @@ The `nixdb` host SHALL be configured to run PostgreSQL with all cluster database
 - **WHEN** `nixdb` configuration is evaluated
 - **THEN** it SHALL NOT enable Caddy proxy, MinIO, SeaweedFS evaluation, or Kanidm identity services
 
-### Requirement: nixstore runs storage services
+### Requirement: nixstor runs storage services
 
-The `nixstore` host SHALL be configured to run MinIO and the SeaweedFS evaluation deployment (when enabled).
+The `nixstor` host SHALL be configured to run MinIO and the SeaweedFS evaluation deployment (when enabled).
 
-#### Scenario: nixstore is the storage primary host
+#### Scenario: nixstor is the storage primary host
 
-- **WHEN** `nixstore` configuration is evaluated
-- **THEN** `config.server.storagePrimaryHost` SHALL match `nixstore`
+- **WHEN** `nixstor` configuration is evaluated
+- **THEN** `config.server.storagePrimaryHost` SHALL match `nixstor`
 - **AND** MinIO SHALL be enabled
 - **AND** SeaweedFS evaluation services SHALL be enabled when SeaweedFS is enabled
 
-#### Scenario: nixstore does not run non-storage services
+#### Scenario: nixstor does not run non-storage services
 
-- **WHEN** `nixstore` configuration is evaluated
+- **WHEN** `nixstor` configuration is evaluated
 - **THEN** it SHALL NOT enable PostgreSQL, pgAdmin, Redis, Caddy proxy, or Kanidm identity services
 
 ### Requirement: nixauth runs identity services

@@ -6,7 +6,7 @@ The cluster currently runs five server hosts (`nixio`, `nixcloud`, `nixarr`, `ni
 
 This coupling forces coordinated downtime across unrelated service areas, conflates blast radius (storage failure takes down the proxy), and makes the config layer ambiguous — `server.ioPrimaryHost` is used to gate database, storage, proxy, and network modules interchangeably.
 
-The proposal splits these roles onto three new dedicated hosts — `nixdb`, `nixstore`, `nixauth` — plus extracts Kanidm from `nixcloud` into a reusable module. This design details how.
+The proposal splits these roles onto three new dedicated hosts — `nixdb`, `nixstor`, `nixauth` — plus extracts Kanidm from `nixcloud` into a reusable module. This design details how.
 
 ## Goals / Non-Goals
 
@@ -190,13 +190,13 @@ options.server.database.host = {
 
 Currently gates on `config.server.ioPrimaryHost == config.networking.hostName`. Change to `config.server.storagePrimaryHost == config.networking.hostName`.
 
-The proxy vhosts (seaweedfs, filer, s3, volume, admin) are currently emitted with `reverse_proxy http://localhost:...` because SeaweedFS runs on the same host as Caddy. After the split, SeaweedFS runs on `nixstore` while Caddy stays on `nixio`. The proxy's `replaceLocalHost` function (in `proxy/default.nix`) already handles this — it replaces `localhost` references with the source hostname when the vhost owner is not the IO primary. Since SeaweedFS proxy config will be collected by `collectAllAttrsFunc` targeting the storage primary, and `replaceLocalHost` checks `isIOPrimaryHost` on the source, the generated Caddy config on `nixio` will correctly point to `nixstore`.
+The proxy vhosts (seaweedfs, filer, s3, volume, admin) are currently emitted with `reverse_proxy http://localhost:...` because SeaweedFS runs on the same host as Caddy. After the split, SeaweedFS runs on `nixstor` while Caddy stays on `nixio`. The proxy's `replaceLocalHost` function (in `proxy/default.nix`) already handles this — it replaces `localhost` references with the source hostname when the vhost owner is not the IO primary. Since SeaweedFS proxy config will be collected by `collectAllAttrsFunc` targeting the storage primary, and `replaceLocalHost` checks `isIOPrimaryHost` on the source, the generated Caddy config on `nixio` will correctly point to `nixstor`.
 
 No changes needed to `replaceLocalHost` itself — it already works cross-host.
 
 **`hosts/server/nixio/storage.nix` / MinIO**:
 
-- MinIO service definition stays in `hosts/server/nixio/storage.nix` structurally but the file moves to `hosts/server/nixstore/default.nix`.
+- MinIO service definition stays in `hosts/server/nixio/storage.nix` structurally but the file moves to `hosts/server/nixstor/default.nix`.
 - Add a `modules/nixos/server/storage/minio.nix` module if MinIO configuration needs to be generalizable, or keep it as a host-level config if it's thin enough.
 
 **`modules/nixos/server/storage/bucket.nix`**:
@@ -216,18 +216,18 @@ Accepts these options under `server.identity`:
 ```
 server.identity = {
   enable = mkEnableOption "Kanidm identity provider";
-  
+
   kanidm = {
     domain = mkOption { type = str; default = "auth.racci.dev"; };
     bindAddress = mkOption { type = str; default = "[::]:8443"; };
     backupSchedule = mkOption { type = str; default = "0 3 * * *"; };
     backupPath = mkOption { type = str; default = "/var/lib/kanidm/backup"; };
     backupVersions = mkOption { type = int; default = 7; };
-    
+
     # Provisioning data — host config fills these in
     groups = mkOption { type = attrsOf (submodule {...}); default = {}; };
     oauth2 = mkOption { ... };  # mirrors today's systems.oauth2 structure
-    
+
     adminPasswordFile = mkOption { type = str; };
     idmAdminPasswordFile = mkOption { type = str; };
     provisioningJsonFile = mkOption { type = str; };
@@ -248,7 +248,7 @@ What the module auto-configures:
 ```nix
 { ... }: {
   imports = [ ../modules/nixos/server/identity ];
-  
+
   server.identity = {
     enable = true;
     kanidm = {
@@ -259,7 +259,7 @@ What the module auto-configures:
       provisioningJsonFile = config.sops.secrets."KANIDM/PROVISIONING_JSON".path;
     };
   };
-  
+
   # Host-specific data — OAuth2 secrets, Cloudflare tokens for ACME,
   # provisioning JSON file reference
   sops.secrets = { ... };
@@ -312,14 +312,14 @@ flowchart TD
     subgraph After
         nixio_after["nixio<br/>Caddy, Tunnel, AdGuard"]
         nixdb["nixdb<br/>PostgreSQL, pgAdmin, Redis"]
-        nixstore["nixstore<br/>MinIO, SeaweedFS eval"]
+        nixstor["nixstor<br/>MinIO, SeaweedFS eval"]
         nixauth["nixauth<br/>Kanidm"]
         nixcloud_after["nixcloud<br/>Home Assistant, Immich<br/>Nextcloud, Navidrome<br/>Homebox, Search"]
     end
 
     nixio --> nixio_after
     nixio --> nixdb
-    nixio --> nixstore
+    nixio --> nixstor
     nixcloud --> nixauth
     nixcloud --> nixcloud_after
 ```
@@ -331,15 +331,15 @@ sequenceDiagram
     participant Internet
     participant nixio as nixio (Caddy)
     participant nixdb as nixdb (PostgreSQL)
-    participant nixstore as nixstore (MinIO/SeaweedFS)
+    participant nixstor as nixstor (MinIO/SeaweedFS)
     participant nixauth as nixauth (Kanidm)
     participant nixcloud as nixcloud (Apps)
 
     Note over Internet,nixcloud: Ingress traffic flows through nixio unchanged
 
     Internet->>nixio: HTTPS request to minio.racci.dev
-    nixio->>nixstore: reverse_proxy to nixstore:9000
-    nixstore-->>nixio: response
+    nixio->>nixstor: reverse_proxy to nixstor:9000
+    nixstor-->>nixio: response
     nixio-->>Internet: response
 
     Internet->>nixio: HTTPS request to auth.racci.dev
@@ -361,7 +361,7 @@ sequenceDiagram
 **Mitigation**: Move `fromAllServers` secret collection logic to `hosts/server/nixdb/database.nix` (or the database module itself). Update sops file references — secrets are stored in `/persist/nix-config/hosts/server/secrets.yaml` shared file, so only the `owner`/`group`/`restartUnits` fields change.
 
 **Same risk for**:
-- MinIO root credentials → move to nixstore sops config
+- MinIO root credentials → move to nixstor sops config
 - Kanidm secrets + provisioning JSON → move to nixauth sops config
 - Cloudflare DNS tokens → remain on nixio (for proxy ACME) AND need to be present on nixauth (for Kanidm ACME)
 
@@ -373,9 +373,9 @@ sequenceDiagram
 
 ### Risk: Storage mounts that depend on MinIO or SeaweedFS
 
-**Problem**: FUSE mounts (`swfsMount`) that use `backend = "minio"` point their endpoint at `https://minio.racci.dev`. After MinIO moves to `nixstore`, this domain resolves through Caddy on `nixio` which reverse proxies to `nixstore`. If the endpoint changes, mounts break.
+**Problem**: FUSE mounts (`swfsMount`) that use `backend = "minio"` point their endpoint at `https://minio.racci.dev`. After MinIO moves to `nixstor`, this domain resolves through Caddy on `nixio` which reverse proxies to `nixstor`. If the endpoint changes, mounts break.
 
-**Mitigation**: The MinIO proxy vhost on `nixio` stays at `minio.racci.dev` — only the back-end target changes from `localhost` to `nixstore`. Mount configs don't need updating. SeaweedFS mount filer addresses are declared explicitly and already reference network-addressable host:port, so they remain correct.
+**Mitigation**: The MinIO proxy vhost on `nixio` stays at `minio.racci.dev` — only the back-end target changes from `localhost` to `nixstor`. Mount configs don't need updating. SeaweedFS mount filer addresses are declared explicitly and already reference network-addressable host:port, so they remain correct.
 
 ### Risk: Guardian coordination during migration
 
@@ -449,7 +449,7 @@ sequenceDiagram
 sequenceDiagram
     participant nixio
     participant nixdb
-    participant nixstore
+    participant nixstor
     participant nixauth
     participant nixcloud
 
@@ -464,13 +464,13 @@ sequenceDiagram
     nixio->>nixio: disable PostgreSQL, pgAdmin, Redis services
     nixcloud->>nixcloud: apps start connecting to nixdb instead of nixio
 
-    Note over nixio,nixcloud: Phase 4: Deploy nixstore
-    nixstore->>nixstore: bring up MinIO + SeaweedFS eval
+    Note over nixio,nixcloud: Phase 4: Deploy nixstor
+    nixstor->>nixstor: bring up MinIO + SeaweedFS eval
 
     Note over nixio,nixcloud: Phase 5: Storage migration
     nixio->>nixio: copy MinIO data + disable MinIO service
-    nixstore->>nixstore: restore MinIO data + enable
-    nixio->>nixio: update proxy vhost target to nixstore
+    nixstor->>nixstor: restore MinIO data + enable
+    nixio->>nixio: update proxy vhost target to nixstor
 
     Note over nixio,nixcloud: Phase 6: Deploy nixauth + identity module
     nixauth->>nixauth: bring up Kanidm (reusable module)
@@ -487,7 +487,7 @@ The migration proceeds in phases, each deployable as a single NixOS generation s
 
 ### Phase 0 — Preparation
 
-- Add `databasePrimaryHost`, `storagePrimaryHost`, `authPrimaryHost` to flake allocations (set to `nixdb`, `nixstore`, `nixauth`)
+- Add `databasePrimaryHost`, `storagePrimaryHost`, `authPrimaryHost` to flake allocations (set to `nixdb`, `nixstor`, `nixauth`)
 - Add server options in `server/default.nix`
 - Add generic helpers (`isPrimaryHost`, `getPrimaryHostAttr`, etc.)
 - Refactor existing IO helpers to delegate to generics
@@ -506,11 +506,11 @@ The migration proceeds in phases, each deployable as a single NixOS generation s
 
 ### Phase 2 — Storage host
 
-- Create `hosts/server/nixstore/default.nix` with MinIO + SeaweedFS evaluation
+- Create `hosts/server/nixstor/default.nix` with MinIO + SeaweedFS evaluation
 - Update `seaweedfs.nix` to gate on `storagePrimaryHost`
-- Copy MinIO data from nixio to nixstore
+- Copy MinIO data from nixio to nixstor
 - Update proxy vhost for MinIO — `replaceLocalHost` handles automatically
-- Deploy `nixstore` first, then `nixio` (disable MinIO), then all others
+- Deploy `nixstor` first, then `nixio` (disable MinIO), then all others
 - Rollback: set `storagePrimaryHost` back to `nixio`, re-enable MinIO on nixio, update proxy
 
 ### Phase 3 — Identity extraction
@@ -535,7 +535,7 @@ graph LR
     subgraph Critical path (sequential)
         A[Phase 0: Modules] --> B[Phase 1: nixdb deploy]
         B --> C[Phase 1: rest deploy]
-        C --> D[Phase 2: nixstore deploy]
+        C --> D[Phase 2: nixstor deploy]
         D --> E[Phase 2: proxy update]
     end
 
@@ -557,7 +557,7 @@ Phases 1 and 2 must be sequential because database must be serving before apps a
 
 1. **Kanidm data migration**: Should the Kanidm database be exported from `nixcloud` and imported on `nixauth`, or should fresh provisioning run and users re-register? If export/import is required, the migration tooling (`kanidmd backup` / `kanidmd restore`) needs to be scripted. This affects Phase 3 sequencing.
 
-2. **MinIO data copy**: The MinIO data directory on `nixio` needs to be copied to `nixstore`. Estimated size? Use `rsync` or object-level replication? If the data volume is large, Phase 2 may require a maintenance window.
+2. **MinIO data copy**: The MinIO data directory on `nixio` needs to be copied to `nixstor`. Estimated size? Use `rsync` or object-level replication? If the data volume is large, Phase 2 may require a maintenance window.
 
 3. **Shared sops file**: All PostgreSQL passwords are in `hosts/server/secrets.yaml` (shared). The `fromAllServers` collection in `nixio/database.nix` patches ownership to `postgres:postgres`. After the split, the same collection logic must run on `nixdb`. Should the secret collection move into the database module itself so it's host-agnostic?
 
@@ -569,4 +569,4 @@ Phases 1 and 2 must be sequential because database must be serving before apps a
 
 7. **Guardian PSK**: Currently a single sops secret shared between all hosts (`IO_GUARDIAN_PSK`). After the split, the guardian runs on `nixdb` with a new PSK (`DB_GUARDIAN_PSK`). Do we keep the old PSK for backward compat during migration, or do a one-shot switch? Keep both during transition, clean up old PSK in Phase 4.
 
-8. **Dashy dashboard for new hosts**: `nixdb`, `nixstore`, and `nixauth` will each need dashboard items registered. The dashboard module currently collects these via `getAllAttrsFunc "server.dashboard"` on the IO primary. The identity module already registers a dashboard item — database and storage might want their own. Should the database and storage modules register default dashboard items when enabled?
+8. **Dashy dashboard for new hosts**: `nixdb`, `nixstor`, and `nixauth` will each need dashboard items registered. The dashboard module currently collects these via `getAllAttrsFunc "server.dashboard"` on the IO primary. The identity module already registers a dashboard item — database and storage might want their own. Should the database and storage modules register default dashboard items when enabled?
