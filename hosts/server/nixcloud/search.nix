@@ -50,10 +50,10 @@
 
       search = {
         safe_search = 0;
-        autocomplete = "";
+        autocomplete = "duckduckgo";
         autocomplete_min = 4;
-        # favicon_resolver = "duckduckgo";
-        default_lang = "en";
+        favicon_resolver = "duckduckgo";
+        default_lang = "auto";
         ban_time_on_fail = 5;
         max_ban_time_on_fail = 120;
         prefer_configured_language = true;
@@ -63,6 +63,17 @@
           "csv"
           "rss"
         ];
+
+        # Engine suspension times after errors.
+        # Defaults are absurd for a private instance (recaptcha: 7 days, cf: 15 days).
+        suspended_times = {
+          SearxEngineAccessDenied = 86400;
+          SearxEngineCaptcha = 3600;
+          SearxEngineTooManyRequests = 1800;
+          cf_SearxEngineCaptcha = 86400;
+          cf_SearxEngineAccessDenied = 3600;
+          recaptcha_SearxEngineCaptcha = 86400;
+        };
       };
 
       ui = {
@@ -83,7 +94,9 @@
         request_timeout = 2.0;
         max_request_timeout = 10.0;
         pool_connections = 100;
-        pool_maxsize = 20;
+        pool_maxsize = 8;
+        enable_http2 = true;
+        keepalive_expiry = 5.0;
       };
 
       enabled_plugins = [
@@ -141,17 +154,20 @@
                 engine = "bing";
                 shortcut = "bi";
                 categories = [ "general" ];
+                weight = 0.5;
               };
               "duckduckgo" = {
                 engine = "duckduckgo";
                 shortcut = "ddg";
                 categories = [ "general" ];
+                weight = 1.2;
               };
               "google" = {
                 engine = "google";
                 shortcut = "go";
                 categories = "general";
                 use_mobile_ui = false;
+                weight = 1.5;
               };
               "brave" = {
                 engine = "brave";
@@ -163,6 +179,25 @@
                   "web"
                 ];
                 braveCategory = "search";
+                weight = 1.2;
+              };
+              "startpage" = {
+                engine = "startpage";
+                shortcut = "sp";
+                categories = [ "general" ];
+                weight = 1.3;
+              };
+              "mojeek" = {
+                engine = "mojeek";
+                shortcut = "mj";
+                categories = [ "general" ];
+                weight = 1.0;
+              };
+              "stract" = {
+                engine = "stract";
+                shortcut = "st";
+                categories = [ "general" ];
+                weight = 0.8;
               };
               #endregion
 
@@ -444,6 +479,7 @@
                 base_url = "https://{language}.wikipedia.org/";
                 categories = [ "general" ];
                 display_type = [ "infobox" ];
+                weight = 1.0;
               };
               "free software directory" = {
                 engine = "mediawiki";
