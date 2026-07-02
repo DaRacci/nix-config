@@ -14,6 +14,8 @@ in
       "AI_AGENT/OPENROUTER_API_KEY" = { };
       "AI_AGENT/DISCORD_BOT_TOKEN" = { };
       "AI_AGENT/API_SERVER_TOKEN" = { };
+
+      "MCP/N8N_API_KEY" = { };
     };
 
     templates."HERMES_ENV".content = lib.toShellVars {
@@ -21,6 +23,9 @@ in
       AZURE_FOUNDRY_BASE_URL = config.sops.placeholder."AI_AGENT/AZURE_FOUNDRY_BASE_URL";
       OPENROUTER_API_KEY = config.sops.placeholder."AI_AGENT/OPENROUTER_API_KEY";
       SEARXNG_URL = "https://search.racci.dev";
+
+      N8N_BASE_URL = "https://n8n.racci.dev";
+      N8N_API_KEY = config.sops.placeholder."MCP/N8N_API_KEY";
     };
   };
 
