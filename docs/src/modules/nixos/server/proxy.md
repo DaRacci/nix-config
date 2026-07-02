@@ -1,138 +1,37 @@
-# Proxy Submodule
-
-The Proxy submodule provides a unified interface for exposing internal services through Caddy. It handles virtual host configuration, automatic SSL via ACME, OAuth2 authentication with Kanidm, static API key authentication, and public exposure through Cloudflared tunnels.
+# Server Proxy — Unified Caddy Reverse Proxy
 
 ## Purpose
 
-This module abstracts the complexity of reverse proxying by allowing services to define their proxy requirements within their own module configuration. It automatically coordinates between backend hosts and the primary IO host to ensure ports are open and traffic is correctly routed.
+The Proxy submodule provides a unified interface for exposing internal services through Caddy. It handles virtual host configuration, automatic SSL via ACME, OAuth2 authentication with Kanidm, static API key authentication, and public exposure through Cloudflared tunnels. It abstracts the complexity of reverse proxying by allowing services to define their proxy requirements within their own module configuration, automatically coordinating between backend hosts and the primary IO host to ensure ports are open and traffic is correctly routed.
 
-## Options
+## Entry Point
+
+- **Main file**: `modules/nixos/server/proxy/default.nix`
+- **Supporting file**: `modules/nixos/server/proxy/options.nix`
+- **Supporting file**: `modules/nixos/server/proxy/config.nix`
+- **Supporting file**: `modules/nixos/server/proxy/kanidm.nix`
+- **Supporting file**: `modules/nixos/server/proxy/extensions.nix`
+- **Supporting file**: `modules/nixos/server/proxy/extensions/l4.nix`
+
+#### Options
 
 {{#include ../../../../generated/server-proxy-options.md}}
 
-## Per-Module Examples
+## Architecture / Services / Scope
 
-### `default.nix` - Logic and Helpers
+### File Layout
 
-This file contains the internal logic for resolving OAuth contexts and mapping local addresses to backend hostnames.
+- **`default.nix`** — Logic and helpers: resolving OAuth contexts and mapping local addresses to backend hostnames.
+- **`options.nix`** — Option definitions for virtual hosts and shared contexts.
+- **`config.nix`** — Caddy integration: generation of `services.caddy.virtualHosts` and ACME certificate requests. L4 (TCP/UDP) forwarding is handled by the `l4` extension, not by `config.nix`.
+- **`kanidm.nix`** — Authentication security: generates the Caddy `security` block, including identity providers, portals, and authorization policies.
+- **`extensions.nix`** — System integration: connects the proxy to the dashboard, Cloudflared tunnels, and automates Kanidm client provisioning.
 
-```nix
-# Example: How contextToEnvPrefix transforms names for environment variables
-contextToEnvPrefix "my-service" # Returns "MY_SERVICE"
-```
-
-### `options.nix` - Option Definitions
-
-Defines the structure of virtual hosts and shared contexts.
-
-```nix
-server.proxy.kanidmContexts.admin-apps = {
-  authDomain = "auth.internal.example.com";
-  allowGroups = [ "admins@auth.example.com" ];
-};
-
-server.proxy.virtualHosts.grafana = {
-  public = true;
-  kanidm = {
-    context = "admin-apps";
-    allowGroups = [ "grafana-users@auth.example.com" ];
-    bypassPaths = [ "/health" ];
-  };
-  extraConfig = "reverse_proxy localhost:3000";
-};
-```
-
-### `config.nix` - Caddy Integration
-
-Handles the generation of `services.caddy.virtualHosts` and ACME certificate requests.
-
-> **Note:** L4 (TCP/UDP) forwarding is handled by the `l4` extension, not by config.nix. See [Layer 4 Forwarding](#layer-4-forwarding).
-
-```nix
-# Generated Caddy block for a vhost with Kanidm
-grafana.example.com {
-    import default
-    import public
-
-    @bypass_auth_grafana path /health
-    handle @bypass_auth_grafana {
-        reverse_proxy 10.0.0.5:3000
-    }
-
-    route /auth/* {
-        authenticate with grafana_portal
-    }
-    handle {
-        authorize with grafana_policy
-        reverse_proxy 10.0.0.5:3000
-    }
-}
-```
-
-### `kanidm.nix` - Authentication Security
-
-Generates the Caddy `security` block, including identity providers, portals, and authorization policies.
-
-```nix
-security {
-    oauth identity provider admin-apps {
-        realm admin-apps
-        client_id "admin-apps"
-        client_secret {env.OAUTH_ADMIN_APPS_CLIENT_SECRET}
-        metadata_url https://auth.internal.example.com/oauth2/openid/admin-apps/.well-known/openid-configuration
-    }
-    # ... portals and policies
-}
-```
-
-### `extensions.nix` - System Integration
-
-Connects the proxy to the dashboard, Cloudflared tunnels, and automates Kanidm client provisioning.
-
-```nix
-# Automatic Kanidm provisioning based on proxy config
-services.kanidm.provision.systems.oauth2.admin-apps = {
-    displayName = "Admin Apps";
-    originUrl = [ "https://grafana.example.com/auth/oauth2/admin-apps/authorization-code-callback" ];
-    # ...
-};
-```
-
-## Operational Notes
-
-### Caddy Integration
-
-The module assumes the existence of a `default` Caddy snippet for common headers and security settings. When `public` is enabled, it also expects a `public` snippet.
-
-### Dashboard Integration
-
-Services defined in `server.proxy.virtualHosts` are automatically added to the server dashboard with default titles and icons derived from the host name.
-
-### Kanidm OAuth2 Context
-
-Authentication requires specific secrets per context, managed via sops-nix:
-
-1. `KANIDM/OAUTH2/<UPPER_CONTEXT>_SECRET`: Provisioning secret for Kanidm systems.
-1. `OAUTH_<PREFIX>_CLIENT_SECRET`: The OAuth2 client secret for Caddy.
-1. `<PREFIX>_SHARED_KEY`: A shared key used by Caddy to sign and verify authentication tokens.
-
-These are automatically managed if Kanidm provisioning is enabled on the same host.
-
-### Layer 4 Forwarding
-
-L4 forwarding uses the `caddy.layer4` plugin for non-HTTP traffic like database connections or SSH. Managed by the `l4` extension (`modules/nixos/server/proxy/extensions/l4.nix`), which auto-enables when any vhost has `l4 != null`.
-
-## References
-
-- [Kanidm OAuth2 Documentation](https://kanidm.github.io/kanidm/master/integrations/oauth2.html)
-- [Caddy Security Plugin](https://github.com/greenpau/caddy-security)
-- [Caddy Layer 4 Plugin](https://github.com/mholt/caddy-l4)
-
-## Extension Architecture
+### Extension System
 
 The proxy module supports a registry-based extension system. Extensions are self-contained modules that inject Caddy directives into virtual host configurations — without modifying proxy internals.
 
-### Extension Registry
+#### Extension Registry
 
 Extensions register themselves via `server.proxy.extensions.<name>`, an attribute set of submodules. Each extension has:
 
@@ -145,11 +44,11 @@ Extensions register themselves via `server.proxy.extensions.<name>`, an attribut
 | `globalConfig`        | `hostConfig -> str`                              | `_ → ""` | Top-level Caddy `globalConfig` directives                                                                                 |
 | `vhostModule`         | `nullOr deferredModule`                          | `null`   | Per-vhost option declarations                                                                                             |
 
-### Per-Vhost Extension Selection
+#### Per-Vhost Extension Selection
 
 Each vhost has `server.proxy.virtualHosts.<name>.extensions` (default `null` = all enabled extensions). Set to a list of extension names for selective enablement, or `[]` to disable all extensions.
 
-### Config Function Signature
+#### Config Function Signature
 
 ```nix
 config :: vhostName -> vhostAttrSet -> hostConfig -> string
@@ -157,13 +56,11 @@ config :: vhostName -> vhostAttrSet -> hostConfig -> string
 
 Arguments:
 
-- `vhostName` (`str`): The vhost's attribute name (e.g., `"grafana"`)
-- `vhostAttrSet`: The full vhost attribute set, including `_resolvedExtraConfig` (user's `extraConfig` with `replaceLocalHost` applied) and `_name`
-- `hostConfig`: Full host-level NixOS config
+- `vhostName` (`str`): The vhost's attribute name (e.g., `"grafana"`).
+- `vhostAttrSet`: The full vhost attribute set, including `_resolvedExtraConfig` (user's `extraConfig` with `replaceLocalHost` applied) and `_name`.
+- `hostConfig`: Full host-level NixOS config.
 
-The vhost attrset contains `_resolvedExtraConfig` — the user's `extraConfig` field with `localhost`/`127.0.0.1` already replaced for non-IO hosts.
-
-### GlobalConfig Function Signature
+#### GlobalConfig Function Signature
 
 ```nix
 globalConfig :: hostConfig -> string
@@ -171,99 +68,25 @@ globalConfig :: hostConfig -> string
 
 Called once per enabled extension on the IO primary host. Output concatenated into `services.caddy.globalConfig`, sorted by extension priority.
 
-### Auto-Enable Pattern
+#### Auto-Enable Pattern
 
-Extensions auto-detect whether they have work to do using `mkDefault`:
+Extensions auto-detect whether they have work to do using `mkDefault`; users can force-disable with explicit `enable = false`.
 
-```nix
-server.proxy.extensions.myext.enable = mkDefault (
-  # check if any vhost uses my extension's features
-);
-```
-
-Users can force-disable with explicit `enable = false`.
-
-### Priority Ordering
+#### Priority Ordering
 
 Extensions sort by priority ascending. Equal priorities break alphabetically by extension name. Extensions with lower priority numbers generate config earlier.
 
-### Authoring a New Extension
+#### Authoring a New Extension
 
 1. Create file: `modules/nixos/server/proxy/extensions/<name>.nix`
-1. Import in `proxy/default.nix`: `(importModule ./extensions/<name>.nix { inherit proxyLib; })`
+1. Import in `proxy/default.nix`.
 1. Set `server.proxy.extensions.<name>` with priority, config function, etc.
-1. Declare per-vhost options via `options.server.proxy.virtualHosts` with `attrsOf (submodule ...)`
-1. Use `proxyLib` for helpers: `replaceLocalHost`, `resolveKanidmContext`, `hasAnyKanidm`
-
-Example skeleton:
-
-```nix
-{ proxyLib, ... }:
-{ config, lib, ... }:
-let
-  inherit (lib) mkOption types mkDefault;
-in
-{
-  options.server.proxy.virtualHosts = mkOption {
-    type = attrsOf (submodule ({ name, ... }: {
-      options.mycustom = mkOption {
-        type = bool;
-        default = false;
-      };
-    }));
-  };
-
-  config = {
-    server.proxy.extensions.mycustom = {
-      priority = 75;
-      config = name: vh: hostCfg:
-        if !vh.mycustom then "" else "header X-Custom on";
-      globalConfig = hostCfg: "";
-      vhostModule = null;
-    };
-  };
-}
-```
+1. Declare per-vhost options via `options.server.proxy.virtualHosts` with `attrsOf (submodule ...)`.
+1. Use `proxyLib` for helpers: `replaceLocalHost`, `resolveKanidmContext`, `hasAnyKanidm`.
 
 ### API Key Auth Extension
 
-The `api-key-auth` extension provides static API key authentication for virtual hosts. When enabled, requests must include a valid `Req-API-Key` header matching a securely generated secret.
-
-```nix
-server.proxy.virtualHosts.myservice = {
-  requireApiKey = {
-    enable = true;
-    bypassPaths = [ "/health" "/metrics" ];  # paths that skip auth
-  };
-  extraConfig = "reverse_proxy localhost:8080";
-};
-```
-
-Generated Caddy config per vhost:
-
-```
-@myservice_apikey_key {
-    header Req-API-Key {env.API_KEY_MYSERVICE}
-}
-route /auth/apikey/* {
-    authorize with myservice_apikey_authorizer
-}
-handle {
-    authorize with myservice_apikey_authorizer
-    reverse_proxy localhost:8080
-}
-```
-
-Global caddy-security config:
-
-```
-order authorize before reverse_proxy
-authorize with myservice_apikey_authorizer {
-    with @myservice_apikey_key
-}
-```
-
-Secrets auto-generated via sops at `PROXY_AUTH/<VHOST_NAME>_API_KEY`, injected via systemd `LoadCredential`. Mutual exclusivity with Kanidm on the same vhost is enforced by the existing `consumesExtraConfig` assertion.
+The `api-key-auth` extension provides static API key authentication for virtual hosts. When enabled, requests must include a valid `Req-API-Key` header matching a securely generated secret. Bypass paths are supported per vhost. Mutual exclusivity with Kanidm on the same vhost is enforced by the existing `consumesExtraConfig` assertion.
 
 ### Migrated Extensions
 
@@ -274,3 +97,31 @@ Secrets auto-generated via sops at `PROXY_AUTH/<VHOST_NAME>_API_KEY`, injected v
 | `api-key-auth` | 50       | Static API key authentication per vhost (with bypass paths) |
 | `dashboard`    | 200      | Auto-generate dashboard items                               |
 | `cloudflared`  | 200      | Cloudflared tunnel ingress                                  |
+
+## Secrets
+
+### Kanidm OAuth2 Context
+
+Authentication requires specific secrets per context, managed via sops-nix:
+
+1. `KANIDM/OAUTH2/<UPPER_CONTEXT>_SECRET`: Provisioning secret for Kanidm systems.
+1. `OAUTH_<PREFIX>_CLIENT_SECRET`: The OAuth2 client secret for Caddy.
+1. `<PREFIX>_SHARED_KEY`: A shared key used by Caddy to sign and verify authentication tokens.
+
+These are automatically managed if Kanidm provisioning is enabled on the same host.
+
+### API Key Auth
+
+Secrets are auto-generated via sops at `PROXY_AUTH/<VHOST_NAME>_API_KEY`, injected via systemd `LoadCredential`.
+
+## Operational Notes / Assumptions
+
+- **Caddy Integration**: The module assumes the existence of a `default` Caddy snippet for common headers and security settings. When `public` is enabled, it also expects a `public` snippet.
+- **Dashboard Integration**: Services defined in `server.proxy.virtualHosts` are automatically added to the server dashboard with default titles and icons derived from the host name.
+- **Layer 4 Forwarding**: L4 forwarding uses the `caddy.layer4` plugin for non-HTTP traffic like database connections or SSH. Managed by the `l4` extension (`modules/nixos/server/proxy/extensions/l4.nix`), which auto-enables when any vhost has `l4 != null`.
+
+## References
+
+- [Kanidm OAuth2 Documentation](https://kanidm.github.io/kanidm/master/integrations/oauth2.html)
+- [Caddy Security Plugin](https://github.com/greenpau/caddy-security)
+- [Caddy Layer 4 Plugin](https://github.com/mholt/caddy-l4)

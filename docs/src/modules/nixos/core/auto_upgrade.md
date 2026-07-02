@@ -2,50 +2,19 @@
 
 Schedules automatic NixOS upgrades from flake host outputs.
 
-- **Entry point**: [auto-upgrade.nix](../../../../../modules/nixos/core/auto-upgrade.nix)
+## Purpose
 
----
+Keep hosts current by rebuilding them from the flake on a schedule, with randomized start times to spread load across hosts and resource limits so upgrades do not starve interactive workloads.
 
-## Overview
+## Entry Point
 
-This module configures `system.autoUpgrade` to rebuild host from `github:DaRacci/nix-config#<host>`. It also applies resource limits to `nixos-upgrade.service` so scheduled upgrades run with lower CPU and IO priority.
+- **Main file**: [auto-upgrade.nix](../../../../../modules/nixos/core/auto-upgrade.nix)
 
----
+## Architecture / Services / Scope
 
-## Options
+When enabled, the module configures `system.autoUpgrade` to rebuild the host from `github:DaRacci/nix-config#<host>`, using the `--refresh`, `--accept-flake-config`, and `--no-update-lock-file` flags, and applies CPU and IO resource limits to `nixos-upgrade.service`.
 
-{{#include ../../../../generated/core-auto-upgrade-options.md}}
+## Operational Notes / Assumptions
 
----
-
-## Behaviour
-
-When enabled, module configures:
-
-- `system.autoUpgrade.dates = "04:00"`,
-- `randomizedDelaySec = "45min"` to spread out upgrade times across hosts,
-- flags `--refresh`, `--accept-flake-config`, and `--no-update-lock-file`,
-- service resource controls for `nixos-upgrade.service`.
-
-Auto-upgrade itself only turns on when flake has `self.rev`, meaning repository is in clean revisioned state.
-
----
-
-## Usage Example
-
-```nix
-{ ... }: {
-  core.auto-upgrade = {
-    enable = true;
-    hostName = "my-host";
-  };
-}
-```
-
----
-
-## Operational Notes
-
-- Dirty working trees or non-revisioned evaluations leave `system.autoUpgrade.enable = false`.
-- Module always points upgrades at GitHub flake source, not local checkout.
-- Resource limits set `CPUWeight = 20`, `CPUQuota = 65%`, and `IOWeight = 20` on upgrade service.
+- Auto-upgrade only turns on when the flake has a revision (`self.rev`), meaning the repository is in a clean, revisioned state. Dirty working trees or non-revisioned evaluations leave `system.autoUpgrade.enable = false`.
+- Upgrades always target the GitHub flake source, not the local checkout.

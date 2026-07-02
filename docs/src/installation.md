@@ -44,7 +44,7 @@ After starting your NixOS-WSL instance:
 sudo git clone https://github.com/DaRacci/nix-config.git /etc/nixos
 
 # Apply the WSL configuration
-sudo nixos-rebuild switch --flake /etc/nixos#winix
+sudo nixos-rebuild switch --flake /etc/nixos#<wsl-hostname>
 ```
 
 #### 4. WSL-Specific Features

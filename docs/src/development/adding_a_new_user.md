@@ -25,7 +25,7 @@ Create host-specific configurations in `home/newuser/{hostname}.nix`:
   home = {
     username = "newuser";
     homeDirectory = "/home/newuser";
-    stateVersion = "25.05";
+    stateVersion = "25.05"; # Update to your current NixOS release
   };
 
   # Add user-specific packages and configuration

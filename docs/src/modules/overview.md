@@ -4,7 +4,9 @@
 
 This section provides an overview of the custom NixOS and Home-Manager modules defined in this repository. These modules allow for modular and reusable configurations across different hosts and users.
 
-## Entry Points
+## Architecture / Services / Scope
+
+### Entry Points
 
 - `modules/nixos/`: Contains NixOS-specific modules.
   - `Core Module`

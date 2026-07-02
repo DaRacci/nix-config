@@ -4,7 +4,9 @@
 
 This section documents the custom packages defined in this repository. These are packages that are either not available in `nixpkgs` or require custom builds.
 
-## Entry Points
+## Architecture / Services / Scope
+
+### Entry Points
 
 - `pkgs/`: Contains the package definitions, typically organized by package name.
   - `alvr-bin`: Binaries for ALVR that allows nvidia accelerated by using the AppImage.
@@ -25,11 +27,13 @@ This section documents the custom packages defined in this repository. These are
   - `python`: Packages for home assistant python components.
   - `take-control-viewer`: Remote support viewer for N-able Take Control via Wine.
 
-## Key Options/Knobs
+## Operational Notes / Assumptions
+
+### Key Options/Knobs
 
 Custom packages may expose different build options depending on their `derivation` definition.
 
-## Common Workflows
+### Common Workflows
 
 - **Adding a Package**: Create a new directory in `pkgs/` with a `default.nix` file.
 - **Using a Package**: Reference the package via `pkgs.<name>` if the `pkgs` overlay is active.

@@ -2,57 +2,35 @@
 
 Configures opinionated SSH server and client defaults.
 
-- **Entry point**: [openssh.nix](../../../../../modules/nixos/core/openssh.nix)
+## Purpose
 
----
+Provide a hardened, consistent SSH experience across hosts: ed25519-only host keys, no password authentication, automatically generated known-host entries, and PAM ssh-agent authentication.
 
-## Overview
+## Entry Point
 
-This module enables OpenSSH with ed25519-only host keys, disables password authentication, and generates known-host entries for all configured NixOS hosts in flake outputs.
+- **Main file**: [openssh.nix](../../../../../modules/nixos/core/openssh.nix)
 
-It also wires SOPS-managed host private key into `sshd` and publishes matching public key under `/etc/ssh/ssh_host_ed25519_key.pub`.
+## Architecture / Services / Scope
 
----
+When enabled, the module:
 
-## Options
-
-{{#include ../../../../generated/core-openssh-options.md}}
-
----
-
-## Behaviour
-
-When enabled, module:
-
-- enables `services.openssh`,
-- disables socket activation (`startWhenNeeded = false`) to prevent mid-connection disruptions during system configuration switches,
-- disables password authentication,
-- sets `PermitRootLogin = "prohibit-password"`,
-- sets `GatewayPorts = "clientspecified"`,
-- configures `services.openssh.hostKeys` from `config.sops.secrets.SSH_PRIVATE_KEY.path`,
-- publishes current host public key at `/etc/ssh/ssh_host_ed25519_key.pub`,
+- enables `services.openssh` with socket activation disabled so SSH runs as a traditional always-on service (avoiding disconnects during `nixos-rebuild switch` over SSH),
+- disables password authentication and sets `PermitRootLogin = "prohibit-password"`,
+- configures the ed25519 host key from the SOPS-managed private key path and publishes the matching public key at `/etc/ssh/ssh_host_ed25519_key.pub`,
 - enables `security.pam.sshAgentAuth`,
-- adds current host public host key to `users.users.root.openssh.authorizedKeys.keyFiles`, and
+- adds the current host's public host key to root's authorized keys, and
 - generates `programs.ssh.knownHosts` entries for every host in `outputs.nixosConfigurations`.
 
-Client configuration also restricts host key algorithms and accepted public key types to `ssh-ed25519`.
+Client configuration restricts host key algorithms and accepted public key types to `ssh-ed25519`.
 
----
+## Secrets
 
-## Usage Example
+The module consumes the SOPS-managed `SSH_PRIVATE_KEY` secret (declared by `core.sops`) as the sshd host key.
 
-```nix
-{ ... }: {
-  core.openssh.enable = true;
-}
-```
+## Operational Notes / Assumptions
 
----
-
-## Operational Notes
-
-- Module expects matching host public key file to exist in flake for each host.
-- Current host gets `localhost` as extra known-host alias in generated SSH client config.
-- Root authorization here uses host key material from flake, not per-user login keys.
-- Private host key comes from SOPS secret `SSH_PRIVATE_KEY`, so `core.sops` integration usually pairs with this module.
-- **Socket activation disabled**: By default, NixOS uses socket activation for SSH which spawns per-connection service instances (`sshd@...service`). When these instances are restarted during a configuration switch, it disconnects active SSH sessions. Disabling socket activation (`startWhenNeeded = false`) runs SSH as a traditional always-on service, preventing remote disconnection during `nixos-rebuild switch` over SSH.
+- Module expects a matching host public key file to exist in the flake for each host.
+- The current host gets `localhost` as an extra known-host alias in the generated SSH client config.
+- Root authorization uses host key material from the flake, not per-user login keys.
+- `core.sops` integration usually pairs with this module, since the private host key comes from SOPS.
+- Socket activation is disabled (`startWhenNeeded = false`): the default NixOS setup spawns per-connection `sshd@...service` instances, and restarting them during a configuration switch disconnects active SSH sessions. An always-on service prevents remote disconnection during `nixos-rebuild switch`.

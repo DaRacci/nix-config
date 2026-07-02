@@ -1,26 +1,28 @@
-# DIY & Making
+# DIY & Making — 3D Printing and Maker Tooling
 
-This section documents the Home-Manager modules under `purpose.diy`, which provide tooling and configuration for hardware tinkering, 3D printing, and related maker activities.
+## Purpose
 
----
+The `purpose.diy` Home-Manager modules provide tooling and configuration for hardware tinkering, 3D printing, and related maker activities.
 
-## Printing
+## Entry Point
+
+- **Main file**: [`modules/home-manager/purpose/diy/printing.nix`](../../../../modules/home-manager/purpose/diy/printing.nix)
+
+## Architecture / Services / Scope
+
+### Printing
 
 The printing module installs 3D-printing software and wires up persistent storage so that settings survive reboots on impermanence-based systems.
 
-- **Entry point**: [printing.nix](../../../../modules/home-manager/purpose/diy/printing.nix)
-
-### Options
+###### Options
 
 {{#include ../../../generated/purpose-diy-printing-options.md}}
 
-### Git Sync
+#### Git Sync
 
-The `gitSync` sub-module adds a long-running systemd user service that watches the OrcaSlicer profile directory and automatically creates a git commit every time a profile file is added, changed, or removed. This gives you a full revision history of your slicer settings with zero manual effort.
+The `gitSync` sub-module adds a long-running systemd user service that watches the OrcaSlicer profile directory and automatically creates a git commit every time a profile file is added, changed, or removed. This gives a full revision history of slicer settings with zero manual effort.
 
----
-
-### Commit Message Convention
+##### Commit Message Convention
 
 Commit messages are generated automatically based on the type of filesystem event and the location of the file within the repository:
 
@@ -43,17 +45,13 @@ refactor(process): updated Standard_0.2mm_Quality
 chore(machine): removed Prusa_MK4S
 ```
 
----
+##### How It Works
 
-### How It Works
-
-1. A systemd user service (`orca-slicer-git-sync.service`) is started at login and kept alive by systemd.
+1. A systemd user service is started at login and kept alive by systemd.
 1. The service uses `inotifywait` (from `inotify-tools`) in one-shot mode inside a loop to detect any filesystem event under the repo path (excluding the `.git` directory).
-1. After an event is received the watcher sleeps for **2 seconds** to debounce rapid bursts of writes (e.g. when OrcaSlicer rewrites multiple files at once).
+1. After an event is received the watcher sleeps for a short debounce period to absorb rapid bursts of writes (e.g. when OrcaSlicer rewrites multiple files at once).
 1. All pending changes are then committed **one file at a time**, each with an individually crafted commit message.
-1. If the watched directory does not yet exist (e.g. OrcaSlicer has never been run), the service polls every 10 seconds until it appears, then initialises the repository and starts watching.
-
----
+1. If the watched directory does not yet exist (e.g. OrcaSlicer has never been run), the service polls until it appears, then initialises the repository and starts watching.
 
 ### Usage Example
 
@@ -73,10 +71,8 @@ chore(machine): removed Prusa_MK4S
 }
 ```
 
----
+## Operational Notes / Assumptions
 
-### Operational Notes
-
-- The git repository is initialised with `git init` and an initial commit (`chore: initial commit`) the first time the service starts if no `.git` directory exists.
-- The service is set to restart on failure (`Restart=on-failure`, `RestartSec=10`) so transient errors do not leave settings un-tracked.
+- The git repository is initialised with `git init` and an initial commit the first time the service starts if no `.git` directory exists.
+- The service is set to restart on failure so transient errors do not leave settings un-tracked.
 - Because the watcher operates on the live OrcaSlicer profile directory, no separate mirroring or rsync step is needed.

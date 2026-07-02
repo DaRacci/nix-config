@@ -1,45 +1,22 @@
-# Stylix
+# Stylix — Shared system theme defaults via Stylix
 
-Applies shared system theme defaults with Stylix.
+## Purpose
 
-- **Entry point**: [stylix.nix](../../../../../modules/nixos/core/stylix.nix)
+Apply a consistent dark theme across graphical hosts by importing Stylix and enabling dark Tokyo Night theming by default.
 
----
+## Entry Point
 
-## Overview
+- **Main file**: [stylix.nix](../../../../../modules/nixos/core/stylix.nix)
 
-This module imports Stylix and enables dark Tokyo Night theming on non-headless hosts by default.
-
----
-
-## Options
-
-{{#include ../../../../generated/core-stylix-options.md}}
-
----
-
-## Behaviour
+## Architecture / Services / Scope
 
 When enabled, module:
 
-- imports `inputs.stylix.nixosModules.stylix` unless function argument `importExternals = false`,
-- sets `stylix.enable = true`,
-- sets `stylix.polarity = "dark"`, and
-- uses Tokyo Night dark Base16 scheme from `tinted-schemes` input.
+- imports `stylix` (skipped when function argument `importExternals = false`),
+- enables Stylix with dark polarity, and
+- selects the Tokyo Night dark Base16 scheme from the `tinted-schemes` input.
 
----
+## Operational Notes / Assumptions
 
-## Usage Example
-
-```nix
-{ ... }: {
-  core.stylix.enable = true;
-}
-```
-
----
-
-## Operational Notes
-
-- Module is intended for graphical hosts.
-- Theme source is `${inputs.stylix.inputs.tinted-schemes}/base16/tokyo-night-dark.yaml`.
+- Intended for graphical (non-headless) hosts; enabled by default there.
+- Theme source comes from the `tinted-schemes` input.

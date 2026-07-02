@@ -1,53 +1,25 @@
 # Display Manager
 
-Configures display manager for graphical sessions on desktop and laptop hosts.
+Configures the display manager for graphical sessions on desktop and laptop hosts.
 
-- **Entry point**: [display-manager.nix](../../../../../modules/nixos/core/display-manager.nix)
+## Purpose
 
----
+Provide a consistent, terminal-based login experience via greetd and tuigreet on hosts with a display.
 
-## Overview
+## Entry Point
 
-This module sets up [greetd](https://sr.ht/~kennylevinsen/greetd/) with [tuigreet](https://github.com/apognu/tuigreet) as default display manager. It is automatically enabled on hosts where `host.device.isHeadless = false`.
+- **Main file**: [display-manager.nix](../../../../../modules/nixos/core/display-manager.nix)
 
-When session packages are present in `services.displayManager.sessionPackages`, module also passes both Wayland and X session directories to `tuigreet`.
+## Architecture / Services / Scope
 
----
+Enabled by default on hosts where `host.device.isHeadless = false`. The greetd greeter runs as the `greeter` user and:
 
-## Options
-
-{{#include ../../../../generated/core-display-manager-options.md}}
-
----
-
-## Behaviour
-
-When enabled, greetd starts with tuigreet providing terminal-based greeter that:
-
-- shows current time with `--time`,
-- remembers last logged-in user with `--remember`,
-- remembers last selected session with `--remember-session`, and
-- adds `--sessions` and `--xsessions` only when `services.displayManager.sessionPackages` is non-empty.
+- shows the current time,
+- remembers the last logged-in user and last selected session, and
+- exposes both Wayland and X11 session directories when `services.displayManager.sessionPackages` is non-empty.
 
 Greeter cache is persisted to `/var/cache/tuigreet` through `host.persistence.directories`.
 
----
+## Operational Notes / Assumptions
 
-## Usage Example
-
-```nix
-{ ... }: {
-  services.displayManager.sessionPackages = [
-    pkgs.hyprland
-  ];
-
-  core.display-manager.enable = true;
-}
-```
-
----
-
-## Operational Notes
-
-- `greetd` runs as `greeter` user.
-- Both Wayland (`wayland-sessions`) and X11 (`xsessions`) session paths are built dynamically from installed session packages, so adding new session package is enough to make it appear in greeter.
+- Both Wayland (`wayland-sessions`) and X11 (`xsessions`) session paths are built dynamically from installed session packages, so adding a new session package is enough to make it appear in the greeter.

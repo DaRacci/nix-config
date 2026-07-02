@@ -1,16 +1,31 @@
-## AI Agent
+# AI Agent — Hermes Autonomous Agent
+
+## Purpose
 
 Autonomous AI Agent service powered by Hermes, providing intelligent task automation with security controls for code review and development tasks.
 
-- **Entry point**: `modules/nixos/services/ai-agent.nix`
+## Entry Point
+
+- **Main file**: [ai-agent.nix](../../../../../modules/nixos/services/ai-agent.nix)
 - **Upstream**: [Hermes Agent](https://hermes-agent.nousresearch.com/)
 - **Package**: The module routes `services.hermes-agent.package` through the local `pkgs.hermes-agent` overlay, which carries a few upstream patches.
 
-### Options
+The module routes `services.hermes-agent.package` through the local `pkgs.hermes-agent` overlay, which carries the lazy-deps managed-install fix from [PR #48637](https://github.com/NousResearch/hermes-agent/pull/48637). This ensures Hermes fails fast with `FeatureUnavailable` on read-only NixOS installs rather than retrying `ensurepip`.
+
+#### Options
 
 {{#include ../../../../generated/services-ai-agent-options.md}}
 
-### Secrets Management
+## Architecture / Services / Scope
+
+The module enables `services.hermes-agent` (running inside a Docker container) and adds optional components on top:
+
+- **Dashboard** — a separate `hermes-dashboard` systemd service runs `docker exec` into the `hermes-agent` container to serve the dashboard under the `hermes` user. Environment files configured via `services.hermes-agent.environmentFiles` are loaded by systemd's `EnvironmentFile` directive (read as root) and passed into the container via `docker exec --env-file`. The dashboard stays local by default and does not open a browser.
+- **Voice & STT** — optional voice input and output. With `voice.wyoming-stt.enable`, Hermes reuses an existing Wyoming faster-whisper server instead of running a separate Whisper instance: `HERMES_LOCAL_STT_COMMAND` is set to invoke `wyoming-transcribe`, which sends audio over the Wyoming protocol and returns the transcript. No second Whisper process needed.
+- **OIDC Authentication** — optional OpenID Connect authentication for the dashboard using a **public PKCE client** (no `client_secret`). The client ID is a public identifier — it does not need to be stored as a secret. The module generates a `HERMES_DASHBOARD_OIDC_ENV` environment file with the OIDC settings, loaded by the `hermes-dashboard` service.
+- **Memory (Mnemosyne)** — with `memory.enable`, the memory provider switches from the built-in user profile (USER.md injection) to **Mnemosyne**, a local SQLite-backed memory system with semantic recall (SQLite with FTS5 hybrid ranking + vector search).
+
+## Secrets
 
 Hermes requires API keys via environment files. Configure via sops-nix:
 
@@ -24,8 +39,17 @@ sops = {
   '';
 };
 
-services.hermes-agent.environmentFile = config.sops.templates."HERMES_ENV".path;
+services.hermes-agent.environmentFiles = [ config.sops.templates."HERMES_ENV".path ];
 ```
+
+The module itself declares secrets for the enabled optional components:
+
+- API server token (default `AI_AGENT/API_SERVER_TOKEN`) — authenticates the OpenAI-compatible API server.
+- Discord bot token (default `AI_AGENT/DISCORD_BOT_TOKEN`) — Discord platform.
+- Home Assistant token (default `AI_AGENT/HASSIO_TOKEN`) — Home Assistant platform.
+- Dashboard OIDC uses a public PKCE client, so no client secret is stored.
+
+## Operational Notes / Assumptions
 
 ### Usage Example
 
@@ -39,11 +63,7 @@ services.hermes-agent.environmentFile = config.sops.templates."HERMES_ENV".path;
 
 ### Voice & STT
 
-Enable voice input and output with `services.ai-agent.voice.enable = true;`.
-
-#### Wyoming STT (Reuse Existing Server)
-
-Instead of running a separate Whisper instance inside the Hermes container, you can point Hermes at an existing Wyoming faster-whisper server (e.g. the one already running on nixai at port 10300):
+Enable voice input and output with `services.ai-agent.voice.enable = true;`. To reuse an existing Wyoming faster-whisper server instead of running a separate Whisper instance:
 
 ```nix
 { ... }: {
@@ -57,19 +77,9 @@ Instead of running a separate Whisper instance inside the Hermes container, you 
 }
 ```
 
-This sets `HERMES_LOCAL_STT_COMMAND` to invoke `wyoming-transcribe`, which sends audio over the Wyoming protocol to the faster-whisper server and returns the transcript. No second Whisper process needed.
+### Dashboard & OIDC
 
-### Dashboard Service
-
-Enable the web dashboard with `services.ai-agent.dashboard.enable = true;`.
-
-This adds a separate `hermes-dashboard` systemd service that runs `docker exec` into the `hermes-agent` container to serve the dashboard under the `hermes` user. Environment files configured via `services.hermes-agent.environmentFiles` are loaded by systemd's `EnvironmentFile` directive (read as root) and passed into the container via `docker exec --env-file`. The dashboard stays local by default and does not open a browser.
-
-### OIDC Authentication
-
-Enable OpenID Connect authentication for the dashboard with `services.ai-agent.dashboard.oidc.enable = true;`.
-
-The dashboard uses a **public PKCE client** (no client_secret). The client ID is a public identifier — it does not need to be stored as a secret.
+Enable the web dashboard with `services.ai-agent.dashboard.enable = true;`, and OIDC authentication with `services.ai-agent.dashboard.oidc.enable = true;`:
 
 ```nix
 { ... }: {
@@ -90,11 +100,9 @@ The dashboard uses a **public PKCE client** (no client_secret). The client ID is
 }
 ```
 
-The module generates a `HERMES_DASHBOARD_OIDC_ENV` environment file with the OIDC settings, which is loaded by the `hermes-dashboard` service.
-
 ### Memory (Mnemosyne)
 
-Enable long-term memory with `services.ai-agent.memory.enable = true;`. This switches the memory provider from the built-in user profile (USER.md injection) to **Mnemosyne**, a local SQLite-backed memory system with semantic recall.
+Enable long-term memory with `services.ai-agent.memory.enable = true;`:
 
 ```nix
 { ... }: {
@@ -105,11 +113,7 @@ Enable long-term memory with `services.ai-agent.memory.enable = true;`. This swi
 }
 ```
 
-**Database location:** `/home/hermes/mnemosyne.db` (SQLite with FTS5 hybrid ranking + vector search).
+## References
 
-The `mnemosyne-hermes` package ships a `plugin.yaml` whose `version` is stale (0.4.0 while the package is 0.5.0). This repo patches it to match the package version so Hermes reports the correct plugin version.
-
-### Extras: Web Scraper & Search
-
-Enable the self-hosted web scraping and search backend with `services.ai-agent.extras.scraper = true;`.
-This runs the [trafilatura-scrape](https://codeberg.org/Racci/trafilatura_scrape) Firecrawl-compatible server (`services.trafilatura-scrape`) and wires it into Hermes.
+- [Hermes Agent](https://hermes-agent.nousresearch.com/)
+- [Mnemosyne](../ai/mnemosyne.md)

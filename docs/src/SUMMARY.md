@@ -57,6 +57,7 @@
     - [SeaweedFS Evaluation](modules/nixos/server/storage/seaweedfs.md)
   - [Proxy](modules/nixos/server/proxy.md)
   - [SSH](modules/nixos/server/ssh.md)
+  - [Identity](modules/nixos/server/identity.md)
 - [Flake Allocations](modules/flake/allocations.md)
 - [AI](modules/nixos/ai/overview.md)
   - [Mnemosyne](modules/nixos/ai/mnemosyne.md)
@@ -80,6 +81,17 @@
 # Hosts
 
 - [Overview](hosts/overview.md)
+- [Server](hosts/server/overview.md)
+  - [NixAI](hosts/server/nixai.md)
+  - [NixArr](hosts/server/nixarr.md)
+  - [NixAuth](hosts/server/nixauth.md)
+  - [NixCloud](hosts/server/nixcloud.md)
+  - [NixDB](hosts/server/nixdb.md)
+  - [NixDev](hosts/server/nixdev.md)
+  - [NixIO](hosts/server/nixio.md)
+  - [NixMon](hosts/server/nixmon.md)
+  - [NixServ](hosts/server/nixserv.md)
+  - [NixStor](hosts/server/nixstor.md)
 
 # Lib
 

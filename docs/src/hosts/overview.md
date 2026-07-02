@@ -4,7 +4,9 @@
 
 This section covers configuration of individual host machines. Repository uses automatic discovery system to manage hosts based on device type.
 
-## Entry Points
+## Architecture / Services / Scope
+
+### Entry Points
 
 - `hosts/`: Root directory for all host configurations.
 - `hosts/desktop/`: Configurations for desktop systems.
@@ -13,22 +15,13 @@ This section covers configuration of individual host machines. Repository uses a
 - `hosts/shared/`: Shared host configuration still used across multiple hosts.
 - `hosts/secrets.yaml`: Root-level encrypted secrets for host configurations.
 
-## Key Options/Knobs
+### Configuration Structure
 
 Host-specific configurations live in `hosts/{device-type}/{hostname}/default.nix`.
 
-Shared NixOS behavior that used to live under `hosts/shared/` is being migrated into reusable modules under `modules/nixos/core/`. Hosts now typically enable these with top-level `core.*` options instead of importing host-shared files directly.
+## Operational Notes / Assumptions
 
-Examples:
-
-- `core.containers.enable = true;`
-- `core.gaming.enable = true;`
-- `core.virtualisation.enable = true;`
-- `core.networking.tailscale.enable = true;`
-
-Global options still shared across all hosts remain in `hosts/shared/global/`.
-
-## Common Workflows
+### Common Workflows
 
 - **Adding new host**: Create directory for host in appropriate device type category and add `default.nix`.
 - **Modifying host**: Update `default.nix`, associated files in host directory, or relevant module under `modules/nixos/core/`.
@@ -39,7 +32,7 @@ Global options still shared across all hosts remain in `hosts/shared/global/`.
 
 ---
 
-## Decky Loader Lifecycle
+### Decky Loader Lifecycle
 
 When `jovian.decky-loader.enable = true` is set on host with `core.gaming.enable = true`, [Decky Loader](https://github.com/SteamDeckHomebrew/decky-loader) is **not** started automatically at boot. Instead it is managed in lock-step with Steam desktop application:
 

@@ -2,33 +2,19 @@
 
 Sets shared timezone and locale defaults.
 
-- **Entry point**: [locale.nix](../../../../../modules/nixos/core/locale.nix)
+## Purpose
 
----
+Provide opinionated regional defaults for timezone and locale so all hosts start from a consistent baseline without forcing per-host overrides.
 
-## Overview
+## Entry Point
 
-This module provides opinionated regional defaults for timezone and locale. It sets Australia/Sydney timezone and enables Australian and US English UTF-8 locales.
+- **Main file**: [locale.nix](../../../../../modules/nixos/core/locale.nix)
 
----
+## Architecture / Services / Scope
 
-## Options
+The module applies an Australian timezone default and enables Australian and US English UTF-8 locales.
 
-{{#include ../../../../generated/core-locale-options.md}}
-
----
-
-## Usage Example
-
-```nix
-{ ... }: {
-  core.locale.enable = true;
-}
-```
-
----
-
-## Operational Notes
+## Operational Notes / Assumptions
 
 - Module is enabled by default.
-- Because settings use `mkDefault`, this module acts as baseline rather than hard override.
+- Because settings use `mkDefault`, the module acts as a baseline rather than a hard override.

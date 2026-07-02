@@ -10,7 +10,7 @@ Sets up the new role selectors so all downstream modules have something to resol
 
 - [x] 1.1 Add `databasePrimaryHost`, `storagePrimaryHost`, `authPrimaryHost` to `allocations.server` in `modules/flake/allocations.nix` using `serverHostnamesEnum` type (spec: `cluster-role-allocations/spec.md`)
 - [x] 1.2 Map new allocations to `server.*` options in `modules/flake/apply/system.nix` alongside existing `ioPrimaryHost` / `monitoringPrimaryHost` (spec: `cluster-role-allocations/spec.md`)
-- [x] 1.3 Set concrete allocation values in `flake/nixos/flake-module.nix` — `databasePrimaryHost = "nixdb"`, `storagePrimaryHost = "nixstore"`, `authPrimaryHost = "nixauth"` (spec: `cluster-role-allocations/spec.md`)
+- [x] 1.3 Set concrete allocation values in `flake/nixos/flake-module.nix` — `databasePrimaryHost = "nixdb"`, `storagePrimaryHost = "nixstor"`, `authPrimaryHost = "nixauth"` (spec: `cluster-role-allocations/spec.md`)
 - [x] 1.4 Add `server.databasePrimaryHost`, `server.storagePrimaryHost`, `server.authPrimaryHost` options to `modules/nixos/server/default.nix` (spec: `database-primary-host/spec.md`, `storage-primary-host/spec.md`)
 - [x] 1.5 Generalize primary host helpers — add `isPrimaryHost`, `isThisPrimaryHost`, `getPrimaryHostConfig`, `getPrimaryHostAttr`, `getOthersWhereExcept` in `modules/nixos/server/default.nix`; refactor existing IO helpers (`isIOPrimaryHost`, etc.) to delegate to generics; add all helpers to `importModule` inherited set (design: Decision 2)
 - [x] 1.6 Update `docs/src/modules/flake/allocations.md` — document `databasePrimaryHost`, `storagePrimaryHost`, `authPrimaryHost`
@@ -40,7 +40,7 @@ Retargets storage modules (SeaweedFS, MinIO bucket placement) from IO primary to
 - [x] 3.2 Update `modules/nixos/server/storage/bucket.nix` — if MinIO bucket declarations are conditional on `isThisIOPrimaryHost`, switch to `isThisPrimaryHost config.server.storagePrimaryHost` (spec: `storage-primary-host/spec.md`)
 - [x] 3.3 Update `docs/src/modules/nixos/server/storage.md` — document storage primary host gating for SeaweedFS and MinIO
 
-**Validation after Group 3**: `nix build .#nixosConfigurations.nixstore.config.system.build.toplevel` to verify storage modules evaluate.
+**Validation after Group 3**: `nix build .#nixosConfigurations.nixstor.config.system.build.toplevel` to verify storage modules evaluate.
 
 ## 4. Identity Module Extraction
 
@@ -57,7 +57,7 @@ Extracts Kanidm identity from `nixcloud/identity.nix` into a reusable module und
 Creates the three new dedicated host configs with their respective service scopes and secrets.
 
 - [x] 5.1 Create `hosts/server/nixdb/default.nix` — enable PostgreSQL, pgAdmin, Redis via database primary gating; configure sops secrets (PostgreSQL passwords, pgAdmin password, Redis password, `DB_GUARDIAN_PSK`); reference shared `hosts/server/secrets.yaml` for `fromAllServers` collection; import guardian module; add dashboard item (spec: `host-service-redistribution/spec.md`, `database-primary-host/spec.md`)
-- [x] 5.2 Create `hosts/server/nixstore/default.nix` — enable MinIO, SeaweedFS evaluation via storage primary gating; configure MinIO root credentials in sops; register SeaweedFS proxy vhosts; add dashboard item (spec: `host-service-redistribution/spec.md`, `storage-primary-host/spec.md`)
+- [x] 5.2 Create `hosts/server/nixstor/default.nix` — enable MinIO, SeaweedFS evaluation via storage primary gating; configure MinIO root credentials in sops; register SeaweedFS proxy vhosts; add dashboard item (spec: `host-service-redistribution/spec.md`, `storage-primary-host/spec.md`)
 - [x] 5.3 Create `hosts/server/nixauth/default.nix` — import identity module; set `server.identity.enable = true`; configure host-local groups, OAuth2 clients (`systems.oauth2`), provisioning JSON; set sops secrets (Kanidm admin password, provisioning JSON, Cloudflare DNS tokens for ACME) (spec: `host-service-redistribution/spec.md`, `reusable-server-identity-module/spec.md`, design: Decision 5)
 
 **Validation after Group 5**: Build each new host config individually to verify service enablement and sops resolution.
@@ -69,7 +69,7 @@ Removes services that moved to dedicated hosts from the existing multipurpose ho
 - [x] 6.1 Update `hosts/server/nixio/default.nix` — remove `database.nix` and `storage.nix` imports; remove host-level PostgreSQL, pgAdmin, MinIO config; keep proxy, tunnel, dashboard, AdGuard imports; remove `hosts/server/nixio/minio/` directory (spec: `host-service-redistribution/spec.md`, design: Phase 4)
 - [x] 6.2 Update `hosts/server/nixcloud/default.nix` — remove `identity.nix` import; keep only application workload imports (Home Assistant, Immich, Nextcloud, Navidrome, Homebox, Search) (spec: `host-service-redistribution/spec.md`, design: Phase 3)
 - [x] 6.3 Create `docs/src/hosts/server/nixdb.md` — document service scope, secrets, guardian coordination
-- [x] 6.4 Create `docs/src/hosts/server/nixstore.md` — document service scope, MinIO + SeaweedFS deployment
+- [x] 6.4 Create `docs/src/hosts/server/nixstor.md` — document service scope, MinIO + SeaweedFS deployment
 - [x] 6.5 Create `docs/src/hosts/server/nixauth.md` — document identity module usage, Kanidm secrets, ACME setup
 - [x] 6.6 Update `docs/src/hosts/server/nixio.md` — reflect reduced service scope (proxy, tunnel, dashboard, AdGuard only) — create page if it doesn't exist yet
 - [x] 6.7 Update `docs/src/hosts/server/nixcloud.md` — reflect identity removal, app-only scope — create page if it doesn't exist yet
@@ -84,7 +84,7 @@ Full validation pass across all affected configurations and hosts.
 - [x] 7.1 Run `nix fmt .` to format all Nix changes
 - [x] 7.2 Build `.#nixosConfigurations.nixio.config.system.build.toplevel`
 - [x] 7.3 Build `.#nixosConfigurations.nixdb.config.system.build.toplevel`
-- [x] 7.4 Build `.#nixosConfigurations.nixstore.config.system.build.toplevel`
+- [x] 7.4 Build `.#nixosConfigurations.nixstor.config.system.build.toplevel`
 - [x] 7.5 Build `.#nixosConfigurations.nixauth.config.system.build.toplevel`
 - [x] 7.6 Build `.#nixosConfigurations.nixcloud.config.system.build.toplevel`
 - [x] 7.7 Run `nix flake check --override-input devenv-root "file+file://$PWD/.devenv/root"` for full evaluation check
@@ -98,7 +98,7 @@ Group 1 (Foundation)
   ├── Group 2 (Database Rework)
   │     └── Group 5.1 (nixdb host config)
   ├── Group 3 (Storage Rework)
-  │     └── Group 5.2 (nixstore host config)
+  │     └── Group 5.2 (nixstor host config)
   └── Group 4 (Identity Module)
         └── Group 5.3 (nixauth host config)
               └── Group 6 (Slim hosts + docs)
@@ -110,7 +110,7 @@ Groups 2, 3, and 4 are parallelizable. Groups 5 (new hosts) depends on the modul
 ## Risk Notes
 
 - **Guardian rename (2.5)**: Systemd target/service renames during migration risk breaking service ordering if not coordinated. Must keep both old and new targets during migration transition (design: Decision 7, Risk: Guardian coordination).
-- **Secret ownership (5.1, 5.2, 5.3)**: PostgreSQL secrets must move from nixio's sops config to nixdb's. MinIO creds to nixstore. Kanidm secrets + Cloudflare DNS tokens to nixauth. Duplicate Cloudflare tokens on both nixio and nixauth is intentional (design: Trade-off).
+- **Secret ownership (5.1, 5.2, 5.3)**: PostgreSQL secrets must move from nixio's sops config to nixdb's. MinIO creds to nixstor. Kanidm secrets + Cloudflare DNS tokens to nixauth. Duplicate Cloudflare tokens on both nixio and nixauth is intentional (design: Trade-off).
 - **redis-mappings.json (2.4)**: Must move atomically with path change in `redis.nix` — if file doesn't exist at new path, Nix evaluation fails (design: Decision 3 Risk).
 - **Helper generalization (1.5)**: Must keep `getOthersWhere` backward-compat alias so existing callers in guardian and other modules continue to work.
 - **Host docs don't exist yet (6.6, 6.7)**: nixio and nixcloud host docs need creation, not just updates. Check if `docs/src/hosts/server/` directory needs creating.

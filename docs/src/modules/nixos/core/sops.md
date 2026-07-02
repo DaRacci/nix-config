@@ -1,46 +1,29 @@
-# SOPS
+# SOPS — Shared SOPS and age decryption defaults
 
-Configures shared SOPS and age decryption defaults.
+## Purpose
 
-- **Entry point**: [sops.nix](../../../../../modules/nixos/core/sops.nix)
+Provide a shared baseline for SOPS-managed secrets on every host: point sops-nix at the host's secrets file, teach age to use the host's SSH keys, and keep the OpenSSH host private key in sync through a managed secret.
 
----
+## Entry Point
 
-## Overview
+- **Main file**: [sops.nix](../../../../../modules/nixos/core/sops.nix)
 
-This module imports `sops-nix`, sets host default secrets file, derives age SSH key paths from persisted host SSH keys, and declares managed SSH private key secret for OpenSSH.
-
----
-
-## Options
-
-{{#include ../../../../generated/core-sops-options.md}}
-
----
-
-## Behaviour
+## Architecture / Services / Scope
 
 When enabled, module:
 
-- imports `inputs.sops-nix.nixosModules.sops` unless function argument `importExternals = false`,
+- imports `sops-nix` (skipped when function argument `importExternals = false`),
 - sets `sops.defaultSopsFile` to `core.sops.hostSecretsFile`,
-- builds `sops.age.sshKeyPaths` from persisted host SSH key path first, then appends any configured ed25519 OpenSSH host keys, and
-- declares `sops.secrets.SSH_PRIVATE_KEY` at `/etc/ssh/ssh_host_ed25519_key` with `sshd.service` restart hook.
+- builds `sops.age.sshKeyPaths` from the persisted host SSH key path first, then appends configured ed25519 OpenSSH host keys, and
+- declares `sops.secrets.SSH_PRIVATE_KEY` at the OpenSSH host key path with an `sshd.service` restart hook.
 
----
+## Secrets
 
-## Usage Example
+- `SSH_PRIVATE_KEY` is declared here and typically consumed by `core.openssh`.
+- Age keys are derived from the host's persisted ed25519 SSH keys; matching public keys must exist so secrets can be encrypted per host.
 
-```nix
-{ ... }: {
-  core.sops.hostSecretsFile = ./secrets.yaml;
-}
-```
+## Operational Notes / Assumptions
 
----
-
-## Operational Notes
-
-- Default age key path includes `${config.host.persistence.root}/etc/ssh/ssh_host_ed25519_key`.
-- Module filters `config.services.openssh.hostKeys` to ed25519 keys before adding them to `sops.age.sshKeyPaths`.
-- `core.openssh` typically consumes `sops.secrets.SSH_PRIVATE_KEY` declared here.
+- Default age key path includes the persisted `/etc/ssh/ssh_host_ed25519_key`.
+- Only ed25519 entries from `config.services.openssh.hostKeys` are appended to the age key paths.
+- Secrets file defaults to `secrets.yaml` inside the host directory, overridable via `core.sops.hostSecretsFile`.

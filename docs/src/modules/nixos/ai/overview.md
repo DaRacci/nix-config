@@ -1,8 +1,16 @@
-# AI Modules
+# AI Modules — Overview
+
+## Purpose
 
 The `modules/nixos/ai/` tree is the canonical home for AI infrastructure services in this NixOS configuration. It provides first-class NixOS modules for AI-related daemons and services that are independent of any specific agent container.
 
-## What belongs in `ai/` vs `services/`
+## Entry Point
+
+- **Main file**: `modules/nixos/ai/default.nix`
+
+## Architecture / Services / Scope
+
+### What belongs in `ai/` vs `services/`
 
 | Location                  | Purpose                       | Examples                                                       |
 | ------------------------- | ----------------------------- | -------------------------------------------------------------- |
@@ -11,19 +19,10 @@ The `modules/nixos/ai/` tree is the canonical home for AI infrastructure service
 
 The `ai/` tree manages standalone services that an AI agent might consume, while `services/` manages the agent container itself.
 
-## Current Modules
-
-- [Mnemosyne](mnemosyne.md) — Sync server, optional MCP server, and sync client orchestration for the Mnemosyne SQLite-based memory provider
-
-## Usage
-
-```nix
-{
-  services.mnemosyne = {
-    enable = true;
-    server.sync.enable = true;
-  };
-}
-```
+## Operational Notes / Assumptions
 
 The `ai/` module tree is loaded on all device types by `mkSystem`.
+
+## References
+
+- [Mnemosyne](mnemosyne.md) — Sync server, optional MCP server, and sync client orchestration for the Mnemosyne SQLite-based memory provider

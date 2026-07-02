@@ -1,4 +1,6 @@
-# Server Cluster Monitoring
+# Server Cluster Monitoring — Observability Stack
+
+## Purpose
 
 The monitoring module provides a comprehensive observability stack for the server
 cluster using Prometheus (metrics), Loki (logs), Grafana (visualization), and
@@ -6,98 +8,57 @@ Grafana Alloy for authenticated OTLP ingestion.
 All components are configured as reusable NixOS modules with automatic
 cross-host discovery.
 
-## Overview
-
 The system consists of three layers:
 
-1. **Exporters** (run on all servers)
-   - node_exporter for system-level metrics (CPU, memory, disk, network, per-process stats)
-   - Grafana Alloy for shipping journald logs and Caddy access logs to Loki
-   - Caddy access logs are parsed as JSON at ingest time so `detected_level`, `logger`, and `status` are available in Loki
-   - Ingest-time log parsing for journal `stdout` entries and Caddy access logs to infer `detected_level` and normalize common timestamp formats
-   - Application-specific exporters (Caddy, PostgreSQL, Redis) enabled automatically
-   - fail2ban exporter available on the IO primary host (when fail2ban is enabled)
+- **Exporters** (run on all servers)
+  - node_exporter for system-level metrics (CPU, memory, disk, network, per-process stats)
+  - Grafana Alloy for shipping journald logs and Caddy access logs to Loki
+  - **Conditional Exporters**: The following exporters are enabled if their corresponding services are configured on the host:
+    - Caddy access logs are parsed and sent to Loki
+    - fail2ban exporter available on the IO Coordinator
+    - PostgreSQL exporter available on the Database Coordinator
+    - Redis exporter available on the Database Coordinator
+    - Proxmox exporter available on the Monitoring Coordinator
 
-1. **Collectors** (run on the monitoring primary host)
-   - Prometheus for metrics aggregation with 90-day retention
-   - Loki for log aggregation with 90-day retention
-   - Alertmanager for alert routing and notifications
-   - OTLP/HTTP ingestion on `otlp.<domain>` with bearer-token authentication
+- **Collectors** (run on the Monitoring Coordinator)
+  - Prometheus for metrics aggregation
+  - Loki for log aggregation with 90-day retention
+  - Alertmanager for alert routing and notifications
+  - OTLP/HTTP ingestion on `otlp.<domain>` with bearer-token authentication
 
-1. **Visualization** (runs on the monitoring primary host)
-   - Grafana with provisioned datasources and dashboards
-   - Native Kanidm OAuth2 authentication
+- **Visualization** (runs on the Monitoring Coordinator)
+  - Grafana with provisioned datasources and dashboards
 
-## Architecture
+## Entry Point
 
-```text
-┌─────────────────────────────────────────────────────┐
-│                    nixmon (Monitoring Primary)      │
-│  ┌──────────┐  ┌──────┐  ┌─────────┐  ┌──────────┐  │
-│  │Prometheus│  │ Loki │  │ Grafana │  │Alertmgr  │  │
-│  │  :9090   │  │:3100 │  │  :3000  │  │  :9093   │  │
-│  └────┬──┬──┘  └──┬───┘  └─────────┘  └────┬─────┘  │
-│       │  │        │                        │        │
-│  ┌────┘  │   ┌────┘        ┌───────────────┘        │
-│  │ scrape│   │ push        │ webhooks               │
-├──┼───────┼───┼─────────────┼────────────────────────┤
-│  ▼       ▼   ▼             ▼                        │
-│  All servers:          Home Assistant / Nextcloud   │
-│  - node_exporter :9100                              │
-│  - alloy → Loki                                     │
-│  - OTLP/HTTP → Alloy :4318                          │
-│  - caddy metrics :2019 (if proxy configured)        │
-│  - fail2ban_exporter :9191 (if fail2ban enabled)    │
-│  - postgres_exporter :9187 (if postgres configured) │
-│  - redis_exporter :9121 (if redis configured)       │
-│  - pve_exporter :9221 (nixmon only, Proxmox API)    │
-└─────────────────────────────────────────────────────┘
-```
+- **Main file**: [`modules/nixos/server/monitoring/default.nix`](../../../modules/nixos/server/monitoring/default.nix)
 
-## Configuration
+## Architecture / Services / Scope
+
+### Configuration
 
 ### Enabling Monitoring
 
-Monitoring is enabled by default on all servers (`server.monitoring.enable = true`).
-The monitoring primary host is configured via the `allocations.server.monitoringPrimaryHost`
-option, currently set to `nixmon`.
+Monitoring is enabled by default on all servers, this can be disabled with `server.monitoring.enable = false`.
 
-### Options
+##### Options
 
 {{#include ../../generated/server-monitoring-options.md}}
 
-### Auto-Detection
-
-The module automatically detects and enables exporters based on host role:
-
-- **Caddy exporter**: Enabled when `server.proxy.virtualHosts` is non-empty
-- **PostgreSQL exporter**: Enabled on the IO primary host when postgres databases are configured
-- **Redis exporter**: Enabled on the IO primary host when redis instances are configured
-- **Caddy access logs**: Enabled when Caddy metrics/logs are enabled; each access log file under `/var/log/caddy-access-*` is shipped to Loki and parsed as JSON
-- **node_exporter process collector**: Enabled on all servers via the `processes` collector to expose per-process stats
-- **fail2ban exporter**: Enabled on the IO primary host when fail2ban intrusion detection is enabled
-- **Collector services**: Enabled only on the monitoring primary host
-
 ## Secrets
 
-The monitoring module requires the following secrets in `hosts/server/nixmon/secrets.yaml`:
+### Declared secrets
 
-```yaml
-MONITORING:
-  OLTP:
-    BEARER_TOKEN: <random-secret-key>
-  GRAFANA:
-    SECRET_KEY: <random-secret-key>
-    OAUTH_SECRET: <kanidm-oauth2-secret>
-  HOME_ASSISTANT:
-    WEBHOOK_URL: <ha-webhook-url>
-  NEXTCLOUD_TALK:
-    WEBHOOK_URL: <nc-talk-webhook-url>
-PROXMOX:
-  USER: <proxmox-user-at-realm>
-  TOKEN_ID: <proxmox-token-name>
-  TOKEN_SECRET: <proxmox-token-secret>
-```
+| Secret key                              | Purpose                              |
+| --------------------------------------- | ------------------------------------ |
+| `MONITORING/OLTP/BEARER_TOKEN`          | Bearer token for OTLP HTTP ingestion |
+| `MONITORING/GRAFANA/SECRET_KEY`         | Grafana secret key                   |
+| `MONITORING/GRAFANA/OAUTH_SECRET`       | Kanidm OAuth2 secret for Grafana     |
+| `MONITORING/HOME_ASSISTANT/WEBHOOK_URL` | Home Assistant alert webhook         |
+| `MONITORING/NEXTCLOUD_TALK/WEBHOOK_URL` | Nextcloud Talk alert webhook         |
+| `PROXMOX/USER`                          | Proxmox metrics user                 |
+| `PROXMOX/TOKEN_ID`                      | Proxmox token name                   |
+| `PROXMOX/TOKEN_SECRET`                  | Proxmox token secret                 |
 
 ### Generating Secrets
 
@@ -107,12 +68,11 @@ Generating secure random secrets can be done with the following command:
 cat /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 48
 ```
 
-The `MONITORING/GRAFANA/OAUTH_SECRET` must match the value in `hosts/server/nixcloud/secrets.yaml`
-under `KANIDM/OAUTH2/GRAFANA_SECRET` (the Kanidm provisioning side).
+The `MONITORING/GRAFANA/OAUTH_SECRET` must match the value in `hosts/server/<Application Server>/secrets.yaml` under `KANIDM/OAUTH2/GRAFANA_SECRET` (the Kanidm provisioning side).
 
-## Caddy Virtual Hosts
+### Caddy Virtual Hosts
 
-The module configures four virtual hosts on nixmon:
+The module configures four virtual hosts on Monitoring Coordinator:
 
 | Service    | Subdomain             | Access                        |
 | ---------- | --------------------- | ----------------------------- |
@@ -129,7 +89,7 @@ paths are the standard `/v1/metrics` and `/v1/logs` endpoints.
 These are defined in `hosts/server/nixmon/default.nix` and collected by the IO
 primary host's Caddy configuration.
 
-## Alert Rules
+### Alert Rules
 
 The following alerts are configured by default:
 
@@ -146,7 +106,7 @@ Alerts are routed to:
 - **Home Assistant**: All critical and warning alerts via webhook (requires `collector.alerting.homeAssistant.enable = true`)
 - **Nextcloud Talk**: Critical alerts only via webhook (requires `collector.alerting.nextcloudTalk.enable = true`)
 
-## Module Structure
+### Module Structure
 
 ```text
 modules/nixos/server/monitoring/
@@ -173,11 +133,13 @@ modules/nixos/server/monitoring/
     └── proxmox.nix          # PVE exporter for Proxmox API
 ```
 
-## Troubleshooting
+## Operational Notes / Assumptions
+
+### Troubleshooting
 
 ### Checking Service Status
 
-On the monitoring host (nixmon):
+On the monitoring host (Monitoring Coordinator):
 
 ```sh
 systemctl status prometheus.service
@@ -237,7 +199,7 @@ curl -s 'http://localhost:3100/loki/api/v1/labels' | jq
 
 **Grafana OAuth login fails:**
 
-- Verify `GRAFANA_OAUTH_SECRET` in nixmon matches `KANIDM/OAUTH2/GRAFANA_SECRET` in nixcloud
+- Verify `GRAFANA_OAUTH_SECRET` in Monitoring Coordinator matches `KANIDM/OAUTH2/GRAFANA_SECRET` in Application Server
 - Check Kanidm provisioning has the grafana OAuth2 client configured
 - Verify DNS resolves `auth.<domain>` correctly
 
@@ -245,10 +207,10 @@ curl -s 'http://localhost:3100/loki/api/v1/labels' | jq
 
 - Check firewall rules allow traffic on exporter ports from the monitoring host
 - Verify the exporter service is running on the target host
-- Check network connectivity between nixmon and the target host
+- Check network connectivity between Monitoring Coordinator and the target host
 
 **Proxmox metrics missing:**
 
 - Verify `proxmox/token_id` and `proxmox/token_secret` are valid
-- Check PVE API is accessible from nixmon: `curl -k https://pve.<domain>/api2/json`
+- Check PVE API is accessible from Monitoring Coordinator: `curl -k https://pve.<domain>/api2/json`
 - Review PVE exporter logs: `journalctl -u prometheus-pve-exporter.service`

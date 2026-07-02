@@ -4,7 +4,9 @@
 
 The `lib` directory contains custom Nix functions and builders used throughout the repository to simplify configuration and reduce duplication.
 
-## Entry Points
+## Architecture / Services / Scope
+
+### Entry Points
 
 - `lib/`: Root directory for lib functions.
   - `attrsets.nix`: Functions for manipulating and merging attribute sets.
@@ -18,11 +20,13 @@ The `lib` directory contains custom Nix functions and builders used throughout t
   - `strings.nix`: String manipulation and formatting utilities.
 - `lib/builders/`: Specialized builders for system and home configurations. Builders forward shared module arguments (e.g. `importExternals` and repo-level args) into both NixOS and nested Home Manager `extraSpecialArgs`, enabling modules that conditionally import external inputs.
 
-## Key Options/Knobs
+## Operational Notes / Assumptions
+
+### Key Options/Knobs
 
 The functions in `lib` take various arguments depending on their purpose. Builders typically take parameters for hostnames, user names, and modules.
 
-## Common Workflows
+### Common Workflows
 
 - **Using a Lib Function**: Access functions via `outputs.lib.<functionName>` or by importing the relevant file.
 - **Creating a Builder**: Add new builder logic to `lib/builders/`.

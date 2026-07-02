@@ -2,46 +2,23 @@
 
 Enables shared printer support for workstation-class NixOS hosts.
 
-- **Entry point**: [printing.nix](../../../../../modules/nixos/core/printing.nix)
+## Purpose
 
----
+Provide CUPS printing and common printer drivers on non-server, non-virtual hosts so local and network printing work out of the box.
 
-## Overview
+## Entry Point
 
-This module enables CUPS printing support on non-server, non-virtual hosts and installs common printer drivers used in this configuration.
+- **Main file**: [printing.nix](../../../../../modules/nixos/core/printing.nix)
 
-When active, it turns on `services.printing`, adds HP and Gutenprint drivers, and includes Brother MFC-L3770CDW driver packages.
+## Architecture / Services / Scope
 
----
+When both top-level `core.enable` and `core.printing.enable` are on, the module:
 
-## Options
-
-{{#include ../../../../generated/core-printing-options.md}}
-
----
-
-## Behaviour
-
-When both `config.core.enable` and `core.printing.enable` are `true`, module:
-
-- enables `services.printing`,
-- installs printer drivers from `pkgs.hplip`, `pkgs.gutenprint`, `pkgs.gutenprint-bin`, `pkgs.cups-filters`, `pkgs.mfcl3770cdwlpr`, and `pkgs.mfcl3770cdwcupswrapper`, and
+- enables `services.printing` with HP and Gutenprint driver stacks plus Brother colour laser driver packages, and
 - adds `lp` to `core.defaultGroups`.
 
----
-
-## Usage Example
-
-```nix
-{ ... }: {
-  core.printing.enable = true;
-}
-```
-
----
-
-## Operational Notes
+## Operational Notes / Assumptions
 
 - Module does not activate unless top-level `core.enable` is also enabled.
 - Default is tuned for physical desktop or laptop systems where local or network printer access is expected.
-- `core.defaultGroups = [ "lp" ]` ensures standard users can access printer devices through shared default group handling.
+- `lp` group membership is granted through the shared `core.defaultGroups` handling.

@@ -1,48 +1,36 @@
-# Home-Manager: AI Editors & Assistants
+# AI Editors & Assistants — AI-Assisted Development Tooling
 
-This page documents the Home-Manager module at:
+## Purpose
 
-- `modules/home-manager/purpose/development/editors/ai/default.nix`
+The `purpose.development.editors.ai` Home-Manager module configures editor and agent tooling for AI-assisted development, centered around OpenCode and shared skill directories.
 
-It configures editor/agent tooling for AI-assisted development, centered around OpenCode and shared skill directories.
+## Entry Point
 
----
+- **Main file**: [`modules/home-manager/purpose/development/editors/ai/default.nix`](../../../../modules/home-manager/purpose/development/editors/ai/default.nix)
+- **Supporting files**: module-local `skills/` directory containing the default skills
 
-## What this module sets up
+## Architecture / Services / Scope
 
 When enabled, the module:
 
-- Ensures `~/Projects/AIFS` exists at activation time.
-- Adds useful global git ignores:
-  - `.workspace`
-  - `.sisyphus`
-- Configures Zed to expose an `OpenCode` agent server (`opencode acp`).
+- Ensures a shared AI filesystem directory exists at activation time.
+- Adds useful global git ignores (e.g. editor workspace and tool-state directories).
+- Configures Zed to expose an `OpenCode` agent server.
 - Enables and configures `programs.opencode` with:
   - plugins
   - Nix formatter integration
-  - LSP integrations:
-    - **Nix**: `nixd`, `nil`
-    - **Config formats**: `marksman` (Markdown), `yaml-language-server`, `vscode-json-language-server`, `taplo` (TOML), `vscode-css-language-server`, `vscode-html-language-server`
-    - **Languages**: `rust-analyzer`, `gopls`, `pyright`, `typescript-language-server`, `bash-language-server`, `lua-language-server`, `nushell`, `powershell-editor-services`, `dockerfile-language-server`
+  - LSP integrations across Nix, config formats, and general-purpose languages
   - command permissions policy
-  - local MCP server (`mcp-nixos` via `uvx`)
-- Writes:
-  - `~/.config/opencode/oh-my-opencode.json`
-  - `~/.config/opencode/opencode-notifier.json`
+  - a local MCP server (e.g. `mcp-nixos` via `uvx`)
+- Writes OpenCode config files (e.g. `~/.config/opencode/oh-my-opencode.json`, `opencode-notifier.json`).
 - Registers AI skills under `~/.agents/skills/<name>` via `home.file`.
-- Persists OpenCode state directories:
-  - `.local/share/opencode`
-  - `.local/state/opencode`
+- Persists OpenCode state directories so they survive reboots on impermanence-based systems.
 
----
-
-## Options
+##### Options
 
 {{#include ../../../generated/purpose-development-editors-ai-options.md}}
 
----
-
-## Usage example
+### Usage Example
 
 ```nix
 { self, inputs, ... }: {
@@ -58,10 +46,8 @@ When enabled, the module:
 }
 ```
 
----
-
-## Notes
+## Operational Notes / Assumptions
 
 - Skill links are generated under `~/.agents/skills/<basename>`.
-- Default skills are discovered automatically from the module’s local `skills/` directory when `includeDefaults = true`.
+- Default skills are discovered automatically from the module's local `skills/` directory when `includeDefaults = true`.
 - The module currently defines default agent discovery as well, but only skill link materialization is active in `home.file` output.

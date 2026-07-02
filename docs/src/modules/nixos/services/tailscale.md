@@ -1,12 +1,24 @@
-## Tailscale
+# Tailscale — Tag Management Extensions
+
+## Purpose
 
 Extensions to the standard NixOS Tailscale module, providing easier tag management.
 
-- **Entry point**: `modules/nixos/services/tailscale.nix`
+## Entry Point
 
-### Options
+- **Main file**: [tailscale.nix](../../../../../modules/nixos/services/tailscale.nix)
+
+#### Options
 
 {{#include ../../../../generated/services-tailscale-options.md}}
+
+## Architecture / Services / Scope
+
+This module extends the standard NixOS `services.tailscale` module by automatically constructing the `--advertise-tags` flag from the configured `services.tailscale.tags` list.
+
+## Operational Notes / Assumptions
+
+- Ensure the device has the necessary permissions in your Tailscale ACLs to apply the requested tags.
 
 ### Usage Example
 
@@ -19,6 +31,6 @@ Extensions to the standard NixOS Tailscale module, providing easier tag manageme
 }
 ```
 
-### Operational Notes
+## References
 
-This module simplifies the application of Tailscale tags by automatically constructing the `--advertise-tags` flag. Ensure that the device has the necessary permissions in your Tailscale ACLs to apply the requested tags.
+- [Tailscale Tags](https://tailscale.com/kb/1018/tags/)

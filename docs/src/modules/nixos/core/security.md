@@ -1,37 +1,24 @@
-# Security
+# Security — Shared host security defaults
 
-Applies shared host security defaults.
+## Purpose
 
-- **Entry point**: [security.nix](../../../../../modules/nixos/core/security.nix)
+Enable baseline host security: `sudo-rs`, TPM2 support, Polkit, kernel protection flags, and open-file limits for users.
 
----
+## Entry Point
 
-## Overview
+- **Main file**: [security.nix](../../../../../modules/nixos/core/security.nix)
 
-This module enables baseline security features such as `sudo-rs`, TPM2 support, Polkit, kernel protection flags, and open-file limits for users.
+## Architecture / Services / Scope
 
----
+When enabled, module:
 
-## Options
+- enables `sudo-rs` in place of sudo, restricted to the wheel group,
+- enables TPM2 and Polkit,
+- enables kernel image protection while leaving `lockKernelModules` off,
+- sets PAM and user systemd service open-file limits from `core.security.userLimit`, and
+- raises `fs.file-max` to a multiple of `userLimit`.
 
-{{#include ../../../../generated/core-security-options.md}}
-
----
-
-## Usage Example
-
-```nix
-{ ... }: {
-  core.security = {
-    enable = true;
-    userLimit = 65536;
-  };
-}
-```
-
----
-
-## Operational Notes
+## Operational Notes / Assumptions
 
 - Module leaves `security.lockKernelModules = false` even while enabling other hardening defaults.
 - `userLimit` affects both PAM sessions and user systemd services, keeping file descriptor limits aligned.

@@ -8,11 +8,13 @@ Documents shared NixOS core modules used across hosts.
 
 It also defines top-level baseline options under `core.*` that control this shared behavior for most hosts.
 
-## Options
+### Options
 
 {{#include ../../../../generated/core-options.md}}
 
-## Baseline Behaviour
+## Architecture / Services / Scope
+
+### Baseline Behaviour
 
 When `core.enable` is true, module applies shared defaults from `modules/nixos/core/default.nix`:
 
@@ -26,7 +28,7 @@ Audio baseline also enables `security.rtkit`, adds `audio`, `pipewire`, and `rtk
 
 Bluetooth baseline unblocks rfkill during activation and persists `/var/lib/bluetooth`.
 
-## Key Pages
+## References
 
 - [Activation](activation.md)
 - [Auto Upgrade](auto_upgrade.md)
@@ -46,7 +48,7 @@ Bluetooth baseline unblocks rfkill during activation and persists `/var/lib/blue
 - [Virtualisation](virtualisation.md)
 - [WSL](wsl.md)
 
-## Usage Example
+### Usage Example
 
 ```nix
 { ... }: {
@@ -59,6 +61,6 @@ Bluetooth baseline unblocks rfkill during activation and persists `/var/lib/blue
 }
 ```
 
-## Notes
+## Operational Notes / Assumptions
 
 These modules are imported through `modules/nixos/core/default.nix`. Most feature pages document their own `core.<name>` option namespaces, while some baseline modules such as [Nix](nix.md) apply unconditionally once imported.
