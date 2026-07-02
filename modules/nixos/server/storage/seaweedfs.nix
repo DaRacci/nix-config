@@ -19,10 +19,10 @@ let
     optionals
     optional
     ;
-  inherit (config.server) ioPrimaryHost;
+  inherit (config.server) storagePrimaryHost;
 
   cfg = config.services.seaweedfs;
-  isIOPrimary = ioPrimaryHost == config.networking.hostName;
+  isStoragePrimary = storagePrimaryHost == config.networking.hostName;
   sopsPh = config.sops.placeholder;
 
   baseDir = "/var/lib/seaweedfs";
@@ -140,10 +140,7 @@ in
 {
   imports = optional importExternals inputs.seaweedfs.outPath;
 
-  config = mkIf isIOPrimary {
-    # Access to sops certs.
-    users.users.caddy.extraGroups = [ "seaweedfs" ];
-
+  config = mkIf isStoragePrimary {
     sops = {
       # Generate certs by running
       # certstrap init --common-name "SeaweedFS CA"

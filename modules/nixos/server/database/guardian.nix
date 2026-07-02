@@ -1,7 +1,7 @@
 {
-  isThisIOPrimaryHost,
-  getIOPrimaryHostAttr,
-  getOthersWhere,
+  isThisPrimaryHost,
+  getPrimaryHostAttr,
+  getOthersWhereExcept,
   ...
 }:
 {
@@ -31,7 +31,7 @@ let
 
   cfg = config.server.database;
 
-  serversWithDatabases = getOthersWhere (
+  serversWithDatabases = getOthersWhereExcept config.server.databasePrimaryHost (
     cfg:
     (builtins.attrNames cfg.server.database.postgres) != [ ]
     || (builtins.attrNames cfg.server.database.redis) != [ ]
@@ -41,19 +41,23 @@ let
   thisHostHasDatabaseDependencies = thisHostHasPostgresDatabases || thisHostHasRedisDatabases;
 
   guardianPort = 9876;
-  ioHostname = cfg.host;
-  postgresPort = getIOPrimaryHostAttr "services.postgresql.settings.port";
-  redisPort = (getIOPrimaryHostAttr "services.redis.servers")."".port;
+  dbHostname = cfg.host;
+  postgresPort = getPrimaryHostAttr config.server.databasePrimaryHost "services.postgresql.settings.port";
+  redisPort = (getPrimaryHostAttr config.server.databasePrimaryHost "services.redis.servers")."".port;
 
   waitForDatabasesScript = pkgs.writeShellApplication {
-    name = "wait-for-io-databases";
+    name = "wait-for-db-databases";
     runtimeInputs = [
       pkgs.toybox
     ]
-    ++ (optional thisHostHasPostgresDatabases (getIOPrimaryHostAttr "services.postgresql.package"))
-    ++ (optional thisHostHasRedisDatabases (getIOPrimaryHostAttr "services.redis.package"));
+    ++ (optional thisHostHasPostgresDatabases (
+      getPrimaryHostAttr config.server.databasePrimaryHost "services.postgresql.package"
+    ))
+    ++ (optional thisHostHasRedisDatabases (
+      getPrimaryHostAttr config.server.databasePrimaryHost "services.redis.package"
+    ));
     text = ''
-      IO_HOSTNAME="${ioHostname}"
+      DB_HOSTNAME="${dbHostname}"
       ${optionalString thisHostHasPostgresDatabases ''
         POSTGRES_PORT="${toString postgresPort}"
       ''}
@@ -63,15 +67,15 @@ let
       MAX_ATTEMPTS=60
       RETRY_INTERVAL=5
 
-      echo "Waiting for an IO database to become available..."
+      echo "Waiting for database primary services to become available..."
 
       attempt=1
       while [ $attempt -le $MAX_ATTEMPTS ]; do
         all_ok=true
 
         ${optionalString thisHostHasPostgresDatabases ''
-          if ! pg_isready -h "$IO_HOSTNAME" -p "$POSTGRES_PORT" -t 5 >/dev/null 2>&1; then
-            echo "Attempt $attempt/$MAX_ATTEMPTS: PostgreSQL not ready at $IO_HOSTNAME:$POSTGRES_PORT"
+          if ! pg_isready -h "$DB_HOSTNAME" -p "$POSTGRES_PORT" -t 5 >/dev/null 2>&1; then
+            echo "Attempt $attempt/$MAX_ATTEMPTS: PostgreSQL not ready at $DB_HOSTNAME:$POSTGRES_PORT"
             all_ok=false
           else
             echo "PostgreSQL is ready"
@@ -79,8 +83,8 @@ let
         ''}
 
         ${optionalString thisHostHasRedisDatabases ''
-          if ! redis-cli -h "$IO_HOSTNAME" -p "$REDIS_PORT" ping >/dev/null 2>&1; then
-            echo "Attempt $attempt/$MAX_ATTEMPTS: Redis not ready at $IO_HOSTNAME:$REDIS_PORT"
+          if ! redis-cli -h "$DB_HOSTNAME" -p "$REDIS_PORT" ping >/dev/null 2>&1; then
+            echo "Attempt $attempt/$MAX_ATTEMPTS: Redis not ready at $DB_HOSTNAME:$REDIS_PORT"
             all_ok=false
           else
             echo "Redis is ready"
@@ -88,7 +92,7 @@ let
         ''}
 
         if [ "$all_ok" = true ]; then
-          echo "All IO databases are available"
+          echo "All database primary services are available"
           exit 0
         fi
 
@@ -96,7 +100,7 @@ let
         sleep $RETRY_INTERVAL
       done
 
-      echo "Timeout waiting an IO database after $MAX_ATTEMPTS attempts"
+      echo "Timeout waiting for database primary services after $MAX_ATTEMPTS attempts"
       exit 1
     '';
   };
@@ -107,8 +111,8 @@ in
       type = listOf str;
       default = [ ];
       description = ''
-        List of systemd service names that depend on io databases.
-        These services will be automatically bound to the io-databases.target
+        List of systemd service names that depend on database primary services.
+        These services will be automatically bound to the db-databases.target
         and will stop/start when databases become unavailable/available.
       '';
       apply = map (n: if hasSuffix ".service" n then n else "${n}.service");
@@ -117,12 +121,15 @@ in
 
   config = mkMerge [
     {
-      sops.secrets."IO_GUARDIAN_PSK" = {
+      sops.secrets."DB_GUARDIAN_PSK" = {
         sopsFile = "${self}/hosts/server/secrets.yaml";
+        # Compatibility shim: SOPS file still carries old key name IO_GUARDIAN_PSK.
+        # Remove this and rename DB_GUARDIAN_PSK → IO_GUARDIAN_PSK in secrets.yaml when rotated.
+        key = "DB_GUARDIAN_PSK";
       };
     }
 
-    (mkIf (!isThisIOPrimaryHost && thisHostHasDatabaseDependencies) {
+    (mkIf (!isThisPrimaryHost config.server.databasePrimaryHost && thisHostHasDatabaseDependencies) {
       server = {
         network.openPortsForSubnet.tcp = [ guardianPort ];
 
@@ -134,17 +141,17 @@ in
           |> map (n: "${n}.service");
       };
 
-      # Target that represents "IO databases are online"
+      # Target that represents "database primary services are online"
       # Services bind to this target to be controlled by database availability
-      systemd.targets.io-databases = {
-        description = "IO Databases Online";
+      systemd.targets.db-databases = {
+        description = "Database Primary Services Online";
         after = [
           "network-online.target"
-          "wait-for-io-databases.service"
+          "wait-for-db-databases.service"
         ];
         wants = [ "network-online.target" ];
         wantedBy = [ "multi-user.target" ]; # Start at boot
-        bindsTo = [ "wait-for-io-databases.service" ];
+        bindsTo = [ "wait-for-db-databases.service" ];
         partOf = [ "multi-user.target" ];
         requiredBy = cfg.dependentServices;
         upholds = cfg.dependentServices;
@@ -152,12 +159,12 @@ in
 
       systemd.services = mkMerge [
         {
-          io-guardian = {
-            description = "IO Database Guardian WebSocket Server";
+          db-guardian = {
+            description = "Database Guardian WebSocket Server";
             wantedBy = [ "multi-user.target" ];
             after = [
               "network-online.target"
-              "wait-for-io.service"
+              "wait-for-db-primary.service"
             ];
             wants = [ "network-online.target" ];
 
@@ -165,7 +172,7 @@ in
               Type = "simple";
               Restart = "always";
               RestartSec = "5s";
-              LoadCredential = [ "psk:${config.sops.secrets."IO_GUARDIAN_PSK".path}" ];
+              LoadCredential = [ "psk:${config.sops.secrets."DB_GUARDIAN_PSK".path}" ];
 
               ExecStart = ''
                 ${getExe pkgs.io-guardian-server} \
@@ -186,8 +193,8 @@ in
         }
 
         {
-          wait-for-io = {
-            description = "Wait for an IO host to become reachable";
+          wait-for-db-primary = {
+            description = "Wait for database primary host to become reachable";
             after = [ "dhcpd.service" ];
             wants = [
               "network.target"
@@ -199,22 +206,22 @@ in
               Type = "oneshot";
               ExecStart = getExe (
                 pkgs.writeShellApplication {
-                  name = "wait-for-io";
+                  name = "wait-for-db-primary";
                   runtimeInputs = [
                     pkgs.iputils
                     pkgs.toybox
                     pkgs.getent
                   ];
                   text = ''
-                    IO_HOSTNAME=${cfg.host}
+                    DB_HOSTNAME=${cfg.host}
                     #shellcheck disable=SC2034
                     for i in {1..150}; do
-                      if getent hosts "$IO_HOSTNAME" >/dev/null 2>&1 && ping -c1 -W1 "$IO_HOSTNAME" >/dev/null 2>&1; then
+                      if getent hosts "$DB_HOSTNAME" >/dev/null 2>&1 && ping -c1 -W1 "$DB_HOSTNAME" >/dev/null 2>&1; then
                         exit 0;
                       fi;
                       sleep 2;
                     done;
-                    echo "WARNING: IO Hosts not reachable after timeout, continuing boot without IO Host" >&2;
+                    echo "WARNING: Database primary host not reachable after timeout, continuing boot without database primary host" >&2;
                     exit 0
                   '';
                 }
@@ -222,15 +229,15 @@ in
             };
           };
 
-          wait-for-io-databases = {
-            description = "Wait for an IO database to become available";
+          wait-for-db-databases = {
+            description = "Wait for database primary services to become available";
             after = [
               "network-online.target"
-              "wait-for-io.service"
+              "wait-for-db-primary.service"
             ];
             wants = [ "network-online.target" ];
-            requires = [ "wait-for-io.service" ];
-            requiredBy = [ "io-databases.target" ];
+            requires = [ "wait-for-db-primary.service" ];
+            requiredBy = [ "db-databases.target" ];
 
             serviceConfig = {
               Type = "oneshot";
@@ -243,43 +250,46 @@ in
       ];
     })
 
-    (mkIf (isThisIOPrimaryHost && (builtins.length serversWithDatabases) > 0) {
-      systemd.services = {
-        io-database-coordinator = rec {
-          description = "Coordinate database availability with remote clients via WebSocket";
+    (mkIf
+      (isThisPrimaryHost config.server.databasePrimaryHost && (builtins.length serversWithDatabases) > 0)
+      {
+        systemd.services = {
+          db-database-coordinator = rec {
+            description = "Coordinate database availability with remote clients via WebSocket";
 
-          after = [
-            "postgresql.service"
-            "redis.service"
-          ];
-          bindsTo = after;
-          partOf = bindsTo;
-          wantedBy = [ "multi-user.target" ];
+            after = [
+              "postgresql.service"
+              "redis.service"
+            ];
+            bindsTo = after;
+            partOf = bindsTo;
+            wantedBy = [ "multi-user.target" ];
 
-          environment.GUARDIAN_PORT = toString guardianPort;
+            environment.GUARDIAN_PORT = toString guardianPort;
 
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            TimeoutStopSec = "90s";
-            LoadCredential = [ "psk:${config.sops.secrets."IO_GUARDIAN_PSK".path}" ];
+            serviceConfig = {
+              Type = "oneshot";
+              RemainAfterExit = true;
+              TimeoutStopSec = "90s";
+              LoadCredential = [ "psk:${config.sops.secrets."DB_GUARDIAN_PSK".path}" ];
 
-            ExecStart = ''
-              ${getExe pkgs.io-guardian-client} \
-                --action undrain \
-                --hosts ${concatStringsSep "," serversWithDatabases} \
-                --psk-file %d/psk
-            '';
+              ExecStart = ''
+                ${getExe pkgs.io-guardian-client} \
+                  --action undrain \
+                  --hosts ${concatStringsSep "," serversWithDatabases} \
+                  --psk-file %d/psk
+              '';
 
-            ExecStop = ''
-              ${getExe pkgs.io-guardian-client} \
-                --action drain \
-                --hosts ${concatStringsSep "," serversWithDatabases} \
-                --psk-file %d/psk
-            '';
+              ExecStop = ''
+                ${getExe pkgs.io-guardian-client} \
+                  --action drain \
+                  --hosts ${concatStringsSep "," serversWithDatabases} \
+                  --psk-file %d/psk
+              '';
+            };
           };
         };
-      };
-    })
+      }
+    )
   ];
 }

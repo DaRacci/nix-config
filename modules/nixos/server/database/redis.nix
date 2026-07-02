@@ -1,6 +1,6 @@
 {
-  isThisIOPrimaryHost,
-  getIOPrimaryHostAttr,
+  isThisPrimaryHost,
+  getPrimaryHostAttr,
   collectAllAttrs,
   ...
 }:
@@ -28,11 +28,11 @@ let
 
   cfg = config.server.database.redis;
 
-  file = "${self}/hosts/server/${config.server.ioPrimaryHost}/redis-mappings.json";
+  file = "${self}/hosts/server/${config.server.databasePrimaryHost}/redis-mappings.json";
   staticDbIdMappings =
     (if builtins.pathExists file then builtins.readFile file else "{}") |> builtins.fromJSON;
 
-  redisPort = (getIOPrimaryHostAttr "services.redis.servers")."".port;
+  redisPort = (getPrimaryHostAttr config.server.databasePrimaryHost "services.redis.servers")."".port;
   hasRedisInstances = builtins.length (builtins.attrNames cfg) > 0;
   allRedisInstances = collectAllAttrs "server.database.redis";
   allRedisPrefixNames = allRedisInstances |> builtins.attrNames;
@@ -74,7 +74,7 @@ in
               type = int;
               default = redisPort;
               defaultText = literalExpression ''
-                (getIOPrimaryHostAttr "services.redis.servers")."".port
+                (getPrimaryHostAttr config.server.databasePrimaryHost "services.redis.servers")."".port
               '';
               readOnly = true;
             };
@@ -85,7 +85,7 @@ in
   };
 
   config = mkMerge [
-    (mkIf (isThisIOPrimaryHost && anyConfiguredRedisAnywhere) {
+    (mkIf (isThisPrimaryHost config.server.databasePrimaryHost && anyConfiguredRedisAnywhere) {
       assertions = [
         {
           assertion = builtins.length allRedisPrefixNames <= 16;
@@ -131,13 +131,13 @@ in
       };
     })
 
-    (mkIf (!isThisIOPrimaryHost && hasRedisInstances) {
+    (mkIf (!isThisPrimaryHost config.server.databasePrimaryHost && hasRedisInstances) {
       assertions = [
         {
           assertion = !(config.services.redis.servers ? "" && config.services.redis.servers."".enable);
           message = ''
-            Redis is enabled & has instances, but you have configured databases for management with an IO Host.
-            If this is on purpose and you want IO Hosts to manage these, set `services.redis.enable` to `false`.
+            Redis is enabled & has instances, but you have configured databases for management with a Database Primary Host.
+            If this is on purpose and you want the database primary host to manage these, set `services.redis.enable` to `false`.
 
             Configured redis instances: ${
               builtins.attrNames config.services.redis.servers |> builtins.concatStringsSep ", "
@@ -151,7 +151,7 @@ in
           assertion = staticDbIdMappings ? ${name};
           message = ''
             Redis instance "${name}" does not have a static database_id mapping configured in
-            hosts/server/${config.server.ioPrimaryHost}/reddis-mappings.json.
+            hosts/server/${config.server.databasePrimaryHost}/reddis-mappings.json.
 
             Run `update-redis-mappings` to automatically generate and insert the required mappings.
 
