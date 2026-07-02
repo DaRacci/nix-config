@@ -1,5 +1,5 @@
 {
-  isThisIOPrimaryHost,
+  isThisPrimaryHost,
   importModule,
   ...
 }:
@@ -29,9 +29,13 @@ in
   options.server.database = {
     host = mkOption {
       type = str;
-      default = if isThisIOPrimaryHost then "localhost" else config.server.ioPrimaryHost;
+      default =
+        if isThisPrimaryHost config.server.databasePrimaryHost then
+          "localhost"
+        else
+          config.server.databasePrimaryHost;
       defaultText = literalExpression ''
-        if isThisIOPrimaryHost then "localhost" else config.server.ioPrimaryHost
+        if isThisPrimaryHost config.server.databasePrimaryHost then "localhost" else config.server.databasePrimaryHost
       '';
       description = ''
         The hostname or IP address to use when connecting to managed databases.

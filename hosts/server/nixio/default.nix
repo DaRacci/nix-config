@@ -28,7 +28,6 @@ in
     ./adguard.nix
     ./dashboard.nix
 
-    (importFile ./database.nix)
     (importFile ./proxy.nix)
     (importFile ./storage.nix)
   ];

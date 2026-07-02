@@ -23,15 +23,34 @@ let
     ;
 
   #region Helper functions for working with the server cluster
-  isIOPrimaryHost =
-    value:
+  # Generic helpers parameterized by a primary-host option value
+  isPrimaryHost =
+    primaryHost: value:
     let
       cmp = if isAttrs value then value.host.name else value;
     in
-    config.server.ioPrimaryHost == cmp;
+    primaryHost == cmp;
 
-  isThisIOPrimaryHost = isIOPrimaryHost config;
+  isThisPrimaryHost = primaryHost: isPrimaryHost primaryHost config;
 
+  getPrimaryHostConfig =
+    primaryHost:
+    if isThisPrimaryHost primaryHost then config else self.nixosConfigurations.${primaryHost}.config;
+
+  getPrimaryHostAttr =
+    primaryHost: attrPath:
+    attrByPath (splitString "." attrPath) null (getPrimaryHostConfig primaryHost);
+
+  # IO primary helpers (delegating to generic helpers)
+  isIOPrimaryHost = isPrimaryHost config.server.ioPrimaryHost;
+
+  isThisIOPrimaryHost = isThisPrimaryHost config.server.ioPrimaryHost;
+
+  primaryIOHostConfig = getPrimaryHostConfig config.server.ioPrimaryHost;
+
+  getIOPrimaryHostAttr = getPrimaryHostAttr config.server.ioPrimaryHost;
+
+  # Monitoring primary helpers (still inline)
   isMonitoringPrimaryHost =
     value:
     let
@@ -40,14 +59,6 @@ let
     config.server.monitoringPrimaryHost == cmp;
 
   isThisMonitoringPrimaryHost = isMonitoringPrimaryHost config;
-
-  primaryIOHostConfig =
-    if isThisIOPrimaryHost then
-      config
-    else
-      self.nixosConfigurations.${config.server.ioPrimaryHost}.config;
-
-  getIOPrimaryHostAttr = attrPath: attrByPath (splitString "." attrPath) null primaryIOHostConfig;
 
   serverConfigurations =
     builtins.attrValues self.nixosConfigurations
@@ -125,13 +136,16 @@ let
   */
   collectOtherAttrsFunc = attrPath: func: getOtherAttrsFunc attrPath func |> joinItems;
 
-  # Returns a list of server hostnames where the function returns true.
-  getOthersWhere =
-    func:
+  # Returns a list of server hostnames where the function returns true,
+  # excluding the given primary host.
+  getOthersWhereExcept =
+    primaryHost: func:
     serverConfigurations
-    |> builtins.filter (cfg: !(isIOPrimaryHost cfg))
+    |> builtins.filter (cfg: !(isPrimaryHost primaryHost cfg))
     |> builtins.filter func
     |> map (cfg: cfg.host.name);
+
+  getOthersWhere = getOthersWhereExcept config.server.ioPrimaryHost;
   #endregion
 
   # Journald configuration limits — defined once to prevent drift between
@@ -158,6 +172,12 @@ let
           primaryIOHostConfig
           getIOPrimaryHostAttr
 
+          isPrimaryHost
+          isThisPrimaryHost
+          getPrimaryHostConfig
+          getPrimaryHostAttr
+          getOthersWhereExcept
+
           getAllAttrs
           getAllAttrsFunc
           getOtherAttrs
@@ -179,11 +199,12 @@ in
 {
   imports = [
     (importModule ./database { })
+    (importModule ./identity { })
+    (importModule ./monitoring { })
+    (importModule ./proxy { })
     (importModule ./dashboard.nix { })
     (importModule ./fail2ban.nix { })
-    (importModule ./monitoring { })
     (importModule ./network.nix { })
-    (importModule ./proxy { })
 
     ./ssh-shell
     ./storage
@@ -213,6 +234,39 @@ in
 
         This host will run Prometheus, Loki, Grafana, and Alertmanager
         for centralized observability of the entire server cluster.
+      '';
+    };
+
+    databasePrimaryHost = mkOption {
+      type = nullOr str;
+      default = null;
+      description = ''
+        Which host is the primary coordinator for databases in the cluster.
+
+        This host will run the primary database instances
+        for centralized data persistence across the cluster.
+      '';
+    };
+
+    storagePrimaryHost = mkOption {
+      type = nullOr str;
+      default = null;
+      description = ''
+        Which host is the primary coordinator for storage in the cluster.
+
+        This host will run the primary file and block storage services
+        for centralized data serving across the cluster.
+      '';
+    };
+
+    authPrimaryHost = mkOption {
+      type = nullOr str;
+      default = null;
+      description = ''
+        Which host is the primary coordinator for authentication in the cluster.
+
+        This host will run the primary authentication and authorization services
+        for centralized identity management across the cluster.
       '';
     };
   };

@@ -1,5 +1,5 @@
 {
-  isThisIOPrimaryHost,
+  isThisPrimaryHost,
   collectAllAttrs,
   ...
 }:
@@ -18,7 +18,13 @@ let
 in
 {
   config =
-    mkIf (cfg.enable && cfg.exporters.redis.enable && isThisIOPrimaryHost && hasRedisInstances)
+    mkIf
+      (
+        cfg.enable
+        && cfg.exporters.redis.enable
+        && isThisPrimaryHost config.server.databasePrimaryHost
+        && hasRedisInstances
+      )
       {
         sops.templates."redis-exporter-password".content = builtins.toJSON {
           "redis://localhost:16379" = config.sops.placeholder."REDIS/PASSWORD";

@@ -15,6 +15,7 @@ in
 
   sops.secrets = {
     "IMMICH/ENV" = immichOwned;
+    "KANIDM/OAUTH2/IMMICH_SECRET" = immichOwned;
   };
 
   server = {

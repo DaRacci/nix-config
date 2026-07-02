@@ -5,7 +5,6 @@
     ./homebox.nix
     ./immich.nix
     ./music.nix
-    ./identity.nix
     ./nextcloud.nix
     ./search.nix
   ];

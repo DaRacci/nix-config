@@ -6,9 +6,6 @@ _:
   ...
 }:
 {
-  # Caddy group has access to certs, and minio needs access to its own certs.
-  users.users.minio.extraGroups = [ "caddy" ];
-
   sops.secrets = {
     "CLOUDFLARE/EMAIL" = { };
     "CLOUDFLARE/DNS_API_TOKEN" = { };
