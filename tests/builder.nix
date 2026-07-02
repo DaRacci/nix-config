@@ -27,6 +27,8 @@ let
     isFunction
     ;
 
+  repoModules = builtins.attrValues (import "${self}/modules/nixos");
+
   filteredTestUnits =
     if testFilter == null then testUnits else lib.filterAttrs (name: _: elem name testFilter) testUnits;
 
@@ -94,17 +96,41 @@ else
   pkgs.testers.runNixOSTest {
     name = scenario.name;
 
+    node.specialArgs = {
+      inherit self inputs;
+      inherit (self) outputs;
+      inherit allocations;
+      hostDirectory = "${self}/tests/scenarios/${scenario.name}";
+      importExternals = true;
+      users = [ ];
+    };
+
     nodes =
       scenario.nodes
       |> mapAttrsToList (
         nodeName: nodeModule:
         nameValuePair nodeName (
-          { ... }:
+          { lib, ... }:
           {
             imports = [
               nodeModule
               vmTestProfile
-            ];
+              inputs.disko.nixosModules.disko
+            ]
+            ++ repoModules;
+
+            options = {
+              host.name = lib.mkOption { type = lib.types.str; };
+              host.system = lib.mkOption { type = lib.types.nullOr lib.types.str; };
+            };
+
+            config = {
+              host.name = nodeName;
+              host.system = "x86_64-linux";
+              host.device.role = "server";
+              networking.hostName = nodeName;
+              system.name = nodeName;
+            };
           }
         )
       )

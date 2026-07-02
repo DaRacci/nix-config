@@ -2,8 +2,8 @@
 
 ## 1. Foundation & Shared Infrastructure
 
-- [ ] 1.1 Create `tests/scenarios/network-policy/default.nix` with VM node definition for single-host iptables assertions (nixio node, `vm-test.nix` profile, subnet config inline).
-- [ ] 1.2 Create `tests/scenarios/runtime-infrastructure/default.nix` with two-node VM topology (nixio builder, nixdev client) and deterministic SSH key injection via VM profile.
+- [x] 1.1 Create `tests/scenarios/network-policy/default.nix` with VM node definition for single-host iptables assertions (nixio node, `vm-test.nix` profile, subnet config inline).
+- [x] 1.2 Create `tests/scenarios/runtime-infrastructure/default.nix` with two-node VM topology (nixio builder, nixdev client) and deterministic SSH key injection via VM profile.
 - [ ] 1.3 Create `tests/scenarios/proxy-extension-behavior/default.nix` with two-node VM topology (nixio proxy, nixcloud backend echo server) and self-signed TLS cert generation at build time.
 - [ ] 1.4 Create `tests/scenarios/monitoring-pipeline/default.nix` with two-node VM topology (nixmon collector, nixio target) and deterministic OTLP bearer token.
 - [ ] 1.5 Create `tests/scenarios/guardian-drain-lifecycle/default.nix` with two-node VM topology (nixio PG primary, nixdev guardian client) and deterministic `IO_GUARDIAN_PSK` via profile.
@@ -11,33 +11,33 @@
 
 ## 2. Phase 1 — Host Unit Tests
 
-- [ ] 2.1 Add `server.tests.units.postgres-init-merge` on nixio: assert `services.postgresql.initialScript` contains merged content from `server.database.postgres.databases.*.initScript`.
-- [ ] 2.2 Add `server.tests.units.redis-db-id-isolation` on nixio: assert each `server.database.redis.<name>` resolves to distinct logical DB ID via `database_id`.
+- [x] 2.1 Add `server.tests.units.postgres-init-merge` on nixio: assert `services.postgresql.initialScript` contains merged content from `server.database.postgres.databases.*.initScript`.
+- [x] 2.2 Add `server.tests.units.redis-db-id-isolation` on nixio: assert each `server.database.redis.<name>` resolves to distinct logical DB ID via `database_id`.
 
 ## 3. Phase 1 — Network Policy Scenario (single-node, low risk)
 
-- [ ] 3.1 Implement `tests/scenarios/network-policy/test.nix`: configure two subnets with `openPortsForSubnet` (TCP 5432,8080; UDP 51820,53). Assert `iptables -S nixos-fw` contains rules for each port × subnet combination.
-- [ ] 3.2 Assert IPv4 source CIDR matches configured subnets in iptables rules.
-- [ ] 3.3 Assert `extraCommands` and `extraStopCommands` generated rules exist after boot.
-- [ ] 3.4 Assert only configured ports appear in nixos-fw chain — no unexpected TCP/UDP ports.
-- [ ] 3.5 Run `nix fmt .`, update `docs/src/development/vm_integration_tests.md` with network-policy scenario row.
+- [x] 3.1 Implement `tests/scenarios/network-policy/test.nix`: configure two subnets with `openPortsForSubnet` (TCP 5432,8080; UDP 51820,53). Assert `iptables -S nixos-fw` contains rules for each port × subnet combination.
+- [x] 3.2 Assert IPv4 source CIDR matches configured subnets in iptables rules.
+- [x] 3.3 Assert `extraCommands` and `extraStopCommands` generated rules exist after boot.
+- [x] 3.4 Assert only configured ports appear in nixos-fw chain — no unexpected TCP/UDP ports.
+- [x] 3.5 Run `nix fmt .`, update `docs/src/development/vm_integration_tests.md` with network-policy scenario row.
 
 ## 4. Phase 1 — Runtime Infrastructure Scenario (two-node, low risk)
 
-- [ ] 4.1 Implement `tests/scenarios/runtime-infrastructure/test.nix`: assert `builder` user exists on nixio, authorized_keys contains nixdev's root public key.
-- [ ] 4.2 Assert SSH connectivity: from nixdev, `ssh builder@nixio echo hello` succeeds.
-- [ ] 4.3 Assert `/etc/nix/machines` on nixdev includes nixio with `ssh-ng` protocol.
-- [ ] 4.4 Assert SSH shell guard fires on root SSH into nixio — verify `SSH_NIX_SHELL` env var is set (or equivalent indicator).
-- [ ] 4.5 Assert `NIX_SKIP_SHELL=1` opt-out works — normal shell on SSH, no nix-shell entry.
-- [ ] 4.6 If feasible (based on SSH transport), assert `nix store ping --store ssh-ng://builder@nixio` succeeds.
-- [ ] 4.7 Run `nix fmt .`, update `docs/src/development/vm_integration_tests.md` with runtime-infrastructure scenario row.
+- [x] 4.1 Implement `tests/scenarios/runtime-infrastructure/test.nix`: assert `builder` user exists on nixio, authorized_keys contains nixdev's root public key.
+- [x] 4.2 Assert SSH connectivity: from nixdev, `ssh builder@nixio echo hello` succeeds.
+- [x] 4.3 Assert `/etc/nix/machines` on nixdev includes nixio with `ssh-ng` protocol.
+- [x] 4.4 Assert SSH shell guard fires on root SSH into nixio — verify `SSH_NIX_SHELL` env var is set (or equivalent indicator).
+- [x] 4.5 Assert `NIX_SKIP_SHELL=1` opt-out works — normal shell on SSH, no nix-shell entry.
+- [x] 4.6 If feasible (based on SSH transport), assert `nix store ping --store ssh-ng://builder@nixio` succeeds.
+- [x] 4.7 Run `nix fmt .`, update `docs/src/development/vm_integration_tests.md` with runtime-infrastructure scenario row.
 
 ## 5. Phase 1 — Verification
 
-- [ ] 5.1 Build and run `network-policy` scenario: `nix build .#checks.<system>.network-policy-vm-tests`.
-- [ ] 5.2 Build and run `runtime-infrastructure` scenario.
-- [ ] 5.3 Run `server.tests.units` on nixio host: verify postgres-init-merge and redis-db-id-isolation tests pass.
-- [ ] 5.4 Fix any module code adjustments needed for testability (iptables extraCommands wiring, builder user SSH key injection). Update affected module files and docs in parallel.
+- [x] 5.1 Build and run `network-policy` scenario: `nix build .#checks.<system>.network-policy-vm-tests`.
+- [x] 5.2 Build and run `runtime-infrastructure` scenario.
+- [x] 5.3 Run `server.tests.units` on nixio host: verify postgres-init-merge and redis-db-id-isolation tests pass.
+- [x] 5.4 Fix any module code adjustments needed for testability (iptables extraCommands wiring, builder user SSH key injection). Update affected module files and docs in parallel.
 
 ## 6. Phase 2 — Proxy Extension Behavior Scenario (two-node, medium risk)
 

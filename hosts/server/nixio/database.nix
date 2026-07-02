@@ -79,6 +79,43 @@
       '';
     };
 
+    postgres-init-merge = {
+      # Verify merged initScript derivation exists via pre-start script.
+      # Merge logic (postgres.nix) uses getOtherAttrs + pkgs.writeText.
+      # nixpkgs bakes the path into the ExecStartPost script (post-start), not the unit directly.
+      testScript = ''
+        import re
+        show = nixio.succeed("systemctl show postgresql-setup.service --property=ExecStart --value")
+        m = re.search(r'/nix/store/[a-z0-9]+-unit-script-postgresql-setup-start/bin/postgresql-setup-start', show)
+        assert m, f"postgresql-setup-start path not found. show output:\n{show}"
+        setup_script = nixio.succeed(f"cat '{m.group(0)}'", timeout=10)
+        m2 = re.search(r'/nix/store/[a-z0-9]+-init-postgresql-script', setup_script)
+        assert m2, f"initScript store path not referenced in setup script. Script:\n{setup_script}"
+        path = m2.group(0)
+        nixio.succeed(f"test -f '{path}'")
+        content = nixio.succeed(f"cat '{path}'").strip()
+        assert content == "", f"Expected empty initScript, got: {content}"
+      '';
+    };
+
+    redis-db-id-isolation = {
+      # Verify Redis logical DB key-space isolation at runtime.
+      # Module assigns static DB IDs from redis-mappings.json.
+      testScript = ''
+        password = nixio.succeed("cat /run/secrets/REDIS/PASSWORD").strip()
+        auth_opts = "-a '%s' --no-auth-warning" % password
+
+        nixio.succeed(f"redis-cli {auth_opts} -n 0 SET test:iso:key 'db0-only'")
+        from_0 = nixio.succeed(f"redis-cli {auth_opts} -n 0 GET test:iso:key").strip()
+        assert from_0 == "db0-only", f"Expected 'db0-only', got '{from_0}'"
+        from_1 = nixio.succeed(f"redis-cli {auth_opts} -n 1 GET test:iso:key").strip()
+        assert from_1 == "", f"DB 0 key leaked into DB 1: {from_1}"
+        nixio.succeed(f"redis-cli {auth_opts} -n 0 DEL test:iso:key")
+        for i in range(16):
+          nixio.succeed(f"redis-cli {auth_opts} -n {i} PING")
+      '';
+    };
+
     pgadmin = {
       testScript = ''
         nixio.succeed("systemctl show pgadmin.service | grep -i loadstate")

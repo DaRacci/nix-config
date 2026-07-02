@@ -345,3 +345,13 @@ client-node.succeed("psql -h server-node -U testuser -d testdb -c 'SELECT 1'")
 ```
 
 IP assignment and DNS are handled automatically by the test driver. No manual IP configuration needed.
+
+## Scenario Catalog
+
+Completed phase-1 scenarios and host unit tests:
+
+| Scenario / Unit          | Type                     | Validates                                                                                                                                                                                                                                                                                  |
+| ------------------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `network-policy`         | Scenario, single-node    | `openPortsForSubnet` generates correct iptables/ip6tables rules per port × subnet, `extraCommands`/`extraStopCommands` create/clean firewall rules, no unexpected ports in `nixos-fw` chain                                                                                                |
+| `runtime-infrastructure` | Scenario, two-node       | `builder` user + SSH authorized key injection, `nixdev→builder@nixio` SSH connectivity, `/etc/nix/machines` with `ssh-ng` protocol, guard-condition shell (PTY) fires only when all criteria met, `NIX_SKIP_SHELL=1` opt-out blocks guard, `nix store ping --store ssh-ng://builder@nixio` |
+| `nixio` host unit tests  | Auto-discovered per-host | `postgres-init-merge`: merged `initialScript` from multiple DB initScripts; `redis-db-id-isolation`: distinct logical DB IDs per `server.database.redis.<name>`                                                                                                                            |

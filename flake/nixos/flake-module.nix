@@ -78,9 +78,7 @@ in
         map (
           hostName:
           let
-            hostSystem =
-              self.nixosConfigurations.${hostName}.config.nixpkgs.hostPlatform
-                or self.nixosConfigurations.${hostName}.pkgs.stdenv.hostPlatform.system;
+            hostSystem = self.nixosConfigurations.${hostName}.pkgs.stdenv.hostPlatform.system;
             hostPkgs = lib.builders.mkPkgs { system = hostSystem; };
           in
           lib.nameValuePair hostName (builder {
@@ -107,9 +105,11 @@ in
               lib.nameValuePair scenarioName (builder {
                 inherit
                   self
-                  pkgs
+                  inputs
                   lib
+                  allocations
                   ;
+                pkgs = lib.builders.mkPkgs { };
                 scenario = (import "${scenariosDir}/${scenarioName}/test.nix") // {
                   name = scenarioName;
                 };
