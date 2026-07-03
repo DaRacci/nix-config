@@ -20,6 +20,7 @@ let
     "jvm"
     "dotnet"
     "python"
+    "work"
   ];
 in
 {
@@ -79,7 +80,6 @@ in
                 "ms-azuretools.vscode-docker"
 
                 # AI
-                "github.copilot"
                 "github.copilot-chat"
 
                 # Other
@@ -228,6 +228,8 @@ in
                   "${config.home.homeDirectory}/Projects"
                 ];
 
+                "todotree.ripgrep" = lib.getExe pkgs.ripgrep;
+
                 # Connecting to a NixOS or NuShell host breaks without this.
                 "remote.SSH.permitPtyAllocation" = true;
                 #endregion
@@ -243,6 +245,7 @@ in
                 # "platformio-ide.pioHomeServerHttpPort" = 8008;
               };
             };
+
             mkProfile =
               attrs:
               let
@@ -314,6 +317,12 @@ in
                 "ms-python.gather"
               ];
             });
+
+            work = mkProfile {
+              extensions = versionExtensions [
+                "teamsdevapp.ms-teams-vscode-extension"
+              ];
+            };
           };
       };
 
