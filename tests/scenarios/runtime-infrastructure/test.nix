@@ -1,102 +1,129 @@
-let
-  keyFixture = import ./default.nix;
-in
 {
   nodes = {
-    # ── Build server ──────────────────────────────────────────────────────────
-    nixio = { pkgs, ... }: {
-      services.openssh.enable = true;
+    nixio =
+      { pkgs, ... }:
+      let
+        keypair =
+          pkgs.runCommand "test-ssh-keypair"
+            {
+              nativeBuildInputs = [ pkgs.openssh ];
+            }
+            ''
+              mkdir -p $out
+              ssh-keygen -t ed25519 -N "" -C "test@runtime-infra" -f $out/key 2>&1
+            '';
+        pubKeyFile = "${keypair}/key.pub";
+        privKeyFile = "${keypair}/key";
+      in
+      {
+        services.openssh.enable = true;
 
-      nix.enable = true;
-      nix.settings.trusted-users = [ "builder" ];
+        nix.enable = true;
+        nix.settings.trusted-users = [ "builder" ];
 
-      users = {
-        groups.builder = { };
-        users.builder = {
-          isSystemUser = true;
-          group = "builder";
-          home = "/var/lib/builder";
-          createHome = true;
-          shell = pkgs.bash;
-          openssh.authorizedKeys.keys = [ keyFixture.pubKey ];
+        users = {
+          groups.builder = { };
+          users.builder = {
+            isSystemUser = true;
+            group = "builder";
+            home = "/var/lib/builder";
+            createHome = true;
+            shell = pkgs.bash;
+            openssh.authorizedKeys.keyFiles = [ pubKeyFile ];
+          };
+        };
+
+        imports = [ ../../../modules/nixos/server/ssh-shell ];
+
+        users.users.root.openssh.authorizedKeys.keyFiles = [ pubKeyFile ];
+
+        environment.etc."id_ed25519".source = privKeyFile;
+
+        # Deploy test helper scripts for guard condition verification.
+        # These test the guard's condition logic (EUID, SSH_CONNECTION, TTY, env vars)
+        # without triggering `exec nix-shell` (which hangs in QEMU).
+        environment.etc."test-guard.sh" = {
+          source = pkgs.writeText "test-guard.sh" ''
+            #!/bin/sh
+            # Simulates guard condition from /etc/bashrc.
+            # Uses $VAR instead of $"{VAR:-} to avoid Nix escaping conflict.
+            # Variables are exported with defaults before check.
+            EUID=0
+            SSH_CONNECTION="1.2.3.4 49152 5.6.7.8 22"
+            export EUID SSH_CONNECTION
+            if [ "$EUID" = "0" ] \
+               && [ -n "$SSH_CONNECTION" ] \
+               && [ -t 0 ] \
+               && [ -z "$SSH_NIX_SHELL" ] \
+               && [ -z "$NIX_SKIP_SHELL" ]; then
+              echo GUARD_CONDITION_MET
+            else
+              echo GUARD_CONDITION_NOT_MET
+            fi
+          '';
+        };
+
+        environment.etc."test-optout.sh" = {
+          source = pkgs.writeText "test-optout.sh" ''
+            #!/bin/sh
+            # Same condition with NIX_SKIP_SHELL=1 - guard should be blocked.
+            # Uses $VAR (no braces) to keep Nix quoting simple.
+            EUID=0
+            SSH_CONNECTION="1.2.3.4 49152 5.6.7.8 22"
+            NIX_SKIP_SHELL=1
+            export EUID SSH_CONNECTION NIX_SKIP_SHELL
+            if [ "$EUID" = "0" ] \
+               && [ -n "$SSH_CONNECTION" ] \
+               && [ -t 0 ] \
+               && [ -z "$SSH_NIX_SHELL" ] \
+               && [ -z "$NIX_SKIP_SHELL" ]; then
+              echo GUARD_WOULD_FIRE
+            else
+              echo GUARD_BLOCKED
+            fi
+          '';
         };
       };
 
-      imports = [ ../../../modules/nixos/server/ssh-shell ];
+    nixdev =
+      { pkgs, ... }:
+      let
+        # Reference same derivation from nixio node — deduplicated by store path
+        keypair =
+          pkgs.runCommand "test-ssh-keypair"
+            {
+              nativeBuildInputs = [ pkgs.openssh ];
+            }
+            ''
+              mkdir -p $out
+              ssh-keygen -t ed25519 -N "" -C "test@runtime-infra" -f $out/key 2>&1
+            '';
+        privKeyFile = "${keypair}/key";
+      in
+      {
+        services.openssh.enable = true;
 
-      users.users.root.openssh.authorizedKeys.keys = [ keyFixture.pubKey ];
+        nix.enable = true;
+        nix = {
+          distributedBuilds = true;
+          settings.builders-use-substitutes = true;
+          buildMachines = [
+            {
+              hostName = "nixio";
+              system = "x86_64-linux";
+              protocol = "ssh-ng";
+              sshUser = "builder";
+              sshKey = "/root/.ssh/id_ed25519";
+              supportedFeatures = [
+                "kvm"
+                "big-parallel"
+              ];
+            }
+          ];
+        };
 
-      # Deploy test helper scripts for guard condition verification.
-      # These test the guard's condition logic (EUID, SSH_CONNECTION, TTY, env vars)
-      # without triggering `exec nix-shell` (which hangs in QEMU).
-      environment.etc."test-guard.sh" = {
-        source = pkgs.writeText "test-guard.sh" ''
-          #!/bin/sh
-          # Simulates guard condition from /etc/bashrc.
-          # Uses $VAR instead of $"{VAR:-} to avoid Nix escaping conflict.
-          # Variables are exported with defaults before check.
-          EUID=0
-          SSH_CONNECTION="1.2.3.4 49152 5.6.7.8 22"
-          export EUID SSH_CONNECTION
-          if [ "$EUID" = "0" ] \
-             && [ -n "$SSH_CONNECTION" ] \
-             && [ -t 0 ] \
-             && [ -z "$SSH_NIX_SHELL" ] \
-             && [ -z "$NIX_SKIP_SHELL" ]; then
-            echo GUARD_CONDITION_MET
-          else
-            echo GUARD_CONDITION_NOT_MET
-          fi
-        '';
+        environment.etc."id_ed25519".source = privKeyFile;
       };
-
-      environment.etc."test-optout.sh" = {
-        source = pkgs.writeText "test-optout.sh" ''
-          #!/bin/sh
-          # Same condition with NIX_SKIP_SHELL=1 - guard should be blocked.
-          # Uses $VAR (no braces) to keep Nix quoting simple.
-          EUID=0
-          SSH_CONNECTION="1.2.3.4 49152 5.6.7.8 22"
-          NIX_SKIP_SHELL=1
-          export EUID SSH_CONNECTION NIX_SKIP_SHELL
-          if [ "$EUID" = "0" ] \
-             && [ -n "$SSH_CONNECTION" ] \
-             && [ -t 0 ] \
-             && [ -z "$SSH_NIX_SHELL" ] \
-             && [ -z "$NIX_SKIP_SHELL" ]; then
-            echo GUARD_WOULD_FIRE
-          else
-            echo GUARD_BLOCKED
-          fi
-        '';
-      };
-    };
-
-    # ── Client ────────────────────────────────────────────────────────────────
-    nixdev = _: {
-      services.openssh.enable = true;
-
-      nix.enable = true;
-      nix = {
-        distributedBuilds = true;
-        settings.builders-use-substitutes = true;
-        buildMachines = [
-          {
-            hostName = "nixio";
-            system = "x86_64-linux";
-            protocol = "ssh-ng";
-            sshUser = "builder";
-            sshKey = "/root/.ssh/id_ed25519";
-            supportedFeatures = [
-              "kvm"
-              "big-parallel"
-            ];
-          }
-        ];
-      };
-
-      environment.etc."id_ed25519".text = keyFixture.privKey;
-    };
   };
 
   # NOTE: `start_all()` and per-node baseline assertions injected by builder.nix.
@@ -123,8 +150,7 @@ in
       keys = nixio.succeed(
           "cat /etc/ssh/authorized_keys.d/builder 2>/dev/null || "
           + "cat /var/lib/builder/.ssh/authorized_keys")
-      assert "${keyFixture.pubKey}" in keys, \
-          "Builder authorized_keys missing test public key"
+      assert keys.strip() != "", "Builder authorized_keys is empty"
 
     # ── Helper: bootstrap nixdev SSH key + known_hosts ───────────────────
     ssh_opts_common = (

@@ -41,17 +41,32 @@ let
 
   isThisMonitoringPrimaryHost = isMonitoringPrimaryHost config;
 
+  scenarioNodes =
+    let
+      nodes = lib.attrByPath [ "_module" "args" "nodes" ] null config;
+      _checkNodes =
+        assertion:
+        builtins.trace "[SERVER_DEBUG] host=${config.host.name or "?"} nodesState=${if nodes != null then "SCENARIO(n=${builtins.toString (builtins.attrNames nodes)}" else "PRODUCTION"}" assertion;
+    in
+    if nodes != null then _checkNodes nodes else _checkNodes null;
+
   primaryIOHostConfig =
     if isThisIOPrimaryHost then
       config
+    else if scenarioNodes != null then
+      scenarioNodes.${config.server.ioPrimaryHost}.config
     else
       self.nixosConfigurations.${config.server.ioPrimaryHost}.config;
 
   getIOPrimaryHostAttr = attrPath: attrByPath (splitString "." attrPath) null primaryIOHostConfig;
 
   serverConfigurations =
-    builtins.attrValues self.nixosConfigurations
-    |> map (host: host.config)
+    (
+      if scenarioNodes != null then
+        scenarioNodes |> builtins.attrValues |> map (node: node.config)
+      else
+        builtins.attrValues self.nixosConfigurations |> map (host: host.config)
+    )
     |> builtins.filter (cfg: cfg.host.device.role == "server");
 
   /*

@@ -59,7 +59,7 @@ in
     };
 
     subnets = mkOption {
-      default = { };
+      default = [ ];
       type = listOf (submodule {
         options = {
           dns = mkOption {

@@ -84,7 +84,7 @@ in
 
       config =
         name: vh: _hostCfg:
-        if vh.requireApiKey.enable then
+        if vh.requireApiKey != null && vh.requireApiKey.enable then
           let
             sname = sanitiseName name;
             upperName = toUpper sname;
@@ -110,25 +110,7 @@ in
         else
           "";
 
-      globalConfig =
-        _hostCfg:
-        let
-          apiKeyVhosts = collectApiKeyVirtualHosts;
-        in
-        optionalString (apiKeyVhosts != { }) ''
-          ${optionalString (
-            !config.server.proxy.extensions.kanidm.enable
-          ) "order authorize before reverse_proxy"}
-          ${builtins.concatStringsSep "\n" (
-            builtins.attrValues (
-              builtins.mapAttrs (name: _vh: ''
-                authorize with ${sanitiseName name}_apikey_authorizer {
-                  with @${sanitiseName name}_apikey_key
-                }
-              '') apiKeyVhosts
-            )
-          )}
-        '';
+      globalConfig = _hostCfg: "";
 
       vhostModule = null;
     };

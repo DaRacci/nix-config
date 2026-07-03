@@ -57,6 +57,7 @@ if hostName != null then
       hostDirectory = "${self}/hosts/server/${hostName}";
       users = [ ];
       importExternals = true;
+      nodes = null;
     };
 
     nodes.${hostName} =

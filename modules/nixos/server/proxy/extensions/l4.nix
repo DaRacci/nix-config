@@ -6,6 +6,7 @@
   ...
 }:
 {
+  config,
   lib,
   ...
 }:
@@ -138,7 +139,7 @@ in
     }
 
     (mkIf isThisIOPrimaryHost {
-      networking.firewall =
+      networking.firewall = lib.mkIf config.server.proxy.extensions.l4.enable (
         let
           l4Entries =
             collectAllAttrsFunc "server.proxy.virtualHosts" (
@@ -158,7 +159,8 @@ in
         {
           allowedTCPPorts = tcpPorts;
           allowedUDPPorts = udpPorts;
-        };
+        }
+      );
     })
   ];
 }

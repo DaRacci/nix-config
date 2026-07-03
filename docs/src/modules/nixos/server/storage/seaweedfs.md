@@ -46,6 +46,19 @@ These entries live under the `SEAWEEDFS` secret tree on the IO primary host and 
 - The evaluation deployment is still separate from `server.storage.swfsMount`. The new storage abstraction can use `weed mount` for SeaweedFS-backed workload mounts without changing the evaluation topology described here.
 - This deployment is intended to shake out integration details first; repository-local abstractions can be added later if SeaweedFS proves to be a good fit.
 
+## FUSE Feasibility (VM Test Environment)
+
+FUSE mounts are feasible in QEMU-based NixOS VM tests. The following was verified in the `seaweedfs-storage-behavior` scenario:
+
+- `/dev/fuse` is available inside the QEMU VM guest
+- Kernel `CONFIG_FUSE_FS` is enabled in the default NixOS kernel
+- `weed mount` can mount a SeaweedFS filer via FUSE
+- Deterministic file write/read/checksum assertions pass over the FUSE mount
+- FUSE mount survives volume server restarts (filer reconnection resumes I/O)
+- FUSE mount remains accessible after master server restart with leader re-election
+
+These findings mean FUSE-based tests can be included in VM test scenarios without special host configuration. No host kernel module loading or device passthrough is needed — `config.boot.kernelModules` and `services.seaweedfs.filer.mountDir` are sufficient.
+
 ## References
 
 - [Storage Overview](../storage.md)
