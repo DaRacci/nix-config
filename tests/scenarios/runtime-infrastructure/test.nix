@@ -38,51 +38,6 @@
         users.users.root.openssh.authorizedKeys.keyFiles = [ pubKeyFile ];
 
         environment.etc."id_ed25519".source = privKeyFile;
-
-        # Deploy test helper scripts for guard condition verification.
-        # These test the guard's condition logic (EUID, SSH_CONNECTION, TTY, env vars)
-        # without triggering `exec nix-shell` (which hangs in QEMU).
-        environment.etc."test-guard.sh" = {
-          source = pkgs.writeText "test-guard.sh" ''
-            #!/bin/sh
-            # Simulates guard condition from /etc/bashrc.
-            # Uses $VAR instead of $"{VAR:-} to avoid Nix escaping conflict.
-            # Variables are exported with defaults before check.
-            EUID=0
-            SSH_CONNECTION="1.2.3.4 49152 5.6.7.8 22"
-            export EUID SSH_CONNECTION
-            if [ "$EUID" = "0" ] \
-               && [ -n "$SSH_CONNECTION" ] \
-               && [ -t 0 ] \
-               && [ -z "$SSH_NIX_SHELL" ] \
-               && [ -z "$NIX_SKIP_SHELL" ]; then
-              echo GUARD_CONDITION_MET
-            else
-              echo GUARD_CONDITION_NOT_MET
-            fi
-          '';
-        };
-
-        environment.etc."test-optout.sh" = {
-          source = pkgs.writeText "test-optout.sh" ''
-            #!/bin/sh
-            # Same condition with NIX_SKIP_SHELL=1 - guard should be blocked.
-            # Uses $VAR (no braces) to keep Nix quoting simple.
-            EUID=0
-            SSH_CONNECTION="1.2.3.4 49152 5.6.7.8 22"
-            NIX_SKIP_SHELL=1
-            export EUID SSH_CONNECTION NIX_SKIP_SHELL
-            if [ "$EUID" = "0" ] \
-               && [ -n "$SSH_CONNECTION" ] \
-               && [ -t 0 ] \
-               && [ -z "$SSH_NIX_SHELL" ] \
-               && [ -z "$NIX_SKIP_SHELL" ]; then
-              echo GUARD_WOULD_FIRE
-            else
-              echo GUARD_BLOCKED
-            fi
-          '';
-        };
       };
 
     nixdev =
@@ -178,33 +133,57 @@
       assert "ssh-ng" in machines_content, "/etc/nix/machines missing ssh-ng protocol"
       assert "builder" in machines_content, "/etc/nix/machines missing builder user"
 
-    # ── Assertion 5: guard condition fires in SSH-like environment ────
-    with subtest("nixio: guard condition fires via script(1) PTY"):
-      # script(1) allocates a PTY so [ -t 0 ] is true (simulates interactive SSH).
-      # bash /etc/test-guard.sh reads script from store path.
-      nixio.succeed(
-          "script -qc 'bash /etc/test-guard.sh' /dev/null 2>&1"
-          + " | grep -q GUARD_CONDITION_MET"
-      )
-
+    # ── Assertion 5: /etc/bashrc guard file exists ───────────────────
     with subtest("nixio: guard file /etc/bashrc exists with SSH_NIX_SHELL"):
       bashrc = nixio.succeed("cat /etc/bashrc")
       assert "SSH_NIX_SHELL" in bashrc, "/etc/bashrc missing SSH_NIX_SHELL guard"
 
-    # ── Assertion 6: NIX_SKIP_SHELL=1 prevents guard condition ─────────
-    with subtest("nixio: NIX_SKIP_SHELL=1 blocks guard via script(1) PTY"):
-      nixio.succeed(
-          "script -qc 'bash /etc/test-optout.sh' /dev/null 2>&1"
-          + " | grep -q GUARD_BLOCKED"
+    # ── Assertion 6: SSH_NIX_COMMAND triggers real shell entry path ──
+    with subtest("nixio: SSH_NIX_COMMAND triggers real shell entry from nixdev"):
+      # Exercises real /etc/bashrc guard → nix-shell → shellHook → exec fish path.
+      # ssh -tt forces PTY so [ -t 0 ] is true in bashrc guard.
+      # SendEnv forwards SSH_NIX_COMMAND through to shellHook.
+      # bashrc fires (root, SSH, PTY, no SSH_NIX_SHELL, no NIX_SKIP_SHELL).
+      # shell.nix shellHook sees SSH_NIX_COMMAND and exec fish -c "$SSH_NIX_COMMAND".
+      # fish sources fishInit (zoxide, starship, carapace, aliases).
+      # functions -q grep confirms the grep→rg alias loaded.
+      output = nixdev.succeed(
+          "SSH_NIX_COMMAND='echo SSH_NIX_COMMAND_TRIGGERED; functions -q grep; and echo FISH_INIT_OK'"
+          + " ssh -tt" + ssh_opts_common
+          + " -o SendEnv=SSH_NIX_COMMAND"
+          + " root@nixio 2>&1"
       )
+      assert "SSH_NIX_COMMAND_TRIGGERED" in output, \
+          f"Expected marker in output, got:\n{output}"
+      assert "FISH_INIT_OK" in output, \
+          f"fish init did not load grep alias; got:\n{output}"
 
-    with subtest("nixio: sshd AcceptEnv includes NIX_SKIP_SHELL"):
+    # ── Assertion 7: NIX_SKIP_SHELL=1 bypasses shell entry ────────────
+    with subtest("nixio: NIX_SKIP_SHELL=1 blocks shell entry even with SSH_NIX_COMMAND"):
+      # With NIX_SKIP_SHELL=1, /etc/bashrc skips → drops to interactive bash.
+      # SSH_NIX_COMMAND must NOT execute. timeout 5 kills hanging interactive session.
+      status, output = nixdev.execute(
+          "SSH_NIX_COMMAND='echo SHOULD_NOT_RUN' NIX_SKIP_SHELL=1 timeout 5"
+          + " ssh -tt" + ssh_opts_common
+          + " -o SendEnv=SSH_NIX_COMMAND"
+          + " -o SendEnv=NIX_SKIP_SHELL"
+          + " root@nixio 2>&1"
+      )
+      assert status != 0, \
+          f"Expected SSH to exit non-zero (timeout/interactive), got status {status}"
+      assert "SHOULD_NOT_RUN" not in output, \
+          f"SSH_NIX_COMMAND should not run when NIX_SKIP_SHELL=1; got:\n{output}"
+
+    # ── Assertion 8: sshd AcceptEnv includes both vars ────────────────
+    with subtest("nixio: sshd AcceptEnv includes NIX_SKIP_SHELL and SSH_NIX_COMMAND"):
       accept_env = nixio.succeed(
           "sshd -T 2>/dev/null | grep -i acceptenv || true")
       assert "NIX_SKIP_SHELL" in accept_env, \
           "NIX_SKIP_SHELL not found in sshd AcceptEnv"
+      assert "SSH_NIX_COMMAND" in accept_env, \
+          "SSH_NIX_COMMAND not found in sshd AcceptEnv"
 
-    # ── Assertion 7: nix store ping via ssh-ng (best-effort) ───────────
+    # ── Assertion 9: nix store ping via ssh-ng (best-effort) ───────────
     with subtest("nix store ping via ssh-ng"):
       nix_sshopts = (
           "-o StrictHostKeyChecking=no"

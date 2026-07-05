@@ -380,6 +380,13 @@ flowchart LR
 
 8. **Deterministic secrets** — for scenarios needing shared secrets (guardian PSK, SSH keys, API keys), use the same inline value on all nodes. The VM profile's deterministic sops injection gives the same content for the same key path.
 
+9. **Do NOT hand-roll module equivalents in scenario nodes.** Every node that exercises
+   a capability owned by a `modules/nixos/server/` module must import and use that
+   module — not replicate its config inline. If a module cannot be imported in a
+   scenario node (missing options, unresolvable deps), fix the module or the VM infra
+   first. A scenario testing inline config duplicates what the module already does;
+   the two drift apart, and the test produces a false pass.
+
 ## Risks / Trade-offs
 
 ### Risk: SeaweedFS FUSE Mount I/O

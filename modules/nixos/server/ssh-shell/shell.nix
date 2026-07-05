@@ -56,6 +56,9 @@ pkgs.mkShellNoCC {
   # exec replaces the shellHook subprocess with fish, keeping it as the
   # interactive session until the user exits.
   shellHook = ''
+    if [ -n "''${SSH_NIX_COMMAND:-}" ]; then
+      exec fish -C 'source ${fishInit}' -c "''$SSH_NIX_COMMAND"
+    fi
     exec fish -C 'source ${fishInit}'
   '';
 }

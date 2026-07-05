@@ -26,7 +26,10 @@ in
 
   config = lib.mkIf cfg.enable {
     services.openssh.settings = {
-      AcceptEnv = [ "NIX_SKIP_SHELL" ];
+      AcceptEnv = [
+        "NIX_SKIP_SHELL"
+        "SSH_NIX_COMMAND"
+      ];
     };
 
     environment.etc."bashrc".text = ''

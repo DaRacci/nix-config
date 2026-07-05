@@ -55,6 +55,20 @@ for nixpkgs services.
 Sops secrets are auto-discovered from `config.sops.secrets` — no manual secret name
 maintenance is needed.
 
+### Must-Use Module Rule
+
+A VM test MUST exercise repository-owned module and option logic directly.
+Do NOT hand-roll equivalent NixOS config in a scenario file to avoid importing
+a module from this repository. If a module or option cannot be instantiated in
+a VM test — because of unresolved sops dependencies, missing options, or
+infrastructure incompatibility — the scenario is invalid. Fix the module or
+the test infrastructure first.
+
+A scenario that duplicates what a module already provides will drift: the
+module's real behavior changes but the hand-rolled copy does not. The test
+passes, but validates logic that is no longer deployed. This produces a false
+signal worse than no test.
+
 ## Two Test Authoring Modes
 
 ### 1. Auto-Discovered Per-Host Tests
@@ -282,6 +296,11 @@ Scenarios define self-contained NixOS nodes testing custom repository logic. Eac
 Scenarios MUST test custom modules from this repository, not upstream nixpkgs behavior.
 A scenario that merely asserts "postgresql responds on port 5432" or "sshd has
 PasswordAuthentication no" adds no value — that is nixpkgs upstream's responsibility.
+
+**No hand-rolling module equivalents.** Do not define inline NixOS config in a
+scenario node that mirrors what a repository module (`modules/nixos/server/`)
+already provides. The config must come from the module itself — else the scenario
+tests a fiction, not the deployed system.
 
 Valid scenario scope:
 

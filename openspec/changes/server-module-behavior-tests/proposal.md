@@ -53,6 +53,10 @@ Each scenario builds on the infrastructure delivered by `testing-framework-prede
 - UI or dashboard-level testing (Grafana, Dashy, pgAdmin interface)
 - Testing services permanently out of scope per `testing-framework-predeploy` (tailscale, ollama with GPU, cloudflared tunnel, ACME cert renewal)
 - Refactoring any existing module code — tests are observational only
+- **Hand-rolling module equivalent config** in scenario nodes. Every VM scenario
+  must validate repository-owned module logic, not inline re-implementations of
+  that same logic. Duplicated config will drift from the deployed module and
+  produce false test signals.
 
 ## Impact
 
