@@ -4,6 +4,10 @@
   lib,
   ...
 }:
+let
+  # Hermes requires plugins to be compiled in the same python version.
+  hermesPythonVersion = pkgs.python312Packages;
+in
 {
   # VR Stuff
   alvr-bin = pkgs.callPackage ./alvr-bin { };
@@ -29,11 +33,12 @@
   uvtools = pkgs.callPackage ./uvtools { };
 
   # Hermes Agent Python Plugins
-  mnemosyne-memory = pkgs.python312Packages.callPackage ./python/mnemosyne-memory.nix { };
-  mnemosyne-hermes = pkgs.python312Packages.callPackage ./python/mnemosyne-hermes.nix { };
+  mnemosyne-memory = hermesPythonVersion.callPackage ./python/mnemosyne-memory.nix { };
+  mnemosyne-hermes = hermesPythonVersion.callPackage ./python/mnemosyne-hermes.nix { };
   mnemosyne-memory-all = pkgs.mnemosyne-memory.overridePythonAttrs (old: {
     dependencies = old.passthru.optional-dependencies.all;
   });
+  rtk-hermes = hermesPythonVersion.callPackage ./python/rtk-hermes.nix { };
 
   # Home Assistant Python Packages
   terminal-manager = pkgs.python3Packages.callPackage ./python/terminal-manager.nix { };

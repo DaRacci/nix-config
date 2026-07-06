@@ -466,6 +466,17 @@ in
       '';
     })
 
+    (mkIf cfg.enable {
+      services.hermes-agent = {
+        extraPythonPackages = [ pkgs.rtk-hermes ];
+        settings.plugins.enabled = [ "rtk-hermes" ];
+      };
+
+      systemd.services.hermes-agent.postStart = ''
+        ${lib.getExe pkgs.docker} exec -u hermes hermes-agent bash -c 'pip install --upgrade rtk-hermes 2> /dev/null || true';
+      '';
+    })
+
     (mkIf (cfg.enable && cfg.apiServer.enable) {
       sops = {
         secrets."${cfg.apiServer.tokenReference}" = { };
