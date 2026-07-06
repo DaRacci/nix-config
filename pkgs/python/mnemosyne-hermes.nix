@@ -9,28 +9,22 @@
   mnemosyne-memory,
 }:
 
-buildPythonPackage rec {
+buildPythonPackage (attrs: {
   pname = "mnemosyne-hermes";
   version = "3.1.0";
   pyproject = true;
 
   src = fetchPypi {
     pname = "mnemosyne_hermes";
-    inherit version;
+    inherit (attrs) version;
     hash = "sha256-639Y6MqRgUT0RDze3JKKuS1qe/nDifYOB7CExpGhh7k=";
   };
 
-  build-system = [
-    setuptools
-  ];
+  build-system = [ setuptools ];
 
-  dependencies = [
-    mnemosyne-memory
-  ];
+  dependencies = [ mnemosyne-memory ];
 
-  pythonImportsCheck = [
-    "mnemosyne_hermes"
-  ];
+  pythonImportsCheck = [ "mnemosyne_hermes" ];
 
   passthru.updateScript = nix-update-script {
     extraArgs = [ "--flake" ];
@@ -41,5 +35,6 @@ buildPythonPackage rec {
     homepage = "https://pypi.org/project/mnemosyne-hermes/";
     license = lib.licenses.mit;
     maintainers = [ lib.maintainers.racci ];
+    mainProgram = attrs.pname;
   };
-}
+})

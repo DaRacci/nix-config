@@ -12,7 +12,6 @@ let
     mkMerge
     optional
     optionals
-    optionalString
     removePrefix
     mapAttrs'
     nameValuePair

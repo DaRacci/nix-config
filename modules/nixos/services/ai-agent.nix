@@ -430,7 +430,7 @@ in
           EnvironmentFile = config.services.hermes-agent.environmentFiles;
           PrivateTmp = true;
           ExecStart = "${lib.getExe pkgs.bash} -c 'env > /tmp/hermes-dashboard.env; exec docker exec -u hermes --env-file /tmp/hermes-dashboard.env hermes-agent /data/current-package/bin/hermes dashboard --host 0.0.0.0 --no-open --port ${toString cfg.dashboard.port}'";
-          Restart = "on-failure";
+          Restart = "always";
           RestartSec = 5;
           SupplementaryGroups = [ "docker" ];
           ReadWritePaths = [ "/var/run/docker.sock" ];
