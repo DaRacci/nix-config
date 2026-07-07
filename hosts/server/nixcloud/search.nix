@@ -53,7 +53,7 @@
         autocomplete = "";
         autocomplete_min = 4;
         # favicon_resolver = "duckduckgo";
-        default_lang = "auto";
+        default_lang = "en";
         ban_time_on_fail = 5;
         max_ban_time_on_fail = 120;
         prefer_configured_language = true;
