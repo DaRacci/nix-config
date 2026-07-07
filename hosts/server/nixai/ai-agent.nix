@@ -119,7 +119,7 @@ in
       settings = {
         timezone = config.time.timeZone;
         display.pet = {
-          enabled = true;
+          enabled = false;
           slug = "megumin";
         };
       };
