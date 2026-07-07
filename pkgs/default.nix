@@ -39,6 +39,7 @@ in
     dependencies = old.passthru.optional-dependencies.all;
   });
   rtk-hermes = hermesPythonVersion.callPackage ./python/rtk-hermes.nix { };
+  hermes-curator-evolver = hermesPythonVersion.callPackage ./python/hermes-curator-evolver.nix { };
 
   # Home Assistant Python Packages
   terminal-manager = pkgs.python3Packages.callPackage ./python/terminal-manager.nix { };

@@ -116,7 +116,7 @@ in
     };
 
     hermes-agent = {
-      settings.timezone = "Australia/Sydney";
+      settings.timezone = config.time.timeZone;
       environmentFiles = [ config.sops.templates."HERMES_ENV".path ];
       environment = {
         MNEMOSYNE_SYNC_REMOTE = "http://127.0.0.1:8765";

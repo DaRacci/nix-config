@@ -221,6 +221,10 @@ in
         '';
       };
     };
+
+    extras = {
+      plugins = mkEnableOption "enable extra plugins for the agent";
+    };
   };
 
   config = mkMerge [
@@ -236,16 +240,6 @@ in
           "messaging"
           "voice"
           "youtube"
-        ];
-
-        #TODO:Need a way to auto update these.
-        extraPlugins = [
-          (pkgs.fetchFromGitHub {
-            owner = "FelineStateMachine";
-            repo = "hermes-openspec";
-            rev = "3cf148b1fcc8ee7ebaff307af88cc27869fc4cfd";
-            sha256 = "sha256-5vLw5Y3Sz5DCwdc8mhUBOKWAF+i+dwAcL2sqWD96ANg=";
-          })
         ];
 
         environment = {
@@ -347,7 +341,6 @@ in
 
           web = {
             search_backend = "searxng";
-            extract_backend = "firecrawl";
           };
 
           display = {
@@ -458,6 +451,8 @@ in
             memory_enabled = false;
             user_profile_enabled = false;
           };
+
+          plugins.enabled = [ "mnemosyne-hermes" ];
         };
       };
 
@@ -467,10 +462,60 @@ in
       '';
     })
 
-    (mkIf cfg.enable {
+    (mkIf (cfg.enable && cfg.extras.plugins) {
       services.hermes-agent = {
-        extraPythonPackages = [ pkgs.rtk-hermes ];
-        settings.plugins.enabled = [ "rtk-hermes" ];
+        extraPackages = [
+          pkgs.openspec
+          pkgs.hermes-curator-evolver
+          pkgs.ast-grep
+          pkgs.tree-sitter
+        ];
+
+        extraPythonPackages = [
+          pkgs.rtk-hermes
+          pkgs.hermes-curator-evolver
+
+          # deps for agentiker-code-intel
+          pkgs.python312Packages.tree-sitter
+          pkgs.python312Packages.ast-grep-py
+          pkgs.python312Packages.rich
+          pkgs.python312Packages.pyyaml
+        ];
+
+        #TODO:Need a way to auto update these source only plugins.
+        extraPlugins = [
+          (pkgs.fetchFromGitHub {
+            owner = "FelineStateMachine";
+            repo = "hermes-openspec";
+            rev = "v0.1.0";
+            hash = "";
+          })
+          (pkgs.fetchFromGitHub {
+            owner = "meleeislandbot";
+            repo = "hermes-hora";
+            version = "v0.1.1";
+            hash = "";
+          })
+          (pkgs.fetchFromGitHub {
+            owner = "IVRZ-da";
+            repo = "agentiker-code-intel";
+            rev = "v0.6.13";
+            hash = "sha256-DEKSe1mrN0KNK0JrzlPJL6tNIjQ9COARD0ddrkHISlk=";
+          })
+        ];
+
+        settings.plugins = {
+          enabled = [
+            "rtk-hermes"
+            "openspec"
+            "hermes-hora"
+            "code-intel"
+          ];
+
+          entries.hermes-hora = {
+            timezone = config.time.timeZone;
+          };
+        };
       };
 
       systemd.services.hermes-agent.postStart = ''
