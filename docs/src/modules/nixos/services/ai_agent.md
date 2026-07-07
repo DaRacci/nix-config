@@ -4,6 +4,7 @@ Autonomous AI Agent service powered by Hermes, providing intelligent task automa
 
 - **Entry point**: `modules/nixos/services/ai-agent.nix`
 - **Upstream**: [Hermes Agent](https://hermes-agent.nousresearch.com/)
+- **Package**: The module routes `services.hermes-agent.package` through the local `pkgs.hermes-agent` overlay, which carries the lazy-deps managed-install fix from [PR #48637](https://github.com/NousResearch/hermes-agent/pull/48637). This ensures Hermes fails fast with `FeatureUnavailable` on read-only NixOS installs rather than retrying `ensurepip`.
 
 ### Options
 

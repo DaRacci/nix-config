@@ -52,8 +52,7 @@
       inputs.website-builder.follows = "";
     };
     hermes-agent = {
-      #TODO:https://github.com/NousResearch/hermes-agent/pull/48637
-      url = "github:liuhao1024/hermes-agent/fix/48628-lazy-deps-managed-check";
+      url = "github:NousResearch/hermes-agent";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-parts.follows = "flake-parts";
     };

@@ -50,6 +50,26 @@ in
     // {
       mcpo = prev.python3Packages.callPackage inputs.mcpo { };
 
+      hermes-agent =
+        let
+          lock = builtins.fromJSON (builtins.readFile ../flake/nixos/flake.lock);
+          haLocked = lock.nodes.hermes-agent.locked;
+          haFlake = builtins.getFlake "github:${haLocked.owner}/${haLocked.repo}/${haLocked.rev}";
+          hermesAgentSrc = prev.applyPatches {
+            name = "hermes-agent-patched";
+            src = haFlake.outPath;
+            patches = [ ./patches/hermes-agent-pr-48637-lazy-deps.patch ];
+          };
+        in
+        final.callPackage (hermesAgentSrc + "/nix/hermes-agent.nix") {
+          uv2nix = haFlake.inputs.uv2nix;
+          pyproject-nix = haFlake.inputs.pyproject-nix;
+          pyproject-build-systems = haFlake.inputs.pyproject-build-systems;
+          npm-lockfile-fix =
+            haFlake.inputs.npm-lockfile-fix.packages.${final.stdenv.hostPlatform.system}.default;
+          rev = haLocked.rev or null;
+        };
+
       lm_sensors-perlless = prev.lm_sensors.overrideAttrs (oldAttrs: {
         buildInputs = oldAttrs.buildInputs |> (lib.remove prev.perl);
       });

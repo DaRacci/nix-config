@@ -227,6 +227,7 @@ in
     (mkIf cfg.enable {
       services.hermes-agent = {
         enable = true;
+        package = pkgs.hermes-agent;
         container.enable = true;
 
         extraDependencyGroups = [

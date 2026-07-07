@@ -16,6 +16,7 @@ Overlays themselves don't typically have "knobs," but they affect the available 
 ## Notable Overrides
 
 - **`kernelPackages.universal-pidff`**: Pinned to upstream commit [`595c65bb`](https://github.com/JacKeTUs/universal-pidff/commit/595c65bb23ad824cb6d8dedb1d74123f622de1cc) from `main`. Provides a newer force-feedback kernel module driver than the version bundled in the current nixpkgs release.
+- **`hermes-agent`**: Local overlay that builds Hermes Agent from upstream source plus patch [`overlays/patches/hermes-agent-pr-48637-lazy-deps.patch`](https://github.com/NousResearch/hermes-agent/pull/48637). The patch (upstream PR [#48637](https://github.com/NousResearch/hermes-agent/pull/48637)) changes `tools/lazy_deps.py` to raise `FeatureUnavailable` on managed/read-only installs (NixOS) instead of attempting `ensurepip` and failing repeatedly.
 
 ## Common Workflows
 
