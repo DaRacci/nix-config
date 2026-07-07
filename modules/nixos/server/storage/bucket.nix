@@ -151,8 +151,6 @@ let
         "umask=${formatUmask mountCfg.umask}"
         "-o"
         "mp_umask=${formatUmask mountCfg.umask}"
-        "-o"
-        "nonempty"
       ]
       ++ optional (mountCfg.uid != null) "-o"
       ++ optional (mountCfg.uid != null) "uid=${toString mountCfg.uid}"
@@ -170,9 +168,9 @@ let
         "-filer=${mountCfg.seaweedfs.filer}"
         "-filer.path=${mountCfg.seaweedfs.filerPath}"
         "-dir=${mountCfg.mountLocation}"
-        "-dirAutoCreate=${if mountCfg.seaweedfs.dirAutoCreate then "true" else "false"}"
-        "-allowOthers=${if mountCfg.seaweedfs.allowOthers then "true" else "false"}"
-        "-readOnly=${if mountCfg.seaweedfs.readOnly then "true" else "false"}"
+        "-dirAutoCreate=${builtins.toJSON mountCfg.seaweedfs.dirAutoCreate}"
+        "-allowOthers=${builtins.toJSON mountCfg.seaweedfs.allowOthers}"
+        "-readOnly=${builtins.toJSON mountCfg.seaweedfs.readOnly}"
         "-umask=${formatUmask mountCfg.umask}"
         "-metadataFlushSeconds=${toString mountCfg.seaweedfs.metadataFlushSeconds}"
       ]
