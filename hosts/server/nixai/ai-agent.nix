@@ -116,7 +116,13 @@ in
     };
 
     hermes-agent = {
-      settings.timezone = config.time.timeZone;
+      settings = {
+        timezone = config.time.timeZone;
+        display.pet = {
+          enabled = true;
+          slug = "megumin";
+        };
+      };
       environmentFiles = [ config.sops.templates."HERMES_ENV".path ];
       environment = {
         MNEMOSYNE_SYNC_REMOTE = "http://127.0.0.1:8765";

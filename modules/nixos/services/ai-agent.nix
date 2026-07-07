@@ -443,6 +443,7 @@ in
 
         environment = {
           MNEMOSYNE_HOST_LLM_ENABLED = "true";
+          SUDO_PASSWORD = ""; # Container has no password but still prompts, this disables the prompt.
         };
 
         settings = {
