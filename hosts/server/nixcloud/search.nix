@@ -141,17 +141,20 @@
                 engine = "bing";
                 shortcut = "bi";
                 categories = [ "general" ];
+                weight = 0.5;
               };
               "duckduckgo" = {
                 engine = "duckduckgo";
                 shortcut = "ddg";
                 categories = [ "general" ];
+                weight = 1.2;
               };
               "google" = {
                 engine = "google";
                 shortcut = "go";
                 categories = "general";
                 use_mobile_ui = false;
+                weight = 1.5;
               };
               "brave" = {
                 engine = "brave";
@@ -163,6 +166,13 @@
                   "web"
                 ];
                 braveCategory = "search";
+                weight = 1.2;
+              };
+              "startpage" = {
+                engine = "startpage";
+                shortcut = "sp";
+                categories = [ "general" ];
+                weight = 1.3;
               };
               #endregion
 
@@ -444,6 +454,7 @@
                 base_url = "https://{language}.wikipedia.org/";
                 categories = [ "general" ];
                 display_type = [ "infobox" ];
+                weight = 1.0;
               };
               "free software directory" = {
                 engine = "mediawiki";
