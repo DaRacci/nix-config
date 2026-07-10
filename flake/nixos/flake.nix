@@ -87,6 +87,10 @@
         nixpkgs.follows = "nixpkgs";
       };
     };
+    forgesync = {
+      url = "github:lukaswrz/forgesync";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     seaweedfs = {
       url = "https://raw.githubusercontent.com/liberodark/nixpkgs/refs/heads/seawedfs/nixos/modules/services/network-filesystems/seaweedfs.nix";
