@@ -285,7 +285,7 @@ def is_option_enabled_for_target [
     let result = (nix eval --json $attr_path | from json)
     $result == true
   } catch {
-    false
+    true
   }
 }
 

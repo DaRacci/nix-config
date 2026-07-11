@@ -206,7 +206,7 @@ export def check_file_changed [
     git show $prev_blob | save -f $old_file
 
     log info $"Checking differences between ($file) and ($old_file)"
-    let old_hash = nix hash file $old_file
+    let old_hash = nix hash path $old_file
     if not ($file | path exists) {
       rm -f $old_file
       log info $"File [($file)] was deleted; treating as changed."
@@ -214,7 +214,7 @@ export def check_file_changed [
       continue
     }
 
-    let cur_hash = nix hash file $file
+    let cur_hash = nix hash path $file
     rm -f $old_file
 
     if $old_hash != $cur_hash {
