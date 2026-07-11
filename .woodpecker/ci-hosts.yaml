@@ -49,7 +49,7 @@ steps:
       set -euo pipefail
 
       SHOULD_BUILD=false
-      if [ "$${CI_PREV_PIPELINE_STATUS}" = "error" ]; then
+      if [ "$${CI_PREV_PIPELINE_STATUS}" = "failure" ]; then
         echo "Previous pipeline failed for $${HOST}, Building to check if it was a transient issue."
         SHOULD_BUILD=true
       else

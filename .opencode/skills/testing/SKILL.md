@@ -19,8 +19,27 @@ SILENT=true nix run .#module-graph -- --since <COMMIT_HASH> --refine --report
 
 This will output a report similar to the following, showing which hosts and homes are affected by the changes:
 
-```
+```text
+*************************************************************
+  NixOS HOSTS
+*************************************************************
 
+Priority: HIGH
+  - nixai [5 modules]
+  - nixserv [4 modules]
+
+Priority: MEDIUM
+  - nixdev [3 modules]
+
+Priority: LOW
+  - nixio [1 modules]
+
+*************************************************************
+  HOME-MANAGER CONFIGS
+*************************************************************
+
+Priority: LOW
+  - racci [1 modules]
 ```
 
 ## Minimum Test Requirements

@@ -64,7 +64,12 @@ steps:
       GITGUARDIAN_API_KEY:
         from_secret: GITGUARDIAN_API_KEY
     when: *when_ci
-    commands: ggshield secret scan commit-range $${CI_PREV_COMMIT_SHA:-HEAD}..
+    commands: |
+      if [ -n "$${CI_PREV_COMMIT_SHA:-}" ]; then
+        ggshield secret scan commit-range "$${CI_PREV_COMMIT_SHA}..HEAD"
+      else
+        ggshield secret scan repo .
+      fi
 
   - name: matrix-ci-hosts.yaml
     image: registry.racci.dev/lix-woodpecker

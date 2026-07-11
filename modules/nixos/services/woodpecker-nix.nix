@@ -68,9 +68,7 @@ let
     concatStringsSep " " (map (p: builtins.unsafeDiscardStringContext (toString p)) allBootstrapPkgs)
   );
 
-  nixBuildUsersGroup = "nixbld";
   nixConf = ''
-    build-users-group = ${nixBuildUsersGroup}
     allowed-users = *
     substituters = ${concatStringsSep " " cfg.isolatedStore.substituters}
     trusted-public-keys = ${concatStringsSep " " cfg.isolatedStore.trustedPublicKeys}
@@ -561,6 +559,11 @@ in
               # destination store paths, and CAP_DAC_OVERRIDE to read
               # source paths from host /nix/store (0444, root-owned).
               CapabilityBoundingSet = [
+                "CAP_CHOWN"
+                "CAP_DAC_OVERRIDE"
+                "CAP_FOWNER"
+              ];
+              AmbientCapabilities = [
                 "CAP_CHOWN"
                 "CAP_DAC_OVERRIDE"
                 "CAP_FOWNER"
@@ -1163,7 +1166,8 @@ in
             ]
             ++ (optional (
               cfg.isolatedStore.gc.maxFreed != null
-            ) "GC_MAX_FREED=${cfg.isolatedStore.gc.maxFreed}");
+            ) "GC_MAX_FREED=${cfg.isolatedStore.gc.maxFreed}")
+            ++ (optional overlayEnabled "UPPER_DIR=${upperDir}");
             NoNewPrivileges = true;
 
             ProtectClock = true;
@@ -1383,7 +1387,7 @@ in
                     fi
 
                     local path_size
-                    path_size=$(grep -oP 'servedb-size: \K[0-9]+' "$narinfo" 2>/dev/null || echo "0")
+                    path_size=$(grep -oP 'NarSize: \K[0-9]+' "$narinfo" 2>/dev/null || echo "0")
 
                     log "NEW: $store_path (narinfo-size: ''${path_size} bytes)"
                     echo "$(date -Iseconds) $store_path $path_size" >> "$JOURNAL"
