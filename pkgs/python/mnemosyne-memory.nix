@@ -4,7 +4,7 @@
   fetchFromGitHub,
   setuptools,
   sqlite-vec,
-  fastembed,
+  fastembed-hermes,
   mcp,
   anyio,
   cryptography,
@@ -28,7 +28,7 @@ buildPythonPackage (attrs: {
 
   passthru.optional-dependencies = {
     embeddings = [
-      fastembed
+      fastembed-hermes
       sqlite-vec
     ];
     sync = [ cryptography ];

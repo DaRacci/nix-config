@@ -73,6 +73,27 @@ in
       lm_sensors-perlless = prev.lm_sensors.overrideAttrs (oldAttrs: {
         buildInputs = oldAttrs.buildInputs |> (lib.remove prev.perl);
       });
+
+      fastembed-hermes = prev.python312Packages.fastembed.overridePythonAttrs (old: {
+        dependencies = builtins.filter (
+          dep:
+          let
+            name = lib.getName dep;
+          in
+          # Hermes uv2nix env already has these deps and complains about colisions.
+          !(builtins.any (n: lib.hasInfix n name) [
+            "huggingface-hub"
+            "numpy"
+            "onnxruntime"
+            "pillow"
+            "requests"
+            "tokenizers"
+            "tqdm"
+          ])
+        ) old.dependencies;
+        dontCheckRuntimeDeps = true;
+        pythonImportsCheck = [ ];
+      });
     };
 
   modifications = final: prev: {
@@ -124,13 +145,11 @@ in
     ];
 
     pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
-      (
-        python-final: python-prev: {
-          inline-snapshot = python-prev.inline-snapshot.overridePythonAttrs (_: {
-            doCheck = false;
-          });
-        }
-      )
+      (python-final: python-prev: {
+        inline-snapshot = python-prev.inline-snapshot.overridePythonAttrs (_: {
+          doCheck = false;
+        });
+      })
     ];
 
     inherit lib;
