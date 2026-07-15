@@ -1,5 +1,6 @@
 {
   config,
+  pkgs,
   lib,
   ...
 }:
@@ -130,4 +131,50 @@ in
       };
     };
   };
+
+  services.ai-agent.containerPostStart = [
+    {
+      command = "${pkgs.docker}/bin/docker cp /etc/ssh/authorized_keys.d/root hermes-agent:/home/hermes/.ssh/authorized_keys";
+      host = true;
+    }
+    ''
+      # Privilege separation
+      getent passwd sshd >/dev/null 2>&1 || useradd -r -s /sbin/nologin -d /var/empty -M sshd
+      mkdir -p /var/empty && chmod 755 /var/empty
+
+      # Host keys
+      ${pkgs.openssh}/bin/ssh-keygen -A
+
+      # Config — reads directly from /home/hermes/.ssh/authorized_keys
+      cat > /etc/ssh/sshd_config_hermes <<'SSHDCFG'
+      Port 2222
+      ListenAddress 0.0.0.0
+      HostKey /etc/ssh/ssh_host_ed25519_key
+      HostKey /etc/ssh/ssh_host_rsa_key
+      HostKey /etc/ssh/ssh_host_ecdsa_key
+      PubkeyAuthentication yes
+      AuthorizedKeysFile .ssh/authorized_keys
+      PasswordAuthentication no
+      ChallengeResponseAuthentication no
+      UsePAM no
+      X11Forwarding no
+      PrintMotd no
+      ClientAliveInterval 60
+      ClientAliveCountMax 3
+      LogLevel VERBOSE
+      SSHDCFG
+
+      passwd -d hermes 2>/dev/null || true
+
+      touch /etc/ssh/.provisioned
+    ''
+
+    ''
+      pkill -f "sshd.*-f /etc/ssh/sshd_config_hermes" 2>/dev/null || true
+      sleep 1
+      ${pkgs.openssh}/bin/sshd -f /etc/ssh/sshd_config_hermes -E /tmp/sshd-container.log
+    ''
+  ];
+
+  server.network.openPortsForSubnet.tcp = [ 2222 ];
 }

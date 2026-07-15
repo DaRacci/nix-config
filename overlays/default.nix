@@ -123,11 +123,15 @@ in
       })
     ];
 
-    python3Packages = prev.python3Packages // {
-      inline-snapshot = prev.python3Packages.inline-snapshot.overrideAttrs (_: {
-        doCheck = false;
-      });
-    };
+    pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+      (
+        python-final: python-prev: {
+          inline-snapshot = python-prev.inline-snapshot.overridePythonAttrs (_: {
+            doCheck = false;
+          });
+        }
+      )
+    ];
 
     inherit lib;
   };
