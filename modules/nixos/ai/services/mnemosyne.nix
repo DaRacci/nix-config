@@ -32,7 +32,8 @@ let
 
   package = pkgs.mnemosyne-memory.overridePythonAttrs (base: {
     dependencies =
-      (optionals hasMcp base.passthru.optional-dependencies.mcp)
+      base.dependencies
+      ++ (optionals hasMcp base.passthru.optional-dependencies.mcp)
       ++ (optionals hasSync base.passthru.optional-dependencies.sync);
   });
 

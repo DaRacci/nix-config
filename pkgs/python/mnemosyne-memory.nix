@@ -3,6 +3,7 @@
   buildPythonPackage,
   fetchFromGitHub,
   setuptools,
+  sqlite-vec,
   fastembed,
   mcp,
   anyio,
@@ -23,8 +24,13 @@ buildPythonPackage (attrs: {
 
   build-system = [ setuptools ];
 
+  dependencies = attrs.passthru.optional-dependencies.embeddings;
+
   passthru.optional-dependencies = {
-    embeddings = [ fastembed ];
+    embeddings = [
+      fastembed
+      sqlite-vec
+    ];
     sync = [ cryptography ];
     mcp = [
       mcp
