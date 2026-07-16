@@ -16,7 +16,11 @@ Overlays themselves don't typically have "knobs," but they affect the available 
 ## Notable Overrides
 
 - **`kernelPackages.universal-pidff`**: Pinned to upstream commit [`595c65bb`](https://github.com/JacKeTUs/universal-pidff/commit/595c65bb23ad824cb6d8dedb1d74123f622de1cc) from `main`. Provides a newer force-feedback kernel module driver than the version bundled in the current nixpkgs release.
-- **`hermes-agent`**: Local overlay that builds Hermes Agent from upstream source plus patch [`overlays/patches/hermes-agent-pr-48637-lazy-deps.patch`](https://github.com/NousResearch/hermes-agent/pull/48637). The patch (upstream PR [#48637](https://github.com/NousResearch/hermes-agent/pull/48637)) changes `tools/lazy_deps.py` to raise `FeatureUnavailable` on managed/read-only installs (NixOS) instead of attempting `ensurepip` and failing repeatedly.
+- **`hermes-agent`**: Local overlay that builds Hermes Agent from upstream source plus two patches:
+  - [`overlays/patches/hermes-agent-pr-48637-lazy-deps.patch`](https://github.com/NousResearch/hermes-agent/pull/48637): Changes `tools/lazy_deps.py` to raise `FeatureUnavailable` on managed/read-only installs (NixOS) instead of attempting `ensurepip` and failing repeatedly.
+  - [`overlays/patches/hermes-agent-pr-61443-node-headers-hash.patch`](https://github.com/NousResearch/hermes-agent/pull/61443): Fixes the hardcoded electron `node-headers` hash in upstream `nix/desktop.nix`, allowing the `hermesDesktop` passthru to build with the local electron version.
+- **`hermes-desktop`** (`pkgs/default.nix`): Routes to `pkgs.hermes-agent.hermesDesktop`, exposing the patched Hermes Desktop package as a top-level `pkgs` entry for use in home-manager configs.
+- **`home/racci/hm-config.nix`**: Uses `pkgs.hermes-desktop` (patched via overlay) instead of the unpatched upstream `inputs.hermes-agent.packages.<system>.desktop`.
 
 ## Common Workflows
 

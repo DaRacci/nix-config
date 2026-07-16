@@ -58,7 +58,12 @@ in
           hermesAgentSrc = prev.applyPatches {
             name = "hermes-agent-patched";
             src = haFlake.outPath;
-            patches = [ ./patches/hermes-agent-pr-48637-lazy-deps.patch ];
+            patches = [
+              # TODO:https://github.com/NousResearch/hermes-agent/pull/48637
+              ./patches/hermes-agent-pr-48637-lazy-deps.patch
+              # TODO:https://github.com/NousResearch/hermes-agent/pull/53202
+              ./patches/hermes-agent-pr-61443-node-headers-hash.patch
+            ];
           };
         in
         final.callPackage (hermesAgentSrc + "/nix/hermes-agent.nix") {
@@ -145,7 +150,7 @@ in
     ];
 
     pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
-      (python-final: python-prev: {
+      (_python-final: python-prev: {
         inline-snapshot = python-prev.inline-snapshot.overridePythonAttrs (_: {
           doCheck = false;
         });

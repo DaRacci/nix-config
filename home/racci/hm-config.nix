@@ -8,7 +8,7 @@
 
   home.packages = [
     inputs.nix-alien.packages.${pkgs.stdenv.hostPlatform.system}.nix-alien
-    inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.desktop
+    pkgs.hermes-desktop
   ];
 
   sops.secrets.LOCATION = { };
