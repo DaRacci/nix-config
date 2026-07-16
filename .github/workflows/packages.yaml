@@ -28,6 +28,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - uses: ./.github/actions/setup-nix
+
       - name: Get packages from flake
         id: get-packages
         run: |
