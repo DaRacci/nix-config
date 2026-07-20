@@ -20,6 +20,9 @@ let
           permittedInsecurePackages = [
             #TODO:https://github.com/bitwarden/clients/pull/20448
             "electron-39.8.10"
+
+            #TODO:Decky loader requirement, remove when possible
+            "pnpm-9.15.9"
           ];
 
           cudaSupport = builtins.elem "cuda" accelerators;

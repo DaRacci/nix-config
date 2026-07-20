@@ -174,11 +174,11 @@
         "uv2nix": "uv2nix_2"
       },
       "locked": {
-        "lastModified": 1784171895,
-        "narHash": "sha256-/jMIjhDo+jzlmH1XHIxTwYhHg3bJUfUJB3he1Ns6cKQ=",
+        "lastModified": 1784629577,
+        "narHash": "sha256-Yv1k9O6j4rE//J99eoOtl4evZ3S398hL69ExK0FY0lk=",
         "owner": "NousResearch",
         "repo": "hermes-agent",
-        "rev": "f8ddf4fd866d4e581a5353f728117faf2736ad4c",
+        "rev": "279be8211d8347cc3500b9a78c6a0f8cb4d92a6a",
         "type": "github"
       },
       "original": {
@@ -260,16 +260,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1765382359,
-        "narHash": "sha256-RJmgVDzjRI18BWVogG6wpsl1UCuV6ui8qr4DJ1LfWZ8=",
+        "lastModified": 1782141370,
+        "narHash": "sha256-hqijVSEETttmo8Okql9/LG0Ua34hdciKW1a5zzlj8mU=",
         "owner": "nix-community",
         "repo": "lanzaboote",
-        "rev": "e8c096ade12ec9130ff931b0f0e25d2f1bc63607",
+        "rev": "7c9a54a7f87b4539ddbd8bda09a8a5f5f9361aa9",
         "type": "github"
       },
       "original": {
         "owner": "nix-community",
-        "ref": "v1.0.0",
+        "ref": "v1.1.0",
         "repo": "lanzaboote",
         "type": "github"
       }
