@@ -86,6 +86,13 @@ in
           defaultText = literalExpression "cfg.enable && thisIsIOPrimaryHost && hasRedisInstances";
         };
       };
+
+      fail2ban = {
+        enable = mkEnableOption "fail2ban metrics exporter" // {
+          default = cfg.enable && isThisIOPrimaryHost && config.server.fail2ban.enable or false;
+          defaultText = literalExpression "cfg.enable && isThisIOPrimaryHost && config.server.fail2ban.enable";
+        };
+      };
     };
 
     scrapeConfigs = mkOption {

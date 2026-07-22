@@ -16,6 +16,7 @@ The system consists of three layers:
    - Caddy access logs are parsed as JSON at ingest time so `detected_level`, `logger`, and `status` are available in Loki
    - Ingest-time log parsing for journal `stdout` entries and Caddy access logs to infer `detected_level` and normalize common timestamp formats
    - Application-specific exporters (Caddy, PostgreSQL, Redis) enabled automatically
+   - fail2ban exporter available on the IO primary host (when fail2ban is enabled)
 
 1. **Collectors** (run on the monitoring primary host)
    - Prometheus for metrics aggregation with 90-day retention
@@ -46,6 +47,7 @@ The system consists of three layers:
 │  - alloy → Loki                                     │
 │  - OTLP/HTTP → Alloy :4318                          │
 │  - caddy metrics :2019 (if proxy configured)        │
+│  - fail2ban_exporter :9191 (if fail2ban enabled)    │
 │  - postgres_exporter :9187 (if postgres configured) │
 │  - redis_exporter :9121 (if redis configured)       │
 │  - pve_exporter :9221 (nixmon only, Proxmox API)    │
@@ -73,6 +75,7 @@ The module automatically detects and enables exporters based on host role:
 - **Redis exporter**: Enabled on the IO primary host when redis instances are configured
 - **Caddy access logs**: Enabled when Caddy metrics/logs are enabled; each access log file under `/var/log/caddy-access-*` is shipped to Loki and parsed as JSON
 - **node_exporter process collector**: Enabled on all servers via the `processes` collector to expose per-process stats
+- **fail2ban exporter**: Enabled on the IO primary host when fail2ban intrusion detection is enabled
 - **Collector services**: Enabled only on the monitoring primary host
 
 ## Secrets
@@ -162,7 +165,8 @@ modules/nixos/server/monitoring/
 │   ├── node.nix             # node_exporter
 │   ├── caddy.nix            # Caddy metrics
 │   ├── postgres.nix         # PostgreSQL exporter
-│   └── redis.nix            # Redis exporter
+│   ├── redis.nix            # Redis exporter
+│   └── fail2ban.nix         # fail2ban metrics exporter
 ├── logs/
 │   └── alloy.nix            # Alloy log shipping
 └── integrations/
@@ -187,6 +191,7 @@ On any server:
 
 ```sh
 systemctl status prometheus-node-exporter.service
+systemctl status prometheus-fail2ban-exporter.service
 systemctl status alloy.service
 ```
 

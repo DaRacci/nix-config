@@ -40,6 +40,11 @@ let
     |> builtins.filter (c: c.server.monitoring.enable && c.server.monitoring.exporters.redis.enable)
     |> map (c: "${c.host.name}:9121");
 
+  fail2banTargets =
+    serverConfigurations
+    |> builtins.filter (c: c.server.monitoring.enable && c.server.monitoring.exporters.fail2ban.enable)
+    |> map (c: "${c.host.name}:9191");
+
   processTargets =
     serverConfigurations
     |> builtins.filter (c: c.server.monitoring.enable && c.server.monitoring.exporters.process.enable)
@@ -142,6 +147,12 @@ in
           job_name = "redis";
           static_configs = [
             { targets = redisTargets; }
+          ];
+        })
+        ++ (optional (fail2banTargets != [ ]) {
+          job_name = "fail2ban";
+          static_configs = [
+            { targets = fail2banTargets; }
           ];
         })
         ++ (optional (processTargets != [ ]) {
