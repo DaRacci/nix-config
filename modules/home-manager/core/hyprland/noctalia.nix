@@ -157,7 +157,7 @@ let
     theme = {
       builtin = "Noctalia";
       mode = "dark";
-      source = "builtin";
+      # source = "builtin";
       templates = {
         enable_builtin_templates = false;
         enable_community_templates = false;

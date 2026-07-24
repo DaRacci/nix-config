@@ -11,8 +11,6 @@ in
     enable = true;
     systemd.enable = true;
     settings = {
-      font.normal.size = 12;
-
       providers = {
         "@khasbilegt/store.raycast.1password" = {
           preferences = {
