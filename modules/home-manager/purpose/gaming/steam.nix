@@ -68,6 +68,12 @@ in
         ".config/unity3d/IronGate/Valheim"
         ".config/StardewValley"
         ".factorio"
+
+        # Damn BeamNG you thick as fuck
+        ".local/share/BeamNG"
+        ".local/share/BeamNG.drive"
+        ".local/share/BeamNG.drive.cloud"
+        ".local/share/BeamNG.drive.ini"
       ];
     };
   };
