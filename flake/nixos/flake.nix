@@ -38,14 +38,6 @@
     ucodenix.url = "github:e-tho/ucodenix";
 
     # Services
-    angrr = {
-      url = "github:linyinfeng/angrr";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-parts.follows = "flake-parts";
-        flake-compat.follows = "";
-      };
-    };
     nixarr = {
       url = "github:rasmus-kirk/nixarr";
       inputs.nixpkgs.follows = "nixpkgs";

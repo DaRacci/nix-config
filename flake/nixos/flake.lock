@@ -1,31 +1,5 @@
 {
   "nodes": {
-    "angrr": {
-      "inputs": {
-        "flake-compat": [],
-        "flake-parts": [
-          "flake-parts"
-        ],
-        "nix-darwin": "nix-darwin",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "treefmt-nix": "treefmt-nix"
-      },
-      "locked": {
-        "lastModified": 1783701705,
-        "narHash": "sha256-uHxBsfvm67G4FRWIA6GYmEUsWZgZqEIHcgolstWJYs4=",
-        "owner": "linyinfeng",
-        "repo": "angrr",
-        "rev": "c7f176570c121b1b430de736cc7213e8dcbb8366",
-        "type": "github"
-      },
-      "original": {
-        "owner": "linyinfeng",
-        "repo": "angrr",
-        "type": "github"
-      }
-    },
     "chaotic-nyx": {
       "inputs": {
         "flake-schemas": [],
@@ -274,33 +248,12 @@
         "type": "github"
       }
     },
-    "nix-darwin": {
-      "inputs": {
-        "nixpkgs": [
-          "angrr",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1783395956,
-        "narHash": "sha256-AAbexQvDoK+6GFJdhY6kqjA+6ECKRkidgWxkn4gMwAA=",
-        "owner": "nix-darwin",
-        "repo": "nix-darwin",
-        "rev": "d5bd9cd77aea4c0a8f49e7fd85545671a208ed15",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-darwin",
-        "repo": "nix-darwin",
-        "type": "github"
-      }
-    },
     "nixarr": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
         ],
-        "treefmt-nix": "treefmt-nix_2",
+        "treefmt-nix": "treefmt-nix",
         "vpnconfinement": "vpnconfinement",
         "website-builder": []
       },
@@ -548,7 +501,6 @@
     },
     "root": {
       "inputs": {
-        "angrr": "angrr",
         "chaotic-nyx": "chaotic-nyx",
         "crtified-nur": "crtified-nur",
         "disko": "disko",
@@ -601,27 +553,6 @@
       }
     },
     "treefmt-nix": {
-      "inputs": {
-        "nixpkgs": [
-          "angrr",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1780220602,
-        "narHash": "sha256-eynAfOmbmxJnkp7YewvCEbShNnnYJ9gLLqkzsYtBPeM=",
-        "owner": "numtide",
-        "repo": "treefmt-nix",
-        "rev": "db947814a175b7ca6ded66e21383d938df01c227",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "treefmt-nix",
-        "type": "github"
-      }
-    },
-    "treefmt-nix_2": {
       "inputs": {
         "nixpkgs": [
           "nixarr",

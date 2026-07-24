@@ -24,7 +24,7 @@ This module does not define `core.*` options. It applies shared baseline configu
 
 Module configures:
 
-- overlays from `inputs.angrr` and `inputs.nix4vscode`,
+- overlays from `inputs.nix4vscode`,
 - `system.stateVersion` from `state.version` file in flake root,
 - trusted Nix users `root` and `@wheel`,
 - `nix.settings.auto-optimise-store = mkForce true`,

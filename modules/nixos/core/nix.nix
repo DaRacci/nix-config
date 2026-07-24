@@ -34,7 +34,6 @@ let
 in
 {
   nixpkgs.overlays = [
-    inputs.angrr.overlays.default
     inputs.nix4vscode.overlays.default
   ];
 
