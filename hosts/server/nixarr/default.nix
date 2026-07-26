@@ -56,14 +56,14 @@
       device = "/dev/dri/renderD128";
     };
 
-    forceEncodingConfig = true;
+    forceEncodingConfig = false;
     transcoding = {
       enableHardwareEncoding = true;
       maxConcurrentStreams = null;
       throttleTranscoding = true;
       hardwareEncodingCodecs = {
         hevc = true;
-        av1 = true;
+        av1 = false;
       };
       hardwareDecodingCodecs = {
         av1 = true;
