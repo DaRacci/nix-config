@@ -28,12 +28,6 @@ in
       };
     }
     {
-      bind = "SUPER+d";
-      class = "me.iepure.devtoolbox";
-      exec = getExe pkgs.devtoolbox;
-      position = "edge";
-    }
-    {
       bind = "SUPER+e";
       exec = getExe pkgs.nautilus;
       class = "org.gnome.Nautilus";

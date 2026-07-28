@@ -127,7 +127,10 @@ in
               };
 
               scheme = mkOption {
-                type = enum [ "http" "https" ];
+                type = enum [
+                  "http"
+                  "https"
+                ];
                 default = "http";
                 description = "URL scheme for scraping.";
               };

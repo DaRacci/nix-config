@@ -39,7 +39,6 @@ in
       iplookup-gtk
       hashes
       wildcard
-      devtoolbox
       d-spy
     ];
 
