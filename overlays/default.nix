@@ -48,7 +48,11 @@ in
       })
     ])
     // {
-      mcpo = prev.python3Packages.callPackage inputs.mcpo { };
+      mcpo = (prev.python3Packages.callPackage inputs.mcpo { }).overridePythonAttrs (old: {
+        patches = (old.patches or [ ]) ++ [
+          ./patches/mcpo-union-repr-compat.patch
+        ];
+      });
 
       hermes-agent =
         let

@@ -25,3 +25,7 @@ Orchestrates Model Context Protocol (MCP) servers, providing a centralized way t
 ### Operational Notes
 
 MCPO runs as a `DynamicUser` with a state directory at `/var/lib/mcpo`. The configuration is rendered via `sops.templates` and loaded into the service via systemd credentials. The service's `PATH` includes `bash`, `nodejs`, and `uv` by default to support various MCP server types.
+
+#### Package Patches
+
+- **mcpo-union-repr-compat.patch** — Applied via overlay in `overlays/patches/`. Upstream test `src/mcpo/tests/test_main.py` asserts `Union` repr starts with `"typing.Union["`, but Python 3.12+ may stringify unions as `str | float`. Patch uses `get_origin(result_type) is Union` instead. Build/test compatibility only; no runtime impact.
