@@ -17,7 +17,7 @@ stdenv.mkDerivation {
 
     cp ${lib.getExe orca-slicer} $out/bin/orca-slicer-zink
     cp -r ${orca-slicer}/share/icons $out/share
-    cp ${orca-slicer}/share/applications/OrcaSlicer.desktop $out/share/applications/OrcaSlicer-zink.desktop
+    cp ${orca-slicer}/share/applications/com.orcaslicer.OrcaSlicer.desktop $out/share/applications/com.orcaslicer.OrcaSlicerZink.desktop
 
     wrapProgram $out/bin/orca-slicer-zink \
       --set GBM_BACKEND dri \
@@ -26,7 +26,7 @@ stdenv.mkDerivation {
       --set MESA_LOADER_DRIVER_OVERRIDE zink \
       --set GALLIUM_DRIVER zink
 
-    substituteInPlace $out/share/applications/OrcaSlicer-zink.desktop \
+    substituteInPlace $out/share/applications/com.orcaslicer.OrcaSlicerZink.desktop \
       --replace-fail 'Exec=orca-slicer' 'Exec=orca-slicer-zink'
   '';
 
