@@ -189,24 +189,24 @@ in
 
       primary = mkOption {
         type = str;
-        default = "deepseek/deepseek-v4-flash";
+        default = "deepseek/deepseek-v4-flash-latest";
         description = "The primary language model to use for the AI agent.";
       };
 
       vision = mkOption {
         type = str;
-        default = "google/gemini-3-flash-preview";
+        default = "xiaomi/mimo-v2.5";
         description = "The vision model to delegate image understanding tasks to.";
       };
 
       compression = mkOption {
         type = str;
-        default = "deepseek/deepseek-v4-flash";
+        default = "deepseek/deepseek-v4-flash-latest";
         description = ''
           The model to use for compression of context, summorisation and similar tasks that don't require reasoning.
           This model still needs a decently sized context window to be effective.
 
-          Used for auxilary models:
+          Used for auxiliary models:
         '';
       };
 
@@ -216,7 +216,7 @@ in
         description = ''
           The simpleton model to delegate tasks to that require less reasoning, basic understanding and small context windows.
 
-          Used for auxilary models:
+          Used for auxiliary models:
         '';
       };
 
@@ -226,7 +226,7 @@ in
         description = ''
           The smartest model to use for complex reasoning and decision-making tasks.
 
-          Used for auxilary models:
+          Used for auxiliary models:
         '';
       };
     };
@@ -312,6 +312,8 @@ in
           };
 
           agent = {
+            # this just breaks so much.
+            verify_on_stop = false;
             max_turns = 150;
             gateway_timeout = 1800;
             restart_drain_timeout = 180;
