@@ -35,6 +35,7 @@ pkgs.mkShellNoCC {
     dust
     duf
     ncdu
+    ttl
 
     # Core tooling typically expected
     uutils-coreutils-noprefix

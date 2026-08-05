@@ -33,5 +33,6 @@
   home.packages = with pkgs; [
     procs
     doggo
+    ttl
   ];
 }
