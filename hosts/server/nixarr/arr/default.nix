@@ -9,7 +9,8 @@
     ./tv.nix
   ];
 
-  services.flaresolverr.enable = true;
+  # This shit broken asf
+  services.flaresolverr.enable = false;
   systemd.services.flaresolverr = {
     unitConfig = {
       StartLimitIntervalSec = "60m";
