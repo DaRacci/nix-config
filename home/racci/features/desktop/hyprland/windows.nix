@@ -8,7 +8,7 @@
     custom-settings = {
       windowrule = {
         pictureInPicture = {
-          matcher = [ { title = "^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$"; } ];
+          matcher = [ { title = "^([Pp]icture[-\\s]?[Ii]n[-\\s]?[Pp]icture)(.*)$"; } ];
           rule = {
             keepAspectRatio = true;
             float = true;
@@ -111,7 +111,7 @@
         dropdownMenus = {
           matcher = [
             { class = "^(org.pulseaudio.pavucontrol)$"; }
-            { class = "^(\.blueman-manager-wrapped)$"; }
+            { class = "^(\\.blueman-manager-wrapped)$"; }
           ];
           rule = {
             float = true;

@@ -23,6 +23,9 @@ let
 
             #TODO:Decky loader requirement, remove when possible
             "pnpm-9.15.9"
+
+            #TODO:https://github.com/NixOS/nixpkgs/pull/525946
+            "elasticsearch-7.17.27"
           ];
 
           cudaSupport = builtins.elem "cuda" accelerators;

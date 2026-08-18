@@ -66,7 +66,7 @@ in
               # TODO:https://github.com/NousResearch/hermes-agent/pull/48637
               ./patches/hermes-agent-pr-48637-lazy-deps.patch
               # TODO:https://github.com/NousResearch/hermes-agent/pull/53202
-              ./patches/hermes-agent-pr-61443-node-headers-hash.patch
+              # ./patches/hermes-agent-pr-61443-node-headers-hash.patch
             ];
           };
         in

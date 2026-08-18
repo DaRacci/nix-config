@@ -58,6 +58,7 @@
   services = {
     transmission.openPeerPorts = lib.mkForce true;
     sabnzbd.allowConfigWrite = true;
+    sabnzbd.configFile = null;
   };
 
   systemd.services.transmission = {

@@ -111,13 +111,13 @@
 
       hostnames = {
         replace = {
-          "(.*\.)\.fandom\.com$" = "https://breezewiki.catsarch.com/$1/";
+          "(.*\\.)\\.fandom\\.com$" = "https://breezewiki.catsarch.com/$1/";
         };
         remove = [
-          "(.*\.)?facebook.com$"
+          "(.*\\.)?facebook.com$"
         ];
         high_priority = [
-          "(.*\.)?wikipedia.org$"
+          "(.*\\.)?wikipedia.org$"
         ];
       };
 
