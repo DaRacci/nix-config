@@ -65,8 +65,8 @@ in
             patches = [
               # TODO:https://github.com/NousResearch/hermes-agent/pull/48637
               ./patches/hermes-agent-pr-48637-lazy-deps.patch
-              # TODO:https://github.com/NousResearch/hermes-agent/pull/53202
-              # ./patches/hermes-agent-pr-61443-node-headers-hash.patch
+              # TODO:https://github.com/NousResearch/hermes-agent/pull/87820
+              ./patches/hermes-agent-pr-87820-desktop-build-tsconfig.patch
             ];
           };
         in
@@ -117,7 +117,6 @@ in
     discord = prev.discord.override {
       withOpenASAR = true;
       withVencord = true;
-      nss = final.nss_latest;
     };
 
     bottles = prev.bottles.override {

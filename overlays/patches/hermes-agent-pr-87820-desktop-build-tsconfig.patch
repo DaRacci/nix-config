@@ -1,0 +1,32 @@
+diff --git a/apps/desktop/tsconfig.build.json b/apps/desktop/tsconfig.build.json
+new file mode 100644
+index 000000000000..8ef86ea75b60
+--- /dev/null
++++ b/apps/desktop/tsconfig.build.json
+@@ -0,0 +1,10 @@
++{
++  "extends": "./tsconfig.json",
++  "exclude": [
++    "e2e",
++    "electron",
++    "playwright.config.ts",
++    "**/*.test.ts",
++    "**/*.test.tsx"
++  ]
++}
+diff --git a/nix/desktop.nix b/nix/desktop.nix
+index fa76993d27c0..fccfcad530c6 100644
+--- a/nix/desktop.nix
++++ b/nix/desktop.nix
+@@ -60,8 +60,9 @@ let
+       patchShebangs .
+
+       pushd apps/desktop
+-        # typecheck :3
+-        npm exec -- tsc -b
++        # Keep the packaged renderer self-contained while the regular desktop
++        # config continues type-checking its test suite and shared fixtures.
++        npm exec -- tsc -b tsconfig.build.json
+
+         # build the renderer bundle
+         # vite's emptyOutDir wipes dist/ on every run
