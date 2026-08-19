@@ -48,8 +48,7 @@
   inputs = {
     # Packages
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    #TODO:https://github.com/nlewo/nix2container/issues/186
-    nix2container.url = "github:nlewo/nix2container?rev=e5496ab66e9de9e3f67dc06f692dfbc471b6316e";
+    nix2container.url = "github:nlewo/nix2container";
     lix = {
       url = "https://git.lix.systems/lix-project/lix/archive/release-2.94.tar.gz";
       flake = false;
