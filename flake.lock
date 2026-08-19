@@ -160,8 +160,7 @@
         "nix2container": "nix2container",
         "nixpkgs": "nixpkgs_2",
         "systems": "systems",
-        "tabby": "tabby",
-        "tabby-agent": "tabby-agent"
+        "tabby": "tabby"
       }
     },
     "systems": {
@@ -189,18 +188,6 @@
       "original": {
         "type": "file",
         "url": "https://raw.githubusercontent.com/dillonfrederica/nixpkgs/refs/heads/tabby-0.32.0/pkgs/by-name/ta/tabby/package.nix"
-      }
-    },
-    "tabby-agent": {
-      "flake": false,
-      "locked": {
-        "narHash": "sha256-LvB6VND4JcJ6BH2s/+R/Ao0BCbjjB5DBbrZ8TOIuqUw=",
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/r-ryantm/nixpkgs/refs/heads/auto-update/tabby-agent/pkgs/by-name/ta/tabby-agent/package.nix"
-      },
-      "original": {
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/r-ryantm/nixpkgs/refs/heads/auto-update/tabby-agent/pkgs/by-name/ta/tabby-agent/package.nix"
       }
     }
   },

@@ -68,12 +68,6 @@
       flake = false;
       type = "file";
     };
-    #TODO:https://github.com/NixOS/nixpkgs/pull/484702
-    tabby-agent = {
-      url = "https://raw.githubusercontent.com/r-ryantm/nixpkgs/refs/heads/auto-update/tabby-agent/pkgs/by-name/ta/tabby-agent/package.nix";
-      flake = false;
-      type = "file";
-    };
 
     # Misc Flake Inputs for other Inputs
     systems.url = "github:nix-systems/default";
