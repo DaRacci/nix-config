@@ -31,6 +31,8 @@ in
   options.server.proxy = {
     domain = mkOption {
       type = str;
+      default = getIOPrimaryHostAttr "server.proxy.domain";
+      defaultText = literalExpression "getIOPrimaryHostAttr \"server.proxy.domain\"";
       description = "The base domain for all virtual hosts.";
     };
 

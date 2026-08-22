@@ -1,7 +1,11 @@
 {
   modulesPath,
+  lib,
   ...
 }:
+let
+  inherit (lib) mkDefault;
+in
 {
   imports = [
     "${modulesPath}/virtualisation/proxmox-lxc.nix"
@@ -14,13 +18,13 @@
     getty.autologinUser = "root";
 
     metrics = {
-      enable = true;
+      enable = mkDefault true;
       upgradeStatus = {
-        enable = true;
-        uptimeKuma.enable = true;
+        enable = mkDefault true;
+        uptimeKuma.enable = mkDefault true;
       };
       hacompanion = {
-        enable = true;
+        enable = mkDefault true;
         sensor = {
           cpu_usage.enable = true;
           uptime.enable = true;
