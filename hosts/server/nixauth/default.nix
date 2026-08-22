@@ -7,6 +7,11 @@ let
     ;
 in
 {
+  services.metrics = {
+    upgradeStatus.enable = false;
+    hacompanion.enable = false;
+  };
+
   sops.secrets =
     let
       acmePermissions = {

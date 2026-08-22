@@ -8,4 +8,9 @@ _: {
       };
     };
   };
+
+  services.metrics = {
+    upgradeStatus.enable = false;
+    hacompanion.enable = false;
+  };
 }

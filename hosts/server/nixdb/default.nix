@@ -22,7 +22,10 @@ let
     );
 in
 {
-  core.sops.hostSecretsFile = ./secrets.yaml;
+  services.metrics = {
+    upgradeStatus.enable = false;
+    hacompanion.enable = false;
+  };
 
   server = {
     database.postgres.postgres = { };

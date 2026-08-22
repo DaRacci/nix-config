@@ -123,9 +123,6 @@ in
     {
       sops.secrets."DB_GUARDIAN_PSK" = {
         sopsFile = "${self}/hosts/server/secrets.yaml";
-        # Compatibility shim: SOPS file still carries old key name IO_GUARDIAN_PSK.
-        # Remove this and rename DB_GUARDIAN_PSK → IO_GUARDIAN_PSK in secrets.yaml when rotated.
-        key = "DB_GUARDIAN_PSK";
       };
     }
 
