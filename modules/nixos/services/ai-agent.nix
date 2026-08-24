@@ -37,7 +37,9 @@ let
   cfg = config.services.ai-agent;
 in
 {
-  imports = optional importExternals inputs.hermes-agent.nixosModules.default;
+  imports =
+    optional importExternals inputs.hermes-agent.nixosModules.default
+    ++ optional importExternals inputs.trafilatura-scrape.nixosModules.default;
 
   options.services.ai-agent = {
     enable = mkEnableOption "autonomous AI Agent service";
@@ -232,7 +234,8 @@ in
     };
 
     extras = {
-      plugins = mkEnableOption "enable extra plugins for the agent";
+      plugins = mkEnableOption "extra plugins for the agent";
+      scraper = mkEnableOption "trafilatura-scrape as a self-hosted Firecrawl-compatible web scrape server.";
     };
 
     containerPostStart = mkOption {
@@ -379,10 +382,6 @@ in
             engine = "auto";
             dialog_policy = "must_respond";
             dialog_timeout_s = 300;
-          };
-
-          web = {
-            search_backend = "searxng";
           };
 
           display = {
@@ -579,6 +578,18 @@ in
       systemd.services.hermes-agent.postStart = ''
         ${lib.getExe pkgs.docker} exec -u hermes hermes-agent bash -c 'pip install --upgrade rtk-hermes 2> /dev/null || true';
       '';
+    })
+
+    (mkIf (cfg.enable && cfg.extras.scraper) {
+      services.trafilatura-scrape.enable = true;
+
+      services.hermes-agent = {
+        settings.web.search_backend = "searxng";
+        environment = {
+          FIRECRAWL_API_URL = "http://127.0.0.1:${toString config.services.trafilatura-scrape.port}";
+          SEARXNG_URL = "https://search.racci.dev";
+        };
+      };
     })
 
     (mkIf (cfg.enable && cfg.apiServer.enable) {

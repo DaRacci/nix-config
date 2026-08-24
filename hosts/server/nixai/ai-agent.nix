@@ -103,6 +103,7 @@ in
 
       extras = {
         plugins = true;
+        scraper = true;
       };
 
       platform = {

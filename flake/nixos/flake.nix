@@ -48,6 +48,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-parts.follows = "flake-parts";
     };
+    trafilatura-scrape = {
+      url = "git+https://codeberg.org/Racci/trafilatura_scrape";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # System Configurations
     jovian = {

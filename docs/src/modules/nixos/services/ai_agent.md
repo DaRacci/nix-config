@@ -106,3 +106,8 @@ Enable long-term memory with `services.ai-agent.memory.enable = true;`. This swi
 ```
 
 **Database location:** `/home/hermes/mnemosyne.db` (SQLite with FTS5 hybrid ranking + vector search).
+
+### Extras: Web Scraper & Search
+
+Enable the self-hosted web scraping and search backend with `services.ai-agent.extras.scraper = true;`.
+This runs the [trafilatura-scrape](https://codeberg.org/Racci/trafilatura_scrape) Firecrawl-compatible server (`services.trafilatura-scrape`) and wires it into Hermes.
