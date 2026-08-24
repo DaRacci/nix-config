@@ -14,7 +14,6 @@
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-compat.follows = "";
-        gitignore.follows = "";
       };
     };
     devenv = {

@@ -62,10 +62,7 @@
     };
     bash-env-json = {
       url = "github:tesujimath/bash-env-json";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     bash-env-nushell = {
       url = "github:tesujimath/bash-env-nushell";
