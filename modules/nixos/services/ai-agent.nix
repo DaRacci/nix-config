@@ -236,6 +236,7 @@ in
     extras = {
       plugins = mkEnableOption "extra plugins for the agent";
       scraper = mkEnableOption "trafilatura-scrape as a self-hosted Firecrawl-compatible web scrape server.";
+      browser = mkEnableOption "headless browser for web scraping and automation";
     };
 
     containerPostStart = mkOption {
@@ -389,13 +390,6 @@ in
               # This roughly compresses deepseek models once they hit 350K tokens instead of 500K.
               "deepseek-v4" = 0.35;
             };
-          };
-
-          browser = {
-            record_sessions = true;
-            engine = "auto";
-            dialog_policy = "must_respond";
-            dialog_timeout_s = 300;
           };
 
           display = {
@@ -617,6 +611,33 @@ in
           FIRECRAWL_API_URL = "http://127.0.0.1:${toString config.services.trafilatura-scrape.port}";
           SEARXNG_URL = "https://search.racci.dev";
         };
+      };
+    })
+
+    (mkIf (cfg.enable && cfg.extras.browser) {
+      services = {
+        hermes-agent = {
+          environment.LIGHTPANDA_DISABLE_TELEMETRY = "true";
+          settings.plugins.enabled = [ "web-browser" ];
+        };
+
+        ai-agent.containerPostStart = [
+          ''
+            BIN_PATH="$HOME/.local/bin"
+            EXEC_PATH="$BIN_PATH/lightpanda"
+            TEMP_DIR=$(mktemp -d)
+            TEMP_FILE="$TEMP_DIR/lightpanda"
+
+            curl -L -o "$TEMP_FILE" https://github.com/lightpanda-io/browser/releases/latest/download/lightpanda-x86_64-linux
+            chmod a+x "$TEMP_FILE"
+
+            mkdir -p "$BIN_PATH"
+            mv "$TEMP_FILE" "$EXEC_PATH"
+            rm -rf "$TEMP_DIR"
+
+            echo "[post-start] lightpanda installed to $EXEC_PATH"
+          ''
+        ];
       };
     })
 
