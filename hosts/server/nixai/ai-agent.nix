@@ -175,6 +175,12 @@ in
     ''
 
     ''
+      touch /home/hermes/.profile
+      grep -q '^export HERMES_HOME=' /home/hermes/.profile \
+        || echo 'export HERMES_HOME=/data/.hermes' >> /home/hermes/.profile
+    ''
+
+    ''
       pkill -f "sshd.*-f /etc/ssh/sshd_config_hermes" 2>/dev/null || true
       sleep 1
       ${pkgs.openssh}/bin/sshd -f /etc/ssh/sshd_config_hermes -E /tmp/sshd-container.log
