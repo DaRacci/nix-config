@@ -101,6 +101,10 @@ in
         wyoming-stt.enable = true;
       };
 
+      extras = {
+        plugins = true;
+      };
+
       platform = {
         discord = {
           enable = true;

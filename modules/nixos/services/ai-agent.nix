@@ -540,18 +540,21 @@ in
         #TODO:Need a way to auto update these source only plugins.
         extraPlugins = [
           (pkgs.fetchFromGitHub {
+            name = "rtk-hermes";
             owner = "FelineStateMachine";
             repo = "hermes-openspec";
-            rev = "v0.1.0";
-            hash = "";
+            rev = "493b42cd95d2a30f967ede5a53eb22d1bd248fb9";
+            hash = "sha256-opSPs/yX9m5if9KP5qVmBLDYxeuYlidHNrFomTkee+k=";
           })
           (pkgs.fetchFromGitHub {
+            name = "hermes-hora";
             owner = "meleeislandbot";
             repo = "hermes-hora";
-            version = "v0.1.1";
-            hash = "";
+            rev = "v0.1.1";
+            hash = "sha256-7x5zfogYe8yDaMQZCqHL2lHyd6Y2xy9rsgF+kSl0t+A=";
           })
           (pkgs.fetchFromGitHub {
+            name = "agentiker-code-intel";
             owner = "IVRZ-da";
             repo = "agentiker-code-intel";
             rev = "v0.6.13";
