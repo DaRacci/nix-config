@@ -35,6 +35,51 @@ let
     ;
 
   cfg = config.services.ai-agent;
+
+  # Takes a list of packages, returning a list of the same packages with any packages matching depNames removed.
+  depsMinusNamed =
+    depNames: pkgs:
+    let
+      depNamesSet = builtins.listToAttrs (
+        map (name: {
+          inherit name;
+          value = true;
+        }) depNames
+      );
+      isNotNamedDep = pkg: !(builtins.hasAttr (lib.getName pkg) depNamesSet);
+    in
+    filter isNotNamedDep pkgs;
+
+  mnemosyne-hermes = pkgs.mnemosyne-hermes.overridePythonAttrs (base: {
+    dependencies =
+      (depsMinusNamed [ "pyyaml" ] base.dependencies)
+      |> (map (dep: if (lib.getName dep) == "mnemosyne-memory" then mnemosyne-memory else dep));
+    dontCheckRuntimeDeps = true;
+  });
+  mnemosyne-memory = pkgs.mnemosyne-memory.overridePythonAttrs (base: {
+    dependencies = depsMinusNamed [ "pyyaml" ] base.dependencies;
+    dontCheckRuntimeDeps = true;
+  });
+  hermes-curator-evolver = pkgs.hermes-curator-evolver.overridePythonAttrs (base: {
+    dependencies = depsMinusNamed [ "pyyaml" ] base.dependencies;
+    dontCheckRuntimeDeps = true;
+  });
+
+  mergeDeep =
+    lhs: rhs:
+    if builtins.isAttrs lhs && builtins.isAttrs rhs then
+      lhs // lib.mapAttrs (name: value: if lhs ? ${name} then mergeDeep lhs.${name} value else value) rhs
+    else if builtins.isList lhs && builtins.isList rhs then
+      lhs ++ rhs
+    else
+      rhs;
+
+  hermesConfigType = lib.types.mkOptionType {
+    name = "ai-agent-hermes-settings";
+    description = "Hermes config attrs, deep-merged with list concatenation.";
+    check = builtins.isAttrs;
+    merge = _loc: defs: lib.foldl' mergeDeep { } (map (d: d.value) defs);
+  };
 in
 {
   imports =
@@ -233,6 +278,19 @@ in
       };
     };
 
+    settings = mkOption {
+      type = hermesConfigType;
+      default = { };
+      description = ''
+        Hermes config to merge into `services.hermes-agent.settings`.
+
+        This is a local option that merges correctly across feature toggles.
+        The upstream `services.hermes-agent.settings` uses `lib.recursiveUpdate` for its config type,
+        which replaces lists instead of concatenating them, so separate blocks would clobber each other.
+        This option deep-merges with list concatenation and is emitted once as the final value of `services.hermes-agent.settings`.
+      '';
+    };
+
     extras = {
       plugins = mkEnableOption "extra plugins for the agent";
       scraper = mkEnableOption "trafilatura-scrape as a self-hosted Firecrawl-compatible web scrape server.";
@@ -272,26 +330,30 @@ in
 
   config = mkMerge [
     (mkIf cfg.enable {
-      services.hermes-agent = {
-        enable = true;
-        package = pkgs.hermes-agent;
-        container.enable = true;
+      services = {
+        hermes-agent = {
+          enable = true;
+          package = pkgs.hermes-agent;
+          container.enable = true;
 
-        extraDependencyGroups = [
-          "acp"
-          "homeassistant"
-          "messaging"
-          "voice"
-          "youtube"
-        ];
+          extraDependencyGroups = [
+            "acp"
+            "homeassistant"
+            "messaging"
+            "voice"
+            "youtube"
+          ];
 
-        environment = {
-          BASH_ENV = "/home/hermes/.bashrc";
-          HOME = "/home/hermes"; # For some reason this is getting set to /var/lib/hermes inside the container
-          SUDO_PASSWORD = ""; # Container has no password but still prompts, this disables the prompt.
+          environment = {
+            BASH_ENV = "/home/hermes/.bashrc";
+            HOME = "/home/hermes"; # For some reason this is getting set to /var/lib/hermes inside the container
+            SUDO_PASSWORD = ""; # Container has no password but still prompts, this disables the prompt.
+          };
+
+          inherit (cfg) settings;
         };
 
-        settings = {
+        ai-agent.settings = {
           model = {
             base_url = "https://openrouter.ai/api/v1";
             default = cfg.models.primary;
@@ -456,7 +518,7 @@ in
     })
 
     (mkIf (cfg.enable && cfg.dashboard.enable) {
-      services.hermes-agent.settings.dashboard = {
+      services.ai-agent.settings.dashboard = {
         public_url = cfg.dashboard.publicURL;
       };
 
@@ -489,100 +551,107 @@ in
     })
 
     (mkIf (cfg.enable && cfg.memory.enable) {
-      services.hermes-agent = {
-        extraPythonPackages = [
-          pkgs.mnemosyne-memory
-          pkgs.mnemosyne-hermes
-        ];
+      services = {
+        hermes-agent = {
+          extraPythonPackages = [
+            mnemosyne-memory
+            mnemosyne-hermes
+          ];
 
-        environment = {
-          MNEMOSYNE_LLM_ENABLED = "true";
-          MNEMOSYNE_HOST_LLM_ENABLED = "true";
-          MNEMOSYNE_USE_CAVEMAN = "true";
-          MNEMOSYNE_AUTO_SLEEP_ENABLED = "true";
-          MNEMOSYNE_LLM_CONFLICT_DETECTION = "true";
-          MNEMOSYNE_ENHANCED_RECALL = "1";
-          MNEMOSYNE_PROACTIVE_LINKING = "1";
-          MNEMOSYNE_FACT_RECALL_ENABLED = "1";
+          environment = {
+            MNEMOSYNE_LLM_ENABLED = "true";
+            MNEMOSYNE_HOST_LLM_ENABLED = "true";
+            MNEMOSYNE_USE_CAVEMAN = "true";
+            MNEMOSYNE_AUTO_SLEEP_ENABLED = "true";
+            MNEMOSYNE_LLM_CONFLICT_DETECTION = "true";
+            MNEMOSYNE_ENHANCED_RECALL = "1";
+            MNEMOSYNE_PROACTIVE_LINKING = "1";
+            MNEMOSYNE_FACT_RECALL_ENABLED = "1";
+          };
         };
 
-        settings = {
-          memory = {
-            provider = "mnemosyne";
-            memory_enabled = false;
-            user_profile_enabled = false;
-            mnemosyne = {
-              auto_sleep = true;
-              profile_isolation = true;
-              shared_surface_read = true;
-              sleep_threshold = 50;
+        ai-agent = {
+          settings = {
+            memory = {
+              provider = "mnemosyne";
+              memory_enabled = false;
+              user_profile_enabled = false;
+              mnemosyne = {
+                auto_sleep = true;
+                profile_isolation = true;
+                shared_surface_read = true;
+                sleep_threshold = 50;
+                tools = null; # Null means all
+              };
             };
+
+            plugins.enabled = [ "mnemosyne" ];
           };
 
-          plugins.enabled = [ "mnemosyne" ];
+          containerPostStart = [
+            ''
+              sudo rm /data/.hermes/plugins/mnemosyne || true
+              ln -s "${mnemosyne-hermes}/lib/${mnemosyne-hermes.pythonModule.libPrefix}/site-packages/mnemosyne_hermes" /data/.hermes/plugins/mnemosyne
+            ''
+          ];
         };
       };
-
-      systemd.services.hermes-agent.postStart = ''
-        export HERMES_HOME="/var/lib/hermes/.hermes"
-        ${lib.getExe pkgs.mnemosyne-hermes} install --force 2> /dev/null
-      '';
     })
 
     (mkIf (cfg.enable && cfg.extras.plugins) {
-      services.hermes-agent = {
-        extraPackages = [
-          pkgs.openspec
-          pkgs.hermes-curator-evolver
-          pkgs.ast-grep
-          pkgs.tree-sitter
-        ];
-
-        extraPythonPackages = [
-          pkgs.rtk-hermes
-          pkgs.hermes-curator-evolver
-
-          # deps for agentiker-code-intel
-          pkgs.python312Packages.tree-sitter
-          pkgs.python312Packages.ast-grep-py
-          pkgs.python312Packages.rich
-          pkgs.python312Packages.pyyaml
-        ];
-
-        #TODO:Need a way to auto update these source only plugins.
-        extraPlugins = [
-          (pkgs.fetchFromGitHub {
-            name = "rtk-hermes";
-            owner = "FelineStateMachine";
-            repo = "hermes-openspec";
-            rev = "493b42cd95d2a30f967ede5a53eb22d1bd248fb9";
-            hash = "sha256-opSPs/yX9m5if9KP5qVmBLDYxeuYlidHNrFomTkee+k=";
-          })
-          (pkgs.fetchFromGitHub {
-            name = "hermes-hora";
-            owner = "meleeislandbot";
-            repo = "hermes-hora";
-            rev = "v0.1.1";
-            hash = "sha256-7x5zfogYe8yDaMQZCqHL2lHyd6Y2xy9rsgF+kSl0t+A=";
-          })
-          (pkgs.fetchFromGitHub {
-            name = "agentiker-code-intel";
-            owner = "IVRZ-da";
-            repo = "agentiker-code-intel";
-            rev = "v0.6.13";
-            hash = "sha256-DEKSe1mrN0KNK0JrzlPJL6tNIjQ9COARD0ddrkHISlk=";
-          })
-        ];
-
-        settings.plugins = {
-          enabled = [
-            "rtk-hermes"
-            "openspec"
-            "hermes-hora"
-            "code_intel"
+      services = {
+        hermes-agent = {
+          extraPackages = [
+            pkgs.openspec
+            pkgs.hermes-curator-evolver
+            pkgs.ast-grep
+            pkgs.tree-sitter
           ];
 
-          entries.hermes-hora = {
+          extraPythonPackages = [
+            pkgs.rtk-hermes
+            hermes-curator-evolver
+
+            # deps for agentiker-code-intel
+            pkgs.python312Packages.tree-sitter
+            pkgs.python312Packages.ast-grep-py
+          ];
+
+          #TODO:Need a way to auto update these source only plugins.
+          extraPlugins = [
+            (pkgs.fetchFromGitHub {
+              name = "hermes-openspec";
+              owner = "FelineStateMachine";
+              repo = "hermes-openspec";
+              rev = "493b42cd95d2a30f967ede5a53eb22d1bd248fb9";
+              hash = "sha256-opSPs/yX9m5if9KP5qVmBLDYxeuYlidHNrFomTkee+k=";
+            })
+            (pkgs.fetchFromGitHub {
+              name = "hermes-hora";
+              owner = "meleeislandbot";
+              repo = "hermes-hora";
+              rev = "v0.1.1";
+              hash = "sha256-7x5zfogYe8yDaMQZCqHL2lHyd6Y2xy9rsgF+kSl0t+A=";
+            })
+            (pkgs.fetchFromGitHub {
+              name = "agentiker-code-intel";
+              owner = "IVRZ-da";
+              repo = "agentiker-code-intel";
+              rev = "v0.6.13";
+              hash = "sha256-DEKSe1mrN0KNK0JrzlPJL6tNIjQ9COARD0ddrkHISlk=";
+            })
+          ];
+        };
+
+        ai-agent.settings = {
+          plugins.enabled = [
+            "rtk-rewrite"
+            "openspec"
+            "hermes-hora"
+            "agentiker-code-intel"
+            "curator-evolver"
+          ];
+          plugins.entries.hermes-hora = {
             timezone = config.time.timeZone;
           };
         };
@@ -594,35 +663,33 @@ in
     })
 
     (mkIf (cfg.enable && cfg.extras.scraper) {
-      services.trafilatura-scrape.enable = true;
-
-      services.hermes-agent = {
-        settings = {
-          web = {
-            search_backend = "searxng";
-            extract_backend = "firecrawl";
-          };
+      services = {
+        trafilatura-scrape.enable = true;
+        ai-agent.settings = {
           plugins.enabled = [
             "web-searxng"
             "web-firecrawl"
           ];
+          web = {
+            search_backend = "searxng";
+            extract_backend = "firecrawl";
+          };
         };
-        environment = {
-          FIRECRAWL_API_URL = "http://127.0.0.1:${toString config.services.trafilatura-scrape.port}";
-          SEARXNG_URL = "https://search.racci.dev";
+        hermes-agent = {
+          environment = {
+            FIRECRAWL_API_URL = "http://127.0.0.1:${toString config.services.trafilatura-scrape.port}";
+            SEARXNG_URL = "https://search.racci.dev";
+          };
         };
       };
     })
 
     (mkIf (cfg.enable && cfg.extras.browser) {
       services = {
-        hermes-agent = {
-          environment.LIGHTPANDA_DISABLE_TELEMETRY = "true";
+        hermes-agent.environment.LIGHTPANDA_DISABLE_TELEMETRY = "true";
+        ai-agent = {
           settings.plugins.enabled = [ "web-browser" ];
-        };
-
-        ai-agent.containerPostStart = [
-          ''
+          containerPostStart = ''
             BIN_PATH="$HOME/.local/bin"
             EXEC_PATH="$BIN_PATH/lightpanda"
             TEMP_DIR=$(mktemp -d)
@@ -636,8 +703,8 @@ in
             rm -rf "$TEMP_DIR"
 
             echo "[post-start] lightpanda installed to $EXEC_PATH"
-          ''
-        ];
+          '';
+        };
       };
     })
 
@@ -656,7 +723,7 @@ in
     })
 
     (mkIf (cfg.enable && cfg.voice.enable) {
-      services.hermes-agent.settings = {
+      services.ai-agent.settings = {
         voice.auto_tts = false;
 
         stt = {
@@ -700,9 +767,9 @@ in
         };
       };
 
-      services.hermes-agent = {
-        environmentFiles = [ config.sops.templates."HERMES_DISCORD_ENV".path ];
-        settings.discord = {
+      services = {
+        hermes-agent.environmentFiles = [ config.sops.templates."HERMES_DISCORD_ENV".path ];
+        ai-agent.settings.discord = {
           auto_thread = true;
           require_mention = true;
         };
@@ -748,9 +815,9 @@ in
         HERMES_DASHBOARD_OIDC_SCOPES = concatStringsSep " " cfg.dashboard.oidc.scopes;
       };
 
-      services.hermes-agent = {
-        environmentFiles = [ config.sops.templates."HERMES_DASHBOARD_OIDC_ENV".path ];
-        settings.dashboard.oauth = {
+      services = {
+        hermes-agent.environmentFiles = [ config.sops.templates."HERMES_DASHBOARD_OIDC_ENV".path ];
+        ai-agent.settings.dashboard.oauth = {
           inherit (cfg.dashboard.oidc) provider;
           "${cfg.dashboard.oidc.provider}" = {
             inherit (cfg.dashboard.oidc) issuer scopes;

@@ -181,12 +181,12 @@ in
         description = "Mnemosyne Sync Server";
 
         environment = {
-          MNEMOSYNE_SYNC_KEY_FILE = mkIf (cfg.server.sync.apiKeyFile != null) "%d/mnemosyne-sync-api-key";
+          # MNEMOSYNE_SYNC_KEY_SOURCE = mkIf (cfg.server.sync.apiKeyFile != null) "file:%d/mnemosyne-sync-api-key";
         };
 
         serviceConfig = {
           ExecStartPre = dockerPreExecSecret cfg.server.mcp;
-          ExecStart = mkCommand "${lib.getExe package} sync-serve --host \"${cfg.server.sync.host}\" --port \"${toString cfg.server.sync.port}\"" cfg.server.sync;
+          ExecStart = mkCommand "${lib.getExe package} sync-serve --db-path \"${cfg.dataDir}/sync/surface.db\" --initialize-surface --behind-tls-proxy --api-key-file \"%d/mnemosyne-sync-api-key\" --host \"${cfg.server.sync.host}\" --port \"${toString cfg.server.sync.port}\"" cfg.server.sync;
           LoadCredential = optional (
             cfg.server.sync.apiKeyFile != null
           ) "mnemosyne-sync-api-key:${cfg.server.sync.apiKeyFile}";
