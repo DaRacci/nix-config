@@ -284,6 +284,7 @@ in
         environment = {
           BASH_ENV = "/home/hermes/.bashrc";
           HOME = "/home/hermes"; # For some reason this is getting set to /var/lib/hermes inside the container
+          SUDO_PASSWORD = ""; # Container has no password but still prompts, this disables the prompt.
         };
 
         settings = {
@@ -484,7 +485,6 @@ in
 
         environment = {
           MNEMOSYNE_HOST_LLM_ENABLED = "true";
-          SUDO_PASSWORD = ""; # Container has no password but still prompts, this disables the prompt.
         };
 
         settings = {
