@@ -381,6 +381,14 @@ in
 
           compression = {
             enabled = true;
+            progress_notices = true;
+            tail_mode = "lean";
+            proactive_prune_tokens = 48000;
+            model_thresholds = {
+              # Compact large context windows earlier since the cost of compression is lower than continuing with super large context windows.
+              # This roughly compresses deepseek models once they hit 350K tokens instead of 500K.
+              "deepseek-v4" = 0.35;
+            };
           };
 
           browser = {
