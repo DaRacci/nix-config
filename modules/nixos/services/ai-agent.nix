@@ -300,8 +300,14 @@ in
           checkpoints.enabled = true;
           code_execution.mode = "project";
 
+          plugins.enabled = [
+            # Builtins
+            "security-guidance"
+            "disk-cleanup"
+          ];
+
           cron = {
-            script_timeout_seconds = 600;
+            script_timeout_seconds = 3600;
             wrap_response = true;
           };
 
@@ -395,7 +401,7 @@ in
             persistent_output = true;
             inline_diffs = true;
             show_cost = true;
-            skin = "mono";
+            skin = "slate";
             language = "en";
             tool_progress = "all";
           };
@@ -584,7 +590,16 @@ in
       services.trafilatura-scrape.enable = true;
 
       services.hermes-agent = {
-        settings.web.search_backend = "searxng";
+        settings = {
+          web = {
+            search_backend = "searxng";
+            extract_backend = "firecrawl";
+          };
+          plugins.enabled = [
+            "web-searxng"
+            "web-firecrawl"
+          ];
+        };
         environment = {
           FIRECRAWL_API_URL = "http://127.0.0.1:${toString config.services.trafilatura-scrape.port}";
           SEARXNG_URL = "https://search.racci.dev";
