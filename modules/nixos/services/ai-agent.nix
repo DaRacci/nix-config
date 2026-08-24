@@ -212,7 +212,7 @@ in
 
       simpleton = mkOption {
         type = str;
-        default = "stepfun/step-3.5-flash";
+        default = "inclusionai/ling-3.0-flash";
         description = ''
           The simpleton model to delegate tasks to that require less reasoning, basic understanding and small context windows.
 
