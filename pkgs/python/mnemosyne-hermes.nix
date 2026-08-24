@@ -23,7 +23,10 @@ buildPythonPackage (attrs: {
 
   build-system = [ setuptools ];
 
-  dependencies = [ mnemosyne-memory pyyaml ];
+  dependencies = [
+    mnemosyne-memory
+    pyyaml
+  ];
 
   pythonImportsCheck = [ "mnemosyne_hermes" ];
 

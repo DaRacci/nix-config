@@ -80,8 +80,7 @@ def candidate_prefixes(prefix, output_path):
         add_variants(without_ns)
 
     stem = Path(output_path).stem
-    if stem.endswith("-options"):
-        stem = stem[: -len("-options")]
+    stem = stem.removesuffix("-options")
     add_variants(stem)
 
     return candidates

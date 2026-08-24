@@ -27,7 +27,8 @@ buildPythonPackage (attrs: {
 
   dependencies = [
     pyyaml
-  ] ++ attrs.passthru.optional-dependencies.embeddings;
+  ]
+  ++ attrs.passthru.optional-dependencies.embeddings;
 
   passthru.optional-dependencies = {
     embeddings = [

@@ -107,6 +107,8 @@ Enable long-term memory with `services.ai-agent.memory.enable = true;`. This swi
 
 **Database location:** `/home/hermes/mnemosyne.db` (SQLite with FTS5 hybrid ranking + vector search).
 
+The `mnemosyne-hermes` package ships a `plugin.yaml` whose `version` is stale (0.4.0 while the package is 0.5.0). This repo patches it to match the package version so Hermes reports the correct plugin version.
+
 ### Extras: Web Scraper & Search
 
 Enable the self-hosted web scraping and search backend with `services.ai-agent.extras.scraper = true;`.

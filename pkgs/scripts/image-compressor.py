@@ -10,10 +10,10 @@ import signal
 import subprocess
 import tempfile
 import threading
+from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple
 
 import magic
 from PIL import Image, UnidentifiedImageError
@@ -70,7 +70,7 @@ class FileResult:
 class HashCache:
     def __init__(self, cache_file: Path) -> None:
         self.cache_file = cache_file
-        self.entries: Dict[str, CacheEntry] = {}
+        self.entries: dict[str, CacheEntry] = {}
         self.modified = False
 
     def load(self) -> int:
@@ -95,7 +95,7 @@ class HashCache:
                 loaded += 1
         return loaded
 
-    def lookup(self, path: Path) -> Optional[CacheEntry]:
+    def lookup(self, path: Path) -> CacheEntry | None:
         stat = path.stat()
         entry = self.entries.get(str(path))
         if entry is None:
@@ -167,13 +167,13 @@ class App:
         )
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.hash_cache = HashCache(self.cache_dir / "hashcache.tsv")
-        self.images: List[Path] = []
+        self.images: list[Path] = []
         self.hash_hits = 0
         self.conversion_hits = 0
         self.errors = 0
         self.applied = 0
         self.skipped_no_gain = 0
-        self.progress: Optional[Progress] = None
+        self.progress: Progress | None = None
 
     def warn(self, message: str) -> None:
         CONSOLE.print(f"[warn] {message}", style="yellow")
@@ -226,9 +226,9 @@ class App:
 
     def compute_missing_hashes(
         self,
-        missing: List[Path],
-    ) -> Dict[Path, CacheEntry]:
-        results: Dict[Path, CacheEntry] = {}
+        missing: list[Path],
+    ) -> dict[Path, CacheEntry]:
+        results: dict[Path, CacheEntry] = {}
         if not missing:
             return results
         self.warn(f"hash misses={len(missing)}")
@@ -246,9 +246,7 @@ class App:
         CONSOLE.print(f"sha256: {computed} computed{suffix}.")
         return results
 
-    def hash_worker(
-        self, path: Path, _state: object
-    ) -> Tuple[Path, Optional[CacheEntry]]:
+    def hash_worker(self, path: Path, _state: object) -> tuple[Path, CacheEntry | None]:
         if STOP_EVENT.is_set():
             return path, None
         try:
@@ -264,10 +262,10 @@ class App:
             self.warn(f"hash failed: {path}: {exc}")
             return path, None
 
-    def cache_hashes(self) -> Tuple[Dict[Path, str], Dict[Path, str]]:
-        img_hash: Dict[Path, str] = {}
-        img_type: Dict[Path, str] = {}
-        missing: List[Path] = []
+    def cache_hashes(self) -> tuple[dict[Path, str], dict[Path, str]]:
+        img_hash: dict[Path, str] = {}
+        img_type: dict[Path, str] = {}
+        missing: list[Path] = []
 
         for path in self.images:
             entry = self.hash_cache.lookup(path)
@@ -309,8 +307,8 @@ class App:
 
     def convert_images(
         self,
-        img_hash: Dict[Path, str],
-        img_type: Dict[Path, str],
+        img_hash: dict[Path, str],
+        img_type: dict[Path, str],
     ) -> None:
         missing = [
             path
@@ -326,7 +324,7 @@ class App:
         )
         if not missing:
             return
-        convert_results: Dict[Path, bool] = {}
+        convert_results: dict[Path, bool] = {}
         self.warn(f"conversion misses={len(missing)}")
         self.run_progress(
             "Converting",
@@ -349,8 +347,8 @@ class App:
     def convert_worker(
         self,
         path: Path,
-        img_hash: Dict[Path, str],
-    ) -> Tuple[Path, bool]:
+        img_hash: dict[Path, str],
+    ) -> tuple[Path, bool]:
         return path, self.convert_one(path, img_hash[path])
 
     def verify_webp(self, path: Path) -> bool:
@@ -398,8 +396,8 @@ class App:
     def apply_worker(
         self,
         path: Path,
-        img_hash: Dict[Path, str],
-    ) -> Tuple[Path, str]:
+        img_hash: dict[Path, str],
+    ) -> tuple[Path, str]:
         status = self.apply_one(path, img_hash[path])
         return path, status
 
@@ -445,11 +443,11 @@ class App:
 
     def collect_results(
         self,
-        img_hash: Dict[Path, str],
-        img_type: Dict[Path, str],
-    ) -> List[FileResult]:
-        results: List[FileResult] = []
-        to_apply: List[Tuple[Path, str]] = []
+        img_hash: dict[Path, str],
+        img_type: dict[Path, str],
+    ) -> list[FileResult]:
+        results: list[FileResult] = []
+        to_apply: list[tuple[Path, str]] = []
 
         for path in self.images:
             sha256 = img_hash.get(path)
@@ -467,8 +465,7 @@ class App:
                 webp_size = cached.stat().st_size
             else:
                 webp_size = original_size
-            if webp_size > original_size:
-                webp_size = original_size
+            webp_size = min(webp_size, original_size)
             if (
                 self.apply
                 and detected_type != "webp"
@@ -490,7 +487,7 @@ class App:
                 )
             )
 
-        apply_results: Dict[Path, str] = {}
+        apply_results: dict[Path, str] = {}
         if self.apply and to_apply:
             self.run_progress(
                 "Applying",
@@ -525,7 +522,7 @@ class App:
                     result.action = "would replace" if saved > 0 else "no gain"
         return results
 
-    def render_results(self, results: List[FileResult]) -> None:
+    def render_results(self, results: list[FileResult]) -> None:
         table = Table(show_header=True, header_style="bold", expand=True)
         table.add_column("File", overflow="ellipsis", ratio=5, no_wrap=True)
         table.add_column("Original", justify="right", no_wrap=True, min_width=12)
@@ -579,10 +576,10 @@ class App:
     def run_progress(
         self,
         label: str,
-        items: List[Path],
+        items: list[Path],
         worker,
         state,
-        results: Optional[Dict[Path, object]] = None,
+        results: dict[Path, object] | None = None,
         description_suffix: str = "items",
     ) -> None:
         total = len(items)
@@ -663,7 +660,7 @@ class App:
         return 0
 
 
-def parse_args(argv: Optional[Iterable[str]] = None) -> argparse.Namespace:
+def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=("Compress images to cached WebP and optionally replace originals.")
     )
@@ -699,7 +696,7 @@ def install_signal_handlers(app: App) -> None:
     signal.signal(signal.SIGTERM, handle_interrupt)
 
 
-def main(argv: Optional[Iterable[str]] = None) -> int:
+def main(argv: Iterable[str] | None = None) -> int:
     args = parse_args(argv)
     if not args.directory.exists():
         CONSOLE.print(f"Error: '{args.directory}' does not exist.", style="red")

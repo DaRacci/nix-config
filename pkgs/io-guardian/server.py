@@ -89,7 +89,7 @@ def _wait_for_state(
         current_state = _decode_state(unit_obj.Unit.ActiveState)
         last_state = current_state
 
-        for dep_unit in dependencies.keys():
+        for dep_unit in dependencies:
             dep_obj, _ = dependency_objs[dep_unit]
             dep_obj.load()
             current_dep_state = _decode_state(dep_obj.Unit.ActiveState)
