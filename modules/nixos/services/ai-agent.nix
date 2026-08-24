@@ -484,7 +484,14 @@ in
         ];
 
         environment = {
+          MNEMOSYNE_LLM_ENABLED = "true";
           MNEMOSYNE_HOST_LLM_ENABLED = "true";
+          MNEMOSYNE_USE_CAVEMAN = "true";
+          MNEMOSYNE_AUTO_SLEEP_ENABLED = "true";
+          MNEMOSYNE_LLM_CONFLICT_DETECTION = "true";
+          MNEMOSYNE_ENHANCED_RECALL = "1";
+          MNEMOSYNE_PROACTIVE_LINKING = "1";
+          MNEMOSYNE_FACT_RECALL_ENABLED = "1";
         };
 
         settings = {
@@ -492,9 +499,15 @@ in
             provider = "mnemosyne";
             memory_enabled = false;
             user_profile_enabled = false;
+            mnemosyne = {
+              auto_sleep = true;
+              profile_isolation = true;
+              shared_surface_read = true;
+              sleep_threshold = 50;
+            };
           };
 
-          plugins.enabled = [ "mnemosyne-hermes" ];
+          plugins.enabled = [ "mnemosyne" ];
         };
       };
 
@@ -551,7 +564,7 @@ in
             "rtk-hermes"
             "openspec"
             "hermes-hora"
-            "code-intel"
+            "code_intel"
           ];
 
           entries.hermes-hora = {
