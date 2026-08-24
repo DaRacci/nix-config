@@ -414,6 +414,11 @@ in
             tool_progress = "all";
           };
 
+          sessions = {
+            auto_archive = true;
+            auto_archive_days = 7;
+          };
+
           streaming = {
             enabled = true;
             transport = "edit";
@@ -429,9 +434,9 @@ in
           security = {
             redact_secrets = true;
             tirith_enabled = true;
-            tirith_path = "tirith";
+            tirith_path = lib.getExe pkgs.tirith;
             tirith_timeout = 5;
-            tirith_fail_open = true;
+            tirith_fail_open = false;
           };
 
           approvals = {
