@@ -587,13 +587,6 @@ in
 
             plugins.enabled = [ "mnemosyne" ];
           };
-
-          containerPostStart = [
-            ''
-              sudo rm /data/.hermes/plugins/mnemosyne || true
-              ln -s "${mnemosyne-hermes}/lib/${mnemosyne-hermes.pythonModule.libPrefix}/site-packages/mnemosyne_hermes" /data/.hermes/plugins/mnemosyne
-            ''
-          ];
         };
       };
     })
