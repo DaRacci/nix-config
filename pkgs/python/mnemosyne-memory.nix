@@ -8,23 +8,26 @@
   mcp,
   anyio,
   cryptography,
+  pyyaml,
 }:
 
 buildPythonPackage (attrs: {
   pname = "mnemosyne-memory";
-  version = "3.10.1";
+  version = "3.15.1";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "mnemosyne-oss";
     repo = "mnemosyne";
     rev = "v${attrs.version}";
-    hash = "sha256-hpNnKc8ZNbqcy9X4Yu/4zMGEW7TCyT9aEfRv03ffuig=";
+    hash = "sha256-Lk0Xx+q266wNBpHrBJUVu98OFkGRN3GXmG2ZK3U1h7w=";
   };
 
   build-system = [ setuptools ];
 
-  dependencies = attrs.passthru.optional-dependencies.embeddings;
+  dependencies = [
+    pyyaml
+  ] ++ attrs.passthru.optional-dependencies.embeddings;
 
   passthru.optional-dependencies = {
     embeddings = [
