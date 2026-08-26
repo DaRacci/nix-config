@@ -151,7 +151,7 @@ in
           assertion = staticDbIdMappings ? ${name};
           message = ''
             Redis instance "${name}" does not have a static database_id mapping configured in
-            hosts/server/${config.server.databasePrimaryHost}/reddis-mappings.json.
+            hosts/server/${config.server.databasePrimaryHost}/redis-mappings.json.
 
             Run `update-redis-mappings` to automatically generate and insert the required mappings.
 

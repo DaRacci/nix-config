@@ -103,7 +103,7 @@ in
         description = ''
           Designate a server to act as the primary storage host.
 
-          This host will run MinIO and related storage services
+          This host will run SeaweedFS and related storage services
           for the entire server cluster.
         '';
       };
