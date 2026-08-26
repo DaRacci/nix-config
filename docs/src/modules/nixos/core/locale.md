@@ -10,6 +10,10 @@ Provide opinionated regional defaults for timezone and locale so all hosts start
 
 - **Main file**: [locale.nix](../../../../../modules/nixos/core/locale.nix)
 
+### Options
+
+{{#include ../../../../generated/core-locale-options.md}}
+
 ## Architecture / Services / Scope
 
 The module applies an Australian timezone default and enables Australian and US English UTF-8 locales.

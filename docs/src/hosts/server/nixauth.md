@@ -32,7 +32,7 @@ The provisioning JSON has its own encrypted [file](../../../../hosts/server/nixa
 
 ### OAuth2 secrets auto-generation
 
-For every non-public OAuth2 client in `server.identity.kanidm.oauth2`, the host file auto-generates a corresponding sops secret path:
+For every non-public OAuth2 client in `server.identity.kanidm.oauth2`, the host file auto-generates a corresponding SOPS secret path:
 
 ```nix
 "KANIDM/OAUTH2/${toUpper clientId}_SECRET"

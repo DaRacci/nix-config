@@ -10,6 +10,10 @@ Expose `nixos-generators` image formats through a `core.generators` option names
 
 - **Main file**: [generators.nix](../../../../../modules/nixos/core/generators.nix)
 
+### Options
+
+{{#include ../../../../generated/core-generators-options.md}}
+
 ## Architecture / Services / Scope
 
 The module imports `nixos-generators` formats unconditionally, but runtime configuration only applies when `core.generators.enable` is on.

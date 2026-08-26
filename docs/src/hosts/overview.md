@@ -26,10 +26,6 @@ Host-specific configurations live in `hosts/{device-type}/{hostname}/default.nix
 - **Adding new host**: Create directory for host in appropriate device type category and add `default.nix`.
 - **Modifying host**: Update `default.nix`, associated files in host directory, or relevant module under `modules/nixos/core/`.
 
-## References
-
-- [Adding a New Host](../development/adding_a_new_host.md)
-
 ---
 
 ### Decky Loader Lifecycle
@@ -53,3 +49,7 @@ This is suppressed with following `LogFilterPatterns` entry on service (requires
 ```text
 LogFilterPatterns = "~\\[CSS_Loader\\].*\\[Health Check\\].*Cannot connect";
 ```
+
+## References
+
+- [Adding a New Host](../development/adding_a_new_host.md)

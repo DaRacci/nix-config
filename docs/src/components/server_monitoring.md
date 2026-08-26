@@ -41,7 +41,7 @@ The system consists of three layers:
 
 Monitoring is enabled by default on all servers, this can be disabled with `server.monitoring.enable = false`.
 
-##### Options
+### Options
 
 {{#include ../../generated/server-monitoring-options.md}}
 
@@ -87,7 +87,7 @@ ingestion endpoint is intended for machine-to-machine clients and requires an
 paths are the standard `/v1/metrics` and `/v1/logs` endpoints.
 
 These are defined in `hosts/server/nixmon/default.nix` and collected by the IO
-primary host's Caddy configuration.
+Coordinator's Caddy configuration.
 
 ### Alert Rules
 
@@ -199,8 +199,8 @@ curl -s 'http://localhost:3100/loki/api/v1/labels' | jq
 
 **Grafana OAuth login fails:**
 
-- Verify `GRAFANA_OAUTH_SECRET` in Monitoring Coordinator matches `KANIDM/OAUTH2/GRAFANA_SECRET` in Application Server
-- Check Kanidm provisioning has the grafana OAuth2 client configured
+- Verify `MONITORING/GRAFANA/OAUTH_SECRET` in the Monitoring Coordinator matches `KANIDM/OAUTH2/GRAFANA_SECRET` in the Identity Coordinator
+- Check Kanidm provisioning has the Grafana OAuth2 client configured
 - Verify DNS resolves `auth.<domain>` correctly
 
 **Prometheus targets showing as down:**
@@ -211,6 +211,14 @@ curl -s 'http://localhost:3100/loki/api/v1/labels' | jq
 
 **Proxmox metrics missing:**
 
-- Verify `proxmox/token_id` and `proxmox/token_secret` are valid
+- Verify `PROXMOX/TOKEN_ID` and `PROXMOX/TOKEN_SECRET` are valid
 - Check PVE API is accessible from Monitoring Coordinator: `curl -k https://pve.<domain>/api2/json`
 - Review PVE exporter logs: `journalctl -u prometheus-pve-exporter.service`
+
+## References
+
+- [IO Coordinator](../hosts/server/nixio.md)
+- [Monitoring Coordinator](../hosts/server/nixmon.md)
+- [Database Coordinator](../hosts/server/nixdb.md)
+- [Storage Coordinator](../hosts/server/nixstor.md)
+- [Identity Coordinator](../hosts/server/nixauth.md)

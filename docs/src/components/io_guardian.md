@@ -72,22 +72,30 @@ The guardian uses a simple JSON-based WebSocket protocol:
 
 **Authentication**
 
-```json
-// Client sends:
-{"type": "auth", "key": "<psk>"}
+Client sends:
 
-// Server responds:
-{"type": "auth", "status": "ok", "message": "Authentication successful"}
+```json
+{ "type": "auth", "key": "<psk>" }
+```
+
+Server responds:
+
+```json
+{ "type": "auth", "status": "ok", "message": "Authentication successful" }
 ```
 
 **Commands**
 
-```json
-// Coordinator sends:
-{"type": "command", "action": "drain"} // or "undrain", "ping"
+Coordinator sends one of the supported actions (`drain`, `undrain`, or `ping`):
 
-// Server responds:
-{"type": "response", "action": "<action>", "status": "ok", "message": "..."}
+```json
+{ "type": "command", "action": "drain" }
+```
+
+Server responds:
+
+```json
+{ "type": "response", "action": "<action>", "status": "ok", "message": "..." }
 ```
 
 ## Secrets
@@ -145,13 +153,13 @@ systemctl stop db-databases.target
 **Guardian server won't start:**
 
 - Check that `DB_GUARDIAN_PSK` secret is properly configured
-- Verify the sops decryption is working: `cat /run/secrets/DB_GUARDIAN_PSK`
+- Verify the SOPS decryption is working and the secret is non-empty: `test -s /run/secrets/DB_GUARDIAN_PSK`
 
 **Services not starting after boot:**
 
 - Check wait service logs: `journalctl -u wait-for-db-databases.service`
 - Verify network connectivity to the Database Coordinator on ports 5432 (Postgres) and 6379 (Redis)
-- Ensure the Database Coordinator's coordinator has sent the undrain command
+- Ensure the Database Coordinator has sent the undrain command
 
 **Authentication failures in logs:**
 

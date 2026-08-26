@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Enable libvirt/QEMU virtualization with VFIO GPU passthrough, Looking Glass shared memory, bridge networking, custom OVMF firmware metadata, and per-guest isolation helpers that reserve host CPUs, detach GPUs, and block host sleep while guests run.
+Enable libvirt/QEMU virtualisation with VFIO GPU passthrough, Looking Glass shared memory, bridge networking, custom OVMF firmware metadata, and per-guest isolation helpers that reserve host CPUs, detach GPUs, and block host sleep while guests run.
 
 ## Entry Point
 

@@ -25,7 +25,7 @@ The module writes a generated config file consumed by the TUI:
 
 Default TUI (fzf-based with keybindings):
 
-```
+```sh
 list-ephemeral
 ```
 

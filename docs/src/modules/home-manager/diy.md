@@ -14,7 +14,7 @@ The `purpose.diy` Home-Manager modules provide tooling and configuration for har
 
 The printing module installs 3D-printing software and wires up persistent storage so that settings survive reboots on impermanence-based systems.
 
-###### Options
+#### Options
 
 {{#include ../../../generated/purpose-diy-printing-options.md}}
 

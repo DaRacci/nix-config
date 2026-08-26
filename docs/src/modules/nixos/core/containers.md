@@ -10,6 +10,10 @@ Provide a Docker-backed container runtime for workloads that still rely on Docke
 
 - **Main file**: [containers.nix](../../../../../modules/nixos/core/containers.nix)
 
+### Options
+
+{{#include ../../../../generated/core-containers-options.md}}
+
 ## Architecture / Services / Scope
 
 When enabled, the module:

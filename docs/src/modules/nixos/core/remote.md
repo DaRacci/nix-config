@@ -8,6 +8,10 @@ Expose the host remotely through two independent sub-features: Remote Desktop (x
 
 - **Main file**: [remote.nix](../../../../../modules/nixos/core/remote.nix)
 
+### Options
+
+{{#include ../../../../generated/core-remote-options.md}}
+
 ## Architecture / Services / Scope
 
 | Sub-feature    | Implementation | Purpose                               |

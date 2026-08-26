@@ -7,7 +7,7 @@
 ## Entry Point
 
 - **Main file**: [`{relative path to module entry point}`]({relative path})
-- **Supporting files**: (List any other key files, e.g. `options.nix`, `config.nix`, sub-modules)
+- **Supporting files**: (List any other key files, e.g. `options.nix`, `config.nix`, submodules)
 
 ## Architecture / Services / Scope
 
@@ -44,4 +44,4 @@
 ## References
 
 - [{Upstream reference or other relevant resource Title}]({relative url})
-- [IO Coordinator](../../hosts/server/nixio.md) {example coordinator link}
+- [IO Coordinator]({relative path from target page to coordinator host doc}) {example coordinator link; set coordinator paths relative to target page}

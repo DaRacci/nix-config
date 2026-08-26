@@ -10,9 +10,13 @@ Keep hosts current by rebuilding them from the flake on a schedule, with randomi
 
 - **Main file**: [auto-upgrade.nix](../../../../../modules/nixos/core/auto-upgrade.nix)
 
+### Options
+
+{{#include ../../../../generated/core-auto-upgrade-options.md}}
+
 ## Architecture / Services / Scope
 
-When enabled, the module configures `system.autoUpgrade` to rebuild the host from `github:DaRacci/nix-config#<host>`, using the `--refresh`, `--accept-flake-config`, and `--no-update-lock-file` flags, and applies CPU and IO resource limits to `nixos-upgrade.service`.
+When enabled, the module configures `system.autoUpgrade` to rebuild the host from the configured GitHub flake output for that host, using the `--refresh`, `--accept-flake-config`, and `--no-update-lock-file` flags, and applies CPU and IO resource limits to `nixos-upgrade.service`.
 
 ## Operational Notes / Assumptions
 

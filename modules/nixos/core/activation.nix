@@ -26,10 +26,10 @@ in
     system.activationScripts.report-changes.text = ''
       PREVIOUS=$(ls -dv /nix/var/nix/profiles/system-*-link 2>/dev/null | tail -n 2 | head -n 1)
       NEW=$(ls -dv /nix/var/nix/profiles/system-*-link 2>/dev/null | tail -n 1)
-      if [ -n "$CURRENT" ] && [ -n "$NEW" ]; then
+      if [ -n "$PREVIOUS" ] && [ -n "$NEW" ]; then
         PREVIOUS=$(readlink -f "$PREVIOUS")
         NEW=$(readlink -f "$NEW")
-        ${getExe pkgs.nvd} diff "$CURRENT" "$NEW" || true
+        ${getExe pkgs.nvd} diff "$PREVIOUS" "$NEW" || true
       fi
     '';
   };

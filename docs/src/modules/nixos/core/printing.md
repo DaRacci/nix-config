@@ -10,6 +10,10 @@ Provide CUPS printing and common printer drivers on non-server, non-virtual host
 
 - **Main file**: [printing.nix](../../../../../modules/nixos/core/printing.nix)
 
+### Options
+
+{{#include ../../../../generated/core-printing-options.md}}
+
 ## Architecture / Services / Scope
 
 When both top-level `core.enable` and `core.printing.enable` are on, the module:

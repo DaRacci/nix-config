@@ -17,7 +17,7 @@ This host coordinates with the [IO Guardian](../../components/io_guardian.md) to
 | Service            | Module                      | Notes                                                        |
 | ------------------ | --------------------------- | ------------------------------------------------------------ |
 | PostgreSQL         | `database/postgres.nix`     | Primary Postgres instance; TCP on subnet CIDRs               |
-| pgAdmin            | Host-level config           | Served behind Caddy reverse proxy on `nixio`                 |
+| pgAdmin            | Host-level config           | Served behind the Caddy reverse proxy on the IO Coordinator  |
 | Redis              | `database/redis.nix`        | Redis instances, mappings from `redis-mappings.json`         |
 | PostgreSQL backups | `services.postgresqlBackup` | Daily zstd dumps                                             |
 | DB guardian        | `database/guardian.nix`     | Coordinates startup/shutdown ordering for DB-dependent hosts |

@@ -26,7 +26,7 @@ When enabled, the module:
 - Registers AI skills under `~/.agents/skills/<name>` via `home.file`.
 - Persists OpenCode state directories so they survive reboots on impermanence-based systems.
 
-##### Options
+### Options
 
 {{#include ../../../generated/purpose-development-editors-ai-options.md}}
 

@@ -7,25 +7,30 @@ let
     ;
 in
 {
-  core.sops.hostSecretsFile = ../nixcloud/secrets.yaml;
-
   sops.secrets =
     let
+      acmePermissions = {
+        owner = "acme";
+        group = "acme";
+        mode = "0400";
+        sopsFile = ../nixio/secrets.yaml;
+      };
       kanidmPermissions = {
         owner = "kanidm";
         group = "kanidm";
+        mode = "0400";
+        restartUnits = [ "kanidm.service" ];
       };
     in
     {
-      "CLOUDFLARE/EMAIL" = { };
-      "CLOUDFLARE/ZONE_API_TOKEN" = { };
-      "CLOUDFLARE/DNS_API_TOKEN" = { };
+      "CLOUDFLARE/EMAIL" = acmePermissions;
+      "CLOUDFLARE/ZONE_API_TOKEN" = acmePermissions;
+      "CLOUDFLARE/DNS_API_TOKEN" = acmePermissions;
 
-      "KANIDM/ADMIN_PASSWORD" = { };
-      "KANIDM/IDM_ADMIN_PASSWORD" = { };
+      "KANIDM/ADMIN_PASSWORD" = kanidmPermissions;
+      "KANIDM/IDM_ADMIN_PASSWORD" = kanidmPermissions;
       "KANIDM/PROVISIONING_JSON" = kanidmPermissions // {
         sopsFile = ./provisioning.json;
-        restartUnits = [ "kanidm.service" ];
         format = "json";
         key = "";
       };

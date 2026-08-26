@@ -26,9 +26,10 @@ Services are gated per host via flake allocations (see [Flake Allocations](../..
 
 ## Operational Notes / Assumptions
 
-- Servers depend on the database primary host for startup ordering (see [IO Guardian](../../components/io_guardian.md)).
-- Shared secrets for all server hosts are stored in the [shared file](../../../../../../hosts/server/secrets.yaml).
+- Servers depend on the Database Coordinator for startup ordering (see [IO Guardian](../../components/io_guardian.md)).
+- Shared secrets for all server hosts are stored in the [shared file](../../../../hosts/server/secrets.yaml).
 
 ## References
 
 - [Adding a New Host](../../development/adding_a_new_host.md)
+- [Database Coordinator](nixdb.md)

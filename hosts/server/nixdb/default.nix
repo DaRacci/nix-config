@@ -6,8 +6,6 @@
   ...
 }:
 let
-  inherit (builtins) removeAttrs;
-
   fromAllServers =
     pipe:
     lib.trivial.pipe self.nixosConfigurations (
@@ -24,10 +22,7 @@ let
     );
 in
 {
-  # TODO: Migrate secrets to shared hosts/server/secrets.yaml when ready.
-  # Currently points to nixio's secrets.yaml which contains PGADMIN_PASSWORD
-  # and POSTGRES/POSTGRES_PASSWORD (not yet moved to the shared file).
-  core.sops.hostSecretsFile = ../nixio/secrets.yaml;
+  core.sops.hostSecretsFile = ./secrets.yaml;
 
   server = {
     database.postgres.postgres = { };
@@ -84,7 +79,7 @@ in
       initialPasswordFile = config.sops.secrets."PGADMIN_PASSWORD".path;
       settings = {
         DEFAULT_BINARY_PATHS = {
-          pg-16 = "${pkgs.postgresql_16}/bin";
+          pg-17 = "${pkgs.postgresql_17}/bin";
         };
       };
     };
@@ -94,14 +89,15 @@ in
     PGADMIN_PASSWORD = {
       owner = config.users.users.pgadmin.name;
       group = config.users.groups.pgadmin.name;
+      mode = "0400";
       restartUnits = [ "pgadmin.service" ];
     };
 
     "POSTGRES/POSTGRES_PASSWORD" = {
       owner = config.users.users.postgres.name;
       group = config.users.groups.postgres.name;
+      mode = "0400";
       restartUnits = [ "postgresql.service" ];
-      mode = "0440";
     };
   }
   // fromAllServers [
@@ -122,6 +118,7 @@ in
         # the `sopsFile = config.sops.defaultSopsFile;` override here.
         owner = config.users.users.postgres.name;
         group = config.users.groups.postgres.name;
+        mode = "0400";
         restartUnits = [ "postgresql.service" ];
       }
     ))

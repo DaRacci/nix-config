@@ -136,6 +136,7 @@ let
 
   homeManagerAggregateOptionsJSON = mkHomeManagerOptionsJSON [
     "${self}/modules/home-manager/purpose/default.nix"
+    "${self}/modules/home-manager/core/default.nix"
     {
       _module.args = {
         inherit self inputs pkgs;
@@ -282,7 +283,9 @@ let
       homeManagerAggregateOptionsJSON
       [ ];
 
-  prefixOverrides = { };
+  prefixOverrides = {
+    "core.hyprland" = "wayland.windowManager.hyprland";
+  };
 
   flakeModules = discoverFlakeModules;
   nixosModules = discoverNixosModules;

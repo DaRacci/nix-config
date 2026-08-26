@@ -25,7 +25,7 @@ Create host-specific configurations in `home/newuser/{hostname}.nix`:
   home = {
     username = "newuser";
     homeDirectory = "/home/newuser";
-    stateVersion = "25.05"; # Update to your current NixOS release
+    stateVersion = "25.05"; # Set this to the Home Manager state version from initial setup; keep it unchanged during normal NixOS or Home Manager upgrades, and only change it during a planned migration
   };
 
   # Add user-specific packages and configuration

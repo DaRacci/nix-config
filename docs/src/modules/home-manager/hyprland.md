@@ -24,6 +24,10 @@ default.nix       # Top-level importer (imports all submodules)
 └── types.nix        # Shared type definitions
 ```
 
+### Options
+
+{{#include ../../../generated/core-hyprland-options.md}}
+
 ## Architecture / Services / Scope
 
 ### `input.nix`

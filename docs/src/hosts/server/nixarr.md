@@ -33,7 +33,7 @@ All downloading happens through a VPN tunnel so P2P traffic is isolated.
 
 - All downloading apps run inside a WireGuard VPN namespace (`vpnNamespaces.wg`) so P2P/usenet traffic egresses through the VPN rather than the host's normal connection.
 - The VPN config is provided as a sops binary secret (`wg.conf`) that restarts `wg.service` when rotated.
-- Access to VPN-isolated apps is allowed from the LAN and the tailnet (`100.100.0.0/16`).
+- Access to VPN-isolated apps is allowed from the LAN and the configured tailnet; see the [Tailscale module documentation](../../modules/nixos/services/tailscale.md) for the cluster's tailnet integration.
 
 ### Authentication
 

@@ -35,11 +35,19 @@ let
 
   getPrimaryHostConfig =
     primaryHost:
-    if isThisPrimaryHost primaryHost then config else self.nixosConfigurations.${primaryHost}.config;
+    if primaryHost == null || !(builtins.hasAttr primaryHost self.nixosConfigurations) then
+      null
+    else if isThisPrimaryHost primaryHost then
+      config
+    else
+      self.nixosConfigurations.${primaryHost}.config;
 
   getPrimaryHostAttr =
     primaryHost: attrPath:
-    attrByPath (splitString "." attrPath) null (getPrimaryHostConfig primaryHost);
+    let
+      primaryConfig = getPrimaryHostConfig primaryHost;
+    in
+    if primaryConfig == null then null else attrByPath (splitString "." attrPath) null primaryConfig;
 
   # IO primary helpers (delegating to generic helpers)
   isIOPrimaryHost = isPrimaryHost config.server.ioPrimaryHost;

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The flake allocations module declares cluster-wide configuration options at the flake level. Rather than configuring each NixOS system independently, allocations let you declare concerns like which machines have accelerators, which server coordinates I/O, and which servers act as distributed builders — in a single place — and then propagate those values into every host configuration.
+The flake allocations module declares cluster-wide configuration options at the flake level. Rather than configuring each NixOS system independently, allocations let you declare concerns like which machines have accelerators, which server acts as the IO Coordinator, and which servers act as distributed builders — in a single place — and then propagate those values into every host configuration.
 
 ## Entry Point
 
@@ -48,13 +48,13 @@ Read-only attribute set mapping device types to their hostnames. Auto-populated 
 
 #### Server primary-host allocations
 
-These options each designate a specific server as the primary host for a cluster role (I/O coordination, monitoring, database, storage, authentication). The type of each is constrained to an enum of server hostnames, automatically derived from `hostTypes.server`. Values flow through `apply/system.nix` into the corresponding `server.*` option on each server configuration:
+These options each designate a specific server as the coordinator for a cluster role (IO Coordinator, Monitoring Coordinator, Database Coordinator, Storage Coordinator, Identity Coordinator). The type of each is constrained to an enum of server hostnames, automatically derived from `hostTypes.server`. Values flow through `apply/system.nix` into the corresponding `server.*` option on each server configuration:
 
-- `allocations.server.ioPrimaryCoordinator` → `server.ioPrimaryHost`
-- `allocations.server.monitoringPrimaryHost` → `server.monitoringPrimaryHost`
-- `allocations.server.databasePrimaryHost` → `server.databasePrimaryHost`
-- `allocations.server.storagePrimaryHost` → `server.storagePrimaryHost`
-- `allocations.server.authPrimaryHost` → `server.authPrimaryHost`
+- `allocations.server.ioPrimaryCoordinator` → `server.ioPrimaryHost` (IO Coordinator)
+- `allocations.server.monitoringPrimaryHost` → `server.monitoringPrimaryHost` (Monitoring Coordinator)
+- `allocations.server.databasePrimaryHost` → `server.databasePrimaryHost` (Database Coordinator)
+- `allocations.server.storagePrimaryHost` → `server.storagePrimaryHost` (Storage Coordinator)
+- `allocations.server.authPrimaryHost` → `server.authPrimaryHost` (Identity Coordinator)
 
 #### `allocations.server.distributedBuilders`
 
@@ -67,3 +67,11 @@ The apply modules bridge flake-level allocations to per-system NixOS options.
 `apply/system.nix` is imported during system construction. It receives `allocations` and `deviceType` via `specialArgs` and maps the server allocations onto the corresponding `server.*` options. It uses `optionalAttrs` to only apply server-specific options when `deviceType == "server"`, preventing errors on non-server systems.
 
 `apply/home-manager.nix` is imported by the Home-Manager builder. It is currently a no-op — a placeholder for future home-manager-level allocations.
+
+## References
+
+- [IO Coordinator](../../hosts/server/nixio.md)
+- [Monitoring Coordinator](../../hosts/server/nixmon.md)
+- [Database Coordinator](../../hosts/server/nixdb.md)
+- [Storage Coordinator](../../hosts/server/nixstor.md)
+- [Identity Coordinator](../../hosts/server/nixauth.md)

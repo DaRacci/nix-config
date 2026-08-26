@@ -4,11 +4,15 @@ Configures opinionated SSH server and client defaults.
 
 ## Purpose
 
-Provide a hardened, consistent SSH experience across hosts: ed25519-only host keys, no password authentication, automatically generated known-host entries, and PAM ssh-agent authentication.
+Provide a hardened, consistent SSH experience across hosts: ed25519-only host keys, no password authentication, automatically generated known-host entries, PAM ssh-agent authentication, and `GatewayPorts = "clientspecified"` so clients may request non-loopback forwarding binds when needed. That forwarding flexibility can expose tunnels beyond localhost if the client explicitly asks for it.
 
 ## Entry Point
 
 - **Main file**: [openssh.nix](../../../../../modules/nixos/core/openssh.nix)
+
+### Options
+
+{{#include ../../../../generated/core-openssh-options.md}}
 
 ## Architecture / Services / Scope
 

@@ -1,5 +1,10 @@
 _:
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   # TEMPORARY: Strip knownVulnerabilities from minio to unblock build.
   # TODO: Remove once migrated off MinIO (SeaweedFS evaluation in progress).
@@ -11,8 +16,13 @@ let
   });
 in
 {
-  # Caddy group has access to certs, and minio needs access to its own certs.
-  users.users.minio.extraGroups = [ "caddy" ];
+  users = {
+    groups.minio-acme = { };
+    users.caddy.extraGroups = lib.mkAfter [ "minio-acme" ];
+    users.minio.extraGroups = lib.mkAfter [ "minio-acme" ];
+  };
+
+  security.acme.certs."minio.racci.dev".group = "minio-acme";
 
   sops.secrets = {
     MINIO_ROOT_CREDENTIALS = {

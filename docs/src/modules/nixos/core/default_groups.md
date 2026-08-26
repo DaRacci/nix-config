@@ -8,6 +8,10 @@ Provide a single `core.defaultGroups` list that other core modules and hosts use
 
 - **Main file**: [default-groups.nix](../../../../../modules/nixos/core/default-groups.nix)
 
+### Options
+
+{{#include ../../../../generated/core-default-groups-options.md}}
+
 ## Architecture / Services / Scope
 
 When `core.defaultGroups` is non-empty, module rewrites `users.users` entries so each declared user receives `extraGroups = mkAfter cfg.defaultGroups`.

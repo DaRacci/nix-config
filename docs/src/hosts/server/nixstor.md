@@ -38,6 +38,11 @@ The SeaweedFS TLS secrets cover six services: `MASTER`, `VOLUME`, `FILER`, `CLIE
 
 ## Operational Notes / Assumptions
 
+- SeaweedFS services wait for `network-online.target` before starting, so early-boot network readiness is a hard prerequisite.
+- SeaweedFS components run under the dedicated `seaweedfs` service user and group; file ownership and secret permissions assume that account exists.
+- Shared component services are configured with `Restart = "always"`, so repeated restart loops usually indicate an unmet dependency rather than one-shot startup failure.
+- Internal gRPC and proxy-facing TLS rely on the `SEAWEEDFS/TLS/*` certificate set, including the CA bundle; both Caddy and SeaweedFS verify that CA during mTLS connections.
+
 ## References
 
 - [Storage Module](../../modules/nixos/server/storage.md)

@@ -20,14 +20,14 @@ Goal: make system configs, user environments, and shared modules easier to under
 ## Workflow
 
 1. **Analyze Changes**: Review implementation commits or code to understand change scope
-2. **Identify Impact**: Determine which files in `docs/src` need create or update
+2. **Identify Impact**: Determine which files in `docs/src` need to create or update
 3. **Format Standard**: All Component, Host, and Module reference documentation MUST adhere to the appropriate reference template (see [Reference Templates](#reference-templates)). Other documentation (guides, index files) may vary but should remain consistent.
 4. **Configuration Drift**: Do not copy-paste exact configuration values (like IPs, specific package versions, or port numbers) into the documentation unless they are an immutable part of the architecture. Instead, describe the _intent_ or point to the code/generated docs. Configuration values drift over time and break documentation.
 5. **Draft Content**:
    - Create or update Markdown files in `docs/src`
    - Use underscore filenames like `my_new_feature.md`
    - For modules, provide a high-level overview and link to relevant code or external resources
-6. **Update Summary**: Make new files are added to `docs/src/SUMMARY.md` so book structure stays correct.
+6. **Update Summary**: Make sure new files are added to `docs/src/SUMMARY.md` so book structure stays correct.
 7. **Verify**: Check that Nix code examples are valid and build commands are accurate
 
 ## Guardrails

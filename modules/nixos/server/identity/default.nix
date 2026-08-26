@@ -233,7 +233,7 @@ in
           reverse_proxy {
             to https://${cfg.bindAddress}
             transport http {
-              tls_insecure_skip_verify
+              tls_server_name ${cfg.tlsCertificateDomain}
             }
           }
         '';

@@ -13,7 +13,9 @@ The `core.profile` module declares a set of shared user-profile options that act
 
 The module only declares options; it does nothing on its own. Consumers use `config.core.profile.*` to read the values.
 
-##### Options
+### Options
+
+{{#include ../../../generated/core-profile-options.md}}
 
 #### `core.profile.avatar.path`
 

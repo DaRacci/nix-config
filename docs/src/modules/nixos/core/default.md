@@ -28,6 +28,19 @@ Audio baseline also enables `security.rtkit`, adds `audio`, `pipewire`, and `rtk
 
 Bluetooth baseline unblocks rfkill during activation and persists `/var/lib/bluetooth`.
 
+## Usage Example
+
+```nix
+{ ... }: {
+  core = {
+    enable = true;
+    audio.enable = true;
+    bluetooth.enable = true;
+    network.enable = true;
+  };
+}
+```
+
 ## References
 
 - [Activation](activation.md)
@@ -47,19 +60,6 @@ Bluetooth baseline unblocks rfkill during activation and persists `/var/lib/blue
 - [Stylix](stylix.md)
 - [Virtualisation](virtualisation.md)
 - [WSL](wsl.md)
-
-### Usage Example
-
-```nix
-{ ... }: {
-  core = {
-    enable = true;
-    audio.enable = true;
-    bluetooth.enable = true;
-    network.enable = true;
-  };
-}
-```
 
 ## Operational Notes / Assumptions
 

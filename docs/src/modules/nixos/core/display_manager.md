@@ -10,6 +10,10 @@ Provide a consistent, terminal-based login experience via greetd and tuigreet on
 
 - **Main file**: [display-manager.nix](../../../../../modules/nixos/core/display-manager.nix)
 
+### Options
+
+{{#include ../../../../generated/core-display-manager-options.md}}
+
 ## Architecture / Services / Scope
 
 Enabled by default on hosts where `host.device.isHeadless = false`. The greetd greeter runs as the `greeter` user and:

@@ -8,6 +8,10 @@ Enable a desktop gaming stack around Steam, 32-bit graphics, Android ADB tooling
 
 - **Main file**: [gaming.nix](../../../../../modules/nixos/core/gaming.nix)
 
+### Options
+
+{{#include ../../../../generated/core-gaming-options.md}}
+
 ## Architecture / Services / Scope
 
 When enabled, module:

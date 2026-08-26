@@ -10,29 +10,9 @@ This module was extracted and generalised from the old [nixcloud/identity.nix](.
 
 - **Main file**: `server.identity` in [modules/nixos/server/identity/default.nix](../../../../modules/nixos/server/identity/default.nix).
 
-#### Options
+### Options
 
 {{#include ../../../../generated/server-identity-options.md}}
-
-## Architecture / Services / Scope
-
-### Core Settings
-
-| Option                 | Type   | Description                                  |
-| ---------------------- | ------ | -------------------------------------------- |
-| `enable`               | `bool` | Enable the Kanidm identity provider.         |
-| `domain`               | `str`  | Domain served by the Kanidm instance.        |
-| `tlsCertificateDomain` | `str`  | Domain used for the ACME TLS certificate.    |
-| `bindAddress`          | `str`  | Address and port Kanidm binds to.            |
-| `acmeEmail`            | `str`  | Email address for ACME certificate requests. |
-
-### Backup Configuration
-
-| Option           | Type  | Description                                |
-| ---------------- | ----- | ------------------------------------------ |
-| `backupSchedule` | `str` | Cron schedule for automated online backup. |
-| `backupPath`     | `str` | Filesystem path for backup storage.        |
-| `backupVersions` | `int` | Number of backup versions to retain.       |
 
 ### Kanidm Provisioning
 
@@ -52,7 +32,7 @@ This module was extracted and generalised from the old [nixcloud/identity.nix](.
 
 ### Proxy Behaviour
 
-When enabled, the module automatically registers a reverse proxy virtual host under `server.proxy.virtualHosts.auth`. This proxy forwards HTTPS traffic to the configured `bindAddress` with TLS verification skipped (since Caddy and Kanidm communicate over the internal network using a self-signed or ACME cert).
+When enabled, the module automatically registers a reverse proxy virtual host under `server.proxy.virtualHosts.auth`. This proxy forwards HTTPS traffic to the configured `bindAddress`.
 
 ### Dashboard Integration
 
