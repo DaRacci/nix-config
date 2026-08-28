@@ -56,10 +56,13 @@ hl.bind("ALT + R", hl.dsp.submap("resize"))
 hl.define_submap("resize", function()
   hl.bind("ESCAPE", hl.dsp.submap("reset"))
 
-  hl.bind("DOWN", hl.dsp.window.resize({ x = 0, y = 50, relative = true }), { ["e"] = true })
-  hl.bind("LEFT", hl.dsp.window.resize({ x = 50, y = 0, relative = true }), { ["e"] = true })
-  hl.bind("RIGHT", hl.dsp.window.resize({ x = -50, y = 0, relative = true }), { ["e"] = true })
-  hl.bind("UP", hl.dsp.window.resize({ x = 0, y = -50, relative = true }), { ["e"] = true })
+  for direction ,_ in pairs(directions) do
+    local axis = directions[direction].pixelAxis
+    local pixelDelta = pixelMoveScale * directions[direction].relativeNumber
+    local otherAxis = axis == "x" and "y" or "x"
+    local resizeCommand = { [axis] = pixelDelta, [otherAxis] = 0, relative = true }
+    hl.bind(direction, hl.dsp.window.resize(resizeCommand))
+  end
 end)
 
 -- ---------------------------------------------------------------------------
