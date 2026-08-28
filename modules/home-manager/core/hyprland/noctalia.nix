@@ -53,7 +53,7 @@ let
       };
 
       side_bar = {
-        enable = false; # Disable by default - Add monitor overrides to enable.
+        enabled = false; # Disable by default - Add monitor overrides to enable.
         background_opacity = 0.9;
         center = [ "workspaces" ];
         end = [
