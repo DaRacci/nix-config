@@ -1,12 +1,9 @@
 {
-  config,
   lib,
   ...
 }:
 with lib;
 {
-  # Smart-gaps: tiled windows on special workspaces get border 0 / rounding 0
-  # via custom-settings.windowrule (camelCase Nix API, Lua output handled by module)
   wayland.windowManager.hyprland.custom-settings.windowrule = {
     "smart-gaps-tiled-float-tv1" = {
       matcher = [
@@ -38,7 +35,6 @@ with lib;
     };
   };
 
-  # Pin-border windowrule — direct Lua entry (bordercolor not supported in custom module)
   wayland.windowManager.hyprland.settings.window_rule = [
     {
       match = {
@@ -94,39 +90,6 @@ with lib;
         dim_inactive = false;
         dim_strength = 0.1;
         dim_special = 0;
-      };
-
-      plugin = {
-        dynamic_cursors = {
-          enabled = true;
-          mode = "tilt";
-          threshold = 2;
-
-          rotate = {
-            length = config.stylix.cursor.size;
-            offset = 0.0;
-          };
-
-          shake = {
-            enabled = true;
-            threshold = 6.0;
-            base = 4.0;
-            speed = 4.0;
-            influence = 0.0;
-            limit = 0.0;
-            timeout = 2000;
-            effects = true;
-            ipc = false;
-          };
-
-          hyprcursor = {
-            enabled = true;
-            nearest = true;
-
-            resolution = -1;
-            fallback = "clientside";
-          };
-        };
       };
     };
 

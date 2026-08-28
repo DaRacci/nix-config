@@ -72,6 +72,7 @@ in
           }
         )
         |> listToAttrs;
+
       custom-settings.lua.variables = {
         applicationBinds = "{ ${
           cfg.applicationBinds
@@ -89,6 +90,8 @@ in
 
         DEFAULT_AUDIO_SINK = null;
         DEFAULT_AUDIO_SOURCE = null;
+
+        cursorSize = config.stylix.cursor.size;
       };
     };
   };
