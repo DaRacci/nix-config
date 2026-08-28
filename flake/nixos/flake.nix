@@ -75,14 +75,6 @@
       url = "github:CRTified/nur-packages";
       flake = false; # We aren't going to use this as a flake
     };
-    # TODO - could this also be moved to only being in a partition that just runs from the flake outputs?
-    nixos-generators = {
-      url = "github:nix-community/nixos-generators";
-      inputs = {
-        nixlib.follows = "nixpkgs";
-        nixpkgs.follows = "nixpkgs";
-      };
-    };
     forgesync = {
       url = "github:lukaswrz/forgesync";
       inputs.nixpkgs.follows = "nixpkgs";

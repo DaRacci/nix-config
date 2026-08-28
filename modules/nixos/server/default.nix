@@ -188,6 +188,7 @@ in
     ./ssh-shell
     ./storage
     ./distributed-builds.nix
+    ./image.nix
   ];
 
   options.server = {
