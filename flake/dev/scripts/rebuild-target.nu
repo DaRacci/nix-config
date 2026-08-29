@@ -7,7 +7,11 @@ def perform-action [
   action: string # "switch" | "build" | "boot" | "test" | "build-vm"
   args: list<string>
 ] {
-  let selected = select_host
+  let selected = select_host --fast
+  if $selected == null {
+    log error "No host selected."
+    exit 1
+  }
 
   let command_args = [
     "os"
@@ -34,7 +38,7 @@ def perform-action [
     }
   } else {
     log info $"Building VM for selected host: ($selected)"
-    nh ...$command_args ...($passthrough_args)
+    nh ...$command_args --diff never --hostname $selected --run --nographics ...($passthrough_args)
   }
 }
 

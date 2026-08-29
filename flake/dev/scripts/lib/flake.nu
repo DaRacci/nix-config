@@ -6,10 +6,24 @@ export-env {
   $env.CURRENT_USER = (whoami | str trim)
 }
 
-export def select_host [] {
-  let hosts = flake-eval r#'builtins.attrNames flake.nixosConfigurations |> builtins.concatStringsSep " "'#  --raw
-    | split words
-    | where $it != $env.CURRENT_HOST
+# Use the --fast switch to estimate the hosts based on fs instead of nix for quicker scans.
+export def select_host [--fast] {
+  mut hosts = []
+
+  if $fast {
+    let hosts_dir = ($env.GIT_ROOT | path join "hosts")
+    let host_types = ^find $hosts_dir -mindepth 1 -maxdepth 1 -type d -print | lines;
+    for $host_type in $host_types {
+      let host_type_dir = ($hosts_dir | path join $host_type)
+      let raw_dirs = ^find $host_type_dir -mindepth 1 -maxdepth  1 -type d -print | lines | each { $in | path basename };
+      let host_names = $raw_dirs | where { $in != $env.CURRENT_HOST and $in != "shared" } | sort | uniq
+      $hosts = $hosts ++ $host_names
+    }
+  } else {
+    $hosts = flake-eval r#'builtins.attrNames flake.nixosConfigurations |> builtins.concatStringsSep " "'#  --raw
+      | split words
+      | where $it != $env.CURRENT_HOST
+  }
 
   let selected = ["current", ...($hosts)] | input list -f
   if $selected == "current" {
