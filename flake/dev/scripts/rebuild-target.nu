@@ -38,7 +38,13 @@ def perform-action [
     }
   } else {
     log info $"Building VM for selected host: ($selected)"
-    nh ...$command_args --diff never --hostname $selected --run --nographics ...($passthrough_args)
+    nh ...$command_args --diff never --hostname $selected ...($passthrough_args)
+    if $env.LAST_EXIT_CODE != 0 {
+      return
+    }
+
+    let run_path = $"./result/bin/run-($selected)-vm"
+    exec $run_path -nographic
   }
 }
 
