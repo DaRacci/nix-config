@@ -27,4 +27,14 @@ in
     name = "update-redis-mappings";
     runtimeInputs = [ pkgs.lix ];
   };
+
+  update-sops = writeNuApplicationWithLibs {
+    inherit pkgs;
+    sourceRoot = ./.;
+    name = "update-sops";
+    runtimeInputs = [
+      pkgs.sops
+      pkgs.ssh-to-age
+    ];
+  };
 }
