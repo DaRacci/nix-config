@@ -62,6 +62,18 @@
           OPENSPEC_TELEMETRY = "0";
         };
 
+        enterShell = ''
+          cat > "$DEVENV_ROOT/.luarc.json" <<'EOF'
+          {
+            "workspace": {
+              "library": [
+                "${pkgs.hyprland}/share/hypr/stubs/"
+              ]
+            }
+          }
+          EOF
+        '';
+
         git-hooks = {
           package = pkgs.prek;
           hooks = {
