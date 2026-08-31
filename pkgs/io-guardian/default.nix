@@ -1,64 +1,52 @@
 {
+  lib,
   python3Packages,
 }:
 let
   inherit (python3Packages) buildPythonApplication websockets pystemd;
+
+  commonDrv = component: {
+    version = "1.1.0";
+    pname = "io-guardian-${component}";
+
+    format = "other";
+    src = ./.;
+    dontBuild = true;
+
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p $out/bin
+      cp ${./. + "/${component}" + ".py"} $out/bin/io-guardian-${component}
+      chmod +x $out/bin/io-guardian-${component}
+
+      runHook postInstall
+    '';
+
+    meta = {
+      license = lib.licenses.mit;
+      maintainers = with lib.maintainers; [ racci ];
+      platforms = lib.platforms.linux;
+      description = "IO Database Guardian WebSocket ${component}";
+      mainProgram = "io-guardian-${component}";
+    };
+  };
 in
 {
-  io-guardian-server = buildPythonApplication {
-    pname = "io-guardian-server";
-    version = "1.0.0";
-    format = "other";
+  io-guardian-server = buildPythonApplication (
+    commonDrv "server"
+    // {
+      propagatedBuildInputs = [
+        websockets
+        pystemd
+      ];
+    }
+  );
 
-    src = ./.;
-
-    propagatedBuildInputs = [
-      websockets
-      pystemd
-    ];
-
-    dontBuild = true;
-
-    installPhase = ''
-      runHook preInstall
-
-      mkdir -p $out/bin
-      cp ${./server.py} $out/bin/io-guardian-server
-      chmod +x $out/bin/io-guardian-server
-
-      runHook postInstall
-    '';
-
-    meta = {
-      description = "IO Database Guardian WebSocket Server";
-      mainProgram = "io-guardian-server";
-    };
-  };
-
-  io-guardian-client = buildPythonApplication {
-    pname = "io-guardian-client";
-    version = "1.0.0";
-    format = "other";
-
-    src = ./.;
-
-    propagatedBuildInputs = [ websockets ];
-
-    dontBuild = true;
-
-    installPhase = ''
-      runHook preInstall
-
-      mkdir -p $out/bin
-      cp ${./client.py} $out/bin/io-guardian-client
-      chmod +x $out/bin/io-guardian-client
-
-      runHook postInstall
-    '';
-
-    meta = {
-      description = "IO Database Guardian WebSocket Client";
-      mainProgram = "io-guardian-client";
-    };
-  };
+  io-guardian-client = buildPythonApplication (
+    commonDrv "client"
+    // {
+      propagatedBuildInputs = [ websockets ];
+    }
+  );
 }

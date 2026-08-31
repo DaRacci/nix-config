@@ -8,15 +8,27 @@ sends to Wyoming faster-whisper server, writes transcript .txt.
 Designed for HERMES_LOCAL_STT_COMMAND variable.
 """
 
+from __future__ import annotations
+
 import argparse
 import asyncio
-import os
 import sys
+import tempfile
+import unittest
 import wave
+from pathlib import Path
 
 from wyoming.asr import Transcribe, Transcript
 from wyoming.audio import AudioChunk, AudioStart, AudioStop
 from wyoming.client import AsyncTcpClient
+
+
+def write_transcript(output_dir: Path, text: str) -> Path:
+    """Create output directory if needed and write transcript text."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / "output.txt"
+    output_path.write_text(text.strip(), encoding="utf-8")
+    return output_path
 
 
 async def run_transcribe(
@@ -28,11 +40,11 @@ async def run_transcribe(
     port: int = 10300,
 ) -> None:
     """Send WAV audio to Wyoming faster-whisper and write transcript."""
-    with wave.open(input_path, "rb") as wf:
-        rate = wf.getframerate()
-        width = wf.getsampwidth()
-        channels = wf.getnchannels()
-        frames = wf.readframes(wf.getnframes())
+    with wave.open(input_path, "rb") as wav_file:
+        rate = wav_file.getframerate()
+        width = wav_file.getsampwidth()
+        channels = wav_file.getnchannels()
+        frames = wav_file.readframes(wav_file.getnframes())
 
     if not frames:
         raise ValueError("No audio data in WAV file")
@@ -44,17 +56,19 @@ async def run_transcribe(
                 language=language if language and language != "auto" else None,
             ).event()
         )
-
         await client.write_event(
             AudioStart(rate=rate, width=width, channels=channels).event()
         )
 
-        chunk_size = rate * width * channels  # ~1s chunks
-        for i in range(0, len(frames), chunk_size):
-            chunk = frames[i : i + chunk_size]
+        chunk_size = rate * width * channels
+        for index in range(0, len(frames), chunk_size):
+            chunk = frames[index : index + chunk_size]
             await client.write_event(
                 AudioChunk(
-                    rate=rate, width=width, channels=channels, audio=chunk
+                    rate=rate,
+                    width=width,
+                    channels=channels,
+                    audio=chunk,
                 ).event()
             )
 
@@ -66,15 +80,35 @@ async def run_transcribe(
                 break
             if Transcript.is_type(event.type):
                 transcript = Transcript.from_event(event)
-                output_path = os.path.join(output_dir, "output.txt")
-                with open(output_path, "w") as f:
-                    f.write(transcript.text.strip())
+                loop = asyncio.get_running_loop()
+                await loop.run_in_executor(
+                    None,
+                    write_transcript,
+                    Path(output_dir),
+                    transcript.text,
+                )
                 return
 
-    sys.exit(1)
+    raise RuntimeError("No transcript received from Wyoming server")
 
 
-def main() -> None:
+def run_tests() -> None:
+    class WyomingTranscribeTests(unittest.TestCase):
+        def test_write_transcript_creates_output_dir_and_strips_text(self) -> None:
+            with tempfile.TemporaryDirectory() as tempdir:
+                output_path = write_transcript(
+                    Path(tempdir) / "nested", " hello world \n"
+                )
+
+                self.assertTrue(output_path.exists())
+                self.assertEqual(output_path.read_text(encoding="utf-8"), "hello world")
+
+    suite = unittest.defaultTestLoader.loadTestsFromTestCase(WyomingTranscribeTests)
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    raise SystemExit(0 if result.wasSuccessful() else 1)
+
+
+def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Send WAV audio to Wyoming faster-whisper STT server"
     )
@@ -88,19 +122,32 @@ def main() -> None:
     parser.add_argument("--language", default="", help="Language code or 'auto'")
     parser.add_argument("--host", default="localhost", help="Wyoming server host")
     parser.add_argument("--port", type=int, default=10300, help="Wyoming server port")
-    args = parser.parse_args()
+    return parser.parse_args(argv)
 
-    asyncio.run(
-        run_transcribe(
-            input_path=args.input_path,
-            output_dir=args.output_dir,
-            model=args.model,
-            language=args.language,
-            host=args.host,
-            port=args.port,
+
+def main(argv: list[str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if len(argv) == 1 and argv[0] in {"test", "--test"}:
+        run_tests()
+
+    args = parse_args(argv)
+    try:
+        asyncio.run(
+            run_transcribe(
+                input_path=args.input_path,
+                output_dir=args.output_dir,
+                model=args.model,
+                language=args.language,
+                host=args.host,
+                port=args.port,
+            )
         )
-    )
+    except (FileNotFoundError, OSError, RuntimeError, ValueError, wave.Error) as exc:
+        print(f"wyoming-transcribe: {exc}", file=sys.stderr)
+        return 1
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

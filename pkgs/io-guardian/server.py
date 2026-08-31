@@ -20,13 +20,15 @@ import json
 import logging
 import os
 import sys
+import unittest
 from pathlib import Path
 from time import monotonic, sleep
+from unittest import mock
 
 import websockets
 from pystemd.dbuslib import DBusError
 from pystemd.systemd1 import Unit
-from websockets.server import serve
+from websockets import serve
 
 logging.basicConfig(
     level=logging.INFO,
@@ -35,7 +37,42 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-authenticated_clients: set = set()
+authenticated_clients: set[str] = set()
+
+
+class ProtocolError(ValueError):
+    """Raised when a client sends an invalid protocol payload."""
+
+
+def format_client_id(remote_address: object) -> str:
+    if isinstance(remote_address, tuple) and len(remote_address) >= 2:
+        return f"{remote_address[0]}:{remote_address[1]}"
+    if remote_address:
+        return str(remote_address)
+    return "unknown"
+
+
+def decode_json_object(raw_message: str) -> dict[str, object]:
+    try:
+        message = json.loads(raw_message)
+    except json.JSONDecodeError as exc:
+        raise ProtocolError("Invalid JSON") from exc
+
+    if not isinstance(message, dict):
+        raise ProtocolError("Invalid message: expected JSON object")
+
+    return message
+
+
+async def run_action(action: str) -> tuple[bool, str] | None:
+    handlers = {
+        "drain": handle_drain,
+        "undrain": handle_undrain,
+    }
+    handler = handlers.get(action)
+    if handler is None:
+        return None
+    return await asyncio.to_thread(handler)
 
 
 def load_psk(psk_file: str) -> str:
@@ -45,7 +82,7 @@ def load_psk(psk_file: str) -> str:
         logger.error(f"PSK file not found: {psk_file}")
         sys.exit(1)
 
-    psk = path.read_text().strip()
+    psk = path.read_text(encoding="utf-8").strip()
     if len(psk) < 32:
         logger.error("PSK must be at least 32 characters")
         sys.exit(1)
@@ -148,7 +185,7 @@ def run_systemctl(action: str, unit: str) -> tuple[bool, str]:
             dep_name = dep.decode()
             dep_obj = Unit(dep)
             dependency_objs[dep_name] = dep_obj
-    except Exception as e:
+    except (DBusError, OSError) as e:
         return False, f"Error loading unit {unit}: {e}"
 
     try:
@@ -183,7 +220,7 @@ def handle_undrain() -> tuple[bool, str]:
 
 async def handle_client(websocket, psk: str):
     """Handle a single WebSocket client connection."""
-    client_id = f"{websocket.remote_address[0]}:{websocket.remote_address[1]}"
+    client_id = format_client_id(websocket.remote_address)
     logger.info(f"New connection from {client_id}")
 
     is_authenticated = False
@@ -191,18 +228,28 @@ async def handle_client(websocket, psk: str):
     try:
         async for raw_message in websocket:
             try:
-                message = json.loads(raw_message)
-            except json.JSONDecodeError:
-                await websocket.send(
-                    json.dumps({"type": "error", "message": "Invalid JSON"})
-                )
+                message = decode_json_object(raw_message)
+            except ProtocolError as exc:
+                await websocket.send(json.dumps({"type": "error", "message": str(exc)}))
                 continue
 
             msg_type = message.get("type")
+            if not isinstance(msg_type, str):
+                await websocket.send(
+                    json.dumps(
+                        {
+                            "type": "error",
+                            "message": "Invalid message: missing string type",
+                        }
+                    )
+                )
+                continue
 
             # Handle authentication
             if msg_type == "auth":
-                provided_key = message.get("key", "")
+                provided_key = message.get("key")
+                if not isinstance(provided_key, str):
+                    provided_key = ""
                 if provided_key == psk:
                     is_authenticated = True
                     authenticated_clients.add(client_id)
@@ -242,34 +289,18 @@ async def handle_client(websocket, psk: str):
             # Handle commands
             if msg_type == "command":
                 action = message.get("action")
-
-                if action == "drain":
-                    success, msg = handle_drain()
+                if not isinstance(action, str):
                     await websocket.send(
                         json.dumps(
                             {
-                                "type": "response",
-                                "action": "drain",
-                                "status": "ok" if success else "error",
-                                "message": msg,
+                                "type": "error",
+                                "message": "Invalid command: missing string action",
                             }
                         )
                     )
+                    continue
 
-                elif action == "undrain":
-                    success, msg = handle_undrain()
-                    await websocket.send(
-                        json.dumps(
-                            {
-                                "type": "response",
-                                "action": "undrain",
-                                "status": "ok" if success else "error",
-                                "message": msg,
-                            }
-                        )
-                    )
-
-                elif action == "ping":
+                if action == "ping":
                     await websocket.send(
                         json.dumps(
                             {
@@ -280,7 +311,21 @@ async def handle_client(websocket, psk: str):
                             }
                         )
                     )
+                    continue
 
+                result = await run_action(action)
+                if result is not None:
+                    success, msg = result
+                    await websocket.send(
+                        json.dumps(
+                            {
+                                "type": "response",
+                                "action": action,
+                                "status": "ok" if success else "error",
+                                "message": msg,
+                            }
+                        )
+                    )
                 else:
                     await websocket.send(
                         json.dumps(
@@ -300,13 +345,53 @@ async def handle_client(websocket, psk: str):
 
     except websockets.exceptions.ConnectionClosed:
         logger.info(f"Client {client_id} disconnected")
-    except Exception as e:
+    except (
+        websockets.exceptions.WebSocketException,
+        DBusError,
+        OSError,
+        asyncio.TimeoutError,
+    ) as e:
         logger.error(f"Error handling client {client_id}: {e}")
     finally:
         authenticated_clients.discard(client_id)
 
 
-async def main():
+def run_tests() -> None:
+    class GuardianServerTests(unittest.TestCase):
+        def test_decode_json_object_accepts_mapping(self) -> None:
+            self.assertEqual(decode_json_object('{"type": "ping"}')["type"], "ping")
+
+        def test_decode_json_object_rejects_non_object_payload(self) -> None:
+            with self.assertRaisesRegex(ProtocolError, "expected JSON object"):
+                decode_json_object("[]")
+
+        def test_format_client_id_handles_missing_remote_address(self) -> None:
+            self.assertEqual(format_client_id(None), "unknown")
+
+    class GuardianServerAsyncTests(unittest.IsolatedAsyncioTestCase):
+        async def test_run_action_offloads_blocking_handler(self) -> None:
+            to_thread = mock.AsyncMock(return_value=(True, "drained"))
+            with mock.patch.object(asyncio, "to_thread", to_thread):
+                result = await run_action("drain")
+
+            to_thread.assert_awaited_once_with(handle_drain)
+            self.assertEqual(result, (True, "drained"))
+
+        async def test_run_action_rejects_unknown_action(self) -> None:
+            self.assertIsNone(await run_action("reload"))
+
+    suite = unittest.TestSuite()
+    suite.addTests(
+        unittest.defaultTestLoader.loadTestsFromTestCase(GuardianServerTests)
+    )
+    suite.addTests(
+        unittest.defaultTestLoader.loadTestsFromTestCase(GuardianServerAsyncTests)
+    )
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    raise SystemExit(0 if result.wasSuccessful() else 1)
+
+
+async def async_main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         description="IO Database Guardian WebSocket Server"
     )
@@ -329,13 +414,13 @@ async def main():
         help="Path to file containing the pre-shared key",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if not args.psk_file:
         logger.error(
             "PSK file must be specified via --psk-file or GUARDIAN_PSK_FILE env var"
         )
-        sys.exit(1)
+        return 1
 
     psk = load_psk(args.psk_file)
     logger.info(f"Loaded PSK from {args.psk_file}")
@@ -348,6 +433,15 @@ async def main():
     async with serve(handler, args.host, args.port):
         await asyncio.Future()  # Run forever
 
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if len(argv) == 1 and argv[0] in {"test", "--test"}:
+        run_tests()
+    return asyncio.run(async_main(argv))
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    raise SystemExit(main())
