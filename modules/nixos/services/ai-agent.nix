@@ -354,6 +354,10 @@ in
         };
 
         ai-agent.settings = {
+          gateway = {
+            multiplex_profiles = true;
+          };
+
           model = {
             base_url = "https://openrouter.ai/api/v1";
             default = cfg.models.primary;
@@ -508,6 +512,7 @@ in
 
           platforms.webhook = {
             enabled = true;
+
             extra = {
               port = cfg.platform.webhook.port;
               rate_limit = 30;
