@@ -1,4 +1,8 @@
-{ pkgs, ... }:
+{
+  inputs,
+  pkgs,
+  ...
+}:
 {
   imports = [
     ./keyboard.nix
@@ -23,11 +27,16 @@
     '';
   };
 
-  home.packages = with pkgs; [
-    fragments
-    gnome-online-accounts-gtk
-    picard
-  ];
+  home = {
+    packages = with pkgs; [
+      fragments
+      gnome-online-accounts-gtk
+      picard
+      pkgs.hermes-desktop
+    ];
+
+    file.".hermes/desktop-plugins".source = "${inputs.fleet-graph}/desktop-plugin";
+  };
 
   core = {
     audio = {
@@ -46,5 +55,7 @@
 
   user.persistence.directories = [
     ".config/MusicBrainz"
+    ".hermes"
+    ".config/Hermes"
   ];
 }
