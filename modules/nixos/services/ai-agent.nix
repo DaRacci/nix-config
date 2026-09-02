@@ -645,6 +645,14 @@ in
               rev = "v0.6.13";
               hash = "sha256-DEKSe1mrN0KNK0JrzlPJL6tNIjQ9COARD0ddrkHISlk=";
             })
+            (pkgs.stdenv.mkDerivation {
+              name = "fleet-graph";
+              src = inputs.fleet-graph;
+              installPhase = ''
+                mkdir -p $out
+                cp -r $src/* $out/
+              '';
+            })
           ];
         };
 
@@ -655,6 +663,7 @@ in
             "hermes-hora"
             "agentiker-code-intel"
             "curator-evolver"
+            "fleet-graph"
           ];
           plugins.entries.hermes-hora = {
             timezone = config.time.timeZone;

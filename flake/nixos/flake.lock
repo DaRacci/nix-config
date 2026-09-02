@@ -129,6 +129,22 @@
         "type": "github"
       }
     },
+    "fleet-graph": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1787684011,
+        "narHash": "sha256-ZeGBOOgsvNbfjeKaIjwWD6HneTPGCgPDpLOG4wbYVUA=",
+        "owner": "asmodaydoescoding",
+        "repo": "fleetgraph",
+        "rev": "8f2a1b6fabec0ce841c1b46774d06dee8aa660c6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "asmodaydoescoding",
+        "repo": "fleetgraph",
+        "type": "github"
+      }
+    },
     "forgesync": {
       "inputs": {
         "nixpkgs": [
@@ -522,6 +538,7 @@
         "crtified-nur": "crtified-nur",
         "disko": "disko",
         "flake-parts": "flake-parts",
+        "fleet-graph": "fleet-graph",
         "forgesync": "forgesync",
         "hermes-agent": "hermes-agent",
         "impermanence": "impermanence",

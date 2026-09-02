@@ -79,6 +79,10 @@
       url = "github:lukaswrz/forgesync";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    fleet-graph = {
+      url = "github:asmodaydoescoding/fleetgraph";
+      flake = false;
+    };
 
     seaweedfs = {
       url = "https://raw.githubusercontent.com/liberodark/nixpkgs/refs/heads/seawedfs/nixos/modules/services/network-filesystems/seaweedfs.nix";
