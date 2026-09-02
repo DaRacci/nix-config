@@ -100,7 +100,7 @@ Defines `custom-settings.slideIn` — a list of edge-sliding popup windows. Each
 Defines `custom-settings.lua` — the Lua config generation subsystem:
 
 - **`enable`** (boolean) — Enable pure Lua configuration files with Nix substitution support.
-- **`variables`** (attrs of `nullOr str`) — Key-value pairs for `@placeholder@` substitution in Lua source files. Each key `foo` replaces `@foo@` in all sourced Lua modules with the given value. Some variables are pre-populated automatically (see `applicationBinds` below). Common injected values include paths to `playerctl`, `wpctl`, `zenity`, `hyprshutdown`, and `uwsm-app`.
+- **`variables`** (attrs of `nullOr str`) — Key-value pairs for `@placeholder@` substitution in Lua source files. Each key `foo` replaces `@foo@` only in Lua modules that reference that placeholder. Modules that don't reference a given placeholder are unaffected, so bundled modules can use disjoint placeholder sets. A placeholder referenced by a module but absent from `variables` is an error. Some variables are pre-populated automatically (see `applicationBinds` below). Common injected values include paths to `playerctl`, `wpctl`, `zenity`, `hyprshutdown`, and `uwsm-app`.
 - **`luaModules`** (list of paths) — Lua source files to copy into the Hyprland config directory and `require` from `init.lua`. Each file undergoes `@placeholder@` substitution using the `variables` attrset. Defaults to the bundled `lua/binds.lua`.
 - **`applicationBinds`** (attrs of `str`) — Application keybinds passed into Lua generation. Each attr key is a bind string and each attr value is a command string. Rendered into `@applicationBinds@` as Lua table entries consumed by `binds.lua`. Generated Lua iterates over those table entries and creates `hl.bind(..., hl.dsp.exec_cmd(...))` calls for each bind/command pair.
 
@@ -122,7 +122,7 @@ This pattern keeps bind and submap definitions inline in Lua. Submaps are define
 
 ### `lua/binds.lua`
 
-The default Lua bind template at `modules/home-manager/core/hyprland/lua/binds.lua`. Uses `@placeholder@` substitution for dynamic injection:
+The default Lua bind template at `modules/home-manager/core/hyprland/lua/binds.lua`. Uses `@placeholder@` substitution for dynamic injection. Substitution is per-file — only placeholders actually present in this template are replaced; other Lua modules are unaffected by binds.lua's placeholder set.
 
 | Placeholder              | Source                                 | Description                              |
 | ------------------------ | -------------------------------------- | ---------------------------------------- |
@@ -201,5 +201,6 @@ Shared type definitions used across the modules:
 
 - All options live under `custom-settings` to avoid collision with upstream HM Hyprland options.
 - `lua.nix` auto-injects `applicationBinds`, `playerctl`, `wpctl`, `zenity`, `hyprshutdown`, and `uwsmApp` as substitution variables — no need to set those manually.
+- Variable substitution is per-file: each Lua module only receives replacements for `@placeholder@` tokens it actually contains. A variable defined but unused by a given module is silently ignored for that module. A placeholder referenced by a module but missing from `variables` is an error.
 - Unknown dispatchers in Lua raise a runtime error from Hyprland's Lua parser, not a build-time error.
 - CamelCase naming in Nix (e.g. `fullscreenState`, `idleInhibit`, `keepAspectRatio`, `noCloseFor`, `forceRgbx`, `syncFullscreen`) is translated to snake_case in the Lua output.

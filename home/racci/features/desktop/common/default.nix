@@ -35,7 +35,7 @@
       pkgs.hermes-desktop
     ];
 
-    file.".hermes/desktop-plugins".source = "${inputs.fleet-graph}/desktop-plugin";
+    file.".hermes/desktop-plugins/fleet-graph".source = "${inputs.fleet-graph}/desktop-plugin";
   };
 
   core = {

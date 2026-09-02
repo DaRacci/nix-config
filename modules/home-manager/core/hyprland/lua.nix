@@ -25,6 +25,31 @@ let
     str
     ;
   cfg = config.wayland.windowManager.hyprland.custom-settings.lua;
+
+  # Extract all @PLACEHOLDER@ names from a file content as a list of strings (without @ signs).
+  # Used to scope variable substitution to only placeholders actually present in each file.
+  parsePlaceholders =
+    fileContent:
+    builtins.filter (s: s != null) (
+      map (m: builtins.elemAt m 0) (
+        builtins.split "@([A-Za-z0-9_-]+)@" fileContent |> builtins.filter builtins.isList
+      )
+    );
+
+  # Build a substitution attrset for a single module: intersect file placeholders with merged variables.
+  # Errors if file references a placeholder that isn't in merged variables.
+  varsForModule =
+    modulePath:
+    let
+      fileContent = builtins.readFile modulePath;
+      referenced = parsePlaceholders fileContent;
+      missing = builtins.filter (name: !cfg.variables ? "${name}") referenced;
+    in
+    if missing != [ ] then
+      builtins.throw "hyprland lua: ${baseNameOf modulePath} references placeholders [${concatStringsSep ", " missing}] not found in config.wayland.windowManager.hyprland.custom-settings.lua.variables"
+    else
+      lib.filterAttrs (name: _: builtins.elem name referenced) cfg.variables;
+
 in
 {
   options.wayland.windowManager.hyprland.custom-settings.lua = {
@@ -41,9 +66,11 @@ in
 
     luaModules = mkOption {
       type = listOf path;
-      default = [
-        ./lua/binds.lua
-      ];
+      default =
+        builtins.readDir ./lua
+        |> builtins.attrNames
+        |> builtins.filter (file: builtins.match ".*\\.lua$" file != null)
+        |> map (file: ./lua/${file});
       description = ''
         Lua modules to load in the main init.lua file.
         Each module is a path to a Lua file, which will be copied to the config directory and required in init.lua.
@@ -67,7 +94,7 @@ in
         |> map (
           modulePath:
           nameValuePair (baseNameOf modulePath) {
-            content = pkgs.replaceVars modulePath cfg.variables;
+            content = pkgs.replaceVars modulePath (varsForModule modulePath);
             autoLoad = true;
           }
         )
@@ -91,7 +118,7 @@ in
         DEFAULT_AUDIO_SINK = null;
         DEFAULT_AUDIO_SOURCE = null;
 
-        cursorSize = config.stylix.cursor.size;
+        cursorSize = toString config.stylix.cursor.size;
       };
     };
   };
