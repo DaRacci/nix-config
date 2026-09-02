@@ -607,6 +607,7 @@ in
       services = {
         hermes-agent = {
           extraPackages = [
+            pkgs.rtk
             pkgs.openspec
             pkgs.hermes-curator-evolver
             pkgs.ast-grep
@@ -670,10 +671,6 @@ in
           };
         };
       };
-
-      systemd.services.hermes-agent.postStart = ''
-        ${lib.getExe pkgs.docker} exec -u hermes hermes-agent bash -c 'pip install --upgrade rtk-hermes 2> /dev/null || true';
-      '';
     })
 
     (mkIf (cfg.enable && cfg.extras.scraper.enable) {
