@@ -293,7 +293,14 @@ in
 
     extras = {
       plugins = mkEnableOption "extra plugins for the agent";
-      scraper = mkEnableOption "trafilatura-scrape as a self-hosted Firecrawl-compatible web scrape server.";
+      scraper = {
+        enable = mkEnableOption "web scraping and search plugins for the agent";
+        searxEndpoint = mkOption {
+          type = nullOr str;
+          default = null;
+          description = "The SearxNG endpoint to use for web search.";
+        };
+      };
       browser = mkEnableOption "headless browser for web scraping and automation";
     };
 
@@ -660,9 +667,13 @@ in
       '';
     })
 
-    (mkIf (cfg.enable && cfg.extras.scraper) {
+    (mkIf (cfg.enable && cfg.extras.scraper.enable) {
       services = {
-        trafilatura-scrape.enable = true;
+        trafilatura-scrape = {
+          enable = true;
+          searxng.url = cfg.extras.scraper.searxEndpoint;
+        };
+
         ai-agent.settings = {
           plugins.enabled = [
             "web-searxng"
@@ -673,6 +684,7 @@ in
             extract_backend = "firecrawl";
           };
         };
+
         hermes-agent = {
           extraDependencyGroups = [ "firecrawl" ];
           environment = {

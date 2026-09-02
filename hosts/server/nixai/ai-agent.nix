@@ -103,7 +103,10 @@ in
 
       extras = {
         plugins = true;
-        scraper = true;
+        scraper = {
+          enable = true;
+          searxEndpoint = "https://search.racci.dev";
+        };
       };
 
       platform = {

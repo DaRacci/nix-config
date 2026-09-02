@@ -592,11 +592,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787547983,
-        "narHash": "sha256-Q92gAB53hgu+fU8q0//cTdb3UbMtWCFKgRTIhDDyWS4=",
+        "lastModified": 1788271648,
+        "narHash": "sha256-zDNobbwxtFoqoJC6624DtkDGtI0RoslIn6ie+z+LXnw=",
         "ref": "refs/heads/main",
-        "rev": "4001a3f468180baf2dd86a111545fa5228279b8b",
-        "revCount": 7,
+        "rev": "29a552ba621bbcbc690d28385d43ba63282ed283",
+        "revCount": 26,
         "type": "git",
         "url": "https://codeberg.org/Racci/trafilatura_scrape"
       },
