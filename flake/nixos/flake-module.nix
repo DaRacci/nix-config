@@ -47,8 +47,11 @@ in
     };
 
     server = {
+      authPrimaryHost = "nixauth";
+      databasePrimaryHost = "nixdb";
       ioPrimaryCoordinator = "nixio";
       monitoringPrimaryHost = "nixmon";
+      storagePrimaryHost = "nixstor";
       distributedBuilders = [ "nixserv" ];
     };
   };

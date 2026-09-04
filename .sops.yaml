@@ -74,3 +74,21 @@ creation_rules:
           - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
           - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
           - age1sayjklnumzyva2zuszce0uplq59cvr9z9wvv7fw6t9m70qndjutshdp0zm
+  - path_regex: hosts/server/nixdb/
+    key_groups:
+      - age:
+          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
+          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
+          - age1f4q0ql6tzzhlg2uc55f49x06e57fpjlzksj4r7scjlr8ssdtlufsgrx4pn
+  - path_regex: hosts/server/nixauth/
+    key_groups:
+      - age:
+          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
+          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
+          - age1f598f5cc069evjtc83p8ym5n59ycvf3jd6u0gs2zhexl3wqncqhsx8lgzh
+  - path_regex: hosts/server/nixstor/
+    key_groups:
+      - age:
+          - age1gmc8dd4mj5q0zncy5gq4lccjlq9v84t8cqnlananmxt8g0jezv6szawll8
+          - age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a
+          - age1yjg2gkatgy3r60pxzs8px6er55guda3pjcpleyk5nq8a5jc69vasymg29q

@@ -1,6 +1,6 @@
 {
-  isThisIOPrimaryHost,
-  getIOPrimaryHostAttr,
+  isThisPrimaryHost,
+  getPrimaryHostAttr,
 
   getOtherAttrs,
   collectAllAttrs,
@@ -40,7 +40,7 @@ let
 
   cfg = config.server.database.postgres;
 
-  postgresPort = getIOPrimaryHostAttr "services.postgresql.settings.port";
+  postgresPort = getPrimaryHostAttr config.server.databasePrimaryHost "services.postgresql.settings.port";
   allDatabaseNames = collectAllAttrs "server.database.postgres" |> builtins.attrNames;
 
   hasPostgresDatabases = builtins.length (builtins.attrNames cfg) > 0;
@@ -122,7 +122,7 @@ in
   };
 
   config = mkMerge [
-    (mkIf (isThisIOPrimaryHost && anyConfiguredPostgresAnywhere) {
+    (mkIf (isThisPrimaryHost config.server.databasePrimaryHost && anyConfiguredPostgresAnywhere) {
       assertions = [
         (
           let
@@ -188,7 +188,7 @@ in
       };
     })
 
-    (mkIf (isThisIOPrimaryHost || hasPostgresDatabases) {
+    (mkIf (isThisPrimaryHost config.server.databasePrimaryHost || hasPostgresDatabases) {
       sops.secrets =
         builtins.attrValues cfg
         |> map (
@@ -202,13 +202,13 @@ in
         |> listToAttrs;
     })
 
-    (mkIf (!isThisIOPrimaryHost && hasPostgresDatabases) {
+    (mkIf (!isThisPrimaryHost config.server.databasePrimaryHost && hasPostgresDatabases) {
       assertions = [
         {
           assertion = !config.services.postgresql.enable;
           message = ''
-            PostgreSQL is enabled & has databases configured, but you have configured databases for management with IO Hosts.
-            If this is on purpose and you want IO Hosts to manage these, set `services.postgresl.enable` to `false`.
+            PostgreSQL is enabled & has databases configured, but you are not the database primary host.
+            If this is on purpose and you want the database primary host to manage these, set `services.postgresql.enable` to `false`.
 
             Configured databases: ${toString config.services.postgresql.ensureDatabases}
           '';

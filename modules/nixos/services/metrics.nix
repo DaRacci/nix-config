@@ -12,7 +12,6 @@ let
     flatten
     getExe
     listToAttrs
-    literalExpression
     mapAttrs
     mapAttrsToList
     mkEnableOption
@@ -25,7 +24,6 @@ let
     ;
 
   inherit (lib.types)
-    anything
     attrsOf
     enum
     nullOr
@@ -210,12 +208,6 @@ in
         )
         |> listToAttrs;
 
-      test = mkOption {
-        type = anything;
-        default = hacompanionConfig;
-        defaultText = literalExpression "hacompanionConfig";
-      };
-
       script = mkOption {
         type = attrsOf (submodule {
           options = {
@@ -345,7 +337,7 @@ in
   };
 
   config = mkMerge [
-    (mkIf cfg.hacompanion.enable {
+    (mkIf (cfg.enable && cfg.hacompanion.enable) {
       sops.secrets.HACOMPANION_ENV = {
         sopsFile = "${self}/hosts/secrets.yaml";
       };
@@ -392,7 +384,7 @@ in
 
     })
 
-    (mkIf cfg.upgradeStatus.enable {
+    (mkIf (cfg.enable && cfg.upgradeStatus.enable) {
       services.metrics.hacompanion.script.upgrade_status = {
         name = "NixOS Upgrade Status";
         icon = "mdi:update";
@@ -442,7 +434,7 @@ in
       };
     })
 
-    (mkIf cfg.upgradeStatus.uptimeKuma.enable {
+    (mkIf (cfg.enable && cfg.upgradeStatus.enable && cfg.upgradeStatus.uptimeKuma.enable) {
       sops.secrets.UPGRADE_STATUS_ID = { };
 
       systemd = {

@@ -1,5 +1,10 @@
 _:
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   # TEMPORARY: Strip knownVulnerabilities from minio to unblock build.
   # TODO: Remove once migrated off MinIO (SeaweedFS evaluation in progress).
@@ -11,6 +16,14 @@ let
   });
 in
 {
+  users = {
+    groups.minio-acme = { };
+    users.caddy.extraGroups = lib.mkAfter [ "minio-acme" ];
+    users.minio.extraGroups = lib.mkAfter [ "minio-acme" ];
+  };
+
+  security.acme.certs."minio.racci.dev".group = "minio-acme";
+
   sops.secrets = {
     MINIO_ROOT_CREDENTIALS = {
       inherit (config.users.users.minio) group;

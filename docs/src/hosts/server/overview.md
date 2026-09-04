@@ -10,10 +10,13 @@ Documentation of the individual server host machines managed by this repository.
 
 - [NixAI](nixai.md): AI agent and inference host
 - [NixArr](nixarr.md): Media management and playback host
+- [NixAuth](nixauth.md): Identity host, OAuth2/OIDC/SSO and user management
 - [NixCloud](nixcloud.md): Application host, user-facing cloud services
+- [NixDB](nixdb.md): Database host, and database-dependent service guardian
 - [NixDev](nixdev.md): Development, CI, and registry host
 - [NixIO](nixio.md): Ingress host, reverse proxy, and network gateway
 - [NixMon](nixmon.md): Monitoring and observability host
+- [NixServ](nixserv.md): Binary cache and distributed build host
 - [NixStor](nixstor.md): Storage host, SeaweedFS evaluation
 
 ### Configuration Structure

@@ -88,6 +88,36 @@ in
         '';
       };
 
+      databasePrimaryHost = mkOption {
+        type = serverHostnamesEnum;
+        description = ''
+          Designate a server to act as the primary database host.
+
+          This host will run PostgreSQL and related database services
+          for the entire server cluster.
+        '';
+      };
+
+      storagePrimaryHost = mkOption {
+        type = serverHostnamesEnum;
+        description = ''
+          Designate a server to act as the primary storage host.
+
+          This host will run SeaweedFS and related storage services
+          for the entire server cluster.
+        '';
+      };
+
+      authPrimaryHost = mkOption {
+        type = serverHostnamesEnum;
+        description = ''
+          Designate a server to act as the primary authentication host.
+
+          This host will run Kanidm and related identity services
+          for the entire server cluster.
+        '';
+      };
+
       distributedBuilders = mkOption {
         type = listOf serverHostnamesEnum;
         default = [ ];

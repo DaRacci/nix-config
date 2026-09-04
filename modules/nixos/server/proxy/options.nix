@@ -1,4 +1,5 @@
 {
+  isThisIOPrimaryHost,
   getIOPrimaryHostAttr,
   ...
 }:
@@ -25,13 +26,18 @@ let
     functionTo
     deferredModule
     ;
-
 in
 {
   options.server.proxy = {
     domain = mkOption {
       type = str;
-      description = "The base domain for all virtual hosts.";
+      default = if isThisIOPrimaryHost then null else getIOPrimaryHostAttr "server.proxy.domain";
+      defaultText = literalExpression "if isThisIOPrimaryHost then null else getIOPrimaryHostAttr \"server.proxy.domain\"";
+      description = ''
+        The base domain for all virtual hosts.
+        Must be set explicitly on the IO primary host (`server.ioPrimaryHost`);
+        other hosts read it from the primary host's configuration.
+      '';
     };
 
     extensions = mkOption {
