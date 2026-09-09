@@ -6,6 +6,7 @@ _: {
     ./windowRule.nix
     ./input.nix
     ./lua.nix
+    ./workspaces.nix
   ];
 
   options.wayland.windowManager.hyprland = { };

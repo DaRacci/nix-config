@@ -66,11 +66,7 @@ in
 
     luaModules = mkOption {
       type = listOf path;
-      default =
-        builtins.readDir ./lua
-        |> builtins.attrNames
-        |> builtins.filter (file: builtins.match ".*\\.lua$" file != null)
-        |> map (file: ./lua/${file});
+      default = [ ];
       description = ''
         Lua modules to load in the main init.lua file.
         Each module is a path to a Lua file, which will be copied to the config directory and required in init.lua.
@@ -87,39 +83,51 @@ in
     };
   };
 
-  config = mkIf (cfg.enable && cfg.luaModules != [ ]) {
-    wayland.windowManager.hyprland = {
-      extraLuaFiles =
-        cfg.luaModules
-        |> map (
-          modulePath:
-          nameValuePair (baseNameOf modulePath) {
-            content = pkgs.replaceVars modulePath (varsForModule modulePath);
-            autoLoad = true;
-          }
-        )
-        |> listToAttrs;
+  config = lib.mkMerge [
+    {
+      wayland.windowManager.hyprland.custom-settings.lua.luaModules =
+        builtins.readDir ./lua
+        |> lib.filterAttrs (_: type: type == "regular")
+        |> builtins.attrNames
+        |> builtins.filter (file: builtins.match ".*\\.lua$" file != null)
+        |> map (file: ./lua/${file})
+        |> lib.mkBefore;
+    }
 
-      custom-settings.lua.variables = {
-        applicationBinds = "{ ${
-          cfg.applicationBinds
-          |> mapAttrsToList (
-            bind: command: "{ bind = ${builtins.toJSON bind}, command = ${builtins.toJSON command} }"
+    (mkIf (cfg.enable) {
+      wayland.windowManager.hyprland = {
+        extraLuaFiles =
+          cfg.luaModules
+          |> map (
+            modulePath:
+            nameValuePair (baseNameOf modulePath) {
+              content = pkgs.replaceVars modulePath (varsForModule modulePath);
+              autoLoad = true;
+            }
           )
-          |> concatStringsSep ", "
-        } }";
+          |> listToAttrs;
 
-        playerctl = getExe pkgs.playerctl;
-        wpctl = getExe' pkgs.wireplumber "wpctl";
-        zenity = getExe pkgs.zenity;
-        hyprshutdown = getExe pkgs.hyprshutdown;
-        uwsmApp = getExe' pkgs.uwsm "uwsm-app";
+        custom-settings.lua.variables = {
+          applicationBinds = "{ ${
+            cfg.applicationBinds
+            |> mapAttrsToList (
+              bind: command: "{ bind = ${builtins.toJSON bind}, command = ${builtins.toJSON command} }"
+            )
+            |> concatStringsSep ", "
+          } }";
 
-        DEFAULT_AUDIO_SINK = null;
-        DEFAULT_AUDIO_SOURCE = null;
+          playerctl = getExe pkgs.playerctl;
+          wpctl = getExe' pkgs.wireplumber "wpctl";
+          zenity = getExe pkgs.zenity;
+          hyprshutdown = getExe pkgs.hyprshutdown;
+          uwsmApp = getExe' pkgs.uwsm "uwsm-app";
 
-        cursorSize = toString config.stylix.cursor.size;
+          DEFAULT_AUDIO_SINK = null;
+          DEFAULT_AUDIO_SOURCE = null;
+
+          cursorSize = toString config.stylix.cursor.size;
+        };
       };
-    };
-  };
+    })
+  ];
 }

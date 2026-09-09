@@ -9,19 +9,21 @@ In Lua mode, direct `settings.*` attribute names must be Lua-safe identifiers �
 ## Entry Point
 
 - **Main file**: [`modules/home-manager/core/hyprland/default.nix`](../../../../modules/home-manager/core/hyprland/default.nix)
-- **Supporting files**: `input.nix`, `windowRule.nix`, `permission.nix`, `slideIn.nix`, `lua.nix`, `types.nix`, `noctalia.nix`, and `lua/binds.lua` in the same directory.
+- **Supporting files**: `input.nix`, `windowRule.nix`, `permission.nix`, `slideIn.nix`, `workspaces.nix`, `lua.nix`, `types.nix`, `noctalia.nix`, and `lua/binds.lua`, `lua/opt/workspaces.lua` in the same directory.
 
 The module structure is:
 
 ```
-default.nix       # Top-level importer (imports all submodules)
-├── permission.nix   # custom-settings.permission
-├── slideIn.nix      # custom-settings.slideIn
-├── windowRule.nix   # custom-settings.windowrule
-├── input.nix        # settings.config defaults (cursor, binds, input, misc)
-├── lua.nix          # custom-settings.lua (Lua config generation)
-│   └── lua/binds.lua  # Default Lua bind template with @placeholder@ substitution
-└── types.nix        # Shared type definitions
+default.nix           # Top-level importer
+├── permission.nix    # custom-settings.permission
+├── slideIn.nix       # custom-settings.slideIn
+├── windowRule.nix    # custom-settings.windowrule
+├── input.nix         # settings.config defaults (cursor, binds, input, misc)
+├── workspaces.nix    # custom-settings.workspaces
+├── lua.nix           # custom-settings.lua (Lua config generation)
+│   └── lua/          # Lua source files, with @placeholder@ substitution
+│       └── opt/      # Conditionally loaded Lua modules
+└── types.nix         # Shared type definitions
 ```
 
 ### Options
@@ -119,6 +121,53 @@ end)
 ```
 
 This pattern keeps bind and submap definitions inline in Lua. Submaps are defined via `hl.define_submap(name, fn)` alongside related `hl.bind(...)` calls.
+
+### `workspaces.nix`
+
+Workspace configuration module at `modules/home-manager/core/hyprland/workspaces.nix`.
+Handles workspace naming, monitor assignments, and startup applications with startup-only monitor assignment behavior:
+
+- **Startup-only assignment**: Monitor assignments run once via `hl.on("hyprland.start")` Lua event hook. Users can move workspaces freely after startup without interference.
+- **Persistent naming**: Workspace names and startup commands persist via `hl.workspace_rule()`, ensuring defaults are restored if a workspace is recreated.
+- **Conditional Lua module**: The `lua/opt/workspaces.lua` module is automatically added to the Lua config only when `custom-settings.workspaces.enable = true`. If disabled, no workspace Lua code is loaded.
+- **Configuration source**: Workspace data (name, monitor, startup commands) is defined in user configs via the typed `custom-settings.workspaces.definitions` option and passed to Lua as `@workspaceConfig@` variable.
+
+Enable and configure workspaces in user home config:
+
+```nix
+wayland.windowManager.hyprland.custom-settings.workspaces = {
+  enable = true;
+  definitions = {
+    "1" = {
+      name = "Terminal";
+      monitor = "DP-6";  # startup-only; workspace can be moved after launch
+      startup = [ (lib.getExe pkgs.alacritty) ];  # runs when workspace first created
+    };
+    "2" = {
+      name = "Browser";
+      monitor = "DP-1";
+      startup = [ (lib.getExe config.programs.firefox.package) ];
+    };
+    # ...
+  };
+};
+```
+
+The module generates:
+
+- Lua substitution variable `@workspaceConfig@` with workspace definitions as JSON
+- Conditionally loads `lua/opt/workspaces.lua` to register startup hooks and workspace rules
+
+### `lua/opt/workspaces.lua`
+
+Lua module at `modules/home-manager/core/hyprland/lua/opt/workspaces.lua` that registers workspace configuration. **Only loaded when `custom-settings.workspaces.enable = true`.** Receives workspace data via `@workspaceConfig@` placeholder substitution and:
+
+- Registers `hl.on("hyprland.start")` hook to assign workspaces to monitors on startup only
+- Calls `hl.workspace_rule()` for each workspace to set persistent names and startup commands
+
+| Placeholder         | Source                                   | Description                    |
+| ------------------- | ---------------------------------------- | ------------------------------ |
+| `@workspaceConfig@` | `custom-settings.workspaces.definitions` | Workspace config table as JSON |
 
 ### `lua/binds.lua`
 
