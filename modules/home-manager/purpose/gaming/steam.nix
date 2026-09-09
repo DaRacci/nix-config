@@ -54,6 +54,7 @@ in
     user.persistence = {
       files = [
         ".steam/registry.vdf"
+        ".local/share/BeamNG.drive.ini"
       ];
       directories = [
         ".local/share/Steam"
@@ -73,7 +74,6 @@ in
         ".local/share/BeamNG"
         ".local/share/BeamNG.drive"
         ".local/share/BeamNG.drive.cloud"
-        ".local/share/BeamNG.drive.ini"
       ];
     };
   };
