@@ -63,22 +63,16 @@ in
             name = "hermes-agent-patched";
             src = haFlake.outPath;
             patches = [
-              # TODO:https://github.com/NousResearch/hermes-agent/pull/48637
-              (prev.fetchpatch {
-                url = "https://github.com/NousResearch/hermes-agent/pull/48637.patch";
-                excludes = [ "tests/tools/test_lazy_deps_managed.py" ];
-                hash = "sha256-ou6mVPoOK/au67xsXxOYtwM+aVKjBkgCVnY2coXhsu8=";
-              })
               # TODO:https://github.com/NousResearch/hermes-agent/pull/87820
               (prev.fetchpatch {
                 url = "https://github.com/NousResearch/hermes-agent/pull/87820.patch";
                 hash = "sha256-FgQc5xwMz3+bhX0yEqjh7kky2lepuUv8xg9g0FCgN74=";
               })
               # TODO:https://github.com/NousResearch/hermes-agent/pull/93896
-              (prev.fetchpatch {
-                url = "https://github.com/NousResearch/hermes-agent/pull/93896.patch";
-                hash = "sha256-5BtZ0IVZwS44rkstSb+vUIje0aVtCcnm9KMr8jauYtY=";
-              })
+              # Local rebased patch — upstream source at 7f3e0bb5 has the
+              # hermes_constants helpers but get_managed_system() is not yet
+              # home-aware.
+              ./patches/hermes-agent-home-aware-managed.patch
             ];
           };
         in
@@ -108,6 +102,7 @@ in
             "onnxruntime"
             "pillow"
             "requests"
+            "snowballstemmer"
             "tokenizers"
             "tqdm"
           ])
