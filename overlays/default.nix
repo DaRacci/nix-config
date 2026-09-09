@@ -159,21 +159,41 @@ in
     inherit lib;
   };
 
-  electronFixes =
+  electronCudaFixes =
     _: prev:
     lib.optionalAttrs prev.config.cudaSupport (
-      prev.lib.pipe
-        [ "vscode" "obsidian" ]
-        [
-          (map (
-            name:
-            prev.lib.nameValuePair name (
-              prev.${name}.override {
-                commandLineArgs = "--disable-gpu-compositing --enable-features=WebRTCPipeWireCapturer";
-              }
-            )
-          ))
-          prev.lib.listToAttrs
-        ]
+      [
+        "vscode"
+        "obsidian"
+      ]
+      |> map (
+        name:
+        prev.lib.nameValuePair name (
+          prev.${name}.override {
+            commandLineArgs = "--disable-gpu-compositing --enable-features=WebRTCPipeWireCapturer";
+          }
+        )
+      )
+      |> prev.lib.listToAttrs
     );
+
+  # Fucking shit ass electron bullshit password store.
+  # Only selects gnome-libsecret if running from a set of hardcoded sessions, dumb fucking shit.
+  # Honestly who the fuck thought that was a good detection method for a password store, and why the fuck is it even a thing in 2026.
+  electronPasswordStoreFixes =
+    _: prev:
+    [
+      "vscode"
+      "obsidian"
+      "hermes-desktop"
+    ]
+    |> map (
+      name:
+      prev.lib.nameValuePair name (
+        prev.${name}.override {
+          commandLineArgs = "--password-store=gnome-libsecret";
+        }
+      )
+    )
+    |> prev.lib.listToAttrs;
 }
