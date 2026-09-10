@@ -62,18 +62,6 @@
           OPENSPEC_TELEMETRY = "0";
         };
 
-        enterShell = ''
-          cat > "$DEVENV_ROOT/.luarc.json" <<'EOF'
-          {
-            "workspace": {
-              "library": [
-                "${pkgs.hyprland}/share/hypr/stubs/"
-              ]
-            }
-          }
-          EOF
-        '';
-
         git-hooks = {
           package = pkgs.prek;
           hooks = {
@@ -95,24 +83,56 @@
           };
         };
 
-        tasks."bash:linkSkills" = {
-          before = [ "devenv:enterShell" ];
-          exec = ''
-            skills_src="$DEVENV_ROOT/modules/home-manager/purpose/development/editors/ai/skills"
-            skills_dst="$DEVENV_ROOT/.opencode/skills"
+        tasks = {
+          "bash:linkSkills" = {
+            before = [ "devenv:enterShell" ];
+            exec = ''
+              skills_src="$DEVENV_ROOT/modules/home-manager/purpose/development/editors/ai/skills"
+              skills_dst="$DEVENV_ROOT/.opencode/skills"
 
-            for skill_dir in "$skills_src"/*/; do
-              [ -d "$skill_dir" ] || continue
-              skill_name=$(basename "$skill_dir")
-              target="$skills_dst/$skill_name"
+              mkdir -p "$skills_dst"
+              touch "$skills_dst/.keep"
 
-              if [ ! -e "$target" ] && [ ! -L "$target" ]; then
-                echo "Linking skill: $skill_name"
-                rel_path=$(realpath --relative-to="$skills_dst" "$skill_dir")
-                ln -s "$rel_path" "$target"
+              if [ ! -f "$skills_dst/.gitignore" ]; then
+                touch "$skills_dst/.gitignore"
+                cat > "$skills_dst/.gitignore" <<EOF
+              .gitignore
+              .keep
+              EOF
               fi
-            done
-          '';
+
+              SKILLS_TO_LINK=$(find "$skills_src" -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
+
+              for skill in $SKILLS_TO_LINK; do
+                target="$skills_dst/$skill"
+
+                if [ ! -e "$target" ] && [ ! -L "$target" ]; then
+                  echo "Linking skill: $skill"
+                  rel_path=$(realpath --relative-to="$skills_dst" "$skills_src/$skill")
+                  ln -s "$rel_path" "$target"
+                fi
+
+                if ! grep -Fxq "$skill" "$skills_dst/.gitignore"; then
+                  echo "$skill" >> "$skills_dst/.gitignore"
+                fi
+              done
+            '';
+          };
+
+          "bash:generateLuaStub" = {
+            before = [ "devenv:enterShell" ];
+            exec = ''
+              cat > "$DEVENV_ROOT/.luarc.json" <<'EOF'
+              {
+                "workspace": {
+                  "library": [
+                    "${pkgs.hyprland}/share/hypr/stubs/"
+                  ]
+                }
+              }
+              EOF
+            '';
+          };
         };
       };
     };
