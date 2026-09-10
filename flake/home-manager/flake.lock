@@ -584,9 +584,9 @@
         "nixpkgs": "nixpkgs",
         "noctalia": "noctalia",
         "skills-skill-creator": "skills-skill-creator",
-        "skills-systematic-debugging": "skills-systematic-debugging",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
+        "superpowers": "superpowers",
         "systems": "systems",
         "vicinae": "vicinae",
         "winapps": "winapps",
@@ -629,24 +629,6 @@
         "dir": "skills/skill-creator",
         "owner": "anthropics",
         "repo": "skills",
-        "type": "github"
-      }
-    },
-    "skills-systematic-debugging": {
-      "flake": false,
-      "locked": {
-        "dir": "skills/systematic-debugging",
-        "lastModified": 1786553601,
-        "narHash": "sha256-EsGNO0dULWf5Bx6bGrCv2kI2Z8aKH0kRvGiuN23wChQ=",
-        "owner": "obra",
-        "repo": "superpowers",
-        "rev": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
-        "type": "github"
-      },
-      "original": {
-        "dir": "skills/systematic-debugging",
-        "owner": "obra",
-        "repo": "superpowers",
         "type": "github"
       }
     },
@@ -723,6 +705,24 @@
       "original": {
         "owner": "nix-community",
         "repo": "stylix",
+        "type": "github"
+      }
+    },
+    "superpowers": {
+      "flake": false,
+      "locked": {
+        "dir": "skills",
+        "lastModified": 1786553601,
+        "narHash": "sha256-EsGNO0dULWf5Bx6bGrCv2kI2Z8aKH0kRvGiuN23wChQ=",
+        "owner": "obra",
+        "repo": "superpowers",
+        "rev": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+        "type": "github"
+      },
+      "original": {
+        "dir": "skills",
+        "owner": "obra",
+        "repo": "superpowers",
         "type": "github"
       }
     },

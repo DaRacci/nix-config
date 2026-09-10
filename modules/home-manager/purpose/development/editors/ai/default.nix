@@ -1,5 +1,5 @@
 {
-  self,
+  inputs,
   osConfig,
   config,
   pkgs,
@@ -20,8 +20,57 @@ let
 
   cfg = config.purpose.development.editors.ai;
 
-  defaultSkills =
-    builtins.readDir ./skills |> builtins.attrNames |> map (skillName: "${self}/skills/${skillName}");
+  findSkillDirs =
+    startPath:
+    let
+      recurse =
+        path: depth:
+        if depth > 5 then
+          [ ]
+        else
+          let
+            entries = builtins.readDir path;
+          in
+          builtins.concatMap (
+            name:
+            let
+              fullPath = path + "/${name}";
+              type = entries.${name};
+            in
+            if type == "directory" then
+              (if builtins.pathExists "${fullPath}/SKILL.md" then [ fullPath ] else [ ])
+              ++ recurse fullPath (depth + 1)
+            else
+              [ ]
+          ) (builtins.attrNames entries);
+    in
+    recurse startPath 0;
+
+  patchedSkill =
+    skillPath:
+    pkgs.stdenv.mkDerivation {
+      name = "skill-${baseNameOf skillPath}";
+      unpackPhase = "true";
+      installPhase = ''
+        cp -r "${skillPath}" "$out"
+        chmod -R u+w "$out"
+      '';
+      postFixup = ''
+        patchShebangs "$out"
+      '';
+    };
+
+  defaultSkillList =
+    let
+      localSkills = findSkillDirs ./skills;
+      flakeInputSkills = lib.concatMap findSkillDirs [
+        inputs.skills-skill-creator
+        inputs.superpowers
+      ];
+    in
+    localSkills ++ flakeInputSkills;
+
+  defaultSkills = map patchedSkill defaultSkillList;
 in
 {
   options.purpose.development.editors.ai = {
@@ -404,6 +453,7 @@ in
       ];
 
       user.persistence.directories = [
+        ".agents"
         ".local/share/opencode"
         ".local/state/opencode"
       ];

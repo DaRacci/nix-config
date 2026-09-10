@@ -110,8 +110,8 @@
       url = "github:anthropics/skills?dir=skills/skill-creator";
       flake = false;
     };
-    skills-systematic-debugging = {
-      url = "github:obra/superpowers?dir=skills/systematic-debugging";
+    superpowers = {
+      url = "github:obra/superpowers?dir=skills";
       flake = false;
     };
   };
