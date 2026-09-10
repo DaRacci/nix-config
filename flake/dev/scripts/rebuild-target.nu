@@ -3,11 +3,48 @@
 use std/log
 use lib/flake.nu *
 
+const ACTIONS = ["switch" "build" "boot" "test" "build-vm"]
+
+def "nu-complete rebuild-target first-arg" [] {
+  # First arg can be action or hostname, suggest both
+  let actions = $ACTIONS
+  let hosts = try { list_hosts --fast } catch { [] }
+  ($actions ++ $hosts | sort | uniq)
+}
+
+def "nu-complete rebuild-target second-arg" [context: string] {
+  # Context: "rebuild-target arg1 arg2 ..."
+  # Find first arg by skipping script name
+  let words = ($context | split words)
+
+  # Filter out script name components (rebuild, target, and .nu files)
+  let first_arg = (
+    $words
+    | where { |w|
+        ($w != "rebuild") and ($w != "target") and (not ($w | str ends-with ".nu"))
+    }
+    | get -o 0
+    | default ""
+  )
+
+  if ($first_arg in $ACTIONS) {
+    try { list_hosts --fast } catch { [] }
+  } else {
+    $ACTIONS
+  }
+}
+
 def perform-action [
   action: string # "switch" | "build" | "boot" | "test" | "build-vm"
-  args: list<string>
+  hostname?: string
+  ...rest_args: string
 ] {
-  let selected = select_host --fast
+  let selected = if ($hostname != null) {
+    $hostname
+  } else {
+    select_host --fast
+  }
+
   if $selected == null {
     log error "No host selected."
     exit 1
@@ -22,7 +59,7 @@ def perform-action [
   let passthrough_args = [
     "--"
     "--accept-flake-config"
-    ...($args)
+    ...($rest_args)
   ]
 
   log info $"Selected host: ($selected)"
@@ -48,22 +85,29 @@ def perform-action [
   }
 }
 
-def --wrapped main [...args: string] {
-  perform-action "switch" $args
+def perform-rebuild-action [
+  arg1?: string
+  arg2?: string
+  ...rest_args: string
+] {
+  let args = ([(if $arg1 != null { [$arg1] } else { [] }), (if $arg2 != null { [$arg2] } else { [] })] | flatten)
+  let all_args = $args ++ $rest_args
+  let parsed = parse-flexible-args $all_args --valid-actions $ACTIONS --default-action "switch"
+  perform-action $parsed.action $parsed.hostname ...$parsed.rest
 }
 
-def --wrapped "main build-vm" [...args: string] {
-  perform-action "build-vm" $args
+export def rebuild-target [
+  arg1?: string@"nu-complete rebuild-target first-arg"     # first arg: action or hostname
+  arg2?: string@"nu-complete rebuild-target second-arg"     # second arg: depends on first
+  ...rest_args: string
+] {
+  perform-rebuild-action $arg1 $arg2 ...$rest_args
 }
 
-def --wrapped "main test" [...args: string] {
-  perform-action "test" $args
-}
-
-def --wrapped "main build" [...args: string] {
-  perform-action "build" $args
-}
-
-def --wrapped "main boot" [...args: string] {
-  perform-action "boot" $args
+def --wrapped main [
+  arg1?: string
+  arg2?: string
+  ...rest_args: string
+] {
+  perform-rebuild-action $arg1 $arg2 ...$rest_args
 }

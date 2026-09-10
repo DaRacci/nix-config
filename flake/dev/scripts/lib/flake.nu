@@ -6,8 +6,9 @@ export-env {
   $env.CURRENT_USER = (whoami | str trim)
 }
 
+# Get a list of all hosts.
 # Use the --fast switch to estimate the hosts based on fs instead of nix for quicker scans.
-export def select_host [--fast] {
+export def list_hosts [--fast] {
   mut hosts = []
 
   if $fast {
@@ -25,12 +26,46 @@ export def select_host [--fast] {
       | where $it != $env.CURRENT_HOST
   }
 
-  let selected = ["current", ...($hosts)] | input list -f
+  $hosts
+}
+
+export def select_host [--fast] {
+  let hosts = list_hosts --fast=$fast
+  let all_hosts = ["current", ...($hosts)]
+  let selected = $all_hosts | input list -f
   if $selected == "current" {
     $env.CURRENT_HOST
   } else {
     $selected
   }
+}
+
+# Parse flexible args where action and hostname can be in different orders
+# Returns {action: string, hostname: string|null, rest: list<string>}
+# Examples with actions=["build" "switch"] and default_action="switch":
+#   parse-flexible-args [] => {action: "switch", hostname: null, rest: []}
+#   parse-flexible-args ["host1"] => {action: "switch", hostname: "host1", rest: []}
+#   parse-flexible-args ["build" "host1"] => {action: "build", hostname: "host1", rest: []}
+#   parse-flexible-args ["host1" "--flag"] => {action: "switch", hostname: "host1", rest: ["--flag"]}
+export def parse-flexible-args [
+  args: list<string>
+  --valid-actions: list<string> = []
+  --default-action: string = "switch"
+] {
+  if ($args | is-empty) {
+    return {action: $default_action, hostname: null, rest: []}
+  }
+
+  let first = ($args | get 0)
+
+  if ($first in $valid_actions) {
+    let hostname = if ($args | length) > 1 { $args | get 1 } else { null }
+    let rest = if ($args | length) > 2 { $args | range 2.. } else { [] }
+    return {action: $first, hostname: $hostname, rest: $rest}
+  }
+
+  let rest = if ($args | length) > 1 { $args | range 1.. } else { [] }
+  return {action: $default_action, hostname: $first, rest: $rest}
 }
 
 export def select_user [] {
