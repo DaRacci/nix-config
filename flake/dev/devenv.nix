@@ -123,15 +123,41 @@
             "bash:generateLuaStub" = {
               before = [ "devenv:enterShell" ];
               exec = ''
-                cat > "$DEVENV_ROOT/.luarc.json" <<'EOF'
-                {
-                  "workspace": {
-                    "library": [
-                      "${pkgs.hyprland}/share/hypr/stubs/"
-                    ]
-                  }
-                }
-                EOF
+                TARGET="$DEVENV_ROOT/.luarc.json"
+                CURRENT_STUB="${pkgs.hyprland}/share/hypr/stubs/"
+                JQ="${lib.getExe pkgs.jq}"
+
+                if [ ! -f "$TARGET" ]; then
+                  printf '%s\n' \
+                    '{' \
+                    '  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",' \
+                    '  "workspace.library": []' \
+                    '}' > "$TARGET"
+                fi
+
+                if ! $JQ -e '.["workspace.library"] | type == "array"' "$TARGET" >/dev/null 2>&1; then
+                  $JQ '.["workspace.library"] = []' "$TARGET" > "$TARGET.tmp" && mv "$TARGET.tmp" "$TARGET"
+                fi
+
+                if ! $JQ -e --arg stub "$CURRENT_STUB" '
+                  ((.["workspace.library"] // []) | map(select(if type == "string" then contains("share/hypr/stubs/") else false end))) as $hyprStubs
+                  | ($hyprStubs | length == 1 and .[0] == $stub)
+                ' "$TARGET" >/dev/null 2>&1; then
+                  $JQ --arg stub "$CURRENT_STUB" '
+                    .["workspace.library"] = (
+                      (.["workspace.library"] // [])
+                      | map(
+                          select(
+                            if type == "string"
+                            then (contains("share/hypr/stubs/") | not)
+                            else true
+                            end
+                          )
+                        )
+                      + [$stub]
+                    )
+                  ' "$TARGET" > "$TARGET.tmp" && mv "$TARGET.tmp" "$TARGET"
+                fi
               '';
             };
           };
