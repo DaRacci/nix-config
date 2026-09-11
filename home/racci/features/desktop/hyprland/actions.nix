@@ -5,7 +5,7 @@
   ...
 }:
 let
-  inherit (lib) getExe concatStringsSep attrsToLuaInlineArgs;
+  inherit (lib) getExe concatStringsSep;
 
   tessdata = pkgs.stdenv.mkDerivation {
     name = "tessdata-multilang";
@@ -190,20 +190,21 @@ in
       pkgs.slurp
     ];
 
-    settings.bind = attrsToLuaInlineArgs {
-      "SUPER+SHIFT+T" = ''hl.dsp.exec_cmd("${ocrRegion}")'';
-      "SUPER+SHIFT+C" = ''hl.dsp.exec_cmd("${colourPicker}")'';
-      "Print" = ''hl.dsp.exec_cmd("${screenshot} area")'';
-      "SUPER+Print" = ''hl.dsp.exec_cmd("${screenshot} output")'';
-      "CTRL+SHIFT+ALT+Delete" =
-        ''hl.dsp.exec_cmd("pkill ${pkgs.wlogout}/bin/wlogout || ${pkgs.wlogout}/bin/wlogout -p layer-shell")'';
-      "CTRL+SHIFT+SPACE" = ''hl.dsp.exec_cmd("${pkgs._1password-gui}/bin/1password --quick-access")'';
-    };
-
-    custom-settings.lua.applicationBinds = {
-      "SUPER+T" = "${pkgs.alacritty}/bin/alacritty";
-      "SUPER+F" = "${pkgs.firefox}/bin/firefox";
-      "SUPER+SHIFT+E" = "${pkgs.nautilus}/bin/nautilus --new-window";
+    custom-settings.lua = {
+      luaModules = [ ./lua/actions.lua ];
+      variables = {
+        inherit ocrRegion;
+        inherit colourPicker;
+        screenshotArea = "${screenshot} area";
+        screenshotOutput = "${screenshot} output";
+        quickAccessCmd = "${pkgs._1password-gui}/bin/1password --quick-access";
+        wlogoutCmd = "pkill ${pkgs.wlogout}/bin/wlogout || ${pkgs.wlogout}/bin/wlogout -p layer-shell";
+      };
+      applicationBinds = {
+        "SUPER+T" = "${pkgs.alacritty}/bin/alacritty";
+        "SUPER+F" = "${pkgs.firefox}/bin/firefox";
+        "SUPER+SHIFT+E" = "${pkgs.nautilus}/bin/nautilus --new-window";
+      };
     };
   };
 }
