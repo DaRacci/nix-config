@@ -2,14 +2,13 @@
 
 ## Purpose
 
-The `core.hyprland` modules extend the upstream Home-Manager `wayland.windowManager.hyprland` module with a typed Nix API for window rules, permissions, slide-in popups, input defaults, and Lua config generation. They target the HM-native Lua configuration format (`configType = "lua"`), which is the repository default.
-
-In Lua mode, direct `settings.*` attribute names must be Lua-safe identifiers — use underscore-style names like `exec_once`, `window_rule`, and `workspace_rule` instead of dashed hyprlang names like `exec-once`.
+The `core.hyprland` modules extend the upstream Home-Manager `wayland.windowManager.hyprland` module with a typed Nix API for window rules, permissions, slide-in popups, input defaults, and Lua config generation.
+They target the HM-native Lua configuration format (`configType = "lua"`), which is the repository default.
 
 ## Entry Point
 
 - **Main file**: [`modules/home-manager/core/hyprland/default.nix`](../../../../modules/home-manager/core/hyprland/default.nix)
-- **Supporting files**: `input.nix`, `windowRule.nix`, `permission.nix`, `slideIn.nix`, `workspaces.nix`, `lua.nix`, `types.nix`, `noctalia.nix`, and `lua/binds.lua`, `lua/opt/workspaces.lua` in the same directory.
+- **Supporting files**: `input.nix`, `permission.nix`, `slideIn.nix`, `workspaces.nix`, `lua.nix`, `types.nix`, `noctalia.nix`, and all files under `lua/*`, in the same directory.
 
 The module structure is:
 
@@ -17,7 +16,6 @@ The module structure is:
 default.nix           # Top-level importer
 ├── permission.nix    # custom-settings.permission
 ├── slideIn.nix       # custom-settings.slideIn
-├── windowRule.nix    # custom-settings.windowrule
 ├── input.nix         # settings.config defaults (cursor, binds, input, misc)
 ├── workspaces.nix    # custom-settings.workspaces
 ├── lua.nix           # custom-settings.lua (Lua config generation)
@@ -42,45 +40,6 @@ Default config covers:
 - `binds`: workspace back-and-forth, allow workspace cycles, focus method
 - `input`: keyboard layout, follow-mouse, touchpad, sensitivity, accel profile
 - `misc`: DPMS on key/mouse events
-
-### `windowRule.nix`
-
-Defines `custom-settings.windowrule`: an attribute set of named window rules. Each rule has:
-
-- `name` — rule name (defaults to the attribute key)
-- `matcher` — list of match conditions (window class, title, workspace, etc.)
-- `rule` — rule properties (float, fullscreen, size, move, opacity, center, monitor, workspace, pin, group, border, animation, idle inhibit, and many more)
-
-```nix
-custom-settings.windowrule = {
-  "kitty-floating" = {
-    matcher = [ { class = "kitty"; } ];
-    rule = {
-      float = true;
-      center = true;
-      size = {
-        width = "40%";
-        height = "60%";
-      };
-    };
-  };
-
-  "firefox-picture-in-picture" = {
-    matcher = [
-      {
-        title = "Picture-in-Picture";
-        class = "firefox";
-      }
-    ];
-    rule = {
-      pin = true;
-      opacity.activeopacity = 0.9;
-    };
-  };
-};
-```
-
-Complex matchers and compound rule types (workspace selectors, monitor selectors, fullscreen state, opacity, center with reserved area, max/min size, move) are fully typed in `types.nix`.
 
 ### `permission.nix`
 
@@ -228,21 +187,13 @@ Shared type definitions used across the modules:
     configType = "lua";
 
     custom-settings = {
-      windowrule."kitty-floating" = {
-        matcher = [ { class = "kitty"; } ];
-        rule = {
-          float = true;
-          size = { width = "40%"; height = "60%"; };
-          center = true;
-        };
-      };
-
       permission = {
         screenCopy = [ pkgs.firefox ];
       };
 
       lua = {
         enable = true;
+        luaModules = [ ./lua/window_rules.lua ];
         applicationBinds = {
           "SUPER + Return" = "${pkgs.kitty}/bin/kitty";
           "SUPER + E" = "${pkgs.nautilus}/bin/nautilus";
