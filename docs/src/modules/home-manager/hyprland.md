@@ -95,7 +95,14 @@ custom-settings.permission = {
 
 ### `slideIn.nix`
 
-Defines `custom-settings.slideIn` — a list of edge-sliding popup windows. Each entry configures a keybind, executable, window class, position (`left`/`right`/`top`/`bottom`/`edge`/`side`), and optional window rules. Uses `hdrop` for dropdown-style window management.
+Add the option `custom-settings.slideIn` to define a list of edge-sliding popup windows.
+Each entry configures a keybind, executable, window class, position, and optional window rules.
+Uses **Pyprland scratchpads** for dropdown-style window management.
+
+Architecture:
+
+- [**Nix module**](../../../../modules/home-manager/core/hyprland/slideIn.nix): generates `~/.config/pypr/config.toml` with scratchpad definitions, and registers `systemd.user.services.pyprland`.
+- [**Lua module**](../../../../modules/home-manager/core/hyprland/lua/opt/slide_in.lua): registers `hl.bind(...)` calls that toggle the scratchpads.
 
 ### `lua.nix`
 

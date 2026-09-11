@@ -12,30 +12,28 @@ in
       bind = "SUPER+b";
       exec = getExe pkgs.bitwarden-desktop;
       class = "Bitwarden";
-      position = "edge";
+      position = "top";
+      extProp = {
+        unfocus = "hide";
+      };
     }
     {
       bind = "SUPER+c";
       exec = getExe pkgs.gnome-calculator;
       class = "org.gnome.Calculator";
-      position = "edge";
-      rule = {
-        size = {
-          width = "19%";
-          height = "33%";
-        };
-        # move.x = "40%";
+      position = "top";
+      size = {
+        width = "19%";
+        height = "33%";
       };
     }
     {
       bind = "SUPER+e";
       exec = getExe pkgs.nautilus;
       class = "org.gnome.Nautilus";
-      position = "side";
-      rule = {
-        size.width = "18%";
-        # move.x = "81%";
-      };
+      position = "right";
+      size.width = "18%";
+      extProp.unfocus = "hide";
     }
   ];
 }
