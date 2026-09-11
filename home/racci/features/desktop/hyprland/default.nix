@@ -2,6 +2,7 @@
   self,
   config,
   pkgs,
+  lib,
   ...
 }:
 {
@@ -11,7 +12,6 @@
 
     ./actions.nix
     ./lock-suspend.nix
-    ./looks.nix
     ./menus
     ./windows.nix
     ./workspaces.nix
@@ -63,6 +63,10 @@
       luaModules = [
         ./lua/default.lua
         ./lua/display.lua
+      ]
+      ++ (builtins.readDir ./lua/looks |> lib.filterAttrs (_: type: type == "regular") |> lib.mapAttrsToList (n: _: ./lua/looks/${n}));
+      luaExtras = [
+        ./lua/helpers
       ];
     };
 

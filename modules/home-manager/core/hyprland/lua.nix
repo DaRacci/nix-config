@@ -16,6 +16,10 @@ let
     nameValuePair
     getExe
     getExe'
+    splitString
+    pathIsDirectory
+    range
+    take
     ;
   inherit (types)
     listOf
@@ -46,10 +50,54 @@ let
       missing = builtins.filter (name: !cfg.variables ? "${name}") referenced;
     in
     if missing != [ ] then
-      builtins.throw "hyprland lua: ${baseNameOf modulePath} references placeholders [${concatStringsSep ", " missing}] not found in config.wayland.windowManager.hyprland.custom-settings.lua.variables"
+      throw "hyprland lua: ${baseNameOf modulePath} references placeholders [${concatStringsSep ", " missing}] not found in config.wayland.windowManager.hyprland.custom-settings.lua.variables"
     else
       lib.filterAttrs (name: _: builtins.elem name referenced) cfg.variables;
 
+  renderFile =
+    modulePath:
+    let
+      fileContent = builtins.readFile modulePath;
+      vars = varsForModule modulePath;
+    in
+    pkgs.replaceVars fileContent vars;
+
+  # Find the closest 'lua' ancestor directory from a path.
+  # Walks up the directory tree until it finds a component named 'lua'.
+  # Returns path to the parent of the lua directory (components before lua).
+  findLuaAncestor =
+    singlePath:
+    let
+      pathStr = toString singlePath;
+      pathComponents = splitString "/" pathStr;
+      # Find indices where component is "lua"
+      luaIndices = builtins.filter (i: builtins.elemAt pathComponents i == "lua") (
+        range 0 (builtins.length pathComponents - 1)
+      );
+    in
+    # Take the last (closest) lua directory
+    if luaIndices != [ ] then
+      let
+        closestIdx = builtins.elemAt luaIndices (builtins.length luaIndices - 1);
+        # Only include components UP TO (not including) the lua directory
+        ancestorComponents = take closestIdx pathComponents;
+      in
+      builtins.concatStringsSep "/" ancestorComponents
+    else
+      "";
+
+  # Get relative path from base to target
+  relPath =
+    base: target:
+    let
+      baseStr = toString base;
+      targetStr = toString target;
+      baseLen = builtins.stringLength baseStr;
+    in
+    if builtins.substring 0 baseLen targetStr == baseStr then
+      builtins.substring (baseLen + 1) (-1) targetStr
+    else
+      targetStr;
 in
 {
   options.wayland.windowManager.hyprland.custom-settings.lua = {
@@ -71,6 +119,20 @@ in
         Lua modules to load in the main init.lua file.
         Each module is a path to a Lua file, which will be copied to the config directory and required in init.lua.
         Each module will have variables substituted according to the "variables" option, so you can use that to inject paths to nix packages or other dynamic values.
+      '';
+    };
+
+    luaExtras = mkOption {
+      type = listOf path;
+      default = [ ];
+      description = ''
+        Extra Lua files to copy to the config directory.
+        These files will be copied to the config directory but not required in init.lua, so you can use them as libraries or for other purposes.
+
+        Files defined here will respect parent directories and will be copied to the same relative path in the config directory.
+        The absolute root of the directory tree will be calulated by finding the highest lua ancestor directory of all files in this list, and copying the entire tree from that root to the config directory.
+
+        If a directory is specified, it will be recursively copied to the config directory, preserving the directory structure.
       '';
     };
 
@@ -101,7 +163,7 @@ in
           |> map (
             modulePath:
             nameValuePair (baseNameOf modulePath) {
-              content = pkgs.replaceVars modulePath (varsForModule modulePath);
+              content = renderFile modulePath;
               autoLoad = true;
             }
           )
@@ -128,6 +190,27 @@ in
           cursorSize = toString config.stylix.cursor.size;
         };
       };
+
+      xdg.configFile =
+        if cfg.luaExtras != [ ] then
+          let
+            # Get lua ancestor from first path (all should share same lua ancestor)
+            luaBase = findLuaAncestor (builtins.head cfg.luaExtras);
+            processed = map (
+              p:
+              let
+                relativePath = relPath luaBase p;
+                isDir = pathIsDirectory p;
+              in
+              nameValuePair "hypr/lua/${relativePath}" (
+                if isDir then { source = p; } else { text = renderFile p; }
+              )
+            ) cfg.luaExtras;
+          in
+          listToAttrs processed
+        else
+          { };
+
     })
   ];
 }
