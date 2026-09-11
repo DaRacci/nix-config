@@ -31,7 +31,7 @@ jobs:
       - name: Get packages from flake
         id: get-packages
         run: |
-          FLAKE_JSON=$(nix flake show --no-pure-eval --json)
+          FLAKE_JSON=$(nix flake show --no-pure-eval --json --allow-import-from-derivation)
           ARCHS=$(echo "$FLAKE_JSON" | jq -r '.packages | keys[]')
           INCLUDE_JSON='[]'
           for ARCH in $ARCHS; do
