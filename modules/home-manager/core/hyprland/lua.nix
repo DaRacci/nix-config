@@ -94,7 +94,7 @@ in
         |> lib.mkBefore;
     }
 
-    (mkIf (cfg.enable) {
+    (mkIf cfg.enable {
       wayland.windowManager.hyprland = {
         extraLuaFiles =
           cfg.luaModules

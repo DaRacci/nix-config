@@ -40,34 +40,80 @@ let
       text = ''
         TEMP_FILE="$(mktemp --suffix=.png)";
         PROCESSED_FILE="$(mktemp --suffix=.png)";
-        trap 'rm -f "$TEMP_FILE" "$PROCESSED_FILE"' EXIT;
+        BINARIZED_FILE="$(mktemp --suffix=.png)";
+        trap 'rm -f "$TEMP_FILE" "$PROCESSED_FILE" "$BINARIZED_FILE"' EXIT;
 
         GRIMBLAST_HIDE_CURSOR=1 grimblast --freeze save area "$TEMP_FILE";
 
-        # upscale 3x, greyscale, sharpen, normalise contrast, and adds a 10px border.
+        # upscale 3x, greyscale, sharpen, normalise contrast, adds 10px border, and deskew.
         # This significantly improves recognition on small or low-DPI captures.
         convert "$TEMP_FILE" \
           -resize 300% \
           -colorspace Gray \
+          -deskew 40% \
           -sharpen 0x1 \
           -contrast-stretch 0.15%x0.15% \
           -bordercolor White \
           -border 10x10 \
           "$PROCESSED_FILE";
+        IMAGE_DIMS=$(identify -format "%wx%h" "$PROCESSED_FILE" 2>&1 || echo "unknown");
 
-        TESSDATA_PREFIX="${tessdata}" tesseract \
-          --oem 1 \
-          --psm 1 \
-          "$PROCESSED_FILE" - -l eng jpn osd | wl-copy;
+        try_ocr() {
+          local psm="$1";
+          local image_file="$2";
+          local result;
+          result=$(TESSDATA_PREFIX="${tessdata}" tesseract \
+            --oem 1 \
+            --psm "$psm" \
+            "$image_file" - -l eng jpn osd 2>&1);
+          trim_whitespace "$result";
+        }
 
-        paplay ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/camera-shutter.oga;
+        trim_whitespace() {
+          printf "%s" "$1" | tr -d '[:space:]';
+        }
 
-        notify-send \
-          "OCR Text Copied" \
-          "Text copied to clipboard" \
-          --app-name="hyprland" \
-          --category="action" \
-          --icon="edit-copy";
+        # Try OCR with different PSM modes, falling back to binarisation at each mode if no text is detected.
+        OCR_TEXT="";
+        DETECTION_METHOD="";
+        for psm in 1 3 6; do
+          OCR_TEXT=$(try_ocr "$psm" "$PROCESSED_FILE");
+          if [ -n "$OCR_TEXT" ]; then
+            DETECTION_METHOD="PSM $psm (normal)";
+            break;
+          fi
+
+          if [ ! -f "$BINARIZED_FILE" ] || [ "$psm" -eq 1 ]; then
+            if [ ! -f "$BINARIZED_FILE" ]; then
+              convert "$PROCESSED_FILE" -threshold 40% "$BINARIZED_FILE";
+            fi
+          fi
+
+          OCR_TEXT=$(try_ocr "$psm" "$BINARIZED_FILE");
+          if [ -n "$OCR_TEXT" ]; then
+            DETECTION_METHOD="PSM $psm (binarized)";
+            break;
+          fi
+        done;
+
+        if [ -z "$OCR_TEXT" ]; then
+          notify-send \
+            "OCR: No Text Detected" \
+            "Image: ''${IMAGE_DIMS}px" \
+            --app-name="hyprland" \
+            --category="action" \
+            --icon="dialog-warning" \
+            --urgency="normal";
+        else
+          printf "%s" "$OCR_TEXT" | wl-copy;
+          paplay ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/camera-shutter.oga;
+          notify-send \
+            "OCR Text Copied" \
+            "Detected with: $DETECTION_METHOD" \
+            --app-name="hyprland" \
+            --category="action" \
+            --icon="edit-copy";
+        fi
       '';
     }
   );
