@@ -39,22 +39,7 @@
     ];
   };
 
-  wayland.windowManager.hyprland = {
-    custom-settings = {
-      windowrule = {
-        centeredPopupModal = {
-          matcher = [ { title = "^(Quick Access — 1Password)$"; } ];
-          rule = {
-            pin = true;
-            center = true;
-            stayFocused = true;
-            noCloseFor = 250; # Sometimes the window closes immediately, this should help.
-          };
-        };
-      };
-    };
-
-  };
+  wayland.windowManager.hyprland.custom-settings.lua.luaModules = [ ./lua/secrets.lua ];
 
   programs.gpg.enable = true;
   services.gpg-agent = {

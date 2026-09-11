@@ -3,7 +3,6 @@ _: {
     ./noctalia.nix
     ./permission.nix
     ./slideIn.nix
-    ./windowRule.nix
     ./input.nix
     ./lua.nix
     ./workspaces.nix
