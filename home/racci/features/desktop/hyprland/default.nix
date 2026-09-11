@@ -2,22 +2,14 @@
   self,
   config,
   pkgs,
-  lib,
   ...
 }:
-let
-  inherit (lib)
-    pipe
-    flatten
-    ;
-in
 {
   imports = [
     "${self}/home/racci/features/desktop/common"
     "${self}/home/shared/desktop/hyprland"
 
     ./actions.nix
-    ./display.nix
     ./lock-suspend.nix
     ./looks.nix
     ./menus
@@ -66,7 +58,13 @@ in
   wayland.windowManager.hyprland = {
     systemd.enable = false;
     configType = "lua";
-    custom-settings.lua.enable = true;
+    custom-settings.lua = {
+      enable = true;
+      luaModules = [
+        ./lua/default.lua
+        ./lua/display.lua
+      ];
+    };
 
     plugins = with pkgs.hyprlandPlugins; [
       hy3
@@ -80,118 +78,5 @@ in
         hypr-dynamic-cursors
       ]
       |> map (plugin: "${plugin}/lib/lib${plugin.pname}.so");
-
-    settings = {
-      config = {
-        debug.disable_logs = true;
-
-        ecosystem = {
-          no_update_news = true;
-          no_donation_nag = true;
-          enforce_permissions = true;
-        };
-
-        general = {
-          resize_on_border = true;
-          no_focus_fallback = true;
-          layout = "hy3";
-          allow_tearing = true;
-
-          snap.enabled = true;
-        };
-
-        misc = {
-          animate_manual_resizes = false;
-          animate_mouse_windowdragging = false;
-
-          focus_on_activate = true;
-          disable_hyprland_logo = true;
-          force_default_wallpaper = 0;
-          allow_session_lock_restore = true;
-
-          initial_workspace_tracking = 1;
-
-          middle_click_paste = false;
-        };
-      };
-
-      layer_rule =
-        #region No Animations
-        (pipe
-          [
-            "walker"
-            "selection"
-            "overview"
-            "anyrun"
-            "gauntlet"
-            "indicator.*"
-            "osk"
-            "hyprpicker"
-            "noanim"
-          ]
-          [
-            (map (ns: {
-              match = {
-                namespace = ns;
-              };
-              no_anim = true;
-            }))
-          ]
-        )
-        #endregion
-        ++ [
-          {
-            match = {
-              namespace = "sideleft.*";
-            };
-            animation = "slide top";
-          }
-          {
-            match = {
-              namespace = "sideright.*";
-            };
-            animation = "slide top";
-          }
-          {
-            match = {
-              namespace = "session";
-            };
-            blur = true;
-          }
-        ]
-        #region Blur & Ignore Alpha
-        ++ (pipe
-          [
-            "bar"
-            "corner.*"
-            "dock"
-            "indicator.*"
-            "indicator*"
-            "overview"
-            "cheatsheet"
-            "sideright"
-            "sideleft"
-            "osk"
-          ]
-          [
-            (map (ns: [
-              {
-                match = {
-                  namespace = ns;
-                };
-                blur = true;
-              }
-              {
-                match = {
-                  namespace = ns;
-                };
-                ignore_alpha = 0.6;
-              }
-            ]))
-            flatten
-          ]
-        );
-      #endregion
-    };
   };
 }
