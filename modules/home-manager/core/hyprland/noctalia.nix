@@ -223,18 +223,7 @@ in
           (getExe config.programs.noctalia.package)
         ];
 
-        settings = {
-          layer_rule = [
-            {
-              match = {
-                namespace = "^noctalia-(bar-.+|notification|dock|panel|attached-panel|osd)$";
-              };
-              blur = true;
-              ignore_alpha = 0.5;
-              blur_popups = true;
-            }
-          ];
-        };
+        custom-settings.lua.luaModules = [ ./lua/opt/noctalia.lua ];
       };
 
       user.persistence = {

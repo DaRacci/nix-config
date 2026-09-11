@@ -34,14 +34,14 @@ default.nix           # Top-level importer
 
 ### `input.nix`
 
-Sets sensible default values under `settings.config` for cursor behavior, input device settings, keyboard binds, and misc Hyprland options. This module activates automatically when the Hyprland HM module is enabled — no `custom-settings` option is involved. Override any value via `settings.config.input.*` etc.
+Sets sensible default values under `settings.config` for cursor behavior, input device settings, keyboard binds, and misc Hyprland options.
 
 Default config covers:
 
-- `cursor` — warp behavior, hardware cursors, inactivity timeout, hide-on-key-press
-- `binds` — workspace back-and-forth, allow workspace cycles, focus method
-- `input` — keyboard layout, follow-mouse, touchpad, sensitivity, accel profile
-- `misc` — DPMS on key/mouse events
+- `cursor`: warp behavior, hardware cursors, inactivity timeout, hide-on-key-press
+- `binds`: workspace back-and-forth, allow workspace cycles, focus method
+- `input`: keyboard layout, follow-mouse, touchpad, sensitivity, accel profile
+- `misc`: DPMS on key/mouse events
 
 ### `windowRule.nix`
 
@@ -173,16 +173,16 @@ Lua module at `modules/home-manager/core/hyprland/lua/opt/workspaces.lua` that r
 
 The default Lua bind template at `modules/home-manager/core/hyprland/lua/binds.lua`. Uses `@placeholder@` substitution for dynamic injection. Substitution is per-file — only placeholders actually present in this template are replaced; other Lua modules are unaffected by binds.lua's placeholder set.
 
-| Placeholder              | Source                                 | Description                              |
+| Placeholder | Source | Description |
 | ------------------------ | -------------------------------------- | ---------------------------------------- |
-| `@applicationBinds@`     | `custom-settings.lua.applicationBinds` | Auto-generated Lua table of app keybinds |
-| `@playerctl@`            | Auto-injected                          | Path to `playerctl` binary               |
-| `@wpctl@`                | Auto-injected                          | Path to `wpctl` binary                   |
-| `@zenity@`               | Auto-injected                          | Path to `zenity` binary                  |
-| `@hyprshutdown@`         | Auto-injected                          | Path to `hyprshutdown` binary            |
-| `@uwsmApp@`              | Auto-injected                          | Path to `uwsm-app` helper                |
-| `@DEFAULT_AUDIO_SINK@`   | `custom-settings.lua.variables`        | Audio sink name                          |
-| `@DEFAULT_AUDIO_SOURCE@` | `custom-settings.lua.variables`        | Audio source name                        |
+| `@applicationBinds@` | `custom-settings.lua.applicationBinds` | Auto-generated Lua table of app keybinds |
+| `@playerctl@` | Auto-injected | Path to `playerctl` binary |
+| `@wpctl@` | Auto-injected | Path to `wpctl` binary |
+| `@zenity@` | Auto-injected | Path to `zenity` binary |
+| `@hyprshutdown@` | Auto-injected | Path to `hyprshutdown` binary |
+| `@uwsmApp@` | Auto-injected | Path to `uwsm-app` helper |
+| `@DEFAULT_AUDIO_SINK@` | `custom-settings.lua.variables` | Audio sink name |
+| `@DEFAULT_AUDIO_SOURCE@` | `custom-settings.lua.variables` | Audio source name |
 
 Add custom placeholders by extending `custom-settings.lua.variables`.
 
@@ -192,7 +192,7 @@ Integrates the [Noctalia](https://github.com/noctaliawm/noctalia) desktop shell 
 
 The module:
 
-- Enables `programs.noctalia` and `systemd`, pins `package` from the `noctalia` flake input's packages, and applies a Hyprland layer blur rule for Noctalia windows.
+- Enables `programs.noctalia` and `systemd`, pins `package` from the `noctalia` flake input's packages, and applies a Hyprland support for Noctalia windows.
 - Mirrors a full exported Noctalia config as a typed Nix attrset (`noctaliaSettings`), covering bar layouts with monitor overrides, shell panel/screen corners/screenshot/session actions, theme, wallpaper, calendar, control-center shortcuts, desktop/lockscreen widgets, notification layer, plugin settings, widget config, brightness, and more.
 - Does **not** declare top-level `colors` or `plugins` HM options, and does **not** manage raw JSON files directly.
 - Persists `~/.local/share/noctalia` via `user.persistence.directories`.
