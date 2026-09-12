@@ -20,6 +20,7 @@ hl.config({
 
 hl.monitor({
   output = "",
+  enabled = false,
   mode = "preferred",
   position = "auto",
   scale = 1,
