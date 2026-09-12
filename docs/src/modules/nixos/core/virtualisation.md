@@ -25,7 +25,7 @@ When enabled, module:
 
 ### Isolation and Hook Helpers
 
-For each guest in `core.virtualisation.isolatedGuests`, module creates libvirt hook entries that:
+For each guest in `core.virtualisation.isolatedGuests`, module creates libvirt hook entries backed by the shared `virtualisation-tools` package that:
 
 - restrict host `user.slice`, `system.slice`, and `init.scope` CPU sets during guest startup,
 - restore full CPU set when guest stops,
@@ -33,6 +33,7 @@ For each guest in `core.virtualisation.isolatedGuests`, module creates libvirt h
 - reattach GPU, reload drivers, restart saved services, and rebind VT consoles after shutdown.
 
 It also creates `libvirt-nosleep@<guest>` service that uses `systemd-inhibit` to block sleep while guest is running.
+Guest-specific CPU ranges are passed through tiny generated wrappers, while shared hook logic stays in the packaged helpers.
 
 ### Firmware and Persistence
 

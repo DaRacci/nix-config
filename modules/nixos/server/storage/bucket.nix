@@ -14,8 +14,7 @@ let
 
   inherit (lib)
     concatLists
-    concatMapStringsSep
-    escapeShellArg
+    concatStringsSep
     escapeShellArgs
     filterAttrs
     getExe
@@ -29,7 +28,6 @@ let
     mkOption
     nameValuePair
     optional
-    optionalString
     toUpper
     unique
     ;
@@ -80,61 +78,29 @@ let
   effectiveRestartServices =
     mountCfg: unique (mountCfg.requiredByServices ++ mountCfg.healthCheck.restartServices);
 
-  mkPrepareScript =
-    name: mountCfg:
-    pkgs.writeShellApplication {
-      name = "${mkMountUnitName name}-prepare";
-      runtimeInputs = with pkgs; [
-        coreutils
-      ];
-      text = ''
-        set -euo pipefail
+  swfsMountHook = getExe pkgs.swfs-mount-hooks;
 
-        install -d -m 0755 ${escapeShellArg mountCfg.mountLocation}
-        ${optionalString (mountCfg.uid != null && mountCfg.gid != null)
-          "chown ${toString mountCfg.uid}:${toString mountCfg.gid} ${escapeShellArg mountCfg.mountLocation}"
-        }
-        ${optionalString (
-          mountCfg.uid != null && mountCfg.gid == null
-        ) "chown ${toString mountCfg.uid} ${escapeShellArg mountCfg.mountLocation}"}
-        ${optionalString (
-          mountCfg.uid == null && mountCfg.gid != null
-        ) "chgrp ${toString mountCfg.gid} ${escapeShellArg mountCfg.mountLocation}"}
-      '';
-    };
+  mkPrepareCommand =
+    mountCfg:
+    escapeShellArgs [
+      swfsMountHook
+      "prepare"
+      mountCfg.mountLocation
+      (if mountCfg.uid != null then toString mountCfg.uid else "-")
+      (if mountCfg.gid != null then toString mountCfg.gid else "-")
+    ];
 
-  mkStopScript =
-    name: mountCfg:
-    pkgs.writeShellApplication {
-      name = "${mkMountUnitName name}-stop";
-      runtimeInputs = with pkgs; [
-        fuse3
-        util-linux
-      ];
-      text = ''
-        set -euo pipefail
+  mkStopCommand =
+    mountCfg:
+    escapeShellArgs [
+      swfsMountHook
+      "stop"
+      mountCfg.mountLocation
+    ];
 
-        if mountpoint -q ${escapeShellArg mountCfg.mountLocation}; then
-          fusermount3 -u ${escapeShellArg mountCfg.mountLocation} 2>/dev/null \
-            || fusermount -uz ${escapeShellArg mountCfg.mountLocation} 2>/dev/null \
-            || umount -l ${escapeShellArg mountCfg.mountLocation} 2>/dev/null \
-            || true
-        fi
-      '';
-    };
-
-  mkMountScript =
+  mkMountCommand =
     name: mountCfg:
     let
-      commonRuntimeInputs = with pkgs; [
-        coreutils
-      ];
-      mountCommand =
-        if mountCfg.backend == "minio" then
-          "${getExe' pkgs.s3fs "s3fs"} ${escapeShellArgs minioArgs}"
-        else
-          "${getExe' config.services.seaweedfs.package "weed"} ${escapeShellArgs seaweedArgs}";
-
       minioArgs = [
         mountCfg.minio.bucketName
         mountCfg.mountLocation
@@ -181,57 +147,22 @@ let
       ) "-writeBufferSizeMB=${toString mountCfg.seaweedfs.writeBufferSizeMB}"
       ++ mountCfg.seaweedfs.extraArgs;
     in
-    pkgs.writeShellApplication {
-      name = mkMountUnitName name;
-      runtimeInputs =
-        commonRuntimeInputs
-        ++ (if mountCfg.backend == "minio" then [ pkgs.s3fs ] else [ config.services.seaweedfs.package ]);
-      text = ''
-        set -euo pipefail
+    if mountCfg.backend == "minio" then
+      escapeShellArgs ([ (getExe' pkgs.s3fs "s3fs") ] ++ minioArgs)
+    else
+      escapeShellArgs ([ (getExe' config.services.seaweedfs.package "weed") ] ++ seaweedArgs);
 
-        exec ${mountCommand}
-      '';
-    };
-
-  mkHealthScript =
+  mkHealthCommand =
     name: mountCfg:
-    let
-      restartServices = effectiveRestartServices mountCfg;
-      reloadServices = mountCfg.healthCheck.reloadServices;
-    in
-    pkgs.writeShellApplication {
-      name = "${mkHealthUnitName name}-check";
-      runtimeInputs = with pkgs; [
-        coreutils
-        fuse3
-        systemd
-        util-linux
-      ];
-      text = ''
-        set -euo pipefail
-
-        mount_path=${escapeShellArg mountCfg.mountLocation}
-        timeout_window=${escapeShellArg mountCfg.healthCheck.timeout}
-
-        if mountpoint -q "$mount_path" && timeout --foreground "$timeout_window" stat "$mount_path" >/dev/null 2>&1; then
-          exit 0
-        fi
-
-        fusermount3 -u "$mount_path" 2>/dev/null \
-          || fusermount -uz "$mount_path" 2>/dev/null \
-          || umount -l "$mount_path" 2>/dev/null \
-          || true
-
-        systemctl restart ${escapeShellArg "${mkMountUnitName name}.service"}
-
-        ${concatMapStringsSep "\n" (
-          serviceName: "systemctl restart ${escapeShellArg serviceName}"
-        ) restartServices}
-        ${concatMapStringsSep "\n" (
-          serviceName: "systemctl reload ${escapeShellArg serviceName}"
-        ) reloadServices}
-      '';
-    };
+    escapeShellArgs [
+      swfsMountHook
+      "health"
+      mountCfg.mountLocation
+      mountCfg.healthCheck.timeout
+      "${mkMountUnitName name}.service"
+      (concatStringsSep "," (effectiveRestartServices mountCfg))
+      (concatStringsSep "," mountCfg.healthCheck.reloadServices)
+    ];
 
   mountServices =
     cfg
@@ -245,9 +176,9 @@ let
         after = [ "network-online.target" ];
         serviceConfig = {
           Type = "simple";
-          ExecStartPre = getExe (mkPrepareScript name mountCfg);
-          ExecStart = getExe (mkMountScript name mountCfg);
-          ExecStop = getExe (mkStopScript name mountCfg);
+          ExecStartPre = mkPrepareCommand mountCfg;
+          ExecStart = mkMountCommand name mountCfg;
+          ExecStop = mkStopCommand mountCfg;
           KillMode = "control-group";
           Restart = "always";
           RestartSec = "45s";
@@ -267,7 +198,7 @@ let
         requires = [ "${mkMountUnitName name}.service" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = getExe (mkHealthScript name mountCfg);
+          ExecStart = mkHealthCommand name mountCfg;
         };
       }
     );

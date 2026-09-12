@@ -17,31 +17,7 @@
     ./workspaces.nix
   ];
 
-  home.file.".local/bin/wlprop" = {
-    executable = true;
-    source = "${
-      pkgs.writeShellApplication {
-        name = "wlprop";
-        runtimeInputs = with pkgs; [
-          hyprland
-          jq
-          slurp
-        ];
-        text = ''
-          TREE=$(hyprctl clients -j | jq -r '.[] | select(.hidden==false and .mapped==true)')
-          SELECTION=$(echo "''${TREE}" | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"' | slurp)
-
-          X=$(echo "''${SELECTION}" | awk -F'[, x]' '{print $1}')
-          Y=$(echo "''${SELECTION}" | awk -F'[, x]' '{print $2}')
-          W=$(echo "''${SELECTION}" | awk -F'[, x]' '{print $3}')
-          H=$(echo "''${SELECTION}" | awk -F'[, x]' '{print $4}')
-
-          # shellcheck disable=SC2016
-          echo "''${TREE}" | jq -r --argjson x "''${X}" --argjson y "''${Y}" --argjson w "''${W}" --argjson h "''${H}" '. | select(.at[0]==$x and .at[1]==$y and .size[0]==$w and.size[1]==$h)'
-        '';
-      }
-    }/bin/wlprop";
-  };
+  home.file.".local/bin/wlprop".source = "${pkgs.wlprop}/bin/wlprop";
 
   services.hyprpolkitagent.enable = true;
 

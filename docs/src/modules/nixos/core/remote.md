@@ -34,39 +34,35 @@ When both `core.remote.streaming.enable` and `programs.hyprland.enable` are `tru
 - sets `services.sunshine.settings.output_name`,
 - adds two Sunshine application entries named `Shared Desktop` and `Exclusive Desktop`,
 - creates headless output at login via Home Manager, and
-- keeps `HEADLESS-2` disabled by default until Sunshine prep commands enable it.
+- keeps `HEADLESS-1` disabled by default until Sunshine prep commands enable it.
 
 #### Lua Mode Handling
 
-If Hyprland is in Lua mode (`programs.hyprland.configType = "lua"`), the shared
-Home Manager module uses Lua-safe equivalents:
+If Home Manager Hyprland is in Lua mode (`wayland.windowManager.hyprland.configType = "lua"`), the shared module uses Lua-safe equivalents:
 
-- **Startup hook**: `settings.on` with `hyprland.start` event triggers
-  `hyprctl output create headless`.
-- **Monitor rule**: `{ output = "HEADLESS-2"; disabled = true; }` (attrset form
-  instead of old string).
-- **Screencopy permission**: routed through
-  `wayland.windowManager.hyprland.custom-settings.permission.screenCopy`,
-  which handles both Lua and hyprlang modes automatically.
+- **Startup hook**: `settings.on` with `hyprland.start` event triggers `hyprctl output create headless`.
+- **Monitor rule**: `{ output = "HEADLESS-1"; disabled = true; }`
+- **Screencopy permission**: routed through `wayland.windowManager.hyprland.custom-settings.permission.screenCopy`, which handles both Lua and hyprlang modes automatically.
 
-For hyprlang mode, the old string forms (`exec-once`, `monitor = "HEADLESS-2,disable"`) are used unchanged.
+| Application           | Behaviour                                                                                                                                                                               |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Shared Desktop**    | Enables `HEADLESS-1` at client resolution and leaves physical monitors active.                                                                                                          |
+| **Exclusive Desktop** | Enables `HEADLESS-1`, saves active physical monitor state to `$XDG_STATE_HOME/hyprland-disabled-monitors-pre-sunshine.json`, disables those monitors, then restores them on disconnect. |
 
-| Application           | Behaviour                                                                                                                                                                                  |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Shared Desktop**    | Enables `HEADLESS-2` at client resolution and leaves physical monitors active.                                                                                                             |
-| **Exclusive Desktop** | Enables `HEADLESS-2`, saves active physical monitor state to `$XDG_STATE_HOME/hyprland-disabled-monitors-pre-sunshine.json`, disables physical monitors, then restores them on disconnect. |
+The socket proxy and Hyprland monitor helpers are shipped together in the shared `sunshine-tools` package so Sunshine startup and prep/undo hooks reuse one tested implementation across hosts.
 
 ### On-Demand Activation & Idle Stop
 
-Sunshine stays on its standard port family rooted at **TCP/UDP 47989–47990+** (no port-family offset). External inbound TCP **47989** is firewall-redirected to internal proxy port **48989**. The proxy wakes Sunshine and forwards to `127.0.0.1:47989`.
+Sunshine stays on its standard port family rooted at **TCP/UDP 47989–47990+** (no port-family offset).
+External inbound TCP **47989** is firewall-redirected to internal proxy port **48989**. The proxy wakes Sunshine and forwards to `127.0.0.1:47989`.
 
-| Stage                 | What happens                                                                                                                                                                                                           |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Firewall redirect** | `iptables` NAT prerouting rule redirects inbound TCP `:47989` to local `:48989`. A conntrack-based filter accept allows only redirected traffic into `:48989`; `:48989` is not broadly exposed.                        |
-| **Socket activation** | `sunshine-proxy.socket` listens on TCP `:48989`. First connection activates `sunshine-proxy.service`.                                                                                                                  |
-| **Proxy start**       | `sunshine-proxy.service` pulls in `sunshine.service` via systemd dependencies, then `sunshine-proxy-wrapper` polls until port 47989 is open and exec-s into `systemd-socket-proxyd` forwarding to `127.0.0.1:47989`.   |
-| **Active streaming**  | Sunshine handles Moonlight/Sunshine client traffic on its standard port family. The proxy relays only the initial control connection transparently. Proxy `bindsTo` Sunshine — if Sunshine crashes proxy goes with it. |
-| **Idle stop**         | After 300s with no connection, `systemd-socket-proxyd` exits. Sunshine has `Restart=no` and `StopWhenUnneeded=true` with no remaining active referrer, so systemd stops it.                                            |
+| Stage                 | What happens                                                                                                                                                                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Firewall redirect** | `iptables` NAT prerouting rule redirects inbound TCP `:47989` to local `:48989`. A conntrack-based filter accept allows only redirected traffic into `:48989`; `:48989` is not broadly exposed.                                          |
+| **Socket activation** | `sunshine-proxy.socket` listens on TCP `:48989`. First connection activates `sunshine-proxy.service`.                                                                                                                                    |
+| **Proxy start**       | `sunshine-proxy.service` pulls in `sunshine.service` via systemd dependencies, then the packaged `sunshine-proxy-wrapper` helper polls until port 47989 is open and exec-s into `systemd-socket-proxyd` forwarding to `127.0.0.1:47989`. |
+| **Active streaming**  | Sunshine handles Moonlight/Sunshine client traffic on its standard port family. The proxy relays only the initial control connection transparently. Proxy `bindsTo` Sunshine — if Sunshine crashes proxy goes with it.                   |
+| **Idle stop**         | After 300s with no connection, `systemd-socket-proxyd` exits. Sunshine has `Restart=no` and `StopWhenUnneeded=true` with no remaining active referrer, so systemd stops it.                                                              |
 
 #### Dependency Model
 
