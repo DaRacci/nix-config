@@ -51,6 +51,7 @@ in
 
       environment.systemPackages = [
         pkgs.android-tools
+        pkgs.wayvr
       ];
 
       programs = {
@@ -102,37 +103,6 @@ in
           steam.importOXRRuntimes = true;
           highPriority = true;
           monadoEnvironment = { };
-          config = {
-            enable = true;
-            json = {
-              scale = [
-                0.75
-                0.5
-              ];
-              bitrate = 100000000;
-              encoders = [
-                {
-                  encoder = "nvenc";
-                  codec = "h265";
-                  width = 0.5;
-                  height = 1;
-                  offset_x = 0;
-                  offset_y = 0;
-                  group = 0;
-                }
-                {
-                  encoder = "nvenc";
-                  codec = "h265";
-                  width = 0.5;
-                  height = 1;
-                  offset_x = 0.5;
-                  offset_y = 0;
-                  group = 0;
-                }
-              ];
-              application = [ pkgs.wayvr ];
-            };
-          };
         };
 
         udev.extraRules = ''
