@@ -15,6 +15,8 @@ let
   packagesFromOtherInstances = [ ];
 in
 {
+  wivrn = import ./wivrn.nix;
+
   singleton = import ./singleton.nix {
     inherit inputs lib;
   };
