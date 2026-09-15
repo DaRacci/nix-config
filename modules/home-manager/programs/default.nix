@@ -12,7 +12,7 @@
   config = {
     home.packages = [
       pkgs.folder-diff
-      pkgs.image-compressor
+      pkgs.compressor
     ];
   };
 }

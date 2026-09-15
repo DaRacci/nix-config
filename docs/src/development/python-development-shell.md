@@ -67,7 +67,7 @@ pytest pkgs/scripts/test_image_compressor.py -v
 Format Python code:
 
 ```bash
-black pkgs/scripts/image-compressor.py
+black pkgs/scripts/compressor.py
 ```
 
 Check with ruff:
@@ -87,7 +87,7 @@ mypy pkgs/scripts/
 Scripts can be executed directly in the shell:
 
 ```bash
-python3 pkgs/scripts/image-compressor.py --help
+python3 pkgs/scripts/compressor.py --help
 python3 docs/preprocessor/gen-options-md.py --help
 ```
 

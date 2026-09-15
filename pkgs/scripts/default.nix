@@ -5,7 +5,9 @@
 let
   inherit (lib.mine.packages) writeNuApplication;
   inherit (pkgs)
+    ffmpeg-headless
     file
+    handbrake
     imagemagick
     python3Packages
     rsync
@@ -24,7 +26,7 @@ in
     ];
   };
 
-  image-compressor = writers.writePython3Bin "image-compressor" {
+  compressor = writers.writePython3Bin "compressor" {
     libraries = [
       python3Packages.pillow
       python3Packages.rich
@@ -42,10 +44,12 @@ in
       "PATH"
       ":"
       (lib.makeBinPath [
+        ffmpeg-headless
+        handbrake
         imagemagick
         file
       ])
     ];
-  } (builtins.readFile ./image-compressor.py);
+  } (builtins.readFile ./compressor.py);
 
 }
