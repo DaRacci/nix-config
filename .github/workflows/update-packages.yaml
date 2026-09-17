@@ -38,7 +38,7 @@ jobs:
           set -euo pipefail
 
           echo "::group::Collect package names from flake"
-          FLAKE_JSON=$(nix flake show --no-pure-eval --json)
+          FLAKE_JSON=$(nix flake show --no-pure-eval --json --allow-import-from-derivation)
           UNIQUE_PKGS=$(echo "$FLAKE_JSON" \
             | jq -r '.packages | to_entries[] | .value | keys[]' \
             | grep -v '^devenv-' \
