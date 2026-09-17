@@ -17,7 +17,7 @@ from collections.abc import Callable, Iterable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TypeVar
+from typing import TypeVar, final
 
 import magic
 from PIL import Image, UnidentifiedImageError
@@ -30,7 +30,6 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 from rich.table import Table
-from typing_extensions import final
 
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "image-savings"
 DEFAULT_JOBS = 8
@@ -1238,7 +1237,7 @@ class App:
                 rel_path = self.truncate_path(path.relative_to(display_root), 48)
                 current_duration = durations[path]
                 remaining_durations = [
-                    durations[other] for other in videos[index + 1 :]
+                    durations[other] for other in videos[index + 1:]
                 ]
                 progress.update(
                     current_task,
