@@ -16,11 +16,11 @@ mkWindowsAppNoCC rec {
   inherit wine;
 
   pname = "take-control-viewer";
-  version = "7.44.07";
+  version = "7.44.08";
 
   src = fetchzip {
     url = "https://swi-rc.cdn-sw.net/logicnow/linux_viewer/${version}/LinuxNSight.zip";
-    hash = "sha256-u/dcgl/9VP9ifhAmAhdbsrinDgDRBZ1NWVWeV3k3OYg=";
+    hash = "sha256-5lM6q/7fKyW6ouMpeH2ov7fzJR75Hbg9TzxaiqIox0w=";
   };
 
   enableMonoBootPrompt = false;
@@ -101,7 +101,7 @@ mkWindowsAppNoCC rec {
     ln -s "$out/bin/.launcher" "$out/bin/${pname}"
 
     mkdir -p "$out/share/icons/hicolor/64x64/apps"
-    icoextract ${src}/TakeControlViewerInstall-${version}* "/tmp/icon.ico"
+    icoextract ${src}/TakeControlViewerInstall-Linux-${version}* "/tmp/icon.ico"
     magick "/tmp/icon.ico[4]" "$out/share/icons/hicolor/64x64/apps/${pname}.png"
 
     runHook postInstall
