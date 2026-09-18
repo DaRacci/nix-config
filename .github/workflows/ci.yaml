@@ -28,7 +28,9 @@ jobs:
           flakes: nixpkgs#jq,nixpkgs#nushell
           script: |
             SCRIPT_ARGS="--json"
-            if [[ -n "${{ github.event.before }}" ]]; then
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              SCRIPT_ARGS+=" --range ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+            elif [[ -n "${{ github.event.before }}" ]] && [[ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]]; then
               SCRIPT_ARGS+=" --range ${{ github.event.before }}..${{ github.sha }}"
             else
               SCRIPT_ARGS+=" $(find . -type f | sed 's|^\./||' | grep -v '^\.git/' | tr '\n' ' ')"
