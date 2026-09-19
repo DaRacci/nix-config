@@ -187,7 +187,7 @@ in
       ];
 
       home.packages = [
-        pkgs.orca-slicer-zink
+        pkgs.orca-slicer
         pkgs.lycheeslicer
         pkgs.uvtools
       ];

@@ -25,7 +25,6 @@ in
   wyoming-transcribe-client = pkgs.callPackage ./wyoming-transcribe-client { };
 
   # Misc
-  orca-slicer-zink = pkgs.callPackage ./orca-slicer-zink { };
   huntress = pkgs.callPackage ./huntress { };
   drive-stats = pkgs.callPackage ./drive-stats { };
   lidarr-plugins = pkgs.callPackage ./lidarr-plugins { };
