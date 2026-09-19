@@ -74,7 +74,7 @@ in
 
               protocol = "ssh-ng";
               sshUser = cfg.builderUser;
-              sshKey = config.sops.secrets.SSH_PRIVATE_KEY.path;
+              sshKey = config.core.openssh.hostPrivateKeyPath;
               supportedFeatures = [
                 "kvm"
                 "big-parallel"

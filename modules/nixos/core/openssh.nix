@@ -7,7 +7,13 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption optional;
+  inherit (lib)
+    mkIf
+    mkEnableOption
+    mkOption
+    optional
+    ;
+  inherit (lib.types) str;
   inherit (builtins) mapAttrs readFile;
   inherit (config.networking) hostName;
 
@@ -28,9 +34,19 @@ in
     enable = mkEnableOption "OpenSSH server and client opinionated configuration" // {
       default = true;
     };
+
+    hostPrivateKeyPath = mkOption {
+      type = str;
+      default = "/var/lib/provisioning/ssh/ssh_host_ed25519_key";
+      description = ''
+        Canonical path of the provisioned ed25519 host private key used by
+        OpenSSH, SOPS age decryption, and server-to-server SSH.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
+    host.persistence.files = [ cfg.hostPrivateKeyPath ];
     users.users.root.openssh.authorizedKeys.keyFiles = [ hostSSHPubKey ];
     environment.etc."ssh/ssh_host_ed25519_key.pub".source = hostSSHPubKey;
     security.pam.sshAgentAuth.enable = true;
@@ -46,7 +62,7 @@ in
 
       hostKeys = [
         {
-          inherit (config.sops.secrets.SSH_PRIVATE_KEY) path;
+          path = cfg.hostPrivateKeyPath;
           type = "ed25519";
         }
       ];

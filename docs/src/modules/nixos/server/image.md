@@ -7,18 +7,23 @@ The `image.nix` module provides image and VM-related configuration for server ho
 On first boot of a freshly installed host, the SSH private key must be provisioned.
 The public key is baked into the image at `/etc/ssh/ssh_host_ed25519_key.pub`, but the private key is deliberately not packaged.
 Instead, the activation script prompts the operator interactively to input the private key,
-validates it with, and stores it to a persistent location where [sops-nix](https://github.com/Mic92/sops-nix) picks it up.
+validates it, and stores it at `core.openssh.hostPrivateKeyPath`, where OpenSSH and sops age decryption both read the same canonical file.
+Before reading input, the script saves the current `/dev/console` tty state, switches the console into canonical line mode for reliable multiline paste handling, and restores the original tty state on exit.
 
 The script is enabled unconditionally on all server hosts as a no-op unless both of the following hold:
 
 - `/dev/console` is available for I/O (it is under `build-vm -nographic`, where QEMU wires it to the host terminal)
-- A persistent SSH key does not already exist.
+- A canonical host key does not already exist at `core.openssh.hostPrivateKeyPath`
 
-### Validation
+### Input handling and validation
 
-The pasted key is checked in two stages:
+The prompt ignores any lines before `-----BEGIN OPENSSH PRIVATE KEY-----`, then captures the key line-by-line until `-----END OPENSSH PRIVATE KEY-----`.
+If the final `END` line does not submit automatically, pressing `Ctrl+D` flushes that last line.
+Pressing `Ctrl+D` before the `BEGIN` line restarts the prompt with `No key provided`, and pressing `Ctrl+D` after `BEGIN` but before `END` discards the partial key and restarts the prompt.
 
-1. The key is parsed and validated as a valid Ed25519 private key.
+The captured key is checked in two stages:
+
+1. The key file is parsed and validated as a valid Ed25519 private key.
 1. The derived public key must match the baked-in public key the image was built with.
 
 On failure the key file is removed and the prompt repeats.

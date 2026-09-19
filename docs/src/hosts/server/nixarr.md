@@ -43,10 +43,9 @@ All downloading happens through a VPN tunnel so P2P traffic is isolated.
 
 ### Declared secrets
 
-| Secret key        | Purpose                                  |
-| ----------------- | ---------------------------------------- |
-| `wireguard`       | WireGuard VPN config (binary, `wg.conf`) |
-| `SSH_PRIVATE_KEY` | SSH key used for cluster coordination    |
+| Secret key  | Purpose                                  |
+| ----------- | ---------------------------------------- |
+| `wireguard` | WireGuard VPN config (binary, `wg.conf`) |
 
 ## Operational Notes / Assumptions
 

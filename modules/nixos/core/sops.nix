@@ -14,6 +14,7 @@ let
     types
     optional
     literalExpression
+    unique
     ;
   inherit (types) path;
   cfg = config.core.sops;
@@ -41,17 +42,7 @@ in
   config = mkIf cfg.enable {
     sops = {
       defaultSopsFile = cfg.hostSecretsFile;
-      age.sshKeyPaths = [
-        "${config.host.persistence.root}/etc/ssh/ssh_host_ed25519_key"
-      ]
-      ++ (map getKeyPath keys);
-
-      secrets = {
-        SSH_PRIVATE_KEY = {
-          path = "/etc/ssh/ssh_host_ed25519_key";
-          restartUnits = [ "sshd.service" ];
-        };
-      };
+      age.sshKeyPaths = unique ([ config.core.openssh.hostPrivateKeyPath ] ++ (map getKeyPath keys));
     };
   };
 }
