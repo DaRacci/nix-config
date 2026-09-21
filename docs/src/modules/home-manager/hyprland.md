@@ -192,7 +192,7 @@ Integrates the [Noctalia](https://github.com/noctaliawm/noctalia) desktop shell 
 
 The module:
 
-- Enables `programs.noctalia` and `systemd`, pins `package` from the `noctalia` flake input's packages, and applies a Hyprland support for Noctalia windows.
+- Enables `programs.noctalia` and `systemd`, pins `package` from the `noctalia` flake input's packages, and applies Hyprland support for Noctalia windows.
 - Mirrors a full exported Noctalia config as a typed Nix attrset (`noctaliaSettings`), covering bar layouts with monitor overrides, shell panel/screen corners/screenshot/session actions, theme, wallpaper, calendar, control-center shortcuts, desktop/lockscreen widgets, notification layer, plugin settings, widget config, brightness, and more.
 - Does **not** declare top-level `colors` or `plugins` HM options, and does **not** manage raw JSON files directly.
 - Persists `~/.local/share/noctalia` via `user.persistence.directories`.

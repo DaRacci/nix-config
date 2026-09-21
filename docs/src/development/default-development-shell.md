@@ -5,6 +5,7 @@ The default `devenv` shell in this repository includes common CLI, Nix, and setu
 ## Entering the Shell
 
 Automatic shell entry via `direnv`, to enable this, run:
+
 ```bash
 direnv allow
 ```

@@ -198,7 +198,7 @@ in
         screenshotArea = "${screenshot} area";
         screenshotOutput = "${screenshot} output";
         quickAccessCmd = "${pkgs._1password-gui}/bin/1password --quick-access";
-        wlogoutCmd = "pkill ${pkgs.wlogout}/bin/wlogout || ${pkgs.wlogout}/bin/wlogout -p layer-shell";
+        wlogoutCmd = "pkill wlogout || ${pkgs.wlogout}/bin/wlogout -p layer-shell";
       };
       applicationBinds = {
         "SUPER+T" = "${pkgs.alacritty}/bin/alacritty";
