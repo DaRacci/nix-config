@@ -42,7 +42,7 @@ in
   config = mkIf cfg.enable {
     sops = {
       defaultSopsFile = cfg.hostSecretsFile;
-      age.sshKeyPaths = unique ([ config.core.openssh.hostPrivateKeyPath ] ++ (map getKeyPath keys));
+      age.sshKeyPaths = unique ([ (lib.mine.persistence.persistable config config.core.openssh.hostPrivateKeyPath) ] ++ (map getKeyPath keys));
     };
   };
 }

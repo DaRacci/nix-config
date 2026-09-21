@@ -1,4 +1,4 @@
-{ lib, host, ... }:
+{ lib, ... }:
 {
   # persistablePath = path:
   #   let
@@ -8,5 +8,5 @@
 
   # hasPersistence = (builtins.hasAttr "persistence" options.environment);
 
-  persistable = path: "${lib.optionalString host.persistence.enable "/persist"}${path}";
+  persistable = config: path: "${lib.optionalString config.host.persistence.enable "/persist"}${path}";
 }

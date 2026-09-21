@@ -13,7 +13,7 @@ let
 
   simpleImport = path: import path { inherit inputs lib; };
 in
-rec {
+{
   mine = {
     attrsets = simpleImport ./attrsets.nix;
     files = simpleImport ./files.nix;
@@ -22,6 +22,7 @@ rec {
     hypr = simpleImport ./hypr.nix;
     strings = simpleImport ./strings.nix;
     packages = simpleImport ./package.nix;
+    persistence = simpleImport ./persistence.nix;
 
     mkPostgresRolePass = role: passPath: ''
       psql -tA <<'EOF'
