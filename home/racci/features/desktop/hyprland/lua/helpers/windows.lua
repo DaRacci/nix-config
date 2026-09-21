@@ -24,7 +24,7 @@ end
 ---@return string
 local function regex(pattern, escape)
   escape = escape == nil and true or escape
-  if !escape then
+  if escape then
     pattern = pattern:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
   end
 

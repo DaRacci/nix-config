@@ -54,17 +54,10 @@ let
     else
       lib.filterAttrs (name: _: builtins.elem name referenced) cfg.variables;
 
-  renderFile =
-    modulePath:
-    let
-      fileContent = builtins.readFile modulePath;
-      vars = varsForModule modulePath;
-    in
-    pkgs.replaceVars fileContent vars;
+  renderFile = modulePath: pkgs.replaceVars modulePath (varsForModule modulePath);
 
   # Find the closest 'lua' ancestor directory from a path.
   # Walks up the directory tree until it finds a component named 'lua'.
-  # Returns path to the parent of the lua directory (components before lua).
   findLuaAncestor =
     singlePath:
     let
@@ -130,7 +123,7 @@ in
         These files will be copied to the config directory but not required in init.lua, so you can use them as libraries or for other purposes.
 
         Files defined here will respect parent directories and will be copied to the same relative path in the config directory.
-        The absolute root of the directory tree will be calulated by finding the highest lua ancestor directory of all files in this list, and copying the entire tree from that root to the config directory.
+        The absolute root of the directory tree will be calculated by finding the closest `lua` ancestor directory, and copying the entire tree from that root to the config directory.
 
         If a directory is specified, it will be recursively copied to the config directory, preserving the directory structure.
       '';
@@ -194,16 +187,11 @@ in
       xdg.configFile =
         if cfg.luaExtras != [ ] then
           let
-            # Get lua ancestor from first path (all should share same lua ancestor)
             luaBase = findLuaAncestor (builtins.head cfg.luaExtras);
             processed = map (
               p:
-              let
-                relativePath = relPath luaBase p;
-                isDir = pathIsDirectory p;
-              in
-              nameValuePair "hypr/lua/${relativePath}" (
-                if isDir then { source = p; } else { text = renderFile p; }
+              nameValuePair "hypr/${relPath luaBase p}" (
+                if (pathIsDirectory p) then { source = p; } else { text = renderFile p; }
               )
             ) cfg.luaExtras;
           in
