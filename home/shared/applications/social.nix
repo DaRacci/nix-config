@@ -8,6 +8,7 @@
   ];
 
   user.persistence.directories = [
+    ".config/Vencord/settings"
     ".config/Nextcloud Talk"
     ".config/discord"
     ".local/share/polari"

@@ -237,9 +237,16 @@ in
         };
       };
 
-      user.persistence.directories = [
-        ".local/share/noctalia"
-      ];
+      user.persistence = {
+        directories = [ ".local/share/noctalia" ];
+        files = [
+          ".local/state/noctalia/settings.toml" # Allows runtime overrides.
+          ".local/state/noctalia/screen_time.json"
+        ];
+      };
+
+      # Without this, noctalia will present a "first run" setup wizard on first launch.
+      home.file.".local/state/noctalia/.setup-complete".text = "";
     }
 
     (mkIf (cfg.location.secret != null) {

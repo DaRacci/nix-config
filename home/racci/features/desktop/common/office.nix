@@ -17,10 +17,16 @@
     "application/pdf" = "org.gnome.Papers.desktop";
   };
 
-  user.persistence.directories = [
-    ".config/news-flash"
-    ".config/evolution"
-    ".local/share/evolution"
-    ".local/share/news-flash"
-  ];
+  user.persistence = {
+    directories = [
+      ".config/libreoffice/4/user/config"
+      ".config/news-flash"
+      ".config/evolution"
+      ".local/share/evolution"
+      ".local/share/news-flash"
+    ];
+    files = [
+      ".config/libreoffice/4/user/registrymodifications.xcu"
+    ];
+  };
 }
