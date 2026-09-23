@@ -62,11 +62,15 @@ let
           local psm="$1";
           local image_file="$2";
           local result;
+          local stderr_file;
+          stderr_file=$(mktemp);
           result=$(TESSDATA_PREFIX="${tessdata}" tesseract \
             --oem 1 \
             --psm "$psm" \
-            "$image_file" - -l eng jpn osd 2>&1);
+            "$image_file" - -l eng jpn osd 2>"$stderr_file");
           trim_whitespace "$result";
+          cat "$stderr_file" >&9;
+          rm -f "$stderr_file";
         }
 
         trim_whitespace() {
@@ -76,6 +80,8 @@ let
         # Try OCR with different PSM modes, falling back to binarisation at each mode if no text is detected.
         OCR_TEXT="";
         DETECTION_METHOD="";
+        STDERR_FILE=$(mktemp);
+        exec 9>"$STDERR_FILE";
         for psm in 1 3 6; do
           OCR_TEXT=$(try_ocr "$psm" "$PROCESSED_FILE");
           if [ -n "$OCR_TEXT" ]; then
@@ -95,11 +101,14 @@ let
             break;
           fi
         done;
+        exec 9>&-;
+        STDERR_LOG=$(cat "$STDERR_FILE" 2>/dev/null);
+        rm -f "$STDERR_FILE";
 
         if [ -z "$OCR_TEXT" ]; then
           notify-send \
             "OCR: No Text Detected" \
-            "Image: ''${IMAGE_DIMS}px" \
+            "Image: ''${IMAGE_DIMS}px - Errors: $STDERR_LOG" \
             --app-name="hyprland" \
             --category="action" \
             --icon="dialog-warning" \
