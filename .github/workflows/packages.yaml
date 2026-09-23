@@ -45,10 +45,10 @@ jobs:
             )
             for PKG in $PKGS; do
               if BROKEN=$(nix eval --json --system "$ARCH" ".#${PKG}.meta.broken" 2>"$ERRFILE"); then
-                if [ "$BROKEN" != "true" ]; then
-                  INCLUDE_JSON=$(echo "$INCLUDE_JSON" | jq --arg pkg "$PKG" --arg arch "$ARCH" '. + [{package:$pkg, arch:$arch}]')
-                else
+                if echo "$BROKEN" | jq -e '. == true or . == "true"' >/dev/null; then
                   echo "Skipping broken package $PKG on $ARCH"
+                else
+                  INCLUDE_JSON=$(echo "$INCLUDE_JSON" | jq --arg pkg "$PKG" --arg arch "$ARCH" '. + [{package:$pkg, arch:$arch}]')
                 fi
               else
                 echo "Skipping unevaluable package $PKG on $ARCH"
