@@ -21,6 +21,7 @@ let
     attrsOf
     anything
     submodule
+    nullOr
     ;
   inherit (pkgs)
     uwsm
@@ -57,11 +58,13 @@ let
       type = submodule {
         options = {
           width = mkOption {
-            type = str;
+            type = nullOr str;
+            default = null;
             description = "Width of the slide-in popup. Can be specified as a percentage (e.g., '20%') or in pixels (e.g., '400px').";
           };
           height = mkOption {
-            type = str;
+            type = nullOr str;
+            default = null;
             description = "Height of the slide-in popup. Can be specified as a percentage (e.g., '33%') or in pixels (e.g., '300px').";
           };
         };
