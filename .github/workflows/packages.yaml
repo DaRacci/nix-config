@@ -51,7 +51,7 @@ jobs:
                 fi
               else
                 echo "Skipping unevaluable package $PKG on $ARCH"
-                sed 's/^/  /' "$ERRFILE"
+                sed 's/^/  /' "$ERRFILE" >&2
               fi
               rm -f "$ERRFILE"
             done
