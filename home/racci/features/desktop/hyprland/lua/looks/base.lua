@@ -31,10 +31,7 @@ hl.config({
       enabled = true,
       range = 4,
       render_power = 3,
-      offset = {
-        x = 0,
-        y = 2,
-      },
+      offset = { 0, 2 },
     },
 
     dim_inactive = false,
