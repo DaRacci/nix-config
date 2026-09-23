@@ -64,6 +64,7 @@ in
         # Games
         ".barony"
         ".local/share/Colossal Order/Cities_Skylines"
+        ".local/share/Bay 12 Games/"
         ".config/WarThunder"
         ".config/Gaijin"
         ".config/unity3d/IronGate/Valheim"
