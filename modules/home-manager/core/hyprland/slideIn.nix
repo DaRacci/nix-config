@@ -136,7 +136,6 @@ let
             inherit (e)
               name
               class
-              position
               animation
               ;
             command = "${uwsmApp} -s b -- ${e.exec}";
