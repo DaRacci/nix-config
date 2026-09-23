@@ -68,11 +68,9 @@ let
         range 0 (builtins.length pathComponents - 1)
       );
     in
-    # Take the last (closest) lua directory
     if luaIndices != [ ] then
       let
-        closestIdx = builtins.elemAt luaIndices (builtins.length luaIndices - 1);
-        # Only include components UP TO (not including) the lua directory
+        closestIdx = builtins.elemAt luaIndices (builtins.length luaIndices - 1) + 1; # +1 to include the "lua" component itself
         ancestorComponents = take closestIdx pathComponents;
       in
       builtins.concatStringsSep "/" ancestorComponents
