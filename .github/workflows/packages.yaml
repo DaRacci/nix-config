@@ -36,13 +36,15 @@ jobs:
             | jq -r '.[]'
           )
           INCLUDE_JSON='[]'
+          ERRFILE=$(mktemp)
+          trap 'rm -f "$ERRFILE"' EXIT
           for ARCH in $ARCHS; do
             PKGS=$(
               nix eval --json --no-pure-eval --allow-import-from-derivation ".#packages.${ARCH}" --apply builtins.attrNames \
               | jq -r '.[] | select(startswith("devenv-") | not)'
             )
             for PKG in $PKGS; do
-              if BROKEN=$(nix eval --json --system "$ARCH" ".#${PKG}.meta.broken" 2>/tmp/nix-eval.err); then
+              if BROKEN=$(nix eval --json --system "$ARCH" ".#${PKG}.meta.broken" 2>"$ERRFILE"); then
                 if [ "$BROKEN" != "true" ]; then
                   INCLUDE_JSON=$(echo "$INCLUDE_JSON" | jq --arg pkg "$PKG" --arg arch "$ARCH" '. + [{package:$pkg, arch:$arch}]')
                 else
@@ -50,7 +52,7 @@ jobs:
                 fi
               else
                 echo "Skipping unevaluable package $PKG on $ARCH"
-                sed 's/^/  /' /tmp/nix-eval.err
+                sed 's/^/  /' "$ERRFILE"
               fi
             done
           done
