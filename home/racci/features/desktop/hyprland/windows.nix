@@ -9,6 +9,8 @@
       ./lua/windows.lua
       ./lua/tags.lua
     ];
-    variables.takeControlConnectingTitleRegex = lib.strings.escapeRegex " - Connecting [v. ${pkgs.take-control-viewer.version}] [0:00:00]";
+    variables.takeControlConnectingTitleRegex =
+      lib.strings.escapeRegex " - Connecting [v. ${pkgs.take-control-viewer.version}] [0:00:00]"
+      |> builtins.replaceStrings [ "\\" ] [ "\\\\" ];
   };
 }
