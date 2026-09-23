@@ -44,7 +44,7 @@ jobs:
               | jq -r '.[] | select(startswith("devenv-") | not)'
             )
             for PKG in $PKGS; do
-              if BROKEN=$(nix eval --json ".#packages.${ARCH}.${PKG}.meta.broken" 2>"$ERRFILE"); then
+              if BROKEN=$(nix eval --json --no-pure-eval --allow-import-from-derivation ".#packages.${ARCH}.${PKG}.meta.broken" 2>"$ERRFILE"); then
                 if echo "$BROKEN" | jq -e '. == true or . == "true"' >/dev/null; then
                   echo "Skipping broken package $PKG on $ARCH"
                 else
