@@ -8,5 +8,6 @@
 
   # hasPersistence = (builtins.hasAttr "persistence" options.environment);
 
-  persistable = config: path: "${lib.optionalString config.host.persistence.enable "/persist"}${path}";
+  persistable =
+    config: path: "${lib.optionalString config.host.persistence.enable "/persist"}${path}";
 }

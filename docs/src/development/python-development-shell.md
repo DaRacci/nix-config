@@ -23,6 +23,7 @@ devenv shell --file devenv.nix --shell python
 The Python shell inherits from the default development environment and adds:
 
 ### Python Runtime & Tools
+
 - **python312** - Python 3.12 interpreter
 - **pip** - Package installer
 - **virtualenv** - Virtual environment management
@@ -36,20 +37,24 @@ The Python shell inherits from the default development environment and adds:
 Libraries are organized by the components they support:
 
 #### Image Compression
+
 - `pillow` - Image processing
 - `rich` - Terminal formatting & progress bars
 - `python-magic` - File type detection
 
 #### Memory/Knowledge Systems
+
 - `pyyaml` - YAML parsing
 - `cryptography` - Encryption utilities
 - `anyio` - Async I/O framework
 
 #### I/O Guardian & Networking
+
 - `websockets` - WebSocket protocol
 - `pystemd` - Systemd D-Bus interface
 
 #### Utilities
+
 - `requests` - HTTP library (for Lidarr plugin updates)
 
 ## Development Workflow
@@ -96,10 +101,10 @@ python3 docs/preprocessor/gen-options-md.py --help
 To add a new Python library:
 
 1. Identify the `python312Packages.` attribute in nixpkgs
-2. Add it to the `packages` list in `/persist/nix-config/flake/dev/devenv.nix` under `devenv.shells.python`
-3. Run `nix fmt flake/dev/devenv.nix` to format
-4. Test with `nix flake check`
-5. Update this documentation
+1. Add it to the `packages` list in `/persist/nix-config/flake/dev/devenv.nix` under `devenv.shells.python`
+1. Run `nix fmt flake/dev/devenv.nix` to format
+1. Test with `nix flake check`
+1. Update this documentation
 
 Example:
 
@@ -119,8 +124,8 @@ If you see `ModuleNotFoundError: No module named 'xxx'`, the package may not be 
 Some packages require Python 3.12. If you need a different version:
 
 1. Modify `python312` reference in `flake/dev/devenv.nix`
-2. Update corresponding `python312Packages` references
-3. Run `nix flake check` to validate
+1. Update corresponding `python312Packages` references
+1. Run `nix flake check` to validate
 
 ### Permissions Errors with pystemd
 

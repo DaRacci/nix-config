@@ -64,7 +64,11 @@
         ./lua/default.lua
         ./lua/display.lua
       ]
-      ++ (builtins.readDir ./lua/looks |> lib.filterAttrs (_: type: type == "regular") |> lib.mapAttrsToList (n: _: ./lua/looks/${n}));
+      ++ (
+        builtins.readDir ./lua/looks
+        |> lib.filterAttrs (_: type: type == "regular")
+        |> lib.mapAttrsToList (n: _: ./lua/looks/${n})
+      );
       luaExtras = [
         ./lua/helpers
       ];

@@ -68,7 +68,7 @@ let
     else
       null;
 
-  workspaceLuaTable = lib.generators.toLua {} (
+  workspaceLuaTable = lib.generators.toLua { } (
     lib.mapAttrs (_id: value: {
       name = optionalString (value.name != null) value.name;
       monitor = value.monitor or null;

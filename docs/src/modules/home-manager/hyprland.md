@@ -139,16 +139,16 @@ Lua module at `modules/home-manager/core/hyprland/lua/opt/workspaces.lua` that r
 
 The default Lua bind template at `modules/home-manager/core/hyprland/lua/binds.lua`. Uses `@placeholder@` substitution for dynamic injection. Substitution is per-file — only placeholders actually present in this template are replaced; other Lua modules are unaffected by binds.lua's placeholder set.
 
-| Placeholder | Source | Description |
+| Placeholder              | Source                                 | Description                              |
 | ------------------------ | -------------------------------------- | ---------------------------------------- |
-| `@applicationBinds@` | `custom-settings.lua.applicationBinds` | Auto-generated Lua table of app keybinds |
-| `@playerctl@` | Auto-injected | Path to `playerctl` binary |
-| `@wpctl@` | Auto-injected | Path to `wpctl` binary |
-| `@zenity@` | Auto-injected | Path to `zenity` binary |
-| `@hyprshutdown@` | Auto-injected | Path to `hyprshutdown` binary |
-| `@uwsmApp@` | Auto-injected | Path to `uwsm-app` helper |
-| `@DEFAULT_AUDIO_SINK@` | `custom-settings.lua.variables` | Audio sink name |
-| `@DEFAULT_AUDIO_SOURCE@` | `custom-settings.lua.variables` | Audio source name |
+| `@applicationBinds@`     | `custom-settings.lua.applicationBinds` | Auto-generated Lua table of app keybinds |
+| `@playerctl@`            | Auto-injected                          | Path to `playerctl` binary               |
+| `@wpctl@`                | Auto-injected                          | Path to `wpctl` binary                   |
+| `@zenity@`               | Auto-injected                          | Path to `zenity` binary                  |
+| `@hyprshutdown@`         | Auto-injected                          | Path to `hyprshutdown` binary            |
+| `@uwsmApp@`              | Auto-injected                          | Path to `uwsm-app` helper                |
+| `@DEFAULT_AUDIO_SINK@`   | `custom-settings.lua.variables`        | Audio sink name                          |
+| `@DEFAULT_AUDIO_SOURCE@` | `custom-settings.lua.variables`        | Audio source name                        |
 
 Add custom placeholders by extending `custom-settings.lua.variables`.
 
