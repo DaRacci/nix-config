@@ -36,3 +36,4 @@ Custom packages may expose different build options depending on their `derivatio
 
 - **Adding a Package**: Create a new directory in `pkgs/` with a `default.nix` file.
 - **Using a Package**: Reference the package via `pkgs.<name>` if the `pkgs` overlay is active.
+- **Package CI discovery**: The package build workflow enumerates package names lazily from `packages.<system>` and skips entries whose `meta.broken` evaluation fails or resolves to `true`, so one unevaluable package does not abort the entire build matrix.
