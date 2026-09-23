@@ -44,7 +44,7 @@ jobs:
             for PKG in $PKGS; do
               ERRFILE=$(mktemp)
               if BROKEN=$(nix eval --json --no-pure-eval --allow-import-from-derivation ".#packages.${ARCH}.${PKG}.meta.broken" 2>"$ERRFILE"); then
-                if echo "$BROKEN" | jq -e 'if type == "boolean" then . else false end' >/dev/null; then
+                if echo "$BROKEN" | jq -e '. == true' >/dev/null; then
                   echo "Skipping broken package $PKG on $ARCH"
                 else
                   INCLUDE_JSON=$(echo "$INCLUDE_JSON" | jq --arg pkg "$PKG" --arg arch "$ARCH" '. + [{package:$pkg, arch:$arch}]')
