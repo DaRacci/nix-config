@@ -107,6 +107,7 @@ TagByMatch(Tags.developmentUtility, {
 
 TagByMatch(Tags.game, {
   Class("steam_app_[0-9]{1,8}", {}, false),
+  Class("dwarfort"),
   Class("gamescope"),
   Class("osu!"),
   -- If a window is on the workspace and fullscreened, it is most likely a game and should be tagged as such.
