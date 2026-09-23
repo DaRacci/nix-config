@@ -9,7 +9,6 @@ let
     mkOption
     mkIf
     getExe'
-    attrsOf
     nameValuePair
     hasAttrByPath
     listToAttrs
@@ -17,8 +16,9 @@ let
     ;
   inherit (lib.types)
     str
-    listOf
     enum
+    listOf
+    attrsOf
     anything
     submodule
     ;
