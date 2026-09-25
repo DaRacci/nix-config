@@ -51,7 +51,7 @@ mkWindowsAppNoCC rec {
     # then use wineserver -k, which is scoped to $WINEPREFIX and safely kills
     # only processes belonging to this prefix.
 
-    wine ${src}/TakeControlViewerInstall-${version}* &
+    wine ${src}/TakeControlViewerInstall* &
 
     # The installer signals success by spawning TakeControlRDViewer.exe with
     # the -installcomplete flag. Wait for it to appear before killing.
@@ -101,7 +101,7 @@ mkWindowsAppNoCC rec {
     ln -s "$out/bin/.launcher" "$out/bin/${pname}"
 
     mkdir -p "$out/share/icons/hicolor/64x64/apps"
-    icoextract ${src}/TakeControlViewerInstall-Linux-${version}* "/tmp/icon.ico"
+    icoextract ${src}/TakeControlViewerInstall* "/tmp/icon.ico"
     magick "/tmp/icon.ico[4]" "$out/share/icons/hicolor/64x64/apps/${pname}.png"
 
     runHook postInstall
