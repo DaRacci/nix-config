@@ -1,6 +1,5 @@
 {
   config,
-  pkgs,
   lib,
   ...
 }:
@@ -23,6 +22,7 @@ in
       activation.steam-setup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         STEAM="$HOME/.local/share/Steam"
 
+        # Required for DeckyLoader
         CEF_FILE="$STEAM/.cef-enable-remote-debugging"
         if [ ! -f $CEF_FILE ]; then
           touch $CEF_FILE
@@ -46,10 +46,6 @@ in
         executable = true;
         text = "steam -shutdown";
       };
-
-      packages = with pkgs; [
-        adwsteamgtk
-      ];
     };
 
     systemd.user.tmpfiles.rules = [
@@ -64,7 +60,6 @@ in
       directories = [
         ".local/share/Steam"
         ".config/steamtinkerlaunch"
-        ".config/AdwSteamGtk"
 
         # Games
         ".barony"
