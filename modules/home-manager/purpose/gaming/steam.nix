@@ -42,6 +42,11 @@ in
         done
       '';
 
+      file."local/bin/steamos-session-select" = {
+        executable = true;
+        text = "steam -shutdown";
+      };
+
       packages = with pkgs; [
         adwsteamgtk
       ];
