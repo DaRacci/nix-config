@@ -134,7 +134,6 @@ in
       }
     ))
 
-    # TODO:Why headless-2 and not headless-1, cant remember, need to test.
     (mkIf (cfg.streaming.enable && config.programs.hyprland.enable) (
       {
         services.sunshine = {
@@ -144,8 +143,8 @@ in
               name = "Shared Desktop";
               prep-cmd = [
                 {
-                  do = ''sh -c "hyprctl keyword monitor HEADLESS-2,''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS},auto,1"'';
-                  undo = "hyprctl keyword monitor HEADLESS-2,disable";
+                  do = ''sh -c "hyprctl keyword monitor HEADLESS-1,''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS},auto,1"'';
+                  undo = "hyprctl keyword monitor HEADLESS-1,disable";
                 }
               ];
             }
@@ -153,8 +152,8 @@ in
               name = "Exclusive Desktop";
               prep-cmd = [
                 {
-                  do = ''sh -c "hyprctl keyword monitor HEADLESS-2,''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS},auto,1" && sleep 5'';
-                  undo = "hyprctl keyword monitor HEADLESS-2,disable";
+                  do = ''sh -c "hyprctl keyword monitor HEADLESS-1,''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS},auto,1" && sleep 5'';
+                  undo = "hyprctl keyword monitor HEADLESS-1,disable";
                 }
                 (
                   let
@@ -217,7 +216,7 @@ in
                 };
                 monitor = [
                   {
-                    output = "HEADLESS-2";
+                    output = "HEADLESS-1";
                     disabled = true;
                   }
                 ];
