@@ -40,6 +40,7 @@ in
       hashes
       wildcard
       d-spy
+      lumen
     ];
 
     programs = {
