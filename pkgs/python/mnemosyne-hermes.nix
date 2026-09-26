@@ -12,13 +12,13 @@
 
 buildPythonPackage (attrs: {
   pname = "mnemosyne-hermes";
-  version = "0.5.0";
+  version = "0.7.3";
   pyproject = true;
 
   src = fetchPypi {
     pname = "mnemosyne_hermes";
     inherit (attrs) version;
-    hash = "sha256-CzEvnUw5oPFtT5bHQQ/GBdy2C/E7qShQn32irIRYKqw=";
+    hash = "sha256-xX7XzHN5hlAiI22WEqDZ33+ZC1eqZND+09OJGFEihLU=";
   };
 
   build-system = [ setuptools ];
