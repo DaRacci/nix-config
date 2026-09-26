@@ -31,18 +31,29 @@ jobs:
       - name: Get packages from flake
         id: get-packages
         run: |
-          FLAKE_JSON=$(nix flake show --no-pure-eval --json --allow-import-from-derivation)
-          ARCHS=$(echo "$FLAKE_JSON" | jq -r '.packages | keys[]')
+          ARCHS=$(
+            nix eval --json --no-pure-eval --allow-import-from-derivation .#packages --apply builtins.attrNames \
+            | jq -r '.[]'
+          )
           INCLUDE_JSON='[]'
           for ARCH in $ARCHS; do
-            PKGS=$(echo "$FLAKE_JSON" | jq -r --arg arch "$ARCH" '.packages[$arch] | keys[] | select(startswith("devenv-") | not)')
+            PKGS=$(
+              nix eval --json --no-pure-eval --allow-import-from-derivation ".#packages.${ARCH}" --apply builtins.attrNames \
+              | jq -r '.[] | select(startswith("devenv-") | not)'
+            )
             for PKG in $PKGS; do
-              BROKEN=$(nix eval --json --system "$ARCH" ".#${PKG}.meta.broken" 2>/dev/null)
-              if [ "$BROKEN" != "true" ]; then
-                INCLUDE_JSON=$(echo "$INCLUDE_JSON" | jq --arg pkg "$PKG" --arg arch "$ARCH" '. + [{package:$pkg, arch:$arch}]')
+              ERRFILE=$(mktemp)
+              if BROKEN=$(nix eval --json --no-pure-eval --allow-import-from-derivation ".#packages.${ARCH}.${PKG}.meta.broken" 2>"$ERRFILE"); then
+                if echo "$BROKEN" | jq -e '. == true' >/dev/null; then
+                  echo "Skipping broken package $PKG on $ARCH"
+                else
+                  INCLUDE_JSON=$(echo "$INCLUDE_JSON" | jq --arg pkg "$PKG" --arg arch "$ARCH" '. + [{package:$pkg, arch:$arch}]')
+                fi
               else
-                echo "Skipping broken package $PKG on $ARCH"
+                echo "Skipping unevaluable package $PKG on $ARCH"
+                sed 's/^/  /' "$ERRFILE" >&2
               fi
+              rm -f "$ERRFILE"
             done
           done
           if [ "$(echo "$INCLUDE_JSON" | jq 'length')" -eq 0 ]; then
