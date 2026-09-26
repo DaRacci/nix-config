@@ -9,13 +9,13 @@
 }:
 buildNpmPackage (_: {
   pname = "mcp-server-amazon";
-  version = "0-unstable-2025-07-25";
+  version = "0-unstable-2026-07-25";
 
   src = fetchFromGitHub {
     owner = "rigwild";
     repo = "mcp-server-amazon";
-    rev = "c2ad8d60bcde54c4444e98b6ec1201688650e403";
-    hash = "sha256-wHUQn4eOhqCJBm9EU7N51++XHGPS+9COOnqDzURk/Ww=";
+    rev = "eb8ff6662d22d67ce6bf0a38c475ac003e65500c";
+    hash = "sha256-ZDdkHVTRiT3da5j7w3wKXgufR9CnzUIzGy2Vu9Yl/Us=";
   };
 
   npmDepsHash = "sha256-5G6w/SL/HHu17HgMx26nt4VuupvMp2ui/tYRQbtSL5M=";
