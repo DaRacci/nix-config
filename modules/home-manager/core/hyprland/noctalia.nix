@@ -213,7 +213,7 @@ in
       programs.noctalia = {
         enable = true;
         systemd.enable = true;
-        validateConfig = true;
+        checkConfig = true;
         settings = noctaliaSettings;
         package = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
       };

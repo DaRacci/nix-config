@@ -11,6 +11,7 @@ cross-host discovery.
 The system consists of three layers:
 
 - **Exporters** (run on all servers)
+
   - node_exporter for system-level metrics (CPU, memory, disk, network, per-process stats)
   - Grafana Alloy for shipping journald logs and Caddy access logs to Loki
   - **Conditional Exporters**: The following exporters are enabled if their corresponding services are configured on the host:
@@ -21,12 +22,14 @@ The system consists of three layers:
     - Proxmox exporter available on the Monitoring Coordinator
 
 - **Collectors** (run on the Monitoring Coordinator)
+
   - Prometheus for metrics aggregation
   - Loki for log aggregation with 90-day retention
   - Alertmanager for alert routing and notifications
   - OTLP/HTTP ingestion on `otlp.<domain>` with bearer-token authentication
 
 - **Visualization** (runs on the Monitoring Coordinator)
+
   - Grafana with provisioned datasources and dashboards
 
 ## Entry Point

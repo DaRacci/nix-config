@@ -178,7 +178,7 @@ in
         PartOf = [ config.wayland.systemd.target ];
         After = [ config.wayland.systemd.target ];
         ConditionEnvironment = "WAYLAND_DISPLAY";
-        X-Reload-Triggers = pyprConfig;
+        X-Reload-Triggers = [ pyprConfig ];
       };
 
       Service = {

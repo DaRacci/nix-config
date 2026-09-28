@@ -16,6 +16,16 @@ Or directly with `nix`:
 nix develop --override-input devenv-root file+file://<path-to-nix-config>/.devenv/root
 ```
 
+## Helper Commands
+
+The shell also exposes repository helper commands from `flake/dev/scripts/`.
+`rebuild-target` accepts `action host`, or just `host`; when the action is omitted it defaults to `switch`. Extra args are forwarded to `nh` / `nix` after `--accept-flake-config`, and args that start with `--` must be separated with a literal `--`:
+
+```bash
+rebuild-target build nixmi -- --fallback
+rebuild-target switch nixmi
+```
+
 ## Generated `.luarc.json`
 
 Entering the default shell refreshes `.luarc.json` in the repository root.

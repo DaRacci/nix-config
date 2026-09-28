@@ -15,8 +15,6 @@ let
   packagesFromOtherInstances = [ ];
 in
 {
-  wivrn = import ./wivrn.nix;
-
   singleton = import ./singleton.nix {
     inherit inputs lib;
   };
@@ -66,14 +64,8 @@ in
             src = haFlake.outPath;
             patches = [
               # TODO:https://github.com/NousResearch/hermes-agent/pull/87820
-              (prev.fetchpatch {
-                url = "https://github.com/NousResearch/hermes-agent/pull/87820.patch";
-                hash = "sha256-FgQc5xwMz3+bhX0yEqjh7kky2lepuUv8xg9g0FCgN74=";
-              })
+              ./patches/hermes-agent-desktop-renderer-typecheck-isolation.patch
               # TODO:https://github.com/NousResearch/hermes-agent/pull/93896
-              # Local rebased patch — upstream source at 7f3e0bb5 has the
-              # hermes_constants helpers but get_managed_system() is not yet
-              # home-aware.
               ./patches/hermes-agent-home-aware-managed.patch
             ];
           };

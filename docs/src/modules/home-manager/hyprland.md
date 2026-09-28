@@ -60,7 +60,7 @@ Uses **Pyprland scratchpads** for dropdown-style window management.
 
 Architecture:
 
-- [**Nix module**](../../../../modules/home-manager/core/hyprland/slideIn.nix): generates `~/.config/pypr/config.toml` with scratchpad definitions, and registers `systemd.user.services.pyprland`.
+- [**Nix module**](../../../../modules/home-manager/core/hyprland/slideIn.nix): generates `~/.config/pypr/config.toml` with scratchpad definitions, registers `systemd.user.services.pyprland`.
 - [**Lua module**](../../../../modules/home-manager/core/hyprland/lua/opt/slide_in.lua): registers `hl.bind(...)` calls that toggle the scratchpads.
 
 ### `lua.nix`
@@ -164,8 +164,8 @@ The module:
 - Persists `~/.local/share/noctalia` via `user.persistence.directories`.
 - Reads `core.profile.avatar.path` → `shell.avatar_path` and `core.profile.wallpaper.directory` → `wallpaper.directory`. Wallpaper fill mode is hardcoded (not a profile option).
 - Location is driven by `core.profile.location.secret` (a SOPS secret name). Two modes:
-  - **Normal** (`secret == null`): sets `programs.noctalia.settings` with build-time validation. No location block.
-  - **Secret** (`secret != null`): base TOML generated at build time; activation copies it to `~/.config/noctalia/config.toml` and appends `[location] address` from the decrypted SOPS secret. Clear text never lands in the repo or Nix store.
+  - **Normal** (`secret == null`): sets `programs.noctalia.settings`. No location block.
+  - **Secret** (`secret != null`): base TOML generated at build time; activation copies it to `~/.config/noctalia/config.toml` and appends `[location] address` from the decrypted SOPS secret.
 
 The user-side Hyprland config pairs with this module via Noctalia IPC keybinds (fullscreen, special workspace toggles, settings, audio/brightness dispatchers). Workspace rules in the user config set `persistent = true` for defined workspaces so they are always available regardless of Noctalia lifecycle.
 

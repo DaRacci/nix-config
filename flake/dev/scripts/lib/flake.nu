@@ -60,11 +60,11 @@ export def parse-flexible-args [
 
   if ($first in $valid_actions) {
     let hostname = if ($args | length) > 1 { $args | get 1 } else { null }
-    let rest = if ($args | length) > 2 { $args | range 2.. } else { [] }
+    let rest = if ($args | length) > 2 { $args | skip 2 } else { [] }
     return {action: $first, hostname: $hostname, rest: $rest}
   }
 
-  let rest = if ($args | length) > 1 { $args | range 1.. } else { [] }
+  let rest = if ($args | length) > 1 { $args | skip 1 } else { [] }
   return {action: $default_action, hostname: $first, rest: $rest}
 }
 

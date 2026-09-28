@@ -60,6 +60,7 @@ in
     firefox = {
       enable = true;
       package = pkgs.firefox;
+      configPath = ".mozilla/firefox";
 
       languagePacks = [
         "en-GB"

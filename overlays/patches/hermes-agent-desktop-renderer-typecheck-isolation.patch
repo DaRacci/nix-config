@@ -1,0 +1,28 @@
+diff --git a/scripts/build/desktop.mjs b/scripts/build/desktop.mjs
+--- a/scripts/build/desktop.mjs
++++ b/scripts/build/desktop.mjs
+@@ -47,7 +47,7 @@ export async function buildDesktop({ source, out, icons, stamp, nativeDeps, type
+     if (existsSync(sourcePublic)) cpSync(sourcePublic, publicDir, { recursive: true })
+     cpSync(publicIcons, publicDir, { recursive: true })
+     if (typecheck) {
+       const ts = workspaceTool(source, app, 'typescript')
+-      execFileSync(process.execPath, [join(dirname(ts), 'tsc.js'), '-p', join(source, app, 'tsconfig.json'),
++      execFileSync(process.execPath, [join(dirname(ts), 'tsc.js'), '-p', join(source, app, 'tsconfig.build.json'),
+         '--noEmit', '--incremental', '--tsBuildInfoFile', join(scratch, 'renderer.tsbuildinfo')], { cwd: join(source, app), stdio: 'inherit' })
+     }
+     const { build } = await import(pathToFileURL(workspaceTool(source, app, 'vite')).href)
+diff --git a/apps/desktop/tsconfig.build.json b/apps/desktop/tsconfig.build.json
+new file mode 100644
+--- /dev/null
++++ b/apps/desktop/tsconfig.build.json
+@@ -0,0 +1,10 @@
++{
++  "extends": "./tsconfig.json",
++  "exclude": [
++    "e2e",
++    "electron",
++    "playwright.config.ts",
++    "**/*.test.ts",
++    "**/*.test.tsx"
++  ]
++}

@@ -14,11 +14,13 @@ It provides graceful startup and shutdown coordination between the database host
 The system consists of two components:
 
 1. **Guardian Server** (runs on client servers)
+
    - WebSocket server that listens for commands from the coordinator
    - Secures connections with a pre-shared key (PSK) from the `DB_GUARDIAN_PSK` secret
    - Executes drain/undrain commands by controlling `db-databases.target`
 
 1. **Guardian Client** (runs on the Database Coordinator)
+
    - WebSocket client that connects to all guardian servers
    - Sends `undrain` command after databases are online (start dependent services)
    - Sends `drain` command before database shutdown (stop dependent services)
