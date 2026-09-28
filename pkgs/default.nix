@@ -49,7 +49,21 @@ in
   # Scripts n stuff
   new-host = pkgs.callPackage ./helpers/new-host.nix { };
   list-ephemeral = pkgs.callPackage ./list-ephemeral { };
-  inherit (pkgs.callPackage ./scripts { inherit lib; }) folder-diff compressor;
+  inherit (pkgs.callPackage ./scripts { inherit lib; })
+    colour-picker
+    folder-diff
+    compressor
+    ocr-region
+    orca-slicer-git-sync
+    screenshot
+    ssh-relay
+    ssh-to-age-keys
+    sunshine-tools
+    swfs-mount-hooks
+    virtualisation-tools
+    wait-for-io-tools
+    wlprop
+    ;
 
   # NixIO Guardian
   inherit (pkgs.callPackage ./io-guardian { }) io-guardian-server io-guardian-client;

@@ -22,7 +22,7 @@ The `swfsMount` option is the repository's declarative storage mount interface. 
 - **Backend Selection**: Set `backend = "minio"` to mount a MinIO bucket through `s3fs`, or `backend = "seaweedfs"` to mount a SeaweedFS filer path through `weed mount`.
 - **Use Scope**: Use `swfsMount` for bucket/object-style workloads or external filer mounts. Do not point it at app state that expects normal local filesystem semantics, frequent metadata updates, or permission changes.
 - **Common Mount Controls**: Each entry supports `mountLocation`, `uid`, `gid`, `umask`, and `requiredByServices` so consuming services can wait for the generated mount unit.
-- **Health Recovery**: Each entry also supports `healthCheck.*` options. By default the module generates a timer-driven probe that can lazily unmount stale FUSE mounts, restart the mount service, and optionally restart dependent services.
+- **Health Recovery**: Each entry also supports `healthCheck.*` options. By default the module uses the shared packaged `swfs-mount-hook` helper for prepare/stop/health actions, including lazy unmount of stale FUSE mounts, mount-service restart, and optional restart or reload of dependent services.
 
 #### MinIO backend
 

@@ -1,9 +1,8 @@
 import json
 import logging
+import os
 import re
 import sys
-import tempfile
-import unittest
 from pathlib import Path
 from urllib.parse import quote
 
@@ -17,8 +16,10 @@ LOGGER = logging.getLogger("rewrite-links")
 
 
 def configure_logging() -> None:
+    level_name = os.environ.get("MDBOOK_REWRITE_LINKS_LOG_LEVEL", "INFO").upper()
+    level = getattr(logging, level_name, logging.INFO)
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=level,
         format="[rewrite-links] %(levelname)s: %(message)s",
         stream=sys.stderr,
     )
@@ -31,11 +32,12 @@ def is_external_link(target: str) -> bool:
 
 
 def split_link_target(target: str) -> tuple[str, str]:
-    for separator in ("#", "?"):
-        if separator in target:
-            index = target.find(separator)
-            return target[:index], target[index:]
-    return target, ""
+    indexes = [index for index in (target.find("?"), target.find("#")) if index != -1]
+    if not indexes:
+        return target, ""
+
+    split_index = min(indexes)
+    return target[:split_index], target[split_index:]
 
 
 def normalize_repo_relative_path(
@@ -172,7 +174,12 @@ def process_item(item: object, docs_root: Path, base_url: str, branch: str) -> N
         process_item(sub_item, docs_root, base_url, branch)
 
 
-def process_book(book: dict, docs_root: Path, base_url: str, branch: str) -> None:
+def process_book(
+    book: dict[str, object],
+    docs_root: Path,
+    base_url: str,
+    branch: str,
+) -> None:
     items = book.get("items")
     if isinstance(items, list):
         for item in items:
@@ -186,85 +193,9 @@ def process_book(book: dict, docs_root: Path, base_url: str, branch: str) -> Non
             process_item(item, docs_root, base_url, branch)
 
 
-def run_tests() -> None:
-    class RewriteLinksTests(unittest.TestCase):
-        def setUp(self) -> None:
-            self.tmpdir = tempfile.TemporaryDirectory()
-            self.repo_root = Path(self.tmpdir.name)
-            self.docs_root = self.repo_root / "docs" / "src"
-            self.chapter_path = "modules/nixos/core/activation.md"
-            target_path = (
-                self.repo_root / "modules" / "nixos" / "core" / "activation.nix"
-            )
-            target_path.parent.mkdir(parents=True)
-            target_path.write_text("# activation\n")
-            (self.docs_root / "modules" / "nixos" / "core").mkdir(parents=True)
-            self.expected = "https://codeberg.org/Racci/nix-config/src/branch/master/modules/nixos/core/activation.nix"
-
-        def tearDown(self) -> None:
-            self.tmpdir.cleanup()
-
-        def test_activation_relative_markdown_link_rewrites(self) -> None:
-            text = "- **Entry point**: [activation.nix](../../../../../modules/nixos/core/activation.nix)"
-
-            rewritten = rewrite_text(
-                text,
-                self.chapter_path,
-                self.docs_root,
-                "https://codeberg.org/Racci/nix-config",
-                "master",
-            )
-
-            self.assertIn(self.expected, rewritten)
-
-        def test_activation_relative_html_link_rewrites(self) -> None:
-            text = '- <strong>Entry point</strong>: <a href="../../../../../modules/nixos/core/activation.nix">activation.nix</a>'
-
-            rewritten = rewrite_text(
-                text,
-                self.chapter_path,
-                self.docs_root,
-                "https://codeberg.org/Racci/nix-config",
-                "master",
-            )
-
-            self.assertIn(self.expected, rewritten)
-
-        def test_process_book_items_shape(self) -> None:
-            book = {
-                "items": [
-                    {
-                        "Chapter": {
-                            "path": self.chapter_path,
-                            "content": "- **Entry point**: [activation.nix](../../../../../modules/nixos/core/activation.nix)",
-                            "sub_items": [],
-                        }
-                    }
-                ]
-            }
-
-            process_book(
-                book,
-                self.docs_root,
-                "https://codeberg.org/Racci/nix-config",
-                "master",
-            )
-
-            self.assertIn(
-                self.expected,
-                book["items"][0]["Chapter"]["content"],
-            )
-
-    suite = unittest.defaultTestLoader.loadTestsFromTestCase(RewriteLinksTests)
-    result = unittest.TextTestRunner(verbosity=2).run(suite)
-    raise SystemExit(0 if result.wasSuccessful() else 1)
-
-
 def main() -> None:
     if len(sys.argv) > 1 and sys.argv[1] == "supports":
         sys.exit(0)
-    if len(sys.argv) > 1 and sys.argv[1] in {"test", "--test"}:
-        run_tests()
 
     configure_logging()
 

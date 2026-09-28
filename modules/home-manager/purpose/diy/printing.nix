@@ -6,135 +6,26 @@
 }:
 let
   inherit (lib)
+    escapeShellArgs
+    getExe
+    literalExpression
+    mkEnableOption
     mkIf
     mkMerge
-    mkEnableOption
     mkOption
+    optionals
     types
-    literalExpression
-    getExe
     ;
 
   cfg = config.purpose.diy;
   gitSyncCfg = cfg.printing.gitSync;
-
-  orcaGitSyncScript = pkgs.writeShellApplication {
-    name = "orca-slicer-git-sync";
-    runtimeInputs = [
-      pkgs.git
-      pkgs.inotify-tools
-      pkgs.busybox
-    ];
-    text = ''
-      REPO_DIR="${gitSyncCfg.repoPath}"
-
-      until [ -d "$REPO_DIR" ]; do
-        sleep 10
-      done
-
-      if [ ! -d "$REPO_DIR/.git" ]; then
-        echo "Initializing git repository at $REPO_DIR"
-        git -C "$REPO_DIR" init -q
-        git -C "$REPO_DIR" add -A
-        if ! git -C "$REPO_DIR" diff --cached --quiet 2>/dev/null; then
-          git -C "$REPO_DIR" commit -m "chore: initial commit" -q
-          echo "Created initial commit"
-        fi
-      fi
-
-      ${lib.optionalString (gitSyncCfg.enable && gitSyncCfg.remoteUrl != null) ''
-        if ! git -C "$REPO_DIR" remote get-url origin 2>/dev/null | grep -q "${gitSyncCfg.remoteUrl}"; then
-          git -C "$REPO_DIR" remote remove origin 2>/dev/null || true
-          git -C "$REPO_DIR" remote add origin "${gitSyncCfg.remoteUrl}" 2>/dev/null || true
-          echo "Configured remote: ${gitSyncCfg.remoteUrl}"
-        fi
-      ''}
-
-      commit_changes() {
-        local status
-        status=$(git -C "$REPO_DIR" status --porcelain 2>/dev/null) || return 0
-        [ -z "$status" ] && return 0
-        echo "Changes detected, preparing commit..."
-
-        while IFS= read -r line; do
-          [ -z "$line" ] && continue
-
-          local xy filepath
-          xy="''${line:0:2}"
-          filepath="''${line:3}"
-          if [[ "$filepath" == *" -> "* ]]; then
-            filepath="''${filepath##* -> }"
-          fi
-          # git quotes filenames containing special characters (spaces, @, &, etc.)
-          # strip surrounding double-quotes if present
-          filepath="''${filepath#\"}"
-          filepath="''${filepath%\"}"
-          echo "Processing change: $xy $filepath"
-
-          # Derive the profile type from the first directory component.
-          # Files at the repo root (no slash) fall back to "config".
-          local type
-          if [[ "$filepath" == */* ]]; then
-            type="''${filepath%%/*}"
-          else
-            type="config"
-          fi
-          echo "Determined type: $type"
-
-          local basename_file name
-          basename_file="$(basename "$filepath")"
-          name="''${basename_file%.*}"
-          echo "Determined name: $name"
-
-          local msg
-          local x="''${xy:0:1}"
-          local y="''${xy:1:1}"
-          if [[ "$xy" == "??" ]] || [[ "$x" == "A" ]] || [[ "$y" == "A" ]]; then
-            msg="feat($type): added $name"
-          elif [[ "$x" == "D" ]] || [[ "$y" == "D" ]]; then
-            msg="chore($type): removed $name"
-          else
-            msg="refactor($type): updated $name"
-          fi
-          echo "Determined commit message: $msg"
-
-          git -C "$REPO_DIR" add -A
-          if ! git -C "$REPO_DIR" diff --cached --quiet 2>/dev/null; then
-            git -C "$REPO_DIR" commit -m "$msg" -q
-            echo "Committed: $msg"
-
-            ${lib.optionalString (gitSyncCfg.enable && gitSyncCfg.remoteUrl != null) ''
-              if git -C "$REPO_DIR" push -q "${gitSyncCfg.remoteUrl}" 2>/dev/null; then
-                echo "Pushed to remote: ${gitSyncCfg.remoteUrl}"
-              else
-                echo "Warning: Failed to push to remote ${gitSyncCfg.remoteUrl}"
-              fi
-            ''}
-          fi
-        done <<< "$status"
-      }
-
-      echo "Starting OrcaSlicer git sync watcher for $REPO_DIR"
-
-      # Use inotifywait in one-shot mode inside a loop so that after each
-      # event we can sleep briefly to batch rapid filesystem activity before
-      # committing all accumulated changes.
-      while true; do
-        if inotifywait -r -q \
-            -e close_write -e create -e delete -e moved_to -e moved_from \
-            --exclude '\.git' \
-            "$REPO_DIR" 2>/dev/null; then
-          echo "Filesystem change detected, processing git commit..."
-          sleep 2
-          commit_changes
-        else
-          # inotifywait failed (e.g. directory was temporarily unavailable);
-          # pause before retrying so we do not spin
-          sleep 5
-        fi
-      done
-    '';
-  };
+  orcaGitSyncCommand = escapeShellArgs (
+    [
+      (getExe pkgs.orca-slicer-git-sync)
+      gitSyncCfg.repoPath
+    ]
+    ++ optionals (gitSyncCfg.remoteUrl != null) [ gitSyncCfg.remoteUrl ]
+  );
 in
 {
   options.purpose.diy.printing = {
@@ -208,7 +99,7 @@ in
 
         Service = {
           Type = "simple";
-          ExecStart = getExe orcaGitSyncScript;
+          ExecStart = orcaGitSyncCommand;
           Restart = "on-failure";
           RestartSec = 10;
         };

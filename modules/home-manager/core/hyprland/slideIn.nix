@@ -167,7 +167,7 @@ in
 
     xdg.configFile."pypr/config.toml" = {
       source = pyprConfig;
-      onChange = "${getExe' pyprland "pypr"} reload";
+      onChange = "${getExe' pyprland "pypr"} reload || true";
     };
 
     systemd.user.services.pyprland = {
@@ -178,10 +178,12 @@ in
         PartOf = [ config.wayland.systemd.target ];
         After = [ config.wayland.systemd.target ];
         ConditionEnvironment = "WAYLAND_DISPLAY";
+        X-Reload-Triggers = pyprConfig;
       };
 
       Service = {
         ExecStart = getExe' pyprland "pypr";
+        ExecReload = "${getExe' pyprland "pypr"} reload";
         Restart = "on-failure";
         RestartSec = 5;
         Type = "simple";

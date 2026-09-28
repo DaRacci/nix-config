@@ -45,8 +45,8 @@ Redis management uses a similar aggregation pattern:
 
 Lifecycle management is handled by the [IO Guardian](../../../components/io_guardian.md). A pre-shared key for guardian communication is managed via the `DB_GUARDIAN_PSK` SOPS secret.
 
-- **On Clients**: Services that use these database modules are automatically bound to `db-databases.target`. This ensures they only start when the remote databases are reachable and stop before the databases go offline.
-- **On Database Coordinator**: The `db-database-coordinator` service manages the `drain` and `undrain` signals sent to clients during system startup and shutdown.
+- **On Clients**: Services that use these database modules are automatically bound to `io-databases.target`. This ensures they only start when the remote databases are reachable and stop before the databases go offline. Reachability and readiness checks are handled by the shared `wait-for-io-tools` package (`wait-for-io` and `wait-for-io-databases`).
+- **On Database Coordinator**: The `io-database-coordinator` service manages the `drain` and `undrain` signals sent to clients during system startup and shutdown.
 
 ## Secrets
 

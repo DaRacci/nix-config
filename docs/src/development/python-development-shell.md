@@ -72,13 +72,7 @@ pytest pkgs/scripts/test_image_compressor.py -v
 Format Python code:
 
 ```bash
-black pkgs/scripts/compressor.py
-```
-
-Check with ruff:
-
-```bash
-ruff check pkgs/scripts/ pkgs/python/ docs/preprocessor/
+nix fmt -- pkgs/scripts/compressor.py
 ```
 
 Check types with mypy:

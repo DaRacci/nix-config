@@ -16,6 +16,8 @@ let
     ;
 in
 {
+  colour-picker = pkgs.callPackage ./colour-picker { };
+
   folder-diff = writeNuApplication {
     inherit pkgs;
     sourceRoot = ./.;
@@ -34,6 +36,7 @@ in
     ];
 
     flakeIgnore = [
+      "E203"
       "E265"
       "E501"
       "W503"
@@ -52,4 +55,14 @@ in
     ];
   } (builtins.readFile ./compressor.py);
 
+  ocr-region = pkgs.callPackage ./ocr-region { };
+  orca-slicer-git-sync = pkgs.callPackage ./orca-slicer-git-sync { };
+  screenshot = pkgs.callPackage ./screenshot { };
+  ssh-relay = pkgs.callPackage ./ssh-relay { };
+  ssh-to-age-keys = pkgs.callPackage ./ssh-to-age-keys { };
+  sunshine-tools = pkgs.callPackage ./sunshine-tools { };
+  swfs-mount-hooks = pkgs.callPackage ./swfs-mount-hooks { };
+  virtualisation-tools = pkgs.callPackage ./virtualisation-tools { };
+  wait-for-io-tools = pkgs.callPackage ./wait-for-io-tools { };
+  wlprop = pkgs.callPackage ./wlprop { };
 }

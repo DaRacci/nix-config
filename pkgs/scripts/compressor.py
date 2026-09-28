@@ -1237,7 +1237,7 @@ class App:
                 rel_path = self.truncate_path(path.relative_to(display_root), 48)
                 current_duration = durations[path]
                 remaining_durations = [
-                    durations[other] for other in videos[index + 1:]
+                    durations[other] for other in videos[index + 1 :]
                 ]
                 progress.update(
                     current_task,
