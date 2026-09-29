@@ -2,5 +2,8 @@
 {
   home.packages = with pkgs; [ bottles ];
 
-  user.persistence.directories = [ ".local/share/bottles" ];
+  user.persistence.directories = [
+    ".local/share/bottles"
+    ".local/share/umu"
+  ];
 }
