@@ -42,7 +42,7 @@ in
         done
       '';
 
-      file."local/bin/steamos-session-select" = {
+      file.".local/bin/steamos-session-select" = {
         executable = true;
         text = "steam -shutdown";
       };
