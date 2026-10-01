@@ -10,6 +10,7 @@
   click,
   cloudscraper,
   cryptography,
+  curl-cffi,
   paho-mqtt,
   pycryptodome,
   python-slugify,
@@ -38,6 +39,7 @@ buildPythonPackage rec {
     click
     cloudscraper
     cryptography
+    curl-cffi
     paho-mqtt
     pycryptodome
     python-slugify
