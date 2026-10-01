@@ -53,6 +53,7 @@
   services.jellyfin = {
     hardwareAcceleration = {
       enable = true;
+      type = "vaapi";
       device = "/dev/dri/renderD128";
     };
 
@@ -60,6 +61,7 @@
     transcoding = {
       enableHardwareEncoding = true;
       maxConcurrentStreams = null;
+      enableToneMapping = false; # Causes playback errors.
       throttleTranscoding = true;
       hardwareEncodingCodecs = {
         hevc = true;
