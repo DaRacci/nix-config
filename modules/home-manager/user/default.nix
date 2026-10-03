@@ -61,8 +61,6 @@ in
               "${config.programs.git.settings.user.email} ${userPublicKey}"
             ];
           }).outPath;
-
-        signing.key = userPublicKey;
       };
     };
 
