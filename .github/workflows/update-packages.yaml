@@ -53,15 +53,19 @@ jobs:
 
           INCLUDE_JSON='[]'
 
-          echo "::group::Filter for passthru.updateScript"
+          echo "::group::Filter for updateScript and discovery"
           for PKG in $UNIQUE_PKGS; do
-            UPDATE_SCRIPT=$(nix eval --json --no-pure-eval ".#${PKG}.passthru.updateScript" 2>/dev/null || echo "null")
-            if [ "$UPDATE_SCRIPT" != "null" ]; then
-              INCLUDE_JSON=$(echo "$INCLUDE_JSON" | jq --arg pkg "$PKG" '. + [{package:$pkg}]')
-              echo "Include: $PKG"
-            else
-              echo "Skip (no updateScript): $PKG"
+            ATTRS=$(nix eval --json --no-pure-eval --apply 'p: {inherit (p.passthru) updateScript discovery;}' ".#${PKG}" 2>/dev/null || echo '{}')
+            UPDATE_SCRIPT=$(echo "$ATTRS" | jq -r '.updateScript // "null"')
+            DISCOVERY=$(echo "$ATTRS" | jq -r '.discovery // true')
+
+            if [ "$UPDATE_SCRIPT" = "null" ] || [ "$DISCOVERY" = "false" ]; then
+              echo "Skip: $PKG ($ATTRS)"
+              continue
             fi
+
+            INCLUDE_JSON=$(echo "$INCLUDE_JSON" | jq --arg pkg "$PKG" '. + [{package:$pkg}]')
+            echo "Include: $PKG"
           done
           echo "::endgroup::"
 
