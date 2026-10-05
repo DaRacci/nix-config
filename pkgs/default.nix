@@ -30,6 +30,7 @@ in
   lidarr-plugins = pkgs.callPackage ./lidarr-plugins { };
   hypr-gamemode = pkgs.callPackage ./hypr-gamemode { };
   uvtools = pkgs.callPackage ./uvtools { };
+  split-tree-overlay = pkgs.callPackage ./split-tree-overlay { };
 
   # Hermes Agent Python Plugins
   mnemosyne-memory = hermesPythonVersion.callPackage ./python/mnemosyne-memory.nix { };
