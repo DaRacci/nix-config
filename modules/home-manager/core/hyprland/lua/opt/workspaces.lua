@@ -63,7 +63,6 @@ end)
 for id, config in pairs(workspaceConfig) do
   local spec = {
     workspace = id,
-    persistent = true,
   }
 
   if config.name ~= "" then
