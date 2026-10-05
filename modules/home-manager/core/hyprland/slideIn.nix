@@ -32,6 +32,7 @@ let
   cfg = config.wayland.windowManager.hyprland.custom-settings.slideIn;
 
   uwsmApp = getExe' uwsm "uwsm-app";
+  systemctl = getExe' pkgs.systemd "systemctl";
 
   commonOptions = {
     bind = mkOption {
@@ -205,11 +206,14 @@ in
       };
     };
 
+    core.uwsm.sliceAllocation.background = [ "pyprland" ];
+
     wayland.windowManager.hyprland.custom-settings.lua = {
       luaModules = [ ./lua/opt/slide_in.lua ];
       variables = {
         slideInConfig = slideInLuaConfig;
         pyprClient = getExe' pyprland "pypr-client";
+        pyprServiceReload = "${systemctl} --user reload-or-restart pyprland.service";
       };
     };
   };
