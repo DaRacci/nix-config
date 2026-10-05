@@ -12,7 +12,7 @@ This is not a faithful port but a opinionated reimplementation that works around
 - Layout logic: [`home/racci/features/desktop/hyprland/lua/layout/split-tree/layout.lua`](../../../../home/racci/features/desktop/hyprland/lua/layout/split-tree/layout.lua)
 - Mouse session handling: [`home/racci/features/desktop/hyprland/lua/layout/split-tree/pointer.lua`](../../../../home/racci/features/desktop/hyprland/lua/layout/split-tree/pointer.lua)
 - Overlay bridge: [`home/racci/features/desktop/hyprland/lua/layout/split-tree/overlay.lua`](../../../../home/racci/features/desktop/hyprland/lua/layout/split-tree/overlay.lua)
-- Overlay client (Rust): [`pkgs/split-tree-overlay`](../../../../pkgs/split-tree-overlay)
+- Overlay client: [`pkgs/split-tree-overlay`](../../../../pkgs/split-tree-overlay)
 - Shared helpers: [`home/racci/features/desktop/hyprland/lua/layout/split-tree/util.lua`](../../../../home/racci/features/desktop/hyprland/lua/layout/split-tree/util.lua)
 - Harness: [`home/racci/features/desktop/hyprland/tests/split-tree.lua`](../../../../home/racci/features/desktop/hyprland/tests/split-tree.lua)
 - Workspace startup seeding: [`modules/home-manager/core/hyprland/lua/opt/workspaces.lua`](../../../../modules/home-manager/core/hyprland/lua/opt/workspaces.lua)
