@@ -70,6 +70,7 @@ let
 
   workspaceLuaTable = lib.generators.toLua { } (
     lib.mapAttrs (_id: value: {
+      extraRules = value.extraRules or { };
       name = optionalString (value.name != null) value.name;
       monitor = value.monitor or null;
       cmds = optionalString ((value.startup or [ ]) != [ ]) (

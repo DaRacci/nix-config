@@ -1,3 +1,18 @@
+local SplitTree = require("./layout/split-tree")
+
+SplitTree.register()
+SplitTree.configure({
+  overlay = "@splitTreeOverlay@",
+})
+
+hl.on("hyprland.start", function()
+  SplitTree.startOverlay()
+end)
+
+hl.on("config.reloaded", function()
+  SplitTree.startOverlay()
+end)
+
 hl.config({
   debug = {
     disable_logs = true,
@@ -12,7 +27,7 @@ hl.config({
   general = {
     resize_on_border = true,
     no_focus_fallback = true,
-    layout = "hy3",
+    layout = "lua:split-tree",
     allow_tearing = true,
     snap = { enabled = true },
   },
@@ -29,11 +44,11 @@ hl.config({
   },
 })
 
-for _, ns in ipairs({ "walker", "selection", "overview", "anyrun", "gauntlet", "indicator.*", "osk", "hyprpicker", "noanim" }) do
+for _, ns in ipairs({ "walker", "selection", "overview", "anyrun", "gauntlet", "indicator.*", "osk", "hyprpicker", "noanim", "split-tree-overlay" }) do
   hl.layer_rule({
     name = "no-anim-" .. ns,
     match = { namespace = ns },
-    no_anim = true
+    no_anim = true,
   })
 end
 
@@ -45,11 +60,11 @@ for _, ns in ipairs({ "bar", "corner.*", "dock", "indicator.*", "indicator*", "o
   hl.layer_rule({
     name = "blur-" .. ns,
     match = { namespace = ns },
-    blur = true
+    blur = true,
   })
   hl.layer_rule({
     name = "ignore-alpha-" .. ns,
     match = { namespace = ns },
-    ignore_alpha = 0.6
+    ignore_alpha = 0.6,
   })
 end

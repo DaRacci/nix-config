@@ -71,6 +71,7 @@
 - [DIY & Making](modules/home-manager/diy.md)
 - [AI Editors & Assistants](modules/home-manager/ai.md)
 - [Hyprland](modules/home-manager/hyprland.md)
+- [Hyprland Split-Tree Layout](modules/home-manager/hyprland-split-tree.md)
 - [Profile](modules/home-manager/profile.md)
 - [Programs](modules/home-manager/programs/list_ephemeral.md)
 

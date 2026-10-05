@@ -36,6 +36,9 @@
     configType = "lua";
     custom-settings.lua = {
       enable = true;
+      variables = {
+        splitTreeOverlay = lib.getExe pkgs.split-tree-overlay;
+      };
       luaModules = [
         ./lua/default.lua
         ./lua/display.lua
@@ -47,20 +50,14 @@
       );
       luaExtras = [
         ./lua/helpers
+        ./lua/layout
       ];
     };
 
     plugins = with pkgs.hyprlandPlugins; [
-      hy3
       hypr-dynamic-cursors
     ];
 
-    custom-settings.permission.plugin =
-      with pkgs.hyprlandPlugins;
-      [
-        hy3
-        hypr-dynamic-cursors
-      ]
-      |> map (plugin: "${plugin}/lib/lib${plugin.pname}.so");
+    custom-settings.permission.plugin = with pkgs.hyprlandPlugins; [ hypr-dynamic-cursors ];
   };
 }

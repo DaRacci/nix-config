@@ -48,7 +48,7 @@ Defines `custom-settings.permission` for screen copy and plugin permission grant
 ```nix
 custom-settings.permission = {
   screenCopy = [ pkgs.firefox pkgs.obs ];
-  plugin = [ pkgs.hyprlandPlugins.hy3 ];
+  plugin = [ pkgs.hyprlandPlugins.hypr-dynamic-cursors ];
 };
 ```
 
@@ -60,8 +60,8 @@ Uses **Pyprland scratchpads** for dropdown-style window management.
 
 Architecture:
 
-- [**Nix module**](../../../../modules/home-manager/core/hyprland/slideIn.nix): generates `~/.config/pypr/config.toml` with scratchpad definitions, registers `systemd.user.services.pyprland`.
-- [**Lua module**](../../../../modules/home-manager/core/hyprland/lua/opt/slide_in.lua): registers `hl.bind(...)` calls that toggle the scratchpads.
+- [**Nix module**](../../../../modules/home-manager/core/hyprland/slideIn.nix): generates `~/.config/pypr/config.toml`, registers `systemd.user.services.pyprland`, and allocates it to the UWSM background slice.
+- [**Lua module**](../../../../modules/home-manager/core/hyprland/lua/opt/slide_in.lua): registers `hl.bind(...)` calls that toggle the scratchpads and reloads the `pyprland` user service on `hyprland.start`. It uses `reload-or-restart` so a still-active-but-stale service (surviving a crashed session) is reloaded rather than restarted, avoiding audio gaps and screen flashes on config reloads.
 
 ### `lua.nix`
 
@@ -69,7 +69,8 @@ Defines `custom-settings.lua` — the Lua config generation subsystem:
 
 - **`enable`** (boolean) — Enable pure Lua configuration files with Nix substitution support.
 - **`variables`** (attrs of `nullOr str`) — Key-value pairs for `@placeholder@` substitution in Lua source files. Each key `foo` replaces `@foo@` only in Lua modules that reference that placeholder. Modules that don't reference a given placeholder are unaffected, so bundled modules can use disjoint placeholder sets. A placeholder referenced by a module but absent from `variables` is an error. Some variables are pre-populated automatically (see `applicationBinds` below). Common injected values include paths to `playerctl`, `wpctl`, `zenity`, `hyprshutdown`, and `uwsm-app`.
-- **`luaModules`** (list of paths) — Lua source files to copy into the Hyprland config directory and `require` from `init.lua`. Each file undergoes `@placeholder@` substitution using the `variables` attrset. Defaults to the bundled `lua/binds.lua`.
+- **`luaModules`** (list of paths) — Lua source files to copy into the Hyprland config directory and `require` from `init.lua`. Each file undergoes `@placeholder@` substitution using the `variables` attrset. Defaults to the bundled `lua/binds.lua`. This is also where repo-local layouts can register themselves via `hl.layout.register(...)` before selecting them with values like `general.layout = "lua:split-tree"`.
+- **`luaExtras`** (list of paths) — Extra Lua files or directories copied into the Hyprland config directory without auto-loading them. Useful for helper libraries and multi-file layouts. Repo-local helpers such as `helpers/*` and `layout/split-tree/*` are shipped this way, then loaded with `require(...)` from auto-loaded modules.
 - **`applicationBinds`** (attrs of `str`) — Application keybinds passed into Lua generation. Each attr key is a bind string and each attr value is a command string. Rendered into `@applicationBinds@` as Lua table entries consumed by `binds.lua`. Generated Lua iterates over those table entries and creates `hl.bind(..., hl.dsp.exec_cmd(...))` calls for each bind/command pair.
 
 #### Lua bind pattern
@@ -93,7 +94,7 @@ This pattern keeps bind and submap definitions inline in Lua. Submaps are define
 Workspace configuration module at `modules/home-manager/core/hyprland/workspaces.nix`.
 Handles workspace naming, monitor assignments, and startup applications with startup-only monitor assignment behavior:
 
-- **Startup-only assignment**: Monitor assignments run once via `hl.on("hyprland.start")` Lua event hook. Users can move workspaces freely after startup without interference.
+- **Startup-only assignment**: Monitor assignments run once via `hl.on("hyprland.start")` Lua event hook by focusing each configured monitor/workspace pair to instantiate those workspaces, then restoring previous focus. Users can move workspaces freely after startup without interference.
 - **Persistent naming**: Workspace names and startup commands persist via `hl.workspace_rule()`, ensuring defaults are restored if a workspace is recreated.
 - **Conditional Lua module**: The `lua/opt/workspaces.lua` module is automatically added to the Lua config only when `custom-settings.workspaces.enable = true`. If disabled, no workspace Lua code is loaded.
 - **Configuration source**: Workspace data (name, monitor, startup commands) is defined in user configs via the typed `custom-settings.workspaces.definitions` option and passed to Lua as `@workspaceConfig@` variable.
@@ -128,8 +129,8 @@ The module generates:
 
 Lua module at `modules/home-manager/core/hyprland/lua/opt/workspaces.lua` that registers workspace configuration. **Only loaded when `custom-settings.workspaces.enable = true`.** Receives workspace data via `@workspaceConfig@` placeholder substitution and:
 
-- Registers `hl.on("hyprland.start")` hook to assign workspaces to monitors on startup only
-- Calls `hl.workspace_rule()` for each workspace to set persistent names and startup commands
+- Registers `hl.on("hyprland.start")` hook to create/focus configured workspaces on their target monitors once at startup, then restores previous focus
+- Calls `hl.workspace_rule()` for each workspace to set persistent names, startup commands, and forwarded `extraRules`
 
 | Placeholder         | Source                                   | Description                    |
 | ------------------- | ---------------------------------------- | ------------------------------ |
