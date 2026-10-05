@@ -95,7 +95,6 @@ Workspace configuration module at `modules/home-manager/core/hyprland/workspaces
 Handles workspace naming, monitor assignments, and startup applications with startup-only monitor assignment behavior:
 
 - **Startup-only assignment**: Monitor assignments run once via `hl.on("hyprland.start")` Lua event hook by focusing each configured monitor/workspace pair to instantiate those workspaces, then restoring previous focus. Users can move workspaces freely after startup without interference.
-- **Persistent naming**: Workspace names and startup commands persist via `hl.workspace_rule()`, ensuring defaults are restored if a workspace is recreated.
 - **Conditional Lua module**: The `lua/opt/workspaces.lua` module is automatically added to the Lua config only when `custom-settings.workspaces.enable = true`. If disabled, no workspace Lua code is loaded.
 - **Configuration source**: Workspace data (name, monitor, startup commands) is defined in user configs via the typed `custom-settings.workspaces.definitions` option and passed to Lua as `@workspaceConfig@` variable.
 
