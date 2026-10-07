@@ -193,6 +193,20 @@
             ]);
           };
         };
+
+        rust = {
+          inherit (default)
+            containers
+            env
+            git-hooks
+            tasks
+            packages
+            ;
+
+          languages.rust = {
+            enable = true;
+          };
+        };
       };
     };
 }
