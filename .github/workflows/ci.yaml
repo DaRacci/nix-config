@@ -11,6 +11,26 @@ permissions:
   contents: read
 
 jobs:
+  docs-lint:
+    name: Lint docs (Australian English)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Vale (Australian English)
+        uses: workflow/nix-shell-action@v4.0.0
+        with:
+          flakes: nixpkgs#vale,nixpkgs#hunspellDicts.en_AU
+          script: |
+            DICT=$(nix build --no-link --print-out-paths 'nixpkgs#hunspellDicts.en_AU')
+            ./ci/vale/install-dictionaries.sh "$DICT"
+
+            # Rule fixtures: locks in that US forms are flagged and AU forms are not.
+            ./ci/vale/test/run.sh
+
+            # Lint the real docs tree.
+            vale docs/
+
   generate-matrix:
     runs-on: self-hosted
     outputs:
