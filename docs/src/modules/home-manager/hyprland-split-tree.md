@@ -2,8 +2,29 @@
 
 ## Purpose
 
-Custom Lua layout that implements a split-tree layout for Hyprland, inspired by the `hy3` plugin which itself was inspired by i3's split-tree layout.
-This is not a faithful port but a opinionated reimplementation that works around Hyprland Lua layout limitations.
+Custom Lua layout that implements a split-tree layout for Hyprland, inspired by the `hy3` plugin, which itself was inspired by i3's split-tree layout.
+This is not a faithful port but an opinionated reimplementation that works around Hyprland's Lua layout limitations.
+
+## Usage
+
+The layout is registered from an auto-loaded Lua module with `hl.layout.register("split-tree", …)` and selected with `general.layout = "lua:split-tree"`.
+The layout files are shipped as extras (`luaExtras`) and pulled in with `require(...)`; the default `lua/binds.lua` template already requires them.
+In this repo both live under `home/racci/features/desktop/hyprland` — `lua/default.lua` selects the layout and `lua/layout/` ships it through `luaExtras`.
+See [Hyprland](hyprland.md) for the `luaModules` / `luaExtras` wiring.
+
+### Keybinds
+
+Default bindings from `lua/binds.lua`:
+
+| Action | Binding |
+| --- | --- |
+| Focus window | `SUPER` + arrow key |
+| Move window | `SUPER + SHIFT` + arrow key |
+| Resize window | `ALT + R`, then arrow key (`ESCAPE` exits) |
+| Toggle floating | `SUPER + SHIFT + SPACE` |
+| Drag window | `SUPER + mouse:left` |
+| Resize window (mouse) | `SUPER + mouse:right` |
+| Resize on border | `mouse:left` near a tiled border |
 
 ## Files
 
@@ -17,12 +38,12 @@ This is not a faithful port but a opinionated reimplementation that works around
 - Harness: [`home/racci/features/desktop/hyprland/tests/split-tree.lua`](../../../../home/racci/features/desktop/hyprland/tests/split-tree.lua)
 - Workspace startup seeding: [`modules/home-manager/core/hyprland/lua/opt/workspaces.lua`](../../../../modules/home-manager/core/hyprland/lua/opt/workspaces.lua)
 
-## Behavior
+## Behaviour
 
 ### Window insertion
 
-New tiled windows split currently active leaf.
-Split axis follows current leaf box shape:
+New tiled windows split the currently active leaf.
+The split axis follows the current leaf's box shape:
 
 - wider than tall → horizontal split (`x`)
 - taller than wide → vertical split (`y`)
@@ -34,12 +55,12 @@ Split axis follows current leaf box shape:
 - if neighbor exists in requested direction, swap leaves
 - if neighbor does not exist, pull active leaf to requested workspace edge
 
-That edge-pull avoids broken nested-column reshapes that earlier Lua version produced.
+That edge-pull avoids the broken nested-column reshapes a plain reflow would produce.
 
 ### Directional resize
 
 `resize left/right/up/down` adjusts nearest ancestor split on requested axis.
-Arrow direction means split line moves in same visual direction.
+The arrow direction means the split line moves in the same visual direction.
 
 ### Floating
 
@@ -48,7 +69,7 @@ Toggling a tiled window to floating (`SUPER + SHIFT + SPACE`) keeps its current 
 ### Mouse drag reorder
 
 `SUPER + mouse:left` starts a repo-local drag session.
-The compositor's native window drag is deliberately not used: it consumes the mouse release and leaves the window floating, which made the drop unreliable.
+The compositor's native window drag is deliberately not used: it consumes the mouse release and leaves the window floating, which makes the drop unreliable.
 Instead split-tree opens the session itself: the dragged window **stays tiled and untouched**, and a layer-shell overlay previews the tile it would land in.
 Nothing reflows until release, so the geometry underneath never shifts and the overlay does not have to fight window snapping or compositor re-layout.
 While the cursor is still over the dragged window the preview stays at its current box; once it crosses into another tile the preview morphs to the projected drop tile.
@@ -56,8 +77,8 @@ An outline is drawn around the dragged source window (by the overlay, not by tou
 On release, split-tree measures the cursor movement; if it moved past a small threshold it computes the target tile from the current layout and dispatches the reorder with a layout message. A click that does not move does not reorder.
 Because this is not the compositor's drag, the mouse-release keybind fires reliably.
 
-Drop direction uses a **normalized** cursor offset per axis rather than the plain nearest edge.
-A plain nearest-edge comparison biases wide (full-width) tiles toward up/down splits because their top/bottom edges are physically closer, which made it hard to insert a side-by-side column split; normalizing makes each axis compete on equal footing.
+Drop direction uses a **normalised** cursor offset per axis rather than the plain nearest edge.
+A plain nearest-edge comparison biases wide (full-width) tiles toward up/down splits because their top/bottom edges are physically closer, which makes it hard to insert a side-by-side column split; normalising makes each axis compete on equal footing.
 
 Hovered-window hit-testing is scoped to the active workspace so stale geometry from hidden workspaces cannot steal pointer interactions.
 
@@ -69,7 +90,7 @@ It creates one `wlr-layer-shell` surface per rect on the overlay layer, anchored
 **Division of work:** the layout owns the tree; the client owns the per-frame preview.
 
 - `layout.lua#buildDropMap` precomputes, for the frozen tree, the projected tile box for every `region|direction` and `root|direction`. The layout writes this "handoff" once per tree change (drag start, and again on every `recalculate` while a drag is active).
-- The client watches the handoff file with inotify, samples the cursor over Hyprland's IPC command socket (`cursorpos`), resolves it to a projected box with a smallest-region hit-test plus the same normalized nearest-edge rule, and paints. It never re-implements the layout algorithm.
+- The client watches the handoff file with inotify, samples the cursor over Hyprland's IPC command socket (`cursorpos`), resolves it to a projected box with a smallest-region hit-test plus the same normalised nearest-edge rule, and paints. It never re-implements the layout algorithm.
 - On release the layout re-derives the placement itself and applies it, so the final result never depends on the client.
 
 Handoff shape that gets written to `$XDG_RUNTIME_DIR/split-tree-overlay-<HYPRLAND_INSTANCE_SIGNATURE>.json`:
@@ -104,14 +125,14 @@ Two tiled resize paths exist:
 - plain `mouse:left` on tiled border — auto-consuming border resize fallback; only consumes click when cursor starts near active tiled border or corner
 
 Edge semantics follow grabbed edge, not merely nearest ancestor split axis. Corner grabs can resize both axes together.
-Floating windows stay on native compositor behavior for plain border clicks; modified mouse resize still delegates to native Hyprland drag / resize dispatchers.
+Floating windows stay on native compositor behaviour for plain border clicks; modified mouse resize still delegates to native Hyprland drag / resize dispatchers.
 
 ## Why custom dispatchers exist
 
 Hyprland Lua layouts only control placement during `recalculate` and optional string-based `layout_msg` commands.
 Native tiled compositor operations do not understand repo-local split-tree state.
 
-Because of that, repo must route tiled interactions through custom layout-aware logic for:
+Because of that, the repo must route tiled interactions through custom layout-aware logic for:
 
 - directional move
 - directional resize
@@ -134,3 +155,7 @@ Run harness directly:
 ```bash
 nix shell nixpkgs#lua --command lua home/racci/features/desktop/hyprland/tests/split-tree.lua
 ```
+
+## Related
+
+- [Hyprland](hyprland.md) — the module this layout is wired into (`luaModules` / `luaExtras`, `general.layout`).
