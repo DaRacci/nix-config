@@ -97,6 +97,7 @@ Handles workspace naming, monitor assignments, and startup applications with sta
 - **Startup-only assignment**: Monitor assignments run once via `hl.on("hyprland.start")` Lua event hook by focusing each configured monitor/workspace pair to instantiate those workspaces, then restoring previous focus. Users can move workspaces freely after startup without interference.
 - **Conditional Lua module**: The `lua/opt/workspaces.lua` module is automatically added to the Lua config only when `custom-settings.workspaces.enable = true`. If disabled, no workspace Lua code is loaded.
 - **Configuration source**: Workspace data (name, monitor, startup commands) is defined in user configs via the typed `custom-settings.workspaces.definitions` option and passed to Lua as `@workspaceConfig@` variable.
+- **Extra rules**: The typed `extraRules` attrset is forwarded verbatim into each `hl.workspace_rule()` call, so any workspace-rule property not covered by the first-class fields (for example `no_rounding`, `border`, `decorate`) can be set per workspace.
 
 Enable and configure workspaces in user home config:
 
@@ -113,6 +114,7 @@ wayland.windowManager.hyprland.custom-settings.workspaces = {
       name = "Browser";
       monitor = "DP-1";
       startup = [ (lib.getExe config.programs.firefox.package) ];
+      extraRules = { no_rounding = 1; };  # forwarded verbatim to workspace_rule()
     };
     # ...
   };
@@ -129,7 +131,7 @@ The module generates:
 Lua module at `modules/home-manager/core/hyprland/lua/opt/workspaces.lua` that registers workspace configuration. **Only loaded when `custom-settings.workspaces.enable = true`.** Receives workspace data via `@workspaceConfig@` placeholder substitution and:
 
 - Registers `hl.on("hyprland.start")` hook to create/focus configured workspaces on their target monitors once at startup, then restores previous focus
-- Calls `hl.workspace_rule()` for each workspace to set persistent names, startup commands, and forwarded `extraRules`
+- Calls `hl.workspace_rule()` for each workspace to set workspace names, startup commands, and forwarded `extraRules`. It no longer marks workspaces `persistent = true`; startup seeding (above) is what keeps them available instead.
 
 | Placeholder         | Source                                   | Description                    |
 | ------------------- | ---------------------------------------- | ------------------------------ |
@@ -152,6 +154,8 @@ The default Lua bind template at `modules/home-manager/core/hyprland/lua/binds.l
 
 Add custom placeholders by extending `custom-settings.lua.variables`.
 
+> **Note:** The default template `require`s the repo-local split-tree layout (`local SplitTree = require("layout.split-tree")`). Because `luaModules` defaults to this template, the layout files must also be shipped — in this repo via `luaExtras` — or the `require` fails at runtime. If you override `luaModules` without replacing `binds.lua`, provide the split-tree files on `luaExtras`. See [Hyprland Split-Tree Layout](hyprland-split-tree.md).
+
 ### `noctalia.nix`
 
 Integrates the [Noctalia](https://github.com/noctaliawm/noctalia) desktop shell as a Hyprland companion. Requires the `noctalia` flake input.
@@ -167,7 +171,7 @@ The module:
   - **Normal** (`secret == null`): sets `programs.noctalia.settings`. No location block.
   - **Secret** (`secret != null`): base TOML generated at build time; activation copies it to `~/.config/noctalia/config.toml` and appends `[location] address` from the decrypted SOPS secret.
 
-The user-side Hyprland config pairs with this module via Noctalia IPC keybinds (fullscreen, special workspace toggles, settings, audio/brightness dispatchers). Workspace rules in the user config set `persistent = true` for defined workspaces so they are always available regardless of Noctalia lifecycle.
+The user-side Hyprland config pairs with this module via Noctalia IPC keybinds (fullscreen, special workspace toggles, settings, audio/brightness dispatchers). Defined workspaces are not marked `persistent`; instead `workspaces.nix` seeds each one onto its target monitor once at `hyprland.start` (see above), so a Noctalia reload does not drag them onto the active monitor.
 
 ### `types.nix`
 

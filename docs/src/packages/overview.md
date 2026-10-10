@@ -29,6 +29,7 @@ This section documents the custom packages defined in this repository. These are
   - `orca-slicer-git-sync`: Watches an OrcaSlicer profile repository, commits batched changes with profile-aware commit messages, and optionally pushes to a configured remote.
   - `python`: Packages for home assistant python components.
   - `screenshot`: Wayland screenshot helper that captures an area or output, stores timestamped files, and optionally opens or annotates the result.
+  - `split-tree-overlay`: Rust Wayland layer-shell client that renders the live drag-and-drop preview for the Hyprland Lua split-tree layout. It watches the JSON handoff the layout writes to `$XDG_RUNTIME_DIR`, samples the cursor over Hyprland IPC, and paints the projected drop tile on an overlay-layer surface.
   - `ssh-relay`: WSL SSH agent relay helper that bridges a Windows named pipe into a local Unix socket.
   - `ssh-to-age-keys`: Converts one or more SSH private keys into a deduplicated `keys.txt` age key file.
   - `sunshine-tools`: Shared Sunshine helpers for socket-proxy startup and Hyprland monitor disable/restore hooks.
