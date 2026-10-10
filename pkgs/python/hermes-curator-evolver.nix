@@ -17,8 +17,8 @@ buildPythonPackage (attrs: {
   src = fetchFromGitHub {
     owner = "pingchesu";
     repo = "hermes-curator-evolver";
-    rev = "main";
-    hash = "sha256-Nh3YqB16/cA01U/TVcpx1Hx0yWgW/8h9iiIYZuVSxrc=";
+    rev = "1aab2a9a7f80b0cd33ec4998e4067c6f355f6ffd";
+    hash = "sha256-xwWxMIylbVFGj3jFqsMj4s0cwlf0fgfW+sKzhGNnGPc=";
   };
 
   build-system = [ hatchling ];

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-SeaweedFS is deployed here as an evaluation-only storage service alongside MinIO. It exists to validate SeaweedFS as a possible replacement candidate without changing existing MinIO-backed workloads or the repository's migration posture. The evaluation deployment provides an all-in-one SeaweedFS stack on the storage primary host so the repository can test endpoint shape, proxy integration, and service behavior in a realistic environment while keeping the current MinIO setup intact.
+SeaweedFS is deployed here as an evaluation-only storage service alongside MinIO. It exists to validate SeaweedFS as a possible replacement candidate without changing existing MinIO-backed workloads or the repository's migration posture. The evaluation deployment provides an all-in-one SeaweedFS stack on the storage primary host so the repository can test endpoint shape, proxy integration, and service behaviour in a realistic environment while keeping the current MinIO setup intact.
 
 ## Entry Point
 

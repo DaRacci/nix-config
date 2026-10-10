@@ -25,7 +25,7 @@ General purpose application server for replacing cloud services with self-hosted
 ## Operational Notes / Assumptions
 
 - All apps are exposed via the cluster's reverse proxy on the IO Coordinator.
-- Applications using OAuth2/OIDC/SSO use the Identity Coordinator for authentication and authorization.
+- Applications using OAuth2/OIDC/SSO use the Identity Coordinator for authentication and authorisation.
 - Database services for these apps are provided by the cluster Database Coordinator via `server.database.postgres.*`.
 - Media storage for Nextcloud and Immich uses seaweedfs mounts on the Storage Coordinator.
 

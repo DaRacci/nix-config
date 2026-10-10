@@ -4,7 +4,7 @@ Schedules automatic NixOS upgrades from flake host outputs.
 
 ## Purpose
 
-Keep hosts current by rebuilding them from the flake on a schedule, with randomized start times to spread load across hosts and resource limits so upgrades do not starve interactive workloads.
+Keep hosts current by rebuilding them from the flake on a schedule, with randomised start times to spread load across hosts and resource limits so upgrades do not starve interactive workloads.
 
 ## Entry Point
 

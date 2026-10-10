@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The `purpose.development.editors.ai` Home-Manager module configures editor and agent tooling for AI-assisted development, centered around OpenCode and shared skill directories.
+The `purpose.development.editors.ai` Home-Manager module configures editor and agent tooling for AI-assisted development, centred around OpenCode and shared skill directories.
 
 ## Entry Point
 
@@ -50,4 +50,4 @@ When enabled, the module:
 
 - Skill links are generated under `~/.agents/skills/<basename>`.
 - Default skills are discovered automatically from the module's local `skills/` directory when `includeDefaults = true`.
-- The module currently defines default agent discovery as well, but only skill link materialization is active in `home.file` output.
+- The module currently defines default agent discovery as well, but only skill link materialisation is active in `home.file` output.

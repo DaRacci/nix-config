@@ -34,7 +34,7 @@ The Python shell inherits from the default development environment and adds:
 
 ### Python Libraries
 
-Libraries are organized by the components they support:
+Libraries are organised by the components they support:
 
 #### Image Compression
 
