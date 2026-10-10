@@ -55,7 +55,7 @@ The WSL configuration includes:
 - SSH agent relay between Windows and WSL
 - Hardware acceleration support for development
 - Remote desktop capabilities
-- Optimized for headless operation
+- Optimised for headless operation
 
 ## Native NixOS Installation
 
@@ -109,7 +109,7 @@ cd /mnt/etc/nixos
 git clone https://github.com/DaRacci/nix-config.git .
 ```
 
-#### 5. Customize Host Configuration
+#### 5. Customise Host Configuration
 
 Edit `hosts/{device-type}/{hostname}/default.nix` and `hardware.nix` according to your needs.
 

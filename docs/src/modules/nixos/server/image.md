@@ -32,7 +32,7 @@ On failure the key file is removed and the prompt repeats.
 
 All servers import the proxmox-lxc module which inherently breaks `nixos-rebuild build-vm`
 because the Proxmox LXC image variant sets `boot.isContainer = true` and therefore disables the initrd.
-We override this behavior for `build-vm` so that a runnable QEMU VM can be built from such hosts with the following options:
+We override this behaviour for `build-vm` so that a runnable QEMU VM can be built from such hosts with the following options:
 
 - `boot.isContainer = false`: restores the initrd and normal VM boot.
 - `boot.loader.initScript.enable = false`: avoids a unique-option conflict on `system.build.installBootLoader` between the grub and init-script loaders.

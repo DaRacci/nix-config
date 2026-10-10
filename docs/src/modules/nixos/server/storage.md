@@ -40,7 +40,7 @@ SeaweedFS is documented separately because it is not part of the current softwar
 
 MinIO services also live on the storage primary host. The MinIO endpoint presented to mounts is served through the IO Coordinator reverse proxy, which routes to the MinIO instance on whichever host currently holds the storage primary role.
 
-See [SeaweedFS Evaluation](storage/seaweedfs.md) for details on scope, host gating, proxy behavior, and security material.
+See [SeaweedFS Evaluation](storage/seaweedfs.md) for details on scope, host gating, proxy behaviour, and security material.
 
 ## Secrets
 
@@ -50,7 +50,7 @@ See [SeaweedFS Evaluation](storage/seaweedfs.md) for details on scope, host gati
 
 - **FUSE Access**: The module enables `programs.fuse.userAllowOther = true` whenever mounts are defined so both `s3fs` and `weed mount` can expose shared FUSE mounts safely.
 - **Network Dependency**: Generated mount services depend on `network-online.target` before attempting either backend.
-- **Recovery Behavior**: The health-check timer uses `mountpoint` plus a bounded `stat` probe. On failure it lazily unmounts the path, restarts the generated mount service, and can restart configured dependent services.
+- **Recovery Behaviour**: The health-check timer uses `mountpoint` plus a bounded `stat` probe. On failure it lazily unmounts the path, restarts the generated mount service, and can restart configured dependent services.
 - **SeaweedFS Scope**: The SeaweedFS evaluation deployment remains separate from this abstraction. The new SeaweedFS backend only reuses `weed mount` for workload mounts and does not replace the evaluation stack.
 
 ## References

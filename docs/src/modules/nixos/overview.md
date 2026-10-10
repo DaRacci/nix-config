@@ -10,7 +10,7 @@ This section covers all NixOS modules provided by this flake, including core bas
 
 ## Architecture / Services / Scope
 
-Modules are categorized into directories based on their target:
+Modules are categorised into directories based on their target:
 
 - `core/`: Shared baselines for all hosts.
 - `server/`: Cluster-aware server modules.

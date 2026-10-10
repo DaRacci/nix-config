@@ -31,4 +31,4 @@ If the `wsl` module exists in the option tree, module additionally:
 
 - `core.wsl.user` is required when WSL integration is enabled.
 - Extra binaries `dirname`, `readlink`, and `uname` are exposed for VS Code Remote WSL compatibility.
-- Behavior is conditional on the separate `wsl` module being available in `options`.
+- Behaviour is conditional on the separate `wsl` module being available in `options`.
