@@ -63,8 +63,18 @@ in
           reverse_proxy localhost:${toString config.services.ai-agent.platform.webhook.port}
       }
 
+      @profileWebhookRequest {
+        path /p/*/webhooks/*
+        method POST
+      }
+
+      handle @profileWebhookRequest {
+          reverse_proxy localhost:${toString config.services.ai-agent.platform.webhook.port}
+      }
+
       @remainingWebhookOrApiRequest {
         path /webhook*
+        path /p/*/webhooks*
         path /v1*
       }
 
