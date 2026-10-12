@@ -40,7 +40,7 @@ list-ephemeral
 | `Space`  | Toggle selection and move down            |
 | `Ctrl-A` | Select all                                |
 | `Ctrl-D` | Deselect all                              |
-| `Ctrl-C` | Quit (standard fzf behavior)              |
+| `Ctrl-C` | Quit (standard fzf behaviour)             |
 | `Enter`  | Confirm selection                         |
 
 **Note:** In browse mode (default), typing text will appear in the prompt but won't filter results. Press `/` to enable search filtering.

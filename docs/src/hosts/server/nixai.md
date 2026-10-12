@@ -14,7 +14,7 @@ It runs the AI agent, local inference via Ollama, the Open WebUI chat interface,
 
 ### AI Agent
 
-- Containerized AI agent with a web dashboard, an OpenAI-compatible API server, and a webhook platform.
+- Containerised AI agent with a web dashboard, an OpenAI-compatible API server, and a webhook platform.
 - Memory is enabled, backed by Mnemosyne sync.
 - Voice is enabled, using the local Wyoming STT server.
 - A hardened SSH daemon is provisioned inside the container for agent administration.

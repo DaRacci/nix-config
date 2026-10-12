@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The IO Guardian system ensures that services across the infrastructure are aware of the availability of centralized databases hosted on the Database Coordinator.
+The IO Guardian system ensures that services across the infrastructure are aware of the availability of centralised databases hosted on the Database Coordinator.
 It provides graceful startup and shutdown coordination between the database host and dependent services on other servers.
 
 ## Entry Point

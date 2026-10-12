@@ -3,7 +3,7 @@
 ## Purpose
 
 The monitoring module provides a comprehensive observability stack for the server
-cluster using Prometheus (metrics), Loki (logs), Grafana (visualization), and
+cluster using Prometheus (metrics), Loki (logs), Grafana (visualisation), and
 Grafana Alloy for authenticated OTLP ingestion.
 All components are configured as reusable NixOS modules with automatic
 cross-host discovery.
@@ -28,7 +28,7 @@ The system consists of three layers:
   - Alertmanager for alert routing and notifications
   - OTLP/HTTP ingestion on `otlp.<domain>` with bearer-token authentication
 
-- **Visualization** (runs on the Monitoring Coordinator)
+- **Visualisation** (runs on the Monitoring Coordinator)
 
   - Grafana with provisioned datasources and dashboards
 
@@ -176,7 +176,7 @@ Alloy applies ingest-time parsing for journal `stdout` logs and Caddy access log
 
 - Legacy timestamps in form `YYYY/MM/DD HH:MM:SS` are parsed and used as event timestamps
 
-- ISO-8601 timestamps with a log level prefix are parsed and normalized
+- ISO-8601 timestamps with a log level prefix are parsed and normalised
 
 - `detected_level` defaults to `info` when the source log line does not provide one
 

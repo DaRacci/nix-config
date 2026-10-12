@@ -49,4 +49,4 @@ WiVRn is activated on-demand through systemd user socket activation instead of r
 
 - Module assumes desktop-class host with graphics stack and Steam support.
 - WiVRn config uses NVENC H.265 encoder entries and enables `wayvr` as application.
-- Some extra behavior only appears when related modules already exist, such as Jovian Decky Loader and Home Manager.
+- Some extra behaviour only appears when related modules already exist, such as Jovian Decky Loader and Home Manager.

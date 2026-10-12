@@ -8,14 +8,14 @@ This section documents the custom packages defined in this repository. These are
 
 ### Entry Points
 
-- `pkgs/`: Contains the package definitions, typically organized by package name.
+- `pkgs/`: Contains the package definitions, typically organised by package name.
   - `alvr-bin`: Binaries for ALVR that allows nvidia accelerated by using the AppImage.
   - `drive-stats`: Tool for monitoring and reporting drive statistics.
-  - `colour-picker`: Hyprland color picker wrapper that temporarily lowers pointer sensitivity, launches `hyprpicker`, then restores the prior sensitivity.
+  - `colour-picker`: Hyprland colour picker wrapper that temporarily lowers pointer sensitivity, launches `hyprpicker`, then restores the prior sensitivity.
   - `folder-diff`: Nushell helper that compares two directories by tracking added, modified, and deleted files in a temporary Git repo, then prints a binary-safe diff plus per-file change summaries.
   - `helpers`: Collection of helper scripts for configuration management.
   - `huntress`: Integration for Huntress security agent.
-  - `hypr-gamemode`: Script to optimize Hyprland performance for gaming.
+  - `hypr-gamemode`: Script to optimise Hyprland performance for gaming.
   - `io-guardian`: Database lifecycle management across hosts.
   - `lidarr-plugins`: Lidarr plugins branch.
   - `list-ephemeral`: Utility to identify ephemeral paths, trace file access, and generate persistence snippets.

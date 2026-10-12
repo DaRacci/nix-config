@@ -24,7 +24,7 @@ The Proxy submodule provides a unified interface for exposing internal services 
 - **`default.nix`** — Logic and helpers: resolving OAuth contexts and mapping local addresses to backend hostnames.
 - **`options.nix`** — Option definitions for virtual hosts and shared contexts.
 - **`config.nix`** — Caddy integration: generation of `services.caddy.virtualHosts` and ACME certificate requests. L4 (TCP/UDP) forwarding is handled by the `l4` extension, not by `config.nix`.
-- **`kanidm.nix`** — Authentication security: generates the Caddy `security` block, including identity providers, portals, and authorization policies.
+- **`kanidm.nix`** — Authentication security: generates the Caddy `security` block, including identity providers, portals, and authorisation policies.
 - **`extensions.nix`** — System integration: connects the proxy to the dashboard, Cloudflared tunnels, and automates Kanidm client provisioning.
 
 ### Extension System

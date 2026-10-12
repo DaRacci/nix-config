@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The database submodule provides a managed interface for PostgreSQL and Redis across the server infrastructure. It centralizes database configuration on the Database Coordinator (`config.server.databasePrimaryHost`) while allowing client services to declaratively request databases. It automates provisioning of PostgreSQL databases and roles, management of Redis database IDs via static mappings, synchronization of service lifecycle with database availability using the [IO Guardian](../../../components/io_guardian.md), and automated password handling via SOPS secrets.
+The database submodule provides a managed interface for PostgreSQL and Redis across the server infrastructure. It centralises database configuration on the Database Coordinator (`config.server.databasePrimaryHost`) while allowing client services to declaratively request databases. It automates provisioning of PostgreSQL databases and roles, management of Redis database IDs via static mappings, synchronisation of service lifecycle with database availability using the [IO Guardian](../../../components/io_guardian.md), and automated password handling via SOPS secrets.
 
 ## Entry Point
 
@@ -11,7 +11,7 @@ The module is implemented across several files in `modules/nixos/server/database
 - **Main file**: [default.nix](../../../../modules/nixos/server/database/default.nix): Core options and connection management.
 - **Supporting file**: [postgres.nix](../../../../modules/nixos/server/database/postgres.nix): PostgreSQL-specific provisioning and secrets.
 - **Supporting file**: [redis.nix](../../../../modules/nixos/server/database/redis.nix): Redis-specific ID mappings and security.
-- **Supporting file**: [guardian.nix](../../../../modules/nixos/server/database/guardian.nix): Lifecycle synchronization and the [IO Guardian](../../../components/io_guardian.md).
+- **Supporting file**: [guardian.nix](../../../../modules/nixos/server/database/guardian.nix): Lifecycle synchronisation and the [IO Guardian](../../../components/io_guardian.md).
 
 ### Options
 

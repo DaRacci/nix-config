@@ -13,12 +13,12 @@ The `lib` directory contains custom Nix functions and builders used throughout t
   - `default.nix`: Main entry point providing the `mine` and `builders` namespaces.
   - `files.nix`: Utilities for filesystem operations and path handling.
   - `hardware.nix`: Detection and configuration helpers for hardware acceleration and drivers.
-  - `hypr.nix`: Specialized helpers for Hyprland window manager configurations.
+  - `hypr.nix`: Specialised helpers for Hyprland window manager configurations.
   - `keys.nix`: Management of SSH, GPG, and other cryptographic keys.
   - `package.nix`: Custom package definitions and derivation helpers.
   - `persistence.nix`: Helpers for managing path persistence in ephemeral (TempFS) environments.
   - `strings.nix`: String manipulation and formatting utilities.
-- `lib/builders/`: Specialized builders for system and home configurations. Builders forward shared module arguments (e.g. `importExternals` and repo-level args) into both NixOS and nested Home Manager `extraSpecialArgs`, enabling modules that conditionally import external inputs.
+- `lib/builders/`: Specialised builders for system and home configurations. Builders forward shared module arguments (e.g. `importExternals` and repo-level args) into both NixOS and nested Home Manager `extraSpecialArgs`, enabling modules that conditionally import external inputs.
 
 ## Operational Notes / Assumptions
 

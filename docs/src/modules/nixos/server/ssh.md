@@ -19,7 +19,7 @@ The module consists of two parts:
 
 ### Auto-entry Logic (`ssh-shell/default.nix`)
 
-- Creates an indirect GC root for the SSH shell at login time by instantiating the shell expression to a derivation, then realizing it with `nix-store --add-root --indirect --realise`. This keeps the realized shell alive across upgrades without referencing `config.system.build.toplevel` during system evaluation.
+- Creates an indirect GC root for the SSH shell at login time by instantiating the shell expression to a derivation, then realising it with `nix-store --add-root --indirect --realise`. This keeps the realised shell alive across upgrades without referencing `config.system.build.toplevel` during system evaluation.
 - Modifies `/etc/bashrc` to detect interactive root logins via SSH. It evaluates several conditions before launching the session shell:
   - User must be root (`EUID=0`).
   - Session must be via SSH (`SSH_CONNECTION` present).
@@ -38,9 +38,9 @@ The module consists of two parts:
 
 ## Operational Notes / Assumptions
 
-### Opt-Out Behavior
+### Opt-Out Behaviour
 
-Set the `NIX_SKIP_SHELL` environment variable on your local machine before connecting to log in as root without entering the specialized shell:
+Set the `NIX_SKIP_SHELL` environment variable on your local machine before connecting to log in as root without entering the specialised shell:
 
 ```bash
 NIX_SKIP_SHELL=1 ssh root@your-server

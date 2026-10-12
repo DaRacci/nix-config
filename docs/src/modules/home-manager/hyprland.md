@@ -32,11 +32,11 @@ default.nix           # Top-level importer
 
 ### `input.nix`
 
-Sets sensible default values under `settings.config` for cursor behavior, input device settings, keyboard binds, and misc Hyprland options.
+Sets sensible default values under `settings.config` for cursor behaviour, input device settings, keyboard binds, and misc Hyprland options.
 
 Default config covers:
 
-- `cursor`: warp behavior, hardware cursors, inactivity timeout, hide-on-key-press
+- `cursor`: warp behaviour, hardware cursors, inactivity timeout, hide-on-key-press
 - `binds`: workspace back-and-forth, allow workspace cycles, focus method
 - `input`: keyboard layout, follow-mouse, touchpad, sensitivity, accel profile
 - `misc`: DPMS on key/mouse events
@@ -91,7 +91,7 @@ This pattern keeps bind and submap definitions inline in Lua. Submaps are define
 ### `workspaces.nix`
 
 Workspace configuration module at `modules/home-manager/core/hyprland/workspaces.nix`.
-Handles workspace naming, monitor assignments, and startup applications with startup-only monitor assignment behavior:
+Handles workspace naming, monitor assignments, and startup applications with startup-only monitor assignment behaviour:
 
 - **Startup-only assignment**: Monitor assignments run once via `hl.on("hyprland.start")` Lua event hook. Users can move workspaces freely after startup without interference.
 - **Persistent naming**: Workspace names and startup commands persist via `hl.workspace_rule()`, ensuring defaults are restored if a workspace is recreated.

@@ -16,17 +16,17 @@ The primary purpose of this module is to establish a shared environment for serv
 
 ## Architecture / Services / Scope
 
-### Special Options and Behaviors
+### Special Options and Behaviours
 
 The main configuration entry point is `server.enable`. Once enabled, it sets up the server-specific baseline:
 
 - **Journald Persistence**: Configured with a 7-day retention period, 256MB total max disk usage, and 512MB keep-free threshold. Per-file size is set to 32MB (1/8 of max use) to allow proper log rotation with ~7 archived files. All limits are defined as `let` variables in the module for consistency between the daemon config and the activation vacuum script. The activation script runs `journalctl --vacuum` on every deploy to immediately enforce the limits on existing logs.
 - **Pre-Switch Checks**: Runs `dix` on system activation to report changes between generations.
-- **`server.ioPrimaryHost`**: Specifies the hostname of the IO Coordinator. This host operates the reverse proxy for handling incoming traffic and manages IO-level coordination. This option is typically set on the coordinator host and used by other servers in the cluster for synchronization.
-- **`server.monitoringPrimaryHost`**: Specifies the hostname of the Monitoring Coordinator. This host runs Prometheus, Loki, Grafana, and Alertmanager for centralized observability across the cluster.
-- **`server.databasePrimaryHost`**: Specifies the hostname of the Database Coordinator. This host runs primary database instances for centralized data persistence across the cluster.
-- **`server.storagePrimaryHost`**: Specifies the hostname of the Storage Coordinator. This host runs primary file and block storage services for centralized data serving across the cluster.
-- **`server.authPrimaryHost`**: Specifies the hostname of the Identity Coordinator. This host runs primary authentication and authorization services for centralized identity management across the cluster.
+- **`server.ioPrimaryHost`**: Specifies the hostname of the IO Coordinator. This host operates the reverse proxy for handling incoming traffic and manages IO-level coordination. This option is typically set on the coordinator host and used by other servers in the cluster for synchronisation.
+- **`server.monitoringPrimaryHost`**: Specifies the hostname of the Monitoring Coordinator. This host runs Prometheus, Loki, Grafana, and Alertmanager for centralised observability across the cluster.
+- **`server.databasePrimaryHost`**: Specifies the hostname of the Database Coordinator. This host runs primary database instances for centralised data persistence across the cluster.
+- **`server.storagePrimaryHost`**: Specifies the hostname of the Storage Coordinator. This host runs primary file and block storage services for centralised data serving across the cluster.
+- **`server.authPrimaryHost`**: Specifies the hostname of the Identity Coordinator. This host runs primary authentication and authorisation services for centralised identity management across the cluster.
 
 ### Example Usage
 
@@ -47,7 +47,7 @@ To use the server module, it must be explicitly enabled in the host configuratio
 
 ### Generic Primary-Host Helpers
 
-Generic helpers parameterized by any primary-host option value. These are used by submodules to check role assignment and fetch remote configuration:
+Generic helpers parameterised by any primary-host option value. These are used by submodules to check role assignment and fetch remote configuration:
 
 - **`isPrimaryHost primaryHost value`**: Returns `true` if `value` matches `primaryHost`. Accepts either a raw hostname string or an attrset with a `host.name` attribute.
 - **`isThisPrimaryHost primaryHost`**: Shorthand for `isPrimaryHost primaryHost config` — checks if the current host is the primary for a given role.

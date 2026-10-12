@@ -1,8 +1,8 @@
-# Server Network — Centralized Subnets and Firewall
+# Server Network — Centralised Subnets and Firewall
 
 ## Purpose
 
-The network module coordinates network subnet definitions and firewall rules, allowing for centralized configuration of subnets and automatic propagation of these settings to other servers in the cluster.
+The network module coordinates network subnet definitions and firewall rules, allowing for centralised configuration of subnets and automatic propagation of these settings to other servers in the cluster.
 
 ## Entry Point
 

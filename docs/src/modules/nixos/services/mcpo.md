@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Orchestrates Model Context Protocol (MCP) servers, providing a centralized way to manage and expose multiple MCP servers.
+Orchestrates Model Context Protocol (MCP) servers, providing a centralised way to manage and expose multiple MCP servers.
 
 ## Entry Point
 

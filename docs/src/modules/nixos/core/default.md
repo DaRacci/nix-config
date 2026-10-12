@@ -6,7 +6,7 @@ Documents shared NixOS core modules used across hosts.
 
 `modules/nixos/core/` contains reusable host-level defaults and feature modules.
 
-It also defines top-level baseline options under `core.*` that control this shared behavior for most hosts.
+It also defines top-level baseline options under `core.*` that control this shared behaviour for most hosts.
 
 ### Options
 
