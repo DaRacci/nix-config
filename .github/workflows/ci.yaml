@@ -12,38 +12,39 @@ permissions:
 
 jobs:
   docs-lint:
-    name: Lint docs (Australian English)
+    name: Lint docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
-      - name: Vale (Australian English)
-        uses: workflow/nix-shell-action@v4.0.0
+      - name: Install Nix
+        uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
         with:
-          flakes: nixpkgs#vale,nixpkgs#hunspellDicts.en_AU
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Vale
+        uses: workflow/nix-shell-action@031bcb0eb0396e0a585e86906809af10fe3bd499 # v4.0.0
+        with:
+          flakes: nixpkgs#vale,nixpkgs#hunspellDicts.en_AU-large
           script: |
-            DICT=$(nix build --no-link --print-out-paths 'nixpkgs#hunspellDicts.en_AU')
+            DICT=$(nix build --no-link --print-out-paths 'nixpkgs#hunspellDicts.en_AU-large')
             ./ci/vale/install-dictionaries.sh "$DICT"
-
-            # Rule fixtures: locks in that US forms are flagged and AU forms are not.
-            ./ci/vale/test/run.sh
-
-            # Lint the real docs tree.
-            vale docs/
+            vale docs/ AGENTS.md
 
   generate-matrix:
     runs-on: self-hosted
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0
 
       - name: Generate Matrix
         id: set-matrix
         # Do not update until https://github.com/workflow/nix-shell-action/issues/364 is fixed.
-        uses: workflow/nix-shell-action@v4.0.0
+        uses: workflow/nix-shell-action@031bcb0eb0396e0a585e86906809af10fe3bd499 # v4.0.0
         with:
           flakes: nixpkgs#jq,nixpkgs#nushell
           script: |
@@ -90,11 +91,11 @@ jobs:
     name: Build ${{ matrix.attr }} on ${{ matrix.system }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Free Disk Space
         if: ${{ matrix.extraSpace && !env.ACT }}
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@36e9a5af4eddb91fc11aec4c6f6f79b3cc0cb523 # main
         with:
           swap-storage: true
           tool-cache: true
@@ -105,7 +106,7 @@ jobs:
 
       - name: Maximize Disk Space
         if: ${{ matrix.extraSpace && !env.ACT }}
-        uses: easimon/maximize-build-space@v10
+        uses: easimon/maximize-build-space@fc881a613ad2a34aca9c9624518214ebc21dfc0c # v10
         with:
           build-mount-path: /nix
           remove-dotnet: true

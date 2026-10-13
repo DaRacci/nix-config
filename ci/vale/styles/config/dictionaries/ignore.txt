@@ -1,11 +1,9 @@
 # Vale spelling allow-list (Australian English lint).
 #
-# One term per line. These are genuine product names, brands, package names and
-# technical identifiers/abbreviations that appear in prose and are NOT
-# US<->AU spelling variants. US spellings must never be added here (wrap a
-# real identifier in backticks instead, or use an inline Vale suppression);
-# the one exception is `center`, the Hyprland window-rule property, which the
-# language audit marks as an identifier to leave untouched.
+# One term per line. These are product names, package names and technical
+# identifiers/abbreviations that appear in prose and are NOT US<->AU spelling
+# variants. US spellings must never be added here; wrap a real identifier in
+# backticks instead.
 
 accel
 acls
@@ -15,7 +13,6 @@ async
 attr
 attrs
 attrset
-auth
 autologin
 azwallpaper
 backend
@@ -24,14 +21,11 @@ bazarr
 blueman
 bootable
 buildkit
-caddy
-center
 cloudflared
 codeberg
 config
 configs
 containerd
-cryptographic
 css_loader
 dashy
 datasources
@@ -43,14 +37,12 @@ deployer
 deps
 dev
 devenv
-dir
 downloader
 enablement
 enum
 env
 filesystem
 forgesync
-formatter
 fullscreen
 fullscreenstate
 fzf
@@ -70,8 +62,6 @@ immich
 initialclass
 initialtitle
 initrd
-input
-integrations
 interop
 jellyfin
 journald
@@ -82,7 +72,6 @@ kuma
 libvirt
 lidarr
 lifecycle
-linter
 localhost
 loopback
 lua
@@ -107,11 +96,8 @@ node_exporter
 nushell
 nvidia
 oauth
-observability
-oculus
 ollama
 oneshot
-orchestrator
 overridable
 passthrough
 passwordless
@@ -128,10 +114,8 @@ pyprland
 pystemd
 pytest
 radarr
-reachability
 readarr
 realtime
-renderer
 repr
 revisioned
 rfkill
@@ -148,7 +132,6 @@ snake_case
 sonarr
 stderr
 stdlib
-steam
 stringify
 stylix
 submap
@@ -160,7 +143,6 @@ subnets
 substituters
 subtree
 sudo
-sunshine
 swfsmount
 swtpm
 systemd
@@ -183,7 +165,6 @@ vencord
 vhost
 virtualenv
 vulkan
-wayland
 webhook
 xdg_tag
 xrdp

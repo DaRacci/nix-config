@@ -55,9 +55,8 @@
               sops
               ssh-to-age
 
-              # Documentation linting (Australian English)
               vale
-              hunspellDicts.en_AU
+              hunspellDicts.en_AU-large
             ]
             ++ config.treefmt.build.devShell.buildInputs
             ++ (import ./scripts { inherit pkgs lib; } |> builtins.attrValues);
@@ -65,9 +64,7 @@
           env = {
             NIX_CONFIG = "extra-experimental-features = nix-command flakes pipe-operator pipe-operators";
             OPENSPEC_TELEMETRY = "0";
-            # en_AU Hunspell dictionary from nixpkgs, installed into the Vale
-            # StylesPath by the vale:installDictionaries task below.
-            HUNSPELL_EN_AU = "${pkgs.hunspellDicts.en_AU}";
+            HUNSPELL_EN_AU = "${pkgs.hunspellDicts.en_AU-large}";
           };
 
           git-hooks = {

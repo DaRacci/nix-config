@@ -2,7 +2,7 @@ extends: spelling
 message: "'%s' is not Australian English spelling."
 level: error
 dictionaries:
-  - en_AU
+  - en_AU-large
 # Path is relative to StylesPath (ci/vale/styles).
 ignore:
   - config/dictionaries/ignore.txt

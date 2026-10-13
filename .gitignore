@@ -9,10 +9,8 @@ result
 
 .cache/
 
-# Vale AU-English dictionary (installed from nixpkgs hunspellDicts.en_AU by
-# ci/vale/install-dictionaries.sh / the devenv vale:installDictionaries task).
-ci/vale/styles/config/dictionaries/en_AU.dic
-ci/vale/styles/config/dictionaries/en_AU.aff
+ci/vale/styles/config/dictionaries/en_AU-large.dic
+ci/vale/styles/config/dictionaries/en_AU-large.aff
 
 @girs
 node_modules

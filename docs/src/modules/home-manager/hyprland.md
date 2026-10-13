@@ -175,7 +175,7 @@ Shared type definitions used across the modules:
 
 - `monitorSelector` — typed Nix attrs for monitor matching (by `name` or `index`)
 - `workspaceSelector` — typed Nix attrs for workspace matching (by `id`, `relativeId`, `name`, or `special`)
-- `rule` — all typed window rule properties (float, fullscreen, opacity, size, move, center, monitor, workspace, and dozens more)
+- `rule` — all typed window rule properties (float, fullscreen, opacity, size, move, `center`, monitor, workspace, and dozens more)
 - `windowMatch` — match condition types (class, title, initialClass, initialTitle, tag, xwayland, float, fullscreen, pin, focus, group, modal, fullscreenstate, workspace, content, xdg_tag)
 
 ### Usage Example
