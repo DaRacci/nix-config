@@ -1,7 +1,7 @@
 {
   lib,
   buildPythonPackage,
-  fetchFromGitHub,
+  fetchPypi,
   setuptools,
   sqlite-vec,
   fastembed-hermes,
@@ -13,14 +13,13 @@
 
 buildPythonPackage (attrs: {
   pname = "mnemosyne-memory";
-  version = "3.15.1";
+  version = "4.0.0b4";
   pyproject = true;
 
-  src = fetchFromGitHub {
-    owner = "mnemosyne-oss";
-    repo = "mnemosyne";
-    rev = "v${attrs.version}";
-    hash = "sha256-Lk0Xx+q266wNBpHrBJUVu98OFkGRN3GXmG2ZK3U1h7w=";
+  src = fetchPypi {
+    pname = "mnemosyne_memory";
+    inherit (attrs) version;
+    hash = "sha256-+9PmpbHtaPStGiHTlxRlRX474ADB4EzrGVxJ+JcJBPQ=";
   };
 
   build-system = [ setuptools ];
