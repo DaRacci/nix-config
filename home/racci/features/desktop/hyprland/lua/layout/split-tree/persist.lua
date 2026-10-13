@@ -19,6 +19,10 @@ local function instanceId()
 end
 
 function M.path()
+  if _G.SPLIT_TREE_STATE_PATH then
+    return _G.SPLIT_TREE_STATE_PATH
+  end
+
   return runtimeDir() .. "/split-tree-layout-" .. instanceId() .. ".lua"
 end
 
@@ -106,7 +110,15 @@ function M.new(path)
       return nil
     end
 
-    local text = handle:read("a")
+    -- Lua 5.2 wants "*a"; 5.4 accepts "a". Try both so the same code runs under either.
+    local ok, text = pcall(function()
+      return handle:read("a")
+    end)
+    if not ok or not text then
+      handle:seek("set", 0)
+      text = handle:read("*a")
+    end
+
     handle:close()
     return M.deserialize(text)
   end

@@ -4,6 +4,10 @@ package.path = table.concat({
   package.path,
 }, ";")
 
+-- Keep the run hermetic: point layout persistence at a throwaway path so a developer's live
+-- state file (keyed by the running Hyprland instance) is never read into the test store.
+_G.SPLIT_TREE_STATE_PATH = os.tmpname()
+
 local SplitTree = require("layout.split-tree")
 local testing = SplitTree._testing
 
@@ -894,6 +898,44 @@ local function test_pointer_toggle_float_keeps_tiled_geometry()
   assertEqual(resized, true, "floating a tiled window keeps its tiled size")
 end
 
+local function test_detached_window_keeps_tree_structure()
+  local store = testing.newStore()
+  local specs = { { id = "a", active = true }, { id = "b" }, { id = "c" } }
+  local context, state = recalc(store, "1", specs)
+
+  -- Move a divider off the default so a rebuild would be visible.
+  testing.layoutMessage(store, context, "resize_edge_px a right 100")
+  testing.recalculate(store, context)
+  local ratio = state.root.ratio
+
+  -- While a workspace switches layout, Hyprland re-adds targets one at a time; "c" is briefly
+  -- absent from the target list but is still a mapped window on this workspace.
+  local windows = fakeWindowsFromBoxes(state.boxes, specs)
+  _G.hl = { get_windows = function()
+    return windows
+  end }
+
+  testing.recalculate(store, ctx("1", { { id = "a", active = true }, { id = "b" } }))
+
+  assertEqual(testing.contains(state.root, "c"), true, "temporarily detached window keeps its leaf")
+  assertClose(state.root.ratio, ratio, 0.0001, "split ratio survives a partial target set")
+
+  -- A window that left the tiled set (here: floated) must still be pruned.
+  local floated = fakeWindowsFromBoxes(state.boxes, specs)
+  for _, window in ipairs(floated) do
+    if tostring(window.stable_id) == "c" then
+      window.floating = true
+    end
+  end
+
+  _G.hl = { get_windows = function()
+    return floated
+  end }
+
+  testing.recalculate(store, ctx("1", { { id = "a", active = true }, { id = "b" } }))
+  assertEqual(testing.contains(state.root, "c"), false, "a floated window is pruned from the tree")
+end
+
 for _, test in ipairs({
   test_keyboard_resize_moves_split_in_arrow_direction,
   test_keyboard_resize_keeps_direction_for_second_branch,
@@ -926,6 +968,7 @@ for _, test in ipairs({
   test_pointer_writes_dropmap_handoff_during_drag,
   test_pointer_reemits_handoff_on_recalculate,
   test_pointer_toggle_float_keeps_tiled_geometry,
+  test_detached_window_keeps_tree_structure,
 }) do
   test()
 end

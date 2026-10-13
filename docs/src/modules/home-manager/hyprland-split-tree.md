@@ -116,6 +116,8 @@ Floating windows stay on native compositor behavior for plain border clicks; mod
 
 A reload recreates the Lua state, so the tree would otherwise be lost and rebuilt with default ratios, resizing every window on the first pass. The tree is saved shortly after changes (throttled to twice a second, and only when it actually changed) to `$XDG_RUNTIME_DIR/split-tree-layout-<HYPRLAND_INSTANCE_SIGNATURE>.lua` and restored at load, so a reload reproduces the existing geometry instead of enforcing default proportions. The file is keyed by the instance signature, so a fresh session starts clean.
 
+Restoring alone is not enough: when a workspace switches layout (which is what happens as a reload re-registers the provider) Hyprland re-adds the layout targets **one at a time**, running `recalculate` after each. A recalculate that only saw a subset used to drop the missing leaves and re-add them at default proportions, destroying the restored tree. Now a leaf whose window is still mapped and tiled on the same workspace is treated as temporarily detached and kept in the tree (no reflow); only leaves whose window is genuinely gone, moved elsewhere, or floated are pruned. Closes and cross-workspace moves are pruned explicitly from `window.close` / `window.move_to_workspace` events, which fire before the target is removed.
+
 ## Why custom dispatchers exist
 
 Hyprland Lua layouts only control placement during `recalculate` and optional string-based `layout_msg` commands.

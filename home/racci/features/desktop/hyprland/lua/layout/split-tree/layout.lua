@@ -7,9 +7,8 @@ local minRatio = 0.1
 local resizeStep = 0.05
 local defaultInsertRatio = 0.5
 
--- Hyprland shows the resize cursor within `general:extend_border_grab_area` (+ `general:border_size`)
--- outside a window's content box. Match that margin so the clickable border zone lines up with the
--- cursor-change zone instead of using a fixed size that is too large or too small.
+-- Hyprland shows the resize cursor within `general:extend_border_grab_area` (+ `general:border_size`) outside a window's content box.
+-- Match that margin so the clickable border zone lines up with the cursor-change zone.
 local function configNumber(candidates, fallback)
   for _, key in ipairs(candidates) do
     local ok, value = pcall(function()
@@ -85,17 +84,63 @@ local function collectTargets(ctx)
   return present, targets, orderedIds
 end
 
-local function prune(node, present)
+local function hasAbsent(node, present)
+  if not node then
+    return false
+  end
+
+  if node.kind == "leaf" then
+    return not present[node.id]
+  end
+
+  return hasAbsent(node.first, present) or hasAbsent(node.second, present)
+end
+
+-- Mapped, tiled windows keyed by id -> their workspace. Used to tell a window that is genuinely
+-- gone (or moved away or floated) from one that is momentarily missing from the target list, which
+-- Hyprland does while it re-adds targets one at a time when a workspace switches layout (e.g. on
+-- config reload). Floating windows are excluded: they belong to the floating algorithm, not this
+-- tree, and Hyprland re-recalcs once their floating flag is set.
+local function aliveWindowWorkspaces()
+  local map = {}
+
+  if not (hl and hl.get_windows) then
+    return map
+  end
+
+  local ok, windows = pcall(hl.get_windows)
+  if not ok or type(windows) ~= "table" then
+    return map
+  end
+
+  for _, window in ipairs(windows) do
+    local id = window.stable_id and tostring(window.stable_id)
+    if id and not window.floating then
+      map[id] = util.workspaceKeyFromWindow(window)
+    end
+  end
+
+  return map
+end
+
+-- `keep` holds ids to retain even though they are absent from the target list (temporarily
+-- detached windows). Keeping their leaves preserves the split structure and ratios so the
+-- remaining windows do not reflow to default proportions.
+local function prune(node, present, keep)
   if not node then
     return nil
   end
 
   if node.kind == "leaf" then
-    return present[node.id] and node or nil
+    if present[node.id] or (keep and keep[node.id]) then
+      return node
+    end
+
+    return nil
   end
 
-  node.first = prune(node.first, present)
-  node.second = prune(node.second, present)
+  node.first = prune(node.first, present, keep)
+  node.second = prune(node.second, present, keep)
 
   if not node.first then
     return node.second
@@ -173,7 +218,18 @@ end
 local function syncTree(state, ctx)
   local present, targets, orderedIds = collectTargets(ctx)
 
-  state.root = prune(state.root, present)
+  local keep = nil
+  if hasAbsent(state.root, present) then
+    local key = util.workspaceKey(ctx)
+    for id, workspaceKey in pairs(aliveWindowWorkspaces()) do
+      if not present[id] and workspaceKey == key then
+        keep = keep or {}
+        keep[id] = true
+      end
+    end
+  end
+
+  state.root = prune(state.root, present, keep)
 
   local anchorId = util.activeId(state, ctx)
   if not anchorId or not M.contains(state.root, anchorId) then

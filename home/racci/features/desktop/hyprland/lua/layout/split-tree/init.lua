@@ -64,6 +64,54 @@ if hl and hl.timer then
   saveTimer:set_enabled(false)
 end
 
+-- Drop a window's leaf from every workspace tree that still holds it. Used for closes and for
+-- moves to another workspace, where the window is still mapped (so a target-set prune would keep
+-- it) but no longer belongs to that workspace.
+local function dropLeaf(id)
+  local dropped = false
+
+  for _, state in pairs(layouts) do
+    if state.root and layout.contains(state.root, id) then
+      state.root = select(1, layout.removeLeaf(state.root, id))
+      dropped = true
+    end
+  end
+
+  if dropped then
+    markPersistDirty()
+  end
+end
+
+local function windowId(window)
+  return window and window.stable_id and tostring(window.stable_id)
+end
+
+if hl and hl.on then
+  -- Hyprland emits `window.close` before removing the target (the window is still mapped then), so
+  -- prune here to let the sibling reclaim the space on the recalculate that follows.
+  hl.on("window.close", function(window)
+    local id = windowId(window)
+    if id then
+      dropLeaf(id)
+    end
+  end)
+
+  hl.on("window.move_to_workspace", function(window, workspace)
+    local id = windowId(window)
+    local target = util.workspaceKeyFromWorkspace(workspace)
+    if not id then
+      return
+    end
+
+    for key, state in pairs(layouts) do
+      if key ~= target and state.root and layout.contains(state.root, id) then
+        state.root = select(1, layout.removeLeaf(state.root, id))
+        markPersistDirty()
+      end
+    end
+  end)
+end
+
 local configuration = {
   exe = nil,
 }
