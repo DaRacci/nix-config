@@ -12,6 +12,7 @@ This is not a faithful port but a opinionated reimplementation that works around
 - Layout logic: [`home/racci/features/desktop/hyprland/lua/layout/split-tree/layout.lua`](../../../../home/racci/features/desktop/hyprland/lua/layout/split-tree/layout.lua)
 - Mouse session handling: [`home/racci/features/desktop/hyprland/lua/layout/split-tree/pointer.lua`](../../../../home/racci/features/desktop/hyprland/lua/layout/split-tree/pointer.lua)
 - Overlay bridge: [`home/racci/features/desktop/hyprland/lua/layout/split-tree/overlay.lua`](../../../../home/racci/features/desktop/hyprland/lua/layout/split-tree/overlay.lua)
+- Reload persistence: [`home/racci/features/desktop/hyprland/lua/layout/split-tree/persist.lua`](../../../../home/racci/features/desktop/hyprland/lua/layout/split-tree/persist.lua)
 - Overlay client: [`pkgs/split-tree-overlay`](../../../../pkgs/split-tree-overlay)
 - Shared helpers: [`home/racci/features/desktop/hyprland/lua/layout/split-tree/util.lua`](../../../../home/racci/features/desktop/hyprland/lua/layout/split-tree/util.lua)
 - Harness: [`home/racci/features/desktop/hyprland/tests/split-tree.lua`](../../../../home/racci/features/desktop/hyprland/tests/split-tree.lua)
@@ -110,6 +111,10 @@ The clickable border margin is read from the live config (`general.extend_border
 While a resize drag is active, animations are suppressed for tiled windows (a temporary `no_anim` window rule matching `float = false`), so the dragged window and every neighbour sharing the moved divider track the cursor without the `windowsMove` animation lag; the poll runs every 8ms and dispatches once the cursor has moved 2px.
 
 Floating windows stay on native compositor behavior for plain border clicks; modified mouse resize still delegates to native Hyprland drag / resize dispatchers. Floating drag hit-testing expands the window box slightly so a click on the decoration just outside the reported geometry still grabs the floating window rather than the tiled window behind it.
+
+### Reloads
+
+A reload recreates the Lua state, so the tree would otherwise be lost and rebuilt with default ratios, resizing every window on the first pass. The tree is saved shortly after changes (throttled to twice a second, and only when it actually changed) to `$XDG_RUNTIME_DIR/split-tree-layout-<HYPRLAND_INSTANCE_SIGNATURE>.lua` and restored at load, so a reload reproduces the existing geometry instead of enforcing default proportions. The file is keyed by the instance signature, so a fresh session starts clean.
 
 ## Why custom dispatchers exist
 

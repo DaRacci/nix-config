@@ -445,6 +445,49 @@ local function test_border_zone_hit_covers_gap_around_window()
   )
 end
 
+local function test_persisted_tree_restores_without_resizing()
+  local persist = require("layout.split-tree.persist")
+
+  local store = testing.newStore()
+  local context, state = recalc(store, "17", {
+    { id = "1", active = true },
+    { id = "2" },
+    { id = "3" },
+  })
+
+  -- Move a divider off the default so a default rebuild would visibly resize.
+  testing.layoutMessage(store, context, "resize_edge_px 1 right 100")
+  testing.recalculate(store, context)
+
+  local before = {}
+  for id, box in pairs(state.boxes) do
+    before[id] = { box.x, box.y, box.w, box.h }
+  end
+
+  local snapshot = {}
+  for key, entry in pairs(store) do
+    if entry.root then
+      snapshot[key] = { root = entry.root, lastActiveId = entry.lastActiveId }
+    end
+  end
+
+  local restored = persist.deserialize(persist.serialize(snapshot))
+  local fresh = {}
+  for key, entry in pairs(restored) do
+    fresh[key] = entry
+  end
+
+  testing.recalculate(fresh, context)
+
+  for id, box in pairs(before) do
+    local after = fresh["17"].boxes[id]
+    assertClose(after.x, box[1], 0.0001, "restored tree keeps x for " .. id)
+    assertClose(after.y, box[2], 0.0001, "restored tree keeps y for " .. id)
+    assertClose(after.w, box[3], 0.0001, "restored tree keeps width for " .. id)
+    assertClose(after.h, box[4], 0.0001, "restored tree keeps height for " .. id)
+  end
+end
+
 local function test_find_window_at_point_prefers_active_workspace_over_stale_hidden_workspace()
   local store = testing.newStore()
 
@@ -813,6 +856,7 @@ for _, test in ipairs({
   test_resize_edge_px_targets_divider_on_grabbed_side,
   test_pick_resize_edges_returns_corner_axes,
   test_border_zone_hit_covers_gap_around_window,
+  test_persisted_tree_restores_without_resizing,
   test_find_window_at_point_prefers_active_workspace_over_stale_hidden_workspace,
   test_window_box_reads_named_at_and_size_fields,
   test_window_box_reads_array_at_and_size_fields,

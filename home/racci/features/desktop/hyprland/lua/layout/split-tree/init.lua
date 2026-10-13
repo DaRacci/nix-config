@@ -1,5 +1,6 @@
 local layout = require("layout.split-tree.layout")
 local overlay = require("layout.split-tree.overlay")
+local persist = require("layout.split-tree.persist")
 local pointer = require("layout.split-tree.pointer")
 local util = require("layout.split-tree.util")
 
@@ -8,6 +9,60 @@ local M = {}
 local layouts = {}
 local overlayController = overlay.new()
 local pointerController = pointer.new(layouts, overlayController)
+local layoutPersist = persist.new()
+
+-- Restore the tree saved before the last reload so the first layout pass reproduces the existing
+-- geometry instead of resizing windows to default proportions.
+local restored = layoutPersist.load()
+if restored then
+  for key, state in pairs(restored) do
+    layouts[key] = state
+  end
+end
+
+local function snapshot()
+  local data = {}
+  for key, state in pairs(layouts) do
+    if state.root then
+      data[key] = { root = state.root, lastActiveId = state.lastActiveId }
+    end
+  end
+  return data
+end
+
+-- Hyprland has no pre-reload hook, so persist on a short throttle rather than on every change.
+-- Tree changes mark the state dirty and a repeating timer flushes at most a couple of times a
+-- second (writing only when the tree actually changed), disabling itself while idle. This keeps a
+-- config reload from losing the tree without a write on every poll of an in-progress drag.
+local SAVE_INTERVAL_MS = 500
+local persistDirty = false
+local saveTimer
+local saveTimerEnabled = false
+
+local function setSaveTimerEnabled(enabled)
+  if saveTimer and saveTimerEnabled ~= enabled then
+    saveTimerEnabled = enabled
+    saveTimer:set_enabled(enabled)
+  end
+end
+
+local function markPersistDirty()
+  persistDirty = true
+  setSaveTimerEnabled(true)
+end
+
+if hl and hl.timer then
+  saveTimer = hl.timer(function()
+    if not persistDirty then
+      setSaveTimerEnabled(false)
+      return
+    end
+
+    persistDirty = false
+    layoutPersist.save(snapshot())
+  end, { timeout = SAVE_INTERVAL_MS, type = "repeat" })
+  saveTimer:set_enabled(false)
+end
 
 local configuration = {
   exe = nil,
@@ -63,10 +118,13 @@ function M.register()
   hl.layout.register("split-tree", {
     recalculate = function(ctx)
       layout.recalculate(layouts, ctx)
+      markPersistDirty()
     end,
 
     layout_msg = function(ctx, msg)
-      return layout.layoutMessage(layouts, ctx, msg)
+      local result = layout.layoutMessage(layouts, ctx, msg)
+      markPersistDirty()
+      return result
     end,
   })
 end
