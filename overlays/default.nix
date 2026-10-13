@@ -83,7 +83,7 @@ in
         buildInputs = oldAttrs.buildInputs |> (lib.remove prev.perl);
       });
 
-      fastembed-hermes = prev.python312Packages.fastembed.overridePythonAttrs (old: {
+      fastembed-hermes = final.hermes-agent.python.pkgs.fastembed.overridePythonAttrs (old: {
         dependencies = builtins.filter (
           dep:
           let
