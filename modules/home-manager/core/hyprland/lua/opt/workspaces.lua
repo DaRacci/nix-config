@@ -24,7 +24,9 @@ end
 
 hl.on("hyprland.start", function()
   local activeMonitor = hl.get_active_monitor()
-  local activeWorkspace = hl.get_active_workspace()
+  -- Capture the selector now: the startup focus dispatches below can move focus and, if the
+  -- original workspace is removed, reading it later would fail to restore focus.
+  local activeSelector = workspaceSelector(hl.get_active_workspace())
   local existing = knownWorkspaces()
   local workspaceIds = {}
 
@@ -54,9 +56,8 @@ hl.on("hyprland.start", function()
     hl.dispatch(hl.dsp.focus({ monitor = activeMonitor.name }))
   end
 
-  local selector = workspaceSelector(activeWorkspace)
-  if selector then
-    hl.dispatch(hl.dsp.focus({ workspace = selector, on_current_monitor = true }))
+  if activeSelector then
+    hl.dispatch(hl.dsp.focus({ workspace = activeSelector, on_current_monitor = true }))
   end
 end)
 

@@ -3,7 +3,7 @@
 ## Purpose
 
 Custom Lua layout that implements a split-tree layout for Hyprland, inspired by the `hy3` plugin which itself was inspired by i3's split-tree layout.
-This is not a faithful port but a opinionated reimplementation that works around Hyprland Lua layout limitations.
+This is not a faithful port but an opinionated reimplementation that works around Hyprland Lua layout limitations.
 
 ## Files
 
