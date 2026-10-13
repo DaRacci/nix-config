@@ -17,7 +17,7 @@ steps:
     image: registry.racci.dev/lix-woodpecker:latest
     pull: true
     commands: |
-      DICT=$(nix build --no-link --print-out-paths 'nixpkgs#hunspellDicts.en_AU-large')
+      DICT=$(nix build --inputs-from . --no-link --print-out-paths 'nixpkgs#hunspellDicts.en_AU-large')
       ./ci/vale/install-dictionaries.sh "$DICT"
 
       nix run nixpkgs#vale -- docs/ AGENTS.md

@@ -17,7 +17,7 @@ dest="$repo_root/ci/vale/styles/config/dictionaries"
 
 dict_path=${1:-${HUNSPELL_EN_AU:-}}
 if [ -z "$dict_path" ]; then
-  dict_path=$(nix build --no-link --print-out-paths 'nixpkgs#hunspellDicts.en_AU-large')
+  dict_path=$(nix build --no-link --print-out-paths --inputs-from "$repo_root" 'nixpkgs#hunspellDicts.en_AU-large')
 fi
 
 src="$dict_path/share/hunspell"

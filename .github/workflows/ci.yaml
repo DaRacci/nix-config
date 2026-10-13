@@ -16,9 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
 
       - name: Install Nix
-        uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
+        uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
@@ -28,7 +30,7 @@ jobs:
         with:
           flakes: nixpkgs#vale,nixpkgs#hunspellDicts.en_AU-large
           script: |
-            DICT=$(nix build --no-link --print-out-paths 'nixpkgs#hunspellDicts.en_AU-large')
+            DICT=$(nix build --inputs-from . --no-link --print-out-paths 'nixpkgs#hunspellDicts.en_AU-large')
             ./ci/vale/install-dictionaries.sh "$DICT"
             vale docs/ AGENTS.md
 
