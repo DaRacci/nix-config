@@ -69,6 +69,24 @@ in
               ./patches/hermes-agent-home-aware-managed.patch
             ];
           };
+          # The release tag is date-style (v2026.9.24) and hermes_cli/__init__.py
+          # hardcodes the same date. Upstream's nix/packages.nix leaves the version
+          # at its "0.0.0" default, which blocks plugin installers that enforce a
+          # minimum Hermes version, so read it from the flake source. The patched
+          # tree cannot be used: applyPatches is a derivation, and readFile cannot
+          # force a build.
+          hermesVersion =
+            let
+              initPath = haFlake.outPath + "/hermes_cli/__init__.py";
+              initPy = builtins.readFile initPath;
+              initLines = lib.splitString "\n" initPy;
+              dateLine = lib.findFirst (line: lib.hasPrefix "__release_date__" line) "" initLines;
+              parsed = builtins.match ''[^"]*"([^"]*)".*'' dateLine;
+            in
+            if parsed == null then
+              throw "hermes-agent: no __release_date__ in hermes_cli/__init__.py"
+            else
+              builtins.head parsed;
         in
         final.callPackage (hermesAgentSrc + "/nix/hermes-agent.nix") {
           uv2nix = haFlake.inputs.uv2nix;
@@ -77,6 +95,7 @@ in
           npm-lockfile-fix =
             haFlake.inputs.npm-lockfile-fix.packages.${final.stdenv.hostPlatform.system}.default;
           rev = haLocked.rev or null;
+          version = hermesVersion;
         };
 
       lm_sensors-perlless = prev.lm_sensors.overrideAttrs (oldAttrs: {
