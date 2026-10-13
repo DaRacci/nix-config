@@ -102,11 +102,11 @@ Cross-workspace drops are supported: the layout resolves on release which visibl
 Two tiled resize paths exist:
 
 - `SUPER + mouse:right` — picks the nearest resizable edge or corner of the hovered tiled window, then resizes along the grabbed axis or axes
-- plain `mouse:left` on tiled border — auto-consuming border resize fallback; only consumes the click when the cursor is within the border margin of the active tiled window
+- plain `mouse:left` on tiled border — auto-consuming border resize fallback; picks the nearest tiled window whose border the cursor is grabbing
 
 The grabbed edge maps to the split whose divider is actually on that edge, not merely the nearest ancestor split on the axis. So grabbing the right edge of a middle column moves the divider to its right (growing it), and an edge with no divider (an outer/workspace edge) is a no-op instead of moving the opposite side. A border-zone click with nothing to resize is consumed so Hyprland's own `resize_on_border` cannot move the wrong edge instead. Corner grabs resize both axes when both grabbed edges are real dividers.
 
-The clickable border margin is read from the live config (`general.extend_border_grab_area` + `general.border_size`) and applies to the ring just outside the window edge — over the window body Hyprland shows no resize cursor, so no border grab there — matching the zone where Hyprland shows the resize cursor.
+The border grab zone mirrors Hyprland's own hit test: the cursor must sit within `general.extend_border_grab_area` + `general.border_size` **outside a window's content box** (or inside a rounded corner it clips), and must not be over any window body. The content box is the geometry Hyprland actually draws — the tiled region insets by `general.border_size` on workspace-area edges and by `general.border_size + general.gaps_in` on interior split edges — so the zone lines up with where Hyprland shows the resize cursor. In a shared gap both neighbours are candidates and the nearer one wins; because adjacent tiles share the divider, either choice resizes the same split.
 
 While a resize drag is active, animations are suppressed for tiled windows (a temporary `no_anim` window rule matching `float = false`), so the dragged window and every neighbour sharing the moved divider track the cursor without the `windowsMove` animation lag; the poll runs every 8ms and dispatches once the cursor has moved 2px.
 

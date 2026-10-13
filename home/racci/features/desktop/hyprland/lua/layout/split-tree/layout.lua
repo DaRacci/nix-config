@@ -8,8 +8,8 @@ local resizeStep = 0.05
 local defaultInsertRatio = 0.5
 
 -- Hyprland shows the resize cursor within `general:extend_border_grab_area` (+ `general:border_size`)
--- of a border. Match that margin so the clickable border zone lines up with the cursor-change zone
--- instead of using a fixed size that is too large.
+-- outside a window's content box. Match that margin so the clickable border zone lines up with the
+-- cursor-change zone instead of using a fixed size that is too large or too small.
 local function configNumber(candidates, fallback)
   for _, key in ipairs(candidates) do
     local ok, value = pcall(function()
@@ -23,10 +23,17 @@ local function configNumber(candidates, fallback)
   return fallback
 end
 
+local function borderSize()
+  return configNumber({ "general.border_size", "general:border_size" }, 2)
+end
+
+local function gapsIn()
+  return configNumber({ "general.gaps_in", "general:gaps_in" }, 5)
+end
+
 local function resizeEdgeMargin()
   local extend = configNumber({ "general.extend_border_grab_area", "general:extend_border_grab_area" }, 15)
-  local border = configNumber({ "general.border_size", "general:border_size" }, 2)
-  return extend + border
+  return extend + borderSize()
 end
 
 local recalcListeners = {}
@@ -670,33 +677,113 @@ local function pickAxisEdge(state, id, box, point, lowEdge, highEdge, margin)
   return nil, nil
 end
 
--- Whether the cursor is in the border grab zone: the ring just outside the window edge, within
--- general:extend_border_grab_area (plus general:border_size). Over the window itself Hyprland
--- shows no resize cursor, so the grab must not trigger there.
+-- The window geometry Hyprland draws (and the box it tests for border grabs) is the content box,
+-- which sits inside the tiled region we assign: by `general:border_size` on sides that coincide
+-- with the workspace-area boundary and by `general:border_size + general:gaps_in` on interior
+-- sides (where the gaps are carved out of the tile). Reproduce that so border and resize-edge
+-- detection line up with where Hyprland actually shows the resize cursor.
+function M.contentBox(state, id)
+  local box = state and state.boxes and state.boxes[id]
+  if not box then
+    return nil
+  end
+
+  local border = borderSize()
+  local inner = border + gapsIn()
+  local area = state.area
+
+  local left, top, right, bottom = border, border, border, border
+  if area then
+    left = (box.x <= area.x + 0.5) and border or inner
+    right = (box.x + box.w >= area.x + area.w - 0.5) and border or inner
+    top = (box.y <= area.y + 0.5) and border or inner
+    bottom = (box.y + box.h >= area.y + area.h - 0.5) and border or inner
+  end
+
+  return {
+    x = box.x + left,
+    y = box.y + top,
+    w = box.w - left - right,
+    h = box.h - top - bottom,
+  }
+end
+
+-- Shortest distance from `point` to `box`; zero when the point is inside.
+function M.distanceToBox(box, point)
+  if not box or not point then
+    return math.huge
+  end
+
+  local dx = math.max(box.x - point.x, 0, point.x - (box.x + box.w))
+  local dy = math.max(box.y - point.y, 0, point.y - (box.y + box.h))
+  return math.sqrt(dx * dx + dy * dy)
+end
+
+-- Mirrors CWindow::isInCurvedCorner: a point inside the content box but clipped off by a rounded
+-- corner still counts as a border grab in Hyprland.
+function M.isInCurvedCorner(box, x, y)
+  local rounding = configNumber({ "decoration.rounding", "decoration:rounding" }, 8)
+  local power = configNumber({ "decoration.rounding_power", "decoration:rounding_power" }, 2)
+  if rounding <= 0 or borderSize() >= rounding then
+    return false
+  end
+
+  local x0 = box.x + rounding
+  local y0 = box.y + rounding
+  local x1 = box.x + box.w - rounding
+  local y1 = box.y + box.h - rounding
+
+  local function outside(dx, dy)
+    return dx ^ power + dy ^ power > rounding ^ power
+  end
+
+  if x < x0 and y < y0 then
+    return outside(x0 - x, y0 - y)
+  elseif x > x1 and y < y0 then
+    return outside(x - x1, y0 - y)
+  elseif x < x0 and y > y1 then
+    return outside(x0 - x, y - y1)
+  elseif x > x1 and y > y1 then
+    return outside(x - x1, y - y1)
+  end
+
+  return false
+end
+
+-- Whether the cursor is in the border grab zone Hyprland uses: within `general:border_size` +
+-- `general:extend_border_grab_area` outside the content box (or clipped by a rounded corner).
 function M.borderZoneHit(state, id, point)
-  local box = state.boxes[id]
-  if not box or not point or util.pointInBox(box, point) then
+  local content = M.contentBox(state, id)
+  if not content or not point then
     return false
   end
 
   local margin = resizeEdgeMargin()
-  return util.pointInBox({
-    x = box.x - margin,
-    y = box.y - margin,
-    w = box.w + margin * 2,
-    h = box.h + margin * 2,
-  }, point)
+  if not util.pointInBox({
+    x = content.x - margin,
+    y = content.y - margin,
+    w = content.w + margin * 2,
+    h = content.h + margin * 2,
+  }, point) then
+    return false
+  end
+
+  if util.pointInBox(content, point) then
+    return M.isInCurvedCorner(content, point.x, point.y)
+  end
+
+  return true
 end
 
 function M.pickResizeEdges(state, id, point, requireBorder)
-  local box = state.boxes[id]
-  if not box or not point then
+  local content = M.contentBox(state, id)
+  if not content or not point then
     return nil
   end
 
   local margin = resizeEdgeMargin()
-  local xEdge, xDistance = pickAxisEdge(state, id, box, point, "left", "right", margin)
-  local yEdge, yDistance = pickAxisEdge(state, id, box, point, "up", "down", margin)
+  local xEdge, xDistance = pickAxisEdge(state, id, content, point, "left", "right", margin)
+  local yEdge, yDistance = pickAxisEdge(state, id, content, point, "up", "down", margin)
   local edges = {}
 
   if requireBorder then

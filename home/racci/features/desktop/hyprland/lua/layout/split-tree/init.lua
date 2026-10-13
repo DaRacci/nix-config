@@ -133,6 +133,7 @@ M._testing = {
   borderZoneHit = layout.borderZoneHit,
   buildDropMap = layout.buildDropMap,
   contains = layout.contains,
+  contentBox = layout.contentBox,
   directionForPointInBox = layout.directionForPointInBox,
   dropTarget = layout.dropTarget,
   findWindowAtPointInWorkspace = function(store, workspace, x, y, ignoreId)
@@ -145,6 +146,7 @@ M._testing = {
   end,
   getState = util.getState,
   insertLeafBeside = layout.insertLeafBeside,
+  isInCurvedCorner = layout.isInCurvedCorner,
   layoutMessage = layout.layoutMessage,
   moveLeafToEdge = layout.moveLeafToEdge,
   moveMessageForBoxes = layout.moveMessageForBoxes,

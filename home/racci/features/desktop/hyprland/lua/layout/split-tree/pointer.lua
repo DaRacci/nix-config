@@ -366,16 +366,11 @@ function M.new(layouts, overlay)
     return { ok = true }
   end
 
-  local function managedWindowContext(cursor, opts)
-    opts = opts or {}
-
-    local hovered = nil
-    if not opts.onlyActiveWindow then
-      hovered = findManagedTiledWindowAtPoint(cursor)
-      if hovered then
-        hovered.cursor = cursor
-        return hovered
-      end
+  local function managedWindowContext(cursor)
+    local hovered = findManagedTiledWindowAtPoint(cursor)
+    if hovered then
+      hovered.cursor = cursor
+      return hovered
     end
 
     local window = hl.get_active_window()
@@ -395,19 +390,8 @@ function M.new(layouts, overlay)
       return nil
     end
 
-    if cursor then
-      -- Border grabs may start just outside the window (in the gap), matching the resize-cursor
-      -- zone; moves still require the cursor to be inside the window.
-      local hit
-      if opts.requireBorder then
-        hit = layout.borderZoneHit(state, windowId, cursor)
-      else
-        hit = util.pointInBox(box, cursor)
-      end
-
-      if not hit then
-        return nil
-      end
+    if cursor and not util.pointInBox(box, cursor) then
+      return nil
     end
 
     return {
@@ -420,22 +404,16 @@ function M.new(layouts, overlay)
     }
   end
 
-  local function beginSession(mode, opts)
-    opts = opts or {}
-
+  local function beginSession(mode)
     local cursor = hl.get_cursor_pos()
 
     local floatingUnder = findFloatingWindowAtPoint(cursor)
     local managed = nil
     if not floatingUnder then
-      managed = managedWindowContext(cursor, opts)
+      managed = managedWindowContext(cursor)
     end
 
     if floatingUnder then
-      if opts.passThroughOnMiss then
-        return { ok = false }
-      end
-
       hl.dispatch(hl.dsp.focus({ window = floatingUnder }))
       if mode == "move" then
         hl.dispatch(hl.dsp.window.drag())
@@ -448,15 +426,9 @@ function M.new(layouts, overlay)
 
     if managed then
       if mode == "resize" then
-        local edges = layout.pickResizeEdges(managed.state, managed.windowId, cursor, opts.requireBorder)
+        local edges = layout.pickResizeEdges(managed.state, managed.windowId, cursor, false)
         if not edges then
-          if opts.requireBorder and layout.borderZoneHit(managed.state, managed.windowId, cursor) then
-            -- Border grab on the active window with nothing to resize on that side: consume the
-            -- click so Hyprland's own resize_on_border cannot move the opposite edge instead.
-            return { ok = true }
-          end
-
-          return { ok = not opts.passThroughOnMiss }
+          return { ok = true }
         end
 
         return startTiledSession(managed, mode, edges)
@@ -467,10 +439,6 @@ function M.new(layouts, overlay)
 
     local window = hl.get_active_window()
     if window and window.floating then
-      if opts.passThroughOnMiss then
-        return { ok = false }
-      end
-
       if mode == "move" then
         hl.dispatch(hl.dsp.window.drag())
       else
@@ -480,7 +448,65 @@ function M.new(layouts, overlay)
       return { ok = true }
     end
 
-    return { ok = not opts.passThroughOnMiss }
+    return { ok = true }
+  end
+
+  -- Locate the window whose border the cursor is grabbing, mirroring Hyprland's own hit test: the
+  -- cursor must be within `border_size + extend_border_grab_area` outside a window's content box
+  -- (or inside its rounded corner) and must not sit on any window body.
+  local function findBorderTarget(cursor)
+    local workspaceCtx = activeWorkspaceContext()
+    if not workspaceCtx or not cursor or not workspaceCtx.state.root then
+      return nil
+    end
+
+    -- Floating windows handle their own border resize natively; don't hijack it for the tile below.
+    if findFloatingWindowAtPoint(cursor) then
+      return nil
+    end
+
+    local state = workspaceCtx.state
+    local candidates = {}
+
+    for _, window in ipairs(hl.get_workspace_windows(workspaceCtx.activeWorkspace)) do
+      if not window.floating then
+        local windowId = window.stable_id and tostring(window.stable_id) or nil
+        local content = windowId and layout.contentBox(state, windowId) or nil
+
+        if content then
+          if util.pointInBox(content, cursor) and not layout.isInCurvedCorner(content, cursor.x, cursor.y) then
+            -- Cursor is over a window body: Hyprland shows no resize cursor there.
+            return nil
+          end
+
+          if layout.borderZoneHit(state, windowId, cursor) then
+            candidates[#candidates + 1] = {
+              distance = layout.distanceToBox(content, cursor),
+              window = window,
+              windowId = windowId,
+            }
+          end
+        end
+      end
+    end
+
+    local best = nil
+    for _, candidate in ipairs(candidates) do
+      if not best or candidate.distance < best.distance then
+        best = candidate
+      end
+    end
+
+    if not best then
+      return nil
+    end
+
+    best.box = state.boxes[best.windowId]
+    best.cursor = cursor
+    best.edges = layout.pickResizeEdges(state, best.windowId, cursor, true)
+    best.state = state
+    best.workspace = workspaceCtx.workspace
+    return best
   end
 
   local api = {}
@@ -584,11 +610,19 @@ function M.new(layouts, overlay)
       cancelPointerSession()
     end
 
-    return beginSession("resize", {
-      onlyActiveWindow = true,
-      passThroughOnMiss = true,
-      requireBorder = true,
-    })
+    local target = findBorderTarget(hl.get_cursor_pos())
+    if not target then
+      -- Not on a border: let Hyprland handle the click normally.
+      return { ok = false }
+    end
+
+    if not target.edges then
+      -- Border grab on a screen edge with nothing to resize: consume the click so Hyprland's own
+      -- resize_on_border cannot move the opposite edge instead.
+      return { ok = true }
+    end
+
+    return startTiledSession(target, "resize", target.edges)
   end
 
   function api.endBorderResize()

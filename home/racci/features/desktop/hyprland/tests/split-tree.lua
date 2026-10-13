@@ -445,6 +445,38 @@ local function test_border_zone_hit_covers_gap_around_window()
   )
 end
 
+-- Hyprland places the drawn window (the box it tests for border grabs) inside the tiled region:
+-- `border_size` on workspace-area edges and `border_size + gaps_in` on interior split edges.
+local function test_content_box_matches_hyprland_insets()
+  local store = testing.newStore()
+
+  local _, state = recalc(store, "21", {
+    { id = "1", active = true },
+    { id = "2" },
+  })
+
+  local first = testing.contentBox(state, "1")
+  assertClose(first.x, 2, 0.0001, "workspace-edge side insets by border_size only")
+  assertClose(first.x + first.w, 493, 0.0001, "interior split side insets by border_size + gaps_in")
+
+  local second = testing.contentBox(state, "2")
+  assertClose(second.x, 507, 0.0001, "interior split side insets by border_size + gaps_in")
+  assertClose(second.x + second.w, 998, 0.0001, "workspace-edge side insets by border_size only")
+end
+
+-- A point clipped by a rounded corner still counts as a border grab in Hyprland.
+local function test_border_zone_hit_allows_rounded_corner_inside()
+  local store = testing.newStore()
+
+  local _, state = recalc(store, "22", {
+    { id = "1", active = true },
+    { id = "2" },
+  })
+
+  assertEqual(testing.borderZoneHit(state, "1", { x = 3, y = 3 }), true, "rounded corner counts as a border grab")
+  assertEqual(testing.borderZoneHit(state, "1", { x = 3, y = 500 }), false, "straight edge inside the body is not a grab")
+end
+
 local function test_persisted_tree_restores_without_resizing()
   local persist = require("layout.split-tree.persist")
 
@@ -814,6 +846,30 @@ local function test_pointer_reemits_handoff_on_recalculate()
   controller.endMouseDrag()
 end
 
+-- A border grab in the gap between two tiles must pick the nearer window's shared divider.
+local function test_border_grab_targets_nearest_window_edge()
+  local store = testing.newStore()
+  local specs = { { id = "a", active = true }, { id = "b" } }
+  local _, state = recalc(store, "1", specs)
+
+  local windows = fakeWindowsFromBoxes(state.boxes, specs)
+  local fake = makeFakeHl(windows)
+  _G.hl = fake
+
+  local controller = pointer.new(store, makeFakeOverlay())
+  fake.cursor = { x = 496, y = 500 }
+
+  local started = controller.beginBorderResize()
+  assertEqual(started.ok, true, "a grab in the gap starts a resize session")
+
+  fake.cursor = { x = 506, y = 500 }
+  repeatTimerOf(fake).cb()
+
+  local message = lastLayoutDispatch(fake)
+  assertEqual(message ~= nil, true, "dragging the grabbed edge dispatches a resize")
+  assertEqual(message:match("^resize_edge_px a right ") ~= nil, true, "the nearer window's inner edge is resized")
+end
+
 local function test_pointer_toggle_float_keeps_tiled_geometry()
   local store = testing.newStore()
   local specs = { { id = "a", active = true }, { id = "b" }, { id = "c" } }
@@ -856,6 +912,9 @@ for _, test in ipairs({
   test_resize_edge_px_targets_divider_on_grabbed_side,
   test_pick_resize_edges_returns_corner_axes,
   test_border_zone_hit_covers_gap_around_window,
+  test_content_box_matches_hyprland_insets,
+  test_border_zone_hit_allows_rounded_corner_inside,
+  test_border_grab_targets_nearest_window_edge,
   test_persisted_tree_restores_without_resizing,
   test_find_window_at_point_prefers_active_workspace_over_stale_hidden_workspace,
   test_window_box_reads_named_at_and_size_fields,
