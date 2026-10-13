@@ -12,11 +12,16 @@ local pointerController = pointer.new(layouts, overlayController)
 local layoutPersist = persist.new()
 
 -- Restore the tree saved before the last reload so the first layout pass reproduces the existing
--- geometry instead of resizing windows to default proportions.
+-- geometry instead of resizing windows to default proportions. Only accept states with a real tree
+-- and give each a `boxes` table so `splitLeaf`/pointer paths can index it before the first
+-- recalculate populates it.
 local restored = layoutPersist.load()
 if restored then
   for key, state in pairs(restored) do
-    layouts[key] = state
+    if type(state) == "table" and type(state.root) == "table" then
+      state.boxes = state.boxes or {}
+      layouts[key] = state
+    end
   end
 end
 

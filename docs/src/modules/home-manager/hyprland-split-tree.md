@@ -144,5 +144,5 @@ Lua layout still cannot fully match native plugin integration:
 Run harness directly:
 
 ```bash
-nix shell nixpkgs#lua --command lua home/racci/features/desktop/hyprland/tests/split-tree.lua
+nix shell nixpkgs#lua5_5 --command lua home/racci/features/desktop/hyprland/tests/split-tree.lua
 ```

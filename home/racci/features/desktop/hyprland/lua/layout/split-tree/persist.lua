@@ -11,19 +11,32 @@
 local M = {}
 
 local function runtimeDir()
-  return os.getenv("XDG_RUNTIME_DIR") or "/tmp"
+  local dir = os.getenv("XDG_RUNTIME_DIR")
+  if not dir or dir == "" then
+    return nil
+  end
+
+  return dir
 end
 
 local function instanceId()
   return os.getenv("HYPRLAND_INSTANCE_SIGNATURE") or "default"
 end
 
+-- The state file must live in the per-user runtime directory. Never fall back to a shared
+-- location such as /tmp: the path is predictable, so a world-writable directory would let another
+-- user plant or symlink the state file. When there is no safe directory, persistence is disabled.
 function M.path()
   if _G.SPLIT_TREE_STATE_PATH then
     return _G.SPLIT_TREE_STATE_PATH
   end
 
-  return runtimeDir() .. "/split-tree-layout-" .. instanceId() .. ".lua"
+  local dir = runtimeDir()
+  if not dir then
+    return nil
+  end
+
+  return dir .. "/split-tree-layout-" .. instanceId() .. ".lua"
 end
 
 local function serialize(value)
@@ -59,17 +72,16 @@ function M.serialize(store)
   return "return " .. (serialize(store) or "{}")
 end
 
+-- Build a chunk from the serialized text.
 function M.deserialize(text)
   if type(text) ~= "string" or text == "" then
     return nil
   end
 
-  local loader = load or loadstring
-  if not loader then
-    return nil
-  end
-
-  local chunk = loader(text)
+  -- Hyprland embeds standard Lua (5.5 at the time of writing), so `load` takes the source string, a
+  -- text-only mode, and an environment. Load with an empty environment so a tampered state file
+  -- cannot reach globals.
+  local chunk = load(text, "split-tree-state", "t", {})
   if not chunk then
     return nil
   end
@@ -82,13 +94,18 @@ function M.deserialize(text)
   return value
 end
 
--- Controller bound to one path. `save` skips writes when the snapshot is unchanged.
+-- Controller bound to one path. `save` skips writes when the snapshot is unchanged. When no safe
+-- path is available, both `save` and `load` are no-ops.
 function M.new(path)
   path = path or M.path()
   local last = nil
   local api = {}
 
   function api.save(snapshot)
+    if not path then
+      return
+    end
+
     local text = M.serialize(snapshot)
     if text == last then
       return
@@ -105,20 +122,16 @@ function M.new(path)
   end
 
   function api.load()
+    if not path then
+      return nil
+    end
+
     local handle = io.open(path, "r")
     if not handle then
       return nil
     end
 
-    -- Lua 5.2 wants "*a"; 5.4 accepts "a". Try both so the same code runs under either.
-    local ok, text = pcall(function()
-      return handle:read("a")
-    end)
-    if not ok or not text then
-      handle:seek("set", 0)
-      text = handle:read("*a")
-    end
-
+    local text = handle:read("a")
     handle:close()
     return M.deserialize(text)
   end
