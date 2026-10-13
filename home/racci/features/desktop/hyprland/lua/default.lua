@@ -1,4 +1,4 @@
-local SplitTree = require("./layout/split-tree")
+local SplitTree = require("layout.split-tree")
 
 SplitTree.register()
 SplitTree.configure({

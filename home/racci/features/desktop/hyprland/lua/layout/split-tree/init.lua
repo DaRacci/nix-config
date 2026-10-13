@@ -72,6 +72,7 @@ function M.register()
 end
 
 M._testing = {
+  borderZoneHit = layout.borderZoneHit,
   buildDropMap = layout.buildDropMap,
   contains = layout.contains,
   directionForPointInBox = layout.directionForPointInBox,

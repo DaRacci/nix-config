@@ -6,7 +6,28 @@ local maxRatio = 0.9
 local minRatio = 0.1
 local resizeStep = 0.05
 local defaultInsertRatio = 0.5
-local edgeActivationMargin = 18
+
+-- Hyprland shows the resize cursor within `general:extend_border_grab_area` (+ `general:border_size`)
+-- of a border. Match that margin so the clickable border zone lines up with the cursor-change zone
+-- instead of using a fixed size that is too large.
+local function configNumber(candidates, fallback)
+  for _, key in ipairs(candidates) do
+    local ok, value = pcall(function()
+      return hl.get_config(key)
+    end)
+    if ok and type(value) == "number" then
+      return value
+    end
+  end
+
+  return fallback
+end
+
+local function resizeEdgeMargin()
+  local extend = configNumber({ "general.extend_border_grab_area", "general:extend_border_grab_area" }, 15)
+  local border = configNumber({ "general.border_size", "general:border_size" }, 2)
+  return extend + border
+end
 
 local recalcListeners = {}
 
@@ -391,7 +412,11 @@ end
 
 function M.resizeEdgeByPixels(state, id, edge, deltaPx)
   local axis = M.axisForDirection(edge)
-  local entry = findSplitEntry(state, id, axis)
+  -- Branch-aware lookup: the divider for the grabbed edge has to actually be on that edge. Using
+  -- the axis-only split here moved the wrong divider (the opposite side) when the leaf sat on the
+  -- far side of the nearest split, and moved the only divider when the grabbed edge was a screen
+  -- edge with nothing to resize.
+  local entry = M.findEdgeEntry(state, id, edge)
   if not entry then
     return false
   end
@@ -620,39 +645,74 @@ local function distanceToEdge(box, point, edge)
   return math.abs((box.y + box.h) - point.y)
 end
 
+-- Pick the nearest edge on one axis whose divider exists. A dead edge (e.g. the outer edge of an
+-- edge window) is ignored rather than silently resizing the opposite side; the opposite edge is
+-- only used when the cursor is genuinely near it too.
+local function pickAxisEdge(state, id, box, point, lowEdge, highEdge, margin)
+  local lowDistance = distanceToEdge(box, point, lowEdge)
+  local highDistance = distanceToEdge(box, point, highEdge)
+
+  local nearest, nearestDistance, other, otherDistance
+  if lowDistance <= highDistance then
+    nearest, nearestDistance, other, otherDistance = lowEdge, lowDistance, highEdge, highDistance
+  else
+    nearest, nearestDistance, other, otherDistance = highEdge, highDistance, lowEdge, lowDistance
+  end
+
+  if M.findEdgeEntry(state, id, nearest) then
+    return nearest, nearestDistance
+  end
+
+  if otherDistance <= margin and M.findEdgeEntry(state, id, other) then
+    return other, otherDistance
+  end
+
+  return nil, nil
+end
+
+-- Whether the cursor is in the border grab zone: the ring just outside the window edge, within
+-- general:extend_border_grab_area (plus general:border_size). Over the window itself Hyprland
+-- shows no resize cursor, so the grab must not trigger there.
+function M.borderZoneHit(state, id, point)
+  local box = state.boxes[id]
+  if not box or not point or util.pointInBox(box, point) then
+    return false
+  end
+
+  local margin = resizeEdgeMargin()
+  return util.pointInBox({
+    x = box.x - margin,
+    y = box.y - margin,
+    w = box.w + margin * 2,
+    h = box.h + margin * 2,
+  }, point)
+end
+
 function M.pickResizeEdges(state, id, point, requireBorder)
   local box = state.boxes[id]
   if not box or not point then
     return nil
   end
 
-  local xCandidate = {
-    distance = math.min(distanceToEdge(box, point, "left"), distanceToEdge(box, point, "right")),
-    edge = distanceToEdge(box, point, "left") <= distanceToEdge(box, point, "right") and "left" or "right",
-  }
-  local yCandidate = {
-    distance = math.min(distanceToEdge(box, point, "up"), distanceToEdge(box, point, "down")),
-    edge = distanceToEdge(box, point, "up") <= distanceToEdge(box, point, "down") and "up" or "down",
-  }
-
-  local hasX = findSplitEntry(state, id, "x") ~= nil
-  local hasY = findSplitEntry(state, id, "y") ~= nil
+  local margin = resizeEdgeMargin()
+  local xEdge, xDistance = pickAxisEdge(state, id, box, point, "left", "right", margin)
+  local yEdge, yDistance = pickAxisEdge(state, id, box, point, "up", "down", margin)
   local edges = {}
 
   if requireBorder then
-    if hasX and xCandidate.distance <= edgeActivationMargin then
-      edges.x = xCandidate.edge
+    if xEdge and xDistance <= margin then
+      edges.x = xEdge
     end
-    if hasY and yCandidate.distance <= edgeActivationMargin then
-      edges.y = yCandidate.edge
+    if yEdge and yDistance <= margin then
+      edges.y = yEdge
     end
-  elseif hasX and hasY and xCandidate.distance <= edgeActivationMargin and yCandidate.distance <= edgeActivationMargin then
-    edges.x = xCandidate.edge
-    edges.y = yCandidate.edge
-  elseif hasX and (not hasY or xCandidate.distance <= yCandidate.distance) then
-    edges.x = xCandidate.edge
-  elseif hasY then
-    edges.y = yCandidate.edge
+  elseif xEdge and yEdge and xDistance <= margin and yDistance <= margin then
+    edges.x = xEdge
+    edges.y = yEdge
+  elseif xEdge and (not yEdge or xDistance <= yDistance) then
+    edges.x = xEdge
+  elseif yEdge then
+    edges.y = yEdge
   end
 
   if not edges.x and not edges.y then

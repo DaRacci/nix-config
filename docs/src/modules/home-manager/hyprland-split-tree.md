@@ -100,11 +100,16 @@ Cross-workspace drops are supported: the layout resolves on release which visibl
 
 Two tiled resize paths exist:
 
-- `SUPER + mouse:right` — picks closest physical edge or corner of hovered tiled window, then resizes along grabbed axis or axes
-- plain `mouse:left` on tiled border — auto-consuming border resize fallback; only consumes click when cursor starts near active tiled border or corner
+- `SUPER + mouse:right` — picks the nearest resizable edge or corner of the hovered tiled window, then resizes along the grabbed axis or axes
+- plain `mouse:left` on tiled border — auto-consuming border resize fallback; only consumes the click when the cursor is within the border margin of the active tiled window
 
-Edge semantics follow grabbed edge, not merely nearest ancestor split axis. Corner grabs can resize both axes together.
-Floating windows stay on native compositor behavior for plain border clicks; modified mouse resize still delegates to native Hyprland drag / resize dispatchers.
+The grabbed edge maps to the split whose divider is actually on that edge, not merely the nearest ancestor split on the axis. So grabbing the right edge of a middle column moves the divider to its right (growing it), and an edge with no divider (an outer/workspace edge) is a no-op instead of moving the opposite side. A border-zone click with nothing to resize is consumed so Hyprland's own `resize_on_border` cannot move the wrong edge instead. Corner grabs resize both axes when both grabbed edges are real dividers.
+
+The clickable border margin is read from the live config (`general.extend_border_grab_area` + `general.border_size`) and applies to the ring just outside the window edge — over the window body Hyprland shows no resize cursor, so no border grab there — matching the zone where Hyprland shows the resize cursor.
+
+While a resize drag is active, animations are suppressed for tiled windows (a temporary `no_anim` window rule matching `float = false`), so the dragged window and every neighbour sharing the moved divider track the cursor without the `windowsMove` animation lag; the poll runs every 8ms and dispatches once the cursor has moved 2px.
+
+Floating windows stay on native compositor behavior for plain border clicks; modified mouse resize still delegates to native Hyprland drag / resize dispatchers. Floating drag hit-testing expands the window box slightly so a click on the decoration just outside the reported geometry still grabs the floating window rather than the tiled window behind it.
 
 ## Why custom dispatchers exist
 

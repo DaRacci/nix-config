@@ -3,8 +3,8 @@ local util = require("layout.split-tree.util")
 
 local M = {}
 
-local pointerPollMs = 16
-local resizePixelThreshold = 12
+local pointerPollMs = 8
+local resizePixelThreshold = 2
 local movePixelThreshold = 20
 
 local noopOverlay = {
@@ -21,6 +21,36 @@ local function configNumber(candidates, fallback)
   end
 
   return fallback
+end
+
+local resizeNoAnimationRule = nil
+
+-- Hyprland animates layout-driven geometry changes (the windowsMove animation). During an edge
+-- drag that makes every window sharing the divider lag behind the cursor, so for the duration of
+-- the drag disable animation for tiled windows (the dragged window and its neighbours). One rule
+-- covering all tiled windows is enough; floating windows are untouched.
+local function setResizeAnimationSuppressed(suppressed)
+  if not suppressed and not resizeNoAnimationRule then
+    return
+  end
+
+  if not resizeNoAnimationRule then
+    local ok, created = pcall(hl.window_rule, {
+      name = "split-tree-resize-noanim",
+      match = { float = false },
+      no_anim = true,
+      enabled = false,
+    })
+    if not ok or not created then
+      return
+    end
+
+    resizeNoAnimationRule = created
+  end
+
+  pcall(function()
+    resizeNoAnimationRule:set_enabled(suppressed)
+  end)
 end
 
 local function handoffStyle()
@@ -125,6 +155,13 @@ function M.new(layouts, overlay)
     return nil
   end
 
+  -- Floating windows are only located by geometry, so expand the box a little: a click on the
+  -- decoration/border (just outside the reported at/size) should still grab the floating window
+  -- rather than falling through to the tiled window behind it.
+  local function floatingGrabTolerance()
+    return configNumber({ "general.border_size", "general:border_size" }, 2) + 4
+  end
+
   local function findFloatingWindowAtPoint(point)
     if not point then
       return nil
@@ -135,11 +172,21 @@ function M.new(layouts, overlay)
       return nil
     end
 
+    local tolerance = floatingGrabTolerance()
+
     for _, window in ipairs(hl.get_workspace_windows(workspaceCtx.activeWorkspace)) do
       if window.floating then
         local box = windowBox(window)
-        if box and util.pointInBox(box, point) then
-          return window
+        if box then
+          local expanded = {
+            x = box.x - tolerance,
+            y = box.y - tolerance,
+            w = box.w + tolerance * 2,
+            h = box.h + tolerance * 2,
+          }
+          if util.pointInBox(expanded, point) then
+            return window
+          end
         end
       end
     end
@@ -215,6 +262,10 @@ function M.new(layouts, overlay)
 
     if pointerTimer then
       pointerTimer:set_enabled(false)
+    end
+
+    if session and session.mode == "resize" then
+      setResizeAnimationSuppressed(false)
     end
 
     overlay.hide()
@@ -310,6 +361,7 @@ function M.new(layouts, overlay)
       return { ok = true }
     end
 
+    setResizeAnimationSuppressed(true)
     pointerTimer:set_enabled(true)
     return { ok = true }
   end
@@ -339,8 +391,23 @@ function M.new(layouts, overlay)
     end
 
     local box = state.boxes[windowId]
-    if not box or (cursor and not util.pointInBox(box, cursor)) then
+    if not box then
       return nil
+    end
+
+    if cursor then
+      -- Border grabs may start just outside the window (in the gap), matching the resize-cursor
+      -- zone; moves still require the cursor to be inside the window.
+      local hit
+      if opts.requireBorder then
+        hit = layout.borderZoneHit(state, windowId, cursor)
+      else
+        hit = util.pointInBox(box, cursor)
+      end
+
+      if not hit then
+        return nil
+      end
     end
 
     return {
@@ -383,6 +450,12 @@ function M.new(layouts, overlay)
       if mode == "resize" then
         local edges = layout.pickResizeEdges(managed.state, managed.windowId, cursor, opts.requireBorder)
         if not edges then
+          if opts.requireBorder and layout.borderZoneHit(managed.state, managed.windowId, cursor) then
+            -- Border grab on the active window with nothing to resize on that side: consume the
+            -- click so Hyprland's own resize_on_border cannot move the opposite edge instead.
+            return { ok = true }
+          end
+
           return { ok = not opts.passThroughOnMiss }
         end
 

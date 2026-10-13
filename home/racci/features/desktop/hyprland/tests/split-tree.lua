@@ -307,7 +307,7 @@ local function test_move_message_projects_drop_target_for_nested_bottom_leaf()
   assertEqual(message, "insert 3 2 left", "drop hit-test uses projected sibling geometry for nested bottom leaf")
 end
 
-local function test_resize_edge_px_respects_grabbed_right_edge_on_second_branch()
+local function test_resize_edge_px_ignores_outer_edge_with_no_divider()
   local store = testing.newStore()
 
   local context, state = recalc(store, "10", {
@@ -315,11 +315,17 @@ local function test_resize_edge_px_respects_grabbed_right_edge_on_second_branch(
     { id = "2", active = true },
   })
 
+  -- Window 2 is the rightmost column, so its right edge is the workspace edge with no divider.
+  -- Dragging it must not move the left divider (which would shrink window 2 from the left).
   testing.layoutMessage(store, context, "resize_edge_px 2 right 100")
-  assertClose(state.root.ratio, 0.4, 0.0001, "dragging right edge right grows second branch")
+  assertClose(state.root.ratio, 0.5, 0.0001, "outer edge with no divider is a no-op")
+
+  -- Its left edge is the divider, so that one does resize (moving the divider left grows window 2).
+  testing.layoutMessage(store, context, "resize_edge_px 2 left -100")
+  assertClose(state.root.ratio, 0.4, 0.0001, "left edge of second branch drags the divider")
 end
 
-local function test_resize_edge_px_respects_grabbed_bottom_edge_on_second_branch()
+local function test_resize_edge_px_ignores_outer_bottom_edge_with_no_divider()
   local store = testing.newStore()
 
   local context, state = recalc(store, "11", {
@@ -329,8 +335,47 @@ local function test_resize_edge_px_respects_grabbed_bottom_edge_on_second_branch
 
   testing.layoutMessage(store, context, "move down")
   testing.recalculate(store, context)
+
+  -- Window 1 ends up in the lower branch, so its bottom edge is the workspace edge, not a divider.
   testing.layoutMessage(store, context, "resize_edge_px 1 down 100")
-  assertClose(state.root.ratio, 0.4, 0.0001, "dragging bottom edge down grows lower branch")
+  assertClose(state.root.ratio, 0.5, 0.0001, "outer bottom edge with no divider is a no-op")
+end
+
+local function test_resize_edge_px_targets_divider_on_grabbed_side()
+  local store = testing.newStore()
+
+  local context, state = recalc(store, "15", {
+    { id = "1" },
+    { id = "2", active = true },
+    { id = "3" },
+  })
+
+  -- Left-leaning columns: ((1 | 2) | 3). Window 2's right divider is the root split; its left
+  -- divider is the nested split. Grabbing the right edge must move the root divider, not the
+  -- nested one (the old axis-only lookup moved the left divider instead).
+  state.root = {
+    kind = "split",
+    axis = "x",
+    ratio = 0.5,
+    first = {
+      kind = "split",
+      axis = "x",
+      ratio = 0.5,
+      first = { kind = "leaf", id = "1" },
+      second = { kind = "leaf", id = "2" },
+    },
+    second = { kind = "leaf", id = "3" },
+  }
+
+  testing.recalculate(store, context)
+
+  testing.layoutMessage(store, context, "resize_edge_px 2 right 100")
+  assertClose(state.root.ratio, 0.6, 0.0001, "right edge moves the root divider, growing window 2")
+  assertClose(state.root.first.ratio, 0.5, 0.0001, "left divider is untouched")
+
+  testing.recalculate(store, context)
+  testing.layoutMessage(store, context, "resize_edge_px 2 left -100")
+  assertClose(state.root.first.ratio, 0.5 - 100 / 600, 0.0001, "left edge moves the nested divider")
 end
 
 local function test_pick_resize_edges_returns_corner_axes()
@@ -340,27 +385,64 @@ local function test_pick_resize_edges_returns_corner_axes()
     { id = "1" },
     { id = "2", active = true },
     { id = "3" },
+    { id = "4" },
   })
 
+  -- Window 2 has a real divider on both its right and below, so a corner grab captures both axes.
   state.root = {
     kind = "split",
     axis = "x",
     ratio = 0.5,
-    first = { kind = "leaf", id = "1" },
-    second = {
+    first = {
       kind = "split",
       axis = "y",
       ratio = 0.5,
-      first = { kind = "leaf", id = "2" },
+      first = {
+        kind = "split",
+        axis = "x",
+        ratio = 0.5,
+        first = { kind = "leaf", id = "2" },
+        second = { kind = "leaf", id = "1" },
+      },
       second = { kind = "leaf", id = "3" },
     },
+    second = { kind = "leaf", id = "4" },
   }
 
   testing.recalculate(store, context)
 
-  local edges = testing.pickResizeEdges(state, "2", { x = 995, y = 495 }, false)
+  local box = state.boxes["2"]
+  local edges = testing.pickResizeEdges(state, "2", { x = box.x + box.w - 2, y = box.y + box.h - 2 }, false)
   assertEqual(edges.x, "right", "corner grab captures right edge")
   assertEqual(edges.y, "down", "corner grab captures bottom edge")
+end
+
+local function test_border_zone_hit_covers_gap_around_window()
+  local store = testing.newStore()
+
+  local _, state = recalc(store, "16", {
+    { id = "1", active = true },
+    { id = "2" },
+  })
+
+  local box = state.boxes["1"]
+  local middleY = box.y + box.h / 2
+
+  assertEqual(
+    testing.borderZoneHit(state, "1", { x = box.x - 3, y = middleY }),
+    true,
+    "cursor just outside the edge (in the gap) counts as a border grab"
+  )
+  assertEqual(
+    testing.borderZoneHit(state, "1", { x = box.x + 3, y = middleY }),
+    false,
+    "cursor just inside the edge is not a border grab"
+  )
+  assertEqual(
+    testing.borderZoneHit(state, "1", { x = box.x + box.w / 2, y = middleY }),
+    false,
+    "cursor in the window body is not a border grab"
+  )
 end
 
 local function test_find_window_at_point_prefers_active_workspace_over_stale_hidden_workspace()
@@ -726,9 +808,11 @@ for _, test in ipairs({
   test_move_message_targets_window_edge_under_cursor,
   test_move_message_projects_drop_target_after_removing_moving_top_leaf,
   test_move_message_projects_drop_target_for_nested_bottom_leaf,
-  test_resize_edge_px_respects_grabbed_right_edge_on_second_branch,
-  test_resize_edge_px_respects_grabbed_bottom_edge_on_second_branch,
+  test_resize_edge_px_ignores_outer_edge_with_no_divider,
+  test_resize_edge_px_ignores_outer_bottom_edge_with_no_divider,
+  test_resize_edge_px_targets_divider_on_grabbed_side,
   test_pick_resize_edges_returns_corner_axes,
+  test_border_zone_hit_covers_gap_around_window,
   test_find_window_at_point_prefers_active_workspace_over_stale_hidden_workspace,
   test_window_box_reads_named_at_and_size_fields,
   test_window_box_reads_array_at_and_size_fields,
