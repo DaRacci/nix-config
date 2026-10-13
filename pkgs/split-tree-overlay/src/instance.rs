@@ -50,13 +50,21 @@ pub(crate) fn acquire_lock(path: &Path) -> Option<(File, Option<u32>)> {
     }
 
     let mut replaced = None;
-    if let Some(pid) = read_pid(path)
-        && is_our_process(pid)
-    {
-        unsafe {
-            libc::kill(pid, libc::SIGTERM);
+    if let Some(pid) = read_pid(path) {
+        match (process_exe(pid), std::env::current_exe().ok()) {
+            // The same binary already holds the lock (e.g. a config reload re-launched us):
+            // leave it running and exit, so the reload stays a no-op.
+            (Some(holder), Some(current)) if holder == current => return None,
+            // A different build holds the lock: terminate it so the rebuilt binary can take over.
+            (Some(_), Some(_)) => {
+                unsafe {
+                    libc::kill(pid, libc::SIGTERM);
+                }
+                replaced = Some(pid as u32);
+            }
+            // Could not identify the holder; fall through and wait for the lock to free up.
+            _ => {}
         }
-        replaced = Some(pid as u32);
     }
 
     for _ in 0..100 {
@@ -82,14 +90,8 @@ fn read_pid(path: &Path) -> Option<i32> {
     text.trim().parse().ok()
 }
 
-fn is_our_process(pid: i32) -> bool {
-    fs::read_link(format!("/proc/{pid}/exe"))
-        .ok()
-        .and_then(|path| {
-            path.file_name()
-                .map(|name| name.to_string_lossy().into_owned())
-        })
-        .is_some_and(|name| name == "split-tree-overlay")
+fn process_exe(pid: i32) -> Option<PathBuf> {
+    fs::read_link(format!("/proc/{pid}/exe")).ok()
 }
 
 /// Bind a Wayland global, exiting with a diagnostic if it is unavailable.
