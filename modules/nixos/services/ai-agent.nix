@@ -544,6 +544,17 @@ in
         requires = [ "docker.service" ];
         bindsTo = [ "hermes-agent.service" ];
         wantedBy = [ "multi-user.target" ];
+        # hermes-agent.service is Type=simple: `docker start -a` is considered
+        # "started" as soon as it is spawned, so After=hermes-agent.service does
+        # NOT guarantee the container is up and accepting exec yet. Without a
+        # readiness wait the `docker exec` in ExecStart races container
+        # (re)creation, fails instantly, and the resulting burst of failed starts
+        # can trip systemd's default start rate limit (StartLimitBurst=5 within
+        # StartLimitIntervalSec=10s), leaving the unit stuck in `failed` and
+        # refusing to start even after the container is healthy. Disable the rate
+        # limit so Restart=always keeps retrying, and gate the real start on the
+        # container actually accepting an exec as the hermes user.
+        startLimitIntervalSec = 0;
         path = [ pkgs.docker ];
         serviceConfig = {
           Type = "simple";
@@ -551,6 +562,9 @@ in
           Group = "hermes";
           EnvironmentFile = config.services.hermes-agent.environmentFiles;
           PrivateTmp = true;
+          # Must exceed the readiness loop below (150 attempts x 2s).
+          TimeoutStartSec = 300;
+          ExecStartPre = "${lib.getExe pkgs.bash} -c 'for ((i = 0; i < 150; i++)); do docker exec -u hermes hermes-agent true 2>/dev/null && exit 0; sleep 2; done; echo \"hermes-agent container not ready after 300s\" >&2; exit 1'";
           ExecStart = "${lib.getExe pkgs.bash} -c 'env > /tmp/hermes-dashboard.env; exec docker exec -u hermes --env-file /tmp/hermes-dashboard.env hermes-agent /data/current-package/bin/hermes dashboard --host 0.0.0.0 --no-open --port ${toString cfg.dashboard.port}'";
           Restart = "always";
           RestartSec = 5;
