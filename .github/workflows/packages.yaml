@@ -181,13 +181,38 @@ jobs:
             echo "Candidate packages from changed paths:"
             printf '%s\n' "$CANDIDATES"
 
+            # A mixed push can match one package and leave a shared directory
+            # (pkgs/scripts, pkgs/io-guardian, ...) unmapped, so every changed
+            # path has to map on its own before the matrix can be narrowed
+            UNMAPPED=$(
+              awk -F'/' 'NR == FNR { k[$0] = 1; next }
+                {
+                  hit = 0
+                  if (NF > 1 && ($2 in k)) hit = 1
+                  if (!hit && $NF == "default.nix" && NF > 1 && ($(NF - 1) in k)) hit = 1
+                  if (!hit && $NF != "default.nix") {
+                    stem = $NF
+                    sub(/\.[^.]*$/, "", stem)
+                    if (stem != "" && (stem in k)) hit = 1
+                  }
+                  if (!hit) print
+                }' \
+                <(printf '%s' "$FULL_MATRIX" | jq -r '.include[].package' | sort -u) \
+                <(printf '%s\n' "$CHANGED_FILES")
+            )
+            if [ -n "$UNMAPPED" ]; then
+              echo "Paths with no matching package; keeping full matrix:"
+              printf '%s\n' "$UNMAPPED"
+              set_matrix "$FULL_MATRIX"
+              exit 0
+            fi
+
             CANDIDATES_JSON=$(printf '%s\n' "$CANDIDATES" | jq -R -s 'split("\n") | map(select(length > 0))')
             SELECTED=$(printf '%s' "$FULL_MATRIX" | jq -c --argjson pkgs "$CANDIDATES_JSON" \
               '[.include[] | .package as $p | select($pkgs | index($p))]')
 
+            # defensive: every changed path matched a package above
             if [ "$(printf '%s' "$SELECTED" | jq 'length')" -eq 0 ]; then
-              # Shared dirs (pkgs/scripts, pkgs/io-guardian, ...) export packages
-              # whose names match no path component; build everything instead
               echo "No changed path maps to a known package; keeping full matrix."
               set_matrix "$FULL_MATRIX"
               exit 0
