@@ -54,6 +54,9 @@
               age
               sops
               ssh-to-age
+
+              vale
+              hunspellDicts.en_AU-large
             ]
             ++ config.treefmt.build.devShell.buildInputs
             ++ (import ./scripts { inherit pkgs lib; } |> builtins.attrValues);
@@ -61,6 +64,7 @@
           env = {
             NIX_CONFIG = "extra-experimental-features = nix-command flakes pipe-operator pipe-operators";
             OPENSPEC_TELEMETRY = "0";
+            HUNSPELL_EN_AU = "${pkgs.hunspellDicts.en_AU-large}";
           };
 
           git-hooks = {
@@ -85,6 +89,13 @@
           };
 
           tasks = {
+            "vale:installDictionaries" = {
+              before = [ "devenv:enterShell" ];
+              exec = ''
+                "$DEVENV_ROOT/ci/vale/install-dictionaries.sh" "$HUNSPELL_EN_AU"
+              '';
+            };
+
             "bash:linkSkills" = {
               before = [ "devenv:enterShell" ];
               exec = ''

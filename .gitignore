@@ -9,6 +9,9 @@ result
 
 .cache/
 
+ci/vale/styles/config/dictionaries/en_AU-large.dic
+ci/vale/styles/config/dictionaries/en_AU-large.aff
+
 @girs
 node_modules
 .workspaces/
