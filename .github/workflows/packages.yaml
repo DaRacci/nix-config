@@ -146,10 +146,20 @@ jobs:
               fi
             fi
 
+            # flake.nix defines the package outputs and inputs, so any change to
+            # it can affect any package. This also covers pushes that touch
+            # flake.nix or this workflow but nothing under pkgs/, where the
+            # package diff below would be empty.
+            if git diff --name-only "$BEFORE_SHA" "$HEAD_SHA" -- flake.nix | grep -q 'flake.nix'; then
+              echo "flake.nix changed; keeping full matrix."
+              set_matrix "$FULL_MATRIX"
+              exit 0
+            fi
+
             CHANGED_FILES=$(git diff --name-only "$BEFORE_SHA" "$HEAD_SHA" -- pkgs/)
             if [ -z "$CHANGED_FILES" ]; then
-              echo "No changes in pkgs, skipping all builds."
-              echo "matrix=[]" >> "$GITHUB_OUTPUT"
+              echo "No changes in pkgs; keeping full matrix."
+              set_matrix "$FULL_MATRIX"
               exit 0
             fi
 
@@ -193,8 +203,13 @@ jobs:
               '[.include[] | .package as $p | select($pkgs | index($p))]')
 
             if [ "$(printf '%s' "$SELECTED" | jq 'length')" -eq 0 ]; then
-              echo "No changed packages match the discovered matrix; skipping all builds."
-              echo "matrix=[]" >> "$GITHUB_OUTPUT"
+              # Shared package directories (pkgs/scripts, pkgs/io-guardian, ...)
+              # export packages whose names match no path component, and a
+              # non-.nix file can belong to a package we cannot name from its
+              # path. Rebuilding everything costs CI minutes; silently skipping
+              # an affected package costs a broken master.
+              echo "No changed path maps to a known package; keeping full matrix."
+              set_matrix "$FULL_MATRIX"
               exit 0
             fi
 
