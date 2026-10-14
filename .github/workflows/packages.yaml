@@ -75,6 +75,7 @@ jobs:
           FULL_MATRIX: ${{ steps.get-packages.outputs.matrix }}
           EVENT_NAME: ${{ github.event_name }}
           BEFORE_SHA: ${{ github.event.before }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.sha }}
         with:
           packages: gawk
@@ -89,19 +90,33 @@ jobs:
               } >> "$GITHUB_OUTPUT"
             }
 
-            if [ "$EVENT_NAME" != "push" ]; then
-              echo "Not a push event ($EVENT_NAME); keeping full matrix."
+            # Diff endpoints per event. A push carries the previous tip in
+            # github.event.before; a pull request carries no such thing, so diff
+            # its base branch against the merge commit GitHub checked out for the
+            # event - base..merge is exactly the change set of the PR. Anything
+            # else (manual dispatch, missing or unavailable base) keeps the full
+            # matrix rather than guessing.
+            case "$EVENT_NAME" in
+              push) DIFF_BASE="$BEFORE_SHA" ;;
+              pull_request) DIFF_BASE="$PR_BASE_SHA" ;;
+              *) DIFF_BASE="" ;;
+            esac
+
+            if [ -z "$DIFF_BASE" ] || [ "$DIFF_BASE" = "0000000000000000000000000000000000000000" ]; then
+              echo "No usable base for $EVENT_NAME; keeping full matrix."
               set_matrix "$FULL_MATRIX"
               exit 0
             fi
 
-            if [ -z "$BEFORE_SHA" ] || [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
-              echo "No usable before SHA; keeping full matrix."
+            git fetch origin "$DIFF_BASE" --depth=1
+
+            if ! git cat-file -e "$DIFF_BASE^{commit}" 2>/dev/null; then
+              echo "Base commit $DIFF_BASE is unavailable; keeping full matrix."
               set_matrix "$FULL_MATRIX"
               exit 0
             fi
 
-            git fetch origin "$BEFORE_SHA" --depth=1
+            BEFORE_SHA="$DIFF_BASE"
 
             # If flake.lock changed, check if the nixpkgs input changed; if so, keep full matrix
             if git diff --name-only "$BEFORE_SHA" "$HEAD_SHA" -- flake.lock | grep -q 'flake.lock'; then
