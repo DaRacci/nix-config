@@ -25,14 +25,15 @@
 
 buildPythonApplication rec {
   pname = "mcp-sequential-thinking";
-  version = "0.7.0-unstable-2026-08-24";
+  # 0.7.0 requires mcp>=2, which nixpkgs does not ship yet (mcp 1.29.0)
+  version = "0.6.0-unstable-2026-07-05";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "arben-adm";
     repo = "mcp-sequential-thinking";
-    rev = "4f71b39c8e4451583749409e5e2475df0fa19d26";
-    hash = "sha256-NUKqpFG2reNnlB3xkfPTIBiAPXjE6oNOhthevhpbD8g=";
+    rev = "527ba64d86b68c4ca54f7986b65537ded19510fa";
+    hash = "sha256-1NSnk67UxhthpbnOk7YMZVU/xj7n7P1wsHHHwgh9K6Y=";
   };
 
   build-system = [
