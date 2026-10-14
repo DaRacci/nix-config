@@ -43,7 +43,7 @@ jobs:
             )
             for PKG in $PKGS; do
               ERRFILE=$(mktemp)
-              if BROKEN=$(nix eval --json --no-pure-eval --allow-import-from-derivation ".#packages.${ARCH}.${PKG}.meta.broken" 2>"$ERRFILE"); then
+              if BROKEN=$(nix eval --json --no-pure-eval --allow-import-from-derivation --system "${ARCH}" ".#packages.${ARCH}.${PKG}.meta.broken" 2>"$ERRFILE"); then
                 if echo "$BROKEN" | jq -e '. == true' >/dev/null; then
                   echo "Skipping broken package $PKG on $ARCH"
                 else
@@ -72,12 +72,6 @@ jobs:
         id: filtered-packages
         uses: workflow/nix-shell-action@v4.0.0
         env:
-          # The package matrix is multi-line JSON, so it is passed through env
-          # instead of being interpolated into the script with ${{ }}.
-          # Interpolating it inside a double-quoted shell string strips the
-          # JSON's own double quotes and yields invalid JSON ("jq: parse error:
-          # Invalid numeric literal"), which broke this step on every push and
-          # made the matrix output unusable for the build-packages job.
           FULL_MATRIX: ${{ steps.get-packages.outputs.matrix }}
           EVENT_NAME: ${{ github.event_name }}
           BEFORE_SHA: ${{ github.event.before }}
@@ -146,10 +140,7 @@ jobs:
               fi
             fi
 
-            # flake.nix defines the package outputs and inputs, so any change to
-            # it can affect any package. This also covers pushes that touch
-            # flake.nix or this workflow but nothing under pkgs/, where the
-            # package diff below would be empty.
+            # flake.nix defines the package outputs, so it can affect any package
             if git diff --name-only "$BEFORE_SHA" "$HEAD_SHA" -- flake.nix | grep -q 'flake.nix'; then
               echo "flake.nix changed; keeping full matrix."
               set_matrix "$FULL_MATRIX"
@@ -163,23 +154,15 @@ jobs:
               exit 0
             fi
 
-            # pkgs/default.nix defines the package set, so a change there can
-            # affect any package.
+            # pkgs/default.nix defines the package set, so it can affect any package
             if printf '%s\n' "$CHANGED_FILES" | grep -qx 'pkgs/default.nix'; then
               echo "pkgs/default.nix changed; keeping full matrix."
               set_matrix "$FULL_MATRIX"
               exit 0
             fi
 
-            # Derive candidate package names from the changed paths. pkgs/ uses
-            # the layouts pkgs/<pkg>/..., pkgs/<category>/<pkg>.nix and
-            # pkgs/<category>/<pkg>/default.nix, so a changed file can name its
-            # package via its first path component, via the parent directory of
-            # a default.nix, or via its own file stem. Candidates are
-            # intersected with the discovered package list below, so extra
-            # candidates are harmless. (Naming a package after the basename of
-            # every changed file instead produced junk entries such as
-            # "app.rs"/"Cargo.toml" for packages that carry a source tree.)
+            # Candidate package names from the changed paths, intersected with the
+            # discovered package list; extra candidates are harmless
             CANDIDATES=$(
               printf '%s\n' "$CHANGED_FILES" \
               | awk -F'/' '
@@ -203,11 +186,8 @@ jobs:
               '[.include[] | .package as $p | select($pkgs | index($p))]')
 
             if [ "$(printf '%s' "$SELECTED" | jq 'length')" -eq 0 ]; then
-              # Shared package directories (pkgs/scripts, pkgs/io-guardian, ...)
-              # export packages whose names match no path component, and a
-              # non-.nix file can belong to a package we cannot name from its
-              # path. Rebuilding everything costs CI minutes; silently skipping
-              # an affected package costs a broken master.
+              # Shared dirs (pkgs/scripts, pkgs/io-guardian, ...) export packages
+              # whose names match no path component; build everything instead
               echo "No changed path maps to a known package; keeping full matrix."
               set_matrix "$FULL_MATRIX"
               exit 0
