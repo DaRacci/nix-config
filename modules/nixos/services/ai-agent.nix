@@ -619,8 +619,8 @@ in
             hermes-curator-evolver
 
             # deps for agentiker-code-intel
-            pkgs.python312Packages.tree-sitter
-            pkgs.python312Packages.ast-grep-py
+            config.services.hermes-agent.package.python.pkgs.tree-sitter
+            config.services.hermes-agent.package.python.pkgs.ast-grep-py
           ];
 
           #TODO:Need a way to auto update these source only plugins.

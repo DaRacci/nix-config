@@ -6,7 +6,9 @@
 }:
 let
   # Hermes requires plugins to be compiled in the same python version.
-  hermesPythonVersion = pkgs.python312Packages;
+  # hermes-agent exposes the interpreter it was built with (pm/lock.json), so
+  # take the plugin packages from that set rather than a hardcoded python3NNPackages.
+  hermesPythonVersion = pkgs.hermes-agent.python.pkgs;
 in
 {
   # VR Stuff
