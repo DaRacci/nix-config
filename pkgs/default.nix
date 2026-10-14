@@ -38,7 +38,6 @@ in
   mnemosyne-memory = hermesPythonVersion.callPackage ./python/mnemosyne-memory.nix { };
   mnemosyne-hermes = hermesPythonVersion.callPackage ./python/mnemosyne-hermes.nix { };
   mnemosyne-memory-all = pkgs.mnemosyne-memory.overridePythonAttrs (old: {
-    # keep the base deps (pyyaml) as well as the optional groups
     dependencies = lib.unique (old.dependencies ++ old.passthru.optional-dependencies.all);
   });
   rtk-hermes = hermesPythonVersion.callPackage ./python/rtk-hermes.nix { };
