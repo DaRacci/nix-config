@@ -110,8 +110,19 @@ function M.new(layouts, overlay)
     }
   end
 
+  -- The workspace the cursor is interacting with.
+  -- A shown special workspace overlays its monitor, so it must be selected over the normal active workspace,
+  local function workspaceUnderCursor()
+    local ok, monitor = pcall(hl.get_monitor_at_cursor)
+    if ok and monitor and monitor.active_special_workspace then
+      return monitor.active_special_workspace
+    end
+
+    return hl.get_active_workspace()
+  end
+
   local function activeWorkspaceContext()
-    local activeWorkspace = hl.get_active_workspace()
+    local activeWorkspace = workspaceUnderCursor()
     local workspace = util.workspaceKeyFromWorkspace(activeWorkspace)
     local state = layouts[workspace]
     if not activeWorkspace or not state then
@@ -194,14 +205,14 @@ function M.new(layouts, overlay)
     return nil
   end
 
-  -- Visible workspaces (one active workspace per monitor) that we could drop into.
+  -- Workspaces visible on a monitor that we could drop into.
   local function visibleStates()
     local states = {}
 
     local ok, monitors = pcall(hl.get_monitors)
     if ok and type(monitors) == "table" then
       for _, monitor in ipairs(monitors) do
-        local workspace = monitor.active_workspace
+        local workspace = monitor.active_special_workspace or monitor.active_workspace
         if workspace then
           local key = util.workspaceKeyFromWorkspace(workspace)
           local state = layouts[key]

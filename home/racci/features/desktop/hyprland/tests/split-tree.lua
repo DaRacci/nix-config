@@ -936,6 +936,67 @@ local function test_detached_window_keeps_tree_structure()
   assertEqual(testing.contains(state.root, "c"), false, "a floated window is pruned from the tree")
 end
 
+-- Cursor interactions on a shown special workspace must resolve to that workspace, not the normal
+-- workspace behind it (focusing the window behind would hide the special workspace).
+local function test_pointer_targets_shown_special_workspace()
+  local store = testing.newStore()
+  local _, specialState = recalc(store, "special:grave", { { id = "s", active = true } })
+  recalc(store, "1", { { id = "n", active = true } })
+
+  local specialWorkspace = { addressable_name = "special:grave", name = "special:grave", id = -99 }
+  local normalWorkspace = { addressable_name = "1", name = "1", id = 1 }
+  local box = specialState.boxes["s"]
+
+  local specialWindow = {
+    stable_id = "s",
+    floating = false,
+    at = { x = box.x, y = box.y },
+    size = { x = box.w, y = box.h },
+    workspace = specialWorkspace,
+  }
+  local normalWindow = {
+    stable_id = "n",
+    floating = false,
+    at = { x = 0, y = 0 },
+    size = { x = 1000, y = 1000 },
+    workspace = normalWorkspace,
+  }
+
+  local fake = makeFakeHl({ normalWindow, specialWindow })
+  fake.workspace = normalWorkspace
+  fake.activeWindow = normalWindow
+  fake.get_workspace_windows = function(workspace)
+    return workspace == specialWorkspace and { specialWindow } or { normalWindow }
+  end
+  fake.get_monitor_at_cursor = function()
+    return { name = "TEST", active_workspace = normalWorkspace, active_special_workspace = specialWorkspace }
+  end
+  fake.get_monitors = function()
+    return { { name = "TEST", active_workspace = normalWorkspace, active_special_workspace = specialWorkspace } }
+  end
+  _G.hl = fake
+
+  local overlay = makeFakeOverlay()
+  local controller = pointer.new(store, overlay)
+  fake.cursor = { x = box.x + box.w / 2, y = box.y + box.h / 2 }
+
+  local started = controller.beginMouseDrag()
+  assertEqual(started.ok, true, "drag starts on a window in the shown special workspace")
+
+  local focused = nil
+  for _, dispatcher in ipairs(fake.dispatches) do
+    if dispatcher.kind == "focus" then
+      focused = dispatcher.spec.window
+    end
+  end
+
+  assertEqual(focused, specialWindow, "focus targets the special workspace window, not the one behind")
+
+  local handoff = lastOverlayWrite(overlay)
+  assertEqual(#handoff.roots, 1, "the workspace behind a special workspace is not a drop target")
+  assertEqual(handoff.roots[1].id, "special:grave:root", "drop map root is the shown special workspace")
+end
+
 for _, test in ipairs({
   test_keyboard_resize_moves_split_in_arrow_direction,
   test_keyboard_resize_keeps_direction_for_second_branch,
@@ -969,6 +1030,7 @@ for _, test in ipairs({
   test_pointer_reemits_handoff_on_recalculate,
   test_pointer_toggle_float_keeps_tiled_geometry,
   test_detached_window_keeps_tree_structure,
+  test_pointer_targets_shown_special_workspace,
 }) do
   test()
 end
