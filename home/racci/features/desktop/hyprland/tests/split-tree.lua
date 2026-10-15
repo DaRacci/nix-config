@@ -1021,6 +1021,30 @@ local function test_end_handlers_only_consume_their_session()
   assertEqual(controller.endMouseDrag().ok, true, "left release ends the move session")
 end
 
+-- A fullscreen window covers the workspace, so the tiles behind it must not be hit-tested.
+local function test_fullscreen_window_blocks_hidden_tile_hit_test()
+  local store = testing.newStore()
+  local specs = { { id = "a", active = true }, { id = "b" } }
+  local _, state = recalc(store, "1", specs)
+
+  local windows = fakeWindowsFromBoxes(state.boxes, specs)
+  windows[1].fullscreen = 2
+  local fake = makeFakeHl(windows)
+  _G.hl = fake
+
+  local controller = pointer.new(store, makeFakeOverlay())
+  local box = state.boxes["a"]
+  fake.cursor = { x = box.x + box.w / 2, y = box.y + box.h / 2 }
+
+  controller.beginMouseDrag()
+  assertEqual(controller.endMouseDrag().ok, false, "no tile drag while a window is fullscreen")
+
+  controller.beginMouseResize()
+  assertEqual(controller.endMouseResize().ok, false, "no tile resize while a window is fullscreen")
+
+  assertEqual(controller.beginBorderResize().ok, false, "no border grab while a window is fullscreen")
+end
+
 for _, test in ipairs({
   test_keyboard_resize_moves_split_in_arrow_direction,
   test_keyboard_resize_keeps_direction_for_second_branch,
@@ -1056,6 +1080,7 @@ for _, test in ipairs({
   test_detached_window_keeps_tree_structure,
   test_pointer_targets_shown_special_workspace,
   test_end_handlers_only_consume_their_session,
+  test_fullscreen_window_blocks_hidden_tile_hit_test,
 }) do
   test()
 end

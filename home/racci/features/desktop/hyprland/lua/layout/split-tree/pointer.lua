@@ -137,6 +137,21 @@ function M.new(layouts, overlay)
     }
   end
 
+  -- A fullscreen/maximized window covers its workspace, so tiles behind it aren't valid targets.
+  local function workspaceCovered(workspace)
+    if not workspace then
+      return false
+    end
+
+    for _, window in ipairs(hl.get_workspace_windows(workspace)) do
+      if (window.fullscreen or 0) ~= 0 then
+        return true
+      end
+    end
+
+    return false
+  end
+
   local function findManagedTiledWindowAtPoint(point)
     if not point then
       return nil
@@ -381,6 +396,11 @@ function M.new(layouts, overlay)
   end
 
   local function managedWindowContext(cursor)
+    local workspaceCtx = activeWorkspaceContext()
+    if not workspaceCtx or workspaceCovered(workspaceCtx.activeWorkspace) then
+      return nil
+    end
+
     local hovered = findManagedTiledWindowAtPoint(cursor)
     if hovered then
       hovered.cursor = cursor
@@ -472,6 +492,10 @@ function M.new(layouts, overlay)
   local function findBorderTarget(cursor)
     local workspaceCtx = activeWorkspaceContext()
     if not workspaceCtx or not cursor or not workspaceCtx.state.root then
+      return nil
+    end
+
+    if workspaceCovered(workspaceCtx.activeWorkspace) then
       return nil
     end
 
