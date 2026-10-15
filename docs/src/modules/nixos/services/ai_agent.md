@@ -111,6 +111,13 @@ Enable long-term memory with `services.ai-agent.memory.enable = true;`:
 }
 ```
 
+This registers the `mnemosyne-hermes` plugin and writes these `settings.memory.mnemosyne` defaults:
+
+- `auto_sleep = true` with `sleep_threshold = 50` — working memory is consolidated into the episodic store once the threshold is reached.
+- `profile_isolation = false` — every Hermes profile in the container shares the single default bank at `$HERMES_HOME/mnemosyne/data/mnemosyne.db`, which is where the existing memory history lives. Setting it to `true` instead gives each profile its own `mnemosyne/data/banks/<profile>/mnemosyne.db`; banks are not migrated between the two modes.
+- `shared_surface_read = true` — `mnemosyne_recall` merges shared-surface results into private-bank recall and tags each result with its origin.
+- `tools = null` — expose every `mnemosyne_*` tool.
+
 ## References
 
 - [Hermes Agent](https://hermes-agent.nousresearch.com/)

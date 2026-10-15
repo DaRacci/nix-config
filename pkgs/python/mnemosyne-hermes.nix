@@ -21,6 +21,12 @@ buildPythonPackage (attrs: {
     hash = "sha256-92BfXleuTmayvI85oDN+O5FuOI1iPxxMZjMC4A3N860=";
   };
 
+  #TODO:https://github.com/mnemosyne-oss/mnemosyne/pull/1125
+  postPatch = ''
+    substituteInPlace src/mnemosyne_hermes/__init__.py \
+      --replace-fail "self._beam: Optional[Any] = None" ""
+  '';
+
   build-system = [ setuptools ];
 
   dependencies = [
