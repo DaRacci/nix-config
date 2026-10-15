@@ -3,7 +3,7 @@
 ## Purpose
 
 Custom Lua layout that implements a split-tree layout for Hyprland, inspired by the `hy3` plugin which itself was inspired by i3's split-tree layout.
-This is not a faithful port but an opinionated reimplementation that works around Hyprland Lua layout limitations.
+This is not a faithful port but an opinionated re-implementation that works around Hyprland Lua layout limitations.
 
 ## Files
 
@@ -18,7 +18,7 @@ This is not a faithful port but an opinionated reimplementation that works aroun
 - Harness: [`home/racci/features/desktop/hyprland/tests/split-tree.lua`](../../../../home/racci/features/desktop/hyprland/tests/split-tree.lua)
 - Workspace startup seeding: [`modules/home-manager/core/hyprland/lua/opt/workspaces.lua`](../../../../modules/home-manager/core/hyprland/lua/opt/workspaces.lua)
 
-## Behavior
+## Behaviour
 
 ### Window insertion
 
@@ -32,8 +32,8 @@ Split axis follows current leaf box shape:
 
 `move left/right/up/down` does two things depending on geometry:
 
-- if neighbor exists in requested direction, swap leaves
-- if neighbor does not exist, pull active leaf to requested workspace edge
+- if neighbour exists in requested direction, swap leaves
+- if neighbour does not exist, pull active leaf to requested workspace edge
 
 That edge-pull avoids broken nested-column reshapes that earlier Lua version produced.
 
@@ -57,20 +57,20 @@ An outline is drawn around the dragged source window (by the overlay, not by tou
 On release, split-tree measures the cursor movement; if it moved past a small threshold it computes the target tile from the current layout and dispatches the reorder with a layout message. A click that does not move does not reorder.
 Because this is not the compositor's drag, the mouse-release keybind fires reliably.
 
-Drop direction uses a **normalized** cursor offset per axis rather than the plain nearest edge.
-A plain nearest-edge comparison biases wide (full-width) tiles toward up/down splits because their top/bottom edges are physically closer, which made it hard to insert a side-by-side column split; normalizing makes each axis compete on equal footing.
+Drop direction uses a **normalised** cursor offset per axis rather than the plain nearest edge.
+A plain nearest-edge comparison biases wide (full-width) tiles toward up/down splits because their top/bottom edges are physically closer, which made it hard to insert a side-by-side column split; normalising makes each axis compete on equal footing.
 
 Hovered-window hit-testing is scoped to the active workspace so stale geometry from hidden workspaces cannot steal pointer interactions.
 
 ### Drag preview overlay
 
 The overlay is a small Rust client ([`pkgs/split-tree-overlay`](../../../../pkgs/split-tree-overlay)).
-It creates one `wlr-layer-shell` surface per rect on the overlay layer, anchored top-left, with an empty input region so it is click-through and never steals focus or pointer events, and renders rounded, anti-aliased rectangles from a shared-memory buffer.
+It creates one `wlr-layer-shell` surface per `rect` on the overlay layer, anchored top-left, with an empty input region so it is click-through and never steals focus or pointer events, and renders rounded, anti-aliased rectangles from a shared-memory buffer.
 
 **Division of work:** the layout owns the tree; the client owns the per-frame preview.
 
-- `layout.lua#buildDropMap` precomputes, for the frozen tree, the projected tile box for every `region|direction` and `root|direction`. The layout writes this "handoff" once per tree change (drag start, and again on every `recalculate` while a drag is active).
-- The client watches the handoff file with inotify, samples the cursor over Hyprland's IPC command socket (`cursorpos`), resolves it to a projected box with a smallest-region hit-test plus the same normalized nearest-edge rule, and paints. It never re-implements the layout algorithm.
+- `layout.lua#buildDropMap` computes, ahead of time and for the frozen tree, the projected tile box for every `region|direction` and `root|direction`. The layout writes this "handoff" once per tree change (drag start, and again on every `recalculate` while a drag is active).
+- The client watches the handoff file with `inotify`, samples the cursor over Hyprland's IPC command socket (`cursorpos`), resolves it to a projected box with a smallest-region hit-test plus the same normalised nearest-edge rule, and paints. It never re-implements the layout algorithm.
 - On release the layout re-derives the placement itself and applies it, so the final result never depends on the client.
 
 Handoff shape that gets written to `$XDG_RUNTIME_DIR/split-tree-overlay-<HYPRLAND_INSTANCE_SIGNATURE>.json`:
@@ -87,9 +87,9 @@ Handoff shape that gets written to `$XDG_RUNTIME_DIR/split-tree-overlay-<HYPRLAN
 }
 ```
 
-Region and root ids are namespaced with the workspace key (`<ws>:<leaf>` / `<ws>:root`). The drop map covers every visible workspace (one active workspace per monitor), so the cursor can resolve to a tile on another monitor, including an **empty** visible workspace (a windowless workspace still exposes its tileable `area`, and dropping there just moves the window over as its only tile).
+Region and root ids carry the workspace key as a prefix (`<ws>:<leaf>` / `<ws>:root`). The drop map covers every visible workspace (one active workspace per monitor), so the cursor can resolve to a tile on another monitor, including an **empty** visible workspace (a windowless workspace still exposes the `area` available for tiling, and dropping there just moves the window over as its only tile).
 
-Projected boxes are inset by half the inner gap (`general.gaps_in`) on interior edges so the preview lines up with real window borders; sides flush with the workspace area (which already excludes outer gaps) are left alone. The preview border uses the Tokyo Night palette and is drawn 25% thicker than `general.border_size` so it stands out; colours are straight (non-premultiplied) and only premultiplied when composited into the shm buffer.
+Projected boxes are inset by half the inner gap (`general.gaps_in`) on interior edges so the preview lines up with real window borders; sides flush with the workspace area (which already excludes outer gaps) are left alone. The preview border uses the Tokyo Night palette and is drawn 25% thicker than `general.border_size` so it stands out; colours are straight (non-premultiplied) and only premultiplied when composited into the `shm` buffer.
 
 Sample rate targets the active monitor's refresh rate (from IPC `j/monitors`), re-evaluated as the cursor crosses monitors; it falls back to idle when no drag is active. `border_width` and `rounding` are read from the live Hyprland config (`general.border_size`, `decoration.rounding`) so the preview matches real windows.
 
@@ -101,7 +101,7 @@ Cross-workspace drops are supported: the layout resolves on release which visibl
 
 Two tiled resize paths exist:
 
-- `SUPER + mouse:right` — picks the nearest resizable edge or corner of the hovered tiled window, then resizes along the grabbed axis or axes
+- `SUPER + mouse:right` — picks the nearest edge or corner of the hovered tiled window that can be resized, then resizes along the grabbed axis or axes
 - plain `mouse:left` on tiled border — auto-consuming border resize fallback; picks the nearest tiled window whose border the cursor is grabbing
 
 The grabbed edge maps to the split whose divider is actually on that edge, not merely the nearest ancestor split on the axis. So grabbing the right edge of a middle column moves the divider to its right (growing it), and an edge with no divider (an outer/workspace edge) is a no-op instead of moving the opposite side. A border-zone click with nothing to resize is consumed so Hyprland's own `resize_on_border` cannot move the wrong edge instead. Corner grabs resize both axes when both grabbed edges are real dividers.
@@ -110,7 +110,7 @@ The border grab zone mirrors Hyprland's own hit test: the cursor must sit within
 
 While a resize drag is active, animations are suppressed for tiled windows (a temporary `no_anim` window rule matching `float = false`), so the dragged window and every neighbour sharing the moved divider track the cursor without the `windowsMove` animation lag; the poll runs every 8ms and dispatches once the cursor has moved 2px.
 
-Floating windows stay on native compositor behavior for plain border clicks; modified mouse resize still delegates to native Hyprland drag / resize dispatchers. Floating drag hit-testing expands the window box slightly so a click on the decoration just outside the reported geometry still grabs the floating window rather than the tiled window behind it.
+Floating windows stay on native compositor behaviour for plain border clicks; modified mouse resize still delegates to native Hyprland drag / resize dispatchers. Floating drag hit-testing expands the window box slightly so a click on the decoration just outside the reported geometry still grabs the floating window rather than the tiled window behind it.
 
 ### Reloads
 
