@@ -69,16 +69,52 @@ function M.firstLeafId(node)
   return M.firstLeafId(node.first) or M.firstLeafId(node.second)
 end
 
+-- Ids whose close event fired while the window was fullscreen.
+-- Closing a fullscreen window runs the fullscreen-exit recalculate before Hyprland
+-- removes the target, so that pass still lists the dying window and would re-tile it.
+-- The tombstone is forgotten once the id is no longer listed.
+local closingIds = {}
+
+function M.markClosing(id, window)
+  if not id or not window then
+    return
+  end
+
+  if (window.fullscreen or 0) == 0 and (window.fullscreen_client or 0) == 0 then
+    return
+  end
+
+  closingIds[id] = true
+end
+
 local function collectTargets(ctx)
   local orderedIds = {}
   local present = {}
   local targets = {}
+  local listed = {}
 
   for _, target in ipairs(ctx.targets) do
-    local id = util.targetId(target)
-    present[id] = true
-    targets[id] = target
-    orderedIds[#orderedIds + 1] = id
+    local window = target.window
+    if window then
+      local id = tostring(window.stable_id)
+      listed[id] = true
+
+      if not closingIds[id] then
+        present[id] = true
+        targets[id] = target
+        orderedIds[#orderedIds + 1] = id
+      end
+    end
+  end
+
+  -- Stable ids are never reused, so a tombstone can be cleared once its id is gone.
+  -- Clearing when nothing else is listed covers a lone fullscreen window that was
+  -- unmapped rather than closed: no tile is left to protect, and that window still
+  -- has to be tiled again when it is remapped.
+  for id in pairs(closingIds) do
+    if not listed[id] or #orderedIds == 0 then
+      closingIds[id] = nil
+    end
   end
 
   return present, targets, orderedIds

@@ -936,6 +936,59 @@ local function test_detached_window_keeps_tree_structure()
   assertEqual(testing.contains(state.root, "c"), false, "a floated window is pruned from the tree")
 end
 
+-- Emulates the window.close handler: drop the leaf, then let the layout handle the
+-- fullscreen-exit pass that still lists the dying window.
+local function closeWindow(store, state, id, window)
+  testing.markClosing(id, window)
+  state.root = select(1, testing.removeLeaf(state.root, id))
+end
+
+-- Closing a fullscreen window runs the fullscreen-exit recalculate before Hyprland
+-- removes the target, so that pass must not re-tile the dying window.
+local function test_closing_fullscreen_window_leaves_no_ghost_tile()
+  local store = testing.newStore()
+  local specs = { { id = "a", active = true }, { id = "b" } }
+  local _, state = recalc(store, "1", specs)
+
+  closeWindow(store, state, "a", { fullscreen = 2 })
+  testing.recalculate(store, ctx("1", specs))
+
+  assertEqual(testing.contains(state.root, "a"), false, "the closing window is not re-tiled")
+  assertEqual(state.boxes["a"], nil, "the closing window gets no tile box")
+  assertClose(state.boxes["b"].w, 1000, 0.0001, "the remaining window takes the freed space")
+
+  testing.recalculate(store, ctx("1", { { id = "b", active = true } }))
+  assertEqual(testing.contains(state.root, "a"), false, "the closed window stays out once its target is gone")
+end
+
+-- A window that is merely unmapped and remapped (not really closed) must still be
+-- tiled again; the suppression must not outlive the pass that lists it.
+local function test_remapped_fullscreen_window_is_tiled_again()
+  local store = testing.newStore()
+  local specs = { { id = "a", active = true } }
+  local _, state = recalc(store, "1", specs)
+
+  closeWindow(store, state, "a", { fullscreen = 2 })
+  testing.recalculate(store, ctx("1", specs))
+  assertEqual(testing.contains(state.root, "a"), false, "the unmapped window is not re-tiled in place")
+
+  testing.recalculate(store, ctx("1", specs))
+  assertEqual(testing.contains(state.root, "a"), true, "the remapped window is tiled again")
+end
+
+-- A non-fullscreen window has no extra pass to survive, so its close must stay on the
+-- plain reconciliation path.
+local function test_window_close_without_fullscreen_is_not_suppressed()
+  local store = testing.newStore()
+  local specs = { { id = "a", active = true }, { id = "b" } }
+  local _, state = recalc(store, "1", specs)
+
+  closeWindow(store, state, "a", { fullscreen = 0 })
+  testing.recalculate(store, ctx("1", specs))
+
+  assertEqual(testing.contains(state.root, "a"), true, "a non-fullscreen close keeps the plain re-add path")
+end
+
 -- Cursor interactions must resolve to a shown special workspace,
 -- not the normal workspace behind.
 local function test_pointer_targets_shown_special_workspace()
@@ -1078,6 +1131,9 @@ for _, test in ipairs({
   test_pointer_reemits_handoff_on_recalculate,
   test_pointer_toggle_float_keeps_tiled_geometry,
   test_detached_window_keeps_tree_structure,
+  test_closing_fullscreen_window_leaves_no_ghost_tile,
+  test_remapped_fullscreen_window_is_tiled_again,
+  test_window_close_without_fullscreen_is_not_suppressed,
   test_pointer_targets_shown_special_workspace,
   test_end_handlers_only_consume_their_session,
   test_fullscreen_window_blocks_hidden_tile_hit_test,

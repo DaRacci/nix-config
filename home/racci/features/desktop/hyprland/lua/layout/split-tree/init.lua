@@ -91,6 +91,7 @@ if hl and hl.on then
   hl.on("window.close", function(window)
     local id = windowId(window)
     if id then
+      layout.markClosing(id, window)
       dropLeaf(id)
     end
   end)
@@ -195,6 +196,7 @@ M._testing = {
   insertLeafBeside = layout.insertLeafBeside,
   isInCurvedCorner = layout.isInCurvedCorner,
   layoutMessage = layout.layoutMessage,
+  markClosing = layout.markClosing,
   moveLeafToEdge = layout.moveLeafToEdge,
   moveMessageForBoxes = layout.moveMessageForBoxes,
   moveMessageForPoint = layout.moveMessageForPoint,
