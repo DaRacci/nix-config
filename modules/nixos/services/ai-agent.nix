@@ -80,6 +80,18 @@ let
     check = builtins.isAttrs;
     merge = _loc: defs: lib.foldl' mergeDeep { } (map (d: d.value) defs);
   };
+
+  # Dashboard readiness gate. hermes-agent.service is Type=simple, so the
+  # dashboard has to wait for the container to accept `docker exec` instead of
+  # racing container (re)creation. Kept here so the wait loop and the systemd
+  # start timeout are derived from one place and cannot drift apart.
+  dashboardReadinessAttempts = 150;
+  dashboardReadinessIntervalSec = 2;
+  dashboardReadinessBudgetSec = dashboardReadinessAttempts * dashboardReadinessIntervalSec;
+  # Margin over the budget: every attempt costs `docker exec` overhead on top of
+  # its sleep, so a start timeout equal to the budget would fire before the loop
+  # could report the failure itself.
+  dashboardStartTimeoutSec = dashboardReadinessBudgetSec + 30;
 in
 {
   imports =
@@ -544,6 +556,17 @@ in
         requires = [ "docker.service" ];
         bindsTo = [ "hermes-agent.service" ];
         wantedBy = [ "multi-user.target" ];
+        # hermes-agent.service is Type=simple: `docker start -a` is considered
+        # "started" as soon as it is spawned, so After=hermes-agent.service does
+        # NOT guarantee the container is up and accepting exec yet. Without a
+        # readiness wait the `docker exec` in ExecStart races container
+        # (re)creation, fails instantly, and the resulting burst of failed starts
+        # can trip systemd's default start rate limit (StartLimitBurst=5 within
+        # StartLimitIntervalSec=10s), leaving the unit stuck in `failed` and
+        # refusing to start even after the container is healthy. Disable the rate
+        # limit so Restart=always keeps retrying, and gate the real start on the
+        # container actually accepting an exec as the hermes user.
+        startLimitIntervalSec = 0;
         path = [ pkgs.docker ];
         serviceConfig = {
           Type = "simple";
@@ -551,6 +574,10 @@ in
           Group = "hermes";
           EnvironmentFile = config.services.hermes-agent.environmentFiles;
           PrivateTmp = true;
+          # Readiness loop keeps its own budget; the start timeout carries a
+          # margin over it so the loop can always report the failure itself.
+          TimeoutStartSec = dashboardStartTimeoutSec;
+          ExecStartPre = "${lib.getExe pkgs.bash} -c 'for ((i = 0; i < ${toString dashboardReadinessAttempts}; i++)); do docker exec -u hermes hermes-agent true 2>/tmp/hermes-dashboard-ready.err && exit 0; sleep ${toString dashboardReadinessIntervalSec}; done; echo \"hermes-agent container not ready after ~${toString dashboardReadinessBudgetSec}s; last docker exec error:\" >&2; cat /tmp/hermes-dashboard-ready.err >&2 || true; exit 1'";
           ExecStart = "${lib.getExe pkgs.bash} -c 'env > /tmp/hermes-dashboard.env; exec docker exec -u hermes --env-file /tmp/hermes-dashboard.env hermes-agent /data/current-package/bin/hermes dashboard --host 0.0.0.0 --no-open --port ${toString cfg.dashboard.port}'";
           Restart = "always";
           RestartSec = 5;
