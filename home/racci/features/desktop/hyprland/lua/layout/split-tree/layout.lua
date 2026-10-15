@@ -7,8 +7,8 @@ local minRatio = 0.1
 local resizeStep = 0.05
 local defaultInsertRatio = 0.5
 
--- Hyprland shows the resize cursor within `general:extend_border_grab_area` (+ `general:border_size`) outside a window's content box.
--- Match that margin so the clickable border zone lines up with the cursor-change zone.
+-- Border grab margin: `extend_border_grab_area + border_size`,
+-- measured outside the content box.
 local function configNumber(candidates, fallback)
   for _, key in ipairs(candidates) do
     local ok, value = pcall(function()
@@ -96,11 +96,9 @@ local function hasAbsent(node, present)
   return hasAbsent(node.first, present) or hasAbsent(node.second, present)
 end
 
--- Mapped, tiled windows keyed by id -> their workspace. Used to tell a window that is genuinely
--- gone (or moved away or floated) from one that is momentarily missing from the target list, which
--- Hyprland does while it re-adds targets one at a time when a workspace switches layout (e.g. on
--- config reload). Floating windows are excluded: they belong to the floating algorithm, not this
--- tree, and Hyprland re-recalcs once their floating flag is set.
+-- Mapped, tiled windows keyed by id -> workspace.
+-- A leaf whose window is still here but absent from the target list must be kept,
+-- since Hyprland re-adds targets one at a time on a layout switch.
 local function aliveWindowWorkspaces()
   local map = {}
 
@@ -123,9 +121,8 @@ local function aliveWindowWorkspaces()
   return map
 end
 
--- `keep` holds ids to retain even though they are absent from the target list (temporarily
--- detached windows). Keeping their leaves preserves the split structure and ratios so the
--- remaining windows do not reflow to default proportions.
+-- `keep` ids are retained despite being absent from the target list (temporarily detached).
+-- That preserves structure and ratios.
 local function prune(node, present, keep)
   if not node then
     return nil
@@ -475,10 +472,8 @@ end
 
 function M.resizeEdgeByPixels(state, id, edge, deltaPx)
   local axis = M.axisForDirection(edge)
-  -- Branch-aware lookup: the divider for the grabbed edge has to actually be on that edge. Using
-  -- the axis-only split here moved the wrong divider (the opposite side) when the leaf sat on the
-  -- far side of the nearest split, and moved the only divider when the grabbed edge was a screen
-  -- edge with nothing to resize.
+  -- The divider must actually sit on the grabbed edge.
+  -- The axis-only split moved the wrong one.
   local entry = M.findEdgeEntry(state, id, edge)
   if not entry then
     return false
@@ -680,10 +675,7 @@ function M.directionForPointInBox(box, point)
     return nil
   end
 
-  -- Compare the cursor offset from each axis, normalized by that axis' half-size. A plain
-  -- nearest-edge comparison biases wide (full-width) tiles toward up/down splits because their
-  -- top/bottom edges are physically closer, making it hard to insert a column split. Normalizing
-  -- makes each axis compete on equal footing.
+  -- Normalize per axis so wide tiles don't bias toward up/down splits.
   local halfW = box.w / 2
   local halfH = box.h / 2
   local nx = halfW > 0 and (point.x - (box.x + halfW)) / halfW or 0
@@ -708,9 +700,8 @@ local function distanceToEdge(box, point, edge)
   return math.abs((box.y + box.h) - point.y)
 end
 
--- Pick the nearest edge on one axis whose divider exists. A dead edge (e.g. the outer edge of an
--- edge window) is ignored rather than silently resizing the opposite side; the opposite edge is
--- only used when the cursor is genuinely near it too.
+-- Nearest edge with a real divider.
+-- A dead edge is ignored, not swapped for the opposite side.
 local function pickAxisEdge(state, id, box, point, lowEdge, highEdge, margin)
   local lowDistance = distanceToEdge(box, point, lowEdge)
   local highDistance = distanceToEdge(box, point, highEdge)
@@ -733,11 +724,9 @@ local function pickAxisEdge(state, id, box, point, lowEdge, highEdge, margin)
   return nil, nil
 end
 
--- The window geometry Hyprland draws (and the box it tests for border grabs) is the content box,
--- which sits inside the tiled region we assign: by `general:border_size` on sides that coincide
--- with the workspace-area boundary and by `general:border_size + general:gaps_in` on interior
--- sides (where the gaps are carved out of the tile). Reproduce that so border and resize-edge
--- detection line up with where Hyprland actually shows the resize cursor.
+-- Hyprland draws the window (and tests border grabs) against the content box:
+-- the tiled region inset by `border_size` on workspace edges,
+-- and by `border_size + gaps_in` on interior edges.
 function M.contentBox(state, id)
   local box = state and state.boxes and state.boxes[id]
   if not box then
@@ -764,7 +753,8 @@ function M.contentBox(state, id)
   }
 end
 
--- Shortest distance from `point` to `box`; zero when the point is inside.
+-- Shortest distance from `point` to `box`.
+-- Zero when the point is inside.
 function M.distanceToBox(box, point)
   if not box or not point then
     return math.huge
@@ -775,8 +765,8 @@ function M.distanceToBox(box, point)
   return math.sqrt(dx * dx + dy * dy)
 end
 
--- Mirrors CWindow::isInCurvedCorner: a point inside the content box but clipped off by a rounded
--- corner still counts as a border grab in Hyprland.
+-- Mirrors CWindow::isInCurvedCorner:
+-- a corner-clipped point inside the content box still counts.
 function M.isInCurvedCorner(box, x, y)
   local rounding = configNumber({ "decoration.rounding", "decoration:rounding" }, 8)
   local power = configNumber({ "decoration.rounding_power", "decoration:rounding_power" }, 2)
@@ -806,8 +796,9 @@ function M.isInCurvedCorner(box, x, y)
   return false
 end
 
--- Whether the cursor is in the border grab zone Hyprland uses: within `general:border_size` +
--- `general:extend_border_grab_area` outside the content box (or clipped by a rounded corner).
+-- Border grab zone Hyprland uses:
+-- within `extend_border_grab_area + border_size` outside the content box,
+-- or a clipped rounded corner.
 function M.borderZoneHit(state, id, point)
   local content = M.contentBox(state, id)
   if not content or not point then
@@ -972,8 +963,8 @@ function M.dropTarget(boxes, rootBox, movingId, cursor)
     return targetId, M.directionForPointInBox(boxes[targetId], cursor)
   end
 
-  -- Cursor still over the dragged window: treat it as "stays put" rather than pulling it to a
-  -- workspace edge, so releasing without crossing into another tile is a no-op.
+  -- Still over the dragged window:
+  -- stays put, so a release without crossing a tile is a no-op.
   local movingBox = boxes[movingId]
   if movingBox and util.pointInBox(movingBox, cursor) then
     return nil, nil
@@ -1012,9 +1003,8 @@ function M.moveMessageForPoint(state, movingId, cursor)
   return M.moveMessageForRoot(state.root, movingId, cursor)
 end
 
--- Compute the tile the moving window would occupy if dropped at the cursor. Used by the
--- overlay client to preview the pending placement without reflowing the real windows. Returns
--- the projected box (global coordinates), the drop target id and the drop direction.
+-- Tile the moving window would occupy if dropped at `cursor`,
+-- for the overlay preview.
 function M.previewForMove(state, movingId, cursor)
   if not state or not state.root or not cursor then
     return nil
@@ -1046,8 +1036,8 @@ function M.previewForMove(state, movingId, cursor)
   return projected[movingId], targetId, direction
 end
 
--- Inset a projected box by half the inner gap, leaving sides flush with the workspace root
--- (the workspace area already excludes outer gaps). Used so the preview lines up with real borders.
+-- Inset by half the inner gap so the preview lines up with real borders;
+-- root edges stay flush.
 local function gapInsetBox(box, rootBox, halfInset)
   if not box or not rootBox or not halfInset or halfInset <= 0 then
     return util.copyBox(box)
@@ -1068,12 +1058,9 @@ end
 
 M.insetForGaps = gapInsetBox
 
--- Precompute every possible drop outcome for one dragged window across all visible workspaces.
--- `states` maps workspace key -> layout state (a state may be windowless but still expose `area`).
--- `halfInset` insets projected boxes by half the inner gap so the preview lines up with real
--- window borders (root-edge sides are left flush; the workspace area already excludes outer gaps).
--- Returns { regions = { { id, box } }, roots = { { id, box } }, entries = { ["<id|dir>"] = box } }
--- where region/root ids are namespaced with the workspace key (`<ws>:<leaf>` / `<ws>:root`).
+-- Precompute every drop outcome for one dragged window across visible workspaces.
+-- Returns { regions, roots, entries },
+-- with region/root ids namespaced as `<ws>:<leaf>` / `<ws>:root`.
 function M.buildDropMap(states, draggedKey, movingId, halfInset)
   if not states or not movingId then
     return nil
@@ -1155,7 +1142,8 @@ function M.buildDropMap(states, draggedKey, movingId, halfInset)
             end
           end
         else
-          -- Empty visible workspace: the dropped window becomes the only tile and fills it.
+          -- Empty visible workspace:
+          -- the dropped window becomes the only tile and fills it.
           local box = gapInsetBox(rootBox, rootBox, halfInset)
           for _, direction in ipairs(directions) do
             entries[key .. ":root|" .. direction] = box

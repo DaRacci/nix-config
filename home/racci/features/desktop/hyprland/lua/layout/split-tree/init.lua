@@ -11,10 +11,8 @@ local overlayController = overlay.new()
 local pointerController = pointer.new(layouts, overlayController)
 local layoutPersist = persist.new()
 
--- Restore the tree saved before the last reload so the first layout pass reproduces the existing
--- geometry instead of resizing windows to default proportions. Only accept states with a real tree
--- and give each a `boxes` table so `splitLeaf`/pointer paths can index it before the first
--- recalculate populates it.
+-- Restore the pre-reload tree so the first pass reproduces existing geometry.
+-- Each state needs a `boxes` table for splitLeaf/pointer lookups.
 local restored = layoutPersist.load()
 if restored then
   for key, state in pairs(restored) do
@@ -35,10 +33,8 @@ local function snapshot()
   return data
 end
 
--- Hyprland has no pre-reload hook, so persist on a short throttle rather than on every change.
--- Tree changes mark the state dirty and a repeating timer flushes at most a couple of times a
--- second (writing only when the tree actually changed), disabling itself while idle. This keeps a
--- config reload from losing the tree without a write on every poll of an in-progress drag.
+-- No pre-reload hook exists, so flush on a short throttle.
+-- Only flush when the tree changed.
 local SAVE_INTERVAL_MS = 500
 local persistDirty = false
 local saveTimer
@@ -69,9 +65,7 @@ if hl and hl.timer then
   saveTimer:set_enabled(false)
 end
 
--- Drop a window's leaf from every workspace tree that still holds it. Used for closes and for
--- moves to another workspace, where the window is still mapped (so a target-set prune would keep
--- it) but no longer belongs to that workspace.
+-- Remove a window's leaf from any workspace tree that holds it.
 local function dropLeaf(id)
   local dropped = false
 
@@ -92,8 +86,8 @@ local function windowId(window)
 end
 
 if hl and hl.on then
-  -- Hyprland emits `window.close` before removing the target (the window is still mapped then), so
-  -- prune here to let the sibling reclaim the space on the recalculate that follows.
+  -- window.close fires before the target is removed,
+  -- so prune now to reclaim the space.
   hl.on("window.close", function(window)
     local id = windowId(window)
     if id then
@@ -126,8 +120,8 @@ function M.configure(opts)
   configuration.exe = opts.overlay or configuration.exe
 end
 
--- Launched on `hyprland.start` (and re-armed on reload). The Rust client enforces a single
--- instance with a file lock, so extra launches on reload are harmless no-ops.
+-- Launched on start and re-armed on reload.
+-- The client is single-instance via a file lock, so extra launches are no-ops.
 function M.startOverlay()
   if not configuration.exe then
     return

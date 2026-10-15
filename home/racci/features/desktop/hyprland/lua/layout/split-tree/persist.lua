@@ -1,12 +1,6 @@
--- Persist the split-tree layout across Hyprland config reloads.
---
--- A reload recreates the Lua state, so without this the layout rebuilds a default tree and resizes
--- the existing windows on the first pass. Saving the tree (structure + ratios) and restoring it
--- before Hyprland lays out means place() reproduces the current geometry instead of enforcing
--- default proportions.
---
--- The file is keyed by the Hyprland instance signature, so it survives config reloads (same
--- process) but a fresh session starts clean.
+-- Persist the split-tree layout across config reloads.
+-- A reload recreates the Lua state,
+-- so the saved tree is restored to keep windows from reflowing to default proportions.
 
 local M = {}
 
@@ -23,9 +17,8 @@ local function instanceId()
   return os.getenv("HYPRLAND_INSTANCE_SIGNATURE") or "default"
 end
 
--- The state file must live in the per-user runtime directory. Never fall back to a shared
--- location such as /tmp: the path is predictable, so a world-writable directory would let another
--- user plant or symlink the state file. When there is no safe directory, persistence is disabled.
+-- Per-user runtime dir only.
+-- No /tmp fallback (predictable path = plant/symlink risk).
 function M.path()
   if _G.SPLIT_TREE_STATE_PATH then
     return _G.SPLIT_TREE_STATE_PATH
@@ -72,15 +65,12 @@ function M.serialize(store)
   return "return " .. (serialize(store) or "{}")
 end
 
--- Build a chunk from the serialized text.
+-- Sandboxed text-only load with an empty environment.
 function M.deserialize(text)
   if type(text) ~= "string" or text == "" then
     return nil
   end
 
-  -- Hyprland embeds standard Lua (5.5 at the time of writing), so `load` takes the source string, a
-  -- text-only mode, and an environment. Load with an empty environment so a tampered state file
-  -- cannot reach globals.
   local chunk = load(text, "split-tree-state", "t", {})
   if not chunk then
     return nil
@@ -94,8 +84,8 @@ function M.deserialize(text)
   return value
 end
 
--- Controller bound to one path. `save` skips writes when the snapshot is unchanged. When no safe
--- path is available, both `save` and `load` are no-ops.
+-- Controller bound to one path.
+-- Save skips unchanged snapshots; both no-op without a path.
 function M.new(path)
   path = path or M.path()
   local last = nil

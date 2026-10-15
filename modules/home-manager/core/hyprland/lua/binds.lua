@@ -46,10 +46,14 @@ hl.bind(mod .. " + ALT + RIGHT", hl.dsp.workspace.move({ monitor = "+1" }))
 -- ---------------------------------------------------------------------------
 -- Mouse Bindings
 -- ---------------------------------------------------------------------------
+-- End binds ignore the modifier:
+-- Hyprland requires mods to still match on release,
+-- so releasing SUPER first would leave the session stuck.
+-- They consume only their own session.
 hl.bind(mod .. " + " .. mouse.left, SplitTree.beginMouseDrag, { mouse = true })
-hl.bind(mod .. " + " .. mouse.left, SplitTree.endMouseDrag, { mouse = true, release = true })
+hl.bind(mod .. " + " .. mouse.left, SplitTree.endMouseDrag, { mouse = true, release = true, ignore_mods = true, auto_consuming = true })
 hl.bind(mod .. " + " .. mouse.right, SplitTree.beginMouseResize, { mouse = true })
-hl.bind(mod .. " + " .. mouse.right, SplitTree.endMouseResize, { mouse = true, release = true })
+hl.bind(mod .. " + " .. mouse.right, SplitTree.endMouseResize, { mouse = true, release = true, ignore_mods = true, auto_consuming = true })
 hl.bind(mouse.left, SplitTree.beginBorderResize, { auto_consuming = true, mouse = true })
 hl.bind(mouse.left, SplitTree.endBorderResize, { auto_consuming = true, mouse = true, release = true })
 

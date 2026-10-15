@@ -4,8 +4,7 @@ package.path = table.concat({
   package.path,
 }, ";")
 
--- Keep the run hermetic: point layout persistence at a throwaway path so a developer's live
--- state file (keyed by the running Hyprland instance) is never read into the test store.
+-- Hermetic: point persistence at a throwaway path so the live state file is never read.
 _G.SPLIT_TREE_STATE_PATH = os.tmpname()
 
 local SplitTree = require("layout.split-tree")
@@ -449,8 +448,9 @@ local function test_border_zone_hit_covers_gap_around_window()
   )
 end
 
--- Hyprland places the drawn window (the box it tests for border grabs) inside the tiled region:
--- `border_size` on workspace-area edges and `border_size + gaps_in` on interior split edges.
+-- Hyprland insets the drawn window inside the tile:
+-- `border_size` on workspace edges,
+-- `border_size + gaps_in` on interior edges.
 local function test_content_box_matches_hyprland_insets()
   local store = testing.newStore()
 
@@ -908,8 +908,8 @@ local function test_detached_window_keeps_tree_structure()
   testing.recalculate(store, context)
   local ratio = state.root.ratio
 
-  -- While a workspace switches layout, Hyprland re-adds targets one at a time; "c" is briefly
-  -- absent from the target list but is still a mapped window on this workspace.
+  -- On a layout switch Hyprland re-adds targets one at a time;
+  -- "c" is briefly absent but still mapped.
   local windows = fakeWindowsFromBoxes(state.boxes, specs)
   _G.hl = { get_windows = function()
     return windows
@@ -936,8 +936,8 @@ local function test_detached_window_keeps_tree_structure()
   assertEqual(testing.contains(state.root, "c"), false, "a floated window is pruned from the tree")
 end
 
--- Cursor interactions on a shown special workspace must resolve to that workspace, not the normal
--- workspace behind it (focusing the window behind would hide the special workspace).
+-- Cursor interactions must resolve to a shown special workspace,
+-- not the normal workspace behind.
 local function test_pointer_targets_shown_special_workspace()
   local store = testing.newStore()
   local _, specialState = recalc(store, "special:grave", { { id = "s", active = true } })
@@ -997,6 +997,30 @@ local function test_pointer_targets_shown_special_workspace()
   assertEqual(handoff.roots[1].id, "special:grave:root", "drop map root is the shown special workspace")
 end
 
+-- End handlers must only consume their own session;
+-- otherwise a plain click release is swallowed.
+local function test_end_handlers_only_consume_their_session()
+  local store = testing.newStore()
+  local specs = { { id = "a", active = true }, { id = "b" } }
+  local _, state = recalc(store, "1", specs)
+
+  local windows = fakeWindowsFromBoxes(state.boxes, specs)
+  local fake = makeFakeHl(windows)
+  _G.hl = fake
+
+  local controller = pointer.new(store, makeFakeOverlay())
+
+  assertEqual(controller.endMouseDrag().ok, false, "left release with no session is not consumed")
+  assertEqual(controller.endMouseResize().ok, false, "right release with no session is not consumed")
+
+  local box = state.boxes["a"]
+  fake.cursor = { x = box.x + box.w / 2, y = box.y + box.h / 2 }
+  assertEqual(controller.beginMouseDrag().ok, true, "drag starts over a tiled window")
+
+  assertEqual(controller.endMouseResize().ok, false, "right release leaves a move session running")
+  assertEqual(controller.endMouseDrag().ok, true, "left release ends the move session")
+end
+
 for _, test in ipairs({
   test_keyboard_resize_moves_split_in_arrow_direction,
   test_keyboard_resize_keeps_direction_for_second_branch,
@@ -1031,6 +1055,7 @@ for _, test in ipairs({
   test_pointer_toggle_float_keeps_tiled_geometry,
   test_detached_window_keeps_tree_structure,
   test_pointer_targets_shown_special_workspace,
+  test_end_handlers_only_consume_their_session,
 }) do
   test()
 end

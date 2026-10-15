@@ -25,10 +25,10 @@ end
 
 local resizeNoAnimationRule = nil
 
--- Hyprland animates layout-driven geometry changes (the windowsMove animation). During an edge
--- drag that makes every window sharing the divider lag behind the cursor, so for the duration of
--- the drag disable animation for tiled windows (the dragged window and its neighbours). One rule
--- covering all tiled windows is enough; floating windows are untouched.
+-- Hyprland animates layout-driven geometry changes (the windowsMove animation).
+-- During an edge drag that makes every window sharing the divider lag behind the cursor,
+-- so disable animation for tiled windows for the duration of the drag.
+-- One rule covering all tiled windows is enough; floating windows are untouched.
 local function setResizeAnimationSuppressed(suppressed)
   if not suppressed and not resizeNoAnimationRule then
     return
@@ -111,7 +111,8 @@ function M.new(layouts, overlay)
   end
 
   -- The workspace the cursor is interacting with.
-  -- A shown special workspace overlays its monitor, so it must be selected over the normal active workspace,
+  -- A shown special workspace overlays its monitor,
+  -- so it takes priority over the normal active workspace.
   local function workspaceUnderCursor()
     local ok, monitor = pcall(hl.get_monitor_at_cursor)
     if ok and monitor and monitor.active_special_workspace then
@@ -166,9 +167,9 @@ function M.new(layouts, overlay)
     return nil
   end
 
-  -- Floating windows are only located by geometry, so expand the box a little: a click on the
-  -- decoration/border (just outside the reported at/size) should still grab the floating window
-  -- rather than falling through to the tiled window behind it.
+  -- Floating windows are only located by geometry, so expand the box a little.
+  -- A click just outside the reported at/size must still grab the floating window,
+  -- not the tiled window behind it.
   local function floatingGrabTolerance()
     return configNumber({ "general.border_size", "general:border_size" }, 2) + 4
   end
@@ -226,8 +227,8 @@ function M.new(layouts, overlay)
     return states
   end
 
-  -- Emit (or clear) the handoff the Rust overlay consumes. Called on drag start, on every
-  -- recalculate while a drag is active, and on drag end.
+  -- Emit (or clear) the handoff the Rust overlay consumes.
+  -- Called on drag start, on every recalculate while a drag is active, and on drag end.
   local function emitHandoff()
     local session = pointerSession
     if not session or session.mode ~= "move" then
@@ -288,8 +289,9 @@ function M.new(layouts, overlay)
     stopPointerSession()
   end
 
-  -- While a drag is active the tree is frozen, but unrelated events (a window opening/closing,
-  -- a reload-triggered reflow) still run recalculate. Re-emit so the overlay's drop map tracks it.
+  -- While a drag is active the tree is frozen.
+  -- Unrelated events (a window opening/closing, a reload-triggered reflow) still run recalculate,
+  -- so re-emit to keep the overlay's drop map tracking.
   layout.onRecalculate(function(state)
     if pointerSession and sessionState(pointerSession) == state then
       emitHandoff()
@@ -306,7 +308,8 @@ function M.new(layouts, overlay)
       return
     end
 
-    -- Move previews are computed by the Rust overlay; the Lua side only needs the resize polling.
+    -- Move previews are computed by the Rust overlay;
+    -- the Lua side only needs the resize polling.
     if pointerSession.mode == "move" then
       return
     end
@@ -462,16 +465,18 @@ function M.new(layouts, overlay)
     return { ok = true }
   end
 
-  -- Locate the window whose border the cursor is grabbing, mirroring Hyprland's own hit test: the
-  -- cursor must be within `border_size + extend_border_grab_area` outside a window's content box
-  -- (or inside its rounded corner) and must not sit on any window body.
+  -- Locate the window whose border the cursor is grabbing, mirroring Hyprland's own hit test:
+  -- the cursor must be within `border_size + extend_border_grab_area` outside the content box
+  -- (or inside its rounded corner),
+  -- and must not sit on any window body.
   local function findBorderTarget(cursor)
     local workspaceCtx = activeWorkspaceContext()
     if not workspaceCtx or not cursor or not workspaceCtx.state.root then
       return nil
     end
 
-    -- Floating windows handle their own border resize natively; don't hijack it for the tile below.
+    -- Floating windows handle their own border resize natively;
+    -- don't hijack it for the tile below.
     if findFloatingWindowAtPoint(cursor) then
       return nil
     end
@@ -486,7 +491,8 @@ function M.new(layouts, overlay)
 
         if content then
           if util.pointInBox(content, cursor) and not layout.isInCurvedCorner(content, cursor.x, cursor.y) then
-            -- Cursor is over a window body: Hyprland shows no resize cursor there.
+            -- Cursor is over a window body:
+            -- Hyprland shows no resize cursor there.
             return nil
           end
 
@@ -531,43 +537,48 @@ function M.new(layouts, overlay)
   end
 
   function api.endMouseDrag()
-    if pointerSession and pointerSession.mode == "move" then
-      local session = stopPointerSession()
-      local cursor = hl.get_cursor_pos() or session.cursor
-      local dx = cursor and (cursor.x - session.startCursor.x) or 0
-      local dy = cursor and (cursor.y - session.startCursor.y) or 0
-      local apply = cursor and (math.abs(dx) >= movePixelThreshold or math.abs(dy) >= movePixelThreshold)
+    if not (pointerSession and pointerSession.mode == "move") then
+      -- Not our session (or none): don't consume,
+      -- so a plain click's release still reaches the app.
+      return { ok = false }
+    end
 
-      if apply then
-        local state = sessionState(session)
-        local states = visibleStates()
-        if state then
-          states[session.workspace] = state
+    local session = stopPointerSession()
+    local cursor = hl.get_cursor_pos() or session.cursor
+    local dx = cursor and (cursor.x - session.startCursor.x) or 0
+    local dy = cursor and (cursor.y - session.startCursor.y) or 0
+    local apply = cursor and (math.abs(dx) >= movePixelThreshold or math.abs(dy) >= movePixelThreshold)
+
+    if apply then
+      local state = sessionState(session)
+      local states = visibleStates()
+      if state then
+        states[session.workspace] = state
+      end
+
+      local key, targetId, direction = layout.resolveDrop(states, session.workspace, session.windowId, cursor)
+
+      if key and key == session.workspace and state and state.root then
+        local message = layout.moveMessageForBoxes(state.boxes, state.root.box, session.windowId, cursor)
+        if message then
+          hl.dispatch(hl.dsp.layout(message))
         end
+      elseif key and direction then
+        -- Cross-workspace drop:
+        -- hand the window to the target workspace, focus it there,
+        -- then reorder relative to the drop target within that workspace
+        -- (skipped for empty workspaces, where the window becomes the only tile).
+        local targetState = states[key]
+        local targetHasWindows = targetState and targetState.root ~= nil
 
-        local key, targetId, direction = layout.resolveDrop(states, session.workspace, session.windowId, cursor)
+        hl.dispatch(hl.dsp.window.move({ window = session.window, workspace = key }))
+        hl.dispatch(hl.dsp.focus({ window = session.window }))
 
-        if key and key == session.workspace and state and state.root then
-          local message = layout.moveMessageForBoxes(state.boxes, state.root.box, session.windowId, cursor)
-          if message then
-            hl.dispatch(hl.dsp.layout(message))
-          end
-        elseif key and direction then
-          -- Cross-workspace drop: hand the window to the target workspace, focus it there, then
-          -- reorder relative to the drop target within that workspace (skipped for empty
-          -- workspaces, where the window simply becomes the only tile).
-          local targetState = states[key]
-          local targetHasWindows = targetState and targetState.root ~= nil
-
-          hl.dispatch(hl.dsp.window.move({ window = session.window, workspace = key }))
-          hl.dispatch(hl.dsp.focus({ window = session.window }))
-
-          if targetHasWindows then
-            local message = targetId
-                and ("insert %s %s %s"):format(session.windowId, targetId, direction)
-              or ("move %s %s"):format(direction, session.windowId)
-            hl.dispatch(hl.dsp.layout(message))
-          end
+        if targetHasWindows then
+          local message = targetId
+              and ("insert %s %s %s"):format(session.windowId, targetId, direction)
+            or ("move %s %s"):format(direction, session.windowId)
+          hl.dispatch(hl.dsp.layout(message))
         end
       end
     end
@@ -609,10 +620,13 @@ function M.new(layouts, overlay)
   end
 
   function api.endMouseResize()
-    if pointerSession and pointerSession.mode == "resize" then
-      stopPointerSession()
+    if not (pointerSession and pointerSession.mode == "resize") then
+      -- Not our session (or none): don't consume,
+      -- so a plain click's release still reaches the app.
+      return { ok = false }
     end
 
+    stopPointerSession()
     return { ok = true }
   end
 
@@ -623,13 +637,14 @@ function M.new(layouts, overlay)
 
     local target = findBorderTarget(hl.get_cursor_pos())
     if not target then
-      -- Not on a border: let Hyprland handle the click normally.
+      -- Not on a border:
+      -- let Hyprland handle the click normally.
       return { ok = false }
     end
 
     if not target.edges then
-      -- Border grab on a screen edge with nothing to resize: consume the click so Hyprland's own
-      -- resize_on_border cannot move the opposite edge instead.
+      -- Border grab on a screen edge with nothing to resize:
+      -- consume the click so Hyprland's own resize_on_border cannot move the opposite edge.
       return { ok = true }
     end
 
