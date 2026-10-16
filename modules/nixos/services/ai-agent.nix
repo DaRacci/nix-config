@@ -617,7 +617,7 @@ in
               user_profile_enabled = false;
               mnemosyne = {
                 auto_sleep = true;
-                profile_isolation = true;
+                profile_isolation = false;
                 shared_surface_read = true;
                 sleep_threshold = 50;
                 tools = null; # Null means all

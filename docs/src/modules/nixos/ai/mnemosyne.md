@@ -54,6 +54,7 @@ The module can run three kinds of services, each either natively on the host or 
 
 - Sync protocol is plain HTTP with delta-based bidirectional sync.
 - Sync interval default is 10 minutes.
+- The `mnemosyne-hermes` plugin (`pkgs/python/mnemosyne-hermes.nix`) is built with a `postPatch` that drops the redundant `self._beam` write from the provider constructor (upstream [PR #1125](https://github.com/mnemosyne-oss/mnemosyne/pull/1125)). Without it, 0.7.4 raises `RuntimeError: … no binding for the current home …` on construction, so Hermes loads the provider but registers no `mnemosyne_*` tools and never recalls or writes. The patch carries a `#TODO` and must be removed once a fixed upstream release is published.
 
 ### Usage Examples
 
