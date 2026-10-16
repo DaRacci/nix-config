@@ -145,3 +145,7 @@ nix fmt .
 - Re-tiling a window that closed while fullscreen (see Reconciliation).
 - Hit-testing tiles behind a fullscreen/maximized window.
 - Special-workspace pointer interactions: use the workspace under the cursor, not `hl.get_active_workspace()`.
+- Window-rule match regexes are anchored (full-string) and are consumed by
+  Hyprland's regex engine, not Lua patterns: use the `Class`/`Title` helpers
+  (they escape with backslashes) or prefix a raw `initial_title`/`title`
+  pattern with `.*` to consume the leading part of the value.

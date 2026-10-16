@@ -225,8 +225,11 @@ TagByMatch(Tags.pictureInPicture, {
   Class(pipRegex, {}, false),
 })
 
+-- Window rules are matched with an anchored (full-string) regex, so the
+-- server-name prefix must be consumed explicitly; a suffix-only pattern
+-- never matches.
 TagByMatch(Tags.silentBullshit, {
-  { initial_title = "(@takeControlConnectingTitleRegex@)$" }
+  { initial_title = "^.*(@takeControlConnectingTitleRegex@)$" }
 })
 
 _G.Tags = Tags

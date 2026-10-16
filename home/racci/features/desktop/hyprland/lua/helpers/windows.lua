@@ -22,10 +22,13 @@ end
 ---@param pattern string The regex pattern to escape.
 ---@param escape? boolean Whether to escape the regex pattern (default: true).
 ---@return string
+-- The returned pattern is consumed as a Hyprland (anchored) regex, so
+-- metacharacters must be escaped with a backslash, not a Lua pattern escape.
+-- A `%` here would be a literal character in the target regex and never match.
 local function regex(pattern, escape)
   escape = escape == nil and true or escape
   if escape then
-    pattern = pattern:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
+    pattern = pattern:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "\\%1")
   end
 
   return "^((?i)" .. pattern .. ")$"
