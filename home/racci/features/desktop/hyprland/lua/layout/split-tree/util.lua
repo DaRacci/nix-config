@@ -22,12 +22,32 @@ function M.pointInBox(box, point)
     and point.y <= box.y + box.h
 end
 
+-- Workspaces are keyed by id: names are not unique,
+-- so two workspaces can share one name and would otherwise share one tree.
 function M.workspaceKeyFromWorkspace(workspace)
   if not workspace then
     return "__default"
   end
 
-  return workspace.addressable_name or workspace.name or (workspace.id and tostring(workspace.id)) or "__default"
+  if workspace.id ~= nil then
+    return tostring(workspace.id)
+  end
+
+  return workspace.name or workspace.addressable_name or "__default"
+end
+
+-- Workspace selector for a dispatch.
+-- Special workspaces carry a negative id and are addressed by name.
+function M.workspaceSelector(workspace)
+  if not workspace then
+    return nil
+  end
+
+  if (workspace.id or 0) >= 0 then
+    return tostring(workspace.id)
+  end
+
+  return workspace.addressable_name or workspace.name
 end
 
 function M.workspaceKey(ctx)

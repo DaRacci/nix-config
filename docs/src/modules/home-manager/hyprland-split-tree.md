@@ -87,7 +87,7 @@ Handoff shape that gets written to `$XDG_RUNTIME_DIR/split-tree-overlay-<HYPRLAN
 }
 ```
 
-Region and root ids carry the workspace key as a prefix (`<ws>:<leaf>` / `<ws>:root`). The drop map covers every visible workspace (one active workspace per monitor), so the cursor can resolve to a tile on another monitor, including an **empty** visible workspace (a windowless workspace still exposes the `area` available for tiling, and dropping there just moves the window over as its only tile).
+Region and root ids are namespaced with the workspace key (`<ws>:<leaf>` / `<ws>:root`). The drop map covers every visible workspace (one active workspace per monitor), so the cursor can resolve to a tile on another monitor, including an **empty** visible workspace (a windowless workspace still exposes its tileable `area`, and dropping there just moves the window over as its only tile).
 
 Projected boxes are inset by half the inner gap (`general.gaps_in`) on interior edges so the preview lines up with real window borders; sides flush with the workspace area (which already excludes outer gaps) are left alone. The preview border uses the Tokyo Night palette and is drawn 25% thicker than `general.border_size` so it stands out; colours are straight (non-premultiplied) and only premultiplied when composited into the `shm` buffer.
 

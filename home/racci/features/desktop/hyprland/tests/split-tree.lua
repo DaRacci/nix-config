@@ -41,6 +41,13 @@ local function split(_, box, side, ratio)
 end
 
 local function ctx(workspace, windows)
+  local id, name = workspace, workspace
+  if type(workspace) == "table" then
+    id, name = workspace.id, workspace.name
+  else
+    id = tonumber(workspace)
+  end
+
   local targets = {}
 
   for index, spec in ipairs(windows) do
@@ -50,8 +57,8 @@ local function ctx(workspace, windows)
         active = spec.active or false,
         stable_id = spec.id,
         workspace = {
-          addressable_name = workspace,
-          name = workspace,
+          id = id,
+          name = name,
         },
       },
       place = function() end,
@@ -65,10 +72,19 @@ local function ctx(workspace, windows)
   }
 end
 
+-- Mirrors the layout's keying: workspace id when there is one, name otherwise.
+local function workspaceKeyOf(workspace)
+  if type(workspace) == "table" then
+    return tostring(workspace.id)
+  end
+
+  return tostring(tonumber(workspace) or workspace)
+end
+
 local function recalc(store, workspace, windows)
   local value = ctx(workspace, windows)
   testing.recalculate(store, value)
-  return value, testing.getState(store, workspace)
+  return value, testing.getState(store, workspaceKeyOf(workspace))
 end
 
 local function test_keyboard_resize_moves_split_in_arrow_direction()
@@ -639,7 +655,7 @@ local function makeFakeHl(windows)
     activeWindow = windows[1],
     dispatches = dispatches,
     timers = timers,
-    workspace = { addressable_name = "1", name = "1", id = 1 },
+    workspace = { id = 1, name = "1" },
   }
 
   function fake.get_active_workspace()
@@ -723,7 +739,7 @@ local function fakeWindowsFromBoxes(boxes, specs)
       floating = false,
       at = { x = box.x, y = box.y },
       size = { x = box.w, y = box.h },
-      workspace = { addressable_name = "1", name = "1", id = 1 },
+      workspace = { id = 1, name = "1" },
     }
   end
   return windows
@@ -989,15 +1005,48 @@ local function test_window_close_without_fullscreen_is_not_suppressed()
   assertEqual(testing.contains(state.root, "a"), true, "a non-fullscreen close keeps the plain re-add path")
 end
 
+-- Two workspaces can share a display name (Hyprland allows it); their trees must not merge,
+-- or each workspace reserves a tile for the other's window and shows an empty tile.
+local function test_same_named_workspaces_keep_separate_trees()
+  local store = testing.newStore()
+  local nine = { id = 9, name = "Miscellaneous" }
+  local ten = { id = 10, name = "Miscellaneous" }
+
+  recalc(store, nine, { { id = "a", active = true } })
+  recalc(store, ten, { { id = "b", active = true } })
+
+  local stateNine = testing.getState(store, "9")
+  local stateTen = testing.getState(store, "10")
+
+  assertEqual(testing.contains(stateNine.root, "a"), true, "workspace 9 keeps its own window")
+  assertEqual(testing.contains(stateNine.root, "b"), false, "workspace 10's window stays out of it")
+  assertEqual(stateNine.boxes["b"], nil, "no tile is reserved for the other workspace's window")
+  assertEqual(testing.contains(stateTen.root, "b"), true, "workspace 10 keeps its own window")
+  assertEqual(testing.contains(stateTen.root, "a"), false, "workspace 9's window stays out of it")
+end
+
+-- Dispatches address normal workspaces by id; special workspaces carry a negative id
+-- and only exist by name.
+local function test_workspace_selector_addresses_by_id_and_special_by_name()
+  assertEqual(testing.workspaceSelector({ id = 9, name = "Miscellaneous" }), "9", "normal workspace is selected by id")
+  assertEqual(
+    testing.workspaceSelector({ id = -99, name = "special:S-slide-1" }),
+    "special:S-slide-1",
+    "special workspace is selected by name"
+  )
+  assertEqual(testing.workspaceSelector(nil), nil, "no workspace yields no selector")
+end
+
 -- Cursor interactions must resolve to a shown special workspace,
 -- not the normal workspace behind.
 local function test_pointer_targets_shown_special_workspace()
   local store = testing.newStore()
-  local _, specialState = recalc(store, "special:grave", { { id = "s", active = true } })
+  local special = { id = -99, name = "special:S-slide-1" }
+  local _, specialState = recalc(store, special, { { id = "s", active = true } })
   recalc(store, "1", { { id = "n", active = true } })
 
-  local specialWorkspace = { addressable_name = "special:grave", name = "special:grave", id = -99 }
-  local normalWorkspace = { addressable_name = "1", name = "1", id = 1 }
+  local specialWorkspace = { id = -99, name = "special:S-slide-1" }
+  local normalWorkspace = { id = 1, name = "1" }
   local box = specialState.boxes["s"]
 
   local specialWindow = {
@@ -1047,7 +1096,7 @@ local function test_pointer_targets_shown_special_workspace()
 
   local handoff = lastOverlayWrite(overlay)
   assertEqual(#handoff.roots, 1, "the workspace behind a special workspace is not a drop target")
-  assertEqual(handoff.roots[1].id, "special:grave:root", "drop map root is the shown special workspace")
+  assertEqual(handoff.roots[1].id, "-99:root", "drop map root is the shown special workspace")
 end
 
 -- End handlers must only consume their own session;
@@ -1134,6 +1183,8 @@ for _, test in ipairs({
   test_closing_fullscreen_window_leaves_no_ghost_tile,
   test_remapped_fullscreen_window_is_tiled_again,
   test_window_close_without_fullscreen_is_not_suppressed,
+  test_same_named_workspaces_keep_separate_trees,
+  test_workspace_selector_addresses_by_id_and_special_by_name,
   test_pointer_targets_shown_special_workspace,
   test_end_handlers_only_consume_their_session,
   test_fullscreen_window_blocks_hidden_tile_hit_test,

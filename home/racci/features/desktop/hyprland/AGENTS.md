@@ -34,7 +34,7 @@ The layout spans several areas — read the map before editing.
 
 ### State model
 
-- `layouts[workspaceKey] = { root, boxes, area, lastActiveId }`; key is `addressable_name or name`.
+- `layouts[workspaceKey] = { root, boxes, area, lastActiveId }`; the key is `tostring(workspace.id)` — never the workspace name, since two workspaces can share one.
 - Node: `{ kind = "split", axis = "x"|"y", ratio, first, second, box }` or `{ kind = "leaf", id, box }`, where `id` is `tostring(window.stable_id)`.
 - `target:place(box)` is the only geometry application; `recalculate` recomputes boxes from ratios and places them. A wrong tree moves every window.
 
@@ -140,6 +140,7 @@ nix fmt .
 ## Pitfalls
 
 - Two module instances from a require-path mismatch (see above).
+- keying state by workspace name (see State model).
 - Rebuilding the tree on partial recalculates (see Reconciliation).
 - Re-tiling a window that closed while fullscreen (see Reconciliation).
 - Hit-testing tiles behind a fullscreen/maximized window.

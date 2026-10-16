@@ -216,6 +216,7 @@ M._testing = {
   resolveDrop = layout.resolveDrop,
   stateFor = util.stateFor,
   windowBox = pointerController._testing.windowBox,
+  workspaceSelector = util.workspaceSelector,
 }
 
 return M

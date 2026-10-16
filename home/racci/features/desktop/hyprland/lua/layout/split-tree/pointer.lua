@@ -222,8 +222,10 @@ function M.new(layouts, overlay)
   end
 
   -- Workspaces visible on a monitor that we could drop into.
-  local function visibleStates()
+  -- Returns key -> state, and key -> workspace for dispatches.
+  local function visibleWorkspaces()
     local states = {}
+    local workspaces = {}
 
     local ok, monitors = pcall(hl.get_monitors)
     if ok and type(monitors) == "table" then
@@ -234,12 +236,13 @@ function M.new(layouts, overlay)
           local state = layouts[key]
           if state and (state.root or state.area) then
             states[key] = state
+            workspaces[key] = workspace
           end
         end
       end
     end
 
-    return states
+    return states, workspaces
   end
 
   -- Emit (or clear) the handoff the Rust overlay consumes.
@@ -257,7 +260,7 @@ function M.new(layouts, overlay)
       return
     end
 
-    local states = visibleStates()
+    local states = visibleWorkspaces()
     states[session.workspace] = state
 
     local halfInset = handoffHalfInset()
@@ -575,7 +578,7 @@ function M.new(layouts, overlay)
 
     if apply then
       local state = sessionState(session)
-      local states = visibleStates()
+      local states, workspaces = visibleWorkspaces()
       if state then
         states[session.workspace] = state
       end
@@ -594,8 +597,9 @@ function M.new(layouts, overlay)
         -- (skipped for empty workspaces, where the window becomes the only tile).
         local targetState = states[key]
         local targetHasWindows = targetState and targetState.root ~= nil
+        local targetWorkspace = util.workspaceSelector(workspaces[key]) or key
 
-        hl.dispatch(hl.dsp.window.move({ window = session.window, workspace = key }))
+        hl.dispatch(hl.dsp.window.move({ window = session.window, workspace = targetWorkspace }))
         hl.dispatch(hl.dsp.focus({ window = session.window }))
 
         if targetHasWindows then
