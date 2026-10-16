@@ -11,6 +11,9 @@
   wine,
   icoextract,
   imagemagick,
+
+  xdotool,
+  xprop,
 }:
 mkWindowsAppNoCC rec {
   inherit wine;
@@ -30,6 +33,12 @@ mkWindowsAppNoCC rec {
 
     icoextract
     imagemagick
+  ];
+
+  # xdotool + xprop are added to the launcher PATH; winAppRun uses them to hide the viewer's placeholder window.
+  buildInputs = [
+    xdotool
+    xprop
   ];
 
   wineArch = "win64";
@@ -73,6 +82,25 @@ mkWindowsAppNoCC rec {
 
     wine "$WINEPREFIX/drive_c/users/$USER/AppData/Local/Take Control Viewer/TakeControlRDLdr.exe" -- "$ARGS" &
 
+    # When a session starts the viewer also opens an empty, fixed-size placeholder window and never hides it under Wine, leaving a blank white box.
+    # Unmap any such window while the app runs.
+    _unmap_placeholder_windows () {
+      while :; do
+        for _win in $(xdotool search --onlyvisible --class takecontrolrdviewer.exe 2> /dev/null); do
+          _hex=$(printf '0x%x' "$_win")
+          if xprop -id "$_hex" WM_HINTS 2> /dev/null | grep -q "group leader: $_hex$"; then
+            xdotool windowunmap "$_win" 2> /dev/null
+          fi
+        done
+        sleep 2
+      done
+    }
+
+    if [ -n "$DISPLAY" ] && command -v xdotool > /dev/null 2>&1; then
+      _unmap_placeholder_windows &
+      _placeholder_watcher=$!
+    fi
+
     # Wait for BASupClpHlp.exe to appear, confirming the session is active.
     # Timeout after 5 minutes in case the connection is never established.
     _timeout=300
@@ -89,6 +117,11 @@ mkWindowsAppNoCC rec {
     while pgrep -x "BASupClpHlp.exe" > /dev/null 2>&1; do
       sleep 1
     done
+
+    # Stop the placeholder watcher.
+    if [ -n "$_placeholder_watcher" ]; then
+      kill "$_placeholder_watcher" 2> /dev/null
+    fi
 
     # Kill all processes in this WINEPREFIX cleanly.
     wineserver -k
