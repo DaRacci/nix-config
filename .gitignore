@@ -11,6 +11,10 @@ result
 
 ci/vale/styles/config/dictionaries/en_AU-large.dic
 ci/vale/styles/config/dictionaries/en_AU-large.aff
+ci/vale/styles/config/dictionaries/tech.dic
+ci/vale/styles/config/dictionaries/tech.aff
+ci/vale/styles/config/dictionaries/terms.txt
+ci/vale/styles/AU-English/Terms.yml
 
 @girs
 node_modules

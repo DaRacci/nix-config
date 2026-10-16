@@ -28,10 +28,9 @@ jobs:
       - name: Vale
         uses: workflow/nix-shell-action@031bcb0eb0396e0a585e86906809af10fe3bd499 # v4.0.0
         with:
-          flakes: nixpkgs#vale,nixpkgs#hunspellDicts.en_AU-large
+          flakes: nixpkgs#vale
           script: |
-            DICT=$(nix build --inputs-from . --no-link --print-out-paths 'nixpkgs#hunspellDicts.en_AU-large')
-            ./ci/vale/install-dictionaries.sh "$DICT"
+            nix run .#install-vale-dictionaries
             vale docs/ AGENTS.md
 
   generate-matrix:

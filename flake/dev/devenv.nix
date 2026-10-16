@@ -11,6 +11,9 @@
       config,
       ...
     }:
+    let
+      devTools = import ./scripts { inherit pkgs lib; };
+    in
     {
       devenv.shells = rec {
         default = {
@@ -59,12 +62,13 @@
               hunspellDicts.en_AU-large
             ]
             ++ config.treefmt.build.devShell.buildInputs
-            ++ (import ./scripts { inherit pkgs lib; } |> builtins.attrValues);
+            ++ (devTools |> builtins.attrValues);
 
           env = {
             NIX_CONFIG = "extra-experimental-features = nix-command flakes pipe-operator pipe-operators";
             OPENSPEC_TELEMETRY = "0";
             HUNSPELL_EN_AU = "${pkgs.hunspellDicts.en_AU-large}";
+            VALE_TECH_DICTIONARY = "${devTools.vale-tech-dictionary}";
           };
 
           git-hooks = {
@@ -92,7 +96,7 @@
             "vale:installDictionaries" = {
               before = [ "devenv:enterShell" ];
               exec = ''
-                "$DEVENV_ROOT/ci/vale/install-dictionaries.sh" "$HUNSPELL_EN_AU"
+                install-vale-dictionaries
               '';
             };
 
