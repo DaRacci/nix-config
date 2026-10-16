@@ -5,4 +5,5 @@ dictionaries:
   - en_AU-large
 # Path is relative to StylesPath (ci/vale/styles).
 ignore:
+  - config/dictionaries/programmer.txt
   - config/dictionaries/ignore.txt
