@@ -41,21 +41,22 @@ mkWindowsAppNoCC rec {
   enableVulkan = false;
 
   winAppInstall = ''
-    # The installer exits in ~5 seconds after writing files, but spawns
-    # helper processes (TakeControlRDLdr, TakeControlRDViewer, tkcuploader)
-    # that never exit on their own.
-    #
-    # All Wine-managed processes are re-parented to the session leader
-    # (not to the wine command that launched them), so PID ancestry tracking
-    # is useless here. Instead, we wait for the install-complete signal and
-    # then use wineserver -k, which is scoped to $WINEPREFIX and safely kills
-    # only processes belonging to this prefix.
+    # The installer writes every file, then launches the application stack from its "run after install" step, and only then exits.
+    # Those processes never exit on their own.
+    # All Wine-managed processes are re-parented to the session leader, so PID ancestry tracking is useless here.
+    # Instead, we watch the installer process and then use wineserver -k, which is scoped to $WINEPREFIX and safely kills only processes belonging to this prefix.
 
     wine ${src}/TakeControlViewerInstall* &
 
-    # The installer signals success by spawning TakeControlRDViewer.exe with
-    # the -installcomplete flag. Wait for it to appear before killing.
-    while ! pgrep -f "TakeControlRDViewer.exe.*installcomplete" > /dev/null 2>&1; do
+    # Wait for the application stack.
+    # Its appearance means the installer reached its final stage and has written all files.
+    while ! pgrep -f "TakeControlRDLdr.exe" > /dev/null 2>&1; do
+      sleep 1
+    done
+
+    # Wait for the installer to exit.
+    # The installer process exiting is the completion signal.
+    while pgrep -f "TakeControlViewerInstall" > /dev/null 2>&1; do
       sleep 1
     done
 
@@ -65,12 +66,10 @@ mkWindowsAppNoCC rec {
   '';
 
   winAppRun = ''
-    # The app never exits on its own — all processes (TakeControlRDLdr,
-    # TakeControlRDViewer, tkcuploader) stay alive indefinitely after the
-    # remote session ends. We launch wine in the background, detect the
-    # session lifecycle via BASupClpHlp.exe (the clipboard/session helper
-    # that is present for exactly the duration of an active session), and
-    # kill everything in the WINEPREFIX once the session ends.
+    # The app never exits on its own, all processes stay alive indefinitely after the remote session ends.
+    # We launch wine in the background, detect the session lifecycle via BASupClpHlp.exe
+    # (the clipboard/session helper that is present for exactly the duration of an active session),
+    # and kill everything in the WINEPREFIX once the session ends.
 
     wine "$WINEPREFIX/drive_c/users/$USER/AppData/Local/Take Control Viewer/TakeControlRDLdr.exe" -- "$ARGS" &
 
@@ -85,8 +84,8 @@ mkWindowsAppNoCC rec {
       fi
     done
 
-    # Wait for BASupClpHlp.exe to exit, which signals the remote session has
-    # ended. All other processes remain alive forever without this explicit kill.
+    # Wait for BASupClpHlp.exe to exit, which signals the remote session has ended.
+    # All other processes remain alive forever without this explicit kill.
     while pgrep -x "BASupClpHlp.exe" > /dev/null 2>&1; do
       sleep 1
     done
