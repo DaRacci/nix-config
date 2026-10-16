@@ -1,4 +1,4 @@
-# nixarr — Media Management
+# NixArr — Media Management
 
 ## Purpose
 
@@ -55,6 +55,6 @@ All downloading happens through a VPN tunnel so P2P traffic is isolated.
 
 ## References
 
-- [nixarr](https://github.com/rasmus-kirk/nixarr/)
+- [NixArr](https://github.com/rasmus-kirk/nixarr/)
 - [Identity Coordinator](../../hosts/server/nixauth.md)
 - [IO Coordinator](../../hosts/server/nixio.md)

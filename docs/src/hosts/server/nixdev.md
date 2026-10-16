@@ -1,9 +1,9 @@
-# nixdev — Development & CI
+# NixDev — Development & CI
 
 ## Purpose
 
 `nixdev` is the development and CI host.
-It runs the self-hosted development services: continuous integration, Coder workspace platform, workflow automation, a Docker registry, and a forgesync mirror job.
+It runs the self-hosted development services: continuous integration, Coder workspace platform, workflow automation, a Docker registry, and a ForgeSync mirror job.
 
 ## Entry Point
 
@@ -28,7 +28,7 @@ It runs the self-hosted development services: continuous integration, Coder work
 ### Registry & Mirroring
 
 - **Docker Registry**: Self-hosted OCI registry storing images on the Storage Coordinator, with htpasswd auth.
-- **Forgesync**: Mirrors repositories between Codeberg and GitHub on a daily schedule.
+- **ForgeSync**: Mirrors repositories between Codeberg and GitHub on a daily schedule.
 
 ## Secrets
 
@@ -51,7 +51,7 @@ It runs the self-hosted development services: continuous integration, Coder work
 | `REGISTRY/SECRET`                                          | Registry shared secret            |
 | `REGISTRY/HTPASSWD`                                        | Registry auth htpasswd            |
 | `REGISTRY/S3_ACCESS_KEY` / `S3_SECRET_KEY`                 | S3 storage credentials            |
-| `FORGESYNC/SOURCE_TOKEN` / `TARGET_TOKEN` / `MIRROR_TOKEN` | Forgesync tokens                  |
+| `FORGESYNC/SOURCE_TOKEN` / `TARGET_TOKEN` / `MIRROR_TOKEN` | ForgeSync tokens                  |
 
 ## Operational Notes / Assumptions
 

@@ -15,8 +15,8 @@ Comprehensive metrics collection and integration with Home Assistant via `hacomp
 
 ## Architecture / Services / Scope
 
-- **hacompanion** — Home Assistant companion daemon that publishes system sensors (CPU, memory, storage, uptime, and more) to Home Assistant. It uses a generated TOML configuration file and loads the Home Assistant API token from `sops.secrets.HACOMPANION_ENV`.
-- **upgradeStatus** — reports NixOS upgrade state (idle / running / failed / dirty). When `upgradeStatus.uptimeKuma.enable` is set, it also sends heartbeat notifications to Uptime Kuma on successful upgrades.
+- **Hacompanion** — Home Assistant companion daemon that publishes system sensors (CPU, memory, storage, uptime, and more) to Home Assistant. It uses a generated TOML configuration file and loads the Home Assistant API token from `sops.secrets.HACOMPANION_ENV`.
+- **`upgradeStatus`** — reports NixOS upgrade state (idle / running / failed / dirty). When `upgradeStatus.uptimeKuma.enable` is set, it also sends heartbeat notifications to Uptime Kuma on successful upgrades.
 
 ## Secrets
 

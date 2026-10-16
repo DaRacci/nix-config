@@ -19,6 +19,7 @@
 - [Using a Package/Module from a Fork](development/using_a_nix_package_or_nixos_module_from_a_separate_fork_of_nixpkgs.md)
 - [Default Development Shell](development/default-development-shell.md)
 - [Python Development Shell](development/python-development-shell.md)
+- [Spelling Lint](development/spelling_lint.md)
 
 # Modules
 

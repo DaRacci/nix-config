@@ -1,4 +1,4 @@
-# nixio - Ingress Host
+# NixIO - Ingress Host
 
 ## Purpose
 

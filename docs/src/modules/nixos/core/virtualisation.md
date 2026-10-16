@@ -21,7 +21,7 @@ When enabled, module:
 - creates bridge networking with DHCP on `bridgeInterface` and `externalInterface` enslaved into the bridge,
 - adds `kvmfr` kernel module package and modprobe config,
 - installs udev rule for `/dev/kvmfr` access, and
-- persists libvirt and swtpm state under `host.persistence.directories`.
+- persists libvirt and `swtpm` state under `host.persistence.directories`.
 
 ### Isolation and Hook Helpers
 
