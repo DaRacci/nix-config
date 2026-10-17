@@ -118,6 +118,12 @@ This registers the `mnemosyne-hermes` plugin and writes these `settings.memory.m
 - `shared_surface_read = true` — `mnemosyne_recall` merges shared-surface results into private-bank recall and tags each result with its origin.
 - `tools = null` — expose every `mnemosyne_*` tool.
 
+### GitHub CLI for PR-contract cards
+
+Cards whose completion contract is a pull request are verified by `hermes_cli/kanban_pr_acceptance.py`, which needs a `gh` that supports `gh api --slurp` and a gh identity for the card's assignee profile. Both are container-local, so they belong in `services.ai-agent.containerPostStart`: a host that can own PR-contract cards provisions a `gh` that precedes `/usr/bin` on the container PATH, and links `/data/.hermes/profiles/<profile>/gh` to the fleet gh config for every profile.
+
+The [`nixai`](../../../hosts/server/nixai.md) host implements both; that page documents the pinned version and digest, the profile onboarding rule, and why a nix `pkgs.gh` cannot be used here (`services.hermes-agent` appends nix store tools to `PATH` with `--suffix`, so `/usr/bin/gh` always wins).
+
 ## References
 
 - [Hermes Agent](https://hermes-agent.nousresearch.com/)
