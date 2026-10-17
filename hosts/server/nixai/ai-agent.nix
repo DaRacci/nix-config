@@ -210,6 +210,13 @@ in
       sleep 1
       ${pkgs.openssh}/bin/sshd -f /etc/ssh/sshd_config_hermes -E /tmp/sshd-container.log
     ''
+
+    # The kanban PR-acceptance gate runs `gh api ... --paginate --slurp`,
+    # which the base image's gh 2.45.0 at /usr/bin/gh rejects.
+    # Install to /usr/local/bin so the gate's PATH lookup finds this gh first.
+    ''
+      ln -sf ${pkgs.gh} /usr/local/bin/gh
+    ''
   ];
 
   server.network.openPortsForSubnet.tcp = [ 2222 ];
