@@ -8,7 +8,7 @@ It runs the AI agent, local inference via Ollama, the Open WebUI chat interface,
 ## Entry Point
 
 - **Main file**: [`hosts/server/nixai/default.nix`](../../../../hosts/server/nixai/default.nix)
-- **Supporting files**: `ai-agent.nix`, `backend.nix`, `mnemosyne.nix`, `voice.nix`, `web.nix`
+- **Supporting files**: `ai-agent.nix`, `backend.nix`, `mnemosyne.nix`, `voice.nix`.
 
 ## Architecture / Services / Scope
 
@@ -23,11 +23,6 @@ It runs the AI agent, local inference via Ollama, the Open WebUI chat interface,
 
 - Runs local models on the host's AMD iGPU (ROCm/Vulkan), loading a small set of chat and embedding models.
 - Used by Open WebUI and the agent for local model access.
-
-### Open WebUI (`web.nix`)
-
-- User-facing chat interface with RAG, web search (via SearXNG), and local Whisper STT.
-- Backed by a PostgreSQL database on the Database Coordinator and tied into the database availability target so it only starts when the DB is reachable.
 
 ### Mnemosyne (`mnemosyne.nix`)
 
