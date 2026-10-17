@@ -24,10 +24,12 @@ The spelling rule loads two hunspell dictionaries:
 
 ## Generated And Hand-Written Allow-lists
 
-`install-vale-dictionaries`, a `nu` tool in `flake/dev/scripts/`, installs the
-dictionaries and writes the generated allow-lists into `ci/vale/styles/`. The
-`vale:installDictionaries` devenv task runs it on shell entry, and CI runs it
-with `nix run .#install-vale-dictionaries`. Everything it writes is gitignored.
+`install-vale-dictionaries`, a `nu` tool in `flake/dev/scripts/`, installs the dictionaries and writes the generated allow-lists into `ci/vale/styles/`.
+The `vale:installDictionaries` devenv task runs it on shell entry, and CI runs it with `nix run .#install-vale-dictionaries`.
+Everything it writes is gitignored.
+
+The `vale` git hook runs Vale on every staged Markdown file, so `docs/` and `AGENTS.md` are checked before the commit is made.
+It needs the dictionaries in place, which the shell entry task provides.
 
 It derives `terms.txt` from the repository: every host, every package under
 `pkgs/`, and every `pkgs.<name>`, `services.<name>`, `programs.<name>` and

@@ -85,6 +85,14 @@
               trim-trailing-whitespace.enable = true;
 
               nil.enable = true;
+
+              vale = {
+                enable = true;
+                name = "vale";
+                entry = lib.getExe pkgs.vale;
+                files = "\\.md$";
+              };
+
               treefmt = {
                 enable = true;
                 packageOverrides.treefmt = config.treefmt.build.wrapper;
