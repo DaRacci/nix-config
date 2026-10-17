@@ -6,6 +6,28 @@
 }:
 let
   cfg = config.services.ai-agent;
+
+  # gh release installed into the container's /usr/local/bin so it precedes the
+  # base image's /usr/bin/gh (see the containerPostStart hooks below). 2.102.0 is
+  # the release verified to support `gh api --slurp`, which the kanban
+  # PR-acceptance gate passes; the tarball digests come from that release's
+  # gh_2.102.0_checksums.txt.
+  ghVersion = "2.102.0";
+
+  ghArch =
+    {
+      x86_64-linux = "amd64";
+      aarch64-linux = "arm64";
+    }
+    .${pkgs.stdenv.hostPlatform.system}
+      or (throw "no gh release tarball is defined for ${pkgs.stdenv.hostPlatform.system}");
+
+  ghTarballHash =
+    {
+      amd64 = "bb766f710eef8ede859c18578c72c327597cd4c8a85b06001b1f3843c6019386";
+      arm64 = "7862c86c72f43df3a2d93ddde6f473285b4e2af61b494849846827e513ef6484";
+    }
+    .${ghArch};
 in
 {
   sops = {
@@ -197,6 +219,54 @@ in
       pkill -f "sshd.*-f /etc/ssh/sshd_config_hermes" 2>/dev/null || true
       sleep 1
       ${pkgs.openssh}/bin/sshd -f /etc/ssh/sshd_config_hermes -E /tmp/sshd-container.log
+    ''
+
+    # The kanban PR-acceptance gate runs `gh api … --paginate --slurp`, which the
+    # base image's gh 2.45.0 at /usr/bin/gh rejects. Install to /usr/local/bin so
+    # the gate's PATH lookup finds this gh first. A nix pkgs.gh cannot be used for
+    # this: the hermes-agent wrapper appends nix store tools to PATH with
+    # `--suffix`, so every /nix/store path sorts after /usr/bin and the distro gh
+    # always wins. This hook runs on every container start, so it skips the
+    # download whenever the installed gh already supports the flag.
+    ''
+      GH_BIN=/usr/local/bin/gh
+      if [ -x "$GH_BIN" ] && "$GH_BIN" api --help 2>&1 | grep -q -- '--slurp'; then
+        echo "[post-start] $("$GH_BIN" --version | head -n 1) at $GH_BIN already supports --slurp"
+      else
+        GH_TMP=$(mktemp -d)
+        trap 'rm -rf "$GH_TMP"' EXIT
+        GH_URL="https://github.com/cli/cli/releases/download/v${ghVersion}/gh_${ghVersion}_linux_${ghArch}.tar.gz"
+        echo "[post-start] installing gh ${ghVersion} from $GH_URL"
+        curl -fsSL -o "$GH_TMP/gh.tar.gz" "$GH_URL"
+        printf '%s  %s\n' "${ghTarballHash}" "$GH_TMP/gh.tar.gz" | sha256sum -c -
+        tar -xzf "$GH_TMP/gh.tar.gz" -C "$GH_TMP"
+        install -m 0755 "$GH_TMP/gh_${ghVersion}_linux_${ghArch}/bin/gh" "$GH_BIN"
+        echo "[post-start] installed $("$GH_BIN" --version | head -n 1) at $GH_BIN"
+      fi
+    ''
+
+    # Every profile that can be assigned a PR-contract card needs a gh identity:
+    # the acceptance gate reads GitHub as the assignee profile and pins
+    # GH_CONFIG_DIR to <profile>/gh whenever that profile's environment carries no
+    # GH_TOKEN, GITHUB_TOKEN or GH_CONFIG_DIR. The fleet has a single GitHub
+    # identity (RacciDev-Bot) at /home/hermes/.config/gh, so link any profile that
+    # does not have one yet. This is the profile onboarding rule: it is re-asserted
+    # on every container start, so a profile created at any point can never be
+    # missing it. Existing links are left untouched, so a profile that points at a
+    # distinct login is not overwritten.
+    ''
+      GH_CONFIG=/home/hermes/.config/gh
+      if [ ! -e "$GH_CONFIG" ]; then
+        echo "[post-start] warning: $GH_CONFIG is missing; per-profile gh logins will fail until it is provisioned" >&2
+      fi
+      for PROFILE_DIR in /data/.hermes/profiles/*; do
+        [ -d "$PROFILE_DIR" ] || continue
+        GH_LINK="$PROFILE_DIR/gh"
+        if [ ! -e "$GH_LINK" ] && [ ! -L "$GH_LINK" ]; then
+          ln -s "$GH_CONFIG" "$GH_LINK"
+          echo "[post-start] linked $GH_LINK -> $GH_CONFIG"
+        fi
+      done
     ''
   ];
 
