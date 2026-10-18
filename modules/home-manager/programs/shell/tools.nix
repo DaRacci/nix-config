@@ -10,10 +10,10 @@ let
     mkIf
     mkMerge
     mkEnableOption
-    fetchFromGitHub
-    optionals
+    optional
     ;
-  cfg = config.programSets.shell;
+  inherit (pkgs) fetchFromGitHub;
+  cfg = config.programSets.shell.tools;
 
   hasGPUAcceleration = osConfig != null && osConfig.hardware.graphics.hasAcceleration;
   hasContainers =
@@ -24,7 +24,7 @@ in
   options.programSets.shell.tools = {
     enable = mkEnableOption "common shell tools" // {
       default =
-        (osConfig == null || osConfig.host.device.role != "server") -> config.programSets.shell.enable;
+        (osConfig == null || osConfig.host.device.role != "server") && config.programSets.shell.enable;
       defaultText = "true if the device is not a server and shell is enabled";
     };
 
@@ -85,7 +85,7 @@ in
       };
     })
 
-    (mkIf cfg.tools.enableModernReplacements {
+    (mkIf cfg.enableModernReplacements {
       home = {
         packages = [
           pkgs.duf
@@ -110,14 +110,14 @@ in
       };
     })
 
-    (mkIf cfg.tools.enableNetworkTools {
+    (mkIf cfg.enableNetworkTools {
       home.packages = [
         pkgs.doggo
         pkgs.ttl
       ];
     })
 
-    (mkIf cfg.tools.enableSystemTools {
+    (mkIf cfg.enableSystemTools {
       home.packages = [
         pkgs.inxi
         pkgs.iotop-c
@@ -125,8 +125,8 @@ in
         pkgs.pciutils
         pkgs.sysstat
       ]
-      ++ (optionals hasGPUAcceleration pkgs.nvtopPackages.full)
-      ++ (optionals hasContainers pkgs.ctop);
+      ++ (optional hasGPUAcceleration pkgs.nvtopPackages.full)
+      ++ (optional hasContainers pkgs.ctop);
 
       programs = {
         btop = {
@@ -300,7 +300,7 @@ in
       };
     })
 
-    (mkIf cfg.tools.enableTUI {
+    (mkIf cfg.enableTUI {
       home.packages = [
         pkgs.trash-cli
         pkgs.fzf
@@ -309,38 +309,38 @@ in
       programs.xplr = {
         enable = true;
         extraConfig = builtins.readFile ./xplr.lua;
-        plugins = [
-          (fetchFromGitHub {
+        plugins = {
+          trash-cli = fetchFromGitHub {
             owner = "sayanarijit";
             repo = "trash-cli.xplr";
             rev = "2c5c8c64ec88c038e2075db3b1c123655dc446fa";
             sha256 = "0vp4lf4v53hh4ipygnrf3vng8qk5izfaz1g498klvbrcxk7srf51";
-          })
-          (fetchFromGitHub {
+          };
+          zoxide = fetchFromGitHub {
             owner = "sayanarijit";
             repo = "zoxide.xplr";
             rev = "e50fd35db5c05e750a74c8f54761922464c1ad5f";
             sha256 = "1f9y6va4xyn7zxmvkqys1y0kvwfvffbrwxmnfqmz4m4psgwz7l1m";
-          })
-          (fetchFromGitHub {
+          };
+          map = fetchFromGitHub {
             owner = "sayanarijit";
             repo = "map.xplr";
             rev = "ed774d21195246060ae2d9cae83f82c698e9d8e7";
             sha256 = "1qidg97l5z2jrq3alsd38jfa7qcqv0njm1f7lsl8x5p7gl9cln8v";
-          })
-          (fetchFromGitHub {
+          };
+          find = fetchFromGitHub {
             owner = "sayanarijit";
             repo = "find.xplr";
             rev = "5355d213a7063347f219975e71ddca4bdf8085c9";
-            hash = "1909p3hxvsb2pv252wzv32vm1vwj88w83rgffnahakkd0bwn0vsq";
-          })
-          (fetchFromGitHub {
+            sha256 = "1909p3hxvsb2pv252wzv32vm1vwj88w83rgffnahakkd0bwn0vsq";
+          };
+          dual-pane = fetchFromGitHub {
             owner = "sayanarijit";
             repo = "dual-pane.xplr";
             rev = "db470860912fb9f36ef397329c0e42c2f76187b8";
             sha256 = "0xxrid3qx7pakzy8df9kh8hfm7jpwbrx5dh2695zl8k3byigb7qj";
-          })
-        ];
+          };
+        };
       };
     })
   ];

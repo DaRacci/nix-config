@@ -17,7 +17,7 @@ in
   ];
 
   options.programSets.shell = {
-    enable = mkEnableOption "shell" {
+    enable = mkEnableOption "shell" // {
       default = osConfig == null || osConfig.host.device.role != "server";
       defaultText = "true if the device is not a server";
     };
