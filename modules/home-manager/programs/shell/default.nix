@@ -9,7 +9,6 @@ in
 {
   imports = [
     ./completions.nix
-    ./history.nix
     ./multiplexer.nix
     ./prompt.nix
     ./shell.nix
