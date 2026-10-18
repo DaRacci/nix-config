@@ -1,4 +1,4 @@
-# nixmon — Monitoring
+# NixMon — Monitoring
 
 ## Purpose
 

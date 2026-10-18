@@ -42,7 +42,7 @@ If Home Manager Hyprland is in Lua mode (`wayland.windowManager.hyprland.configT
 
 - **Startup hook**: `settings.on` with `hyprland.start` event triggers `hyprctl output create headless`.
 - **Monitor rule**: `{ output = "HEADLESS-1"; disabled = true; }`
-- **Screencopy permission**: routed through `wayland.windowManager.hyprland.custom-settings.permission.screenCopy`, which handles both Lua and hyprlang modes automatically.
+- **Screencopy permission**: routed through `wayland.windowManager.hyprland.custom-settings.permission.screenCopy`, which handles both Lua and `hyprlang` modes automatically.
 
 | Application           | Behaviour                                                                                                                                                                               |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -1,4 +1,4 @@
-# nixcloud - Application Server
+# NixCloud - Application Server
 
 ## Purpose
 
@@ -13,21 +13,21 @@ General purpose application server for replacing cloud services with self-hosted
 
 ### Application Workloads
 
-| Workload       | Service        | File                                    | Domain            |
-| -------------- | -------------- | --------------------------------------- | ----------------- |
-| Home Assistant | home-assistant | `hosts/server/nixcloud/home-assistant/` | hassio.racci.dev  |
-| Homebox        | homebox        | `hosts/server/nixcloud/homebox.nix`     | homebox.racci.dev |
-| Immich         | immich         | `hosts/server/nixcloud/immich.nix`      | photos.racci.dev  |
-| Music          | navidrome      | `hosts/server/nixcloud/music.nix`       | music.racci.dev   |
-| Nextcloud      | nextcloud      | `hosts/server/nixcloud/nextcloud.nix`   | nc.racci.dev      |
-| Search         | searx          | `hosts/server/nixcloud/search.nix`      | search.racci.dev  |
+| Workload       | Service          | File                                    | Domain              |
+| -------------- | ---------------- | --------------------------------------- | ------------------- |
+| Home Assistant | `home-assistant` | `hosts/server/nixcloud/home-assistant/` | `hassio.racci.dev`  |
+| Homebox        | `homebox`        | `hosts/server/nixcloud/homebox.nix`     | `homebox.racci.dev` |
+| Immich         | `immich`         | `hosts/server/nixcloud/immich.nix`      | `photos.racci.dev`  |
+| Music          | `navidrome`      | `hosts/server/nixcloud/music.nix`       | `music.racci.dev`   |
+| Nextcloud      | `nextcloud`      | `hosts/server/nixcloud/nextcloud.nix`   | `nc.racci.dev`      |
+| Search         | `searx`          | `hosts/server/nixcloud/search.nix`      | `search.racci.dev`  |
 
 ## Operational Notes / Assumptions
 
 - All apps are exposed via the cluster's reverse proxy on the IO Coordinator.
 - Applications using OAuth2/OIDC/SSO use the Identity Coordinator for authentication and authorisation.
 - Database services for these apps are provided by the cluster Database Coordinator via `server.database.postgres.*`.
-- Media storage for Nextcloud and Immich uses seaweedfs mounts on the Storage Coordinator.
+- Media storage for Nextcloud and Immich uses SeaweedFS mounts on the Storage Coordinator.
 
 ## References
 

@@ -8,7 +8,8 @@ export-env {
 
 # Get a list of all hosts.
 # Use the --fast switch to estimate the hosts based on fs instead of nix for quicker scans.
-export def list_hosts [--fast] {
+# The current host is left out unless --include-current is passed.
+export def list_hosts [--fast, --include-current] {
   mut hosts = []
 
   if $fast {
@@ -16,17 +17,20 @@ export def list_hosts [--fast] {
     let host_types = ^find $hosts_dir -mindepth 1 -maxdepth 1 -type d -print | lines;
     for $host_type in $host_types {
       let host_type_dir = ($hosts_dir | path join $host_type)
-      let raw_dirs = ^find $host_type_dir -mindepth 1 -maxdepth  1 -type d -print | lines | each { $in | path basename };
-      let host_names = $raw_dirs | where { $in != $env.CURRENT_HOST and $in != "shared" } | sort | uniq
+      let raw_dirs = ^find $host_type_dir -mindepth 1 -maxdepth 1 -type d -print | lines | each { $in | path basename };
+      let host_names = $raw_dirs | where { $in != "shared" } | sort | uniq
       $hosts = $hosts ++ $host_names
     }
   } else {
     $hosts = flake-eval r#'builtins.attrNames flake.nixosConfigurations |> builtins.concatStringsSep " "'#  --raw
       | split words
-      | where $it != $env.CURRENT_HOST
   }
 
-  $hosts
+  if $include_current {
+    $hosts
+  } else {
+    $hosts | where $it != $env.CURRENT_HOST
+  }
 }
 
 export def select_host [--fast] {

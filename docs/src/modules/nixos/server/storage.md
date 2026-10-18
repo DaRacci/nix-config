@@ -15,7 +15,7 @@ The storage module manages persistent storage abstractions for the server fleet.
 
 ## Architecture / Services / Scope
 
-### swfsMount
+### `swfsMount`
 
 The `swfsMount` option is the repository's declarative storage mount interface. It is a breaking rename from `server.storage.bucketMounts` and each entry chooses a backend explicitly.
 
@@ -59,4 +59,4 @@ See [SeaweedFS Evaluation](storage/seaweedfs.md) for details on scope, host gati
 
 - [SeaweedFS Evaluation](storage/seaweedfs.md)
 
-- IO Coordinator(../../../hosts/server/nixio.md)
+- [IO Coordinator](../../../hosts/server/nixio.md)

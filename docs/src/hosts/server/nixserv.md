@@ -1,4 +1,4 @@
-# nixserv — Nix Build Server
+# NixServ — Nix Build Server
 
 ## Purpose
 

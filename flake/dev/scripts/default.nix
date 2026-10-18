@@ -7,6 +7,26 @@ let
   inherit (lib.mine.packages) writeNuApplicationWithLibs;
 in
 {
+  install-vale-dictionaries = writeNuApplicationWithLibs {
+    inherit pkgs;
+    sourceRoot = ./.;
+    name = "install-vale-dictionaries";
+    runtimeInputs = [ pkgs.ripgrep ];
+  };
+
+  vale-tech-dictionary =
+    pkgs.runCommandLocal "vale-tech-dictionary"
+      {
+        CSPELL = pkgs.cspell;
+        nativeBuildInputs = [
+          pkgs.gzip
+          pkgs.nushell
+        ];
+      }
+      ''
+        nu ${./vale-tech-dictionary.nu}
+      '';
+
   nix-tree-host = writeNuApplicationWithLibs {
     inherit pkgs;
     sourceRoot = ./.;

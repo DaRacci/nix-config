@@ -12,7 +12,7 @@ The system consists of three layers:
 
 - **Exporters** (run on all servers)
 
-  - node_exporter for system-level metrics (CPU, memory, disk, network, per-process stats)
+  - `node_exporter` for system-level metrics (CPU, memory, disk, network, per-process stats)
   - Grafana Alloy for shipping journald logs and Caddy access logs to Loki
   - **Conditional Exporters**: The following exporters are enabled if their corresponding services are configured on the host:
     - Caddy access logs are parsed and sent to Loki
@@ -184,7 +184,7 @@ Alloy applies ingest-time parsing for journal `stdout` logs and Caddy access log
 
 - Caddy access logs are read from `/var/log/caddy-access-*.log` and use the timestamp and level prefix in each line when present
 
-node_exporter also enables the `processes` collector, which exposes per-process metrics such as CPU and memory usage for running processes.
+`node_exporter` also enables the `processes` collector, which exposes per-process metrics such as CPU and memory usage for running processes.
 
 Check Alloy is shipping logs:
 

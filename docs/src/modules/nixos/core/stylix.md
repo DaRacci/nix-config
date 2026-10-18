@@ -6,7 +6,7 @@ Apply a consistent dark theme across graphical hosts by importing Stylix and ena
 
 ## Entry Point
 
-- **Main file**: [stylix.nix](../../../../../modules/nixos/core/stylix.nix)
+- **Main file**: [`stylix.nix`](../../../../../modules/nixos/core/stylix.nix)
 
 ## Architecture / Services / Scope
 

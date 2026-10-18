@@ -1,96 +1,51 @@
-# Generic programming/computer vocabulary for the AU-English spelling lint.
+# Programming and technical vocabulary for the AU-English spelling lint.
 #
-# Language- and project-agnostic terms: they appear in prose across the repo
-# and are NOT US<->AU spelling variants. Add a word here when it is ordinary
-# programmer vocabulary; add it to ignore.txt when it is a project, host,
-# package or service name. US spellings must never be added to either file;
-# wrap a real identifier in backticks instead.
-#
-# One term per line, lowercase.
+# Only terms that neither en_AU-large nor the generated tech dictionary cover.
+# The bulk of ordinary programming vocabulary lives in tech.dic,
+# which is built from a fixed subset of the cspell wordlists by ci/vale/install-dictionaries.sh.
+# Project, host, package and service names belong in ignore.txt.
 
 accel
 acls
-args
 async
-attr
-attrs
 attrset
 autologin
-backend
-backends
+backtick
+backticks
 bootable
-config
-configs
-datasources
-debounce
 declaratively
-deps
-dev
-downloader
-enablement
-enum
-env
-filesystem
-fullscreen
 gpus
-hardcoded
-hostname
 hostnames
 htpasswd
-initrd
-interop
+input's
 keybind
 keybinds
 lifecycle
-localhost
-loopback
 multiline
-namespace
-namespaced
-namespaces
 natively
 oauth
 oneshot
-overridable
 passthrough
 passwordless
-premultiplied
-preprocesses
 prerouting
-proxying
 ps
-realtime
 repr
 revisioned
 rfkill
-rsync
-runnable
 sandboxed
 screencopy
 snake_case
-stderr
 stdlib
-stringify
 submap
 submaps
-submodule
-submodules
 subnet
 subnets
 substituters
-subtree
-sudo
 tailnet
-theming
-toolchain
-transcoding
+tileable
 tty
-typecheck
-udev
 uis
 undrain
-unmount
-unmounts
 vhost
+vhost's
 virtualenv
-webhook

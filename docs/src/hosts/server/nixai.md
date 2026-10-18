@@ -1,4 +1,4 @@
-# nixai — AI Agent Host
+# NixAI — AI Agent Host
 
 ## Purpose
 
