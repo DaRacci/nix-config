@@ -12,6 +12,7 @@ let
     mkMerge
     mkOption
     mkEnableOption
+    optionalAttrs
     literalExpression
     ;
   inherit (types) str enum nullOr;
@@ -96,12 +97,17 @@ in
           lfs.enable = true;
 
           settings = {
-            user = { inherit (cfg.user) email name; };
+            user = {
+              inherit (cfg.user) name;
+            }
+            // optionalAttrs (cfg.user.email != null) {
+              inherit (cfg.user) email;
+            };
 
             init.defaultBranch = "master";
             pull.rebase = true;
 
-            aliases = {
+            alias = {
               lg = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
               resign = "!re() { git rebase --exec 'git commit --amend --no-edit -n -S' $1; }; re";
               caa = "commit -a --amend -C HEAD";
@@ -151,12 +157,10 @@ in
     })
 
     (mkIf (cfg.enable && cfg.user.publicKey != null) {
-      programs.git.settings = {
-        gpg.format = "ssh";
-        signing = {
-          key = cfg.user.publicKey;
-          signByDefault = true;
-        };
+      programs.git.signing = {
+        format = "ssh";
+        key = cfg.user.publicKey;
+        signByDefault = true;
       };
 
       programs.jujutsu.settings = {
@@ -183,7 +187,8 @@ in
         pkgs.meld
         pkgs.watchman
         pkgs.jj-pre-push
-      ] ++ (if cfg.enableJJDescWrapper then [ jj-desc-wrapped ] else [ pkgs.jj-desc ]);
+      ]
+      ++ (if cfg.enableJJDescWrapper then [ jj-desc-wrapped ] else [ pkgs.jj-desc ]);
 
       programs = {
         delta.enableJujutsuIntegration = true;

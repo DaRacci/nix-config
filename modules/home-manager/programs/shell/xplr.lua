@@ -113,5 +113,4 @@ require("trash-cli").setup({
 require("dual-pane").setup()
 require("find").setup()
 require("map").setup()
-require("tree-view").setup()
 require("zoxide").setup()

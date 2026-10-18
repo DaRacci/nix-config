@@ -1,5 +1,5 @@
 {
-  osConfig,
+  osConfig ? null,
   pkgs,
   ...
 }:
