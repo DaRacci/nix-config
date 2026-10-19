@@ -33,7 +33,7 @@ in
       };
       applicationBinds = {
         "SUPER+T" = "${pkgs.alacritty}/bin/alacritty";
-        "SUPER+F" = "${pkgs.firefox}/bin/firefox";
+        "SUPER+F" = getExe config.programs.firefox.finalPackage;
         "SUPER+SHIFT+E" = "${pkgs.nautilus}/bin/nautilus --new-window";
       };
     };
