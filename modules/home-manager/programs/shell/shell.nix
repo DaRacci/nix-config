@@ -16,7 +16,7 @@ in
 {
   options.programSets.shell = {
     minimal = mkEnableOption "minimal installation" // {
-      default = osConfig != null -> osConfig.host.device.role == "server";
+      default = osConfig != null && osConfig.host.device.role == "server";
       defaultText = "enabled if not a server";
     };
 
