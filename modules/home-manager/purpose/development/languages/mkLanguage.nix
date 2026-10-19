@@ -98,5 +98,11 @@ in
 
   config = mkIf (cfg.enable && rootCfg.enable) (mkMerge [
     extraConfig
+
+    {
+      programs.zed-editor = {
+        extraPackages = cfg.allPackages;
+      };
+    }
   ]);
 }

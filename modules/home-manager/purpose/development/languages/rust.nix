@@ -16,6 +16,7 @@ import ./mkLanguage.nix {
   inherit config pkgs lib;
   name = "rust";
 
+  extraPackages = [ pkgs.cargo pkgs.clippy pkgs.rustc ];
   lspPackages = [ pkgs.rust-analyzer ];
   formatterPackages = [ pkgs.rustfmt ];
 
@@ -25,5 +26,9 @@ import ./mkLanguage.nix {
 
   extraConfig = {
     home.packages = mkIf cfg.rust-rover.enable [ pkgs.jetbrains.rust-rover ];
+
+    programs.zed-editor = {
+      extensions = [ "cargo-tom" ];
+    };
   };
 }

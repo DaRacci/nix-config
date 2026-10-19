@@ -7,10 +7,10 @@
   ...
 }:
 let
-  inherit (lib) optional;
+  inherit (lib) optional getExe;
 in
 
-import ./mkLanguage.nix {
+import ./mkLanguage.nix rec {
   inherit
     config
     pkgs
@@ -36,15 +36,28 @@ import ./mkLanguage.nix {
   extraConfig = {
     programs.nix-index.enable = true;
 
-    home.packages = [
-      pkgs.dix
-      pkgs.nix-init
-      pkgs.nixpkgs-review
-    ];
+    home.packages = extraPackages;
 
     xdg.configFile."nix-init/config.toml".text = pkgs.writers.writeTOML {
       maintainers = [ config.programs.git.userName ];
       nixpkgs = ''builtins.getFlake "nixpkgs"'';
+    };
+
+    programs.zed-editor = {
+      extensions = [ "nix" ];
+      userSettings = {
+        languages.Nix.languag_servers = [
+          "nixd"
+          "nil"
+        ];
+        lsp = {
+          nixd.binary.path = getExe pkgs.nixd;
+          nil = {
+            binnary.path = getExe pkgs.nil;
+            initialization_options.formatting.command = [ (getExe pkgs.nixfmt) ];
+          };
+        };
+      };
     };
   };
 }

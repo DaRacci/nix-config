@@ -12,11 +12,6 @@
       autocorrect
       docker-compose-language-service
       dockerfile-language-server
-      nil
-      nixd
-      nixfmt
-      powershell
-      powershell-editor-services
       shellcheck
       shfmt
 
@@ -24,8 +19,6 @@
     ];
     extensions = [
       "autocorrect"
-      "cargo-appraiser"
-      "cargo-tom"
       "catppuccin-icons"
       "docker-compose"
       "dockerfile"
@@ -33,7 +26,6 @@
       "git-firefly"
       "ini"
       "log"
-      "nix"
       "nu"
       "qml"
       "terraform"
@@ -174,27 +166,9 @@
         quick_actions = true;
       };
 
-      languages = {
-        Nix = {
-          language_servers = [
-            "nixd"
-            "nil"
-          ];
-        };
-      };
-
       lsp = {
-        nil = {
-          binary.path = lib.getExe pkgs.nil;
-          initialization_options = {
-            formatting = {
-              command = [ (lib.getExe pkgs.nixfmt) ];
-            };
-          };
-        };
         # TODO - Figure out how to do this without hard-coded paths.
         nixd = {
-          binary.path = lib.getExe pkgs.nixd;
           settings = {
             nixpkgs.expr = "import (builtins.getFlake \"/persist/nix-config\").inputs.nixpkgs { }";
             options = rec {
@@ -204,10 +178,6 @@
               flake-parts2.expr = "(builtins.getFlake \"/persist/nix-config\").currentSystem.options";
             };
           };
-        };
-
-        powershell-es = {
-          binary.path = lib.getExe pkgs.powershell-editor-services;
         };
 
         docker-compose = {
@@ -245,10 +215,6 @@
         "**/.direnv"
         "**/.devenv"
       ];
-
-      file_types = {
-
-      };
 
       git = {
         git_gutter = "tracked_files";
