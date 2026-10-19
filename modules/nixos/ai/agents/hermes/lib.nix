@@ -1,6 +1,13 @@
 { lib }:
 let
-  inherit (lib) mkIf mkEnableOption optional;
+  inherit (lib)
+    mkIf
+    mkEnableOption
+    optional
+    getName
+    getExe
+    splitString
+    ;
   inherit (builtins)
     filter
     isAttrs
@@ -8,6 +15,8 @@ let
     hasAttr
     isList
     foldl'
+    elemAt
+    length
     ;
 
   # Takes a list of packages, returning a list of the same packages with any packages matching depNames removed.
@@ -63,6 +72,27 @@ let
             extraPlugins = optional (extraPluginSrc != null) extraPluginSrc;
           };
         };
+
+        # When hermes-agent runs inside a container it doesnt inherit the PATH from the systemd unit which includes the extraPackages,
+        # so we symlink the binaries into the virtualenv bin dir so they are available to the agent at runtime.
+        #
+        # This does come with some caveats, such as for plugins that rely on the presence of a binary to register themselves,
+        # since this is ran as a postStart hook, the agent may have already started and not had the binary available at the time of plugin registration, so the plugin may not be loaded.
+        # This would be resolved uppon a restart of the agent, but isnt ideal.
+        services.ai-agent.containerPostStart =
+          extraPackages
+          |> map (
+            pkg:
+            let
+              binaryPath = getExe pkg;
+              binaryName =
+                if binaryPath == "" then
+                  getName pkg
+                else
+                  elemAt (splitString "/" binaryPath) (length (splitString "/" binaryPath) - 1);
+            in
+            "ln -sfn ${binaryPath} /home/hermes/.venv/bin/${binaryName}"
+          );
       };
     };
 
