@@ -84,11 +84,12 @@ xplr.fn.custom.edit_file = function(app)
   local editor = os.getenv("EDITOR")
   if not editor then
     return {
-      LogWarning = "No editor found, ensure $EDITOR is set"
+      { LogWarning = "No editor found, ensure $EDITOR is set" },
     }
   end
-
-  os.execute(editor .. " " .. xplr.util.shell_escape(node.absolute_path))
+  return {
+    { BashExec0 = editor .. " " .. xplr.util.shell_escape(node.absolute_path) },
+  }
 end
 
 require("trash-cli").setup({
