@@ -25,7 +25,7 @@ The spelling rule loads two hunspell dictionaries:
 ## Generated And Hand-Written Allow-lists
 
 `install-vale-dictionaries`, a `nu` tool in `flake/dev/scripts/`, installs the dictionaries and writes the generated allow-lists into `ci/vale/styles/`.
-The `vale:installDictionaries` devenv task runs it on shell entry, and CI runs it with `nix run .#install-vale-dictionaries`.
+The `vale:installDictionaries` devenv task runs it on shell entry, and CI runs it with `nix --extra-experimental-features 'nix-command flakes pipe-operators' run .#install-vale-dictionaries`.
 Everything it writes is gitignored.
 
 The `vale` git hook runs Vale on every staged Markdown file, so `docs/` and `AGENTS.md` are checked before the commit is made.
