@@ -127,7 +127,6 @@ TagByMatch(Tags.gameLauncher, {
 
 TagByMatch(Tags.gameUtility, {
   Class("steamwebhelper"),
-  Class("SideQuest"),
   Class("r2modman"),
   Class("bs-manager"),
   Class("io.github.lawstorant.boxflat"),

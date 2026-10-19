@@ -15,7 +15,6 @@ in
   config = lib.mkIf cfg.enable {
     home = {
       packages = with pkgs; [
-        sidequest
         oscavmgr
         vrcadvert
         android-tools
@@ -76,7 +75,6 @@ in
     user.persistence.directories = [
       ".config/alvr"
       ".android"
-      ".SideQuest"
       ".config/wivrn"
     ];
   };
