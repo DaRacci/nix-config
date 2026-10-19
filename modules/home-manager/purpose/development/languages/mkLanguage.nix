@@ -22,10 +22,10 @@ let
     mkMerge
     mkOption
     types
+    optional
     ;
   inherit (types)
     listOf
-    nullOr
     package
     ;
 
@@ -38,17 +38,17 @@ in
   options.purpose.development.languages.${name} = {
     enable = mkEnableOption "Enable language support for ${name}";
 
-    treesitterPackage = mkOption {
-      type = nullOr package;
+    treesitterPackages = mkOption {
+      type = listOf package;
       default =
         if treesitterPackage != null then
-          treesitterPackage
+          [ treesitterPackage ]
         else
           (
             let
               pkgName = "tree-sitter-grammars.tree-sitter-${name}";
-            in
-            pkgs.${pkgName} or null
+              pkg = pkgs.${pkgName} or null;
+            in optional pkg != null pkg
           );
       description = ''
         The Tree-sitter grammar package for ${name}, if available.
@@ -86,7 +86,7 @@ in
       type = listOf package;
       readOnly = true;
       default = concatLists [
-        (if cfg.treesitterPackage != null then [ cfg.treesitterPackage ] else [ ])
+        cfg.treesitterPackages
         cfg.lspPackages
         cfg.formatterPackages
         cfg.extraPackages
