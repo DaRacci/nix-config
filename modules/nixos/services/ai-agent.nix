@@ -357,7 +357,6 @@ in
 
           extraDependencyGroups = [
             "acp"
-            "homeassistant"
             "messaging"
             "voice"
             "youtube"
