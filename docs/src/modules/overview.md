@@ -22,11 +22,13 @@ This section provides an overview of the custom NixOS and Home-Manager modules d
     - [Proxy Module](nixos/server/proxy.md)
     - [SSH Module](nixos/server/ssh.md)
   - [Services](nixos/services/default.md)
-    - [AI Agent](nixos/services/ai_agent.md)
     - [Huntress](nixos/services/huntress.md)
     - [MCPO](nixos/services/mcpo.md)
     - [Metrics](nixos/services/metrics.md)
     - [Tailscale](nixos/services/tailscale.md)
+  - [AI Modules](nixos/ai/overview.md)
+    - [Agents](nixos/ai/agents.md)
+    - [Mnemosyne](nixos/ai/mnemosyne.md)
 - `modules/flake/`: Flake-level modules for cross-host configuration.
   - [Flake Allocations](flake/allocations.md)
 - `modules/home-manager/`: Contains Home-Manager-specific modules.

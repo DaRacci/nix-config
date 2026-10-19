@@ -34,9 +34,9 @@ in
     public = true;
 
     ports = [
-      cfg.apiServer.port
       cfg.dashboard.port
-      config.services.ai-agent.platform.webhook.port
+      cfg.platform.apiServer.port
+      cfg.platform.webhook.port
     ];
 
     extraConfig = ''
@@ -51,7 +51,7 @@ in
       }
 
       handle @apiRequest {
-        reverse_proxy localhost:${toString config.services.ai-agent.apiServer.port}
+        reverse_proxy localhost:${toString cfg.platform.apiServer.port}
       }
 
       @webhookRequest {
@@ -60,7 +60,7 @@ in
       }
 
       handle @webhookRequest {
-          reverse_proxy localhost:${toString config.services.ai-agent.platform.webhook.port}
+          reverse_proxy localhost:${toString cfg.platform.webhook.port}
       }
 
       @profileWebhookRequest {
@@ -69,7 +69,7 @@ in
       }
 
       handle @profileWebhookRequest {
-          reverse_proxy localhost:${toString config.services.ai-agent.platform.webhook.port}
+          reverse_proxy localhost:${toString cfg.platform.webhook.port}
       }
 
       @remainingWebhookOrApiRequest {
@@ -83,7 +83,7 @@ in
       }
 
       handle {
-        reverse_proxy localhost:${toString config.services.ai-agent.dashboard.port}
+        reverse_proxy localhost:${toString cfg.dashboard.port}
       }
     '';
   };
@@ -92,7 +92,6 @@ in
     ai-agent = {
       enable = true;
       memory.enable = true;
-      apiServer.enable = true;
 
       dashboard = {
         enable = true;
@@ -112,7 +111,6 @@ in
       };
 
       extras = {
-        plugins = true;
         scraper = {
           enable = true;
           searxEndpoint = "https://search.racci.dev";
@@ -120,6 +118,8 @@ in
       };
 
       platform = {
+        apiServer.enable = true;
+
         discord = {
           enable = true;
           tokenReference = "AI_AGENT/DISCORD_BOT_TOKEN";
@@ -131,6 +131,17 @@ in
           enable = true;
           url = "https://hassio.racci.dev";
         };
+
+        webhook.enable = true;
+      };
+
+      plugins = {
+        agentiker-code-intel.enable = true;
+        curator-evolver.enable = true;
+        fleet-graph.enable = true;
+        hermes-hora.enable = true;
+        openspec.enable = true;
+        rtk-rewrite.enable = true;
       };
     };
 
