@@ -58,8 +58,8 @@ in
       publicKey = mkOption {
         description = "The SSH key to use for signing commits.";
         type = nullOr str;
-        default = builtins.readFile "${self}/home/${config.home.username}/id_ed25519.pub";
-        defaultText = "The public key from the flake at `home/<username>/id_ed25519.pub`";
+        default = builtins.readFile config.core.profile.identity.publicKey;
+        defaultText = literalExpression ''builtins.readFile "''${config.core.profile.identity.publicKey}"'';
       };
     };
 
@@ -248,13 +248,13 @@ in
                 name = "jj-desc";
                 lua = ''
                   revisions.refresh()
-                  local revisions = revisions.checked()
-                  if #revisions == 0 then
-                    revisions = { revisions.current() }
+                  local selectedRevisions = revisions.checked()
+                  if #selectedRevisions == 0 then
+                    selectedRevisions = { revisions.current() }
                   end
 
                   local toProcess = { }
-                  for _, rev in ipairs(revisions) do
+                  for _, rev in ipairs(selectedRevisions) do
                     local description = rev.description()
                     if description ~= nil and description ~= "" then
                       local overwrite = choose("Overwrite description for " .. rev.id() .. "?", { "Yes", "No" })

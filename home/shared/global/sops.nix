@@ -17,9 +17,6 @@ let
   sopsFile = "${self}/home/${username}/secrets.yaml";
   hasSopsFile = builtins.pathExists sopsFile;
 
-  pubKeyFile = "${self}/home/${username}/id_ed25519.pub";
-  hasPubKeyFile = builtins.pathExists pubKeyFile;
-
   sshToAgeOutputDir = "${config.xdg.configHome}/sops/age";
   sshToAgeCommand = escapeShellArgs (
     [
@@ -43,10 +40,6 @@ in
         path = "${config.home.homeDirectory}/.ssh/id_ed25519";
       };
     };
-  };
-
-  home.file = mkIf hasPubKeyFile {
-    ".ssh/id_ed25519.pub".source = "${self}/home/${username}/id_ed25519.pub";
   };
 
   systemd.user.services.ssh-to-age = {
