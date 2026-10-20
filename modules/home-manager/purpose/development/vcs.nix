@@ -1,5 +1,4 @@
 {
-  self,
   config,
   pkgs,
   lib,
@@ -14,6 +13,7 @@ let
     mkEnableOption
     optionalAttrs
     literalExpression
+    concatStringsSep
     ;
   inherit (types) str enum nullOr;
   cfg = config.purpose.development.vcs;
@@ -163,10 +163,20 @@ in
     })
 
     (mkIf (cfg.enable && cfg.user.publicKey != null) {
-      programs.git.signing = {
-        format = "ssh";
-        key = cfg.user.publicKey;
-        signByDefault = true;
+      programs.git = {
+        signing = {
+          format = "ssh";
+          key = cfg.user.publicKey;
+          signByDefault = true;
+        };
+
+        settings.gpg.ssh.allowedSignersFile =
+          (pkgs.writeTextFile {
+            name = "allowed-signers";
+            text = concatStringsSep "\n" [
+              "${config.programs.git.settings.user.email} ${cfg.user.publicKey}"
+            ];
+          }).outPath;
       };
 
       programs.jujutsu.settings = {
