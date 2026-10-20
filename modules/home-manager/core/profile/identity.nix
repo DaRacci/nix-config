@@ -29,23 +29,21 @@ in
     };
   };
 
-  assertions = [
-    {
-      assertion = builtins.pathExists cfg.publicKey;
-      message = ''
-        The public key file ${cfg.publicKey} does not exist.
-
-        If you are receiving this error, you may need to set `core.profile.identity.publicKey` to a valid path of your public key.
-        This is typically automatically set to the public key in your flake at `home/<username>/id_ed25519.pub`.
-      '';
-    }
-  ];
-
   config = {
+    assertions = [
+      {
+        assertion = builtins.pathExists cfg.publicKey;
+        message = ''
+          The public key file ${cfg.publicKey} does not exist.
+
+          If you are receiving this error, you may need to set `core.profile.identity.publicKey` to a valid path of your public key.
+          This is typically automatically set to the public key in your flake at `home/<username>/id_ed25519.pub`.
+        '';
+      }
+    ];
+
     home.file.".ssh/id_ed25519.pub" = {
       source = cfg.publicKey;
     };
-
-
   };
 }

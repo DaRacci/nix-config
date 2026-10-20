@@ -49,30 +49,32 @@ in
     };
   };
 
-  assertions = [
-    {
-      assertion = cfg.enable -> config.programSets.shell.enable;
-      message = "shell tools can only be enabled if shell is enabled";
-    }
-    {
-      assertion = cfg.enableModernReplacements -> cfg.enable;
-      message = "enableModernReplacements requires shell tools to be enabled";
-    }
-    {
-      assertion = cfg.enableNetworkTools -> cfg.enable;
-      message = "enableNetworkTools requires shell tools to be enabled";
-    }
-    {
-      assertion = cfg.enableSystemTools -> cfg.enable;
-      message = "enableSystemTools requires shell tools to be enabled";
-    }
-    {
-      assertion = cfg.enableTUI -> cfg.enable;
-      message = "enableTUI requires shell tools to be enabled";
-    }
-  ];
-
   config = mkMerge [
+    {
+      assertions = [
+        {
+          assertion = cfg.enable -> config.programSets.shell.enable;
+          message = "shell tools can only be enabled if shell is enabled";
+        }
+        {
+          assertion = cfg.enableModernReplacements -> cfg.enable;
+          message = "enableModernReplacements requires shell tools to be enabled";
+        }
+        {
+          assertion = cfg.enableNetworkTools -> cfg.enable;
+          message = "enableNetworkTools requires shell tools to be enabled";
+        }
+        {
+          assertion = cfg.enableSystemTools -> cfg.enable;
+          message = "enableSystemTools requires shell tools to be enabled";
+        }
+        {
+          assertion = cfg.enableTUI -> cfg.enable;
+          message = "enableTUI requires shell tools to be enabled";
+        }
+      ];
+    }
+
     (mkIf cfg.enable {
       programs.helix = {
         enable = true;
