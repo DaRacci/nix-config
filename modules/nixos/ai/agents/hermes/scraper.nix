@@ -51,7 +51,7 @@ in
         extraDependencyGroups = [ "firecrawl" ];
         environment = {
           FIRECRAWL_API_URL = "http://127.0.0.1:${toString config.services.trafilatura-scrape.port}";
-          SEARXNG_URL = "https://search.racci.dev";
+          SEARXNG_URL = cfg.extras.scraper.searxEndpoint;
         };
       };
     };
