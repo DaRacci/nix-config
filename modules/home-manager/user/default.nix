@@ -51,16 +51,6 @@ in
           };
         };
       };
-
-      git.settings = {
-        gpg.ssh.allowedSignersFile =
-          (pkgs.writeTextFile {
-            name = "allowed-signers";
-            text = pkgs.lib.concatStringsSep "\n" [
-              "${config.programs.git.settings.user.email} ${builtins.readFile config.core.profile.identity.publicKey}"
-            ];
-          }).outPath;
-      };
     };
 
     user.persistence.files = [ ".ssh/known_hosts" ];
