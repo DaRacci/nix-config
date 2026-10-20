@@ -59,7 +59,7 @@ in
 
             mnemosyne = {
               auto_sleep = true;
-              profile_isolation = false;
+              profile_isolation = true;
               shared_surface_read = true;
               sleep_threshold = 50;
               tools = null; # Null means all

@@ -15,16 +15,16 @@ The module is provider-oriented: `default.nix` holds universal defaults, while e
 ### File layout
 
 - `default.nix` — entry point. Declares only universal options shared by every agent backend: `enable` and `models`.
-- `hermes/default.nix` — import aggregator. Declares the local `services.ai-agent.settings` option, which deep-merges (with list concatenation) and is emitted once as `services.hermes-agent.settings`.
-- `hermes/lib.nix` — shared helpers: the deep-merge option type and `depsMinusNamed` dependency trimming.
+- `hermes/default.nix` — import aggregator. Declares the local `services.ai-agent.settings` option, which deep-merges and is emitted once as `services.hermes-agent.settings`.
+- `hermes/lib.nix` — shared helpers.
 - `hermes/core.nix` — the agent container plus universal agent settings (models wiring, auxiliary models, display, security, approvals, …).
-- `hermes/dashboard.nix`, `hermes/dashboard-oidc.nix` — web dashboard unit and OIDC authentication.
-- `hermes/api-server.nix` — OpenAI-compatible API server and its environment file.
-- `hermes/voice.nix` — voice input/output via Wyoming STT.
+- `hermes/dashboard.nix` — web dashboard unit and OIDC authentication.
 - `hermes/memory.nix` — Mnemosyne long-term memory provider.
-- `hermes/plugins.nix`, `hermes/scraper.nix`, `hermes/browser.nix` — the `services.ai-agent.extras.*` features.
-- `hermes/platform-discord.nix`, `hermes/platform-hassio.nix`, `hermes/platform-webhook.nix` — messaging platforms.
 - `hermes/post-start.nix` — `services.ai-agent.containerPostStart` commands.
+- `hermes/voice.nix` — voice input/output via Wyoming STT.
+- `hermes/scrapper.nix` — web search and extract scrapper.
+- `hermes/platform/*` — messaging platforms.
+- `hermes/plugins/*` — Hermes plugins.
 
 #### Options
 
