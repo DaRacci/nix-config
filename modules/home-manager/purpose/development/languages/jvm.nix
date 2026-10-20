@@ -20,6 +20,7 @@ import ./mkLanguage.nix {
       package = pkgs.jdt-language-server;
       languages = [ "Java" ];
       filetypes = [ ".java" ];
+      editors.helix.languages = [ "java" ];
     }
     {
       name = "kotlin-language-server";
@@ -29,6 +30,7 @@ import ./mkLanguage.nix {
         ".kt"
         ".kts"
       ];
+      editors.helix.languages = [ "kotlin" ];
     }
     {
       name = "metals";
@@ -38,6 +40,7 @@ import ./mkLanguage.nix {
         ".scala"
         ".sc"
       ];
+      editors.helix.languages = [ "scala" ];
     }
   ];
 
@@ -48,6 +51,7 @@ import ./mkLanguage.nix {
       args = [ "-" ];
       languages = [ "Java" ];
       filetypes = [ ".java" ];
+      editors.helix.languages = [ "java" ];
     }
     {
       name = "ktlint";
@@ -57,6 +61,7 @@ import ./mkLanguage.nix {
         ".kt"
         ".kts"
       ];
+      editors.helix.languages = [ "kotlin" ];
     }
   ];
 

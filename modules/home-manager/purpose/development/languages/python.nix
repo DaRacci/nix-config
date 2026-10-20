@@ -12,6 +12,8 @@ import ./mkLanguage.nix {
     {
       name = "pyright";
       package = pkgs.pyright;
+      binary = "pyright-langserver";
+      args = [ "--stdio" ];
       filetypes = [ ".py" ];
     }
   ];

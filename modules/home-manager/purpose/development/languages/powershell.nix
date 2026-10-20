@@ -12,10 +12,18 @@ import ./mkLanguage.nix {
     {
       name = "powershell-es";
       package = pkgs.powershell-editor-services;
+      binary = "powershell-editor-services";
       filetypes = [
         ".ps1"
         ".psm1"
         ".psd1"
+      ];
+      editors.helix.args = [
+        "-Stdio"
+        "-HostName 'Helix'"
+        "-HostProfileId 0"
+        "-HostVersion 1.0.0"
+        "-LogLevel 'Information'"
       ];
     }
   ];

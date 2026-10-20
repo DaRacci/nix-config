@@ -14,6 +14,8 @@ import ./mkLanguage.nix {
     {
       name = "roslyn-ls";
       package = pkgs.roslyn-ls;
+      binary = "Microsoft.CodeAnalysis.LanguageServer";
+      args = [ "--stdio" ];
       filetypes = [ ".cs" ];
     }
   ];
@@ -27,5 +29,8 @@ import ./mkLanguage.nix {
     }
   ];
 
-  editors.zed.languages = [ "C#" ];
+  editors = {
+    zed.languages = [ "C#" ];
+    helix.languages = [ "c-sharp" ];
+  };
 }

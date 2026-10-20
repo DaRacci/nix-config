@@ -3,7 +3,7 @@ _: {
     ./ai
     ./vscode
     ./zed
-    ./helix.nix
+    ./helix
   ];
 
   options.purpose.development.editors = { };
