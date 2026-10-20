@@ -7,7 +7,7 @@
   ...
 }:
 let
-  inherit (lib) optional;
+  inherit (lib) getExe optional;
 in
 
 import ./mkLanguage.nix rec {
@@ -50,9 +50,56 @@ import ./mkLanguage.nix rec {
     }
   ];
 
-  editors.zed = {
-    extensions = [ "nix" ];
-    languages = [ "Nix" ];
+  editors = {
+    zed = {
+      extensions = [ "nix" ];
+      languages = [ "Nix" ];
+    };
+
+    helix.languages = [ "nix" ];
+
+    vscode = {
+      profile = "default";
+      extensions = [ "jnoortheen.nix-ide" ];
+      settings = {
+        "nix.enableLanguageServer" = true;
+        "nix.serverPath" = getExe pkgs.nil;
+        "nix.serverSettings" = {
+          nil = {
+            diagnostics = {
+              ignored = [ ];
+            };
+            formatting = {
+              command = [ (getExe pkgs.nixfmt) ];
+            };
+          };
+
+          nixd = {
+            formatting.command = getExe pkgs.nixfmt;
+            eval = {
+              enable = true;
+              targets = {
+                args = [
+                  "-f"
+                  "default.nix"
+                ];
+                installable = "";
+              };
+            };
+            options = {
+              enable = true;
+              targets = {
+                args = [
+                  "-f"
+                  "default.nix"
+                ];
+                installable = "";
+              };
+            };
+          };
+        };
+      };
+    };
   };
 
   extraPackages = [

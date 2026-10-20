@@ -30,8 +30,26 @@ import ./mkLanguage.nix {
 
   extraPackages = [ pkgs.powershell ];
 
-  editors.zed = {
-    extensions = [ "powershell" ];
-    languages = [ "PowerShell" ];
+  editors = {
+    zed = {
+      extensions = [ "powershell" ];
+      languages = [ "PowerShell" ];
+    };
+
+    helix.languages = [ "powershell" ];
+
+    vscode = {
+      profile = "dotnet";
+      extensions = [
+        "ms-vscode.powershell"
+        "pspester.pester-test"
+        "ironmansoftware.powershellprotools"
+        "tylerleonhardt.vscode-inline-values-powershell"
+      ];
+      settings = {
+        # Required by ironmansoftware.powershellprotools
+        "terminal.integrated.enablePersistentSessions" = false;
+      };
+    };
   };
 }

@@ -65,11 +65,15 @@ import ./mkLanguage.nix {
     }
   ];
 
-  editors.zed.extensions = [
-    "java"
-    "kotlin"
-    "scala"
-  ];
+  editors = {
+    zed.extensions = [
+      "java"
+      "kotlin"
+      "scala"
+    ];
+
+    vscode.profile = "jvm";
+  };
 
   extraConfig = {
     home.packages = [ pkgs.jetbrains.idea-community ];

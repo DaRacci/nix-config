@@ -27,5 +27,23 @@ import ./mkLanguage.nix {
     }
   ];
 
-  editors.zed.languages = [ "Python" ];
+  editors = {
+    zed.languages = [ "Python" ];
+
+    helix.languages = [ "python" ];
+
+    vscode = {
+      profile = "python";
+      extensions = [
+        "ms-python.python"
+        "ms-python.vscode-pylance"
+        "ms-python.debugpy"
+        "ms-python.black-formatter"
+        "ms-python.isort"
+        "ms-python.pylint"
+        "ms-python.mypy-type-checker"
+        "ms-python.gather"
+      ];
+    };
+  };
 }

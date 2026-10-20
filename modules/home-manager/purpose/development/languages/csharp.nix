@@ -32,5 +32,14 @@ import ./mkLanguage.nix {
   editors = {
     zed.languages = [ "C#" ];
     helix.languages = [ "c-sharp" ];
+
+    vscode = {
+      profile = "dotnet";
+      extensions = [
+        "ms-dotnettools.csharp"
+        "ms-dotnettools.csdevkit"
+        "ms-dotnettools.vscode-dotnet-runtime"
+      ];
+    };
   };
 }

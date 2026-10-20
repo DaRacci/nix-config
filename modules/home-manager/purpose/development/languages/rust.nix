@@ -39,9 +39,22 @@ import ./mkLanguage.nix {
     pkgs.rustc
   ];
 
-  editors.zed = {
-    extensions = [ "cargo-tom" ];
-    languages = [ "Rust" ];
+  editors = {
+    zed = {
+      extensions = [ "cargo-tom" ];
+      languages = [ "Rust" ];
+    };
+
+    helix.languages = [ "rust" ];
+
+    vscode = {
+      profile = "rust";
+      extensions = [
+        "jscearcy.rust-doc-viewer"
+        "dustypomerleau.rust-syntax"
+        "rust-lang.rust-analyzer"
+      ];
+    };
   };
 
   options = {
