@@ -24,6 +24,11 @@ import ./mkLanguage.nix rec {
       name = "nixd";
       package = pkgs.nixd;
       filetypes = [ ".nix" ];
+      editors.opencode.command = [
+        "nixd"
+        "--semantic-tokens"
+        "--inlay-hints"
+      ];
       settings = {
         nixpkgs.expr = "import (builtins.getFlake \"/persist/nix-config\").inputs.nixpkgs { }";
         options = rec {

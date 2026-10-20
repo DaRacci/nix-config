@@ -52,6 +52,11 @@ import ./mkLanguage.nix {
       languages = [ "Java" ];
       filetypes = [ ".java" ];
       editors.helix.languages = [ "java" ];
+      editors.opencode.command = [
+        "google-java-format"
+        "--replace"
+        "$FILE"
+      ];
     }
     {
       name = "ktlint";
@@ -62,6 +67,11 @@ import ./mkLanguage.nix {
         ".kts"
       ];
       editors.helix.languages = [ "kotlin" ];
+      editors.opencode.command = [
+        "ktlint"
+        "-F"
+        "$FILE"
+      ];
     }
   ];
 

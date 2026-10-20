@@ -174,6 +174,11 @@ import ./mkLanguage.nix {
       filetypes = [ ".toml" ];
       languages = [ "TOML" ];
       editors.helix.languages = [ "toml" ];
+      editors.opencode.command = [
+        "taplo"
+        "format"
+        "$FILE"
+      ];
     }
     {
       name = "shfmt";
@@ -186,6 +191,11 @@ import ./mkLanguage.nix {
       ];
       languages = [ "Shell Script" ];
       editors.helix.languages = [ "bash" ];
+      editors.opencode.command = [
+        "shfmt"
+        "-w"
+        "$FILE"
+      ];
     }
   ];
 

@@ -187,12 +187,6 @@ let
       quick_actions = true;
     };
 
-    lsp = {
-      docker-compose.binary.arguments = [ "--stdio" ];
-      autocorrect.binary.arguments = [ "server" ];
-      qmljs.binary.arguments = [ "-E" ];
-    };
-
     file_scan_exclusions = [
       "**/.git"
       "**/.svn"

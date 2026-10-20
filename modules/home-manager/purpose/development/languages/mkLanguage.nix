@@ -27,6 +27,7 @@ let
     mkOption
     types
     optional
+    unique
     ;
   inherit (types)
     attrs
@@ -163,13 +164,13 @@ in
     allPackages = mkOption {
       type = listOf package;
       readOnly = true;
-      default = concatLists [
+      default = unique (concatLists [
         cfg.treesitterPackages
         (map (descriptor: descriptor.package) (
           builtins.filter (descriptor: descriptor.package != null) (cfg.lsp ++ cfg.formatters)
         ))
         cfg.extraPackages
-      ];
+      ]);
       description = "All packages related to ${name}, including Tree-sitter grammar, LSP servers, formatters, and any extra packages.";
     };
   }

@@ -24,6 +24,11 @@ import ./mkLanguage.nix {
       binary = "gofmt";
       filetypes = [ ".go" ];
       languages = [ "Go" ];
+      editors.opencode.command = [
+        "gofmt"
+        "-w"
+        "$FILE"
+      ];
     }
   ];
 

@@ -25,12 +25,7 @@ in
   config = mkIf cfg.enable {
     programs.helix = {
       enable = true;
-      extraPackages = [
-        pkgs.bash-language-server
-        pkgs.cmake-language-server
-        pkgs.clang-tools
-      ]
-      ++ rendered.extraPackages;
+      extraPackages = [ pkgs.cmake-language-server ] ++ rendered.extraPackages;
 
       settings = {
         editor = {

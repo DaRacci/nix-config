@@ -52,6 +52,11 @@ import ./mkLanguage.nix {
         "C"
         "C++"
       ];
+      editors.opencode.command = [
+        "clang-format"
+        "-i"
+        "$FILE"
+      ];
     }
   ];
 
