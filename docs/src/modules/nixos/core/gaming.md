@@ -19,7 +19,7 @@ When enabled, module:
 - adds `adbusers` to `core.defaultGroups`,
 - enables `hardware.steam-hardware` and 32-bit graphics support,
 - installs `android-tools`,
-- enables Steam with Steam Deck style launch arguments, `extest`, `xwayland-run`/`xwininfo` extras, and `proton-ge-bin` compatibility,
+- enables Steam with Steam Deck style launch arguments, `extest`, `xwayland-run`/`xwininfo` extras, and `proton-ge-bin` compatibility; on Jovian hosts the Jovian Steam package is overridden instead of defining a second package,
 - opens Steam Remote Play and local transfer firewall rules,
 - enables WiVRn with `highPriority`, OpenXR runtime import, firewall access, and JSON config,
 - installs udev rules for PlayStation controller, Oculus Quest, and tty ACM devices, and
@@ -48,5 +48,6 @@ WiVRn is activated on-demand through systemd user socket activation instead of r
 ## Operational Notes / Assumptions
 
 - Module assumes desktop-class host with graphics stack and Steam support.
+- Jovian also defines `programs.steam.package`. The module force-overrides that option with `pkgs.jovianPackages.steam` plus the gaming launcher arguments and environment when `jovian.steam.enable` is set, avoiding a duplicate definition.
 - WiVRn config uses NVENC H.265 encoder entries and enables `wayvr` as application.
 - Some extra behaviour only appears when related modules already exist, such as Jovian Decky Loader and Home Manager.

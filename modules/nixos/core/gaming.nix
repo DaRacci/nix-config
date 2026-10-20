@@ -16,6 +16,19 @@ let
 
   cfg = config.core.gaming;
   hasHomeManager = options ? home-manager;
+
+  # Jovian owns the Steam package on SteamOS hosts, so override that base
+  # instead of defining a second package at the same priority.
+  jovianSteam = options ? jovian && config.jovian.steam.enable;
+
+  steamPackage = (if jovianSteam then pkgs.jovianPackages.steam else pkgs.steam).override {
+    extraArgs = "-steamos3 -steamdeck -steampal -gamepadui";
+    extraEnv = {
+      PRESSURE_VESSEL_SYSTEMD_SCOPE = 1;
+      PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES = 1;
+      PRESSURE_VESSEL_FILESYSTEMS_RW = "$XDG_RUNTIME_DIR/wivrn/comp_ipc";
+    };
+  };
 in
 {
   options.core.gaming = {
@@ -57,14 +70,7 @@ in
       programs = {
         steam = {
           enable = true;
-          package = pkgs.steam.override {
-            extraArgs = "-steamos3 -steamdeck -steampal -gamepadui";
-            extraEnv = {
-              PRESSURE_VESSEL_SYSTEMD_SCOPE = 1;
-              PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES = 1;
-              PRESSURE_VESSEL_FILESYSTEMS_RW = "$XDG_RUNTIME_DIR/wivrn/comp_ipc";
-            };
-          };
+          package = mkForce steamPackage;
           extest.enable = true;
           extraPackages = [
             pkgs.xwayland-run
