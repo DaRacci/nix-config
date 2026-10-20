@@ -2,6 +2,7 @@ _: {
   imports = [
     ./ai
     ./vscode
+    ./zed
     ./helix.nix
   ];
 
