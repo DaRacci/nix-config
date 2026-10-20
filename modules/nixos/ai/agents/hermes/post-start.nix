@@ -103,7 +103,6 @@ in
       + optionalString (containerCmds != [ ]) ''
         ${pkgs.docker}/bin/docker exec -u root hermes-agent ${containerScript} 2>&1 || echo "[hermes-agent] container postStart FAILED (exit $?)" >&2
       ''
-      + optionalString (hostCmds != [ ]) ""
       + concatStringsSep "\n" (
         imap0 (n: c: ''
           echo "[hermes-agent] host postStart #${toString (n + 1)}..." >&2
