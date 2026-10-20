@@ -50,7 +50,7 @@ in
 
       name = mkOption {
         description = "The name to use for version control operations, this is your commit display name.";
-        type = nullOr str;
+        type = str;
         default = lib.mine.strings.capitalise config.home.username;
         defaultText = "home-manager username with capitalisation for the first character";
       };
@@ -58,7 +58,11 @@ in
       publicKey = mkOption {
         description = "The SSH key to use for signing commits.";
         type = nullOr str;
-        default = builtins.readFile config.core.profile.identity.publicKey;
+        default =
+          if builtins.pathExists config.core.profile.identity.publicKey then
+            builtins.readFile config.core.profile.identity.publicKey
+          else
+            null;
         defaultText = literalExpression ''builtins.readFile "''${config.core.profile.identity.publicKey}"'';
       };
     };
@@ -198,7 +202,12 @@ in
         jujutsu = {
           enable = true;
           settings = {
-            user = { inherit (cfg.user) name email; };
+            user = {
+              inherit (cfg.user) name;
+            }
+            // optionalAttrs (cfg.user.email != null) {
+              inherit (cfg.user) email;
+            };
 
             ui = {
               default-branch = "master";
