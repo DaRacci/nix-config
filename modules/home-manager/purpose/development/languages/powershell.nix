@@ -4,24 +4,26 @@
   lib,
   ...
 }:
-let
-  inherit (lib)
-    getExe
-    ;
-in
 import ./mkLanguage.nix {
   inherit config pkgs lib;
   name = "powershell";
 
-  lspPackages = [ pkgs.powershell-editor-services ];
+  lsp = [
+    {
+      name = "powershell-es";
+      package = pkgs.powershell-editor-services;
+      filetypes = [
+        ".ps1"
+        ".psm1"
+        ".psd1"
+      ];
+    }
+  ];
+
   extraPackages = [ pkgs.powershell ];
 
-  extraConfig = {
-    programs.zed-editor = {
-      extensions = [ "powershell" ];
-      userSettings.lsp.powershell-es = {
-        binary.path = getExe pkgs.powershell-editor-services;
-      };
-    };
+  editors.zed = {
+    extensions = [ "powershell" ];
+    languages = [ "PowerShell" ];
   };
 }

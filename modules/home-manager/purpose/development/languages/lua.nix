@@ -4,23 +4,29 @@
   lib,
   ...
 }:
-let
-  inherit (lib)
-    getExe
-    ;
-in
 import ./mkLanguage.nix {
   inherit config pkgs lib;
   name = "lua";
 
-  lspPackages = [ pkgs.lua-language-server ];
+  lsp = [
+    {
+      name = "lua-language-server";
+      package = pkgs.lua-language-server;
+      filetypes = [ ".lua" ];
+    }
+  ];
 
-  extraConfig = {
-    programs.zed-editor = {
-      extensions = [ "lua" ];
-      userSettings.lsp.lua-language-server = {
-        binary.path = getExe pkgs.lua-language-server;
-      };
-    };
+  formatters = [
+    {
+      name = "stylua";
+      package = pkgs.stylua;
+      args = [ "-" ];
+      filetypes = [ ".lua" ];
+    }
+  ];
+
+  editors.zed = {
+    extensions = [ "lua" ];
+    languages = [ "Lua" ];
   };
 }

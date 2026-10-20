@@ -7,8 +7,6 @@
 
   treesitterPackage ? null,
   treesitterPackages ? [ ],
-  lspPackages ? [ ],
-  formatterPackages ? [ ],
   extraPackages ? [ ],
 
   lsp ? [ ],
@@ -24,7 +22,6 @@ let
     concatLists
     mkEnableOption
     mkIf
-    mkMerge
     mkOption
     types
     optional
@@ -135,24 +132,6 @@ in
       '';
     };
 
-    lspPackages = mkOption {
-      type = listOf package;
-      default = lspPackages;
-      description = ''
-        The LSP server package(s) for ${name}.
-        This will be used to provide editor/IDE support for ${name} in supported editors.
-      '';
-    };
-
-    formatterPackages = mkOption {
-      type = listOf package;
-      default = formatterPackages;
-      description = ''
-        The formatter package(s) for ${name}.
-        This will be used to provide code formatting support for ${name} in supported editors.
-      '';
-    };
-
     extraPackages = mkOption {
       type = listOf package;
       default = extraPackages;
@@ -182,8 +161,6 @@ in
       readOnly = true;
       default = concatLists [
         cfg.treesitterPackages
-        cfg.lspPackages
-        cfg.formatterPackages
         (map (descriptor: descriptor.package) (
           builtins.filter (descriptor: descriptor.package != null) (cfg.lsp ++ cfg.formatters)
         ))
@@ -194,13 +171,5 @@ in
   }
   // options;
 
-  config = mkIf (cfg.enable && rootCfg.enable) (mkMerge [
-    extraConfig
-
-    {
-      programs.zed-editor = {
-        extraPackages = cfg.allPackages;
-      };
-    }
-  ]);
+  config = mkIf (cfg.enable && rootCfg.enable) extraConfig;
 }

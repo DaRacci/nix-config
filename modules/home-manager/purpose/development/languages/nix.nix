@@ -7,7 +7,7 @@
   ...
 }:
 let
-  inherit (lib) optional getExe;
+  inherit (lib) optional;
 in
 
 import ./mkLanguage.nix rec {
@@ -19,11 +19,41 @@ import ./mkLanguage.nix rec {
 
   name = "nix";
 
-  lspPackages = [
-    pkgs.nixd
-    pkgs.nil
+  lsp = [
+    {
+      name = "nixd";
+      package = pkgs.nixd;
+      filetypes = [ ".nix" ];
+      settings = {
+        nixpkgs.expr = "import (builtins.getFlake \"/persist/nix-config\").inputs.nixpkgs { }";
+        options = rec {
+          nixos.expr = "(builtins.getFlake \"/persist/nix-config\").nixosConfigurations.(builtins.replaceStrings [\"\\n\"] [\"\"] (builtins.readFile /etc/hostname)).options";
+          home-manager.expr = "${nixos.expr}.home-manager.users.type.getSubOptions []";
+          flake-parts.expr = "(builtins.getFlake \"/persist/nix-config\").debug.options";
+          flake-parts2.expr = "(builtins.getFlake \"/persist/nix-config\").currentSystem.options";
+        };
+      };
+    }
+    {
+      name = "nil";
+      package = pkgs.nil;
+      filetypes = [ ".nix" ];
+      initializationOptions.formatting.command = [ "nixfmt" ];
+    }
   ];
-  formatterPackages = [ pkgs.nixfmt ];
+
+  formatters = [
+    {
+      name = "nixfmt";
+      package = pkgs.nixfmt;
+      filetypes = [ ".nix" ];
+    }
+  ];
+
+  editors.zed = {
+    extensions = [ "nix" ];
+    languages = [ "Nix" ];
+  };
 
   extraPackages = [
     pkgs.dix
@@ -41,23 +71,6 @@ import ./mkLanguage.nix rec {
     xdg.configFile."nix-init/config.toml".text = pkgs.writers.writeTOML {
       maintainers = [ config.programs.git.userName ];
       nixpkgs = ''builtins.getFlake "nixpkgs"'';
-    };
-
-    programs.zed-editor = {
-      extensions = [ "nix" ];
-      userSettings = {
-        languages.Nix.languag_servers = [
-          "nixd"
-          "nil"
-        ];
-        lsp = {
-          nixd.binary.path = getExe pkgs.nixd;
-          nil = {
-            binnary.path = getExe pkgs.nil;
-            initialization_options.formatting.command = [ (getExe pkgs.nixfmt) ];
-          };
-        };
-      };
     };
   };
 }

@@ -21,6 +21,12 @@ let
 
   cfg = config.purpose.development.editors.zed;
 
+  languages = config.purpose.development.languages;
+
+  rendered = import ./render.nix {
+    inherit lib languages;
+  };
+
   defaultExtensions = [
     "autocorrect"
     "catppuccin-icons"
@@ -181,6 +187,12 @@ let
       quick_actions = true;
     };
 
+    lsp = {
+      docker-compose.binary.arguments = [ "--stdio" ];
+      autocorrect.binary.arguments = [ "server" ];
+      qmljs.binary.arguments = [ "-E" ];
+    };
+
     file_scan_exclusions = [
       "**/.git"
       "**/.svn"
@@ -311,11 +323,12 @@ in
     programs.zed-editor = {
       enable = true;
       installRemoteServer = cfg.installRemoteServer;
-      extraPackages = cfg.extraPackages;
-      extensions = cfg.extensions;
+      extraPackages = cfg.extraPackages ++ rendered.extraPackages;
+      extensions = cfg.extensions ++ rendered.extensions;
       userSettings = lib.mkMerge [
         defaultSettings
         cfg.userSettings
+        rendered.userSettings
       ];
     };
 

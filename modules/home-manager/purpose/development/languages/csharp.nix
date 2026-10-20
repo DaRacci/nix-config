@@ -9,5 +9,23 @@ import ./mkLanguage.nix {
   name = "csharp";
 
   treesitterPackages = [ pkgs.tree-sitter-grammars.tree-sitter-c-sharp ];
-  lspPackages = [ pkgs.roslyn-ls ];
+
+  lsp = [
+    {
+      name = "roslyn-ls";
+      package = pkgs.roslyn-ls;
+      filetypes = [ ".cs" ];
+    }
+  ];
+
+  formatters = [
+    {
+      name = "csharpier";
+      package = pkgs.csharpier;
+      args = [ "--write-stdout" ];
+      filetypes = [ ".cs" ];
+    }
+  ];
+
+  editors.zed.languages = [ "C#" ];
 }

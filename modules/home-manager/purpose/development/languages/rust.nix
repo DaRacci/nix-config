@@ -5,10 +5,7 @@
   ...
 }:
 let
-  inherit (lib)
-    mkIf
-    mkEnableOption
-    ;
+  inherit (lib) mkIf mkEnableOption;
 
   cfg = config.purpose.development.languages.rust;
 in
@@ -16,9 +13,36 @@ import ./mkLanguage.nix {
   inherit config pkgs lib;
   name = "rust";
 
-  extraPackages = [ pkgs.cargo pkgs.clippy pkgs.rustc ];
-  lspPackages = [ pkgs.rust-analyzer ];
-  formatterPackages = [ pkgs.rustfmt ];
+  lsp = [
+    {
+      name = "rust-analyzer";
+      package = pkgs.rust-analyzer;
+      filetypes = [ ".rs" ];
+    }
+  ];
+
+  formatters = [
+    {
+      name = "rustfmt";
+      package = pkgs.rustfmt;
+      args = [
+        "--emit"
+        "stdout"
+      ];
+      filetypes = [ ".rs" ];
+    }
+  ];
+
+  extraPackages = [
+    pkgs.cargo
+    pkgs.clippy
+    pkgs.rustc
+  ];
+
+  editors.zed = {
+    extensions = [ "cargo-tom" ];
+    languages = [ "Rust" ];
+  };
 
   options = {
     rust-rover.enable = mkEnableOption "Add the rust-rover package.";
@@ -26,9 +50,5 @@ import ./mkLanguage.nix {
 
   extraConfig = {
     home.packages = mkIf cfg.rust-rover.enable [ pkgs.jetbrains.rust-rover ];
-
-    programs.zed-editor = {
-      extensions = [ "cargo-tom" ];
-    };
   };
 }
