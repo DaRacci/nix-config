@@ -83,6 +83,11 @@
       url = "github:asmodaydoescoding/fleetgraph";
       flake = false;
     };
+    lightpanda = {
+      url = "github:lightpanda-io/browser";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
 
     seaweedfs = {
       url = "https://raw.githubusercontent.com/liberodark/nixpkgs/refs/heads/seawedfs/nixos/modules/services/network-filesystems/seaweedfs.nix";
