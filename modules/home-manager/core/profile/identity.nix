@@ -8,7 +8,7 @@ let
   inherit (lib) mkOption types literalExpression;
   inherit (types) path;
 
-  cfg = config.user;
+  cfg = config.core.profile.identity;
 
   keyPath = "${self}/home/${config.home.username}/id_ed25519.pub";
 in
