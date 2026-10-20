@@ -2,7 +2,8 @@
 
 ## Purpose
 
-The `modules/nixos/ai/` tree is the canonical home for AI infrastructure services in this NixOS configuration. It provides first-class NixOS modules for AI-related daemons and services that are independent of any specific agent container.
+The `modules/nixos/ai/` tree is the canonical home for AI infrastructure services in this NixOS configuration.
+It provides first-class NixOS modules for AI-related daemons and services that are independent of any specific agent container.
 
 ## Entry Point
 
@@ -10,19 +11,16 @@ The `modules/nixos/ai/` tree is the canonical home for AI infrastructure service
 
 ## Architecture / Services / Scope
 
-### What belongs in `ai/` vs `services/`
+### What belongs in `ai/`
 
-| Location                  | Purpose                       | Examples                                                       |
-| ------------------------- | ----------------------------- | -------------------------------------------------------------- |
-| `modules/nixos/ai/`       | AI infrastructure daemons     | Mnemosyne sync server, future: LLM gateways, embedding servers |
-| `modules/nixos/services/` | Monolithic service containers | AI Agent (Hermes), future: agent orchestration                 |
+| Location                     | Purpose                           | Examples                                                |
+| ---------------------------- | --------------------------------- | ------------------------------------------------------- |
+| `modules/nixos/ai/agents/`   | Agent container modules           | AI Agent, with per-feature files under `agents/hermes/` |
+| `modules/nixos/ai/services/` | AI infrastructure/sidecar daemons | Mnemosyne sync server, MCPO                             |
 
-The `ai/` tree manages standalone services that an AI agent might consume, while `services/` manages the agent container itself.
-
-## Operational Notes / Assumptions
-
-The `ai/` module tree is loaded on all device types by `mkSystem`.
+The `ai/` tree owns both the agent container and the standalone services it consumes.
 
 ## References
 
+- [Agents](agents.md) — Hermes autonomous agent container and its per-feature modules
 - [Mnemosyne](mnemosyne.md) — Sync server, optional MCP server, and sync client orchestration for the Mnemosyne SQLite-based memory provider

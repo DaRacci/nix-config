@@ -6,12 +6,12 @@ Orchestrates Model Context Protocol (MCP) servers, providing a centralised way t
 
 ## Entry Point
 
-- **Main file**: [mcpo.nix](../../../../../modules/nixos/services/mcpo.nix)
+- **Main file**: [mcpo.nix](../../../../../modules/nixos/ai/services/mcpo.nix)
 - **Upstream**: [MCPO GitHub Repository](https://github.com/open-webui/mcpo)
 
 #### Options
 
-{{#include ../../../../generated/services-mcpo-options.md}}
+{{#include ../../../../generated/ai-services-mcpo-options.md}}
 
 ## Architecture / Services / Scope
 

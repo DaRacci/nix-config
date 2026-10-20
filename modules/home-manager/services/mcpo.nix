@@ -8,7 +8,7 @@
 }:
 let
   inherit
-    (import "${self}/modules/nixos/services/mcpo.nix" {
+    (import "${self}/modules/nixos/ai/services/mcpo.nix" {
       inherit
         inputs
         config

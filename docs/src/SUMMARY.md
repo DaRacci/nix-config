@@ -29,7 +29,6 @@
 
 - [Overview](modules/nixos/overview.md)
 - [Services](modules/nixos/services/default.md)
-  - [AI Agent](modules/nixos/services/ai_agent.md)
   - [Huntress](modules/nixos/services/huntress.md)
   - [MCPO](modules/nixos/services/mcpo.md)
   - [Metrics](modules/nixos/services/metrics.md)
@@ -65,6 +64,7 @@
   - [Image](modules/nixos/server/image.md)
 - [Flake Allocations](modules/flake/allocations.md)
 - [AI](modules/nixos/ai/overview.md)
+  - [Agents](modules/nixos/ai/agents.md)
   - [Mnemosyne](modules/nixos/ai/mnemosyne.md)
 
 # Home-Manager Modules

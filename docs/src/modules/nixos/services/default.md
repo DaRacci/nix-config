@@ -2,7 +2,8 @@
 
 ## Purpose
 
-This section documents the custom NixOS service modules available in this configuration. These modules provide specialised integrations and monitoring capabilities.
+This section documents the custom NixOS service modules available in this configuration.
+These modules provide specialised integrations and monitoring capabilities.
 
 ## Entry Point
 
@@ -18,7 +19,6 @@ Nested service modules emit generated fragments for options, which are included 
 
 ## References
 
-- [AI Agent](ai_agent.md)
 - [Huntress](huntress.md)
 - [MCPO](mcpo.md)
 - [Metrics](metrics.md)

@@ -2,12 +2,12 @@
 
 ## Purpose
 
-SQLite-backed memory provider with sync and optional MCP server. Part of the `ai/` module tree.
+SQLite-backed memory provider with sync and optional MCP server.
 
 ## Entry Point
 
 - **Main file**: [mnemosyne.nix](../../../../../modules/nixos/ai/services/mnemosyne.nix)
-- **Upstream**: [mnemosyne-oss/mnemosyne](https://pypi.org/project/mnemosyne-memory/)
+- **Upstream**: [mnemosyne-oss/mnemosyne](https://github.com/mnemosyne-oss/mnemosyne)
 
 ## Architecture / Services / Scope
 
@@ -40,7 +40,7 @@ The module can run three kinds of services, each either natively on the host or 
 
 - **Sync server** (`mnemosyne sync-serve`) — stdlib HTTP, no extra Python dependencies.
 - **MCP server** (`mnemosyne mcp`) — adds the `mcp` and `anyio` dependencies via the package's optional `mcp` group.
-- **Sync client** — per-profile periodic sync to a remote server, driven by a systemd timer (default interval 10 minutes).
+- **Sync client** — per-profile periodic sync to a remote server, driven by a systemd timer.
 
 #### Options
 
@@ -48,13 +48,12 @@ The module can run three kinds of services, each either natively on the host or 
 
 ## Secrets
 
-- `MNEMOSYNE_SYNC_KEY` — API key for sync server authentication (host-level sops secret), provided via `apiKeyFile` and loaded into the services through systemd credentials.
+- `MNEMOSYNE_SYNC_KEY` — API key for sync server authentication, provided via `apiKeyFile` and loaded into the services through systemd credentials.
 
 ## Operational Notes / Assumptions
 
 - Sync protocol is plain HTTP with delta-based bidirectional sync.
 - Sync interval default is 10 minutes.
-- The `mnemosyne-hermes` plugin (`pkgs/python/mnemosyne-hermes.nix`) is built with a `postPatch` that drops the redundant `self._beam` write from the provider constructor (upstream [PR #1125](https://github.com/mnemosyne-oss/mnemosyne/pull/1125)). Without it, 0.7.4 raises `RuntimeError: … no binding for the current home …` on construction, so Hermes loads the provider but registers no `mnemosyne_*` tools and never recalls or writes. The patch carries a `#TODO` and must be removed once a fixed upstream release is published.
 
 ### Usage Examples
 
@@ -87,4 +86,4 @@ The module can run three kinds of services, each either natively on the host or 
 ## References
 
 - [AI Modules](overview.md)
-- [AI Agent (Mnemosyne memory)](../services/ai_agent.md)
+- [AI Agent (Mnemosyne memory)](agents.md)
