@@ -64,7 +64,7 @@ let
 
       config = mkIf (config.services.ai-agent.plugins.${pluginName}.enable) {
         services = {
-          ai-agent.settings = settings // {
+          ai-agent.settings = mergeDeep settings {
             plugins.enabled = [ pluginName ];
           };
           hermes-agent = {
