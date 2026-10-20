@@ -61,13 +61,13 @@ in
       };
 
       issuer = mkOption {
-        type = str;
+        type = nullOr str;
         default = null;
         description = "The OIDC issuer URL for dashboard authentication.";
       };
 
       clientId = mkOption {
-        type = str;
+        type = nullOr str;
         default = null;
         description = "The OIDC client ID for dashboard authentication.";
       };
