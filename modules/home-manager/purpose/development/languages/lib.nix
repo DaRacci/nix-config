@@ -13,7 +13,7 @@ let
     Language configs that are enabled.
 
     Language modules are the only attrsets under `purpose.development.languages`
-    that carry an `enable` option, so this also filters out helper options.
+    that carry an `enable` field, so this also filters out helper entries.
   */
   enabled = languages: filterAttrs (_: value: isAttrs value && (value.enable or false)) languages;
 

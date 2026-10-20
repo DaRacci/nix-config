@@ -70,6 +70,7 @@
 # Home-Manager Modules
 
 - [DIY & Making](modules/home-manager/diy.md)
+- [Development](modules/home-manager/development.md)
 - [AI Editors & Assistants](modules/home-manager/ai.md)
 - [Browser](modules/home-manager/browser.md)
 - [Hyprland](modules/home-manager/hyprland.md)

@@ -50,7 +50,7 @@ let
     let
       generated =
         optionalAttrs (descriptor.initializationOptions != { }) {
-          initialization_options = descriptor.initializationOptions;
+          "initialization_options" = descriptor.initializationOptions;
         }
         // optionalAttrs (descriptor.settings != { }) {
           settings = descriptor.settings;
