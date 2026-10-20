@@ -49,8 +49,8 @@ in
         HASS_TOKEN = config.sops.placeholder."${cfg.platform.hassio.tokenReference}";
         HASS_URL = cfg.platform.hassio.url;
       };
-
-      services.hermes-agent.environmentFiles = [ config.sops.templates."HERMES_HASSIO_ENV".path ];
     };
+
+    services.hermes-agent.environmentFiles = [ config.sops.templates."HERMES_HASSIO_ENV".path ];
   };
 }

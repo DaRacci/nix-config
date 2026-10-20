@@ -17,7 +17,6 @@ in
     ./plugins
 
     ./core.nix
-    ./browser.nix
     ./dashboard.nix
     ./memory.nix
     ./post-start.nix

@@ -56,13 +56,14 @@ let
       pluginName ? name,
 
       settings ? { },
+      extraConfig ? { },
     }:
     {
-      options.services.ai-agent.plugins.${pluginName} = {
-        enable = mkEnableOption "${pluginName} plugin";
+      options.services.ai-agent.plugins.${name} = {
+        enable = mkEnableOption "${name} plugin";
       };
 
-      config = mkIf (config.services.ai-agent.plugins.${pluginName}.enable) {
+      config = mkIf (config.services.ai-agent.plugins.${name}.enable) (mergeDeep extraConfig {
         services = {
           ai-agent.settings = mergeDeep settings {
             plugins.enabled = [ pluginName ];
@@ -93,7 +94,7 @@ let
             in
             "ln -sfn ${binaryPath} /home/hermes/.venv/bin/${binaryName}"
           );
-      };
+      });
     };
 
   hermesConfigType = lib.types.mkOptionType {
