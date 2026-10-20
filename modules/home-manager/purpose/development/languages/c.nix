@@ -28,8 +28,8 @@ import ./mkLanguage.nix {
         ".hxx"
       ];
       languages = [
-        "C"
-        "C++"
+        "c"
+        "cpp"
       ];
     }
   ];
@@ -49,8 +49,8 @@ import ./mkLanguage.nix {
         ".hxx"
       ];
       languages = [
-        "C"
-        "C++"
+        "c"
+        "cpp"
       ];
       editors.opencode.command = [
         "clang-format"
@@ -61,17 +61,7 @@ import ./mkLanguage.nix {
   ];
 
   editors = {
-    zed = {
-      extensions = [
-        "c"
-        "cpp"
-      ];
-      languages = [
-        "C"
-        "C++"
-      ];
-    };
-    helix.languages = [
+    zed.extensions = [
       "c"
       "cpp"
     ];

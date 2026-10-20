@@ -31,13 +31,7 @@ import ./mkLanguage.nix {
   extraPackages = [ pkgs.powershell ];
 
   editors = {
-    zed = {
-      extensions = [ "powershell" ];
-      languages = [ "PowerShell" ];
-    };
-
-    helix.languages = [ "powershell" ];
-
+    zed.extensions = [ "powershell" ];
     vscode = {
       profile = "dotnet";
       extensions = [

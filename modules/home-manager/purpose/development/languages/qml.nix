@@ -15,16 +15,11 @@ import ./mkLanguage.nix {
       binary = "qmlls";
       args = [ "-E" ];
       filetypes = [ ".qml" ];
-      languages = [ "QML" ];
     }
   ];
 
   editors = {
-    zed = {
-      extensions = [ "qml" ];
-      languages = [ "QML" ];
-    };
-    helix.languages = [ "qml" ];
+    zed.extensions = [ "qml" ];
     vscode = {
       profile = "default";
       extensions = [ "theqtcompany.qt-core" ];

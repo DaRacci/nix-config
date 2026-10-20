@@ -22,8 +22,8 @@ import ./mkLanguage.nix {
         ".cjs"
       ];
       languages = [
-        "TypeScript"
-        "JavaScript"
+        "typescript"
+        "javascript"
       ];
     }
   ];
@@ -33,18 +33,8 @@ import ./mkLanguage.nix {
     pkgs.typescript
   ];
 
-  editors = {
-    zed.languages = [
-      "TypeScript"
-      "JavaScript"
-    ];
-    helix.languages = [
-      "typescript"
-      "javascript"
-    ];
-    vscode = {
-      profile = "default";
-      extensions = [ "dbaeumer.vscode-eslint" ];
-    };
+  editors.vscode = {
+    profile = "default";
+    extensions = [ "dbaeumer.vscode-eslint" ];
   };
 }

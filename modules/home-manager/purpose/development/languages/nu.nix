@@ -15,18 +15,13 @@ import ./mkLanguage.nix {
       binary = "nu";
       args = [ "--lsp" ];
       filetypes = [ ".nu" ];
-      languages = [ "Nu" ];
     }
   ];
 
   extraPackages = [ pkgs.nushell ];
 
   editors = {
-    zed = {
-      extensions = [ "nu" ];
-      languages = [ "Nu" ];
-    };
-    helix.languages = [ "nu" ];
+    zed.extensions = [ "nu" ];
     vscode = {
       profile = "default";
       extensions = [ "thenuprojectcontributors.vscode-nushell-lang" ];

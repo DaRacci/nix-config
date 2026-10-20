@@ -18,20 +18,7 @@ let
 
   binaryName = descriptor: if descriptor.binary != null then descriptor.binary else descriptor.name;
 
-  helixLanguages =
-    descriptor:
-    let
-      descriptorLanguages = (descriptor.editors.helix or { }).languages or [ ];
-      moduleLanguages = ((languages.${descriptor.language}.editors or { }).helix or { }).languages or [ ];
-    in
-    if descriptorLanguages != [ ] then
-      descriptorLanguages
-    else if moduleLanguages != [ ] then
-      moduleLanguages
-    else if descriptor.languages != [ ] then
-      descriptor.languages
-    else
-      [ descriptor.language ];
+  helixLanguages = helpers.editorLanguages "helix";
 
   allHelixLanguages = unique (concatLists (map helixLanguages (lsp ++ formatters)));
 

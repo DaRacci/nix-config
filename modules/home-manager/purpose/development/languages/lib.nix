@@ -35,6 +35,29 @@ let
 
   descriptors = languages: (lsp languages) ++ (formatters languages);
 
+  languageNames = import ./names.nix;
+
+  /*
+    Canonical language ids for a descriptor.
+    Descriptors without explicit languages inherit the owning module name.
+  */
+  canonicalLanguages =
+    descriptor: if descriptor.languages != [ ] then descriptor.languages else [ descriptor.language ];
+
+  /*
+    Canonical ids translated to an editor's language names.
+    `editors.<name>.languages` stays available as an explicit override.
+  */
+  editorLanguages =
+    editor: descriptor:
+    let
+      override = (descriptor.editors.${editor} or { }).languages or [ ];
+    in
+    if override != [ ] then
+      override
+    else
+      map (id: (languageNames.${id}.${editor} or id)) (canonicalLanguages descriptor);
+
   packages =
     languages:
     unique (
@@ -50,8 +73,10 @@ let
 in
 {
   inherit
+    canonicalLanguages
     descriptors
     editorExtensions
+    editorLanguages
     enabled
     flatten
     formatters

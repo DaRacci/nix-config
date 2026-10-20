@@ -56,12 +56,7 @@ import ./mkLanguage.nix rec {
   ];
 
   editors = {
-    zed = {
-      extensions = [ "nix" ];
-      languages = [ "Nix" ];
-    };
-
-    helix.languages = [ "nix" ];
+    zed.extensions = [ "nix" ];
 
     vscode = {
       profile = "default";

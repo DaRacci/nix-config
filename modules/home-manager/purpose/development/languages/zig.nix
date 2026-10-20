@@ -13,18 +13,13 @@ import ./mkLanguage.nix {
       name = "zls";
       package = pkgs.zls;
       filetypes = [ ".zig" ];
-      languages = [ "Zig" ];
     }
   ];
 
   extraPackages = [ pkgs.zig ];
 
   editors = {
-    zed = {
-      extensions = [ "zig" ];
-      languages = [ "Zig" ];
-    };
-    helix.languages = [ "zig" ];
+    zed.extensions = [ "zig" ];
     vscode = {
       profile = "default";
       extensions = [ "ziglang.vscode-zig" ];

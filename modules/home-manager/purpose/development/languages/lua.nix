@@ -26,13 +26,7 @@ import ./mkLanguage.nix {
   ];
 
   editors = {
-    zed = {
-      extensions = [ "lua" ];
-      languages = [ "Lua" ];
-    };
-
-    helix.languages = [ "lua" ];
-
+    zed.extensions = [ "lua" ];
     vscode = {
       profile = "default";
       extensions = [ "sumneko.lua" ];

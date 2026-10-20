@@ -22,8 +22,7 @@ import ./mkLanguage.nix {
         ".md"
         ".mdx"
       ];
-      languages = [ "Markdown" ];
-      editors.helix.languages = [ "markdown" ];
+      languages = [ "markdown" ];
     }
     {
       name = "yaml-language-server";
@@ -33,8 +32,7 @@ import ./mkLanguage.nix {
         ".yaml"
         ".yml"
       ];
-      languages = [ "YAML" ];
-      editors.helix.languages = [ "yaml" ];
+      languages = [ "yaml" ];
     }
     {
       name = "vscode-json-language-server";
@@ -45,8 +43,7 @@ import ./mkLanguage.nix {
         ".json"
         ".jsonc"
       ];
-      languages = [ "JSON" ];
-      editors.helix.languages = [ "json" ];
+      languages = [ "json" ];
     }
     {
       name = "vscode-css-language-server";
@@ -58,8 +55,7 @@ import ./mkLanguage.nix {
         ".scss"
         ".less"
       ];
-      languages = [ "CSS" ];
-      editors.helix.languages = [ "css" ];
+      languages = [ "css" ];
     }
     {
       name = "vscode-html-language-server";
@@ -70,8 +66,7 @@ import ./mkLanguage.nix {
         ".html"
         ".htm"
       ];
-      languages = [ "HTML" ];
-      editors.helix.languages = [ "html" ];
+      languages = [ "html" ];
     }
     {
       name = "taplo";
@@ -81,8 +76,7 @@ import ./mkLanguage.nix {
         "stdio"
       ];
       filetypes = [ ".toml" ];
-      languages = [ "TOML" ];
-      editors.helix.languages = [ "toml" ];
+      languages = [ "toml" ];
     }
     {
       name = "bash-language-server";
@@ -93,8 +87,7 @@ import ./mkLanguage.nix {
         ".bash"
         ".zsh"
       ];
-      languages = [ "Shell Script" ];
-      editors.helix.languages = [ "bash" ];
+      languages = [ "bash" ];
     }
     {
       name = "dockerfile-language-server";
@@ -105,8 +98,7 @@ import ./mkLanguage.nix {
         "Dockerfile.*"
         "*.dockerfile"
       ];
-      languages = [ "Dockerfile" ];
-      editors.helix.languages = [ "dockerfile" ];
+      languages = [ "dockerfile" ];
     }
     {
       name = "docker-compose";
@@ -119,15 +111,13 @@ import ./mkLanguage.nix {
         "compose.yml"
         "compose.yaml"
       ];
-      languages = [ "Docker Compose" ];
-      editors.helix.languages = [ "yaml" ];
+      languages = [ "docker-compose" ];
     }
     {
       name = "sqls";
       package = pkgs.sqls;
       filetypes = [ ".sql" ];
-      languages = [ "SQL" ];
-      editors.helix.languages = [ "sql" ];
+      languages = [ "sql" ];
     }
     {
       name = "terraform-ls";
@@ -137,15 +127,13 @@ import ./mkLanguage.nix {
         ".tf"
         ".tfvars"
       ];
-      languages = [ "Terraform" ];
-      editors.helix.languages = [ "hcl" ];
+      languages = [ "terraform" ];
     }
     {
       name = "lemminx";
       package = pkgs.lemminx;
       filetypes = [ ".xml" ];
-      languages = [ "XML" ];
-      editors.helix.languages = [ "xml" ];
+      languages = [ "xml" ];
     }
     {
       name = "autocorrect";
@@ -155,11 +143,7 @@ import ./mkLanguage.nix {
         ".md"
         ".txt"
       ];
-      languages = [
-        "Markdown"
-        "Text"
-      ];
-      editors.helix.languages = [ "markdown" ];
+      languages = [ "markdown" ];
     }
   ];
 
@@ -172,8 +156,7 @@ import ./mkLanguage.nix {
         "-"
       ];
       filetypes = [ ".toml" ];
-      languages = [ "TOML" ];
-      editors.helix.languages = [ "toml" ];
+      languages = [ "toml" ];
       editors.opencode.command = [
         "taplo"
         "format"
@@ -189,8 +172,7 @@ import ./mkLanguage.nix {
         ".bash"
         ".zsh"
       ];
-      languages = [ "Shell Script" ];
-      editors.helix.languages = [ "bash" ];
+      languages = [ "bash" ];
       editors.opencode.command = [
         "shfmt"
         "-w"
@@ -206,35 +188,19 @@ import ./mkLanguage.nix {
   ];
 
   editors = {
-    zed = {
-      extensions = [
-        "docker-compose"
-        "dockerfile"
-        "editorconfig"
-        "ini"
-        "json"
-        "markdown"
-        "sql"
-        "terraform"
-        "toml"
-        "xml"
-        "yaml"
-      ];
-      languages = [
-        "JSON"
-        "YAML"
-        "TOML"
-        "Markdown"
-        "CSS"
-        "HTML"
-        "XML"
-        "SQL"
-        "Terraform"
-        "Dockerfile"
-        "Docker Compose"
-        "Shell Script"
-      ];
-    };
+    zed.extensions = [
+      "docker-compose"
+      "dockerfile"
+      "editorconfig"
+      "ini"
+      "json"
+      "markdown"
+      "sql"
+      "terraform"
+      "toml"
+      "xml"
+      "yaml"
+    ];
 
     vscode = {
       profile = "default";

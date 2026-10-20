@@ -77,7 +77,11 @@ let
       languages = mkOption {
         type = listOf str;
         default = [ ];
-        description = "Editor language identifiers when they differ from the module name.";
+        description = ''
+          Canonical language ids, for example `nix`, `csharp`, or `markdown`.
+          Renderers translate them to each editor's own names.
+          Defaults to the module name when omitted.
+        '';
       };
 
       initializationOptions = mkOption {

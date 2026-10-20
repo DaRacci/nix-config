@@ -18,21 +18,7 @@ let
 
   binaryName = descriptor: if descriptor.binary != null then descriptor.binary else descriptor.name;
 
-  /*
-    Zed language names for a descriptor.
-
-    Descriptors may target several Zed languages (for example a shared config
-    server). Otherwise fall back to the metadata declared by the owning module.
-  */
-  zedLanguages =
-    descriptor:
-    if descriptor.languages != [ ] then
-      descriptor.languages
-    else
-      let
-        editorConfig = (languages.${descriptor.language}.editors or { }).zed or { };
-      in
-      editorConfig.languages or [ descriptor.language ];
+  zedLanguages = helpers.editorLanguages "zed";
 
   allZedLanguages = unique (concatLists (map zedLanguages (lsp ++ formatters)));
 

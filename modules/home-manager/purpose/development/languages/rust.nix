@@ -40,12 +40,7 @@ import ./mkLanguage.nix {
   ];
 
   editors = {
-    zed = {
-      extensions = [ "cargo-tom" ];
-      languages = [ "Rust" ];
-    };
-
-    helix.languages = [ "rust" ];
+    zed.extensions = [ "cargo-tom" ];
 
     vscode = {
       profile = "rust";

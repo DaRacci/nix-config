@@ -18,29 +18,26 @@ import ./mkLanguage.nix {
     {
       name = "jdtls";
       package = pkgs.jdt-language-server;
-      languages = [ "Java" ];
+      languages = [ "java" ];
       filetypes = [ ".java" ];
-      editors.helix.languages = [ "java" ];
     }
     {
       name = "kotlin-language-server";
       package = pkgs.kotlin-language-server;
-      languages = [ "Kotlin" ];
+      languages = [ "kotlin" ];
       filetypes = [
         ".kt"
         ".kts"
       ];
-      editors.helix.languages = [ "kotlin" ];
     }
     {
       name = "metals";
       package = pkgs.metals;
-      languages = [ "Scala" ];
+      languages = [ "scala" ];
       filetypes = [
         ".scala"
         ".sc"
       ];
-      editors.helix.languages = [ "scala" ];
     }
   ];
 
@@ -49,9 +46,8 @@ import ./mkLanguage.nix {
       name = "google-java-format";
       package = pkgs.google-java-format;
       args = [ "-" ];
-      languages = [ "Java" ];
+      languages = [ "java" ];
       filetypes = [ ".java" ];
-      editors.helix.languages = [ "java" ];
       editors.opencode.command = [
         "google-java-format"
         "--replace"
@@ -61,12 +57,11 @@ import ./mkLanguage.nix {
     {
       name = "ktlint";
       package = pkgs.ktlint;
-      languages = [ "Kotlin" ];
+      languages = [ "kotlin" ];
       filetypes = [
         ".kt"
         ".kts"
       ];
-      editors.helix.languages = [ "kotlin" ];
       editors.opencode.command = [
         "ktlint"
         "-F"

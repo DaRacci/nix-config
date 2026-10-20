@@ -13,7 +13,6 @@ import ./mkLanguage.nix {
       name = "gopls";
       package = pkgs.gopls;
       filetypes = [ ".go" ];
-      languages = [ "Go" ];
     }
   ];
 
@@ -23,7 +22,6 @@ import ./mkLanguage.nix {
       package = pkgs.go;
       binary = "gofmt";
       filetypes = [ ".go" ];
-      languages = [ "Go" ];
       editors.opencode.command = [
         "gofmt"
         "-w"
@@ -34,12 +32,8 @@ import ./mkLanguage.nix {
 
   extraPackages = [ pkgs.go ];
 
-  editors = {
-    zed.languages = [ "Go" ];
-    helix.languages = [ "go" ];
-    vscode = {
-      profile = "default";
-      extensions = [ "golang.go" ];
-    };
+  editors.vscode = {
+    profile = "default";
+    extensions = [ "golang.go" ];
   };
 }
