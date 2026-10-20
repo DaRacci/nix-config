@@ -9,7 +9,7 @@
     proxy.virtualHosts = {
       # TODO - DNS over HTTPS
       adguard.extraConfig = ''
-        reverse_proxy http://${config.services.adguardhome.host}:${toString config.services.adguardhome.port}
+        reverse_proxy http://${config.services.adguardhome.settings.http.address}
       '';
     };
   };
