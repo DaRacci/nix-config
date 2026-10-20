@@ -7,7 +7,7 @@
 let
   lightpanda = pkgs.stdenv.mkDerivation {
     name = "lightpanda";
-    unpackPhase = false;
+    unpackPhase = true;
     src = pkgs.fetchurl {
       url = "https://github.com/lightpanda-io/browser/releases/download/1.0.1/lightpanda-x86_64-linux";
       sha256 = "1z9mpi408rzngc29mw207cm7n1wfnjjfqxsjbmxi1fjibkilf5sm";
