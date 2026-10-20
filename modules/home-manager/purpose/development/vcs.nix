@@ -72,14 +72,16 @@ in
     };
   };
 
-  assertions = [
-    {
-      assertion = cfg.enable -> config.purpose.development.enable;
-      message = "The development purpose must be enabled to use `purpose.development.vcs` options.";
-    }
-  ];
-
   config = mkMerge [
+    {
+      assertions = [
+        {
+          assertion = cfg.enable -> config.purpose.development.enable;
+          message = "The development purpose must be enabled to use `purpose.development.vcs` options.";
+        }
+      ];
+    }
+
     (mkIf cfg.enable {
       home.packages = [
         pkgs.lumen
