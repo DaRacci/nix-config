@@ -54,8 +54,8 @@ in
         settings = {
           memory = {
             provider = "mnemosyne";
-            memory_enabled = lib.mkForce false;
-            user_profile_enabled = lib.mkForce false;
+            memory_enabled = false;
+            user_profile_enabled = false;
 
             mnemosyne = {
               auto_sleep = true;
