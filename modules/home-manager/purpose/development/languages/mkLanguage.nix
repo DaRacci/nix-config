@@ -6,6 +6,7 @@
   name,
 
   treesitterPackage ? null,
+  treesitterPackages ? [ ],
   lspPackages ? [ ],
   formatterPackages ? [ ],
   extraPackages ? [ ],
@@ -41,14 +42,17 @@ in
     treesitterPackages = mkOption {
       type = listOf package;
       default =
-        if treesitterPackage != null then
+        if treesitterPackages != [ ] then
+          treesitterPackages
+        else if treesitterPackage != null then
           [ treesitterPackage ]
         else
           (
             let
               pkgName = "tree-sitter-grammars.tree-sitter-${name}";
               pkg = pkgs.${pkgName} or null;
-            in optional pkg != null pkg
+            in
+            optional (pkg != null) pkg
           );
       description = ''
         The Tree-sitter grammar package for ${name}, if available.
