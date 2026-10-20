@@ -43,6 +43,7 @@ in
 
     publicURL = mkOption {
       type = nullOr (addCheck str (url: builtins.match "https?://.+" url != null));
+      default = null;
       description = ''
         The public URL for the dashboard, used for generating links in notifications and similar. If not set, localhost URLs will be used.
 
@@ -61,11 +62,13 @@ in
 
       issuer = mkOption {
         type = str;
+        default = null;
         description = "The OIDC issuer URL for dashboard authentication.";
       };
 
       clientId = mkOption {
         type = str;
+        default = null;
         description = "The OIDC client ID for dashboard authentication.";
       };
 
