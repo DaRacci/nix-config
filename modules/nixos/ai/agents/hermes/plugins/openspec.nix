@@ -3,7 +3,8 @@
   pkgs,
   lib,
   ...
-}: (import ../lib.nix { inherit lib; }).mkPluginModule config {
+}:
+(import ../lib.nix { inherit lib; }).mkPluginModule config {
   name = "openspec";
   extraPackages = [ pkgs.openspec ];
   extraPluginSrc = pkgs.fetchFromGitHub {

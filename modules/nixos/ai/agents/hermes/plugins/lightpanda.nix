@@ -19,7 +19,8 @@ let
     '';
     meta.mainProgram = "lightpanda";
   };
-in (import ../lib.nix { inherit lib; }).mkPluginModule config {
+in
+(import ../lib.nix { inherit lib; }).mkPluginModule config {
   name = "lightpanda";
   pluginName = "web-browser";
 
