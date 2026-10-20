@@ -13,6 +13,8 @@
   formatters ? [ ],
   editors ? { },
 
+  defaultEnable ? false,
+
   imports ? [ ],
   options ? { },
   extraConfig ? { },
@@ -107,7 +109,9 @@ in
   inherit imports;
 
   options.purpose.development.languages.${name} = {
-    enable = mkEnableOption "Enable language support for ${name}";
+    enable = mkEnableOption "Enable language support for ${name}" // {
+      default = defaultEnable;
+    };
 
     treesitterPackages = mkOption {
       type = listOf package;

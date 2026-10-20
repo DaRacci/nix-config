@@ -63,25 +63,12 @@ in
                 "eamodio.gitlens"
 
                 # Language Support
-                "redhat.vscode-xml"
-                "redhat.vscode-yaml"
-                "tamasfe.even-better-toml"
-                "matthewpi.caddyfile-support"
-                "coolbear.systemd-unit-file"
-                "hashicorp.terraform"
-                "bierner.markdown-preview-github-styles"
-                "ruschaaf.extended-embedded-languages"
-                "jamief.vscode-ssh-config-enhanced"
-                "keesschollaart.vscode-home-assistant"
-                "owensimon.combinatorc"
 
                 # LSP Servers
 
                 # Formatters
-                "esbenp.prettier-vscode"
 
                 # Containers
-                "ms-azuretools.vscode-docker"
 
                 # AI
                 "github.copilot-chat"
@@ -94,7 +81,6 @@ in
 
                 # Bash Extensions
                 "rogalmic.bash-debug"
-                "foxundermoon.shell-format"
 
                 # Integrations
                 "jjk.jjk"
@@ -147,21 +133,9 @@ in
                 #endregion
 
                 #region Language Settings
-                "[jsonc]" = {
-                  "editor.defaultFormatter" = "vscode.json-language-features";
-                };
                 #endregion
 
                 #region Language Formatters
-                "evenBetterToml.formatter.alignComments" = true;
-                "evenBetterToml.formatter.alignEntries" = true;
-                "evenBetterToml.formatter.allowedBlankLines" = 1;
-                "evenBetterToml.formatter.arrayAutoCollapse" = true;
-                "evenBetterToml.formatter.arrayAutoExpand" = true;
-                "evenBetterToml.formatter.arrayTrailingComma" = true;
-                "evenBetterToml.formatter.columnWidth" = 80;
-
-                "markdown.validate.enabled" = true;
                 #endregion
 
                 #region Telemetry & Data Collection
@@ -180,8 +154,6 @@ in
 
                 "direnv.restart.automatic" = true;
                 "direnv.status.showChangesCount" = true;
-
-                "caddyfile.executable" = "${lib.getExe pkgs.caddy}";
 
                 "gitlens.plusFeatures.enabled" = false;
                 "gitlens.graph.layout" = "editor";
