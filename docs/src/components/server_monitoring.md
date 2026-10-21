@@ -66,7 +66,7 @@ Monitoring is enabled by default on all servers, this can be disabled with `serv
 ### Tempo MinIO policy
 
 Tempo authenticates to MinIO with `MONITORING/TEMPO/MINIO_ACCESS_KEY` and `MONITORING/TEMPO/MINIO_SECRET_KEY`, so that user needs an IAM policy scoped to the `tempo` bucket.
-The policy lives is [tempo.json](hosts/server/nixio/minio/policies/tempo.json) and grants the actions Tempo requires upstream:
+The policy lives is [tempo.json](../../../hosts/server/nixio/minio/policies/tempo.json) and grants the actions Tempo requires upstream:
 
 | Action                        | Resource               |
 | ----------------------------- | ---------------------- |
