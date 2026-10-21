@@ -40,7 +40,7 @@ in
 
         prometheus.remote_write "otlp" {
           endpoint {
-            endpoint = "http://127.0.0.1:${toString config.services.prometheus.port}/api/v1/write"
+            url = "http://127.0.0.1:${toString config.services.prometheus.port}/api/v1/write"
           }
         }
 
