@@ -96,6 +96,7 @@ never `"C#"` and `"c-sharp"` separately.
   instead of pinning store paths.
 - Launch arguments are shared across editors. Use `editors.<name>` when an editor
   needs different flags, for example formatter write flags in OpenCode.
+- Zed settings merge recursively. `userSettings` values take precedence over the module defaults.
 - `languages.common` is enabled with `purpose.development.enable`; disable it
   explicitly when a host should not receive the shared config-format tooling.
 

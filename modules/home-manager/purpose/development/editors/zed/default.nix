@@ -57,8 +57,8 @@ let
   # Ported from the previous user-level Zed configuration.
   # Values are plain defaults so they can be overridden via `userSettings`.
   defaultSettings = {
-    theme = lib.mkForce "Tokyo Night";
-    ui_font_size = lib.mkForce 24;
+    theme = "Tokyo Night";
+    ui_font_size = 24;
     load_direnv = "direct";
     autosave = "on_focus_change";
     auto_update = false;
@@ -256,7 +256,7 @@ let
       };
     };
 
-    ui_font_family = lib.mkForce ".ZedSans";
+    ui_font_family = ".ZedSans";
 
     terminal = {
       env = {
@@ -307,8 +307,8 @@ in
       type = attrs;
       default = { };
       description = ''
-        Settings merged over the module defaults.
-        Use `lib.mkForce` to override forced defaults such as the theme and fonts.
+        Settings merged recursively over the module defaults.
+        User values take precedence.
       '';
     };
   };
@@ -319,10 +319,10 @@ in
       installRemoteServer = cfg.installRemoteServer;
       extraPackages = cfg.extraPackages ++ rendered.extraPackages;
       extensions = cfg.extensions ++ rendered.extensions;
-      userSettings = lib.mkMerge [
+      userSettings = lib.foldl' lib.recursiveUpdate { } [
         defaultSettings
-        cfg.userSettings
         rendered.userSettings
+        cfg.userSettings
       ];
     };
 
