@@ -2,11 +2,8 @@
 
 ## Purpose
 
-The monitoring module provides a comprehensive observability stack for the server
-cluster using Prometheus (metrics), Loki (logs), Tempo (traces), Grafana (visualisation), and
-Grafana Alloy for authenticated OTLP ingestion.
-All components are configured as reusable NixOS modules with automatic
-cross-host discovery.
+The monitoring module provides a comprehensive observability stack for the server cluster using Prometheus, Loki, Tempo, Grafana, and Grafana Alloy for authenticated OTLP ingestion.
+All components are configured as reusable NixOS modules with automatic cross-host discovery.
 
 The system consists of three layers:
 
@@ -53,16 +50,38 @@ Monitoring is enabled by default on all servers, this can be disabled with `serv
 
 ### Declared secrets
 
-| Secret key                              | Purpose                              |
-| --------------------------------------- | ------------------------------------ |
-| `MONITORING/OLTP/BEARER_TOKEN`          | Bearer token for OTLP HTTP ingestion |
-| `MONITORING/GRAFANA/SECRET_KEY`         | Grafana secret key                   |
-| `MONITORING/GRAFANA/OAUTH_SECRET`       | Kanidm OAuth2 secret for Grafana     |
-| `MONITORING/HOME_ASSISTANT/WEBHOOK_URL` | Home Assistant alert webhook         |
-| `MONITORING/NEXTCLOUD_TALK/WEBHOOK_URL` | Nextcloud Talk alert webhook         |
-| `PROXMOX/USER`                          | Proxmox metrics user                 |
-| `PROXMOX/TOKEN_ID`                      | Proxmox token name                   |
-| `PROXMOX/TOKEN_SECRET`                  | Proxmox token secret                 |
+| Secret key                              | Purpose                               |
+| --------------------------------------- | ------------------------------------- |
+| `MONITORING/OLTP/BEARER_TOKEN`          | Bearer token for OTLP HTTP ingestion  |
+| `MONITORING/GRAFANA/SECRET_KEY`         | Grafana secret key                    |
+| `MONITORING/GRAFANA/OAUTH_SECRET`       | Kanidm OAuth2 secret for Grafana      |
+| `MONITORING/TEMPO/MINIO_ACCESS_KEY`     | MinIO access key for Tempo S3 backend |
+| `MONITORING/TEMPO/MINIO_SECRET_KEY`     | MinIO secret key for Tempo S3 backend |
+| `MONITORING/HOME_ASSISTANT/WEBHOOK_URL` | Home Assistant alert webhook          |
+| `MONITORING/NEXTCLOUD_TALK/WEBHOOK_URL` | Nextcloud Talk alert webhook          |
+| `PROXMOX/USER`                          | Proxmox metrics user                  |
+| `PROXMOX/TOKEN_ID`                      | Proxmox token name                    |
+| `PROXMOX/TOKEN_SECRET`                  | Proxmox token secret                  |
+
+### Tempo MinIO policy
+
+Tempo authenticates to MinIO with `MONITORING/TEMPO/MINIO_ACCESS_KEY` and `MONITORING/TEMPO/MINIO_SECRET_KEY`, so that user needs an IAM policy scoped to the `tempo` bucket.
+The policy lives is [tempo.json](hosts/server/nixio/minio/policies/tempo.json) and grants the actions Tempo requires upstream:
+
+| Action                        | Resource               |
+| ----------------------------- | ---------------------- |
+| `s3:ListBucket`               | `arn:aws:s3:::tempo`   |
+| `s3:GetObject`                | `arn:aws:s3:::tempo/*` |
+| `s3:PutObject`                | `arn:aws:s3:::tempo/*` |
+| `s3:DeleteObject`             | `arn:aws:s3:::tempo/*` |
+| `s3:GetObjectTagging`         | `arn:aws:s3:::tempo/*` |
+| `s3:PutObjectTagging`         | `arn:aws:s3:::tempo/*` |
+| `s3:AbortMultipartUpload`     | `arn:aws:s3:::tempo/*` |
+| `s3:ListMultipartUploadParts` | `arn:aws:s3:::tempo/*` |
+
+The policy is not applied automatically, you must attach it to a MinIO user with `mc admin policy create` followed by `mc admin policy attach`.
+
+Upstream reference: [Tempo S3 storage](https://grafana.com/docs/tempo/latest/configuration/s3/).
 
 ### Generating Secrets
 
