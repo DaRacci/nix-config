@@ -12,7 +12,53 @@ let
 
   cfg = config.server.monitoring;
   grafanaCfg = cfg.collector.grafana;
+  captureCfg = cfg.logs.capture;
+  relayCfg = captureCfg.relay;
   domain = getIOPrimaryHostAttr "server.proxy.domain";
+
+  sanitiseHost = host: builtins.replaceStrings [ "." "_" ] [ "-" "-" ] host;
+
+  relayContactPoints =
+    relayCfg.targets
+    |> map (
+      host:
+      let
+        hostId = sanitiseHost host;
+      in
+      [
+        {
+          orgId = 1;
+          name = "alloy-capture-${host}-enable";
+          receivers = [
+            {
+              uid = "alloy-capture-${hostId}-enable";
+              type = "webhook";
+              disableResolveMessage = true;
+              settings = {
+                url = "http://${relayCfg.listenAddress}:${toString relayCfg.port}/capture/${host}/enable?ttl=${toString relayCfg.defaultTTLSeconds}";
+                httpMethod = "POST";
+              };
+            }
+          ];
+        }
+        {
+          orgId = 1;
+          name = "alloy-capture-${host}-disable";
+          receivers = [
+            {
+              uid = "alloy-capture-${hostId}-disable";
+              type = "webhook";
+              disableResolveMessage = true;
+              settings = {
+                url = "http://${relayCfg.listenAddress}:${toString relayCfg.port}/capture/${host}/disable";
+                httpMethod = "POST";
+              };
+            }
+          ];
+        }
+      ]
+    )
+    |> builtins.concatLists;
 in
 {
   config = mkIf (cfg.enable && cfg.collector.enable) (mkMerge [
@@ -107,6 +153,13 @@ in
       sops.secrets."MONITORING/GRAFANA/OAUTH_SECRET" = {
         owner = "grafana";
         group = "grafana";
+      };
+    })
+
+    (mkIf (captureCfg.enable && relayCfg.enable) {
+      services.grafana.provision.alerting.contactPoints.settings = {
+        apiVersion = 1;
+        contactPoints = relayContactPoints;
       };
     })
   ]);

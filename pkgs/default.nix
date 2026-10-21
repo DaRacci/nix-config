@@ -71,6 +71,13 @@ in
   # NixIO Guardian
   inherit (pkgs.callPackage ./io-guardian { }) io-guardian-server io-guardian-client;
 
+  # Alloy Dynamic Capture
+  inherit (pkgs.callPackage ./alloy-dynamic-capture { })
+    alloy-dynamic-capture-api
+    alloy-dynamic-capture-ctl
+    alloy-dynamic-capture-relay
+    ;
+
   # Wine Apps
   take-control-viewer = pkgs.callPackage ./take-control-viewer {
     inherit (inputs.erosanix.lib.x86_64-linux) mkWindowsAppNoCC;

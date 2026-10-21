@@ -2,7 +2,11 @@
 
 ## Purpose
 
-Comprehensive metrics collection and integration with Home Assistant via `hacompanion`.
+Home Assistant integration via `hacompanion` and NixOS upgrade heartbeat reporting.
+
+Server hosts do not run `hacompanion`.
+Their CPU, memory, load, and uptime metrics come from Prometheus, and their NixOS build metadata comes from the `node_exporter` textfile collector.
+`hacompanion` remains available for hosts that need Home Assistant-only sensors such as webcam or CPU temperature.
 
 ## Entry Point
 
@@ -16,7 +20,7 @@ Comprehensive metrics collection and integration with Home Assistant via `hacomp
 ## Architecture / Services / Scope
 
 - **Hacompanion** — Home Assistant companion daemon that publishes system sensors (CPU, memory, storage, uptime, and more) to Home Assistant. It uses a generated TOML configuration file and loads the Home Assistant API token from `sops.secrets.HACOMPANION_ENV`.
-- **`upgradeStatus`** — reports NixOS upgrade state (idle / running / failed / dirty). When `upgradeStatus.uptimeKuma.enable` is set, it also sends heartbeat notifications to Uptime Kuma on successful upgrades.
+- **`upgradeStatus`** — reports NixOS upgrade state (idle / running / failed / dirty). When `upgradeStatus.uptimeKuma.enable` is set, it also sends heartbeat notifications to Uptime Kuma on successful upgrades. The Home Assistant upgrade-status sensor is only available when `hacompanion` is enabled.
 
 ## Secrets
 

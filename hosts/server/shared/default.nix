@@ -15,19 +15,7 @@
 
     metrics = {
       enable = true;
-      upgradeStatus = {
-        enable = true;
-        uptimeKuma.enable = true;
-      };
-      hacompanion = {
-        enable = true;
-        sensor = {
-          cpu_usage.enable = true;
-          uptime.enable = true;
-          memory.enable = true;
-          load_avg.enable = true;
-        };
-      };
+      upgradeStatus.uptimeKuma.enable = true;
     };
   };
 

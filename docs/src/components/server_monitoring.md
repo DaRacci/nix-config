@@ -12,7 +12,8 @@ The system consists of three layers:
 
 - **Exporters** (run on all servers)
 
-  - `node_exporter` for system-level metrics (CPU, memory, disk, network, per-process stats)
+  - `node_exporter` with an explicit, minimal collector profile for system-level metrics
+  - NixOS build metadata exported through the `node_exporter` textfile collector
   - Grafana Alloy for shipping journald logs and Caddy access logs to Loki
   - **Conditional Exporters**: The following exporters are enabled if their corresponding services are configured on the host:
     - Caddy access logs are parsed and sent to Loki
@@ -48,20 +49,55 @@ Monitoring is enabled by default on all servers, this can be disabled with `serv
 
 {{#include ../../generated/server-monitoring-options.md}}
 
+### node_exporter Collector Profile
+
+`node_exporter` runs with `--collector.disable-defaults` and only enables the collectors listed below.
+This avoids the upstream default set, which includes many hardware, filesystem, and kernel collectors that are useless or misleading inside an LXC.
+
+| Collector    | Virtual hosts | Physical hosts | Why                                                                                                                             |
+| ------------ | ------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `filesystem` | yes           | yes            | Root and bind-mount free space inside the container. The Proxmox exporter reports storage allocation, not per-mount free space. |
+| `systemd`    | yes           | yes            | Unit state and failed units inside the container. The host cannot see these.                                                    |
+| `cpu`        | no            | yes            | CPU, memory, disk, and network dashboards/alerts use `pve_*` metrics for LXCs. Host metrics still use `node_*`.                 |
+| `meminfo`    | no            | yes            | Same as above.                                                                                                                  |
+| `netdev`     | no            | yes            | Same as above.                                                                                                                  |
+| `diskstats`  | no            | yes            | Per-device I/O on physical hosts. Container I/O comes from `pve_disk_*`.                                                        |
+| `loadavg`    | no            | yes            | Host load average. LXC load is host-wide unless `lxcfs` virtualises it.                                                         |
+| `pressure`   | no            | yes            | PSI is not reliably namespaced in containers.                                                                                   |
+| `stat`       | no            | yes            | Host boot time and context-switch counters.                                                                                     |
+| `time`       | no            | yes            | Host clock synchronisation state.                                                                                               |
+| `vmstat`     | no            | yes            | Host virtual-memory counters.                                                                                                   |
+
+### NixOS Build Metadata
+
+A oneshot service writes `/var/lib/prometheus-node-exporter/textfile/nixos.prom` before `node_exporter` starts.
+
+The textfile collector exposes:
+
+| Metric                                   | Description                                                                                 |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `nixos_system_install_timestamp_seconds` | Unix timestamp of the current system activation.                                            |
+| `nixos_system_build_info`                | Gauge with `version`, `code_name`, `nixpkgs_revision`, and `configuration_revision` labels. |
+
 ## Secrets
 
 ### Declared secrets
 
-| Secret key                              | Purpose                              |
-| --------------------------------------- | ------------------------------------ |
-| `MONITORING/OLTP/BEARER_TOKEN`          | Bearer token for OTLP HTTP ingestion |
-| `MONITORING/GRAFANA/SECRET_KEY`         | Grafana secret key                   |
-| `MONITORING/GRAFANA/OAUTH_SECRET`       | Kanidm OAuth2 secret for Grafana     |
-| `MONITORING/HOME_ASSISTANT/WEBHOOK_URL` | Home Assistant alert webhook         |
-| `MONITORING/NEXTCLOUD_TALK/WEBHOOK_URL` | Nextcloud Talk alert webhook         |
-| `PROXMOX/USER`                          | Proxmox metrics user                 |
-| `PROXMOX/TOKEN_ID`                      | Proxmox token name                   |
-| `PROXMOX/TOKEN_SECRET`                  | Proxmox token secret                 |
+| Secret key                              | Purpose                                                          |
+| --------------------------------------- | ---------------------------------------------------------------- |
+| `MONITORING/OLTP/BEARER_TOKEN`          | Bearer token for OTLP HTTP ingestion                             |
+| `MONITORING/GRAFANA/SECRET_KEY`         | Grafana secret key                                               |
+| `MONITORING/GRAFANA/OAUTH_SECRET`       | Kanidm OAuth2 secret for Grafana                                 |
+| `MONITORING/HOME_ASSISTANT/WEBHOOK_URL` | Home Assistant alert webhook                                     |
+| `MONITORING/NEXTCLOUD_TALK/WEBHOOK_URL` | Nextcloud Talk alert webhook                                     |
+| `MONITORING/ALLOY_DYNAMIC/CA_CERT`      | mTLS CA certificate for the dynamic capture API                  |
+| `MONITORING/ALLOY_DYNAMIC/SERVER_CERT`  | mTLS server certificate for the dynamic capture API              |
+| `MONITORING/ALLOY_DYNAMIC/SERVER_KEY`   | mTLS server key for the dynamic capture API                      |
+| `MONITORING/ALLOY_DYNAMIC/CLIENT_CERT`  | mTLS client certificate used by the Grafana manual-trigger relay |
+| `MONITORING/ALLOY_DYNAMIC/CLIENT_KEY`   | mTLS client key used by the Grafana manual-trigger relay         |
+| `PROXMOX/USER`                          | Proxmox metrics user                                             |
+| `PROXMOX/TOKEN_ID`                      | Proxmox token name                                               |
+| `PROXMOX/TOKEN_SECRET`                  | Proxmox token secret                                             |
 
 ### Generating Secrets
 
@@ -184,7 +220,58 @@ Alloy applies ingest-time parsing for journal `stdout` logs and Caddy access log
 
 - Caddy access logs are read from `/var/log/caddy-access-*.log` and use the timestamp and level prefix in each line when present
 
-`node_exporter` also enables the `processes` collector, which exposes per-process metrics such as CPU and memory usage for running processes.
+### Log Filtering
+
+Alloy drops journal lines from the units listed in `server.monitoring.logs.dropUnits` before parsing.
+The default list targets high-volume application units.
+Lines whose detected level is `debug` or `trace` are also _dropped_.
+
+Alloy also rate-limits low-value levels (`info`, `debug`, `trace`) with a hard cap (`server.monitoring.logs.rateLimit`).
+This protects the central Loki path when one host gets noisy.
+
+Caddy access logs are a separate `loki.source.file` pipeline and are not affected by these journal filters, so successful requests remain available.
+
+### Dynamic Expanded Capture API (mTLS)
+
+When `server.monitoring.logs.capture.enable = true`, each host exposes an mTLS-protected API to temporarily disable journal drops and rate limits.
+This is useful for short incident windows.
+
+- Endpoint: `POST https://<host>:12445/capture`
+- Client cert is required and must chain to `MONITORING/ALLOY_DYNAMIC/CA_CERT`
+- Optional CN allow-list: `server.monitoring.logs.capture.allowedClientCommonNames`
+
+Example payloads:
+
+```json
+{ "action": "enable_extra_capture", "ttl_seconds": 1800 }
+```
+
+```json
+{ "action": "disable_extra_capture" }
+```
+
+Status endpoint:
+
+```sh
+curl --cert client.crt --key client.key --cacert ca.crt \
+  https://<host>:12445/status
+```
+
+### Manual trigger from Grafana
+
+When both of these are enabled on the monitoring coordinator:
+
+- `server.monitoring.logs.capture.enable = true`
+- `server.monitoring.logs.capture.relay.enable = true`
+
+A loopback relay service is started and Grafana contact points are provisioned.
+The dynamic capture API, relay, and control helper are packaged in `pkgs/alloy-dynamic-capture` and consumed by `modules/nixos/server/monitoring/logs/alloy.nix`:
+
+- `alloy-capture-<host>-enable`
+- `alloy-capture-<host>-disable`
+
+You can manually trigger expanded capture from Grafana UI by opening **Alerting → Contact points** and clicking **Test** on the desired contact point.
+The relay then calls the host mTLS API and applies the configured TTL.
 
 Check Alloy is shipping logs:
 

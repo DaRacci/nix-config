@@ -97,7 +97,7 @@ let
           };
           targets = [
             {
-              expr = "100 - (avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)";
+              expr = "label_replace((pve_cpu_usage_ratio{id=~\"lxc/.+\"} * 100), \"instance\", \"$1:9100\", \"name\", \"(.*)\") or (100 - (avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100))";
               legendFormat = "{{ instance }}";
             }
           ];
@@ -117,7 +117,7 @@ let
           };
           targets = [
             {
-              expr = "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100";
+              expr = "label_replace((pve_memory_usage_bytes{id=~\"lxc/.+\"} / pve_memory_size_bytes{id=~\"lxc/.+\"} * 100), \"instance\", \"$1:9100\", \"name\", \"(.*)\") or ((1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100)";
               legendFormat = "{{ instance }}";
             }
           ];
@@ -137,7 +137,7 @@ let
           };
           targets = [
             {
-              expr = "(1 - (node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"})) * 100";
+              expr = "label_replace((pve_disk_usage_bytes_total{id=~\"lxc/.+\"} / pve_disk_size_bytes_total{id=~\"lxc/.+\"} * 100), \"instance\", \"$1:9100\", \"name\", \"(.*)\") or ((1 - (node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"})) * 100)";
               legendFormat = "{{ instance }}";
             }
           ];
@@ -157,11 +157,11 @@ let
           };
           targets = [
             {
-              expr = "rate(node_network_receive_bytes_total{device!~\"lo|veth.*|br.*\"}[5m]) * 8";
+              expr = "label_replace((rate(pve_network_receive_bytes_total{id=~\"lxc/.+\"}[5m]) * 8), \"instance\", \"$1:9100\", \"name\", \"(.*)\") or (rate(node_network_receive_bytes_total{device!~\"lo|veth.*|br.*\"}[5m]) * 8)";
               legendFormat = "{{ instance }} rx";
             }
             {
-              expr = "rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|br.*\"}[5m]) * 8";
+              expr = "label_replace((rate(pve_network_transmit_bytes_total{id=~\"lxc/.+\"}[5m]) * 8), \"instance\", \"$1:9100\", \"name\", \"(.*)\") or (rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|br.*\"}[5m]) * 8)";
               legendFormat = "{{ instance }} tx";
             }
           ];

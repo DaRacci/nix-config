@@ -34,10 +34,6 @@ _:
       after = [ "caddy.service" ];
       wants = after;
     };
-    hacompanion = rec {
-      after = [ "caddy.service" ];
-      wants = after;
-    };
   };
 
   services.caddy = {

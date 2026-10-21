@@ -10,6 +10,7 @@ This section documents the custom packages defined in this repository. These are
 
 - `pkgs/`: Contains the package definitions, typically organised by package name.
   - `alvr-bin`: Binaries for ALVR that allows NVIDIA accelerated by using the AppImage.
+  - `alloy-dynamic-capture`: Helper tools for temporary Alloy expanded capture, split into `ctl`, mTLS API, and Grafana relay binaries.
   - `drive-stats`: Tool for monitoring and reporting drive statistics.
   - `colour-picker`: Hyprland colour picker wrapper that temporarily lowers pointer sensitivity, launches `hyprpicker`, then restores the prior sensitivity.
   - `folder-diff`: Nushell helper that compares two directories by tracking added, modified, and deleted files in a temporary Git repo, then prints a binary-safe diff plus per-file change summaries.
