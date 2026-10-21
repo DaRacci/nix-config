@@ -17,7 +17,7 @@ This section documents the custom packages defined in this repository. These are
   - `helpers`: Collection of helper scripts for configuration management.
   - `huntress`: Integration for Huntress security agent.
   - `hypr-gamemode`: Script to optimise Hyprland performance for gaming.
-  - `io-guardian`: Database lifecycle management across hosts.
+  - `db-guardian`: Database lifecycle management across hosts.
   - `lidarr-plugins`: Lidarr plugins branch.
   - `list-ephemeral`: Utility to identify ephemeral paths, trace file access, and generate persistence snippets.
   - `lix-woodpecker`: Woodpecker CI runner.
@@ -36,7 +36,7 @@ This section documents the custom packages defined in this repository. These are
   - `swfs-mount-hooks`: Shared mount helper for `server.storage.swfsMount` prepare, stop, and health-recovery actions.
   - `take-control-viewer`: Remote support viewer for N-able Take Control via Wine.
   - `virtualisation-tools`: Shared libvirt and VFIO hook helpers for CPU isolation, GPU detach/attach, and guest hook dispatch.
-  - `wait-for-io-tools`: Shared reachability and database-readiness helpers for IO Guardian-managed services.
+  - `wait-for-db-tools`: Shared reachability and database-readiness helpers for DB Guardian-managed services.
   - `wlprop`: Wayland helper that selects a visible Hyprland window region with `slurp` and prints matching client JSON.
 
 ## Operational Notes / Assumptions

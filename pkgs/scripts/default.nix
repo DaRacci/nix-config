@@ -63,6 +63,6 @@ in
   sunshine-tools = pkgs.callPackage ./sunshine-tools { };
   swfs-mount-hooks = pkgs.callPackage ./swfs-mount-hooks { };
   virtualisation-tools = pkgs.callPackage ./virtualisation-tools { };
-  wait-for-io-tools = pkgs.callPackage ./wait-for-io-tools { };
+  wait-for-db-tools = pkgs.callPackage ./wait-for-db-tools { };
   wlprop = pkgs.callPackage ./wlprop { };
 }

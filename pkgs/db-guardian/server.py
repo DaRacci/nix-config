@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-IO Database Guardian - WebSocket Server
+Database Guardian - WebSocket Server
 
-This server runs on client machines that depend on an IO Hosts database.
-It listens for drain/undrain commands from the IO coordinator to
+This server runs on client machines that depend on a database primary host.
+It listens for drain/undrain commands from the database coordinator to
 control database-dependent services.
 
 Protocol:
@@ -197,9 +197,9 @@ def run_systemctl(action: str, unit: str) -> tuple[bool, str]:
 
 
 def handle_drain() -> tuple[bool, str]:
-    """Stop the io-databases.target to drain dependent services."""
-    logger.info("Executing drain: stopping io-databases.target")
-    success, message = run_systemctl("stop", "io-databases.target")
+    """Stop the db-databases.target to drain dependent services."""
+    logger.info("Executing drain: stopping db-databases.target")
+    success, message = run_systemctl("stop", "db-databases.target")
     if success:
         logger.info("Drain successful")
     else:
@@ -208,9 +208,9 @@ def handle_drain() -> tuple[bool, str]:
 
 
 def handle_undrain() -> tuple[bool, str]:
-    """Start the io-databases.target to enable dependent services."""
-    logger.info("Executing undrain: starting io-databases.target")
-    success, message = run_systemctl("start", "io-databases.target")
+    """Start the db-databases.target to enable dependent services."""
+    logger.info("Executing undrain: starting db-databases.target")
+    success, message = run_systemctl("start", "db-databases.target")
     if success:
         logger.info("Undrain successful")
     else:
@@ -393,7 +393,7 @@ def run_tests() -> None:
 
 async def async_main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
-        description="IO Database Guardian WebSocket Server"
+        description="Database Guardian WebSocket Server"
     )
     parser.add_argument(
         "--port",
@@ -428,7 +428,7 @@ async def async_main(argv: list[str]) -> int:
     async def handler(websocket):
         await handle_client(websocket, psk)
 
-    logger.info(f"Starting IO Guardian server on {args.host}:{args.port}")
+    logger.info(f"Starting DB Guardian server on {args.host}:{args.port}")
 
     async with serve(handler, args.host, args.port):
         await asyncio.Future()  # Run forever

@@ -64,12 +64,12 @@ in
     sunshine-tools
     swfs-mount-hooks
     virtualisation-tools
-    wait-for-io-tools
+    wait-for-db-tools
     wlprop
     ;
 
-  # NixIO Guardian
-  inherit (pkgs.callPackage ./io-guardian { }) io-guardian-server io-guardian-client;
+  # Database Guardian
+  inherit (pkgs.callPackage ./db-guardian { }) db-guardian-server db-guardian-client;
 
   # Alloy Dynamic Capture
   inherit (pkgs.callPackage ./alloy-dynamic-capture { })

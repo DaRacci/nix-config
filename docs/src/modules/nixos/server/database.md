@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The database submodule provides a managed interface for PostgreSQL and Redis across the server infrastructure. It centralises database configuration on the Database Coordinator (`config.server.databasePrimaryHost`) while allowing client services to declaratively request databases. It automates provisioning of PostgreSQL databases and roles, management of Redis database IDs via static mappings, synchronisation of service lifecycle with database availability using the [IO Guardian](../../../components/io_guardian.md), and automated password handling via SOPS secrets.
+The database submodule provides a managed interface for PostgreSQL and Redis across the server infrastructure. It centralises database configuration on the Database Coordinator (`config.server.databasePrimaryHost`) while allowing client services to declaratively request databases. It automates provisioning of PostgreSQL databases and roles, management of Redis database IDs via static mappings, synchronisation of service lifecycle with database availability using the [DB Guardian](../../../components/db_guardian.md), and automated password handling via SOPS secrets.
 
 ## Entry Point
 
@@ -11,7 +11,7 @@ The module is implemented across several files in `modules/nixos/server/database
 - **Main file**: [default.nix](../../../../modules/nixos/server/database/default.nix): Core options and connection management.
 - **Supporting file**: [postgres.nix](../../../../modules/nixos/server/database/postgres.nix): PostgreSQL-specific provisioning and secrets.
 - **Supporting file**: [redis.nix](../../../../modules/nixos/server/database/redis.nix): Redis-specific ID mappings and security.
-- **Supporting file**: [guardian.nix](../../../../modules/nixos/server/database/guardian.nix): Lifecycle synchronisation and the [IO Guardian](../../../components/io_guardian.md).
+- **Supporting file**: [guardian.nix](../../../../modules/nixos/server/database/guardian.nix): Lifecycle synchronisation and the [DB Guardian](../../../components/db_guardian.md).
 
 ### Options
 
@@ -41,18 +41,18 @@ Redis management uses a similar aggregation pattern:
 - **Password Management**: A shared password for the primary Redis instance is managed via `REDIS/PASSWORD` in SOPS.
 - **Tooling**: Use the `update-redis-mappings` command on the Database Coordinator to update the mapping file when adding new Redis clients.
 
-### IO Guardian Coordination
+### DB Guardian Coordination
 
-Lifecycle management is handled by the [IO Guardian](../../../components/io_guardian.md). A pre-shared key for guardian communication is managed via the `DB_GUARDIAN_PSK` SOPS secret.
+Lifecycle management is handled by the [DB Guardian](../../../components/db_guardian.md). A pre-shared key for guardian communication is managed via the `DB_GUARDIAN_PSK` SOPS secret.
 
-- **On Clients**: Services that use these database modules are automatically bound to `io-databases.target`. This ensures they only start when the remote databases are reachable and stop before the databases go offline. Reachability and readiness checks are handled by the shared `wait-for-io-tools` package (`wait-for-io` and `wait-for-io-databases`).
-- **On Database Coordinator**: The `io-database-coordinator` service manages the `drain` and `undrain` signals sent to clients during system startup and shutdown. It is bound to PostgreSQL and Redis, restarts with either database, and retries a failed `undrain` every 30 seconds until every client is reachable. While active, `io-database-coordinator-reconcile.timer` re-sends `undrain` every 5 minutes so clients that stop their target later are recovered automatically.
+- **On Clients**: Services that use these database modules are automatically bound to `db-databases.target`. This ensures they only start when the remote databases are reachable and stop before the databases go offline. Reachability and readiness checks are handled by the shared `wait-for-db-tools` package (`wait-for-db-primary` and `wait-for-db-databases`).
+- **On Database Coordinator**: The `db-database-coordinator` service manages the `drain` and `undrain` signals sent to clients during system startup and shutdown. It is bound to PostgreSQL and Redis, restarts with either database, and retries a failed `undrain` every 30 seconds until every client is reachable. While active, `db-database-coordinator-reconcile.timer` re-sends `undrain` every 5 minutes so clients that stop their target later are recovered automatically.
 
 ## Secrets
 
 - `POSTGRES/<DB_NAME_UPPER>_PASSWORD`: Per-database role password, provisioned during `postgresql-setup`.
 - `REDIS/PASSWORD`: Shared password for the primary Redis instance.
-- `DB_GUARDIAN_PSK`: Pre-shared key for IO Guardian communication. Rotating it restarts the guardian server on clients and the coordinator on the database host.
+- `DB_GUARDIAN_PSK`: Pre-shared key for DB Guardian communication. Rotating it restarts the guardian server on clients and the coordinator on the database host.
 
 ## Operational Notes / Assumptions
 
@@ -61,5 +61,5 @@ Lifecycle management is handled by the [IO Guardian](../../../components/io_guar
 
 ## References
 
-- [IO Guardian](../../../components/io_guardian.md)
+- [DB Guardian](../../../components/db_guardian.md)
 - [Database Coordinator](../../../hosts/server/nixdb.md)

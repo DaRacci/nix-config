@@ -23,7 +23,7 @@ Services are gated per host via flake allocations (see [Flake Allocations](../..
 
 ## Operational Notes / Assumptions
 
-- Servers depend on the Database Coordinator for startup ordering (see [IO Guardian](../../components/io_guardian.md)).
+- Servers depend on the Database Coordinator for startup ordering (see [DB Guardian](../../components/db_guardian.md)).
 - Shared secrets for all server hosts are stored in the [shared file](../../../../hosts/server/secrets.yaml).
 
 ## References

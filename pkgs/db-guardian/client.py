@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-IO Database Guardian - WebSocket Client
+Database Guardian - WebSocket Client
 
-This client runs on IO Hosts (the database host) and connects to guardian
+This client runs on the database primary host and connects to guardian
 servers running on client machines to send drain/undrain commands.
 
 Usage:
-    io-guardian-client --action drain --hosts nixai,nixdev,nixcloud
-    io-guardian-client --action undrain --hosts nixai,nixdev,nixcloud
+    db-guardian-client --action drain --hosts nixai,nixdev,nixcloud
+    db-guardian-client --action undrain --hosts nixai,nixdev,nixcloud
 """
 
 from __future__ import annotations
@@ -159,7 +159,7 @@ def run_tests() -> None:
 
 async def async_main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
-        description="IO Database Guardian WebSocket Client"
+        description="Database Guardian WebSocket Client"
     )
     parser.add_argument(
         "--action",

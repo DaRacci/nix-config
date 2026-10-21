@@ -197,7 +197,7 @@ jobs:
             printf '%s\n' "$CANDIDATES"
 
             # A mixed push can match one package and leave a shared directory
-            # (pkgs/scripts, pkgs/io-guardian, ...) unmapped, so every changed
+            # (pkgs/scripts, pkgs/db-guardian, ...) unmapped, so every changed
             # path has to map on its own before the matrix can be narrowed
             UNMAPPED=$(
               awk -F'/' 'NR == FNR { k[$0] = 1; next }

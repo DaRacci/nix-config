@@ -7,7 +7,7 @@ let
 
   commonDrv = component: {
     version = "1.1.0";
-    pname = "io-guardian-${component}";
+    pname = "db-guardian-${component}";
 
     format = "other";
     src = ./.;
@@ -17,8 +17,8 @@ let
       runHook preInstall
 
       mkdir -p $out/bin
-      cp ${./. + "/${component}" + ".py"} $out/bin/io-guardian-${component}
-      chmod +x $out/bin/io-guardian-${component}
+      cp ${./. + "/${component}" + ".py"} $out/bin/db-guardian-${component}
+      chmod +x $out/bin/db-guardian-${component}
 
       runHook postInstall
     '';
@@ -27,13 +27,13 @@ let
       license = lib.licenses.mit;
       maintainers = with lib.maintainers; [ racci ];
       platforms = lib.platforms.linux;
-      description = "IO Database Guardian WebSocket ${component}";
-      mainProgram = "io-guardian-${component}";
+      description = "Database Guardian WebSocket ${component}";
+      mainProgram = "db-guardian-${component}";
     };
   };
 in
 {
-  io-guardian-server = buildPythonApplication (
+  db-guardian-server = buildPythonApplication (
     commonDrv "server"
     // {
       propagatedBuildInputs = [
@@ -43,7 +43,7 @@ in
     }
   );
 
-  io-guardian-client = buildPythonApplication (
+  db-guardian-client = buildPythonApplication (
     commonDrv "client"
     // {
       propagatedBuildInputs = [ websockets ];

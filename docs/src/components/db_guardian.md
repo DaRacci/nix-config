@@ -1,8 +1,8 @@
-# IO Guardian - Database Availability System
+# DB Guardian - Database Availability System
 
 ## Purpose
 
-The IO Guardian system ensures that services across the infrastructure are aware of the availability of centralised databases hosted on the Database Coordinator.
+The DB Guardian system ensures that services across the infrastructure are aware of the availability of centralised databases hosted on the Database Coordinator.
 It provides graceful startup and shutdown coordination between the database host and dependent services on other servers.
 
 ## Entry Point
@@ -77,11 +77,12 @@ The timer is started and stopped with the coordinator. An intentional drain stop
 
 #### On Client Servers
 
-| Unit                            | Type    | Description                             |
-| ------------------------------- | ------- | --------------------------------------- |
-| `db-guardian.service`           | simple  | WebSocket server for receiving commands |
-| `db-databases.target`           | target  | Represents "databases are online"       |
-| `wait-for-db-databases.service` | oneshot | Waits for databases at boot (runs once) |
+| Unit                            | Type    | Description                                         |
+| ------------------------------- | ------- | --------------------------------------------------- |
+| `db-guardian.service`           | simple  | WebSocket server for receiving commands             |
+| `db-databases.target`           | target  | Represents "databases are online"                   |
+| `wait-for-db-primary.service`   | oneshot | Waits for the database primary host to be reachable |
+| `wait-for-db-databases.service` | oneshot | Waits for databases at boot (runs once)             |
 
 The target is bound to `wait-for-db-databases.service` and is also wanted by it.
 Restarting the readiness check therefore restarts the target instead of leaving it inactive.
