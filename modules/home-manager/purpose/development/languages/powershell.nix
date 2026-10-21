@@ -13,6 +13,7 @@ import ./mkLanguage.nix {
       name = "powershell-es";
       package = pkgs.powershell-editor-services;
       binary = "powershell-editor-services";
+      args = [ "-Stdio" ];
       filetypes = [
         ".ps1"
         ".psm1"
