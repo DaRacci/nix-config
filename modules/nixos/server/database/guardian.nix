@@ -14,13 +14,14 @@
 let
   inherit (lib)
     concatStringsSep
+    escapeShellArgs
     getExe
+    getExe'
     hasSuffix
     mkIf
     mkMerge
     mkOption
     optional
-    optionalString
     types
     unique
     ;
@@ -45,61 +46,16 @@ let
   postgresPort = getIOPrimaryHostAttr "services.postgresql.settings.port";
   redisPort = (getIOPrimaryHostAttr "services.redis.servers")."".port;
 
-  waitForDatabasesScript = pkgs.writeShellApplication {
-    name = "wait-for-io-databases";
-    runtimeInputs = [
-      pkgs.toybox
-    ]
-    ++ (optional thisHostHasPostgresDatabases (getIOPrimaryHostAttr "services.postgresql.package"))
-    ++ (optional thisHostHasRedisDatabases (getIOPrimaryHostAttr "services.redis.package"));
-    text = ''
-      IO_HOSTNAME="${ioHostname}"
-      ${optionalString thisHostHasPostgresDatabases ''
-        POSTGRES_PORT="${toString postgresPort}"
-      ''}
-      ${optionalString thisHostHasRedisDatabases ''
-        REDIS_PORT="${toString redisPort}"
-      ''}
-      MAX_ATTEMPTS=60
-      RETRY_INTERVAL=5
-
-      echo "Waiting for an IO database to become available..."
-
-      attempt=1
-      while [ $attempt -le $MAX_ATTEMPTS ]; do
-        all_ok=true
-
-        ${optionalString thisHostHasPostgresDatabases ''
-          if ! pg_isready -h "$IO_HOSTNAME" -p "$POSTGRES_PORT" -t 5 >/dev/null 2>&1; then
-            echo "Attempt $attempt/$MAX_ATTEMPTS: PostgreSQL not ready at $IO_HOSTNAME:$POSTGRES_PORT"
-            all_ok=false
-          else
-            echo "PostgreSQL is ready"
-          fi
-        ''}
-
-        ${optionalString thisHostHasRedisDatabases ''
-          if ! redis-cli -h "$IO_HOSTNAME" -p "$REDIS_PORT" ping >/dev/null 2>&1; then
-            echo "Attempt $attempt/$MAX_ATTEMPTS: Redis not ready at $IO_HOSTNAME:$REDIS_PORT"
-            all_ok=false
-          else
-            echo "Redis is ready"
-          fi
-        ''}
-
-        if [ "$all_ok" = true ]; then
-          echo "All IO databases are available"
-          exit 0
-        fi
-
-        attempt=$((attempt + 1))
-        sleep $RETRY_INTERVAL
-      done
-
-      echo "Timeout waiting an IO database after $MAX_ATTEMPTS attempts"
-      exit 1
-    '';
-  };
+  waitForIoCommand = escapeShellArgs [
+    (getExe' pkgs.wait-for-io-tools "wait-for-io")
+    cfg.host
+  ];
+  waitForDatabasesCommand = escapeShellArgs [
+    (getExe' pkgs.wait-for-io-tools "wait-for-io-databases")
+    ioHostname
+    (if thisHostHasPostgresDatabases then toString postgresPort else "")
+    (if thisHostHasRedisDatabases then toString redisPort else "")
+  ];
 in
 {
   options.server.database = {
@@ -197,28 +153,7 @@ in
             wantedBy = [ "network-online.target" ];
             serviceConfig = {
               Type = "oneshot";
-              ExecStart = getExe (
-                pkgs.writeShellApplication {
-                  name = "wait-for-io";
-                  runtimeInputs = [
-                    pkgs.iputils
-                    pkgs.toybox
-                    pkgs.getent
-                  ];
-                  text = ''
-                    IO_HOSTNAME=${cfg.host}
-                    #shellcheck disable=SC2034
-                    for i in {1..150}; do
-                      if getent hosts "$IO_HOSTNAME" >/dev/null 2>&1 && ping -c1 -W1 "$IO_HOSTNAME" >/dev/null 2>&1; then
-                        exit 0;
-                      fi;
-                      sleep 2;
-                    done;
-                    echo "WARNING: IO Hosts not reachable after timeout, continuing boot without IO Host" >&2;
-                    exit 0
-                  '';
-                }
-              );
+              ExecStart = waitForIoCommand;
             };
           };
 
@@ -231,12 +166,17 @@ in
             wants = [ "network-online.target" ];
             requires = [ "wait-for-io.service" ];
             requiredBy = [ "io-databases.target" ];
+            path = [
+              pkgs.toybox
+            ]
+            ++ (optional thisHostHasPostgresDatabases (getIOPrimaryHostAttr "services.postgresql.package"))
+            ++ (optional thisHostHasRedisDatabases (getIOPrimaryHostAttr "services.redis.package"));
 
             serviceConfig = {
               Type = "oneshot";
               RemainAfterExit = true;
               TimeoutStartSec = "5min";
-              ExecStart = getExe waitForDatabasesScript;
+              ExecStart = waitForDatabasesCommand;
             };
           };
         }

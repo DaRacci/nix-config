@@ -61,7 +61,8 @@
           ];
       };
       customComponents = with pkgs.home-assistant-custom-components; [
-        moonraker
+        #TODO:https://github.com/marcolivierarsenault/moonraker-home-assistant/issues/789
+        # moonraker
         waste_collection_schedule
         philips_airpurifier_coap
         smartir

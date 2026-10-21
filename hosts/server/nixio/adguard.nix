@@ -9,7 +9,7 @@
     proxy.virtualHosts = {
       # TODO - DNS over HTTPS
       adguard.extraConfig = ''
-        reverse_proxy http://${config.services.adguardhome.host}:${toString config.services.adguardhome.port}
+        reverse_proxy http://${config.services.adguardhome.settings.http.address}
       '';
     };
   };
@@ -140,7 +140,8 @@
             "@@||nextcloud.racci.dev^$dnsrewrite" # Nextcloud isn't hosted internally yet.
             "@@||cloud.racci.dev^$dnsrewrite" # Digital Ocean DNS
             "@@||s.youtube.com^$important" # Fix YouTube history for IOS App
-            "@@||ipinfo.io^$important" # Blocked by HaGeZi's Ultimate Blocklist but needed.
+            "@@||ipinfo.io^$important" # Blocked by HaGeZi's but needed.
+            "@@||api.loganalytics.io^$important" # Blocked by HaGeZi's but needed for Azure Log Analytics.
 
             # Proxmox serves its HTTPS itself, no proxy.
             "@@||proxmox.racci.dev^$dnsrewrite"
@@ -180,7 +181,7 @@
           let
             mkFilter = name: fileId: {
               enabled = true;
-              url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_${builtins.toString fileId}.txt";
+              url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_${toString fileId}.txt";
               inherit name;
               id = fileId;
             };

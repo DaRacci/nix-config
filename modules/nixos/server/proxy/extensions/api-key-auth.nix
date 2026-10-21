@@ -34,12 +34,13 @@ let
 
   hasAnyApiKey =
     getAllAttrsFunc "server.proxy.virtualHosts" (
-      virtualHosts: _: virtualHosts |> builtins.attrValues |> builtins.any (vh: vh.requireApiKey.enable)
+      virtualHosts: _:
+      virtualHosts |> builtins.attrValues |> builtins.any (vh: vh.requireApiKey.enable or false)
     )
     |> builtins.any (x: x);
 
   collectApiKeyVirtualHosts = collectAllAttrsFunc "server.proxy.virtualHosts" (
-    virtualHosts: _: virtualHosts |> lib.filterAttrs (_: vh: vh.requireApiKey.enable)
+    virtualHosts: _: virtualHosts |> lib.filterAttrs (_: vh: vh.requireApiKey.enable or false)
   );
 in
 {
@@ -113,7 +114,7 @@ in
         in
         optionalString (apiKeyVhosts != { }) ''
           ${optionalString (
-            !config.server.proxy.extensions.kanidm.enable
+            !(config.server.proxy.extensions.kanidm.enable or false)
           ) "order authorize before reverse_proxy"}
           ${builtins.concatStringsSep "\n" (
             builtins.attrValues (

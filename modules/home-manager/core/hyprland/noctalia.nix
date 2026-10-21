@@ -53,7 +53,7 @@ let
       };
 
       side_bar = {
-        enable = false; # Disable by default - Add monitor overrides to enable.
+        enabled = false; # Disable by default - Add monitor overrides to enable.
         background_opacity = 0.9;
         center = [ "workspaces" ];
         end = [
@@ -157,7 +157,7 @@ let
     theme = {
       builtin = "Noctalia";
       mode = "dark";
-      source = "builtin";
+      # source = "builtin";
       templates = {
         enable_builtin_templates = false;
         enable_community_templates = false;
@@ -213,7 +213,7 @@ in
       programs.noctalia = {
         enable = true;
         systemd.enable = true;
-        validateConfig = true;
+        checkConfig = true;
         settings = noctaliaSettings;
         package = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
       };
@@ -223,23 +223,19 @@ in
           (getExe config.programs.noctalia.package)
         ];
 
-        settings = {
-          layer_rule = [
-            {
-              match = {
-                namespace = "^noctalia-(bar-.+|notification|dock|panel|attached-panel|osd)$";
-              };
-              blur = true;
-              ignore_alpha = 0.5;
-              blur_popups = true;
-            }
-          ];
-        };
+        custom-settings.lua.luaModules = [ ./lua/opt/noctalia.lua ];
       };
 
-      user.persistence.directories = [
-        ".local/share/noctalia"
-      ];
+      user.persistence = {
+        directories = [ ".local/share/noctalia" ];
+        files = [
+          ".local/state/noctalia/settings.toml" # Allows runtime overrides.
+          ".local/state/noctalia/screen_time.json"
+        ];
+      };
+
+      # Without this, noctalia will present a "first run" setup wizard on first launch.
+      home.file.".local/state/noctalia/.setup-complete".text = "";
     }
 
     (mkIf (cfg.location.secret != null) {

@@ -28,7 +28,6 @@ in
     ./containers.nix
     ./display-manager.nix
     ./gaming.nix
-    ./generators.nix
     ./default-groups.nix
     ./locale.nix
     ./nix.nix

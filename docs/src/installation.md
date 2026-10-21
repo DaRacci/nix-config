@@ -44,7 +44,8 @@ After starting your NixOS-WSL instance:
 sudo git clone https://github.com/DaRacci/nix-config.git /etc/nixos
 
 # Apply the WSL configuration
-sudo nixos-rebuild switch --flake /etc/nixos#winix
+# Replace YOUR_WSL_HOSTNAME with your actual WSL hostname
+sudo nixos-rebuild switch --flake /etc/nixos#YOUR_WSL_HOSTNAME
 ```
 
 #### 4. WSL-Specific Features
@@ -54,7 +55,7 @@ The WSL configuration includes:
 - SSH agent relay between Windows and WSL
 - Hardware acceleration support for development
 - Remote desktop capabilities
-- Optimized for headless operation
+- Optimised for headless operation
 
 ## Native NixOS Installation
 
@@ -108,7 +109,7 @@ cd /mnt/etc/nixos
 git clone https://github.com/DaRacci/nix-config.git .
 ```
 
-#### 5. Customize Host Configuration
+#### 5. Customise Host Configuration
 
 Edit `hosts/{device-type}/{hostname}/default.nix` and `hardware.nix` according to your needs.
 

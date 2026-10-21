@@ -12,7 +12,6 @@
 
     # Thumbnailers
     ffmpegthumbnailer
-    nufraw-thumbnailer
     # stl-thumb
 
     # collision

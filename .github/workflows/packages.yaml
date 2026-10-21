@@ -31,18 +31,29 @@ jobs:
       - name: Get packages from flake
         id: get-packages
         run: |
-          FLAKE_JSON=$(nix flake show --no-pure-eval --json)
-          ARCHS=$(echo "$FLAKE_JSON" | jq -r '.packages | keys[]')
+          ARCHS=$(
+            nix eval --json --no-pure-eval --allow-import-from-derivation .#packages --apply builtins.attrNames \
+            | jq -r '.[]'
+          )
           INCLUDE_JSON='[]'
           for ARCH in $ARCHS; do
-            PKGS=$(echo "$FLAKE_JSON" | jq -r --arg arch "$ARCH" '.packages[$arch] | keys[] | select(startswith("devenv-") | not)')
+            PKGS=$(
+              nix eval --json --no-pure-eval --allow-import-from-derivation ".#packages.${ARCH}" --apply builtins.attrNames \
+              | jq -r '.[] | select(startswith("devenv-") | not)'
+            )
             for PKG in $PKGS; do
-              BROKEN=$(nix eval --json --system "$ARCH" ".#${PKG}.meta.broken" 2>/dev/null)
-              if [ "$BROKEN" != "true" ]; then
-                INCLUDE_JSON=$(echo "$INCLUDE_JSON" | jq --arg pkg "$PKG" --arg arch "$ARCH" '. + [{package:$pkg, arch:$arch}]')
+              ERRFILE=$(mktemp)
+              if BROKEN=$(nix eval --json --no-pure-eval --allow-import-from-derivation --system "${ARCH}" ".#packages.${ARCH}.${PKG}.meta.broken" 2>"$ERRFILE"); then
+                if echo "$BROKEN" | jq -e '. == true' >/dev/null; then
+                  echo "Skipping broken package $PKG on $ARCH"
+                else
+                  INCLUDE_JSON=$(echo "$INCLUDE_JSON" | jq --arg pkg "$PKG" --arg arch "$ARCH" '. + [{package:$pkg, arch:$arch}]')
+                fi
               else
-                echo "Skipping broken package $PKG on $ARCH"
+                echo "Skipping unevaluable package $PKG on $ARCH"
+                sed 's/^/  /' "$ERRFILE" >&2
               fi
+              rm -f "$ERRFILE"
             done
           done
           if [ "$(echo "$INCLUDE_JSON" | jq 'length')" -eq 0 ]; then
@@ -60,36 +71,62 @@ jobs:
       - name: Filter to changed packages
         id: filtered-packages
         uses: workflow/nix-shell-action@v4.0.0
+        env:
+          FULL_MATRIX: ${{ steps.get-packages.outputs.matrix }}
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.sha }}
         with:
           packages: gawk
           script: |
             set -euo pipefail
 
-            git fetch origin ${{ github.event.before }} --depth=1
-
-            if [ "${{ github.event_name }}" != "push" ]; then
-              echo "Not a push event (${{ github.event_name }}); keeping full matrix."
+            set_matrix() {
               {
                 echo 'matrix<<EOF'
-                echo "${{ steps.get-packages.outputs.matrix }}"
+                printf '%s\n' "$1"
                 echo EOF
               } >> "$GITHUB_OUTPUT"
+            }
+
+            # Diff endpoints per event. A push carries the previous tip in
+            # github.event.before; a pull request carries no such thing, so diff
+            # its base branch against the merge commit GitHub checked out for the
+            # event - base..merge is exactly the change set of the PR. Anything
+            # else (manual dispatch, missing or unavailable base) keeps the full
+            # matrix rather than guessing.
+            case "$EVENT_NAME" in
+              push) DIFF_BASE="$BEFORE_SHA" ;;
+              pull_request) DIFF_BASE="$PR_BASE_SHA" ;;
+              *) DIFF_BASE="" ;;
+            esac
+
+            if [ -z "$DIFF_BASE" ] || [ "$DIFF_BASE" = "0000000000000000000000000000000000000000" ]; then
+              echo "No usable base for $EVENT_NAME; keeping full matrix."
+              set_matrix "$FULL_MATRIX"
               exit 0
             fi
 
+            git fetch origin "$DIFF_BASE" --depth=1
+
+            if ! git cat-file -e "$DIFF_BASE^{commit}" 2>/dev/null; then
+              echo "Base commit $DIFF_BASE is unavailable; keeping full matrix."
+              set_matrix "$FULL_MATRIX"
+              exit 0
+            fi
+
+            BEFORE_SHA="$DIFF_BASE"
+
             # If flake.lock changed, check if the nixpkgs input changed; if so, keep full matrix
-            if git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- flake.lock | grep -q 'flake.lock'; then
+            if git diff --name-only "$BEFORE_SHA" "$HEAD_SHA" -- flake.lock | grep -q 'flake.lock'; then
               echo "flake.lock changed, checking nixpkgs input change..."
               # Try to obtain previous flake.lock; if unavailable, assume nixpkgs changed
-              if git show ${{ github.event.before }}:flake.lock > /tmp/old.lock 2>/dev/null; then
+              if git show "$BEFORE_SHA:flake.lock" > /tmp/old.lock 2>/dev/null; then
                 :
               else
                 echo "Previous flake.lock not available; assuming nixpkgs changed. Keeping full matrix."
-                {
-                  echo 'matrix<<EOF'
-                  echo "${{ steps.get-packages.outputs.matrix }}"
-                  echo EOF
-                } >> "$GITHUB_OUTPUT"
+                set_matrix "$FULL_MATRIX"
                 exit 0
               fi
 
@@ -111,59 +148,94 @@ jobs:
 
               if [ "$OLD_NIXPKGS" != "$NEW_NIXPKGS" ]; then
                 echo "nixpkgs input changed ($OLD_NIXPKGS -> $NEW_NIXPKGS). Keeping full matrix."
-                {
-                  echo 'matrix<<EOF'
-                  echo "${{ steps.get-packages.outputs.matrix }}"
-                  echo EOF
-                } >> "$GITHUB_OUTPUT"
+                set_matrix "$FULL_MATRIX"
                 exit 0
               else
                 echo "nixpkgs input did not change."
               fi
             fi
 
-            CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- pkgs/)
-            if [ -z "$CHANGED_FILES" ]; then
-              echo "No changes in pkgs, skipping all builds."
-              echo "matrix=[]" >> "$GITHUB_OUTPUT"
+            # flake.nix defines the package outputs, so it can affect any package
+            if git diff --name-only "$BEFORE_SHA" "$HEAD_SHA" -- flake.nix | grep -q 'flake.nix'; then
+              echo "flake.nix changed; keeping full matrix."
+              set_matrix "$FULL_MATRIX"
               exit 0
             fi
 
-            CHANGED_PKGS=$(
-              echo "$CHANGED_FILES" \
-              | tr ' ' '\n' \
-              | grep -E '^pkgs/' \
-              | sed 's|^pkgs/||' \
-              | awk -F'/' '{
-                  n=split($0,a,"/");
-                  if (a[n]=="default.nix") {
-                    if (n>1) print a[n-1]
-                  } else {
-                    fname=a[n]; sub(/\.nix$/,"",fname); print fname
+            CHANGED_FILES=$(git diff --name-only "$BEFORE_SHA" "$HEAD_SHA" -- pkgs/)
+            if [ -z "$CHANGED_FILES" ]; then
+              echo "No changes in pkgs; keeping full matrix."
+              set_matrix "$FULL_MATRIX"
+              exit 0
+            fi
+
+            # pkgs/default.nix defines the package set, so it can affect any package
+            if printf '%s\n' "$CHANGED_FILES" | grep -qx 'pkgs/default.nix'; then
+              echo "pkgs/default.nix changed; keeping full matrix."
+              set_matrix "$FULL_MATRIX"
+              exit 0
+            fi
+
+            # Candidate package names from the changed paths, intersected with the
+            # discovered package list; extra candidates are harmless
+            CANDIDATES=$(
+              printf '%s\n' "$CHANGED_FILES" \
+              | awk -F'/' '
+                  {
+                    if (NF > 1) print $2
+                    if ($NF == "default.nix" && NF > 1) print $(NF - 1)
+                    if ($NF != "default.nix") {
+                      stem = $NF
+                      sub(/\.[^.]*$/, "", stem)
+                      if (stem != "") print stem
+                    }
                   }
-                }' \
+                ' \
               | sort -u
             )
-            echo "Changed packages:"
-            echo "$CHANGED_PKGS"
-            FILTERED_JSON='[]'
-            for PKG in $CHANGED_PKGS; do
-              MATCHING_ENTRIES=$(echo "${{ steps.get-packages.outputs.matrix }}" | jq --arg pkg "$PKG" '.include[] | select(.package == $pkg)')
-              if [ -n "$MATCHING_ENTRIES" ]; then
-                FILTERED_JSON=$(echo "$FILTERED_JSON" | jq --argjson entries "$MATCHING_ENTRIES" '. + $entries')
-              fi
-            done
-            if [ "$(echo "$FILTERED_JSON" | jq 'length')" -eq 0 ]; then
-              MATRIX_JSON='[]'
-            else
-              MATRIX_JSON=$(jq -n --argjson include "$FILTERED_JSON" '{include:$include}')
+            echo "Candidate packages from changed paths:"
+            printf '%s\n' "$CANDIDATES"
+
+            # A mixed push can match one package and leave a shared directory
+            # (pkgs/scripts, pkgs/io-guardian, ...) unmapped, so every changed
+            # path has to map on its own before the matrix can be narrowed
+            UNMAPPED=$(
+              awk -F'/' 'NR == FNR { k[$0] = 1; next }
+                {
+                  hit = 0
+                  if (NF > 1 && ($2 in k)) hit = 1
+                  if (!hit && $NF == "default.nix" && NF > 1 && ($(NF - 1) in k)) hit = 1
+                  if (!hit && $NF != "default.nix") {
+                    stem = $NF
+                    sub(/\.[^.]*$/, "", stem)
+                    if (stem != "" && (stem in k)) hit = 1
+                  }
+                  if (!hit) print
+                }' \
+                <(printf '%s' "$FULL_MATRIX" | jq -r '.include[].package' | sort -u) \
+                <(printf '%s\n' "$CHANGED_FILES")
+            )
+            if [ -n "$UNMAPPED" ]; then
+              echo "Paths with no matching package; keeping full matrix:"
+              printf '%s\n' "$UNMAPPED"
+              set_matrix "$FULL_MATRIX"
+              exit 0
             fi
+
+            CANDIDATES_JSON=$(printf '%s\n' "$CANDIDATES" | jq -R -s 'split("\n") | map(select(length > 0))')
+            SELECTED=$(printf '%s' "$FULL_MATRIX" | jq -c --argjson pkgs "$CANDIDATES_JSON" \
+              '[.include[] | .package as $p | select($pkgs | index($p))]')
+
+            # defensive: every changed path matched a package above
+            if [ "$(printf '%s' "$SELECTED" | jq 'length')" -eq 0 ]; then
+              echo "No changed path maps to a known package; keeping full matrix."
+              set_matrix "$FULL_MATRIX"
+              exit 0
+            fi
+
+            MATRIX_JSON=$(jq -cn --argjson include "$SELECTED" '{include:$include}')
             echo "Filtered matrix: $MATRIX_JSON"
-            {
-              echo 'matrix<<EOF'
-              echo "$MATRIX_JSON"
-              echo EOF
-            } >> "$GITHUB_OUTPUT"
+            set_matrix "$MATRIX_JSON"
 
   build-packages:
     needs: discover-packages

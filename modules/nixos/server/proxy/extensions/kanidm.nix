@@ -225,7 +225,7 @@ in
     server.proxy.extensions.kanidm = {
       priority = 50;
       consumesExtraConfig = true;
-      enable = mkDefault true;
+      enable = mkDefault hasAnyKanidm;
 
       config =
         name: vh: _hostCfg:

@@ -16,6 +16,19 @@ let
 
   cfg = config.core.gaming;
   hasHomeManager = options ? home-manager;
+
+  # Jovian owns the Steam package on SteamOS hosts, so override that base
+  # instead of defining a second package at the same priority.
+  jovianSteam = options ? jovian && config.jovian.steam.enable;
+
+  steamPackage = (if jovianSteam then pkgs.jovianPackages.steam else pkgs.steam).override {
+    extraArgs = "-steamos3 -steamdeck -steampal -gamepadui";
+    extraEnv = {
+      PRESSURE_VESSEL_SYSTEMD_SCOPE = 1;
+      PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES = 1;
+      PRESSURE_VESSEL_FILESYSTEMS_RW = "$XDG_RUNTIME_DIR/wivrn/comp_ipc";
+    };
+  };
 in
 {
   options.core.gaming = {
@@ -51,19 +64,13 @@ in
 
       environment.systemPackages = [
         pkgs.android-tools
+        pkgs.wayvr
       ];
 
       programs = {
         steam = {
           enable = true;
-          package = pkgs.steam.override {
-            extraArgs = "-steamos3 -steamdeck -steampal -gamepadui";
-            extraEnv = {
-              PRESSURE_VESSEL_SYSTEMD_SCOPE = 1;
-              PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES = 1;
-              PRESSURE_VESSEL_FILESYSTEMS_RW = "$XDG_RUNTIME_DIR/wivrn/comp_ipc";
-            };
-          };
+          package = mkForce steamPackage;
           extest.enable = true;
           extraPackages = [
             pkgs.xwayland-run
@@ -102,37 +109,6 @@ in
           steam.importOXRRuntimes = true;
           highPriority = true;
           monadoEnvironment = { };
-          config = {
-            enable = true;
-            json = {
-              scale = [
-                0.75
-                0.5
-              ];
-              bitrate = 100000000;
-              encoders = [
-                {
-                  encoder = "nvenc";
-                  codec = "h265";
-                  width = 0.5;
-                  height = 1;
-                  offset_x = 0;
-                  offset_y = 0;
-                  group = 0;
-                }
-                {
-                  encoder = "nvenc";
-                  codec = "h265";
-                  width = 0.5;
-                  height = 1;
-                  offset_x = 0.5;
-                  offset_y = 0;
-                  group = 0;
-                }
-              ];
-              application = [ pkgs.wayvr ];
-            };
-          };
         };
 
         udev.extraRules = ''

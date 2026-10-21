@@ -293,7 +293,6 @@
         dock = "left";
         entry_spacing = "comfortable";
         file_icons = true;
-        folder_icons = true;
         git_status = true;
         indent_size = 20;
         auto_reveal_entries = true;

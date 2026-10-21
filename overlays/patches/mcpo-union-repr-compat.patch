@@ -1,0 +1,25 @@
+diff --git a/src/mcpo/tests/test_main.py b/src/mcpo/tests/test_main.py
+index e5d71ba..c34a108 100644
+--- a/src/mcpo/tests/test_main.py
++++ b/src/mcpo/tests/test_main.py
+@@ -1,6 +1,6 @@
+ import pytest
+ from pydantic import BaseModel, Field
+-from typing import Any, List, Dict, Union
++from typing import Any, List, Dict, Union, get_origin
+
+ from mcpo.utils.main import _process_schema_property
+
+@@ -182,10 +182,11 @@ def test_multi_type_property_with_list():
+     )
+
+     # Check if the resulting type is a Union
+-    assert str(result_type).startswith("typing.Union[")
++    # Use get_origin for Python 3.12+ compatibility where Union[str, float] repr is "str | float"
++    assert get_origin(result_type) is Union
+
+     # Check if both types are in the Union
+     assert str in result_type.__args__
+     assert float in result_type.__args__
+
+     # Check field properties

@@ -17,7 +17,7 @@
 
     # Hardware & Boot
     lanzaboote = {
-      url = "github:nix-community/lanzaboote/v1.0.0";
+      url = "github:nix-community/lanzaboote/v1.1.0";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         rust-overlay.follows = "rust-overlay";
@@ -38,24 +38,19 @@
     ucodenix.url = "github:e-tho/ucodenix";
 
     # Services
-    angrr = {
-      url = "github:linyinfeng/angrr";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-parts.follows = "flake-parts";
-        flake-compat.follows = "";
-      };
-    };
     nixarr = {
       url = "github:rasmus-kirk/nixarr";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.website-builder.follows = "";
     };
     hermes-agent = {
-      #TODO:https://github.com/NousResearch/hermes-agent/pull/48637
-      url = "github:liuhao1024/hermes-agent/fix/48628-lazy-deps-managed-check";
+      url = "github:NousResearch/hermes-agent";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-parts.follows = "flake-parts";
+    };
+    trafilatura-scrape = {
+      url = "git+https://codeberg.org/Racci/trafilatura_scrape";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # System Configurations
@@ -80,13 +75,13 @@
       url = "github:CRTified/nur-packages";
       flake = false; # We aren't going to use this as a flake
     };
-    # TODO - could this also be moved to only being in a partition that just runs from the flake outputs?
-    nixos-generators = {
-      url = "github:nix-community/nixos-generators";
-      inputs = {
-        nixlib.follows = "nixpkgs";
-        nixpkgs.follows = "nixpkgs";
-      };
+    forgesync = {
+      url = "github:lukaswrz/forgesync";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    fleet-graph = {
+      url = "github:asmodaydoescoding/fleetgraph";
+      flake = false;
     };
 
     seaweedfs = {

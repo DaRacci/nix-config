@@ -12,7 +12,11 @@
   ...
 }:
 let
-  inherit (builtins) pathExists attrValues filter;
+  inherit (builtins)
+    pathExists
+    attrValues
+    filter
+    ;
   inherit (lib)
     mkDefault
     mkBefore
@@ -32,12 +36,14 @@ let
 
   userDirectory = username: "${self}/home/${username}";
   osConfigPath = username: "${userDirectory username}/os-config.nix";
+
+  allModules = import "${self}/modules/nixos";
 in
 nixosSystem rec {
   inherit pkgs lib system;
 
   modules =
-    (attrValues (import "${self}/modules/nixos"))
+    (attrValues allModules)
     ++ (usersWithRoot |> map osConfigPath |> filter pathExists) # Include each user's os-config.nix if it exists
     ++ [
       hostDirectory
@@ -112,7 +118,7 @@ nixosSystem rec {
     ));
 
   specialArgs = {
-    inherit self hostDirectory;
+    inherit self hostDirectory deviceType;
     inherit (self) inputs outputs;
     users = deviceUsers;
     importExternals = true;

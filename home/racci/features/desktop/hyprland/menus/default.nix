@@ -15,27 +15,30 @@
 
     bar = {
       default.monitor = {
-        DP-1.enable = false;
-        HDMI-A-1.enable = false;
+        DP-6.enabled = true;
+        DP-1.enabled = false;
+        HDMI-A-1.enabled = false;
       };
 
       side_bar.monitor = {
         DP-1 = {
-          enable = true;
+          enabled = true;
           position = "right";
-          radius_bottom_left = -12;
+          concave_edge_corners = true;
+          radius_bottom_left = 12;
           radius_bottom_right = 0;
-          radius_top_left = -12;
+          radius_top_left = 12;
           radius_top_right = 0;
         };
 
         HDMI-A-1 = {
-          enable = true;
+          enabled = true;
           position = "left";
+          concave_edge_corners = true;
           radius_bottom_left = 0;
-          radius_bottom_right = -12;
+          radius_bottom_right = 12;
           radius_top_left = 0;
-          radius_top_right = -12;
+          radius_top_right = 12;
         };
       };
     };

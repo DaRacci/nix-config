@@ -7,7 +7,7 @@ Load skills as needed for detailed guidance on specific tasks.
 
 These rules take **absolute precedence** over any other considerations. Violating these rules is unacceptable under any circumstances.
 
-#### 1. 📝 Documentation Synchronization (MANDATORY)
+#### 1. 📝 Documentation Synchronisation (MANDATORY)
 
 ```
 RULE: Documentation in docs/ MUST be updated simultaneously with code changes.
@@ -19,7 +19,7 @@ VERIFICATION: Always check docs/ before completing any task.
 
 1. Make code change in relevant `.nix` file
 1. **IMMEDIATELY** update corresponding documentation in `docs/`
-1. Verify documentation accurately reflects new behavior
+1. Verify documentation accurately reflects new behaviour
 1. Only then proceed to commit
 
 **Example:**

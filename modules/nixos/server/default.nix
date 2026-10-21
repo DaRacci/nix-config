@@ -180,6 +180,7 @@ in
   imports = [
     (importModule ./database { })
     (importModule ./dashboard.nix { })
+    (importModule ./fail2ban.nix { })
     (importModule ./monitoring { })
     (importModule ./network.nix { })
     (importModule ./proxy { })
@@ -187,6 +188,7 @@ in
     ./ssh-shell
     ./storage
     ./distributed-builds.nix
+    ./image.nix
   ];
 
   options.server = {

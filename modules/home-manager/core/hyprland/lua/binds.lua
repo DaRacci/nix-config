@@ -1,7 +1,8 @@
+local SplitTree = require("layout.split-tree")
+
 local mod = "SUPER"
 local workspaceCount = 10
 local specialWorkspaceKey = "S"
-local pixelMoveScale = 50
 local directions = {
   LEFT = { relative = "-", relativeNumber = -1, pixelAxis = "x" },
   RIGHT = { relative = "+", relativeNumber = 1, pixelAxis = "x" },
@@ -19,12 +20,12 @@ local mouse = {
 -- ---------------------------------------------------------------------------
 hl.bind(mod .. " + Q", hl.dsp.window.close())
 hl.bind(mod .. " + SPACE", hl.dsp.window.fullscreen())
-hl.bind(mod .. " + SHIFT + SPACE", hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mod .. " + SHIFT + SPACE", SplitTree.toggleFloat)
 
 for direction,_ in pairs(directions) do
   local lowerName = direction:lower()
-  hl.bind(mod .. " + " .. direction, hl.plugin.hy3.move_focus(lowerName))
-  hl.bind(mod .. " + SHIFT + " .. direction, hl.plugin.hy3.move_window(lowerName))
+  hl.bind(mod .. " + " .. direction, hl.dsp.focus({ direction = lowerName }))
+  hl.bind(mod .. " + SHIFT + " .. direction, hl.dsp.layout("move " .. lowerName))
 end
 
 -- ---------------------------------------------------------------------------
@@ -45,8 +46,16 @@ hl.bind(mod .. " + ALT + RIGHT", hl.dsp.workspace.move({ monitor = "+1" }))
 -- ---------------------------------------------------------------------------
 -- Mouse Bindings
 -- ---------------------------------------------------------------------------
-hl.bind(mod .. " + " .. mouse.left, hl.dsp.window.drag())
-hl.bind(mod .. " + " .. mouse.right, hl.dsp.window.resize())
+-- End binds ignore the modifier:
+-- Hyprland requires mods to still match on release,
+-- so releasing SUPER first would leave the session stuck.
+-- They consume only their own session.
+hl.bind(mod .. " + " .. mouse.left, SplitTree.beginMouseDrag, { mouse = true })
+hl.bind(mod .. " + " .. mouse.left, SplitTree.endMouseDrag, { mouse = true, release = true, ignore_mods = true, auto_consuming = true })
+hl.bind(mod .. " + " .. mouse.right, SplitTree.beginMouseResize, { mouse = true })
+hl.bind(mod .. " + " .. mouse.right, SplitTree.endMouseResize, { mouse = true, release = true, ignore_mods = true, auto_consuming = true })
+hl.bind(mouse.left, SplitTree.beginBorderResize, { auto_consuming = true, mouse = true })
+hl.bind(mouse.left, SplitTree.endBorderResize, { auto_consuming = true, mouse = true, release = true })
 
 -- ---------------------------------------------------------------------------
 -- Submap: Resize
@@ -56,10 +65,10 @@ hl.bind("ALT + R", hl.dsp.submap("resize"))
 hl.define_submap("resize", function()
   hl.bind("ESCAPE", hl.dsp.submap("reset"))
 
-  hl.bind("DOWN", hl.dsp.window.resize({ x = 0, y = 50, relative = true }), { ["e"] = true })
-  hl.bind("LEFT", hl.dsp.window.resize({ x = 50, y = 0, relative = true }), { ["e"] = true })
-  hl.bind("RIGHT", hl.dsp.window.resize({ x = -50, y = 0, relative = true }), { ["e"] = true })
-  hl.bind("UP", hl.dsp.window.resize({ x = 0, y = -50, relative = true }), { ["e"] = true })
+  for direction ,_ in pairs(directions) do
+    local lowerName = direction:lower()
+    hl.bind(direction, hl.dsp.layout("resize " .. lowerName))
+  end
 end)
 
 -- ---------------------------------------------------------------------------

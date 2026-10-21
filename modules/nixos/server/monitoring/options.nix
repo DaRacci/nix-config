@@ -16,9 +16,13 @@ let
     mkOption
     ;
   inherit (lib.types)
+    attrsOf
     int
+    nullOr
     str
     port
+    submodule
+    enum
     ;
 
   hasPostgresDatabases =
@@ -83,6 +87,72 @@ in
           defaultText = literalExpression "cfg.enable && thisIsIOPrimaryHost && hasRedisInstances";
         };
       };
+
+      fail2ban = {
+        enable = mkEnableOption "fail2ban metrics exporter" // {
+          default = cfg.enable && isThisIOPrimaryHost && config.server.fail2ban.enable or false;
+          defaultText = literalExpression "cfg.enable && isThisIOPrimaryHost && config.server.fail2ban.enable";
+        };
+      };
+    };
+
+    scrapeConfigs = mkOption {
+      default = { };
+      type = attrsOf (
+        submodule (
+          { name, ... }:
+          {
+            options = {
+              job_name = mkOption {
+                type = str;
+                default = name;
+                description = "Prometheus job name for this scrape target.";
+              };
+
+              host = mkOption {
+                type = str;
+                default = config.host.name;
+                defaultText = literalExpression "config.host.name";
+                description = "Host to scrape metrics from.";
+              };
+
+              port = mkOption {
+                type = int;
+                description = "Port the metrics endpoint listens on.";
+              };
+
+              metrics_path = mkOption {
+                type = str;
+                default = "/metrics";
+                description = "HTTP path to the metrics endpoint.";
+              };
+
+              scheme = mkOption {
+                type = enum [
+                  "http"
+                  "https"
+                ];
+                default = "http";
+                description = "URL scheme for scraping.";
+              };
+
+              bearer_token_secret = mkOption {
+                type = nullOr str;
+                default = null;
+                description = ''
+                  SOPS secret path for bearer token authentication.
+                  When set, the secret will be created on the monitoring primary host.
+                '';
+              };
+            };
+          }
+        )
+      );
+      description = ''
+        Declarative scrape configs for services running on this host.
+        These are collected by the monitoring primary host and converted
+        into Prometheus scrape configurations.
+      '';
     };
 
     logs = {

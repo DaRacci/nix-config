@@ -1,4 +1,7 @@
-{ pkgs, ... }:
+{
+  pkgs,
+  ...
+}:
 {
   imports = [
     ./atuin.nix
@@ -33,5 +36,6 @@
   home.packages = with pkgs; [
     procs
     doggo
+    ttl
   ];
 }

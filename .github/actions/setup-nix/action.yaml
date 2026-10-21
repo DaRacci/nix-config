@@ -65,6 +65,7 @@ runs:
         find /tmp/attic-client -type f -print0 | xargs -0 touch -d '@0'
 
         nix copy --inputs-from ${{inputs.root}} --from file:///tmp/attic-client nixpkgs#attic-client
+        nix profile install --inputs-from ${{inputs.root}} nixpkgs#attic-client
     - name: Setup Attic cache
       uses: ryanccn/attic-action@v0
       if: ${{ !env.ACT && inputs.ATTIC_ENDPOINT && inputs.ATTIC_CACHE && inputs.ATTIC_TOKEN }}

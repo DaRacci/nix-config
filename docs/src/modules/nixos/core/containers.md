@@ -2,49 +2,30 @@
 
 Enables Docker-based container runtime defaults.
 
-- **Entry point**: [containers.nix](../../../../../modules/nixos/core/containers.nix)
+## Purpose
 
----
+Provide a Docker-backed container runtime for workloads that still rely on Docker-specific features, with automatic image pruning and persistent state.
 
-## Overview
+## Entry Point
 
-This module turns on Docker as primary container backend and configures OCI containers to use Docker. It also enables weekly image pruning and persists Docker state directories.
+- **Main file**: [containers.nix](../../../../../modules/nixos/core/containers.nix)
 
----
-
-## Options
+### Options
 
 {{#include ../../../../generated/core-containers-options.md}}
 
----
+## Architecture / Services / Scope
 
-## Behaviour
+When enabled, the module:
 
-When enabled, module:
-
-- enables `virtualisation.docker`,
-- sets `virtualisation.docker.package = pkgs.docker`,
-- enables CDI support with `daemon.settings.features.cdi = true`,
-- enables weekly `docker autoPrune`,
+- enables `virtualisation.docker` with the default Docker package,
+- enables CDI device support in the Docker daemon,
+- enables weekly automatic image pruning,
 - sets `virtualisation.oci-containers.backend = "docker"`,
 - adds `docker` to `core.defaultGroups`, and
-- persists Docker state under `/var/lib/docker`.
+- persists Docker state directories under `/var/lib/docker` (overlay storage, images, volumes, containers, containerd, and buildkit data).
 
-Persisted directories include `overlay2`, `image`, `volumes`, `containers`, `containerd`, and `buildkit`.
+## Operational Notes / Assumptions
 
----
-
-## Usage Example
-
-```nix
-{ ... }: {
-  core.containers.enable = true;
-}
-```
-
----
-
-## Operational Notes
-
-- Module intentionally prefers Docker because current workloads still need features not covered by Podman or `podman-compose`.
-- Users receive Docker access through shared `core.defaultGroups` handling.
+- Docker is intentionally preferred because current workloads still need features not covered by Podman or `podman-compose`.
+- Users receive Docker access through the shared `core.defaultGroups` handling.

@@ -1,0 +1,11 @@
+extends: spelling
+message: "'%s' is not Australian English spelling."
+level: error
+dictionaries:
+  - en_AU-large
+  - tech
+# Path is relative to StylesPath (ci/vale/styles).
+ignore:
+  - config/dictionaries/programmer.txt
+  - config/dictionaries/ignore.txt
+  - config/dictionaries/terms.txt

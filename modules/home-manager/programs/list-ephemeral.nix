@@ -53,7 +53,6 @@ let
 
   electronApps = [
     "${configPrefix}/Code"
-    "${configPrefix}/SideQuest"
     "${configPrefix}/1Password"
     "${configPrefix}/1Password/Partitions/1password"
   ];

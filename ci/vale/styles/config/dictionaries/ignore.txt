@@ -1,0 +1,58 @@
+# Vale spelling allow-list for names with no derivable source:
+#   upstream products, services and tools that appear in prose.
+#
+# Names this repository defines are generated into terms.txt instead.
+# Generic programming vocabulary belongs in programmer.txt.
+#
+# Capitalisation is enforced for the entries here: `homebox` in prose is reported as "Use 'Homebox' rather than 'homebox'".
+# Listing a lowercase form as well switches enforcement off for that name.
+
+Alertmanager
+azwallpaper
+Bazarr
+Blueman
+Codeberg
+Dashy
+dconf
+Decky
+devenv
+Floorp
+ForgeSync
+fzf
+Grafana
+greetd
+Gutenprint
+hacompanion
+Homebox
+Hyprland
+Immich
+Jellyfin
+Kanidm
+Lidarr
+mypy
+Navidrome
+Nextcloud
+nixpkgs
+Noctalia
+NVIDIA
+Ollama
+Polkit
+Prowlarr
+Proxmox
+pystemd
+pytest
+Radarr
+Readarr
+ROCm
+Sabnzbd
+SearXNG
+SeaweedFS
+Seerr
+Sonarr
+Stylix
+Tesseract
+tuigreet
+Vencord
+xrdp
+Xwayland
+zstd

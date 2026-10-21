@@ -33,22 +33,32 @@ in
     MINIO_OPTS = "--certs-dir /var/lib/acme/";
   };
 
-  server.proxy.virtualHosts.minio = {
-    aliases = [ "*.minio" ];
-    ports = [
-      9000
-      9001
-    ];
-    extraConfig = ''
-      redir /console /console/
+  server = {
+    proxy.virtualHosts.minio = {
+      aliases = [ "*.minio" ];
+      ports = [
+        9000
+        9001
+      ];
+      extraConfig = ''
+        redir /console /console/
 
-      handle_path /console* {
-        reverse_proxy http://localhost${config.services.minio.consoleAddress}
-      }
+        handle_path /console* {
+          reverse_proxy http://localhost${config.services.minio.consoleAddress}
+        }
 
-      reverse_proxy {
-        to http://localhost${config.services.minio.listenAddress}
-      }
-    '';
+        reverse_proxy {
+          to http://localhost${config.services.minio.listenAddress}
+        }
+      '';
+    };
+
+    monitoring.scrapeConfigs.minio = {
+      port = 443;
+      metrics_path = "/minio/v2/metrics/cluster";
+      scheme = "https";
+      host = "minio.racci.dev";
+      bearer_token_secret = "MONITORING/MINIO_PROMETHEUS_TOKEN";
+    };
   };
 }

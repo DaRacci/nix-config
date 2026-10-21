@@ -2,45 +2,25 @@
 
 Reports system generation changes during NixOS activation.
 
-- **Entry point**: [activation.nix](../../../../../modules/nixos/core/activation.nix)
+## Purpose
 
----
+Provide visibility into what changed between system generations by comparing the previous and newest generation during NixOS activation, so each upgrade shows a readable package and closure diff.
 
-## Overview
+## Entry Point
 
-This module adds activation-time diff reporting with [`nvd`](https://github.com/vlinkz/nvd). During activation it compares previous and new system generations and prints package and closure changes.
+- **Main file**: [activation.nix](../../../../../modules/nixos/core/activation.nix)
 
----
+## Architecture / Services / Scope
 
-## Options
+When enabled, the module installs an activation script (`system.activationScripts.report-changes`) that:
 
-{{#include ../../../../generated/core-activation-options.md}}
-
----
-
-## Behaviour
-
-When enabled, module installs `system.activationScripts.report-changes` that:
-
-- finds previous and newest system profile links under `/nix/var/nix/profiles`,
-- resolves both links to store paths, and
+- locates the previous and newest system profile generations under `/nix/var/nix/profiles`,
+- resolves both links to their store paths, and
 - runs `nvd diff` between them.
 
-If no previous generation exists yet, script does nothing.
+If no previous generation exists yet, the script does nothing.
 
----
+## Operational Notes / Assumptions
 
-## Usage Example
-
-```nix
-{ ... }: {
-  core.activation.enable = true;
-}
-```
-
----
-
-## Operational Notes
-
-- Diff output is informational only. Script ends with `|| true`, so activation does not fail if `nvd diff` returns non-zero.
+- Diff output is informational only; the script tolerates a non-zero `nvd` exit so activation never fails because of a diff error.
 - Default follows top-level `core.enable`, so most hosts get generation diff reporting automatically.

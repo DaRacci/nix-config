@@ -1,46 +1,24 @@
-# Groups
+# Groups — Shared extra group membership for all declared users
 
-Applies shared extra group membership to all declared users.
+## Purpose
 
-- **Entry point**: [default-groups.nix](../../../../../modules/nixos/core/default-groups.nix)
+Provide a single `core.defaultGroups` list that other core modules and hosts use to grant access to subsystems like audio, networking, Docker, printing, and virtualisation, appended to every configured standard user.
 
----
+## Entry Point
 
-## Overview
+- **Main file**: [default-groups.nix](../../../../../modules/nixos/core/default-groups.nix)
 
-This module defines `core.defaultGroups`, shared list of Unix groups appended to every configured standard user. Other core modules use this option to grant access to subsystems like audio, networking, Docker, printing, and virtualisation.
-
----
-
-## Options
+### Options
 
 {{#include ../../../../generated/core-default-groups-options.md}}
 
----
-
-## Behaviour
+## Architecture / Services / Scope
 
 When `core.defaultGroups` is non-empty, module rewrites `users.users` entries so each declared user receives `extraGroups = mkAfter cfg.defaultGroups`.
 
-This means module appends shared groups after any user-specific group configuration instead of replacing it.
+This appends shared groups after any user-specific group configuration instead of replacing it.
 
----
+## Operational Notes / Assumptions
 
-## Usage Example
-
-```nix
-{ ... }: {
-  core.defaultGroups = [
-    "audio"
-    "network"
-    "lp"
-  ];
-}
-```
-
----
-
-## Operational Notes
-
-- This module has no enable flag. It activates whenever `core.defaultGroups` contains values.
+- Module has no enable flag. It activates whenever `core.defaultGroups` contains values.
 - Group assignment applies to every user passed through module argument `users`.

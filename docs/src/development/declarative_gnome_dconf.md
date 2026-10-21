@@ -1,3 +1,5 @@
+# Declarative GNOME DConf
+
 ## Description
 
 When changing GNOME or GNOME extension settings, it is recommended to use dconf2nix and cherry pick its output. This allows for easy configuration using the GUI, but requires copying the settings back into the respective dconf settings in home-manager to save them.

@@ -1,6 +1,5 @@
 {
   config,
-  pkgs,
   lib,
   ...
 }:
@@ -23,6 +22,7 @@ in
       activation.steam-setup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         STEAM="$HOME/.local/share/Steam"
 
+        # Required for DeckyLoader
         CEF_FILE="$STEAM/.cef-enable-remote-debugging"
         if [ ! -f $CEF_FILE ]; then
           touch $CEF_FILE
@@ -42,9 +42,10 @@ in
         done
       '';
 
-      packages = with pkgs; [
-        adwsteamgtk
-      ];
+      file.".local/bin/steamos-session-select" = {
+        executable = true;
+        text = "steam -shutdown";
+      };
     };
 
     systemd.user.tmpfiles.rules = [
@@ -54,20 +55,26 @@ in
     user.persistence = {
       files = [
         ".steam/registry.vdf"
+        ".local/share/BeamNG.drive.ini"
       ];
       directories = [
         ".local/share/Steam"
         ".config/steamtinkerlaunch"
-        ".config/AdwSteamGtk"
 
         # Games
         ".barony"
         ".local/share/Colossal Order/Cities_Skylines"
+        ".local/share/Bay 12 Games/"
         ".config/WarThunder"
         ".config/Gaijin"
         ".config/unity3d/IronGate/Valheim"
         ".config/StardewValley"
         ".factorio"
+
+        # Damn BeamNG you thick as fuck
+        ".local/share/BeamNG"
+        ".local/share/BeamNG.drive"
+        ".local/share/BeamNG.drive.cloud"
       ];
     };
   };

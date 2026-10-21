@@ -39,18 +39,14 @@ in
       iplookup-gtk
       hashes
       wildcard
-      devtoolbox
       d-spy
+      lumen
     ];
 
     programs = {
       direnv = {
         enable = true;
         nix-direnv.enable = true;
-
-        enableBashIntegration = config.programs.bash.enable;
-        enableNushellIntegration = config.programs.nushell.enable;
-        enableZshIntegration = config.programs.zsh.enable;
       };
 
       git = lib.mkIf config.programs.git.enable { ignores = [ ".direnv" ]; };

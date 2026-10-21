@@ -6,17 +6,70 @@ export-env {
   $env.CURRENT_USER = (whoami | str trim)
 }
 
-export def select_host [] {
-  let hosts = flake-eval r#'builtins.attrNames flake.nixosConfigurations |> builtins.concatStringsSep " "'#  --raw
-    | split words
-    | where $it != $env.CURRENT_HOST
+# Get a list of all hosts.
+# Use the --fast switch to estimate the hosts based on fs instead of nix for quicker scans.
+# The current host is left out unless --include-current is passed.
+export def list_hosts [--fast, --include-current] {
+  mut hosts = []
 
-  let selected = ["current", ...($hosts)] | input list -f
+  if $fast {
+    let hosts_dir = ($env.GIT_ROOT | path join "hosts")
+    let host_types = ^find $hosts_dir -mindepth 1 -maxdepth 1 -type d -print | lines;
+    for $host_type in $host_types {
+      let host_type_dir = ($hosts_dir | path join $host_type)
+      let raw_dirs = ^find $host_type_dir -mindepth 1 -maxdepth 1 -type d -print | lines | each { $in | path basename };
+      let host_names = $raw_dirs | where { $in != "shared" } | sort | uniq
+      $hosts = $hosts ++ $host_names
+    }
+  } else {
+    $hosts = flake-eval r#'builtins.attrNames flake.nixosConfigurations |> builtins.concatStringsSep " "'#  --raw
+      | split words
+  }
+
+  if $include_current {
+    $hosts
+  } else {
+    $hosts | where $it != $env.CURRENT_HOST
+  }
+}
+
+export def select_host [--fast] {
+  let hosts = list_hosts --fast=$fast
+  let all_hosts = ["current", ...($hosts)]
+  let selected = $all_hosts | input list -f
   if $selected == "current" {
     $env.CURRENT_HOST
   } else {
     $selected
   }
+}
+
+# Parse flexible args where action and hostname can be in different orders
+# Returns {action: string, hostname: string|null, rest: list<string>}
+# Examples with actions=["build" "switch"] and default_action="switch":
+#   parse-flexible-args [] => {action: "switch", hostname: null, rest: []}
+#   parse-flexible-args ["host1"] => {action: "switch", hostname: "host1", rest: []}
+#   parse-flexible-args ["build" "host1"] => {action: "build", hostname: "host1", rest: []}
+#   parse-flexible-args ["host1" "--flag"] => {action: "switch", hostname: "host1", rest: ["--flag"]}
+export def parse-flexible-args [
+  args: list<string>
+  --valid-actions: list<string> = []
+  --default-action: string = "switch"
+] {
+  if ($args | is-empty) {
+    return {action: $default_action, hostname: null, rest: []}
+  }
+
+  let first = ($args | get 0)
+
+  if ($first in $valid_actions) {
+    let hostname = if ($args | length) > 1 { $args | get 1 } else { null }
+    let rest = if ($args | length) > 2 { $args | skip 2 } else { [] }
+    return {action: $first, hostname: $hostname, rest: $rest}
+  }
+
+  let rest = if ($args | length) > 1 { $args | skip 1 } else { [] }
+  return {action: $default_action, hostname: $first, rest: $rest}
 }
 
 export def select_user [] {

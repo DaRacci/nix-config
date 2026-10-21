@@ -11,5 +11,7 @@
     (importModule ./caddy.nix { })
     (importModule ./postgres.nix { })
     (importModule ./redis.nix { })
+    (importModule ./process.nix { })
+    (importModule ./fail2ban.nix { })
   ];
 }

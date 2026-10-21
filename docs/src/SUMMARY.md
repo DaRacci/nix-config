@@ -13,9 +13,13 @@
 
 - [Adding a new User](development/adding_a_new_user.md)
 - [Adding a new Host](development/adding_a_new_host.md)
+- [Updating SOPS Rules](development/updating_sops.md)
 - [Adding an External Package](development/adding_an_external_package.md)
 - [Declarative Gnome Dconf](development/declarative_gnome_dconf.md)
 - [Using a Package/Module from a Fork](development/using_a_nix_package_or_nixos_module_from_a_separate_fork_of_nixpkgs.md)
+- [Default Development Shell](development/default-development-shell.md)
+- [Python Development Shell](development/python-development-shell.md)
+- [Spelling Lint](development/spelling_lint.md)
 
 # Modules
 
@@ -25,7 +29,6 @@
 
 - [Overview](modules/nixos/overview.md)
 - [Services](modules/nixos/services/default.md)
-  - [AI Agent](modules/nixos/services/ai_agent.md)
   - [Huntress](modules/nixos/services/huntress.md)
   - [MCPO](modules/nixos/services/mcpo.md)
   - [Metrics](modules/nixos/services/metrics.md)
@@ -57,13 +60,20 @@
     - [SeaweedFS Evaluation](modules/nixos/server/storage/seaweedfs.md)
   - [Proxy](modules/nixos/server/proxy.md)
   - [SSH](modules/nixos/server/ssh.md)
+  - [Identity](modules/nixos/server/identity.md)
+  - [Image](modules/nixos/server/image.md)
 - [Flake Allocations](modules/flake/allocations.md)
+- [AI](modules/nixos/ai/overview.md)
+  - [Agents](modules/nixos/ai/agents.md)
+  - [Mnemosyne](modules/nixos/ai/mnemosyne.md)
 
 # Home-Manager Modules
 
 - [DIY & Making](modules/home-manager/diy.md)
 - [AI Editors & Assistants](modules/home-manager/ai.md)
+- [Browser](modules/home-manager/browser.md)
 - [Hyprland](modules/home-manager/hyprland.md)
+- [Hyprland Split-Tree Layout](modules/home-manager/hyprland-split-tree.md)
 - [Profile](modules/home-manager/profile.md)
 - [Programs](modules/home-manager/programs/list_ephemeral.md)
 
@@ -78,6 +88,17 @@
 # Hosts
 
 - [Overview](hosts/overview.md)
+- [Server](hosts/server/overview.md)
+  - [NixAI](hosts/server/nixai.md)
+  - [NixArr](hosts/server/nixarr.md)
+  - [NixAuth](hosts/server/nixauth.md)
+  - [NixCloud](hosts/server/nixcloud.md)
+  - [NixDB](hosts/server/nixdb.md)
+  - [NixDev](hosts/server/nixdev.md)
+  - [NixIO](hosts/server/nixio.md)
+  - [NixMon](hosts/server/nixmon.md)
+  - [NixServ](hosts/server/nixserv.md)
+  - [NixStor](hosts/server/nixstor.md)
 
 # Lib
 

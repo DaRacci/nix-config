@@ -249,3 +249,88 @@ See the proxy extension registry for a complete example:
 - `modules/nixos/server/proxy/extensions/kanidm.nix` — injects `kanidm` option + owns all kanidm logic (auth, globalConfig, provisioning)
 - `modules/nixos/server/proxy/extensions/dashboard.nix` — no vhost options needed
 - `modules/nixos/server/proxy/extensions/cloudflared.nix` — no vhost options needed
+
+## Device-gated options (server-only config in shared modules)
+
+**Problem:** A module loaded on all device types sets options that only exist on servers (e.g. `server.proxy.virtualHosts`). `mkIf` does **not** help — the NixOS module system resolves the attribute path in the definition body even when the condition is false. On a desktop, `server.proxy` doesn't exist → evaluation fails.
+
+### Pattern: `imports` gated on `deviceType` specialArg
+
+`mkSystem` passes `deviceType` via `specialArgs` (like `importExternals`), so it is available at module level without touching `config` — no circular dependency.
+
+1. Accept `deviceType` in the module's function parameters.
+2. Gate the device-specific submodule in `imports`.
+3. The submodule can use `mkIf` normally since it only loads on matching device types.
+
+```nix
+# modules/nixos/ai/services/mnemosyne.nix
+{
+  config,
+  pkgs,
+  lib,
+  deviceType ? null,
+  ...
+}:
+{
+  imports = lib.optionals (deviceType == "server") [ ./mnemosyne-caddy.nix ];
+  ...
+}
+```
+
+```nix
+# The standalone submodule (mnemosyne-caddy.nix)
+{
+  config,
+  lib,
+  ...
+}:
+let
+  cfg = config.services.mnemosyne;
+in
+lib.mkIf (cfg.enable && cfg.caddy.enable) {
+  server.proxy.virtualHosts = lib.mkMerge [ ... ];
+}
+```
+
+```nix
+# lib/builders/mkSystem.nix — deviceType passed as specialArg
+specialArgs = {
+  inherit deviceType;
+  ...
+};
+```
+
+### Why not `imports` + `config`?
+
+```nix
+# Fails: infinite recursion
+{
+  config, ...
+}: {
+  imports = lib.optionals (config.host.device.role == "server") [ ./caddy.nix ];
+}
+```
+
+Reading `config` inside a module's `imports` creates a circular dependency:
+`config` needs all imports resolved first, but the import list depends on `config`.
+`deviceType` from `specialArgs` avoids this — it's a plain value, not a thunk into `config`.
+
+### When to use this pattern
+
+- Your module defines `config` that references options from a device-type-specific namespace (`server.*`, `hardware.*`)
+- The module is loaded via `attrValues allModules` (all device types)
+- Those options don't exist on other device types
+
+### Alternative: stub the option
+
+If the device-gated config is small, declare a stub option in a core module that always loads:
+
+```nix
+# modules/nixos/core/default.nix
+options.server.proxy.virtualHosts = lib.mkOption {
+  type = lib.types.attrsOf lib.types.anything;
+  default = { };
+};
+```
+
+Then `mkIf` works normally. Downside: pollutes the option namespace on non-server hosts, and the stub type might accept invalid config silently. Prefer the `imports` + `deviceType` pattern for anything non-trivial.

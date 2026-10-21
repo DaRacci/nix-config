@@ -37,7 +37,7 @@ in
     };
 
     mcpo = {
-      enable = true;
+      enable = false;
       extraPackages = with pkgs; [
         git
         diffutils

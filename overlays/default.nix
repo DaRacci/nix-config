@@ -48,10 +48,80 @@ in
       })
     ])
     // {
-      mcpo = prev.python3Packages.callPackage inputs.mcpo { };
+      mcpo = (prev.python3Packages.callPackage inputs.mcpo { }).overridePythonAttrs (old: {
+        patches = (old.patches or [ ]) ++ [
+          ./patches/mcpo-union-repr-compat.patch
+        ];
+      });
+
+      hermes-agent =
+        let
+          lock = builtins.fromJSON (builtins.readFile ../flake/nixos/flake.lock);
+          haLocked = lock.nodes.hermes-agent.locked;
+          haFlake = builtins.getFlake "github:${haLocked.owner}/${haLocked.repo}/${haLocked.rev}";
+          hermesAgentSrc = prev.applyPatches {
+            name = "hermes-agent-patched";
+            src = haFlake.outPath;
+            patches = [
+              # TODO:https://github.com/NousResearch/hermes-agent/pull/87820
+              ./patches/hermes-agent-desktop-renderer-typecheck-isolation.patch
+              # TODO:https://github.com/NousResearch/hermes-agent/pull/93896
+              ./patches/hermes-agent-home-aware-managed.patch
+            ];
+          };
+          # The release tag is date-style (v2026.9.24) and hermes_cli/__init__.py
+          # hardcodes the same date. Upstream's nix/packages.nix leaves the version
+          # at its "0.0.0" default, which blocks plugin installers that enforce a
+          # minimum Hermes version, so read it from the flake source. The patched
+          # tree cannot be used: applyPatches is a derivation, and readFile cannot
+          # force a build.
+          hermesVersion =
+            let
+              initPath = haFlake.outPath + "/hermes_cli/__init__.py";
+              initPy = builtins.readFile initPath;
+              initLines = lib.splitString "\n" initPy;
+              dateLine = lib.findFirst (line: lib.hasPrefix "__release_date__" line) "" initLines;
+              parsed = builtins.match ''[^"]*"([^"]*)".*'' dateLine;
+            in
+            if parsed == null then
+              throw "hermes-agent: no __release_date__ in hermes_cli/__init__.py"
+            else
+              builtins.head parsed;
+        in
+        final.callPackage (hermesAgentSrc + "/nix/hermes-agent.nix") {
+          uv2nix = haFlake.inputs.uv2nix;
+          pyproject-nix = haFlake.inputs.pyproject-nix;
+          pyproject-build-systems = haFlake.inputs.pyproject-build-systems;
+          npm-lockfile-fix =
+            haFlake.inputs.npm-lockfile-fix.packages.${final.stdenv.hostPlatform.system}.default;
+          rev = haLocked.rev or null;
+          version = hermesVersion;
+        };
 
       lm_sensors-perlless = prev.lm_sensors.overrideAttrs (oldAttrs: {
         buildInputs = oldAttrs.buildInputs |> (lib.remove prev.perl);
+      });
+
+      fastembed-hermes = final.hermes-agent.python.pkgs.fastembed.overridePythonAttrs (old: {
+        dependencies = builtins.filter (
+          dep:
+          let
+            name = lib.getName dep;
+          in
+          # Hermes uv2nix env already has these deps and complains about colisions.
+          !(builtins.any (n: lib.hasInfix n name) [
+            "huggingface-hub"
+            "numpy"
+            "onnxruntime"
+            "pillow"
+            "requests"
+            "snowballstemmer"
+            "tokenizers"
+            "tqdm"
+          ])
+        ) old.dependencies;
+        dontCheckRuntimeDeps = true;
+        pythonImportsCheck = [ ];
       });
     };
 
@@ -66,8 +136,7 @@ in
 
     discord = prev.discord.override {
       withOpenASAR = true;
-      # withVencord = true;
-      nss = final.nss_latest;
+      withVencord = true;
     };
 
     bottles = prev.bottles.override {
@@ -89,16 +158,13 @@ in
     });
 
     kernelPackagesExtensions = prev.kernelPackagesExtensions ++ [
-      (_self: super: {
-        #TODO:Remove once nixpkgs kernel-zen is updated to 7.1 which includes the fix i wanted.
-        universal-pidff = super.universal-pidff.overrideAttrs (_old: {
-          version = "unstable-2026-06-02";
-          src = prev.fetchFromGitHub {
-            owner = "JacKeTUs";
-            repo = "universal-pidff";
-            rev = "595c65bb23ad824cb6d8dedb1d74123f622de1cc";
-            hash = "sha256-0eXrCZSHrD5OkrqeYMcuV20us2Hl6d48dIvrZi/GY8c=";
-          };
+      (_self: _super: { })
+    ];
+
+    pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+      (_python-final: python-prev: {
+        inline-snapshot = python-prev.inline-snapshot.overridePythonAttrs (_: {
+          doCheck = false;
         });
       })
     ];
@@ -106,21 +172,41 @@ in
     inherit lib;
   };
 
-  electronFixes =
+  electronCudaFixes =
     _: prev:
     lib.optionalAttrs prev.config.cudaSupport (
-      prev.lib.pipe
-        [ "vscode" "obsidian" ]
-        [
-          (map (
-            name:
-            prev.lib.nameValuePair name (
-              prev.${name}.override {
-                commandLineArgs = "--disable-gpu-compositing --enable-features=WebRTCPipeWireCapturer";
-              }
-            )
-          ))
-          prev.lib.listToAttrs
-        ]
+      [
+        "vscode"
+        "obsidian"
+      ]
+      |> map (
+        name:
+        prev.lib.nameValuePair name (
+          prev.${name}.override {
+            commandLineArgs = "--disable-gpu-compositing --enable-features=WebRTCPipeWireCapturer";
+          }
+        )
+      )
+      |> prev.lib.listToAttrs
     );
+
+  # Fucking shit ass electron bullshit password store.
+  # Only selects gnome-libsecret if running from a set of hardcoded sessions, dumb fucking shit.
+  # Honestly who the fuck thought that was a good detection method for a password store, and why the fuck is it even a thing in 2026.
+  electronPasswordStoreFixes =
+    _: prev:
+    [
+      "vscode"
+      "obsidian"
+      "hermes-desktop"
+    ]
+    |> map (
+      name:
+      prev.lib.nameValuePair name (
+        prev.${name}.override {
+          commandLineArgs = "--password-store=gnome-libsecret";
+        }
+      )
+    )
+    |> prev.lib.listToAttrs;
 }

@@ -1,62 +1,9 @@
 { pkgs, lib, ... }:
 let
+  inherit (lib) getExe;
+
   SSH_AUTH_SOCK = "/home/racci/.ssh/wsl-ssh-agent.sock";
-  RELAY_SCRIPT = pkgs.writeShellScriptBin "ssh-relay" ''
-    function start() {
-      if [[ -S ${SSH_AUTH_SOCK} ]]; then
-        echo "removing previous socket..."
-        rm ${SSH_AUTH_SOCK}
-      fi
-      echo "Starting SSH-Agent relay..."
-      (setsid ${lib.getExe pkgs.socat} UNIX-LISTEN:${SSH_AUTH_SOCK},fork EXEC:"/home/racci/.local/bin/npiperelay.exe -ei -s //./pipe/openssh-ssh-agent",nofork &) >/dev/null 2>&1
-    }
-
-    function stop() {
-      echo "Stopping SSH-Agent relay..."
-      if [[ -S ${SSH_AUTH_SOCK} ]]; then
-        rm ${SSH_AUTH_SOCK}
-      fi
-    }
-
-    function status() {
-      if [[ -S ${SSH_AUTH_SOCK} ]]; then
-        if pgrep -fx "^${lib.getExe pkgs.socat}\s.+" >/dev/null; then
-            local res
-            echo "Polling remote ssh-agent..."
-            SSH_AUTH_SOCK="${SSH_AUTH_SOCK}" ssh-add -L >/dev/null 2>&1
-            res=$?
-            if [[ "''${res}" -ge 2 ]]; then
-              "[''${res}] Failure communicating with ssh-agent"
-              exit 1
-            fi
-          if SSH_AUTH_SOCK=${SSH_AUTH_SOCK} ssh-add -L >/dev/null 2>&1; then
-            echo "SSH-Agent relay is running and working."
-          else
-            echo "SSH-Agent relay is running but not working."
-          fi
-        else
-          echo "SSH-Agent relay is not running."
-        fi
-      else
-        echo "SSH-Agent relay is not running."
-      fi
-    }
-
-    case "$1" in
-      start)
-        start
-        ;;
-      stop)
-        stop
-        ;;
-      status)
-        status
-        ;;
-      *)
-        echo "Usage: ssh-relay [start|stop|status]"
-        ;;
-    esac
-  '';
+  sshRelay = getExe pkgs.ssh-relay;
 in
 {
   imports = [
@@ -69,7 +16,7 @@ in
   home = {
     file.".local/bin/ssh-relay" = {
       executable = true;
-      source = lib.getExe RELAY_SCRIPT;
+      source = sshRelay;
     };
   };
 
@@ -102,10 +49,13 @@ in
     Service = {
       Type = "oneshot";
       RemainAfterExit = true;
-      PassEnvironment = [ "SSH_AUTH_SOCK" ];
-      ExecStart = "${lib.getExe RELAY_SCRIPT} start";
-      ExecStop = "${lib.getExe RELAY_SCRIPT} stop";
-      ExecStatus = "${lib.getExe RELAY_SCRIPT} status";
+      Environment = [
+        "SSH_RELAY_SOCKET_PATH=${SSH_AUTH_SOCK}"
+        "SSH_RELAY_TARGET_COMMAND=/home/racci/.local/bin/npiperelay.exe -ei -s //./pipe/openssh-ssh-agent"
+      ];
+      ExecStart = "${sshRelay} start";
+      ExecStop = "${sshRelay} stop";
+      ExecStatus = "${sshRelay} status";
     };
 
     Install = {

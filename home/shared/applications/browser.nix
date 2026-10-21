@@ -26,6 +26,26 @@ let
       // args
     );
   mkSimpleExtension = shortId: guid: mkExtension shortId guid { };
+
+  # FF Ultima 5 ships an AutoConfig bootstrap that must live in the browser installation directory.
+  # That directory is read-only in the Nix store, so it is injected through the wrapper instead,
+  # and the AutoConfig sandbox is disabled so the userChromeJS bootstrap can run.
+  withUltimaAutoConfig =
+    pkg:
+    (pkg.override {
+      extraPrefsFiles = [ (inputs.firefox-ultima + "/userchromejs/firefox/config.js") ];
+    }).overrideAttrs
+      (old: {
+        buildCommand = ''
+          ${old.buildCommand}
+
+          for pref in "$out"/lib/*/defaults/pref/autoconfig.js; do
+            if [ -f "$pref" ]; then
+              echo 'pref("general.config.sandbox_enabled", false);' >> "$pref"
+            fi
+          done
+        '';
+      });
 in
 {
   home = {
@@ -43,9 +63,20 @@ in
       source = inputs.firefox-ultima;
     };
 
+    # userChromeJS resolves its assets from `userchromejs/` at the chrome root.
+    file."firefox-ultima-userchromejs" = {
+      target = ".mozilla/firefox/${config.home.username}/chrome/userchromejs";
+      source = inputs.firefox-ultima + "/userchromejs";
+    };
+
     file."firefox-ultima-floorp" = {
       target = ".floorp/${config.home.username}/chrome/firefox-ultima";
       source = inputs.firefox-ultima;
+    };
+
+    file."firefox-ultima-floorp-userchromejs" = {
+      target = ".floorp/${config.home.username}/chrome/userchromejs";
+      source = inputs.firefox-ultima + "/userchromejs";
     };
   };
 
@@ -59,7 +90,8 @@ in
   programs = rec {
     firefox = {
       enable = true;
-      package = pkgs.firefox;
+      package = withUltimaAutoConfig pkgs.firefox;
+      configPath = ".mozilla/firefox";
 
       languagePacks = [
         "en-GB"
@@ -98,6 +130,10 @@ in
                 [
                   "darkreader"
                   "addon@darkreader.org"
+                ]
+                [
+                  "userchrome-companion"
+                  "userChromeCompanion@soulhotel.net"
                 ]
                 [
                   "sidebery"
@@ -408,52 +444,32 @@ in
           @import "firefox-ultima/userContent.css";
         '';
 
-        # We always want to load the user.js file because if its being updated, there are sometimes breaking changes that need it reapplied.
-        # We then load our settings which will override the user.js defaults.
-        extraConfig = ''
-          ${builtins.readFile "${inputs.firefox-ultima}/user.js"}
+        # FF Ultima 5 manages its settings through about:config preferences
+        # (toggled by the userChrome Companion extension).
+        settings = {
+          "browser.tabs.loadInBackground" = true;
+          "widget.gtk.rounded-bottom-corners.enabled" = true;
+          "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+          "svg.context-properties.content.enabled" = true;
+          "dom.event.clipboardevents.enabled" = true;
 
-          // This must be done manually so they are placed after the after user.js defaults.
-          // Using the settings option will place them before the defaults.
-          ${
-            let
-              # Copied from https://github.com/nix-community/home-manager/blob/2f23fa308a7c067e52dfcc30a0758f47043ec176/modules/programs/firefox.nix#L57-L61
-              userPrefValue =
-                pref:
-                builtins.toJSON (if isBool pref || isInt pref || isString pref then pref else builtins.toJSON pref);
+          # Ultima
+          "ultima.enable.js.config" = true;
 
-              settings = {
-                "browser.tabs.loadInBackground" = true;
-                "widget.gtk.rounded-bottom-corners.enabled" = true;
-                "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
-                "svg.context-properties.content.enabled" = true;
-                "dom.event.clipboardevents.enabled" = true;
+          # Sidebery drives the tab bar, so hide Firefox's own.
+          "ultima.tabs.hide-for-sidebery" = true;
+          "ultima.sidebery.autohide" = true;
 
-                # Ultima
-                "ultima.OS.gnome" = true;
-                "ultima.OS.gnome.wdl" = true;
-                "ultima.OS.kde" = false;
-                "ultima.disable.alltabs.button" = true;
-                "ultima.disable.windowcontrols.button" = true;
-                "ultima.sidebery.autohide" = true;
+          "ultima.hide.titlebar-buttons" = true;
+          "ultima.tabs.disable.all-tabs-button" = true;
 
-                # Completely disable built-in vertical bar
-                "ultima.tabs.tabbar.disabled" = true;
+          "ultima.urlbar.hide.buttons" = true;
+          "ultima.urlbar.text-centered" = true;
 
-                "ultima.urlbar.hide.buttons" = true;
-                "ultima.urlbar.centered" = true;
-                "ultima.theme.extensions" = true;
-                "ultima.theme.menubar" = true;
-                "ultima.enable.js.config" = true;
-              };
-            in
-            concatStrings (
-              mapAttrsToList (name: value: ''
-                user_pref("${name}", ${userPrefValue value});
-              '') settings
-            )
-          }
-        '';
+          "ultima.extension.theme.ucc" = true;
+          "ultima.extension.theme.ublock" = true;
+          "ultima.extension.theme.sidebery" = true;
+        };
 
         search = {
           default = "ddg";
@@ -550,6 +566,7 @@ in
 
     floorp = {
       enable = true;
+      package = withUltimaAutoConfig pkgs.floorp-bin;
       inherit (firefox) languagePacks policies profiles;
     };
   };

@@ -6,6 +6,7 @@
     ./automation.nix
     ./ci.nix
     ./coder.nix
+    ./forgesync.nix
     ./registry.nix
     ./woodpecker.nix
   ];

@@ -1,0 +1,51 @@
+# Programming and technical vocabulary for the AU-English spelling lint.
+#
+# Only terms that neither en_AU-large nor the generated tech dictionary cover.
+# The bulk of ordinary programming vocabulary lives in tech.dic,
+# which is built from a fixed subset of the cspell wordlists by ci/vale/install-dictionaries.sh.
+# Project, host, package and service names belong in ignore.txt.
+
+accel
+acls
+async
+attrset
+autologin
+backtick
+backticks
+bootable
+declaratively
+gpus
+hostnames
+htpasswd
+input's
+keybind
+keybinds
+lifecycle
+multiline
+natively
+oauth
+oneshot
+passthrough
+passwordless
+prerouting
+ps
+repr
+revisioned
+rfkill
+sandboxed
+screencopy
+snake_case
+stdlib
+submap
+submaps
+subnet
+subnets
+substituters
+tailnet
+tileable
+tty
+uis
+undrain
+vhost
+vhost's
+virtualenv

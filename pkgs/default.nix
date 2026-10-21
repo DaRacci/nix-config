@@ -4,6 +4,12 @@
   lib,
   ...
 }:
+let
+  # Hermes requires plugins to be compiled in the same python version.
+  # hermes-agent exposes the interpreter it was built with (pm/lock.json), so
+  # take the plugin packages from that set rather than a hardcoded python3NNPackages.
+  hermesPythonVersion = pkgs.hermes-agent.python.pkgs;
+in
 {
   # VR Stuff
   alvr-bin = pkgs.callPackage ./alvr-bin { };
@@ -21,12 +27,21 @@
   wyoming-transcribe-client = pkgs.callPackage ./wyoming-transcribe-client { };
 
   # Misc
-  orca-slicer-zink = pkgs.callPackage ./orca-slicer-zink { };
   huntress = pkgs.callPackage ./huntress { };
   drive-stats = pkgs.callPackage ./drive-stats { };
   lidarr-plugins = pkgs.callPackage ./lidarr-plugins { };
   hypr-gamemode = pkgs.callPackage ./hypr-gamemode { };
   uvtools = pkgs.callPackage ./uvtools { };
+  split-tree-overlay = pkgs.callPackage ./split-tree-overlay { };
+
+  # Hermes Agent Python Plugins
+  mnemosyne-memory = hermesPythonVersion.callPackage ./python/mnemosyne-memory.nix { };
+  mnemosyne-hermes = hermesPythonVersion.callPackage ./python/mnemosyne-hermes.nix { };
+  mnemosyne-memory-all = pkgs.mnemosyne-memory.overridePythonAttrs (old: {
+    dependencies = lib.unique (old.dependencies ++ old.passthru.optional-dependencies.all);
+  });
+  rtk-hermes = hermesPythonVersion.callPackage ./python/rtk-hermes.nix { };
+  hermes-curator-evolver = hermesPythonVersion.callPackage ./python/hermes-curator-evolver.nix { };
 
   # Home Assistant Python Packages
   terminal-manager = pkgs.python3Packages.callPackage ./python/terminal-manager.nix { };
@@ -37,7 +52,21 @@
   # Scripts n stuff
   new-host = pkgs.callPackage ./helpers/new-host.nix { };
   list-ephemeral = pkgs.callPackage ./list-ephemeral { };
-  inherit (pkgs.callPackage ./scripts { inherit lib; }) folder-diff image-compressor;
+  inherit (pkgs.callPackage ./scripts { inherit lib; })
+    colour-picker
+    folder-diff
+    compressor
+    ocr-region
+    orca-slicer-git-sync
+    screenshot
+    ssh-relay
+    ssh-to-age-keys
+    sunshine-tools
+    swfs-mount-hooks
+    virtualisation-tools
+    wait-for-io-tools
+    wlprop
+    ;
 
   # NixIO Guardian
   inherit (pkgs.callPackage ./io-guardian { }) io-guardian-server io-guardian-client;
@@ -54,4 +83,7 @@
 
   jj-desc = pkgs.callPackage ./jj-desc { };
   jj-pre-push = pkgs.python3Packages.callPackage ./jj-pre-push { };
+
+  # Hermes Desktop — routes through overlay for node-headers hash fix
+  hermes-desktop = pkgs.hermes-agent.hermesDesktop;
 }
