@@ -1,5 +1,4 @@
 {
-  self,
   outputs,
   config,
   pkgs,
@@ -7,10 +6,11 @@
   ...
 }:
 let
+  inherit (lib) mkOption types literalExpression;
+  inherit (types) str;
+
   cfg = config.user;
   hostnames = builtins.attrNames outputs.nixosConfigurations;
-
-  userPublicKey = builtins.readFile "${self}/home/${config.home.username}/id_ed25519.pub";
 in
 {
   imports = [
@@ -20,12 +20,11 @@ in
   ];
 
   options.user = {
-    sshSocket = lib.mkOption {
-      type = lib.types.str;
+    sshSocket = mkOption {
+      type = str;
       default = "/home/${config.home.username}/.1password/agent.sock";
-      defaultText = lib.literalExpression ''"/home/${config.home.username}/.1password/agent.sock"'';
+      defaultText = literalExpression ''"/home/${config.home.username}/.1password/agent.sock"'';
     };
-
   };
 
   config = {
@@ -51,18 +50,6 @@ in
             IdentityAgent = cfg.sshSocket;
           };
         };
-      };
-
-      git.settings = {
-        gpg.ssh.allowedSignersFile =
-          (pkgs.writeTextFile {
-            name = "allowed-signers";
-            text = pkgs.lib.concatStringsSep "\n" [
-              "${config.programs.git.settings.user.email} ${userPublicKey}"
-            ];
-          }).outPath;
-
-        signing.key = userPublicKey;
       };
     };
 

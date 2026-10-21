@@ -40,7 +40,6 @@ in
       hashes
       wildcard
       d-spy
-      lumen
     ];
 
     programs = {
@@ -49,7 +48,7 @@ in
         nix-direnv.enable = true;
       };
 
-      git = lib.mkIf config.programs.git.enable { ignores = [ ".direnv" ]; };
+      git.ignores = [ ".direnv" ];
     };
 
     xdg.configFile."act/actrc".text = ''
@@ -67,6 +66,7 @@ in
     user.persistence.directories = [
       "Projects"
 
+      ".terraform.d"
       ".local/share/direnv"
 
       # JetBrains IDEs

@@ -4,8 +4,6 @@
   ...
 }:
 {
-  imports = [ ./features/cli ];
-
   home.packages = [
     inputs.nix-alien.packages.${pkgs.stdenv.hostPlatform.system}.nix-alien
   ];
@@ -34,6 +32,15 @@
       autoconnect = [ "qemu:///system" ];
     };
   };
+
+  programs.gh-dash.settings.repoPaths = {
+    "DaRacci/nix-config" = "/persist/nix-config";
+    "DaRacci/*" = "~/Projects/Coding/*";
+    "AMTSupport/*" = "~/Projects/Coding/AMT/*";
+    "NixOS/*" = "~/Projects/Coding/nix/*";
+  };
+
+  purpose.development.vcs.user.email = "me@racci.dev";
 
   user.persistence.directories = [ ".config/goa-1.0" ];
 
