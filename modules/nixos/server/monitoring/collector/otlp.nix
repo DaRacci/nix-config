@@ -57,7 +57,7 @@ in
             ''
               otelcol.exporter.otlphttp "tempo" {
                 client {
-                  url = "http://127.0.0.1:${toString cfg.collector.tempo.otlpPort}"
+                  endpoint = "http://127.0.0.1:${toString cfg.collector.tempo.otlpPort}"
                 }
               }
             ''
