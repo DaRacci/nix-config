@@ -57,6 +57,11 @@ import ./mkLanguage.nix {
     {
       name = "ktlint";
       package = pkgs.ktlint;
+      args = [
+        "--format"
+        "--stdin"
+        "--log-level=none"
+      ];
       languages = [ "kotlin" ];
       filetypes = [
         ".kt"
