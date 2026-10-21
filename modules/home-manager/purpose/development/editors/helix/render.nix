@@ -53,12 +53,13 @@ let
       languageFormatters = filter (
         descriptor: builtins.elem language (helixLanguages descriptor)
       ) formatters;
+      languageServers = filter (descriptor: builtins.elem language (helixLanguages descriptor)) lsp;
     in
     {
       name = language;
-      "language-servers" = map (descriptor: descriptor.name) (
-        filter (descriptor: builtins.elem language (helixLanguages descriptor)) lsp
-      );
+    }
+    // optionalAttrs (languageServers != [ ]) {
+      "language-servers" = map (descriptor: descriptor.name) languageServers;
     }
     // optionalAttrs (languageFormatters != [ ]) {
       auto-format = true;
