@@ -23,6 +23,12 @@ let
       }
       // optionalAttrs (descriptor.filetypes != [ ]) {
         extensions = descriptor.filetypes;
+      }
+      // optionalAttrs (descriptor.env != { }) {
+        env = descriptor.env;
+      }
+      // optionalAttrs (descriptor.initializationOptions != { }) {
+        initialization = descriptor.initializationOptions;
       };
     in
     recursiveUpdate generated (descriptor.editors.opencode or { });
