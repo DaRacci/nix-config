@@ -128,8 +128,7 @@ in
         else
           (
             let
-              pkgName = "tree-sitter-grammars.tree-sitter-${name}";
-              pkg = pkgs.${pkgName} or null;
+              pkg = pkgs.tree-sitter-grammars.${"tree-sitter-${name}"} or null;
             in
             optional (pkg != null) pkg
           );
