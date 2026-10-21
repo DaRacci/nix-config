@@ -41,7 +41,6 @@ in
       "emSign ECC Root CA - C3"
     ];
 
-
     security = {
       lockKernelModules = false;
       protectKernelImage = true;

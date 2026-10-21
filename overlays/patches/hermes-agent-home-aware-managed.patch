@@ -6,8 +6,8 @@ index d7e5b8a9951f..7c3c95d9fb0b 100644
  # Explicit opt-out (``HERMES_MANAGED=false``): without this a bool-shaped value became a package
  # manager literally named "false" and is_managed() blocked `hermes update` (#12864).
  _MANAGED_FALSE_VALUES = frozenset({"false", "0", "no", "off"})
- 
- 
+
+
 +def _resolve_managed_marker(home: Path) -> str | None:
 +    """Return managed marker for specific Hermes home, or ``None``."""
 +    managed_marker = home / ".managed"
@@ -31,7 +31,7 @@ index d7e5b8a9951f..7c3c95d9fb0b 100644
 +    ``config.yaml``, not per-profile configs, so a profile without its own
 +    ``.managed`` marker must remain user-writable even when the global install is
 +    managed.
- 
+
      ``home`` names the home whose marker file is read, for callers that already resolved it
      (:func:`get_scratch_dir` at boot, before ``--profile`` re-homes the process).
      Defaults to the effective home."""
