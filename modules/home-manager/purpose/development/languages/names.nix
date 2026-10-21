@@ -27,7 +27,7 @@
   };
   docker-compose = {
     zed = "Docker Compose";
-    helix = "yaml";
+    helix = "docker-compose";
   };
   dockerfile = {
     zed = "Dockerfile";
