@@ -75,6 +75,13 @@ in
     {
       sops.secrets."IO_GUARDIAN_PSK" = {
         sopsFile = "${self}/hosts/server/secrets.yaml";
+        # Restart whichever side of the guardian owns the PSK on this host.
+        # sops-nix uses try-restart, which errors on units that do not exist, so only list units this host actually defines.
+        restartUnits =
+          optional (!isThisIOPrimaryHost && thisHostHasDatabaseDependencies) "io-guardian.service"
+          ++ optional (
+            isThisIOPrimaryHost && (builtins.length serversWithDatabases) > 0
+          ) "io-database-coordinator.service";
       };
     }
 
@@ -99,7 +106,12 @@ in
           "wait-for-io-databases.service"
         ];
         wants = [ "network-online.target" ];
-        wantedBy = [ "multi-user.target" ]; # Start at boot
+        # Start at boot, and again whenever the readiness check restarts.
+        # bindsTo stops this target when the check stops, so without the second wantedBy a restarted check would leave the target down.
+        wantedBy = [
+          "multi-user.target"
+          "wait-for-io-databases.service"
+        ];
         bindsTo = [ "wait-for-io-databases.service" ];
         partOf = [ "multi-user.target" ];
         requiredBy = cfg.dependentServices;
@@ -165,7 +177,6 @@ in
             ];
             wants = [ "network-online.target" ];
             requires = [ "wait-for-io.service" ];
-            requiredBy = [ "io-databases.target" ];
             path = [
               pkgs.toybox
             ]
@@ -194,13 +205,23 @@ in
           ];
           bindsTo = after;
           partOf = bindsTo;
-          wantedBy = [ "multi-user.target" ];
+          # bindsTo/partOf only propagate stop and restart.
+          # Start the coordinator again whenever either database starts,
+          # otherwise a database restart leaves it dead and clients stay drained.
+          wantedBy = [
+            "multi-user.target"
+            "postgresql.service"
+            "redis.service"
+          ];
 
           environment.GUARDIAN_PORT = toString guardianPort;
 
           serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = true;
+            Restart = "on-failure";
+            RestartSec = "30s";
+            TimeoutStartSec = "120s";
             TimeoutStopSec = "90s";
             LoadCredential = [ "psk:${config.sops.secrets."IO_GUARDIAN_PSK".path}" ];
 
@@ -208,7 +229,8 @@ in
               ${getExe pkgs.io-guardian-client} \
                 --action undrain \
                 --hosts ${concatStringsSep "," serversWithDatabases} \
-                --psk-file %d/psk
+                --psk-file %d/psk \
+                --fail-fast
             '';
 
             ExecStop = ''
@@ -218,6 +240,44 @@ in
                 --psk-file %d/psk
             '';
           };
+        };
+
+        # Re-assert the desired state while the coordinator is active.
+        # The initial undrain can be missed by a client that boots late,
+        # or by a target that stops after the coordinator already went active.
+        io-database-coordinator-reconcile = {
+          description = "Re-assert database availability to guardian clients";
+          bindsTo = [ "io-database-coordinator.service" ];
+          after = [ "io-database-coordinator.service" ];
+
+          environment.GUARDIAN_PORT = toString guardianPort;
+
+          serviceConfig = {
+            Type = "oneshot";
+            TimeoutStartSec = "120s";
+            LoadCredential = [ "psk:${config.sops.secrets."IO_GUARDIAN_PSK".path}" ];
+
+            ExecStart = ''
+              ${getExe pkgs.io-guardian-client} \
+                --action undrain \
+                --hosts ${concatStringsSep "," serversWithDatabases} \
+                --psk-file %d/psk \
+                --fail-fast
+            '';
+          };
+        };
+      };
+
+      systemd.timers.io-database-coordinator-reconcile = {
+        description = "Periodically re-assert database availability to guardian clients";
+        # Start and stop with the coordinator so an intentional drain is not undone by the reconciliation loop.
+        wantedBy = [ "io-database-coordinator.service" ];
+        partOf = [ "io-database-coordinator.service" ];
+        after = [ "io-database-coordinator.service" ];
+
+        timerConfig = {
+          OnActiveSec = "5min";
+          OnUnitActiveSec = "5min";
         };
       };
     })

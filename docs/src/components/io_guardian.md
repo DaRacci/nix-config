@@ -35,6 +35,7 @@ The system consists of two components:
 1. The `db-databases.target` is now ready to be activated
 1. When the Database Coordinator's `db-database-coordinator.service` starts, it sends `undrain` to all clients
 1. Clients start `db-databases.target`, which starts all dependent services
+1. If any client is unreachable, the coordinator fails and retries every 30 seconds until every client acknowledges the `undrain`
 
 #### Database Shutdown (Graceful Drain)
 
@@ -44,6 +45,10 @@ The system consists of two components:
 1. Guardian servers stop `db-databases.target`
 1. Dependent services stop gracefully before databases go down
 
+`db-database-coordinator.service` is bound to PostgreSQL and Redis.
+A database stop or restart therefore stops the coordinator and triggers the drain.
+The coordinator is started again whenever either database starts, so a database restart cannot leave clients drained indefinitely.
+
 #### Database Startup (Undrain)
 
 1. When databases come online on the Database Coordinator
@@ -51,6 +56,22 @@ The system consists of two components:
 1. It sends `undrain` command to all guardian servers
 1. Guardian servers start `db-databases.target`
 1. All dependent services start
+
+If a guardian server is not reachable yet, the coordinator exits non-zero and systemd retries it every 30 seconds.
+This closes the race where a client boots slower than the coordinator and would otherwise stay drained.
+
+#### Reconciliation
+
+While `db-database-coordinator.service` is active, `db-database-coordinator-reconcile.timer` re-sends `undrain` every 5 minutes.
+The command is idempotent, so clients that are already undrained are unaffected.
+
+This covers failures that happen after the initial undrain succeeded:
+
+- A client boots while the databases are down, so its readiness check times out and its target fails. When the databases return, the next reconciliation starts the target again.
+- A client's readiness check is restarted and fails, stopping the target. The next reconciliation starts it again.
+- A client's target is stopped for any other reason while the coordinator is active.
+
+The timer is started and stopped with the coordinator. An intentional drain stops the coordinator, which stops the timer, so reconciliation cannot undo the drain. If a reconciliation run fails, the timer retries at the next interval.
 
 ### Systemd Units
 
@@ -62,11 +83,16 @@ The system consists of two components:
 | `db-databases.target`           | target  | Represents "databases are online"       |
 | `wait-for-db-databases.service` | oneshot | Waits for databases at boot (runs once) |
 
+The target is bound to `wait-for-db-databases.service` and is also wanted by it.
+Restarting the readiness check therefore restarts the target instead of leaving it inactive.
+
 #### On the Database Coordinator
 
-| Unit                              | Type    | Description                           |
-| --------------------------------- | ------- | ------------------------------------- |
-| `db-database-coordinator.service` | oneshot | Sends undrain on start, drain on stop |
+| Unit                                        | Type    | Description                                                         |
+| ------------------------------------------- | ------- | ------------------------------------------------------------------- |
+| `db-database-coordinator.service`           | oneshot | Sends undrain on start, drain on stop; retries failed undrains      |
+| `db-database-coordinator-reconcile.service` | oneshot | Re-sends undrain to all clients                                     |
+| `db-database-coordinator-reconcile.timer`   | timer   | Runs reconciliation every 5 minutes while the coordinator is active |
 
 ### Protocol Reference
 
@@ -107,9 +133,9 @@ All WebSocket connections must authenticate with this key before commands are ac
 
 ### Declared secrets
 
-| Secret key        | Owner | Group | Restart unit        | Purpose                                |
-| ----------------- | ----- | ----- | ------------------- | -------------------------------------- |
-| `DB_GUARDIAN_PSK` | root  | root  | db-guardian.service | Authenticate DB Guardian WebSocket API |
+| Secret key        | Owner | Group | Restart unit                                                                     | Purpose                                |
+| ----------------- | ----- | ----- | -------------------------------------------------------------------------------- | -------------------------------------- |
+| `DB_GUARDIAN_PSK` | root  | root  | `db-guardian.service` (clients), `db-database-coordinator.service` (coordinator) | Authenticate DB Guardian WebSocket API |
 
 ## Operational Notes / Assumptions
 
@@ -162,6 +188,16 @@ systemctl stop db-databases.target
 - Check wait service logs: `journalctl -u wait-for-db-databases.service`
 - Verify network connectivity to the Database Coordinator on ports 5432 (Postgres) and 6379 (Redis)
 - Ensure the Database Coordinator has sent the undrain command
+- Check the coordinator is active: `systemctl status db-database-coordinator.service`
+- If the coordinator is inactive, start it: `systemctl start db-database-coordinator.service`
+
+**Clients stay drained after a database restart:**
+
+- Check the coordinator's last start and stop times: `systemctl show db-database-coordinator.service -p ActiveEnterTimestamp,InactiveEnterTimestamp,Result`
+- Check for repeated undrain attempts: `journalctl -u db-database-coordinator.service`
+- Check the reconciliation timer: `systemctl status db-database-coordinator-reconcile.timer`
+- Check reconciliation runs: `journalctl -u db-database-coordinator-reconcile.service`
+- The coordinator is restarted by `postgresql.service` and `redis.service`, retries failed undrains every 30 seconds, and re-asserts undrain every 5 minutes while active
 
 **Authentication failures in logs:**
 

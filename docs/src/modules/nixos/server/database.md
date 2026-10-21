@@ -46,13 +46,13 @@ Redis management uses a similar aggregation pattern:
 Lifecycle management is handled by the [IO Guardian](../../../components/io_guardian.md). A pre-shared key for guardian communication is managed via the `DB_GUARDIAN_PSK` SOPS secret.
 
 - **On Clients**: Services that use these database modules are automatically bound to `io-databases.target`. This ensures they only start when the remote databases are reachable and stop before the databases go offline. Reachability and readiness checks are handled by the shared `wait-for-io-tools` package (`wait-for-io` and `wait-for-io-databases`).
-- **On Database Coordinator**: The `io-database-coordinator` service manages the `drain` and `undrain` signals sent to clients during system startup and shutdown.
+- **On Database Coordinator**: The `io-database-coordinator` service manages the `drain` and `undrain` signals sent to clients during system startup and shutdown. It is bound to PostgreSQL and Redis, restarts with either database, and retries a failed `undrain` every 30 seconds until every client is reachable. While active, `io-database-coordinator-reconcile.timer` re-sends `undrain` every 5 minutes so clients that stop their target later are recovered automatically.
 
 ## Secrets
 
 - `POSTGRES/<DB_NAME_UPPER>_PASSWORD`: Per-database role password, provisioned during `postgresql-setup`.
 - `REDIS/PASSWORD`: Shared password for the primary Redis instance.
-- `DB_GUARDIAN_PSK`: Pre-shared key for IO Guardian communication.
+- `DB_GUARDIAN_PSK`: Pre-shared key for IO Guardian communication. Rotating it restarts the guardian server on clients and the coordinator on the database host.
 
 ## Operational Notes / Assumptions
 
