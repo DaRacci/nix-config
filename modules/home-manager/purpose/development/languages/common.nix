@@ -92,6 +92,7 @@ import ./mkLanguage.nix {
     {
       name = "dockerfile-language-server";
       package = pkgs.dockerfile-language-server;
+      binary = "docker-langserver";
       args = [ "--stdio" ];
       filetypes = [
         "Dockerfile"
