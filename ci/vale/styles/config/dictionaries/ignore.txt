@@ -16,6 +16,7 @@ Dashy
 dconf
 Decky
 devenv
+direnv
 Floorp
 ForgeSync
 fzf
