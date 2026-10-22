@@ -2,7 +2,8 @@ _: {
   imports = [
     ./ai
     ./vscode
-    ./helix.nix
+    ./zed
+    ./helix
   ];
 
   options.purpose.development.editors = { };

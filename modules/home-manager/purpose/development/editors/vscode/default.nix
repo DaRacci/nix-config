@@ -9,10 +9,15 @@ let
     mkIf
     mkMerge
     mkEnableOption
-    optionals
     ;
 
   cfg = config.purpose.development;
+
+  languages = config.purpose.development.languages;
+
+  rendered = import ./render.nix {
+    inherit lib languages;
+  };
 
   profiles = [
     "default"
@@ -58,26 +63,12 @@ in
                 "eamodio.gitlens"
 
                 # Language Support
-                "redhat.vscode-xml"
-                "redhat.vscode-yaml"
-                "tamasfe.even-better-toml"
-                "matthewpi.caddyfile-support"
-                "coolbear.systemd-unit-file"
-                "hashicorp.terraform"
-                "bierner.markdown-preview-github-styles"
-                "ruschaaf.extended-embedded-languages"
-                "jamief.vscode-ssh-config-enhanced"
-                "keesschollaart.vscode-home-assistant"
-                "owensimon.combinatorc"
 
                 # LSP Servers
-                "jnoortheen.nix-ide"
 
                 # Formatters
-                "esbenp.prettier-vscode"
 
                 # Containers
-                "ms-azuretools.vscode-docker"
 
                 # AI
                 "github.copilot-chat"
@@ -90,7 +81,6 @@ in
 
                 # Bash Extensions
                 "rogalmic.bash-debug"
-                "foxundermoon.shell-format"
 
                 # Integrations
                 "jjk.jjk"
@@ -143,21 +133,9 @@ in
                 #endregion
 
                 #region Language Settings
-                "[jsonc]" = {
-                  "editor.defaultFormatter" = "vscode.json-language-features";
-                };
                 #endregion
 
                 #region Language Formatters
-                "evenBetterToml.formatter.alignComments" = true;
-                "evenBetterToml.formatter.alignEntries" = true;
-                "evenBetterToml.formatter.allowedBlankLines" = 1;
-                "evenBetterToml.formatter.arrayAutoCollapse" = true;
-                "evenBetterToml.formatter.arrayAutoExpand" = true;
-                "evenBetterToml.formatter.arrayTrailingComma" = true;
-                "evenBetterToml.formatter.columnWidth" = 80;
-
-                "markdown.validate.enabled" = true;
                 #endregion
 
                 #region Telemetry & Data Collection
@@ -177,52 +155,12 @@ in
                 "direnv.restart.automatic" = true;
                 "direnv.status.showChangesCount" = true;
 
-                "caddyfile.executable" = "${lib.getExe pkgs.caddy}";
-
                 "gitlens.plusFeatures.enabled" = false;
                 "gitlens.graph.layout" = "editor";
                 "gitlens.launchpad.indicator.enabled" = false;
                 "gitlens.cloudPatches.enabled" = false;
                 "gitlens.views.commits.showStashes" = true;
                 "gitlens.views.repositories.showStashes" = true;
-
-                "nix.enableLanguageServer" = true;
-                "nix.serverPath" = "${lib.getExe pkgs.nil}";
-                "nix.serverSettings" = {
-                  nil = {
-                    diagnostics = {
-                      ignored = [ ];
-                    };
-                    formatting = {
-                      command = [ "${lib.getExe pkgs.nixfmt}" ];
-                    };
-                  };
-
-                  nixd = {
-                    formatting.command = "${lib.getExe pkgs.nixfmt}";
-                    eval = {
-                      enable = true;
-                      targets = {
-                        args = [
-                          "-f"
-                          "default.nix"
-                        ];
-                        installable = "";
-                      };
-                    };
-                    options = {
-                      enable = true;
-                      targets = {
-                        args = [
-                          "-f"
-                          "default.nix"
-                        ];
-                        installable = "";
-                        # installable = "/flakeref#nixosConfigurations.nixe.options";
-                      };
-                    };
-                  };
-                };
 
                 "projectManager.git.baseFolders" = [
                   "${config.home.homeDirectory}/Projects"
@@ -270,52 +208,28 @@ in
             default = mkProfile {
               enableUpdateCheck = false;
               enableExtensionUpdateCheck = false;
+              extensions = versionExtensions (rendered.extensions "default");
+              userSettings = rendered.settings "default";
             };
 
-            jvm = lib.mkIf cfg.languages.jvm.enable (mkProfile {
-
+            jvm = mkIf cfg.languages.jvm.enable (mkProfile {
+              extensions = versionExtensions (rendered.extensions "jvm");
+              userSettings = rendered.settings "jvm";
             });
 
             rust = mkIf cfg.languages.rust.enable (mkProfile {
-              extensions = versionExtensions [
-                "jscearcy.rust-doc-viewer"
-                "dustypomerleau.rust-syntax"
-                "rust-lang.rust-analyzer"
-              ];
+              extensions = versionExtensions (rendered.extensions "rust");
+              userSettings = rendered.settings "rust";
             });
 
             dotnet = mkIf (cfg.languages.csharp.enable || cfg.languages.powershell.enable) (mkProfile {
-              extensions = versionExtensions (
-                (optionals cfg.languages.csharp.enable [
-                  "ms-dotnettools.csharp"
-                  "ms-dotnettools.csdevkit"
-                  "ms-dotnettools.vscode-dotnet-runtime"
-                ])
-                ++ (optionals cfg.languages.powershell.enable [
-                  "ms-vscode.powershell"
-                  "pspester.pester-test"
-                  "ironmansoftware.powershellprotools"
-                  "tylerleonhardt.vscode-inline-values-powershell"
-                ])
-              );
-
-              userSettings = {
-                # Required by ironmansoftware.powershellprotools
-                "terminal.integrated.enablePersistentSessions" = false;
-              };
+              extensions = versionExtensions (rendered.extensions "dotnet");
+              userSettings = rendered.settings "dotnet";
             });
 
             python = mkIf cfg.languages.python.enable (mkProfile {
-              extensions = versionExtensions [
-                "ms-python.python"
-                "ms-python.vscode-pylance"
-                "ms-python.debugpy"
-                "ms-python.black-formatter"
-                "ms-python.isort"
-                "ms-python.pylint"
-                "ms-python.mypy-type-checker"
-                "ms-python.gather"
-              ];
+              extensions = versionExtensions (rendered.extensions "python");
+              userSettings = rendered.settings "python";
             });
 
             work = mkProfile {

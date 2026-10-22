@@ -18,8 +18,7 @@ When enabled, the module:
 - Configures Zed to expose an `OpenCode` agent server.
 - Enables and configures `programs.opencode` with:
   - plugins
-  - Nix formatter integration
-  - LSP integrations across Nix, config formats, and general-purpose languages
+  - LSP and formatter integrations generated from the enabled language modules (see [Development](development.md))
   - command permissions policy
   - a local MCP server (e.g. `mcp-nixos` via `uvx`)
 - Writes OpenCode config files (e.g. `~/.config/opencode/oh-my-opencode.json`, `opencode-notifier.json`).
