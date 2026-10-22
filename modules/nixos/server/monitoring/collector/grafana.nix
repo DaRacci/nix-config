@@ -63,7 +63,14 @@ in
               url = "http://localhost:3100";
               access = "proxy";
             }
-          ];
+          ]
+          ++ lib.optional (cfg.collector.tempo.enable or false) {
+            name = "Tempo";
+            type = "tempo";
+            uid = "tempo";
+            url = "http://localhost:3200";
+            access = "proxy";
+          };
         };
       };
 

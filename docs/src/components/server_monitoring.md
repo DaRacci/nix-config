@@ -2,11 +2,8 @@
 
 ## Purpose
 
-The monitoring module provides a comprehensive observability stack for the server
-cluster using Prometheus (metrics), Loki (logs), Grafana (visualisation), and
-Grafana Alloy for authenticated OTLP ingestion.
-All components are configured as reusable NixOS modules with automatic
-cross-host discovery.
+The monitoring module provides a comprehensive observability stack for the server cluster using Prometheus, Loki, Tempo, Grafana, and Grafana Alloy for authenticated OTLP ingestion.
+All components are configured as reusable NixOS modules with automatic cross-host discovery.
 
 The system consists of three layers:
 
@@ -25,6 +22,7 @@ The system consists of three layers:
 
   - Prometheus for metrics aggregation
   - Loki for log aggregation with 90-day retention
+  - Tempo for distributed trace storage with MinIO S3 bucket backend
   - Alertmanager for alert routing and notifications
   - OTLP/HTTP ingestion on `otlp.<domain>` with bearer-token authentication
 
@@ -52,16 +50,38 @@ Monitoring is enabled by default on all servers, this can be disabled with `serv
 
 ### Declared secrets
 
-| Secret key                              | Purpose                              |
-| --------------------------------------- | ------------------------------------ |
-| `MONITORING/OLTP/BEARER_TOKEN`          | Bearer token for OTLP HTTP ingestion |
-| `MONITORING/GRAFANA/SECRET_KEY`         | Grafana secret key                   |
-| `MONITORING/GRAFANA/OAUTH_SECRET`       | Kanidm OAuth2 secret for Grafana     |
-| `MONITORING/HOME_ASSISTANT/WEBHOOK_URL` | Home Assistant alert webhook         |
-| `MONITORING/NEXTCLOUD_TALK/WEBHOOK_URL` | Nextcloud Talk alert webhook         |
-| `PROXMOX/USER`                          | Proxmox metrics user                 |
-| `PROXMOX/TOKEN_ID`                      | Proxmox token name                   |
-| `PROXMOX/TOKEN_SECRET`                  | Proxmox token secret                 |
+| Secret key                              | Purpose                               |
+| --------------------------------------- | ------------------------------------- |
+| `MONITORING/OLTP/BEARER_TOKEN`          | Bearer token for OTLP HTTP ingestion  |
+| `MONITORING/GRAFANA/SECRET_KEY`         | Grafana secret key                    |
+| `MONITORING/GRAFANA/OAUTH_SECRET`       | Kanidm OAuth2 secret for Grafana      |
+| `MONITORING/TEMPO/MINIO_ACCESS_KEY`     | MinIO access key for Tempo S3 backend |
+| `MONITORING/TEMPO/MINIO_SECRET_KEY`     | MinIO secret key for Tempo S3 backend |
+| `MONITORING/HOME_ASSISTANT/WEBHOOK_URL` | Home Assistant alert webhook          |
+| `MONITORING/NEXTCLOUD_TALK/WEBHOOK_URL` | Nextcloud Talk alert webhook          |
+| `PROXMOX/USER`                          | Proxmox metrics user                  |
+| `PROXMOX/TOKEN_ID`                      | Proxmox token name                    |
+| `PROXMOX/TOKEN_SECRET`                  | Proxmox token secret                  |
+
+### Tempo MinIO policy
+
+Tempo authenticates to MinIO with `MONITORING/TEMPO/MINIO_ACCESS_KEY` and `MONITORING/TEMPO/MINIO_SECRET_KEY`, so that user needs an IAM policy scoped to the `tempo` bucket.
+The policy lives is [tempo.json](../../../hosts/server/nixio/minio/policies/tempo.json) and grants the actions Tempo requires upstream:
+
+| Action                        | Resource               |
+| ----------------------------- | ---------------------- |
+| `s3:ListBucket`               | `arn:aws:s3:::tempo`   |
+| `s3:GetObject`                | `arn:aws:s3:::tempo/*` |
+| `s3:PutObject`                | `arn:aws:s3:::tempo/*` |
+| `s3:DeleteObject`             | `arn:aws:s3:::tempo/*` |
+| `s3:GetObjectTagging`         | `arn:aws:s3:::tempo/*` |
+| `s3:PutObjectTagging`         | `arn:aws:s3:::tempo/*` |
+| `s3:AbortMultipartUpload`     | `arn:aws:s3:::tempo/*` |
+| `s3:ListMultipartUploadParts` | `arn:aws:s3:::tempo/*` |
+
+The policy is not applied automatically, you must attach it to a MinIO user with `mc admin policy create` followed by `mc admin policy attach`.
+
+Upstream reference: [Tempo S3 storage](https://grafana.com/docs/tempo/latest/configuration/s3/).
 
 ### Generating Secrets
 
@@ -75,19 +95,23 @@ The `MONITORING/GRAFANA/OAUTH_SECRET` must match the value in `hosts/server/<App
 
 ### Caddy Virtual Hosts
 
-The module configures four virtual hosts on Monitoring Coordinator:
+The module configures five virtual hosts on Monitoring Coordinator:
 
 | Service    | Subdomain             | Access                        |
 | ---------- | --------------------- | ----------------------------- |
 | Grafana    | `grafana.<domain>`    | Public                        |
 | OTLP       | `otlp.<domain>`       | Public, bearer token required |
+| Tempo      | `tempo.<domain>`      | LAN                           |
 | Prometheus | `prometheus.<domain>` | LAN                           |
 | Loki       | `loki.<domain>`       | LAN                           |
 
-Grafana remains protected by the existing Kanidm-backed login flow. The OTLP
-ingestion endpoint is intended for machine-to-machine clients and requires an
+Grafana remains protected by the existing Kanidm-backed login flow.
+Tempo is a LAN-only service and does not expose its query API publicly;
+Grafana proxies queries to Tempo on the backend.
+
+The OTLP ingestion endpoint is intended for machine-to-machine clients and requires an
 `Authorization: Bearer <token>` header on every request. The exposed OTLP/HTTP
-paths are the standard `/v1/metrics` and `/v1/logs` endpoints.
+paths are the standard `/v1/metrics`, `/v1/logs`, and `/v1/traces` endpoints.
 
 These are defined in `hosts/server/nixmon/default.nix` and collected by the IO
 Coordinator's Caddy configuration.
@@ -120,6 +144,7 @@ modules/nixos/server/monitoring/
 │   ├── prometheus.nix       # Prometheus server + scrape targets
 │   ├── loki.nix             # Loki server + storage config
 │   ├── grafana.nix          # Grafana + Kanidm OAuth2
+│   ├── tempo.nix            # Tempo distributed tracing
 │   ├── otlp.nix             # OTLP ingestion
 │   ├── alerting.nix         # Alertmanager + alert rules
 │   └── dashboards.nix       # Dashboard provisioning
@@ -147,6 +172,7 @@ On the monitoring host (Monitoring Coordinator):
 ```sh
 systemctl status prometheus.service
 systemctl status loki.service
+systemctl status tempo.service
 systemctl status grafana.service
 systemctl status prometheus-alertmanager.service
 systemctl status prometheus-pve-exporter.service

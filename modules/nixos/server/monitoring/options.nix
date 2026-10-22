@@ -20,6 +20,7 @@ let
     int
     nullOr
     str
+    port
     submodule
     enum
     ;
@@ -162,9 +163,34 @@ in
     };
 
     collector = {
-      enable = mkEnableOption "monitoring collector services (Prometheus, Loki, Grafana)" // {
+      enable = mkEnableOption "monitoring collector services (Prometheus, Loki, Grafana, Tempo)" // {
         default = isThisMonitoringPrimaryHost && cfg.enable;
-        defaultText = literalExpression "thisIsMonitoringPrimaryHost && cfg.enable";
+        defaultText = literalExpression "isThisMonitoringPrimaryHost && cfg.enable";
+      };
+
+      tempo = {
+        enable = mkEnableOption "Grafana Tempo distributed tracing backend" // {
+          default = isThisMonitoringPrimaryHost && cfg.enable;
+          defaultText = literalExpression "isThisMonitoringPrimaryHost && cfg.enable";
+        };
+
+        otlpPort = mkOption {
+          type = port;
+          default = 4319;
+          description = "Port for Tempo's OTLP HTTP receiver. Must not conflict with the Alloy OTLP receiver port (default 4318).";
+        };
+
+        minioAccessKeySecret = mkOption {
+          type = str;
+          default = "MONITORING/TEMPO/MINIO_ACCESS_KEY";
+          description = "SOPS secret path for the MinIO access key used by Tempo.";
+        };
+
+        minioSecretKeySecret = mkOption {
+          type = str;
+          default = "MONITORING/TEMPO/MINIO_SECRET_KEY";
+          description = "SOPS secret path for the MinIO secret key used by Tempo.";
+        };
       };
 
       grafana = {
