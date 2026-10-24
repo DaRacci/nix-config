@@ -54,11 +54,7 @@ let
     libz
   ];
 
-  # Ported from the previous user-level Zed configuration.
-  # Values are plain defaults so they can be overridden via `userSettings`.
   defaultSettings = {
-    theme = "Tokyo Night";
-    ui_font_size = 24;
     load_direnv = "direct";
     autosave = "on_focus_change";
     auto_update = false;
@@ -68,39 +64,6 @@ let
 
     agent = {
       default_profile = "write";
-      profiles = {
-        write = {
-          name = "Write";
-          tools = {
-            open = true;
-            create_directory = true;
-            batch_tool = true;
-            code_actions = true;
-            code_symbols = true;
-            contents = true;
-            copy_path = true;
-            create_file = true;
-            delete_path = false;
-            diagnostics = true;
-            edit_file = true;
-            fetch = true;
-            list_directory = true;
-            move_path = true;
-            now = true;
-            find_path = true;
-            read_file = true;
-            grep = true;
-            rename = true;
-            symbol_info = true;
-            terminal = true;
-            thinking = true;
-            web_search = true;
-          };
-
-          enable_all_context_servers = true;
-          context_servers = { };
-        };
-      };
 
       thread_summary_model = {
         provider = "openrouter";
@@ -110,16 +73,6 @@ let
         provider = "openrouter";
         model = "deepseek/deepseek-v4-flash";
       };
-    };
-
-    icon_theme = {
-      mode = "dark";
-      dark = "Catppuccin Latte";
-      light = "Catppuccin Mocha";
-    };
-
-    language_models = {
-      ollama.api_url = "http://localhost:11434";
     };
 
     node = {
@@ -137,12 +90,6 @@ let
         "**/*.crt"
         "**/secrets.yml"
       ];
-      ollama = {
-        max_output_tokens = 256;
-        prompt_format = "zeta2";
-        api_url = "http://localhost:11434";
-        model = "hf.co/bluevoid-pl/zeta2-GUFF:Q8_0";
-      };
     };
 
     diagnostics = {
@@ -212,8 +159,6 @@ let
       worktree_directory = ".git/zed-worktrees";
     };
 
-    gutter = { };
-
     indent_guides = {
       enabled = true;
       line_width = 1;
@@ -236,8 +181,6 @@ let
       modal_max_width = "small";
     };
 
-    outline_panel = { };
-
     project_panel = {
       button = true;
       default_width = 240;
@@ -255,8 +198,6 @@ let
         show = "always";
       };
     };
-
-    ui_font_family = ".ZedSans";
 
     terminal = {
       env = {

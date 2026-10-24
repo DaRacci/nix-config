@@ -41,8 +41,8 @@
       };
 
       sansSerif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Sans";
+        package = pkgs.ibm-plex;
+        name = "IBM Plex Sanns";
       };
 
       sizes = {
