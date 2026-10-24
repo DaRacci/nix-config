@@ -185,6 +185,7 @@ in
     (importModule ./network.nix { })
     (importModule ./proxy { })
 
+    ./ssh-guard
     ./ssh-shell
     ./storage
     ./distributed-builds.nix

@@ -84,6 +84,13 @@
       flake = false;
     };
 
+    ssh-guard = {
+      url = "git+https://codeberg.org/Racci/ssh-guard";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rust-overlay.follows = "rust-overlay";
+      inputs.flake-parts.follows = "flake-parts";
+    };
+
     seaweedfs = {
       url = "https://raw.githubusercontent.com/liberodark/nixpkgs/refs/heads/seawedfs/nixos/modules/services/network-filesystems/seaweedfs.nix";
       flake = false;

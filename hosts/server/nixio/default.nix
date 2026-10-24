@@ -33,6 +33,23 @@ in
     (importFile ./storage.nix)
   ];
 
+  server.sshGuard = {
+    extraGroups = [ "caddy" ];
+    tailRoots = [ "/var/log/caddy" ];
+    catRoots = [ "/etc/caddy" ];
+    extraRules = [
+      {
+        command = "pg_isready";
+        action = {
+          type = "run";
+          binary = lib.getExe' config.services.postgresql.package "pg_isready";
+          args = [ ];
+          timeout = "10s";
+        };
+      }
+    ];
+  };
+
   core = {
     networking.tailscale.enable = true;
   };
