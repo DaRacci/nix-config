@@ -2,6 +2,7 @@
   config,
   inputs,
   lib,
+  hostDirectory,
   importExternals ? true,
   ...
 }:
@@ -26,13 +27,21 @@ let
   sopsPh = config.sops.placeholder;
 
   baseDir = "/var/lib/seaweedfs";
-  master = [ "seaweedfs.racci.dev:443" ];
+  master = [ "seaweedfs.${config.server.proxy.domain}:443" ];
 
   sopsCertAndKeys = {
     owner = "seaweedfs";
     group = "seaweedfs";
     mode = "0640";
   };
+
+  sopsTlsFile =
+    name:
+    sopsCertAndKeys
+    // {
+      sopsFile = "${hostDirectory}/seaweedfs-tls/${name}";
+      format = "binary";
+    };
 
   mkCommonSystemdService =
     extraConfig:
@@ -85,7 +94,7 @@ let
         reverse_proxy localhost:${toString attr.grpcPort} {
           transport http {
             tls_trust_pool file ${config.sops.secrets."SEAWEEDFS/TLS/CA".path}
-            tls_server_name "${domain}.racci.dev"
+            tls_server_name "${domain}.${config.server.proxy.domain}"
             tls_client_auth ${config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_CRT".path} ${
               config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_KEY".path
             }
@@ -145,21 +154,19 @@ in
     users.users.caddy.extraGroups = [ "seaweedfs" ];
 
     sops = {
-      # Generate certs by running
-      # certstrap init --common-name "SeaweedFS CA"
-      # certstrap request-cert --common-name <SERVICE> --domain <domain> --key-bits 4096
-      # certstrap sign --expires "2 years" --CA "SeaweedFS CA" <SERVICE>
+      # Certificates chain from the offline root through the SeaweedFS intermediate to each component leaf.
+      # `CA` is a trust bundle and each `_CRT` value is a leaf followed by the intermediate.
       secrets = {
         "SEAWEEDFS/JWT/MASTER" = { };
         "SEAWEEDFS/JWT/MASTER_READ" = { };
         "SEAWEEDFS/JWT/FILER" = { };
         "SEAWEEDFS/JWT/FILER_READ" = { };
-        "SEAWEEDFS/TLS/CA" = sopsCertAndKeys;
+        "SEAWEEDFS/TLS/CA" = sopsTlsFile "CA";
       }
       // (
         map (service: {
-          "SEAWEEDFS/TLS/${toUpper service}_CRT" = sopsCertAndKeys;
-          "SEAWEEDFS/TLS/${toUpper service}_KEY" = sopsCertAndKeys;
+          "SEAWEEDFS/TLS/${toUpper service}_CRT" = sopsTlsFile "${toUpper service}_CRT";
+          "SEAWEEDFS/TLS/${toUpper service}_KEY" = sopsTlsFile "${toUpper service}_KEY";
         }) grpcTLSServices
         |> mergeAttrsList
       );
@@ -222,7 +229,7 @@ in
         s3 = {
           enable = true;
           allowDeleteBucketNotEmpty = false;
-          domainName = "s3.seaweedfs.racci.dev";
+          domainName = "s3.seaweedfs.${config.server.proxy.domain}";
         };
       };
     };
@@ -361,7 +368,7 @@ in
         serviceConfig = {
           ExecStart = ''
             ${cfg.package}/bin/weed worker \
-              -admin=admin.seaweedfs.racci.dev:443.10443 \
+              -admin=admin.seaweedfs.${config.server.proxy.domain}:443.10443 \
               -jobType=vacuum,volume_balance,erasure_coding,admin_script
           '';
           WorkingDirectory = "/var/lib/seaweedfs/worker";

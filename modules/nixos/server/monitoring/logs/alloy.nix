@@ -6,6 +6,7 @@
   config,
   lib,
   pkgs,
+  hostDirectory,
   ...
 }:
 let
@@ -47,6 +48,11 @@ let
   captureCtlExe = getExe pkgs.alloy-dynamic-capture-ctl;
   captureAPIExe = getExe pkgs.alloy-dynamic-capture-api;
   captureRelayExe = getExe pkgs.alloy-dynamic-capture-relay;
+
+  alloySopsFile = name: {
+    sopsFile = "${hostDirectory}/alloy/${name}";
+    format = "binary";
+  };
 
   captureAPIArgs = [
     "--listen-address"
@@ -219,13 +225,13 @@ in
         caCertSecret = mkOption {
           type = types.str;
           default = "MONITORING/ALLOY_DYNAMIC/CA_CERT";
-          description = "SOPS secret containing the PEM CA certificate used to verify client certificates.";
+          description = "SOPS secret containing the PEM CA trust bundle used to verify client certificates.";
         };
 
         serverCertSecret = mkOption {
           type = types.str;
           default = "MONITORING/ALLOY_DYNAMIC/SERVER_CERT";
-          description = "SOPS secret containing the PEM server certificate for the capture API.";
+          description = "SOPS secret containing the PEM server certificate chain (leaf followed by intermediate) for the capture API.";
         };
 
         serverKeySecret = mkOption {
@@ -255,13 +261,13 @@ in
           caCertSecret = mkOption {
             type = types.str;
             default = "MONITORING/ALLOY_DYNAMIC/CA_CERT";
-            description = "SOPS secret containing the PEM CA certificate for upstream capture APIs.";
+            description = "SOPS secret containing the PEM CA trust bundle for upstream capture APIs.";
           };
 
           clientCertSecret = mkOption {
             type = types.str;
             default = "MONITORING/ALLOY_DYNAMIC/CLIENT_CERT";
-            description = "SOPS secret containing the PEM client certificate used by the relay.";
+            description = "SOPS secret containing the PEM client certificate chain (leaf followed by intermediate) used by the relay.";
           };
 
           clientKeySecret = mkOption {
@@ -479,9 +485,9 @@ in
 
     (mkIf captureCfg.enable {
       sops.secrets = {
-        "${captureCfg.tls.caCertSecret}" = { };
-        "${captureCfg.tls.serverCertSecret}" = { };
-        "${captureCfg.tls.serverKeySecret}" = { };
+        "${captureCfg.tls.caCertSecret}" = alloySopsFile "CA_CERT";
+        "${captureCfg.tls.serverCertSecret}" = alloySopsFile "SERVER_CERT";
+        "${captureCfg.tls.serverKeySecret}" = alloySopsFile "SERVER_KEY";
       };
 
       systemd.services.alloy-dynamic-capture = {
@@ -508,9 +514,9 @@ in
 
     (mkIf (cfg.collector.enable && captureCfg.enable && relayCfg.enable) {
       sops.secrets = {
-        "${relayCfg.tls.caCertSecret}" = { };
-        "${relayCfg.tls.clientCertSecret}" = { };
-        "${relayCfg.tls.clientKeySecret}" = { };
+        "${relayCfg.tls.caCertSecret}" = alloySopsFile "CA_CERT";
+        "${relayCfg.tls.clientCertSecret}" = alloySopsFile "CLIENT_CERT";
+        "${relayCfg.tls.clientKeySecret}" = alloySopsFile "CLIENT_KEY";
       };
 
       systemd.services.alloy-dynamic-capture-relay = {

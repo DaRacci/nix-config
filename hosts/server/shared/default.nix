@@ -23,6 +23,12 @@
     manageNetwork = true;
     manageHostName = true;
   };
+
+  server.monitoring.logs.capture = {
+    enable = true;
+    allowedClientCommonNames = [ "alloy-capture-relay" ];
+  };
+
   networking = {
     domain = "localdomain";
   };

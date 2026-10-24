@@ -9,6 +9,10 @@
 - [DB Guardian](components/db_guardian.md)
 - [Server Monitoring](components/server_monitoring.md)
 
+# Security
+
+- [Internal mTLS CA](security/internal_mtls_ca.md)
+
 # Development
 
 - [Adding a new User](development/adding_a_new_user.md)

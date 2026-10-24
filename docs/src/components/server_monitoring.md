@@ -27,7 +27,7 @@ The system consists of three layers:
   - Prometheus for metrics aggregation
   - Loki for log aggregation with 90-day retention
   - Alertmanager for alert routing and notifications
-  - OTLP/HTTP ingestion on `otlp.<domain>` with bearer-token authentication
+  - OTLP/HTTP ingestion on `otlp.${server.proxy.domain}` with bearer-token authentication
 
 - **Visualisation** (runs on the Monitoring Coordinator)
 
@@ -83,21 +83,23 @@ The textfile collector exposes:
 
 ### Declared secrets
 
-| Secret key                              | Purpose                                                          |
-| --------------------------------------- | ---------------------------------------------------------------- |
-| `MONITORING/OLTP/BEARER_TOKEN`          | Bearer token for OTLP HTTP ingestion                             |
-| `MONITORING/GRAFANA/SECRET_KEY`         | Grafana secret key                                               |
-| `MONITORING/GRAFANA/OAUTH_SECRET`       | Kanidm OAuth2 secret for Grafana                                 |
-| `MONITORING/HOME_ASSISTANT/WEBHOOK_URL` | Home Assistant alert webhook                                     |
-| `MONITORING/NEXTCLOUD_TALK/WEBHOOK_URL` | Nextcloud Talk alert webhook                                     |
-| `MONITORING/ALLOY_DYNAMIC/CA_CERT`      | mTLS CA certificate for the dynamic capture API                  |
-| `MONITORING/ALLOY_DYNAMIC/SERVER_CERT`  | mTLS server certificate for the dynamic capture API              |
-| `MONITORING/ALLOY_DYNAMIC/SERVER_KEY`   | mTLS server key for the dynamic capture API                      |
-| `MONITORING/ALLOY_DYNAMIC/CLIENT_CERT`  | mTLS client certificate used by the Grafana manual-trigger relay |
-| `MONITORING/ALLOY_DYNAMIC/CLIENT_KEY`   | mTLS client key used by the Grafana manual-trigger relay         |
-| `PROXMOX/USER`                          | Proxmox metrics user                                             |
-| `PROXMOX/TOKEN_ID`                      | Proxmox token name                                               |
-| `PROXMOX/TOKEN_SECRET`                  | Proxmox token secret                                             |
+| Secret key                              | Purpose                                                   |
+| --------------------------------------- | --------------------------------------------------------- |
+| `MONITORING/OLTP/BEARER_TOKEN`          | Bearer token for OTLP HTTP ingestion                      |
+| `MONITORING/GRAFANA/SECRET_KEY`         | Grafana secret key                                        |
+| `MONITORING/GRAFANA/OAUTH_SECRET`       | Kanidm OAuth2 secret for Grafana                          |
+| `MONITORING/HOME_ASSISTANT/WEBHOOK_URL` | Home Assistant alert webhook                              |
+| `MONITORING/NEXTCLOUD_TALK/WEBHOOK_URL` | Nextcloud Talk alert webhook                              |
+| `MONITORING/ALLOY_DYNAMIC/CA_CERT`      | mTLS CA trust bundle for the dynamic capture API          |
+| `MONITORING/ALLOY_DYNAMIC/SERVER_CERT`  | mTLS server certificate chain for the dynamic capture API |
+| `MONITORING/ALLOY_DYNAMIC/SERVER_KEY`   | mTLS server key for the dynamic capture API               |
+| `MONITORING/ALLOY_DYNAMIC/CLIENT_CERT`  | mTLS client certificate chain used by the Grafana relay   |
+| `MONITORING/ALLOY_DYNAMIC/CLIENT_KEY`   | mTLS client key used by the Grafana manual-trigger relay  |
+| `PROXMOX/USER`                          | Proxmox metrics user                                      |
+| `PROXMOX/TOKEN_ID`                      | Proxmox token name                                        |
+| `PROXMOX/TOKEN_SECRET`                  | Proxmox token secret                                      |
+
+The `MONITORING/ALLOY_DYNAMIC/*` entries are sops-nix secret names backed by binary files under `hosts/server/<host>/alloy/`.
 
 ### Generating Secrets
 
@@ -109,16 +111,88 @@ cat /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 48
 
 The `MONITORING/GRAFANA/OAUTH_SECRET` must match the value in `hosts/server/<Application Server>/secrets.yaml` under `KANIDM/OAUTH2/GRAFANA_SECRET` (the Kanidm provisioning side).
 
+### mTLS CA scope
+
+The dynamic capture API uses `Alloy Dynamic Capture Intermediate CA`, signed by `Fleet mTLS Root CA`.
+See [Internal mTLS CA](../security/internal_mtls_ca.md) for the hierarchy, key custody, rotation, and trust-store policy.
+
+`MONITORING/ALLOY_DYNAMIC/CA_CERT` contains the Fleet root certificate.
+The dynamic capture API was never deployed with a legacy CA, so no legacy trust anchors are needed.
+`SERVER_CERT` and `CLIENT_CERT` are chains ordered leaf first, then the Alloy intermediate.
+
+### Alloy leaf certificates
+
+Server certificates are valid for two years and include these SANs:
+
+- `DNS:<host>`
+- `DNS:<host>.localdomain`
+- `DNS:<host>.${server.proxy.domain}`
+- `IP:127.0.0.1`
+
+The bare host name is required because the relay connects to `https://<host>:12445`.
+`server.proxy.domain` is the fleet's DNS suffix.
+Server certificates use `extendedKeyUsage = serverAuth`.
+The client certificate uses `commonName = alloy-capture-relay` and `extendedKeyUsage = clientAuth`.
+
+The following assumes `alloy-intermediate.crt` and `alloy-intermediate.key` from the [Internal mTLS CA](../security/internal_mtls_ca.md) procedure.
+`<io-primary>` is the host that defines `server.proxy.domain`.
+
+```bash
+domain="$(nix eval --raw .#nixosConfigurations.<io-primary>.config.server.proxy.domain)"
+
+for host in nixai nixarr nixcloud nixdev nixio nixmon nixserv; do
+  openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out "$host.key"
+  openssl req -new -key "$host.key" -subj "/CN=$host" -out "$host.csr"
+  openssl x509 -req -in "$host.csr" -CA alloy-intermediate.crt -CAkey alloy-intermediate.key \
+    -CAcreateserial -days 730 -sha256 -out "$host.crt" -extensions v3 \
+    -extfile <(printf '[v3]\nbasicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth\nsubjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid,issuer\nsubjectAltName=DNS:%s,DNS:%s.localdomain,DNS:%s.%s,IP:127.0.0.1\n' "$host" "$host" "$host" "$domain")
+  cat "$host.crt" alloy-intermediate.crt > "$host-chain.crt"
+done
+
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out client.key
+openssl req -new -key client.key -subj "/CN=alloy-capture-relay" -out client.csr
+openssl x509 -req -in client.csr -CA alloy-intermediate.crt -CAkey alloy-intermediate.key \
+  -CAcreateserial -days 730 -sha256 -out client.crt -extensions v3 \
+  -extfile <(printf '[v3]\nbasicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature\nextendedKeyUsage=clientAuth\nsubjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid,issuer\nsubjectAltName=DNS:alloy-capture-relay\n')
+cat client.crt alloy-intermediate.crt > client-chain.crt
+```
+
+Store each certificate as a binary SOPS file under the host directory, then encrypt it in place:
+
+```sh
+for host in nixai nixarr nixcloud nixdev nixio nixmon nixserv; do
+  mkdir -p "hosts/server/$host/alloy"
+  cp alloy-trust-bundle.crt "hosts/server/$host/alloy/CA_CERT"
+  cp "$host-chain.crt" "hosts/server/$host/alloy/SERVER_CERT"
+  cp "$host.key" "hosts/server/$host/alloy/SERVER_KEY"
+
+  sops encrypt --input-type binary --in-place "hosts/server/$host/alloy/CA_CERT"
+  sops encrypt --input-type binary --in-place "hosts/server/$host/alloy/SERVER_CERT"
+  sops encrypt --input-type binary --in-place "hosts/server/$host/alloy/SERVER_KEY"
+done
+
+cp client-chain.crt hosts/server/nixmon/alloy/CLIENT_CERT
+cp client.key hosts/server/nixmon/alloy/CLIENT_KEY
+sops encrypt --input-type binary --in-place hosts/server/nixmon/alloy/CLIENT_CERT
+sops encrypt --input-type binary --in-place hosts/server/nixmon/alloy/CLIENT_KEY
+```
+
+`sops` uses the target path to select the `.sops.yaml` recipients.
+The encrypted file is a SOPS JSON envelope; `format = "binary"` makes sops-nix decrypt it back to the original PEM.
+
+Only the monitoring host needs the client certificate and key because the relay is gated by `server.monitoring.collector.enable`.
+Capture is enabled for all servers in `hosts/server/shared/default.nix` and accepts only client certificates with `CN=alloy-capture-relay`.
+
 ### Caddy Virtual Hosts
 
 The module configures four virtual hosts on Monitoring Coordinator:
 
-| Service    | Subdomain             | Access                        |
-| ---------- | --------------------- | ----------------------------- |
-| Grafana    | `grafana.<domain>`    | Public                        |
-| OTLP       | `otlp.<domain>`       | Public, bearer token required |
-| Prometheus | `prometheus.<domain>` | LAN                           |
-| Loki       | `loki.<domain>`       | LAN                           |
+| Service    | Subdomain                           | Access                        |
+| ---------- | ----------------------------------- | ----------------------------- |
+| Grafana    | `grafana.${server.proxy.domain}`    | Public                        |
+| OTLP       | `otlp.${server.proxy.domain}`       | Public, bearer token required |
+| Prometheus | `prometheus.${server.proxy.domain}` | LAN                           |
+| Loki       | `loki.${server.proxy.domain}`       | LAN                           |
 
 Grafana remains protected by the existing Kanidm-backed login flow. The OTLP
 ingestion endpoint is intended for machine-to-machine clients and requires an
@@ -233,11 +307,13 @@ Caddy access logs are a separate `loki.source.file` pipeline and are not affecte
 
 ### Dynamic Expanded Capture API (mTLS)
 
-When `server.monitoring.logs.capture.enable = true`, each host exposes an mTLS-protected API to temporarily disable journal drops and rate limits.
+Capture is enabled for all servers by `hosts/server/shared/default.nix`.
+Each host exposes an mTLS-protected API to temporarily disable journal drops and rate limits.
 This is useful for short incident windows.
 
 - Endpoint: `POST https://<host>:12445/capture`
 - Client cert is required and must chain to `MONITORING/ALLOY_DYNAMIC/CA_CERT`
+- The configured CN allow-list is `alloy-capture-relay`
 - Optional CN allow-list: `server.monitoring.logs.capture.allowedClientCommonNames`
 
 Example payloads:
@@ -291,7 +367,7 @@ curl -s 'http://localhost:3100/loki/api/v1/labels' | jq
 
 - Verify `MONITORING/GRAFANA/OAUTH_SECRET` in the Monitoring Coordinator matches `KANIDM/OAUTH2/GRAFANA_SECRET` in the Identity Coordinator
 - Check Kanidm provisioning has the Grafana OAuth2 client configured
-- Verify DNS resolves `auth.<domain>` correctly
+- Verify DNS resolves `auth.${server.proxy.domain}` correctly
 
 **Prometheus targets showing as down:**
 
@@ -302,7 +378,7 @@ curl -s 'http://localhost:3100/loki/api/v1/labels' | jq
 **Proxmox metrics missing:**
 
 - Verify `PROXMOX/TOKEN_ID` and `PROXMOX/TOKEN_SECRET` are valid
-- Check PVE API is accessible from Monitoring Coordinator: `curl -k https://pve.<domain>/api2/json`
+- Check PVE API is accessible from Monitoring Coordinator: `curl -k https://pve.${server.proxy.domain}/api2/json`
 - Review PVE exporter logs: `journalctl -u prometheus-pve-exporter.service`
 
 ## References
