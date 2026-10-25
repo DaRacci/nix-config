@@ -61,7 +61,10 @@ in
       # but this flag is still required: it sets PrivateUsers = false,
       # without which dbus-next's peer-UID authentication to the proxy fails.
       bluetoothSupport = true;
-      extraArgs = [ "--bluetooth-adapter=0" "--primary-interface=eth0" ];
+      extraArgs = [
+        "--bluetooth-adapter=0"
+        "--primary-interface=eth0"
+      ];
     };
 
     mosquitto = {
