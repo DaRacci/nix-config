@@ -7,6 +7,8 @@
 
 let
   inherit (config.sops) secrets;
+
+  mqttPort = (config.services.mosquitto.listeners |> builtins.head).port;
 in
 {
   sops = {
@@ -125,7 +127,7 @@ in
       package = pkgs.zigbee2mqtt_2;
       settings = {
         mqtt = {
-          server = "mqtt://localhost:1883";
+          server = "mqtt://localhost:${(toString mqttPort)}";
           user = "zigbee2mqtt";
           password = "!secrets.yaml mqtt_password";
         };
@@ -156,14 +158,14 @@ in
     };
 
     proxy.virtualHosts = {
-      mqtt = rec {
-        ports = [ l4.listenPort ];
+      mqtt = {
+        ports = [ mqttPort ];
         l4 = {
-          listenPort = 1883;
+          listenPort = mqttPort;
           protocol = "tcp";
           config = ''
             route {
-              proxy localhost:${toString l4.listenPort}
+              proxy localhost:${toString mqttPort}
             }
           '';
         };
@@ -177,6 +179,13 @@ in
         ports = [ 8080 ];
         extraConfig = ''
           reverse_proxy http://localhost:8080
+        '';
+      };
+
+      matterjs = {
+        ports = [ config.services.matterjs-server.port ];
+        extraConfig = ''
+          reverse_proxy http://localhost:${toString config.services.matterjs-server.port}
         '';
       };
     };
