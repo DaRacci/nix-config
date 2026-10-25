@@ -25,7 +25,7 @@ in
 
       primary = mkOption {
         type = str;
-        default = "~deepseek/deepseek-v4-flash-latest";
+        default = "~deepseek/deepseek-flash-latest";
         description = "The primary language model to use for the AI agent.";
       };
 
@@ -37,7 +37,7 @@ in
 
       compression = mkOption {
         type = str;
-        default = "~deepseek/deepseek-v4-flash-latest";
+        default = "~deepseek/deepseek-flash-latest";
         description = ''
           The model to use for compression of context, summorisation and similar tasks that don't require reasoning.
           This model still needs a decently sized context window to be effective.
@@ -54,7 +54,7 @@ in
 
       brains = mkOption {
         type = str;
-        default = "deepseek/deepseek-v4-pro-0813";
+        default = "~deepseek/deepseek-pro-latest";
         description = ''
           The smartest model to use for complex reasoning and decision-making tasks.
         '';
