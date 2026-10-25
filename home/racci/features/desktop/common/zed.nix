@@ -27,5 +27,16 @@ in
       api_url = "http://localhost:11434";
       model = "hf.co/bluevoid-pl/zeta2-GUFF:Q8_0";
     };
+
+    agent_servers = {
+      Hermes = {
+        type = "custom";
+        command = "ssh";
+        args = [
+          "-p2222" "-T" "-o" "BatchMode=yes" "hermes@nixai"
+          "HERMES_HOME=/data/.hermes exec hermes -p coder acp"
+        ];
+      };
+    };
   };
 }
