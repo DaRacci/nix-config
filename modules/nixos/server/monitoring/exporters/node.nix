@@ -98,8 +98,8 @@ in
 
       serviceConfig = {
         Type = "oneshot";
-        User = "prometheus-node-exporter";
-        Group = "prometheus-node-exporter";
+        User = "node-exporter";
+        Group = "node-exporter";
         StateDirectory = "prometheus-node-exporter";
         ExecStart = getExe nixosMetrics;
       };
