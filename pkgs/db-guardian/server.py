@@ -392,9 +392,7 @@ def run_tests() -> None:
 
 
 async def async_main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(
-        description="Database Guardian WebSocket Server"
-    )
+    parser = argparse.ArgumentParser(description="Database Guardian WebSocket Server")
     parser.add_argument(
         "--port",
         type=int,

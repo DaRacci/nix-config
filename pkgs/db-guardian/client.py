@@ -158,9 +158,7 @@ def run_tests() -> None:
 
 
 async def async_main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(
-        description="Database Guardian WebSocket Client"
-    )
+    parser = argparse.ArgumentParser(description="Database Guardian WebSocket Client")
     parser.add_argument(
         "--action",
         type=str,
