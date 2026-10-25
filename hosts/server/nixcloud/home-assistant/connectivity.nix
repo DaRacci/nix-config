@@ -11,6 +11,17 @@ let
   mqttPort = (config.services.mosquitto.listeners |> builtins.head).port;
 in
 {
+  users = {
+    groups.matterjs = {
+      gid = 1500;
+    };
+    users.matterjs = {
+      isSystemUser = true;
+      uid = 1500;
+      group = "matterjs";
+    };
+  };
+
   sops = {
     secrets =
       [
@@ -145,9 +156,17 @@ in
     };
   };
 
-  systemd.services.matterjs-server.environment = {
-    NOBLE_BINDINGS = "dbus";
-    DBUS_SYSTEM_BUS_ADDRESS = "unix:path=/var/lib/host-bluez/bus.sock";
+  systemd.services.matterjs-server = {
+    serviceConfig = {
+      DynamicUser = lib.mkForce false;
+      User = config.users.users.matterjs.name;
+      Group = config.users.users.matterjs.group;
+    };
+    environment = {
+      HOME = "/var/lib/matterjs-server";
+      NOBLE_BINDINGS = "dbus";
+      DBUS_SYSTEM_BUS_ADDRESS = "unix:path=/var/lib/host-bluez/bus.sock";
+    };
   };
 
   server = {
