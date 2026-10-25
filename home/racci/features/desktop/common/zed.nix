@@ -33,7 +33,11 @@ in
         type = "custom";
         command = "ssh";
         args = [
-          "-p2222" "-T" "-o" "BatchMode=yes" "hermes@nixai"
+          "-p2222"
+          "-T"
+          "-o"
+          "BatchMode=yes"
+          "hermes@nixai"
           "HERMES_HOME=/data/.hermes exec hermes -p coder acp"
         ];
       };
