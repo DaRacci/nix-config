@@ -53,7 +53,16 @@ in
       address = "0.0.0.0";
     };
 
-    matter-server.enable = true;
+    matterjs-server = {
+      enable = true;
+      listenAddress = "0.0.0.0";
+
+      # BLE is done by the host's BlueZ over D-Bus, so no raw HCI access is needed
+      # but this flag is still required: it sets PrivateUsers = false,
+      # without which dbus-next's peer-UID authentication to the proxy fails.
+      bluetoothSupport = true;
+      extraArgs = [ "--bluetooth-adapter=0" "--primary-interface=eth0" ];
+    };
 
     mosquitto = {
       enable = true;
@@ -131,6 +140,11 @@ in
     };
   };
 
+  systemd.services.matterjs-server.environment = {
+    NOBLE_BINDINGS = "dbus";
+    DBUS_SYSTEM_BUS_ADDRESS = "unix:path=/var/lib/host-bluez/bus.sock";
+  };
+
   server = {
     dashboard.items = {
       esphome.title = "ESPHome";
@@ -153,20 +167,15 @@ in
       };
 
       esphome.extraConfig = ''
-        reverse_proxy http://localhost:${builtins.toString config.services.esphome.port}
+        reverse_proxy http://localhost:${toString config.services.esphome.port}
       '';
 
-      zigbee2mqtt.extraConfig = ''
-        reverse_proxy http://localhost:8080
-      '';
+      zigbee2mqtt = {
+        ports = [ 8080 ];
+        extraConfig = ''
+          reverse_proxy http://localhost:8080
+        '';
+      };
     };
-  };
-
-  networking.firewall = {
-    allowedTCPPorts = [
-      5580
-      8080
-    ];
-    allowedUDPPorts = [ 5580 ];
   };
 }
