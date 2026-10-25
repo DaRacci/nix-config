@@ -69,11 +69,6 @@ in
     matterjs-server = {
       enable = true;
       listenAddress = "0.0.0.0";
-
-      # BLE is done by the host's BlueZ over D-Bus, so no raw HCI access is needed
-      # but this flag is still required: it sets PrivateUsers = false,
-      # without which dbus-next's peer-UID authentication to the proxy fails.
-      bluetoothSupport = true;
       extraArgs = [
         "--bluetooth-adapter=0"
         "--primary-interface=eth0"
