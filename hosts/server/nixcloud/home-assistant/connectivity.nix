@@ -77,6 +77,9 @@ in
       extraArgs = [
         "--bluetooth-adapter=0"
         "--primary-interface=eth0"
+
+        "--vendorid=4939"
+        "--fabricid=1"
       ];
     };
 
