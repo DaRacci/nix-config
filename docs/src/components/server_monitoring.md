@@ -49,7 +49,7 @@ Monitoring is enabled by default on all servers, this can be disabled with `serv
 
 {{#include ../../generated/server-monitoring-options.md}}
 
-### node_exporter Collector Profile
+### `node_exporter` Collector Profile
 
 `node_exporter` runs with `--collector.disable-defaults` and only enables the collectors listed below.
 This avoids the upstream default set, which includes many hardware, filesystem, and kernel collectors that are useless or misleading inside an LXC.

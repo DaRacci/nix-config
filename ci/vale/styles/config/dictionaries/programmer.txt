@@ -13,6 +13,9 @@ autologin
 backtick
 backticks
 bootable
+CA
+CAs
+CRLs
 declaratively
 gpus
 hostnames
@@ -21,6 +24,8 @@ input's
 keybind
 keybinds
 lifecycle
+LXC
+LXCs
 multiline
 natively
 oauth
@@ -46,6 +51,9 @@ tileable
 tty
 uis
 undrain
+undrained
+undrains
 vhost
 vhost's
 virtualenv
+virtualises
