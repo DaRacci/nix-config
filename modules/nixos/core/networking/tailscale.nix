@@ -18,6 +18,11 @@ in
   options.core.networking.tailscale.enable = mkEnableOption "tailscale configuration";
 
   config = mkIf cfg.enable {
+    # tailscaled's own accept rules live in its own table, which cannot override
+    # the drop policy of the NixOS firewall chains. Trusting the tunnel
+    # interface reproduces what tailscaled's iptables INPUT rule used to do.
+    networking.firewall.trustedInterfaces = [ "tailscale0" ];
+
     sops.secrets.TAILSCALE_AUTH_KEY = {
       sopsFile = "${self}/hosts/secrets.yaml";
       restartUnits = [
@@ -50,6 +55,8 @@ in
     };
 
     systemd = {
+      services.tailscaled.environment.TS_DEBUG_FIREWALL_MODE = "nftables";
+
       services.tailscale-check = {
         description = "Check Tailscale login status";
         after = [ "tailscaled.service" ];
