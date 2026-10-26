@@ -73,6 +73,9 @@ in
         # Container-scoped and not covered by the Proxmox exporter.
         "filesystem"
         "systemd"
+
+        # Required for nixos-system-metrics textfile ingestion.
+        "textfile"
       ]
       ++ optionals (!isVirtual) [
         # These read host devices or kernel state that is either absent or not namespaced inside a container.
