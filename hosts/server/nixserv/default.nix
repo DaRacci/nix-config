@@ -4,6 +4,7 @@
   ...
 }:
 let
+  inherit (pkgs) attic-client;
   atticOwned = {
     owner = config.services.atticd.user;
     inherit (config.services.atticd) group;
@@ -41,7 +42,7 @@ in
     };
   };
 
-  environment.systemPackages = with pkgs; [ attic-client ];
+  environment.systemPackages = [ attic-client ];
 
   users = {
     users.atticd = {

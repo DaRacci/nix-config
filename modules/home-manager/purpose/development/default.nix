@@ -4,8 +4,20 @@
   lib,
   ...
 }:
-with lib;
 let
+  inherit (lib) mkEnableOption mkIf;
+  inherit (pkgs)
+    act
+    d-spy
+    delineate
+    hashes
+    iplookup-gtk
+    letterpress
+    lumen
+    sysprof
+    textpieces
+    wildcard
+    ;
   cfg = config.purpose;
 in
 {
@@ -30,7 +42,7 @@ in
       }
     ];
 
-    home.packages = with pkgs; [
+    home.packages = [
       act
       sysprof
       textpieces

@@ -2,6 +2,35 @@
   pkgs ? import <nixpkgs> { },
 }:
 let
+  inherit (pkgs)
+    bat
+    btop
+    carapace
+    curl
+    doggo
+    duf
+    dust
+    fd
+    fish
+    gawk
+    git
+    gping
+    helix
+    hyfetch
+    inxi
+    less
+    lsof
+    ncdu
+    openssh
+    pciutils
+    procs
+    ripgrep
+    starship
+    ttl
+    uutils-coreutils-noprefix
+    uutils-findutils
+    zoxide
+    ;
   fishInit = pkgs.writeText "fish-init.fish" ''
     zoxide init fish | source
     starship init fish | source
@@ -16,7 +45,7 @@ in
 pkgs.mkShellNoCC {
   name = "ssh-shell";
 
-  packages = with pkgs; [
+  packages = [
     # Prompts and shells
     starship
     zoxide

@@ -5,6 +5,14 @@
   ...
 }:
 let
+  inherit (pkgs)
+    autocorrect
+    docker-compose-language-service
+    dockerfile-language-server
+    libz
+    shellcheck
+    shfmt
+    ;
   inherit (lib)
     mkEnableOption
     mkIf
@@ -44,7 +52,7 @@ let
     "typos"
   ];
 
-  defaultPackages = with pkgs; [
+  defaultPackages = [
     autocorrect
     docker-compose-language-service
     dockerfile-language-server

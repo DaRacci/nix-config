@@ -2,6 +2,21 @@
   pkgs,
   ...
 }:
+let
+  inherit (pkgs.kdePackages)
+    ark
+    baloo-widgets
+    dolphin-plugins
+    elisa
+    ffmpegthumbs
+    gwenview
+    kate
+    khelpcenter
+    konsole
+    okular
+    plasma-browser-integration
+    ;
+in
 {
   imports = [
     ./default.nix
@@ -12,7 +27,7 @@
     orca.enable = false;
   };
 
-  environment.plasma6.excludePackages = with pkgs.kdePackages; [
+  environment.plasma6.excludePackages = [
     plasma-browser-integration
     konsole
     ark

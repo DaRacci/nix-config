@@ -1,6 +1,9 @@
 { pkgs, ... }:
+let
+  inherit (pkgs) obsidian;
+in
 {
-  home.packages = with pkgs; [ obsidian ];
+  home.packages = [ obsidian ];
 
   user.persistence.directories = [ ".config/obsidian" ];
 }

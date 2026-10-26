@@ -5,6 +5,19 @@
   ...
 }:
 let
+  inherit (lib.types)
+    attrs
+    attrsOf
+    enum
+    listOf
+    nullOr
+    package
+    path
+    str
+    submodule
+    ;
+  inherit (pkgs.python3Packages) toPythonApplication;
+  inherit (pkgs) bash nodejs uv;
   cfg = config.services.mcpo;
 
   npx = lib.getExe' pkgs.nodejs "npx";
@@ -44,12 +57,12 @@ let
   };
 in
 {
-  options.services.mcpo = with lib.types; {
+  options.services.mcpo = {
     enable = lib.mkEnableOption "mcpo (Model Context Protocol Orchestrator) service";
 
     package = lib.mkOption {
       type = package;
-      default = with pkgs.python3Packages; toPythonApplication pkgs.mcpo;
+      default = toPythonApplication pkgs.mcpo;
       description = "Package providing the mcpo executable.";
     };
 
@@ -138,14 +151,12 @@ in
 
       environment.HOME = "/var/lib/mcpo";
 
-      path =
-        with pkgs;
-        [
-          bash
-          nodejs
-          uv
-        ]
-        ++ cfg.extraPackages;
+      path = [
+        bash
+        nodejs
+        uv
+      ]
+      ++ cfg.extraPackages;
 
       serviceConfig = {
         EnvironmentFile = config.sops.templates.mcpoEnvironment.path;

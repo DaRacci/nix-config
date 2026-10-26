@@ -21,7 +21,35 @@
           containers = lib.mkForce { };
 
           packages =
-            with pkgs;
+            let
+              inherit (pkgs)
+                act
+                age
+                cocogitto
+                cryptsetup
+                dconf2nix
+                disko
+                dive
+                dix
+                git
+                home-manager
+                hunspellDicts
+                hyperfine
+                lix
+                nh
+                nil
+                nix-diff
+                nix-init
+                nix-tree
+                nix-update
+                nixd
+                openspec
+                sbctl
+                sops
+                ssh-to-age
+                vale
+                ;
+            in
             [
               # Cli Tools
               act # Github Action testing

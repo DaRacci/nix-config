@@ -3,8 +3,8 @@
   lib,
   ...
 }:
-with lib;
 let
+  inherit (lib) mkEnableOption mkIf;
   cfg = config.purpose.gaming.steam;
 in
 {

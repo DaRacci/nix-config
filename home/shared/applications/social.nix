@@ -1,6 +1,14 @@
 { pkgs, ... }:
+let
+  inherit (pkgs)
+    discord
+    nextcloud-talk-desktop
+    polari
+    tuba
+    ;
+in
 {
-  home.packages = with pkgs; [
+  home.packages = [
     nextcloud-talk-desktop
     discord
     tuba

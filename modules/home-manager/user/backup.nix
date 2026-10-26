@@ -5,6 +5,7 @@
   ...
 }:
 let
+  inherit (pkgs) kopia kopia-ui;
   inherit (lib) mkIf mkEnableOption;
 in
 {
@@ -13,7 +14,7 @@ in
   };
 
   config = mkIf config.user.backup.enable {
-    home.packages = with pkgs; [
+    home.packages = [
       kopia
       kopia-ui
     ];

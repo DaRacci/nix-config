@@ -1,6 +1,9 @@
 { pkgs, ... }:
+let
+  inherit (pkgs) protonmail-bridge protonmail-desktop;
+in
 {
-  home.packages = with pkgs; [
+  home.packages = [
     protonmail-bridge
     protonmail-desktop
   ];

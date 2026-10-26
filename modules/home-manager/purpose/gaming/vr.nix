@@ -5,6 +5,7 @@
   ...
 }:
 let
+  inherit (pkgs) android-tools oscavmgr vrcadvert;
   cfg = config.purpose.gaming.vr;
 in
 {
@@ -14,7 +15,7 @@ in
 
   config = lib.mkIf cfg.enable {
     home = {
-      packages = with pkgs; [
+      packages = [
         oscavmgr
         vrcadvert
         android-tools

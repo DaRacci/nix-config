@@ -75,7 +75,12 @@
       enableJIT = true;
       enableTCPIP = true;
 
-      extensions = ps: with ps; [ system_stats ];
+      extensions =
+        ps:
+        let
+          inherit (ps) system_stats;
+        in
+        [ system_stats ];
 
       authentication = ''
         # TYPE  DATABASE  USER  ADDRESS   AUTH-METHOD   [AUTH-OPTIONS]

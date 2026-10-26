@@ -5,6 +5,9 @@
   lib,
   ...
 }:
+let
+  inherit (pkgs) bashInteractive openssh toybox;
+in
 {
   imports = [
     # (modulesPath + "/profiles/perlless.nix")
@@ -33,14 +36,11 @@
 
   environment = {
     defaultPackages = lib.mkDefault [ ];
-    corePackages = lib.mkForce (
-      with pkgs;
-      [
-        bashInteractive
-        openssh
-        toybox
-      ]
-    );
+    corePackages = lib.mkForce [
+      bashInteractive
+      openssh
+      toybox
+    ];
   };
 
   fonts.fontconfig.enable = false;

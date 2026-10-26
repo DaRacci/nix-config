@@ -1,6 +1,9 @@
 { pkgs, ... }:
+let
+  inherit (pkgs) teams-for-linux;
+in
 {
-  home.packages = with pkgs; [
+  home.packages = [
     teams-for-linux
   ];
 

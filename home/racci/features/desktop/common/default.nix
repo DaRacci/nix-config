@@ -3,6 +3,9 @@
   pkgs,
   ...
 }:
+let
+  inherit (pkgs) fragments gnome-online-accounts-gtk picard;
+in
 {
   imports = [
     ./keyboard.nix
@@ -28,7 +31,7 @@
   };
 
   home = {
-    packages = with pkgs; [
+    packages = [
       fragments
       gnome-online-accounts-gtk
       picard

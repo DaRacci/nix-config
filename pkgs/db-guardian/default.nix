@@ -3,6 +3,7 @@
   python3Packages,
 }:
 let
+  inherit (lib.maintainers) racci;
   inherit (python3Packages) buildPythonApplication websockets pystemd;
 
   commonDrv = component: {
@@ -25,7 +26,7 @@ let
 
     meta = {
       license = lib.licenses.mit;
-      maintainers = with lib.maintainers; [ racci ];
+      maintainers = [ racci ];
       platforms = lib.platforms.linux;
       description = "Database Guardian WebSocket ${component}";
       mainProgram = "db-guardian-${component}";

@@ -5,6 +5,12 @@
 }:
 
 let
+  inherit (pkgs)
+    attic-client
+    gawk
+    gnupg
+    jq
+    ;
   inherit (pkgs.stdenv.hostPlatform) system;
   inherit (inputs.nix2container.packages.${system}) nix2container;
   buildLixImage = import "${inputs.lix}/docker.nix";
@@ -14,7 +20,7 @@ buildLixImage {
   name = "registry.racci.dev/lix-woodpecker";
   maxLayers = 128;
 
-  extraPkgs = with pkgs; [
+  extraPkgs = [
     gawk
     jq
     gnupg

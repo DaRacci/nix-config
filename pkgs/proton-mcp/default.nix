@@ -6,6 +6,10 @@
   setuptools,
   nix-update-script,
 }:
+let
+  inherit (python.pkgs) mcp python-dotenv requests;
+  inherit (lib.maintainers) racci;
+in
 buildPythonApplication rec {
   pname = "proton-mcp";
   version = "0-unstable-2025-09-01";
@@ -21,7 +25,7 @@ buildPythonApplication rec {
   doCheck = false;
 
   nativeBuildInputs = [ setuptools ];
-  propagatedBuildInputs = with python.pkgs; [
+  propagatedBuildInputs = [
     requests
     python-dotenv
     mcp
@@ -66,7 +70,7 @@ buildPythonApplication rec {
     description = "";
     homepage = "https://github.com/ccunning2/proton-mcp";
     license = lib.licenses.unfree; # FIXME: nix-init did not find a license
-    maintainers = with lib.maintainers; [ racci ];
+    maintainers = [ racci ];
     mainProgram = "proton-mcp";
     platforms = lib.platforms.all;
   };

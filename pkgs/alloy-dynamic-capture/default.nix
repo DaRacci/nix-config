@@ -6,6 +6,7 @@
   writeShellApplication,
 }:
 let
+  inherit (lib.maintainers) racci;
   inherit (python3Packages) buildPythonApplication;
 
   mkPythonTool =
@@ -30,7 +31,7 @@ let
 
       meta = {
         license = lib.licenses.mit;
-        maintainers = with lib.maintainers; [ racci ];
+        maintainers = [ racci ];
         platforms = lib.platforms.linux;
         inherit description;
         mainProgram = "alloy-dynamic-capture-${component}";

@@ -1,6 +1,9 @@
 { pkgs, ... }:
+let
+  inherit (pkgs) vintagestory;
+in
 {
-  home.packages = with pkgs; [ vintagestory ];
+  home.packages = [ vintagestory ];
 
   user.persistence.directories = [ ".config/VintagestoryData/" ];
 }

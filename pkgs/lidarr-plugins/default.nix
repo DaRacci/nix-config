@@ -20,6 +20,8 @@
   fixup-yarn-lock,
 }:
 let
+  inherit (python3Packages) requests;
+  inherit (lib.maintainers) racci;
   version = "3.1.2.4913";
   src = applyPatches {
     src = fetchFromGitHub {
@@ -138,7 +140,7 @@ buildDotnetModule rec {
   ];
   passthru = {
     updateScript = writers.writePython3 "lidarr-updater" {
-      libraries = with python3Packages; [ requests ];
+      libraries = [ requests ];
       makeWrapperArgs = [
         "--prefix"
         "PATH"
@@ -156,7 +158,7 @@ buildDotnetModule rec {
     description = "Looks and smells like Sonarr but made for music";
     homepage = "https://github.com/Lidarr/Lidarr/tree/plugins";
     license = lib.licenses.gpl3Only;
-    maintainers = with lib.maintainers; [ racci ];
+    maintainers = [ racci ];
     mainProgram = "lidarr-plugins";
     platforms = lib.platforms.all;
   };

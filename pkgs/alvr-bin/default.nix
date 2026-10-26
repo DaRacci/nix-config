@@ -30,6 +30,9 @@
   libXi,
   SDL2,
 }:
+let
+  inherit (lib.maintainers) racci;
+in
 stdenv.mkDerivation (finalAttrs: rec {
   pname = "alvr-bin";
   version = "20.12.1";
@@ -96,7 +99,7 @@ stdenv.mkDerivation (finalAttrs: rec {
     homepage = "https://github.com/alvr-org/ALVR/";
     changelog = "https://github.com/alvr-org/ALVR/releases/tag/v${finalAttrs.version}";
     license = lib.licenses.mit;
-    maintainers = with lib.maintainers; [ racci ];
+    maintainers = [ racci ];
     platforms = lib.platforms.linux;
     mainProgram = "alvr_dashboard";
   };

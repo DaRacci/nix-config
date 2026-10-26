@@ -2,6 +2,9 @@
   pkgs,
   ...
 }:
+let
+  inherit (pkgs) doggo procs ttl;
+in
 {
   imports = [
     ./atuin.nix
@@ -33,7 +36,7 @@
     '';
   };
 
-  home.packages = with pkgs; [
+  home.packages = [
     procs
     doggo
     ttl

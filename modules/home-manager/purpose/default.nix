@@ -1,6 +1,6 @@
 { lib, config, ... }:
-with lib;
 let
+  inherit (lib) mkEnableOption mkIf;
   cfg = config.purpose;
 in
 {

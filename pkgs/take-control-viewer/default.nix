@@ -15,6 +15,10 @@
   xdotool,
   xprop,
 }:
+let
+  inherit (lib) licenses maintainers platforms;
+  inherit (maintainers) racci;
+in
 mkWindowsAppNoCC rec {
   inherit wine;
 
@@ -153,10 +157,10 @@ mkWindowsAppNoCC rec {
     })
   ];
 
-  meta = with lib; {
+  meta = {
     description = "Take Control Viewer for N-Sight";
     license = licenses.unfreeRedistributable;
-    maintainers = with maintainers; [ racci ];
+    maintainers = [ racci ];
     platforms = platforms.linux;
     broken = !stdenv.hostPlatform.isx86;
     mainProgram = pname;

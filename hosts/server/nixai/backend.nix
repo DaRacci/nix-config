@@ -5,6 +5,7 @@
   ...
 }:
 let
+  inherit (pkgs) diffutils gh git;
   inherit (config.sops) placeholder;
 in
 {
@@ -38,7 +39,7 @@ in
 
     mcpo = {
       enable = false;
-      extraPackages = with pkgs; [
+      extraPackages = [
         git
         diffutils
         gh

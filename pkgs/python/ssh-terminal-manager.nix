@@ -12,6 +12,9 @@
   wakeonlan,
 }:
 
+let
+  inherit (lib.maintainers) racci;
+in
 buildPythonPackage rec {
   pname = "ssh-terminal-manager";
   version = "2.0.2";
@@ -47,6 +50,6 @@ buildPythonPackage rec {
     description = "Control and monitor devices with SSH terminal commands";
     homepage = "https://github.com/zhbjsh/ssh-terminal-manager";
     license = lib.licenses.mit;
-    maintainers = with lib.maintainers; [ racci ];
+    maintainers = [ racci ];
   };
 }

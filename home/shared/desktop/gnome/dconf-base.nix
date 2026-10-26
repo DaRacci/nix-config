@@ -1,6 +1,9 @@
 { lib, ... }:
+let
+  inherit (lib.hm.gvariant) mkUint32;
+in
 {
-  dconf.settings = with lib.hm.gvariant; {
+  dconf.settings = {
     "org/gnome/Console" = {
       font-scale = 1.6;
     };

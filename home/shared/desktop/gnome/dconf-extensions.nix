@@ -4,8 +4,29 @@
   lib,
   ...
 }:
+let
+  inherit (pkgs.gnomeExtensions)
+    appindicator
+    blur-my-shell
+    clipboard-indicator
+    fuzzy-app-search
+    gnome-40-ui-improvements
+    home-assistant-extension
+    just-perfection
+    open-bar
+    quick-settings-audio-devices-hider
+    quick-settings-audio-panel
+    quick-text
+    quick-web-search
+    tailscale-qs
+    trimmer
+    vitals
+    wallpaper-slideshow
+    ;
+  inherit (lib.hm.gvariant) mkTuple;
+in
 {
-  home.packages = with pkgs.gnomeExtensions; [
+  home.packages = [
     # Quick Access and Panel
     quick-settings-audio-devices-hider
     quick-settings-audio-panel
@@ -31,7 +52,7 @@
     blur-my-shell
   ];
 
-  dconf.settings = with lib.hm.gvariant; {
+  dconf.settings = {
     "org/gnome/shell" = {
       enabled-extensions = [
         "apps-menu@gnome-shell-extensions.gcampax.github.com"

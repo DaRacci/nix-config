@@ -6,6 +6,12 @@
   ...
 }:
 let
+  inherit (pkgs)
+    virt-manager
+    virtio-win
+    virtiofsd
+    win-spice
+    ;
   inherit (lib)
     escapeShellArg
     getExe'
@@ -310,7 +316,7 @@ in
 
       environment = {
         sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
-        systemPackages = with pkgs; [
+        systemPackages = [
           virt-manager
           virtiofsd
           virtio-win

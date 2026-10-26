@@ -1,6 +1,19 @@
 { pkgs, ... }:
+let
+  inherit (pkgs)
+    gnome-calculator
+    gnome-calendar
+    gnome-clocks
+    gnome-contacts
+    libreoffice
+    newsflash
+    papers
+    take-control-viewer
+    wike
+    ;
+in
 {
-  home.packages = with pkgs; [
+  home.packages = [
     libreoffice
     newsflash # RSS
     wike # Wiki

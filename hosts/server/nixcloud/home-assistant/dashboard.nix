@@ -2,9 +2,27 @@
   pkgs,
   ...
 }:
+let
+  inherit (pkgs.home-assistant-custom-lovelace-modules)
+    auto-entities
+    bubble-card
+    card-mod
+    clock-weather-card
+    decluttering-card
+    hourly-weather
+    mini-graph-card
+    mini-media-player
+    mushroom
+    plotly-chart-card
+    universal-remote-card
+    vacuum-card
+    versatile-thermostat-ui-card
+    weather-chart-card
+    ;
+in
 {
   services.home-assistant = rec {
-    customLovelaceModules = with pkgs.home-assistant-custom-lovelace-modules; [
+    customLovelaceModules = [
       auto-entities
       bubble-card
       card-mod

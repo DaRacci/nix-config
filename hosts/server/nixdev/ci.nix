@@ -4,6 +4,9 @@
   lib,
   ...
 }:
+let
+  inherit (pkgs) gh git jq;
+in
 {
   sops.secrets = {
     GITHUB_TOKEN = { };
@@ -16,7 +19,7 @@
     group = null;
     url = "https://github.com/DaRacci/nix-config";
     tokenFile = config.sops.secrets.GITHUB_TOKEN.path;
-    extraPackages = with pkgs; [
+    extraPackages = [
       git
       jq
       gh

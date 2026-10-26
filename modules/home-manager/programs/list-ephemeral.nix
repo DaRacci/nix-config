@@ -4,8 +4,17 @@
   lib,
   ...
 }:
-with lib;
 let
+  inherit (lib)
+    hasPrefix
+    isAttrs
+    mkEnableOption
+    mkIf
+    mkOption
+    removePrefix
+    types
+    ;
+  inherit (types) listOf str;
   cfg = config.programs.list-ephemeral;
   homeDir = config.home.homeDirectory;
   homePrefix = removePrefix "/" homeDir;
@@ -118,14 +127,14 @@ in
     };
 
     extraExcludes = mkOption {
-      type = with types; listOf str;
+      type = listOf str;
       default = [ ];
       example = [ "home/*/.local/share/Trash" ];
       description = "Additional exclude patterns for list-ephemeral.";
     };
 
     extraIncludes = mkOption {
-      type = with types; listOf str;
+      type = listOf str;
       default = [ ];
       example = [
         ".config/my-app"

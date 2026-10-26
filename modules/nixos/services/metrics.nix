@@ -6,6 +6,21 @@
   ...
 }:
 let
+  inherit (pkgs)
+    gawk
+    hacompanion
+    lm_sensors-perlless
+    nix
+    smartmontools
+    systemd
+    toybox
+    util-linux
+    zfs
+    gnugrep
+    curl
+    perl
+    perlPackages
+    ;
   inherit (lib)
     concatStringsSep
     filterAttrs
@@ -357,7 +372,7 @@ in
         after = [ "network-online.target" ];
         requires = [ "network-online.target" ];
 
-        path = with pkgs; [
+        path = [
           hacompanion
           systemd
           lm_sensors-perlless
@@ -401,7 +416,7 @@ in
         path = getExe (
           pkgs.writeShellApplication {
             name = "upgrade-status";
-            runtimeInputs = with pkgs; [
+            runtimeInputs = [
               gnugrep
               gawk
               systemd
@@ -468,7 +483,7 @@ in
           serviceConfig.ExecStart = getExe (
             pkgs.writeShellApplication {
               name = "upgrade-status";
-              runtimeInputs = with pkgs; [
+              runtimeInputs = [
                 curl
                 perl
                 perlPackages.URIEscapeXS

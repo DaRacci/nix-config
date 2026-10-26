@@ -3,8 +3,41 @@
   lib,
   ...
 }:
+let
+  inherit (pkgs)
+    decibels
+    feishin
+    ff2mpv-rust
+    footage
+    gimp3
+    gnome-obfuscate
+    identity
+    loupe
+    parabolic
+    tsukimi
+    ;
+  inherit (pkgs.mpvScripts)
+    memo
+    modernz
+    mpris
+    mpv-cheatsheet-ng
+    mpv-notify-send
+    quality-menu
+    reload
+    smartskip
+    sponsorblock-minimal
+    thumbfast
+    videoclip
+    visualizer
+    vr-reversal
+    webtorrent-mpv-hook
+    youtube-chat
+    youtube-upnext
+    ;
+  inherit (lib.hm.gvariant) mkUint32;
+in
 {
-  home.packages = with pkgs; [
+  home.packages = [
     # Audio
     decibels
     feishin
@@ -27,7 +60,7 @@
 
   programs.mpv = {
     enable = true;
-    scripts = with pkgs.mpvScripts; [
+    scripts = [
       youtube-upnext
       youtube-chat
       sponsorblock-minimal
@@ -217,7 +250,7 @@
         ];
     };
 
-  dconf.settings = with lib.hm.gvariant; {
+  dconf.settings = {
     "net/nokyan/Resources" = {
       detailed-priority = true;
       graph-data-points = mkUint32 240;

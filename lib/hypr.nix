@@ -1,4 +1,7 @@
 { lib, ... }:
+let
+  inherit (lib.types) listOf nonEmptyStr oneOf;
+in
 rec {
   types = {
     # https://wiki.hyprland.org/Configuring/Binds/#bind-flags
@@ -21,7 +24,7 @@ rec {
     bindModifier = lib.types.enum (builtins.attrNames types.bindModifier);
   };
 
-  optionTypes = with lib.types; {
+  optionTypes = {
     bindModifier = lib.mkOption {
       type = oneOf [
         enums.bindModifier

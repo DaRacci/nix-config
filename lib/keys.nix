@@ -1,4 +1,7 @@
 { inputs, lib, ... }:
+let
+  inherit (lib.types) listOf oneOf str;
+in
 rec {
   asciiKeys = import "${inputs.nixpkgs}/lib/ascii-table.nix";
 
@@ -117,7 +120,6 @@ rec {
   alphanumericKeysEnum = lib.types.enum alphanumericKeys;
 
   keyType =
-    with lib.types;
     (oneOf [
       str
       alphanumericKeysEnum

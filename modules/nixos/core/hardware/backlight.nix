@@ -5,6 +5,7 @@
   ...
 }:
 let
+  inherit (pkgs) ddcutil luminance;
   inherit (lib)
     mkIf
     mkMerge
@@ -28,7 +29,7 @@ in
     (mkIf cfg.backlight.enable {
       hardware.acpilight.enable = true;
 
-      environment.systemPackages = with pkgs; [
+      environment.systemPackages = [
         ddcutil
         luminance
       ];

@@ -2,9 +2,18 @@
   pkgs,
   ...
 }:
+let
+  inherit (pkgs)
+    duf
+    dust
+    gping
+    sd
+    xh
+    ;
+in
 {
   home = {
-    packages = with pkgs; [
+    packages = [
       dust
       duf
       gping

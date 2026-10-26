@@ -4,8 +4,14 @@
   config,
   ...
 }:
-with lib;
 let
+  inherit (lib)
+    mkEnableOption
+    mkOption
+    optional
+    optionals
+    types
+    ;
   cfg = config.virtualisation.vfio;
 in
 {

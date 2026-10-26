@@ -7,6 +7,9 @@
   chromium,
   nodejs,
 }:
+let
+  inherit (lib.maintainers) racci;
+in
 buildNpmPackage (_: {
   pname = "mcp-server-amazon";
   version = "0-unstable-2025-07-25";
@@ -46,7 +49,7 @@ buildNpmPackage (_: {
     description = "Unofficial Amazon Model Context Protocol Server (MCP) - Search products and purchase directly from Claude AI";
     homepage = "https://github.com/rigwild/mcp-server-amazon";
     license = lib.licenses.mit;
-    maintainers = with lib.maintainers; [ racci ];
+    maintainers = [ racci ];
     mainProgram = "mcp-server-amazon";
     platforms = lib.platforms.all;
   };

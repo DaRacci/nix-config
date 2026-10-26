@@ -4,8 +4,22 @@
   lib,
   ...
 }:
-with lib;
 let
+  inherit (lib)
+    concatStringsSep
+    mapAttrs'
+    mkEnableOption
+    mkIf
+    mkOption
+    nameValuePair
+    types
+    ;
+  inherit (types)
+    listOf
+    str
+    attrsOf
+    submodule
+    ;
   cfg = config.user.autorun;
 
   packageDefinition =
@@ -46,7 +60,7 @@ let
         };
 
         extraArgs = mkOption {
-          type = with types; listOf str;
+          type = listOf str;
           default = "";
           example = "--silent";
           description = ''
@@ -76,7 +90,7 @@ in
     };
 
     services = mkOption {
-      type = with types; attrsOf (submodule packageDefinition);
+      type = attrsOf (submodule packageDefinition);
       default = { };
       description = ''
         List of services to be started automatically.

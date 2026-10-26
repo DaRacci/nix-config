@@ -1,6 +1,9 @@
 { pkgs, ... }:
+let
+  inherit (pkgs) resources;
+in
 {
-  home.packages = with pkgs; [
+  home.packages = [
     resources
   ];
 }

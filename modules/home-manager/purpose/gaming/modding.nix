@@ -4,8 +4,14 @@
   lib,
   ...
 }:
-with lib;
 let
+  inherit (lib)
+    mkEnableOption
+    mkIf
+    optional
+    optionals
+    ;
+  inherit (pkgs) bs-manager ficsit-cli r2modman;
   cfg = config.purpose.gaming.modding;
 in
 {
@@ -18,7 +24,6 @@ in
 
   config = mkIf cfg.enable {
     home.packages =
-      with pkgs;
       (optional cfg.enableSatisfactory ficsit-cli)
       ++ (optional cfg.enableBeatSaber bs-manager)
       ++ (optionals cfg.enableThunderstore [ r2modman ]);

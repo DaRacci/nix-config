@@ -1,5 +1,6 @@
 { config, lib, ... }:
 let
+  inherit (lib.types) listOf str submodule;
   inherit (lib) mkIf mkOption;
   cfg = config.hardware.bluetooth;
 in
@@ -7,21 +8,19 @@ in
   options.hardware.bluetooth = {
     disabledDevices = mkOption {
       default = [ ];
-      type =
-        with lib.types;
-        listOf (submodule {
-          options = {
-            vendorId = mkOption {
-              type = str;
-              description = "The vendor ID of the device to disable.";
-            };
-
-            productId = mkOption {
-              type = str;
-              description = "The product ID of the device to disable.";
-            };
+      type = listOf (submodule {
+        options = {
+          vendorId = mkOption {
+            type = str;
+            description = "The vendor ID of the device to disable.";
           };
-        });
+
+          productId = mkOption {
+            type = str;
+            description = "The product ID of the device to disable.";
+          };
+        };
+      });
     };
   };
 

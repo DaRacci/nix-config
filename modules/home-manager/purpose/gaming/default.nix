@@ -4,8 +4,9 @@
   lib,
   ...
 }:
-with lib;
 let
+  inherit (lib) mkEnableOption mkIf optionals;
+  inherit (pkgs) dualsensectl trigger-control;
   cfg = config.purpose.gaming;
 in
 {
@@ -30,13 +31,10 @@ in
     xdg.userDirs.extraConfig.XDG_GAME_DIR = "${config.home.homeDirectory}/Games";
     user.persistence.directories = [ "Games" ];
 
-    home.packages = optionals cfg.controllerSupport (
-      with pkgs;
-      [
-        dualsensectl
-        trigger-control
-      ]
-    );
+    home.packages = optionals cfg.controllerSupport [
+      dualsensectl
+      trigger-control
+    ];
 
     programs.mangohud = {
       enable = true;

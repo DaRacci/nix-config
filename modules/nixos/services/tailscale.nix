@@ -4,10 +4,11 @@
   ...
 }:
 let
+  inherit (lib.types) listOf str;
   cfg = config.services.tailscale;
 in
 {
-  options.services.tailscale = with lib.types; {
+  options.services.tailscale = {
     tags = lib.mkOption {
       type = listOf str;
       default = [ ];

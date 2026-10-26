@@ -1,6 +1,9 @@
 { pkgs, ... }:
+let
+  inherit (pkgs) keypunch vial wootility;
+in
 {
-  home.packages = with pkgs; [
+  home.packages = [
     keypunch
     vial
     wootility

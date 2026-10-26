@@ -3,8 +3,16 @@
   pkgs,
   ...
 }:
+let
+  inherit (pkgs)
+    _1password-cli
+    _1password-gui
+    bitwarden-cli
+    bitwarden-desktop
+    ;
+in
 {
-  home.packages = with pkgs; [
+  home.packages = [
     _1password-gui
     _1password-cli
     bitwarden-desktop

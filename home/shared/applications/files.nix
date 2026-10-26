@@ -4,8 +4,20 @@
   lib,
   ...
 }:
+let
+  inherit (pkgs)
+    baobab
+    ffmpegthumbnailer
+    file-roller
+    gnome-disk-utility
+    impression
+    nautilus
+    nautilus-open-any-terminal
+    nautilus-python
+    ;
+in
 {
-  home.packages = with pkgs; [
+  home.packages = [
     nautilus
     nautilus-python
     nautilus-open-any-terminal

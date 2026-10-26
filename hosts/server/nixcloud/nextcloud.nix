@@ -161,7 +161,27 @@ in
 
       # Just copied what AIO provides.
       phpExtraExtensions =
-        all: with all; [
+        all:
+        let
+          inherit (all)
+            bcmath
+            exif
+            ftp
+            gd
+            gmp
+            igbinary
+            imap
+            ldap
+            pcntl
+            pdlib
+            pdo_pgsql
+            pgsql
+            smbclient
+            sysvsem
+            zip
+            ;
+        in
+        [
           pdlib
           bcmath
           exif

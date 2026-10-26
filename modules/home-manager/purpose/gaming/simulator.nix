@@ -5,6 +5,7 @@
   ...
 }:
 let
+  inherit (pkgs) boxflat;
   cfg = config.purpose.gaming.simulator;
 in
 {
@@ -14,7 +15,7 @@ in
   };
 
   config = lib.mkIf (cfg.enable && cfg.enableRacing) {
-    home.packages = with pkgs; [ boxflat ];
+    home.packages = [ boxflat ];
 
     user.persistence.directories = [ ".config/boxflat" ];
   };

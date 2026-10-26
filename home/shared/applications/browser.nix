@@ -6,8 +6,15 @@
   lib,
   ...
 }:
-with lib;
 let
+  inherit (lib)
+    elemAt
+    listToAttrs
+    mapAttrsToList
+    nameValuePair
+    optionalAttrs
+    trivial
+    ;
   mkLockedValue = value: {
     Value = value;
     Status = "locked";

@@ -21,7 +21,9 @@ let
       mkdir $out
       ${concatStringsSep "\n" (
         map (lang: "cp ${lang} $out/${lang.name}") (
-          with tesseract.passthru.languages;
+          let
+            inherit (tesseract.passthru.languages) eng jpn osd;
+          in
           [
             eng
             jpn

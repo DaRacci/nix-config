@@ -4,6 +4,7 @@
   writeShellApplication,
 }:
 let
+  inherit (lib.maintainers) racci;
   wyoming = python3.pkgs.wyoming;
   py = python3.withPackages (_: [ wyoming ]);
 in
@@ -17,7 +18,7 @@ writeShellApplication {
     description = "Wyoming protocol client that sends WAV audio to a faster-whisper server and writes transcript .txt";
     homepage = "https://github.com/NousResearch/hermes-agent";
     license = lib.licenses.mit;
-    maintainers = with lib.maintainers; [ racci ];
+    maintainers = [ racci ];
     platforms = lib.platforms.linux;
   };
 }

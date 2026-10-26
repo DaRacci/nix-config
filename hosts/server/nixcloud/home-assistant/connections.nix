@@ -2,9 +2,12 @@
   pkgs,
   ...
 }:
+let
+  inherit (pkgs.home-assistant-custom-components) auth_oidc;
+in
 {
   services.home-assistant = {
-    customComponents = with pkgs.home-assistant-custom-components; [
+    customComponents = [
       auth_oidc
     ];
 

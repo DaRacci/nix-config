@@ -4,17 +4,23 @@
   lib,
   ...
 }:
+let
+  inherit (pkgs)
+    ctop
+    iotop-c
+    nvtopPackages
+    sysstat
+    ;
+in
 {
-  home.packages =
-    with pkgs;
-    [
-      ctop
-      iotop-c
-      sysstat
-    ]
-    ++ lib.optionals (osConfig != null && osConfig.hardware.graphics.hasAcceleration) [
-      nvtopPackages.full
-    ];
+  home.packages = [
+    ctop
+    iotop-c
+    sysstat
+  ]
+  ++ lib.optionals (osConfig != null && osConfig.hardware.graphics.hasAcceleration) [
+    nvtopPackages.full
+  ];
 
   programs = {
     btop = {

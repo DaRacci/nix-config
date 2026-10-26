@@ -4,8 +4,19 @@
   lib,
   ...
 }:
-with lib;
 let
+  inherit (lib)
+    mkEnableOption
+    mkIf
+    mkOption
+    types
+    ;
+  inherit (types)
+    either
+    listOf
+    str
+    submodule
+    ;
   inherit (lib) literalExpression;
   cfg = config.user.persistence;
 in
@@ -30,19 +41,17 @@ in
     };
 
     directories = mkOption {
-      type =
-        with types;
-        listOf (
-          either str (submodule {
-            options = {
-              directory = mkOption {
-                type = str;
-                default = null;
-                description = "The directory path to be linked.";
-              };
+      type = listOf (
+        either str (submodule {
+          options = {
+            directory = mkOption {
+              type = str;
+              default = null;
+              description = "The directory path to be linked.";
             };
-          })
-        );
+          };
+        })
+      );
       default = [ ];
       example = [
         "Downloads"
@@ -64,7 +73,7 @@ in
     };
 
     files = mkOption {
-      type = with types; listOf str;
+      type = listOf str;
       default = [ ];
       example = [ ".screenrc" ];
       description = ''

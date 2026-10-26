@@ -1,6 +1,12 @@
 { config, lib, ... }:
-with lib;
 let
+  inherit (lib)
+    mkEnableOption
+    mkIf
+    mkOption
+    types
+    ;
+  inherit (types) attrsOf submodule;
   cfg = config.virtual-machines;
   guestOpts =
     { name, ... }:
@@ -151,7 +157,7 @@ in
 
     guests = mkOption {
       default = { };
-      type = with types; attrsOf (submodule guestOpts);
+      type = attrsOf (submodule guestOpts);
     };
   };
 

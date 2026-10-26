@@ -1,6 +1,9 @@
 { pkgs, ... }:
+let
+  inherit (pkgs) bottles;
+in
 {
-  home.packages = with pkgs; [ bottles ];
+  home.packages = [ bottles ];
 
   user.persistence.directories = [
     ".local/share/bottles"

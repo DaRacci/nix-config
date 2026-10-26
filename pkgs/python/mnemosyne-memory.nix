@@ -40,7 +40,9 @@ buildPythonPackage (attrs: {
       anyio
     ];
     all =
-      with attrs.passthru;
+      let
+        inherit (attrs.passthru) optional-dependencies;
+      in
       optional-dependencies.embeddings ++ optional-dependencies.mcp ++ optional-dependencies.sync;
   };
 

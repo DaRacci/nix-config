@@ -44,7 +44,14 @@ in
           "HOME=${config.home.homeDirectory}"
           "PATH=${
             lib.makeBinPath (
-              with pkgs;
+              let
+                inherit (pkgs)
+                  bash
+                  nodejs
+                  toybox
+                  uv
+                  ;
+              in
               [
                 bash
                 toybox

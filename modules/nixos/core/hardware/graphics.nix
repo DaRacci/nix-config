@@ -5,6 +5,8 @@
   ...
 }:
 let
+  inherit (lib.types) enum listOf;
+  inherit (pkgs.rocmPackages) clr hipblas rocblas;
   inherit (lib) mkOption optionals mkIf;
   cfg = config.hardware.graphics;
 
@@ -73,12 +75,10 @@ in
 {
   options.hardware.graphics = {
     manufacturer = mkOption {
-      type =
-        with lib.types;
-        listOf (enum [
-          "amd"
-          "nvidia"
-        ]);
+      type = listOf (enum [
+        "amd"
+        "nvidia"
+      ]);
       default = [ ];
       description = "The manufacturer of your GPU(s)";
     };
@@ -169,7 +169,7 @@ in
       let
         rocmEnv = pkgs.symlinkJoin {
           name = "rocm-combined";
-          paths = with pkgs.rocmPackages; [
+          paths = [
             rocblas
             hipblas
             clr

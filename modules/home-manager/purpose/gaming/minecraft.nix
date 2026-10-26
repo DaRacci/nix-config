@@ -5,6 +5,7 @@
   ...
 }:
 let
+  inherit (pkgs) prismlauncher;
   cfg = config.purpose.gaming.minecraft;
 in
 {
@@ -13,7 +14,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = with pkgs; [
+    home.packages = [
       prismlauncher
     ];
 

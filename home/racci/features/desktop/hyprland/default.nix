@@ -5,6 +5,9 @@
   lib,
   ...
 }:
+let
+  inherit (pkgs.hyprlandPlugins) hypr-dynamic-cursors;
+in
 {
   imports = [
     "${self}/home/racci/features/desktop/common"
@@ -54,10 +57,10 @@
       ];
     };
 
-    plugins = with pkgs.hyprlandPlugins; [
+    plugins = [
       hypr-dynamic-cursors
     ];
 
-    custom-settings.permission.plugin = with pkgs.hyprlandPlugins; [ hypr-dynamic-cursors ];
+    custom-settings.permission.plugin = [ hypr-dynamic-cursors ];
   };
 }

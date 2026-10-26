@@ -1,6 +1,9 @@
 { pkgs, ... }:
+let
+  inherit (pkgs) lutris;
+in
 {
-  home.packages = with pkgs; [ lutris ];
+  home.packages = [ lutris ];
 
   user.persistence.directories = [
     ".config/lutris"

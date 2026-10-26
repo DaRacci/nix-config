@@ -4,6 +4,7 @@
   ...
 }:
 let
+  inherit (pkgs) gh-eco gh-markdown-preview gh-notify;
   jj-desc-wrapped = pkgs.writeShellScriptBin "jj-desc" ''
     export LLM_MODEL="deepseek/deepseek-v4-flash"
     export LLM_PROVIDER="openrouter"
@@ -166,7 +167,7 @@ in
 
     gh = {
       enable = true;
-      extensions = with pkgs; [
+      extensions = [
         gh-markdown-preview
         gh-notify
         gh-eco

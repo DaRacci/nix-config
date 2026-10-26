@@ -5,6 +5,47 @@
   pkgs,
   ...
 }:
+let
+  inherit (pkgs)
+    alsa-lib
+    at-spi2-atk
+    at-spi2-core
+    atk
+    cairo
+    cups
+    curl
+    dbus
+    expat
+    fontconfig
+    freetype
+    fuse3
+    gdk-pixbuf
+    glib
+    gtk3
+    gtk4
+    icu
+    libGL
+    libappindicator-gtk3
+    libdrm
+    libglvnd
+    libnotify
+    libpulseaudio
+    libunwind
+    libusb1
+    libuuid
+    libxkbcommon
+    libxml2
+    nspr
+    nss
+    openssl
+    pango
+    pipewire
+    stdenv
+    systemd
+    vulkan-loader
+    zlib
+    ;
+in
 {
   imports = [
     inputs.jovian.nixosModules.default
@@ -71,7 +112,7 @@
 
   programs = {
     nix-ld.enable = true;
-    nix-ld.libraries = with pkgs; [
+    nix-ld.libraries = [
       alsa-lib
       at-spi2-atk
       at-spi2-core

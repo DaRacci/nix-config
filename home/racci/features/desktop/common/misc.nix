@@ -1,6 +1,9 @@
 { pkgs, ... }:
+let
+  inherit (pkgs) bustle door-knocker gnome-maps;
+in
 {
-  home.packages = with pkgs; [
+  home.packages = [
     gnome-maps
     door-knocker
     bustle

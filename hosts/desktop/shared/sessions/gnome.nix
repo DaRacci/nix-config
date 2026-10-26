@@ -1,4 +1,14 @@
 { pkgs, lib, ... }:
+let
+  inherit (pkgs)
+    gnome-calculator
+    gnome-connections
+    gnome-text-editor
+    gnome-tour
+    simple-scan
+    yelp
+    ;
+in
 {
   imports = [
     ./default.nix
@@ -24,7 +34,7 @@
     };
   };
 
-  environment.gnome.excludePackages = with pkgs; [
+  environment.gnome.excludePackages = [
     gnome-tour
     gnome-text-editor
     gnome-calculator

@@ -18,6 +18,9 @@
   unidecode,
 }:
 
+let
+  inherit (lib.maintainers) racci;
+in
 buildPythonPackage rec {
   pname = "pyaarlo";
   version = "0.8.0.22";
@@ -60,6 +63,6 @@ buildPythonPackage rec {
     homepage = "https://github.com/twrecked/pyaarlo";
     changelog = "https://github.com/twrecked/pyaarlo/blob/${src.rev}/changelog";
     license = lib.licenses.gpl3;
-    maintainers = with lib.maintainers; [ racci ];
+    maintainers = [ racci ];
   };
 }

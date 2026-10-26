@@ -5,8 +5,14 @@
   ...
 }:
 
-with lib;
 let
+  inherit (lib)
+    mkEnableOption
+    mkIf
+    mkOption
+    types
+    ;
+  inherit (lib.maintainers) racci;
   cfg = config.hardware.openrgb;
 in
 {
@@ -42,6 +48,6 @@ in
   };
 
   meta = {
-    maintainers = with lib.maintainers; [ racci ];
+    maintainers = [ racci ];
   };
 }

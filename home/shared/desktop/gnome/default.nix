@@ -1,5 +1,11 @@
 { self, pkgs, ... }:
 let
+  inherit (pkgs)
+    eyedropper
+    glib
+    gnome-decoder
+    raider
+    ;
   inherit (pkgs) lib;
 in
 {
@@ -12,7 +18,7 @@ in
     ./dconf-extensions.nix
   ];
 
-  home.packages = with pkgs; [
+  home.packages = [
     glib
     gnome-decoder
     eyedropper

@@ -3,6 +3,13 @@
   pkgs,
   ...
 }:
+let
+  inherit (pkgs.home-assistant-custom-components)
+    philips_airpurifier_coap
+    smartir
+    waste_collection_schedule
+    ;
+in
 {
   imports = [
     ./connections.nix
@@ -34,7 +41,27 @@
       enable = true;
       package = pkgs.home-assistant.override {
         extraPackages =
-          ps: with ps; [
+          ps:
+          let
+            inherit (ps)
+              aiogithubapi
+              google-nest-sdm
+              grpcio
+              langchain
+              langchain-core
+              langchain-google-genai
+              langchain-ollama
+              langchain-openai
+              langgraph
+              langgraph-checkpoint-postgres
+              ollama
+              openai
+              pynetgear
+              spotifyaio
+              transformers
+              ;
+          in
+          [
             aiogithubapi
             pynetgear
             google-nest-sdm
@@ -60,7 +87,7 @@
             langchain-google-genai
           ];
       };
-      customComponents = with pkgs.home-assistant-custom-components; [
+      customComponents = [
         #TODO:https://github.com/marcolivierarsenault/moonraker-home-assistant/issues/789
         # moonraker
         waste_collection_schedule

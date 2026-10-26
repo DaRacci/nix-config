@@ -7,8 +7,9 @@
   lib,
   ...
 }:
-with lib;
 let
+  inherit (lib) mkEnableOption mkIf;
+  inherit (pkgs) blender;
   cfg = config.purpose.modelling.blender;
 in
 {
@@ -17,7 +18,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.packages = with pkgs; [ blender ];
+    home.packages = [ blender ];
 
     user.persistence.directories = [ ".config/blender" ];
   };

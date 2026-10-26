@@ -16,7 +16,11 @@
   services = {
     home-assistant = {
       extraPackages =
-        ps: with ps; [
+        ps:
+        let
+          inherit (ps) psycopg2;
+        in
+        [
           psycopg2
         ];
 
@@ -25,7 +29,12 @@
       };
     };
 
-    postgresql.extensions = ps: with ps; [ pgvector ];
+    postgresql.extensions =
+      ps:
+      let
+        inherit (ps) pgvector;
+      in
+      [ pgvector ];
   };
 
   systemd.services.postgresql-setup.serviceConfig.ExecStartPost =

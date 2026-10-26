@@ -9,6 +9,9 @@
   python-slugify,
 }:
 
+let
+  inherit (lib.maintainers) racci;
+in
 buildPythonPackage rec {
   pname = "terminal-manager";
   version = "2.0.2";
@@ -41,6 +44,6 @@ buildPythonPackage rec {
     description = "Control and monitor devices with terminal commands";
     homepage = "https://github.com/zhbjsh/terminal-manager";
     license = lib.licenses.mit;
-    maintainers = with lib.maintainers; [ racci ];
+    maintainers = [ racci ];
   };
 }
