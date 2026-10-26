@@ -10,8 +10,6 @@ in
 {
   sops = {
     secrets = {
-      "AI_AGENT/AZURE_FOUNDRY_API_KEY" = { };
-      "AI_AGENT/AZURE_FOUNDRY_BASE_URL" = { };
       "AI_AGENT/OPENROUTER_API_KEY" = { };
       "AI_AGENT/DISCORD_BOT_TOKEN" = { };
       "AI_AGENT/API_SERVER_TOKEN" = { };
@@ -20,8 +18,6 @@ in
     };
 
     templates."HERMES_ENV".content = lib.toShellVars {
-      AZURE_FOUNDRY_API_KEY = config.sops.placeholder."AI_AGENT/AZURE_FOUNDRY_API_KEY";
-      AZURE_FOUNDRY_BASE_URL = config.sops.placeholder."AI_AGENT/AZURE_FOUNDRY_BASE_URL";
       OPENROUTER_API_KEY = config.sops.placeholder."AI_AGENT/OPENROUTER_API_KEY";
       SEARXNG_URL = "https://search.racci.dev";
 

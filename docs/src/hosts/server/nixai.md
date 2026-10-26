@@ -38,8 +38,6 @@ It runs the AI agent, local inference via Ollama, the Open WebUI chat interface,
 
 | Secret key                        | Purpose                       |
 | --------------------------------- | ----------------------------- |
-| `AI_AGENT/AZURE_FOUNDRY_API_KEY`  | Model API key (Azure Foundry) |
-| `AI_AGENT/AZURE_FOUNDRY_BASE_URL` | Model API base URL            |
 | `AI_AGENT/OPENROUTER_API_KEY`     | OpenRouter model API key      |
 | `AI_AGENT/DISCORD_BOT_TOKEN`      | Discord bot token             |
 | `AI_AGENT/API_SERVER_TOKEN`       | Agent API server auth         |
