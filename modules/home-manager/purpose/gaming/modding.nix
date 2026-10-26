@@ -21,10 +21,7 @@ in
       with pkgs;
       (optional cfg.enableSatisfactory ficsit-cli)
       ++ (optional cfg.enableBeatSaber bs-manager)
-      ++ (optionals cfg.enableThunderstore [
-        # gale
-        r2modman
-      ]);
+      ++ (optionals cfg.enableThunderstore [ r2modman ]);
 
     user.persistence.directories =
       (optional cfg.enableSatisfactory ".local/share/ficsit")
