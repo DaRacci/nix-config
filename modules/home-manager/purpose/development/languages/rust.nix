@@ -18,6 +18,9 @@ import ./mkLanguage.nix {
       name = "rust-analyzer";
       package = pkgs.rust-analyzer;
       filetypes = [ ".rs" ];
+
+      # formats with rustfmt.
+      providesFormatting = true;
     }
   ];
 

@@ -15,6 +15,7 @@ let
 
   lsp = helpers.lsp languages;
   formatters = helpers.formatters languages;
+  lspFormatters = helpers.lspFormatters languages;
 
   binaryName = descriptor: if descriptor.binary != null then descriptor.binary else descriptor.name;
 
@@ -47,6 +48,13 @@ let
       }
       // optionalAttrs (descriptor.args != [ ]) { args = descriptor.args; };
 
+  lspFormats =
+    language:
+    let
+      matches = filter (descriptor: builtins.elem language (helixLanguages descriptor)) lspFormatters;
+    in
+    matches != [ ];
+
   languageEntry =
     language:
     let
@@ -54,6 +62,16 @@ let
         descriptor: builtins.elem language (helixLanguages descriptor)
       ) formatters;
       languageServers = filter (descriptor: builtins.elem language (helixLanguages descriptor)) lsp;
+
+      # A formatting server wins over an external formatter,
+      # and Helix formats with the server when no formatter is set.
+      formatter =
+        if lspFormats language then
+          null
+        else if languageFormatters != [ ] then
+          formatterEntry (builtins.head languageFormatters)
+        else
+          null;
     in
     {
       name = language;
@@ -61,9 +79,11 @@ let
     // optionalAttrs (languageServers != [ ]) {
       "language-servers" = map (descriptor: descriptor.name) languageServers;
     }
-    // optionalAttrs (languageFormatters != [ ]) {
+    // optionalAttrs (lspFormats language || formatter != null) {
       auto-format = true;
-      formatter = formatterEntry (builtins.head languageFormatters);
+    }
+    // optionalAttrs (formatter != null) {
+      inherit formatter;
     };
 in
 {

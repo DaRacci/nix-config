@@ -33,6 +33,9 @@ import ./mkLanguage.nix {
         ".yml"
       ];
       languages = [ "yaml" ];
+
+      # formats with prettier.
+      providesFormatting = true;
     }
     {
       name = "vscode-json-language-server";
@@ -77,6 +80,7 @@ import ./mkLanguage.nix {
       ];
       filetypes = [ ".toml" ];
       languages = [ "toml" ];
+      providesFormatting = true;
     }
     {
       name = "bash-language-server";
@@ -88,6 +92,9 @@ import ./mkLanguage.nix {
         ".zsh"
       ];
       languages = [ "bash" ];
+
+      # formats with shfmt
+      providesFormatting = true;
     }
     {
       name = "dockerfile-language-server";

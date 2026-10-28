@@ -31,6 +31,7 @@ let
     ;
   inherit (types)
     attrs
+    bool
     listOf
     nullOr
     package
@@ -100,6 +101,16 @@ let
         type = attrs;
         default = { };
         description = "Environment variables for the server process.";
+      };
+
+      providesFormatting = mkOption {
+        type = bool;
+        default = false;
+        description = ''
+          Whether this server also formats the language.
+          Renderers then format with the language server instead of an external formatter,
+          so editor formatting inherits the server's project knowledge, such as a crate's edition for rust-analyzer.
+        '';
       };
 
       editors = mkOption {

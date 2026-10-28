@@ -47,8 +47,31 @@ Every descriptor is self-describing, so editors never hard-code language knowled
   settings = { };
   env = { };
   editors = { };              # per-editor overrides, keyed by editor name
+  providesFormatting = false;  # server also formats; see below
 }
 ```
+
+### Servers that format
+
+An LSP descriptor may set `providesFormatting = true` to declare that the server
+formats the language. Renderers that support language-server formatting then use
+that server instead of an external formatter descriptor:
+
+- Zed emits `formatter = { language_server = { name = <server>; }; }`.
+- Helix sets `auto-format = true` and omits `formatter`, so Helix formats with the server.
+- OpenCode has no language-server formatting and keeps using the external formatter descriptor.
+
+This keeps formatting aligned with the server's own project knowledge, such as the
+crate edition rust-analyzer passes to `rustfmt`. A language therefore keeps its
+external formatter descriptor for editors that cannot format through a server.
+Capability is always declared explicitly; never inferred from a server's presence,
+because many servers (`pyright`, `marksman`, `autocorrect`) do not format.
+
+Servers that currently opt in: `rust-analyzer`, `clangd`, `gopls`, `nil`, `taplo`,
+`yaml-language-server`, and `bash-language-server`.
+Each of these formats with the same engine as the language's external formatter,
+so opting in does not change formatting output,
+except `bash-language-server`, which passes editor indent and `.editorconfig` to `shfmt`.
 
 ### Editor renderers
 
@@ -96,6 +119,8 @@ never `"C#"` and `"c-sharp"` separately.
   instead of pinning store paths.
 - Launch arguments are shared across editors. Use `editors.<name>` when an editor
   needs different flags, for example formatter write flags in OpenCode.
+- A server marked `providesFormatting` takes precedence over external formatter
+  descriptors in Zed and Helix. Keep the external formatter declared for OpenCode.
 - Zed settings merge recursively. `userSettings` values take precedence over the module defaults.
 - `languages.common` is enabled with `purpose.development.enable`; disable it
   explicitly when a host should not receive the shared config-format tooling.

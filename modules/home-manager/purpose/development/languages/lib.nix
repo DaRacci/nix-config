@@ -1,6 +1,6 @@
 { lib }:
 let
-  inherit (builtins) filter map;
+  inherit (builtins) filter;
   inherit (lib)
     concatLists
     filterAttrs
@@ -32,6 +32,12 @@ let
 
   lsp = flatten "lsp";
   formatters = flatten "formatters";
+
+  /*
+    Servers that also format.
+    Renderers prefer these over external formatters on languages they serve.
+  */
+  lspFormatters = languages: filter (descriptor: descriptor.providesFormatting) (lsp languages);
 
   descriptors = languages: (lsp languages) ++ (formatters languages);
 
@@ -81,6 +87,7 @@ in
     flatten
     formatters
     lsp
+    lspFormatters
     packages
     ;
 }

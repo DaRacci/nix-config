@@ -13,6 +13,9 @@ import ./mkLanguage.nix {
       name = "gopls";
       package = pkgs.gopls;
       filetypes = [ ".go" ];
+
+      # formats with gofmt
+      providesFormatting = true;
     }
   ];
 

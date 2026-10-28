@@ -15,6 +15,7 @@ let
 
   lsp = helpers.lsp languages;
   formatters = helpers.formatters languages;
+  lspFormatters = helpers.lspFormatters languages;
 
   binaryName = descriptor: if descriptor.binary != null then descriptor.binary else descriptor.name;
 
@@ -64,6 +65,20 @@ let
         };
       };
 
+  lspFormatterFor =
+    language:
+    let
+      matches = filter (descriptor: builtins.elem language (zedLanguages descriptor)) lspFormatters;
+    in
+    if matches == [ ] then
+      null
+    else
+      {
+        language_server = {
+          name = (builtins.head matches).name;
+        };
+      };
+
   formatterValue =
     descriptors:
     if builtins.length descriptors == 1 then
@@ -77,13 +92,23 @@ let
       languageFormatters = filter (
         descriptor: builtins.elem language (zedLanguages descriptor)
       ) formatters;
+      formatter =
+        let
+          lspFormatter = lspFormatterFor language;
+        in
+        if lspFormatter != null then
+          lspFormatter
+        else if languageFormatters != [ ] then
+          formatterValue languageFormatters
+        else
+          null;
     in
     {
       language_servers = serversFor language;
     }
-    // optionalAttrs (languageFormatters != [ ]) {
+    // optionalAttrs (formatter != null) {
       format_on_save = "on";
-      formatter = formatterValue languageFormatters;
+      inherit formatter;
     };
 in
 {

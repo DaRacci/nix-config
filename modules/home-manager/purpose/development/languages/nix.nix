@@ -43,7 +43,11 @@ import ./mkLanguage.nix rec {
       name = "nil";
       package = pkgs.nil;
       filetypes = [ ".nix" ];
+
+      # nil has no built-in formatter, it shells out to this command.
+      # nixd formats too but stays unflagged, so nil owns the formatter slot.
       initializationOptions.formatting.command = [ "nixfmt" ];
+      providesFormatting = true;
     }
   ];
 

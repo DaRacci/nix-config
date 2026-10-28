@@ -31,6 +31,9 @@ import ./mkLanguage.nix {
         "c"
         "cpp"
       ];
+
+      # formats with clang-format
+      providesFormatting = true;
     }
   ];
 
