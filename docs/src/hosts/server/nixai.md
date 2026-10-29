@@ -36,17 +36,17 @@ It runs the AI agent, local inference via Ollama, the Open WebUI chat interface,
 
 ### Declared secrets
 
-| Secret key                        | Purpose                       |
-| --------------------------------- | ----------------------------- |
-| `AI_AGENT/OPENROUTER_API_KEY`     | OpenRouter model API key      |
-| `AI_AGENT/DISCORD_BOT_TOKEN`      | Discord bot token             |
-| `AI_AGENT/API_SERVER_TOKEN`       | Agent API server auth         |
-| `MCP/N8N_API_KEY`                 | MCP access to n8n             |
-| `MCP/API_TOKEN`                   | MCP bridge API token          |
-| `MCP/HASSIO_TOKEN`                | Home Assistant MCP token      |
-| `MCP/GITHUB_TOKEN`                | GitHub MCP token              |
-| `MCP/ANILIST_TOKEN`               | AniList MCP token             |
-| `MNEMOSYNE_SYNC_KEY`              | Mnemosyne sync API key        |
+| Secret key                    | Purpose                  |
+| ----------------------------- | ------------------------ |
+| `AI_AGENT/OPENROUTER_API_KEY` | OpenRouter model API key |
+| `AI_AGENT/DISCORD_BOT_TOKEN`  | Discord bot token        |
+| `AI_AGENT/API_SERVER_TOKEN`   | Agent API server auth    |
+| `MCP/N8N_API_KEY`             | MCP access to n8n        |
+| `MCP/API_TOKEN`               | MCP bridge API token     |
+| `MCP/HASSIO_TOKEN`            | Home Assistant MCP token |
+| `MCP/GITHUB_TOKEN`            | GitHub MCP token         |
+| `MCP/ANILIST_TOKEN`           | AniList MCP token        |
+| `MNEMOSYNE_SYNC_KEY`          | Mnemosyne sync API key   |
 
 ## Operational Notes / Assumptions
 
