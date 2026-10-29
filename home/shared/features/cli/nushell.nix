@@ -26,28 +26,28 @@ lib.mkIf (osConfig == null || osConfig.users.users.${config.home.username}.shell
       '';
 
       extraConfig = ''
-        let carapace_completer = {|spans: list<string>|
-          ${lib.getExe config.programs.carapace.package} $spans.0 nushell ...$spans
+        let carapace_completer = {|place: record|
+          ${lib.getExe config.programs.carapace.package} $place.command.0 nushell ...$place.command
             | from json
-            | if ($in | default [] | where value == $"($spans | last)ERR" | is-empty) { $in } else { null }
+            | if ($in | default [] | where value == $"($place.command | last)ERR" | is-empty) { $in } else { null }
         }
 
-        let fish_completer = {|spans|
-          ${lib.getExe config.programs.fish.package} --command $'complete "--do-complete=($spans | str join " ")"'
+        let fish_completer = {|place: record|
+          ${lib.getExe config.programs.fish.package} --command $'complete "--do-complete=($place.command | str join " ")"'
             | $"value(char tab)description(char newline)" + $in
             | from tsv --flexible --no-infer
         }
 
-        let zoxide_completer = {|spans|
-          $spans | skip 1 | ${lib.getExe config.programs.zoxide.package} query -l ...$in | lines | where {|x| $x != $env.PWD}
+        let zoxide_completer = {|place: record|
+          $place.command | skip 1 | ${lib.getExe config.programs.zoxide.package} query -l ...$in | lines | where {|x| $x != $env.PWD}
         }
 
-        let external_completer = {|spans|
-          match $spans.0 {
+        let external_completer = {|place: record|
+          match $place.command.0 {
             # git | nix | nix-shell | nix-store | nix-* => $fish_completer
             __zoxide_z | __zoxide_zi => $zoxide_completer
             _ => $carapace_completer
-          } | do $in $spans
+          } | do $in $place
         }
 
         $env.config = {
