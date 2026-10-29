@@ -42,7 +42,7 @@
 
       sansSerif = {
         package = pkgs.ibm-plex;
-        name = "IBM Plex Sanns";
+        name = "IBM Plex Sans";
       };
 
       sizes = {
