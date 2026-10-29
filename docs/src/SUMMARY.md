@@ -64,6 +64,7 @@
     - [SeaweedFS Evaluation](modules/nixos/server/storage/seaweedfs.md)
   - [Proxy](modules/nixos/server/proxy.md)
   - [SSH](modules/nixos/server/ssh.md)
+  - [SSH Guard](modules/nixos/server/ssh_guard.md)
   - [Identity](modules/nixos/server/identity.md)
   - [Image](modules/nixos/server/image.md)
 - [Flake Allocations](modules/flake/allocations.md)

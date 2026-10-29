@@ -1,6 +1,14 @@
 _: {
   sops.secrets = { };
 
+  server.sshGuard.endpoints = [
+    "http://127.0.0.1:9090/-/healthy"
+    "http://127.0.0.1:9090/-/ready"
+    "http://127.0.0.1:9093/-/healthy"
+    "http://127.0.0.1:3100/ready"
+    "http://127.0.0.1:3000/api/health"
+  ];
+
   server = {
     dashboard = {
       icon = "mdi-monitor-dashboard";

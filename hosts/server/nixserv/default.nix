@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   ...
 }:
@@ -13,6 +14,30 @@ in
   sops.secrets = {
     ATTIC_ENVIRONMENT = atticOwned;
   };
+
+  server.sshGuard.extraRules = [
+    {
+      command = "nix";
+      action = {
+        type = "run";
+        binary = lib.getExe' pkgs.lix "nix";
+        args = [ ];
+        timeout = "120s";
+      };
+      subcommands = [
+        {
+          name = "store";
+          subcommands = [
+            { name = "ping"; }
+            {
+              name = "gc";
+              pre_args = [ "--dry-run" ];
+            }
+          ];
+        }
+      ];
+    }
+  ];
 
   server = {
     database.postgres.attic = {
