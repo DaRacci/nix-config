@@ -79,7 +79,7 @@ Renderers live beside the editor they serve and flatten descriptors across every
 enabled language:
 
 - `editors/zed/render.nix` — `lsp` settings, `languages.*.language_servers`, per-language formatters, extensions, and wrapper packages.
-- `editors/helix/render.nix` — `language-server`, `language`, and formatter entries.
+- `editors/helix/render.nix` — `languages.toml` `language-server`, `language`, and formatter entries.
 - `editors/vscode/render.nix` — extension lists and settings grouped by profile.
 - `editors/ai/render.nix` — OpenCode `lsp` and `formatter` sections.
 

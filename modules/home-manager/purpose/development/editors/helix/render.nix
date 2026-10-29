@@ -91,7 +91,7 @@ in
     concatLists (map (language: language.allPackages) (attrValues (helpers.enabled languages)))
   );
 
-  settings.languages = {
+  languages = {
     language = map languageEntry allHelixLanguages;
     language-server = listToAttrs (
       map (descriptor: nameValuePair descriptor.name (serverEntry descriptor)) lsp

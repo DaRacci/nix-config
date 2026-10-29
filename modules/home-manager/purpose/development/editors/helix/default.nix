@@ -27,6 +27,8 @@ in
       enable = true;
       extraPackages = [ pkgs.cmake-language-server ] ++ rendered.extraPackages;
 
+      languages = rendered.languages;
+
       settings = {
         editor = {
           middle-click-paste = false;
@@ -46,8 +48,6 @@ in
             other-lines = "info";
           };
         };
-
-        languages = rendered.settings.languages;
       };
       ignores = [ ];
     };
