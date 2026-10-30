@@ -68,6 +68,13 @@
       type = "file";
     };
 
+    # Built by the overlays, so it must be visible to every partition's pkgs.
+    hermes-agent = {
+      url = "github:NousResearch/hermes-agent";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
+    };
+
     # Misc Flake Inputs for other Inputs
     systems.url = "github:nix-systems/default";
     flake-utils = {

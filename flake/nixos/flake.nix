@@ -43,11 +43,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.website-builder.follows = "";
     };
-    hermes-agent = {
-      url = "github:NousResearch/hermes-agent";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-parts.follows = "flake-parts";
-    };
+
     trafilatura-scrape = {
       url = "git+https://codeberg.org/Racci/trafilatura_scrape";
       inputs.nixpkgs.follows = "nixpkgs";

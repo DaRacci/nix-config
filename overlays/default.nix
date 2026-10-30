@@ -56,9 +56,7 @@ in
 
       hermes-agent =
         let
-          lock = builtins.fromJSON (builtins.readFile ../flake/nixos/flake.lock);
-          haLocked = lock.nodes.hermes-agent.locked;
-          haFlake = builtins.getFlake "github:${haLocked.owner}/${haLocked.repo}/${haLocked.rev}";
+          haFlake = inputs.hermes-agent;
           hermesAgentSrc = prev.applyPatches {
             name = "hermes-agent-patched";
             src = haFlake.outPath;
@@ -100,7 +98,7 @@ in
           npm-lockfile-fix =
             haFlake.inputs.npm-lockfile-fix.packages.${final.stdenv.hostPlatform.system}.default;
           inherit pmPackages;
-          rev = haLocked.rev or null;
+          rev = haFlake.rev or null;
           version = hermesVersion;
         };
 
