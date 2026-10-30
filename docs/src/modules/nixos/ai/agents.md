@@ -38,6 +38,7 @@ The module enables `services.hermes-agent` and adds optional components on top:
 - **Voice & STT** — optional voice input and output. With `services.ai-agent.voice.wyoming-stt.enable`, Hermes reuses an existing Wyoming faster-whisper server instead of running a separate Whisper instance: `HERMES_LOCAL_STT_COMMAND` is set to invoke `wyoming-transcribe`, which sends audio over the Wyoming protocol and returns the transcript.
 - **OIDC Authentication** — optional OpenID Connect authentication for the dashboard using a **public PKCE client**.
 - **Memory (Mnemosyne)** — with `services.ai-agent.memory.enable`, the memory provider switches to **Mnemosyne**, a local SQLite-backed memory system with semantic recall.
+- **Plugin binaries** — the `extraPackages` of each plugin are placed in `/home/hermes/.local/nix-agent-bin` by the `containerPostStart` hook, because the container does not inherit the systemd unit's PATH. The host adds that directory to `/home/hermes/.profile`, so the binaries resolve in agent login shells. `/home/hermes/.venv` is now purely a Python virtual environment and holds none of them.
 
 ## Secrets
 

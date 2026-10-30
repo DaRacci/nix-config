@@ -43,6 +43,14 @@ let
     else
       rhs;
 
+  # Binaries from plugin `extraPackages` are symlinked into this directory so they are
+  # available to the agent at runtime: the container does not inherit the systemd unit's
+  # PATH. It is a dedicated directory rather than the agent's Python virtualenv `bin/`, so
+  # the venv stays purely a Python environment and delivery does not depend on its layout.
+  # The host must put this directory on PATH for login shells — see
+  # `hosts/server/nixai/ai-agent.nix`.
+  agentBinDir = "/home/hermes/.local/nix-agent-bin";
+
   # Create a simple option and config module for plugins.
   mkPluginModule =
     config:
@@ -76,7 +84,7 @@ let
           };
 
           # When hermes-agent runs inside a container it doesnt inherit the PATH from the systemd unit which includes the extraPackages,
-          # so we symlink the binaries into the virtualenv bin dir so they are available to the agent at runtime.
+          # so we symlink the binaries into a dedicated bin dir (see `agentBinDir`) so they are available to the agent at runtime.
           #
           # This does come with some caveats, such as for plugins that rely on the presence of a binary to register themselves,
           # since this is ran as a postStart hook, the agent may have already started and not had the binary available at the time of plugin registration, so the plugin may not be loaded.
@@ -93,7 +101,7 @@ let
                   else
                     elemAt (splitString "/" binaryPath) (length (splitString "/" binaryPath) - 1);
               in
-              "ln -sfn ${binaryPath} /home/hermes/.venv/bin/${binaryName}"
+              "mkdir -p ${agentBinDir} && ln -sfn ${binaryPath} ${agentBinDir}/${binaryName}"
             );
         }
       );
