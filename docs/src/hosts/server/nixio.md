@@ -19,6 +19,7 @@ It handles all external traffic routing, VPN tunnelling, DNS filtering, and dash
 | **Tailscale Tunnel** | `hosts/server/nixio/tunnel/`       | Mesh VPN connectivity, subnet routing, and ingress via Tailscale tags |
 | **Dashy Dashboard**  | `hosts/server/nixio/dashboard.nix` | Aggregated service dashboard displayed on the IO Coordinator          |
 | **AdGuard Home**     | `hosts/server/nixio/adguard.nix`   | Local DNS filtering and ad-blocking for the home network              |
+| **MinIO**            | `hosts/server/nixio/storage.nix`   | S3-compatible object storage for cluster services                     |
 | **Network Config**   | `default.nix`                      | Subnet declarations, IP forwarding (IPv4 + IPv6)                      |
 
 ## Secrets
@@ -30,12 +31,14 @@ It handles all external traffic routing, VPN tunnelling, DNS filtering, and dash
 | `CLOUDFLARE/EMAIL`          | ACME DNS challenge account email |
 | `CLOUDFLARE/ZONE_API_TOKEN` | ACME DNS challenge zone token    |
 | `CLOUDFLARE/DNS_API_TOKEN`  | ACME DNS challenge API token     |
+| `MINIO_ROOT_CREDENTIALS`    | MinIO root user and password     |
 
 ## Operational Notes / Assumptions
 
 - This host is expected to have stable upstream network access plus reachability to the cluster LAN and tailnet, because ingress, DNS, and tunnel traffic all terminate here.
 - Caddy terminates public TLS for cluster services, while some backends also use separate internal TLS or mTLS; certificate trust and backend server names must stay aligned with those upstream services.
 - Reverse-proxied services remain individually responsible for their own authn/authz. Publishing a route here does not replace service-level access controls.
+- MinIO is built from the `nixpkgs-minio` input pinned to a revision from before nixpkgs removed the package and module. The service definition lives in `hosts/server/nixio/storage.nix` and should be dropped once storage moves to SeaweedFS.
 
 ## References
 

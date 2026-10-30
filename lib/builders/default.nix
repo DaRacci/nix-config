@@ -27,6 +27,8 @@ let
 
           cudaSupport = builtins.elem "cuda" accelerators;
           rocmSupport = builtins.elem "rocm" accelerators;
+
+          problems.handlers.fastmcp-slim.broken = "warn";
         };
 
         overlays = builtins.attrValues (import ../../overlays { inherit inputs lib; });

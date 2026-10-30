@@ -110,7 +110,7 @@ async def send_command(
                 logger.error(f"[{host}] Command '{action}' failed: {message}")
                 return False, message
 
-    except asyncio.TimeoutError:
+    except TimeoutError:
         logger.error(f"[{host}] Connection timed out after {timeout}s")
         return False, f"Connection timed out after {timeout}s"
     except ConnectionRefusedError:

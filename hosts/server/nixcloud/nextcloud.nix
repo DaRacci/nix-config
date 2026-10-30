@@ -20,10 +20,6 @@ in
     groups.nextcloud.gid = 997;
   };
 
-  sops.secrets = {
-    "NEXTCLOUD/admin-password" = ncOwned;
-  };
-
   server = {
     database = {
       postgres.nextcloud.password = ncOwned;
@@ -108,9 +104,6 @@ in
           db = config.server.database.postgres.nextcloud;
         in
         {
-          adminuser = "admin";
-          adminpassFile = config.sops.secrets."NEXTCLOUD/admin-password".path;
-
           dbtype = "pgsql";
           dbuser = db.user;
           dbname = db.database;

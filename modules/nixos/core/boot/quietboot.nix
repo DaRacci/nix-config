@@ -38,7 +38,6 @@ in
         "vt.global_cursor_default=0"
       ];
       consoleLogLevel = 0;
-      initrd.verbose = false;
     };
   };
 }

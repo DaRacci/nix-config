@@ -16,8 +16,6 @@ in
         efi.canTouchEfiVariables = true;
         systemd-boot.editor = false;
       };
-
-      initrd.systemd.enable = mkDefault true;
     };
 
     systemd.settings.Manager.RebootWatchdogSec = "0";

@@ -91,6 +91,5 @@ in
   jj-desc = pkgs.callPackage ./jj-desc { };
   jj-pre-push = pkgs.python3Packages.callPackage ./jj-pre-push { };
 
-  # Hermes Desktop — routes through overlay for node-headers hash fix
   hermes-desktop = pkgs.hermes-agent.hermesDesktop;
 }

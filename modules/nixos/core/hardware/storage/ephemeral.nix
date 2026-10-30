@@ -62,7 +62,6 @@ in
 
       boot.initrd =
         let
-          phase1Systemd = config.boot.initrd.systemd.enable;
           wipeScript = ''
             mkdir /tmp -p
             MNTPOINT=$(mktemp -d)
@@ -86,8 +85,7 @@ in
         in
         lib.mkIf (cfg.ephemeral.type == "btrfs") {
           supportedFilesystems = [ "btrfs" ];
-          postDeviceCommands = lib.mkIf (!phase1Systemd) (lib.mkBefore wipeScript);
-          systemd.services.restore-root = lib.mkIf phase1Systemd {
+          systemd.services.restore-root = {
             description = "Rollback btrfs rootfs";
             wantedBy = [ "initrd.target" ];
             requires = [ "dev-disk-by\\x2dpartlabel-${cfg.ephemeral.paritionLabel}.device" ];

@@ -27,7 +27,8 @@ The `swfsMount` option is the repository's declarative storage mount interface. 
 #### MinIO backend
 
 - **Credential Management**: By default the MinIO backend provisions and uses sops secrets with the pattern `S3FS_AUTH/<NAME_IN_UPPERCASE>`. These secrets must contain `ACCESS_KEY_ID:SECRET_ACCESS_KEY`.
-- **Runtime Model**: MinIO mounts now run as generated systemd services instead of `fileSystems` entries so they can share the same recovery model as SeaweedFS.
+- **Runtime Model**: MinIO mounts run as generated systemd services instead of `fileSystems` entries so they can share the same recovery model as SeaweedFS.
+- **Upstream Removal**: nixpkgs removed both the MinIO package and its NixOS module. The server itself now runs from an inlined systemd service in `hosts/server/nixio/storage.nix`, built from the `nixpkgs-minio` input pinned to the last revision that still shipped MinIO.
 
 #### SeaweedFS backend
 
@@ -38,7 +39,7 @@ The `swfsMount` option is the repository's declarative storage mount interface. 
 
 SeaweedFS is documented separately because it is not part of the current software filesystem workflow. The repository uses it as an evaluation deployment gated by `server.storagePrimaryHost` — SeaweedFS services and their Caddy proxy rules only activate on the host designated as the storage primary. The `swfsMount` mount module itself remains role-agnostic; host placement is determined by which host runs the services.
 
-MinIO services also live on the storage primary host. The MinIO endpoint presented to mounts is served through the IO Coordinator reverse proxy, which routes to the MinIO instance on whichever host currently holds the storage primary role.
+MinIO services also live on the storage primary host. The MinIO endpoint presented to mounts is served through the IO Coordinator reverse proxy, which routes to the MinIO instance on whichever host currently holds the storage primary role. MinIO is pinned to a pre-removal nixpkgs revision because upstream dropped both the package and module; SeaweedFS remains the intended replacement.
 
 See [SeaweedFS Evaluation](storage/seaweedfs.md) for details on scope, host gating, proxy behaviour, and security material.
 

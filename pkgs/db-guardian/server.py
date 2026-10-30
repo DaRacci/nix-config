@@ -346,10 +346,10 @@ async def handle_client(websocket, psk: str):
     except websockets.exceptions.ConnectionClosed:
         logger.info(f"Client {client_id} disconnected")
     except (
+        TimeoutError,
         websockets.exceptions.WebSocketException,
         DBusError,
         OSError,
-        asyncio.TimeoutError,
     ) as e:
         logger.error(f"Error handling client {client_id}: {e}")
     finally:

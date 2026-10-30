@@ -28,6 +28,7 @@ General purpose application server for replacing cloud services with self-hosted
 - Applications using OAuth2/OIDC/SSO use the Identity Coordinator for authentication and authorisation.
 - Database services for these apps are provided by the cluster Database Coordinator via `server.database.postgres.*`.
 - Media storage for Nextcloud and Immich uses SeaweedFS mounts on the Storage Coordinator.
+- Nextcloud has no declarative admin account: nixpkgs removed the `adminuser`/`adminpassFile` options. Create the admin after installation with `nextcloud-occ user:add <username>` followed by `nextcloud-occ group:adduser admin <username>`.
 
 ## References
 

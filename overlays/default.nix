@@ -69,6 +69,11 @@ in
               ./patches/hermes-agent-home-aware-managed.patch
             ];
           };
+          # pm/lock.json pins every pm tool; upstream packages.nix builds them
+          # and drops the callPackage helper attributes.
+          pmPackages = lib.filterAttrs (_: lib.isDerivation) (
+            final.callPackage (hermesAgentSrc + "/nix/pm-packages.nix") { }
+          );
           # The release tag is date-style (v2026.9.24) and hermes_cli/__init__.py
           # hardcodes the same date. Upstream's nix/packages.nix leaves the version
           # at its "0.0.0" default, which blocks plugin installers that enforce a
@@ -94,6 +99,7 @@ in
           pyproject-build-systems = haFlake.inputs.pyproject-build-systems;
           npm-lockfile-fix =
             haFlake.inputs.npm-lockfile-fix.packages.${final.stdenv.hostPlatform.system}.default;
+          inherit pmPackages;
           rev = haLocked.rev or null;
           version = hermesVersion;
         };
