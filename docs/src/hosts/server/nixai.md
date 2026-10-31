@@ -53,6 +53,7 @@ It runs the AI agent, local inference via Ollama, the Open WebUI chat interface,
 - Ollama relies on the AMD iGPU; ROCm on the iGPU is noted as unreliable upstream, so the config pins an override and waits on a Vulkan fix.
 - Open WebUI, the agent dashboard, Mnemosyne, and the voice/whisper endpoints are exposed through the IO Coordinator reverse proxy.
 - The agent's SSH port is opened to the subnet for administration.
+- The gateway control directory (`/var/lib/hermes/.hermes`) is narrowed to `0750` by an appended `systemd.tmpfiles` rule in [`hermes/core.nix`](../../../../modules/nixos/ai/agents/hermes/core.nix): the gateway client refuses a control directory another user can write, while the upstream module creates it `2770` so group members share it. The state directory and the `.hermes` subdirectories keep `2770`, because the container relies on the `setgid` bit when it changes ownership.
 
 ## References
 

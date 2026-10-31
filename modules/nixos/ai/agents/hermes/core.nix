@@ -5,9 +5,13 @@
   ...
 }:
 let
-  inherit (lib) mkIf;
+  inherit (lib)
+    mkAfter
+    mkIf
+    ;
 
   cfg = config.services.ai-agent;
+  hermes = config.services.hermes-agent;
 in
 {
   config = mkIf cfg.enable {
@@ -182,5 +186,13 @@ in
         };
       };
     };
+
+    # The gateway client refuses a control directory another user can write
+    # (home_mode_unsafe in hermes_cli/gateway_runtime_discovery.py), while the
+    # upstream module creates this one 2770 so container hostUsers can share it.
+    # `z` and not `d`: tmpfiles drops a second `d` line for a path that exists.
+    systemd.tmpfiles.rules = mkAfter [
+      "z ${hermes.stateDir}/.hermes 0750 ${hermes.user} ${hermes.group} - -"
+    ];
   };
 }
