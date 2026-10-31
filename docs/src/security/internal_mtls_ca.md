@@ -15,9 +15,12 @@ This keeps a compromised intermediate from minting certificates for another serv
 Fleet mTLS Root CA (offline, pathlen 1, 10 years)
 ├── SeaweedFS Intermediate CA (offline, pathlen 0, 5 years)
 │   └── master, volume, filer, admin, client, worker leaves (2 years)
-└── Alloy Dynamic Capture Intermediate CA (offline, pathlen 0, 5 years)
-    ├── per-host capture API server leaves (2 years)
-    └── alloy-capture-relay client leaf (2 years)
+├── Alloy Dynamic Capture Intermediate CA (offline, pathlen 0, 5 years)
+│   ├── per-host capture API server leaves (2 years)
+│   └── alloy-capture-relay client leaf (2 years)
+└── DB Guardian Intermediate CA (offline, pathlen 0, 5 years)
+    ├── per-host guardian server leaves (2 years)
+    └── db-guardian-coordinator client leaf (2 years)
 ```
 
 The root and intermediates are CAs.
@@ -27,11 +30,13 @@ Leaf certificates are never CAs.
 
 Keep the used domain aligned with `server.proxy.domain`.
 
-| Consumer                       | Intermediate                            | Leaf profile                                                                                                              | Trust store file                      |
+| Consumer | Intermediate | Leaf profile | Trust store file |
 | ------------------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| SeaweedFS gRPC and Caddy proxy | `SeaweedFS Intermediate CA`             | `serverAuth` + `clientAuth`, SANs for `seaweedfs.${server.proxy.domain}` and `<service>.seaweedfs.${server.proxy.domain}` | `hosts/server/nixio/seaweedfs-tls/CA` |
-| Alloy dynamic capture API      | `Alloy Dynamic Capture Intermediate CA` | `serverAuth`, SANs for `<host>`, `<host>.localdomain`, `<host>.${server.proxy.domain}`, `127.0.0.1`                       | `hosts/server/<host>/alloy/CA_CERT`   |
-| Alloy capture relay client     | `Alloy Dynamic Capture Intermediate CA` | `clientAuth`, CN `alloy-capture-relay`                                                                                    | `hosts/server/nixmon/alloy/CA_CERT`   |
+| SeaweedFS gRPC and Caddy proxy | `SeaweedFS Intermediate CA` | `serverAuth` + `clientAuth`, SANs for `seaweedfs.${server.proxy.domain}` and `<service>.seaweedfs.${server.proxy.domain}` | `hosts/server/nixio/seaweedfs-tls/CA` |
+| Alloy dynamic capture API | `Alloy Dynamic Capture Intermediate CA` | `serverAuth`, SANs for `<host>`, `<host>.localdomain`, `<host>.${server.proxy.domain}`, `127.0.0.1` | `hosts/server/<host>/alloy/CA_CERT` |
+| Alloy capture relay client | `Alloy Dynamic Capture Intermediate CA` | `clientAuth`, CN `alloy-capture-relay` | `hosts/server/nixmon/alloy/CA_CERT` |
+| DB Guardian server | `DB Guardian Intermediate CA` | `serverAuth`, SANs for `<host>`, `<host>.localdomain`, `<host>.${server.proxy.domain}` | `hosts/server/<host>/db-guardian-tls/CA_CERT` |
+| DB Guardian coordinator client | `DB Guardian Intermediate CA` | `clientAuth`, CN `db-guardian-coordinator` | `hosts/server/<database primary>/db-guardian-tls/CA_CERT` |
 
 Service-specific leaf details live in:
 
@@ -53,19 +58,26 @@ The other service and the root remain unaffected.
 TLS material is stored as binary SOPS files, not inline YAML values.
 `sops.secrets` declarations point at these files with `format = "binary"`.
 
-| Purpose                | Path                                             |
+| Purpose | Path |
 | ---------------------- | ------------------------------------------------ |
-| SeaweedFS trust bundle | `hosts/server/nixio/seaweedfs-tls/CA`            |
-| SeaweedFS leaf chain   | `hosts/server/nixio/seaweedfs-tls/<SERVICE>_CRT` |
-| SeaweedFS leaf key     | `hosts/server/nixio/seaweedfs-tls/<SERVICE>_KEY` |
-| Alloy trust root       | `hosts/server/<host>/alloy/CA_CERT`              |
-| Alloy server chain     | `hosts/server/<host>/alloy/SERVER_CERT`          |
-| Alloy server key       | `hosts/server/<host>/alloy/SERVER_KEY`           |
-| Alloy client chain     | `hosts/server/nixmon/alloy/CLIENT_CERT`          |
-| Alloy client key       | `hosts/server/nixmon/alloy/CLIENT_KEY`           |
+| SeaweedFS trust bundle | `hosts/server/nixio/seaweedfs-tls/CA` |
+| SeaweedFS leaf chain | `hosts/server/nixio/seaweedfs-tls/<SERVICE>_CRT` |
+| SeaweedFS leaf key | `hosts/server/nixio/seaweedfs-tls/<SERVICE>_KEY` |
+| Alloy trust root | `hosts/server/<host>/alloy/CA_CERT` |
+| Alloy server chain | `hosts/server/<host>/alloy/SERVER_CERT` |
+| Alloy server key | `hosts/server/<host>/alloy/SERVER_KEY` |
+| Alloy client chain | `hosts/server/nixmon/alloy/CLIENT_CERT` |
+| Alloy client key | `hosts/server/nixmon/alloy/CLIENT_KEY` |
+| DB Guardian trust file | `hosts/server/<host>/db-guardian-tls/CA_CERT` |
+| DB Guardian server chain | `hosts/server/<host>/db-guardian-tls/SERVER_CERT` |
+| DB Guardian server key | `hosts/server/<host>/db-guardian-tls/SERVER_KEY` |
+| DB Guardian client chain | `hosts/server/<database primary>/db-guardian-tls/CLIENT_CERT` |
+| DB Guardian client key | `hosts/server/<database primary>/db-guardian-tls/CLIENT_KEY` |
 
-The service intermediate is not a trust anchor.
-Relying parties trust the root and receive the intermediate from the peer's certificate chain.
+The service intermediate is not a trust anchor, and relying parties receive the intermediate from the peer's certificate chain.
+The DB Guardian is the exception: its `CA_CERT` holds the intermediate certificate rather than the root.
+Trusting the root there would accept a leaf minted by any other service intermediate, and the guardian authorises by client common name, so an Alloy intermediate key could then mint `CN=db-guardian-coordinator` and drive every guardian.
+Pinning the intermediate is what makes the separate CA meaningful; the peer's chain terminates at it with `VERIFY_X509_PARTIAL_CHAIN`, which `ssl.create_default_context` enables and the guardian's own context sets explicitly.
 
 ## Issuing certificates
 
@@ -121,9 +133,10 @@ The encrypted file is a SOPS JSON envelope; `format = "binary"` makes sops-nix d
 - **Leaf renewal:** sign with the current service intermediate.
   No trust-store change is needed.
 - **Intermediate rotation:** sign a new intermediate with the root, reissue that service's leaves, and deploy the new chains.
-  The trust store stays on the root.
+  The trust store stays on the root, except for DB Guardian, whose trust file is the intermediate itself and must be replaced at the same time.
+  The three service intermediates are SeaweedFS, Alloy Dynamic Capture and DB Guardian; rotating one never requires touching the others.
 - **Root rotation:** add the new root to the trust bundle, reissue all intermediates and leaves, deploy them, then remove the old root.
-- **Revocation:** neither the Alloy API nor the SeaweedFS/Caddy path currently checks CRLs or OCSP.
+- **Revocation:** neither the Alloy API, the SeaweedFS/Caddy path nor the DB Guardian checks CRLs or OCSP.
   A leaked leaf certificate stays usable until it expires, or until its issuing intermediate is rotated and the service leaves are reissued.
   Per-leaf revocation would require adding CRL/OCSP support or using short-lived leaves.
 
@@ -140,6 +153,14 @@ Verify a live mTLS peer:
 ```bash
 openssl s_client -connect <host>:<port> \
   -CAfile root.crt -cert <client-chain>.crt -key <client>.key \
+  -verify_hostname <host>
+```
+
+Verify a live guardian, whose trust file is the intermediate rather than the root:
+
+```bash
+openssl s_client -connect <host>:9876 \
+  -CAfile guardian-intermediate.crt -cert CLIENT_CERT -key CLIENT_KEY \
   -verify_hostname <host>
 ```
 

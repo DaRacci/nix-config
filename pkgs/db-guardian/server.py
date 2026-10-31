@@ -7,10 +7,10 @@ It listens for drain/undrain commands from the database coordinator to
 control database-dependent services.
 
 Protocol:
+- The listener is TLS-only and requires a client certificate issued by the DB Guardian
+  intermediate whose common name is in the configured allowlist
 - All messages are JSON
-- First message from client must be auth: {"type": "auth", "key": "<psk>"}
-- Server responds: {"type": "auth", "status": "ok|error", "message": "..."}
-- After auth, coordinator sends: {"type": "command", "action": "drain|undrain|ping"}
+- Coordinator sends: {"type": "command", "action": "drain|undrain|ping"}
 - Server responds: {"type": "response", "status": "ok|error", "message": "..."}
 """
 
@@ -19,9 +19,9 @@ import asyncio
 import json
 import logging
 import os
+import ssl
 import sys
 import unittest
-from pathlib import Path
 from time import monotonic, sleep
 from unittest import mock
 
@@ -37,11 +37,36 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-authenticated_clients: set[str] = set()
-
 
 class ProtocolError(ValueError):
     """Raised when a client sends an invalid protocol payload."""
+
+
+def create_server_context(
+    ca_cert: str, server_cert: str, server_key: str
+) -> ssl.SSLContext:
+    """Build the mTLS context for the listener, trusting only the guardian intermediate."""
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    context.verify_mode = ssl.CERT_REQUIRED
+    # The trust file holds an intermediate certificate that is not self-signed, so the
+    # chain may terminate there only with partial-chain verification enabled.
+    context.verify_flags |= ssl.VERIFY_X509_PARTIAL_CHAIN
+    context.load_cert_chain(certfile=server_cert, keyfile=server_key)
+    context.load_verify_locations(cafile=ca_cert)
+    return context
+
+
+def peer_common_name(connection) -> str | None:
+    """Return the verified common name of the peer certificate, or None when absent."""
+    certificate = connection.transport.get_extra_info("peercert")
+    if not certificate:
+        return None
+    for relative_distinguished_name in certificate.get("subject", ()):
+        for attribute, value in relative_distinguished_name:
+            if attribute == "commonName":
+                return value
+    return None
 
 
 def format_client_id(remote_address: object) -> str:
@@ -73,21 +98,6 @@ async def run_action(action: str) -> tuple[bool, str] | None:
     if handler is None:
         return None
     return await asyncio.to_thread(handler)
-
-
-def load_psk(psk_file: str) -> str:
-    """Load the pre-shared key from file."""
-    path = Path(psk_file)
-    if not path.exists():
-        logger.error(f"PSK file not found: {psk_file}")
-        sys.exit(1)
-
-    psk = path.read_text(encoding="utf-8").strip()
-    if len(psk) < 32:
-        logger.error("PSK must be at least 32 characters")
-        sys.exit(1)
-
-    return psk
 
 
 def _decode_state(state) -> str:
@@ -218,12 +228,19 @@ def handle_undrain() -> tuple[bool, str]:
     return success, message
 
 
-async def handle_client(websocket, psk: str):
+async def handle_client(websocket, allowed_cns: frozenset[str]) -> None:
     """Handle a single WebSocket client connection."""
     client_id = format_client_id(websocket.remote_address)
-    logger.info(f"New connection from {client_id}")
+    common_name = peer_common_name(websocket)
 
-    is_authenticated = False
+    if common_name is None or common_name not in allowed_cns:
+        logger.warning(
+            f"Rejecting {client_id}: certificate common name {common_name!r} is not in the allowlist"
+        )
+        await websocket.close(1008, "Client certificate not allowed")
+        return
+
+    logger.info(f"New connection from {client_id} as {common_name}")
 
     try:
         async for raw_message in websocket:
@@ -244,47 +261,6 @@ async def handle_client(websocket, psk: str):
                     )
                 )
                 continue
-
-            # Handle authentication
-            if msg_type == "auth":
-                provided_key = message.get("key")
-                if not isinstance(provided_key, str):
-                    provided_key = ""
-                if provided_key == psk:
-                    is_authenticated = True
-                    authenticated_clients.add(client_id)
-                    logger.info(f"Client {client_id} authenticated successfully")
-                    await websocket.send(
-                        json.dumps(
-                            {
-                                "type": "auth",
-                                "status": "ok",
-                                "message": "Authentication successful",
-                            }
-                        )
-                    )
-                else:
-                    logger.warning(f"Client {client_id} failed authentication")
-                    await websocket.send(
-                        json.dumps(
-                            {
-                                "type": "auth",
-                                "status": "error",
-                                "message": "Invalid key",
-                            }
-                        )
-                    )
-                    await websocket.close(1008, "Authentication failed")
-                    return
-                continue
-
-            # All other messages require authentication
-            if not is_authenticated:
-                await websocket.send(
-                    json.dumps({"type": "error", "message": "Not authenticated"})
-                )
-                await websocket.close(1008, "Not authenticated")
-                return
 
             # Handle commands
             if msg_type == "command":
@@ -352,11 +328,50 @@ async def handle_client(websocket, psk: str):
         OSError,
     ) as e:
         logger.error(f"Error handling client {client_id}: {e}")
-    finally:
-        authenticated_clients.discard(client_id)
 
 
 def run_tests() -> None:
+    class FakeTransport:
+        def __init__(self, certificate: dict[str, object] | None) -> None:
+            self.certificate = certificate
+
+        def get_extra_info(self, name: str) -> dict[str, object] | None:
+            return self.certificate if name == "peercert" else None
+
+    class FakeWebSocket:
+        def __init__(
+            self, certificate: dict[str, object] | None, messages: list[str]
+        ) -> None:
+            self.remote_address = ("192.0.2.10", 54321)
+            self.transport = FakeTransport(certificate)
+            self.messages = list(messages)
+            self.sent: list[str] = []
+            self.closed: tuple[int, str] | None = None
+
+        def __aiter__(self) -> "FakeWebSocket":
+            return self
+
+        async def __anext__(self) -> str:
+            if not self.messages:
+                raise StopAsyncIteration
+            return self.messages.pop(0)
+
+        async def send(self, message: str) -> None:
+            self.sent.append(message)
+
+        async def close(self, code: int, reason: str = "") -> None:
+            self.closed = (code, reason)
+
+    coordinator_certificate: dict[str, object] = {
+        "subject": ((("commonName", "db-guardian-coordinator"),),),
+        "issuer": ((("commonName", "DB Guardian Intermediate CA"),),),
+    }
+    stranger_certificate: dict[str, object] = {
+        "subject": ((("commonName", "alloy-capture-relay"),),),
+        "issuer": ((("commonName", "Alloy Dynamic Capture Intermediate CA"),),),
+    }
+    server_module = sys.modules[__name__]
+
     class GuardianServerTests(unittest.TestCase):
         def test_decode_json_object_accepts_mapping(self) -> None:
             self.assertEqual(decode_json_object('{"type": "ping"}')["type"], "ping")
@@ -367,6 +382,29 @@ def run_tests() -> None:
 
         def test_format_client_id_handles_missing_remote_address(self) -> None:
             self.assertEqual(format_client_id(None), "unknown")
+
+        def test_peer_common_name_reads_verified_certificate(self) -> None:
+            websocket = FakeWebSocket(coordinator_certificate, [])
+            self.assertEqual(peer_common_name(websocket), "db-guardian-coordinator")
+
+        def test_peer_common_name_returns_none_without_certificate(self) -> None:
+            self.assertIsNone(peer_common_name(FakeWebSocket(None, [])))
+
+        def test_create_server_context_requires_client_certificate(self) -> None:
+            context = mock.MagicMock()
+            context.verify_flags = 0
+
+            with mock.patch.object(ssl, "SSLContext", return_value=context):
+                created = create_server_context("ca.pem", "cert.pem", "key.pem")
+
+            self.assertIs(created, context)
+            self.assertEqual(created.verify_mode, ssl.CERT_REQUIRED)
+            self.assertEqual(created.minimum_version, ssl.TLSVersion.TLSv1_2)
+            self.assertIn(ssl.VERIFY_X509_PARTIAL_CHAIN, created.verify_flags)
+            created.load_cert_chain.assert_called_once_with(
+                certfile="cert.pem", keyfile="key.pem"
+            )
+            created.load_verify_locations.assert_called_once_with(cafile="ca.pem")
 
     class GuardianServerAsyncTests(unittest.IsolatedAsyncioTestCase):
         async def test_run_action_offloads_blocking_handler(self) -> None:
@@ -379,6 +417,62 @@ def run_tests() -> None:
 
         async def test_run_action_rejects_unknown_action(self) -> None:
             self.assertIsNone(await run_action("reload"))
+
+        async def test_handle_client_rejects_unknown_common_name(self) -> None:
+            websocket = FakeWebSocket(
+                stranger_certificate, ['{"type": "command", "action": "drain"}']
+            )
+
+            await handle_client(websocket, frozenset({"db-guardian-coordinator"}))
+
+            self.assertEqual(websocket.closed, (1008, "Client certificate not allowed"))
+            self.assertEqual(websocket.sent, [])
+
+        async def test_handle_client_accepts_allowed_common_name(self) -> None:
+            websocket = FakeWebSocket(
+                coordinator_certificate, ['{"type": "command", "action": "ping"}']
+            )
+
+            await handle_client(websocket, frozenset({"db-guardian-coordinator"}))
+
+            self.assertIsNone(websocket.closed)
+            self.assertEqual(
+                json.loads(websocket.sent[0]),
+                {
+                    "type": "response",
+                    "action": "ping",
+                    "status": "ok",
+                    "message": "pong",
+                },
+            )
+
+        async def test_handle_client_rejects_stale_auth_frame(self) -> None:
+            websocket = FakeWebSocket(
+                coordinator_certificate, ['{"type": "auth", "key": "old"}']
+            )
+
+            await handle_client(websocket, frozenset({"db-guardian-coordinator"}))
+
+            self.assertEqual(
+                json.loads(websocket.sent[0])["message"],
+                "Unknown message type: auth",
+            )
+
+        async def test_empty_allowlist_refuses_to_start(self) -> None:
+            with mock.patch.object(server_module, "serve") as serve:
+                status = await async_main(
+                    [
+                        "--ca-cert",
+                        "ca.pem",
+                        "--server-cert",
+                        "cert.pem",
+                        "--server-key",
+                        "key.pem",
+                    ]
+                )
+
+            self.assertEqual(status, 1)
+            serve.assert_not_called()
 
     suite = unittest.TestSuite()
     suite.addTests(
@@ -406,29 +500,46 @@ async def async_main(argv: list[str]) -> int:
         help="Host to bind to (default: 0.0.0.0)",
     )
     parser.add_argument(
-        "--psk-file",
+        "--ca-cert",
         type=str,
-        default=os.environ.get("GUARDIAN_PSK_FILE"),
-        help="Path to file containing the pre-shared key",
+        required=True,
+        help="Path to the PEM certificate of the DB Guardian intermediate CA",
+    )
+    parser.add_argument(
+        "--server-cert",
+        type=str,
+        required=True,
+        help="Path to the PEM server certificate chain (leaf followed by intermediate)",
+    )
+    parser.add_argument(
+        "--server-key",
+        type=str,
+        required=True,
+        help="Path to the PEM server private key",
+    )
+    parser.add_argument(
+        "--allowed-cn",
+        type=str,
+        action="append",
+        default=[],
+        help="Client certificate common name to accept (repeatable, at least one required)",
     )
 
     args = parser.parse_args(argv)
 
-    if not args.psk_file:
-        logger.error(
-            "PSK file must be specified via --psk-file or GUARDIAN_PSK_FILE env var"
-        )
+    allowed_cns = frozenset(args.allowed_cn)
+    if not allowed_cns:
+        logger.error("Refusing to start: at least one --allowed-cn is required")
         return 1
 
-    psk = load_psk(args.psk_file)
-    logger.info(f"Loaded PSK from {args.psk_file}")
+    context = create_server_context(args.ca_cert, args.server_cert, args.server_key)
 
     async def handler(websocket):
-        await handle_client(websocket, psk)
+        await handle_client(websocket, allowed_cns)
 
-    logger.info(f"Starting DB Guardian server on {args.host}:{args.port}")
+    logger.info(f"Starting DB Guardian server on {args.host}:{args.port} over TLS")
 
-    async with serve(handler, args.host, args.port):
+    async with serve(handler, args.host, args.port, ssl=context):
         await asyncio.Future()  # Run forever
 
     return 0

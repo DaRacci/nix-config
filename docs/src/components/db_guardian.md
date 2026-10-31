@@ -15,13 +15,15 @@ The system consists of two components:
 
 1. **Guardian Server** (runs on client servers)
 
-   - WebSocket server that listens for commands from the coordinator
-   - Secures connections with a pre-shared key (PSK) from the `DB_GUARDIAN_PSK` secret
+   - WebSocket-over-TLS server that listens for commands from the coordinator
+   - Requires a client certificate issued by the DB Guardian intermediate CA and only accepts the common names in `server.database.guardian.allowedClientCommonNames`
+   - Runs as the unprivileged `db-guardian` user; a polkit rule grants it start and stop on `db-databases.target` only
    - Executes drain/undrain commands by controlling `db-databases.target`
 
 1. **Guardian Client** (runs on the Database Coordinator)
 
-   - WebSocket client that connects to all guardian servers
+   - WebSocket client that connects to all guardian servers over `wss://`
+   - Verifies each guardian's certificate chain and hostname, and presents the single `db-guardian-coordinator` client certificate
    - Sends `undrain` command after databases are online (start dependent services)
    - Sends `drain` command before database shutdown (stop dependent services)
 
@@ -77,41 +79,28 @@ The timer is started and stopped with the coordinator. An intentional drain stop
 
 #### On Client Servers
 
-| Unit                            | Type    | Description                                         |
+| Unit | Type | Description |
 | ------------------------------- | ------- | --------------------------------------------------- |
-| `db-guardian.service`           | simple  | WebSocket server for receiving commands             |
-| `db-databases.target`           | target  | Represents "databases are online"                   |
-| `wait-for-db-primary.service`   | oneshot | Waits for the database primary host to be reachable |
-| `wait-for-db-databases.service` | oneshot | Waits for databases at boot (runs once)             |
+| `db-guardian.service` | simple | WebSocket server for receiving commands |
+| `db-databases.target` | target | Represents "databases are online" |
+| `wait-for-db-primary.service` | oneshot | Waits for the database primary host to be reachable |
+| `wait-for-db-databases.service` | oneshot | Waits for databases at boot (runs once) |
 
 The target is bound to `wait-for-db-databases.service` and is also wanted by it.
 Restarting the readiness check therefore restarts the target instead of leaving it inactive.
 
 #### On the Database Coordinator
 
-| Unit                                        | Type    | Description                                                         |
+| Unit | Type | Description |
 | ------------------------------------------- | ------- | ------------------------------------------------------------------- |
-| `db-database-coordinator.service`           | oneshot | Sends undrain on start, drain on stop; retries failed undrains      |
-| `db-database-coordinator-reconcile.service` | oneshot | Re-sends undrain to all clients                                     |
-| `db-database-coordinator-reconcile.timer`   | timer   | Runs reconciliation every 5 minutes while the coordinator is active |
+| `db-database-coordinator.service` | oneshot | Sends undrain on start, drain on stop; retries failed undrains |
+| `db-database-coordinator-reconcile.service` | oneshot | Re-sends undrain to all clients |
+| `db-database-coordinator-reconcile.timer` | timer | Runs reconciliation every 5 minutes while the coordinator is active |
 
 ### Protocol Reference
 
-The guardian uses a simple JSON-based WebSocket protocol:
-
-**Authentication**
-
-Client sends:
-
-```json
-{ "type": "auth", "key": "<psk>" }
-```
-
-Server responds:
-
-```json
-{ "type": "auth", "status": "ok", "message": "Authentication successful" }
-```
+The guardian uses a JSON-based WebSocket protocol over mutual TLS.
+The TLS handshake authenticates both ends, so the first frame on a connection is a command:
 
 **Commands**
 
@@ -127,22 +116,45 @@ Server responds:
 { "type": "response", "action": "<action>", "status": "ok", "message": "..." }
 ```
 
+A client that sends any other message type receives an `error` response naming the type, and no command is executed.
+That is how a stale client that still opens with an authentication frame is diagnosed.
+
 ## Secrets
 
-Communication is secured using a Pre-Shared Key (PSK) that must be at least 32 characters.
-All WebSocket connections must authenticate with this key before commands are accepted.
+Connections are mutually authenticated with TLS.
+There is no shared secret in the protocol: the coordinator proves its identity with a client certificate, and the guardian proves its own with a per-host server certificate.
+Both sides trust the **DB Guardian Intermediate CA** and nothing else, so a certificate issued by another service's intermediate is rejected during the handshake.
+
+| Identity | Leaf profile | Issued to | Allowed by the guardian |
+| ---------------------------- | ------------ | --------------------------------------------- | ----------------------- |
+| `<host>` guardian server | `serverAuth` | Every guardian host, one leaf each | n/a |
+| `db-guardian-coordinator` | `clientAuth` | The database primary host only | Common name allowlist |
+
+The guardian rejects a connection whose client certificate common name is not in `server.database.guardian.allowedClientCommonNames`, and refuses to start at all when that list is empty.
+An empty list is a Nix evaluation error, so a misconfigured generation cannot be built.
 
 ### Declared secrets
 
-| Secret key        | Owner | Group | Restart unit                                                                     | Purpose                                |
-| ----------------- | ----- | ----- | -------------------------------------------------------------------------------- | -------------------------------------- |
-| `DB_GUARDIAN_PSK` | root  | root  | `db-guardian.service` (clients), `db-database-coordinator.service` (coordinator) | Authenticate DB Guardian WebSocket API |
+Certificate material is stored as binary SOPS files and passed to the units as systemd credentials.
+No secret is a YAML value.
+
+| Secret key | Owner | Group | Restart unit | Purpose |
+| ---------------------------- | ----- | ----- | -------------------------------- | ------------------------------------------- |
+| `db-guardian/CA_CERT` | root | root | `db-guardian.service` (clients), `db-database-coordinator.service` (coordinator) | Intermediate CA certificate used as the trust store |
+| `db-guardian/SERVER_CERT` | root | root | `db-guardian.service` | Server leaf and intermediate chain |
+| `db-guardian/SERVER_KEY` | root | root | `db-guardian.service` | Server leaf private key |
+| `db-guardian/CLIENT_CERT` | root | root | `db-database-coordinator.service` | Coordinator leaf and intermediate chain |
+| `db-guardian/CLIENT_KEY` | root | root | `db-database-coordinator.service` | Coordinator leaf private key |
+
+The files live in `hosts/server/<host>/db-guardian-tls/` and are encrypted to that host's recipients only, so a guardian cannot decrypt another guardian's key.
+Issue and rotate them with the procedure in [Internal mTLS CA](../security/internal_mtls_ca.md).
 
 ## Operational Notes / Assumptions
 
 ### Configuration
 
-**Port**: The guardian WebSocket server listens on port **9876** by default. This port is automatically opened to local subnets on servers with database dependencies.
+**Port**: The guardian WebSocket server listens on port **9876**. This port is automatically opened to local subnets on servers with database dependencies.
+Port 9876 serves TLS only: the plaintext listener was removed in the same generation that introduced mutual TLS, and there is no transitional port.
 
 **Dependent Services**: Dependent Services will be automatically populated with service names where there is a `systemd.service.<name>` defined from the names in `server.database.postgres` or `server.database.redis`.
 To manually add a service bind to the database availability target, add it to the `server.database.dependentServices` option.
@@ -181,8 +193,19 @@ systemctl stop db-databases.target
 
 **Guardian server won't start:**
 
-- Check that `DB_GUARDIAN_PSK` secret is properly configured
-- Verify the SOPS decryption is working and the secret is non-empty: `test -s /run/secrets/DB_GUARDIAN_PSK`
+- Check that the certificate secrets decrypted and are non-empty: `for f in /run/secrets/db-guardian/*; do test -s "$f" || echo "empty: $f"; done`
+- Check that at least one client common name is configured: `systemctl show db-guardian.service -p ExecStart`
+- A startup line `Refusing to start: at least one --allowed-cn is required` means the allowlist came through empty.
+
+**Connections fail with a certificate error:**
+
+- `certificate verify failed: unable to get local issuer certificate` on the guardian means the coordinator's chain does not reach the DB Guardian intermediate CA; confirm `CLIENT_CERT` carries the leaf followed by the intermediate.
+- `Hostname mismatch` or `IP address mismatch` on the coordinator means the dialled name is missing from the guardian's server certificate; the SAN set must contain the bare hostname used in `--hosts`.
+- `certificate has expired` means the leaf is past its validity; reissue it with the procedure in [Internal mTLS CA](../security/internal_mtls_ca.md).
+
+**Guardian rejects the client with `certificate common name ... is not in the allowlist`:**
+
+- The client certificate common name is not listed in `server.database.guardian.allowedClientCommonNames`; the observed name is in the log line.
 
 **Services not starting after boot:**
 
@@ -200,10 +223,10 @@ systemctl stop db-databases.target
 - Check reconciliation runs: `journalctl -u db-database-coordinator-reconcile.service`
 - The coordinator is restarted by `postgresql.service` and `redis.service`, retries failed undrains every 30 seconds, and re-asserts undrain every 5 minutes while active
 
-**Authentication failures in logs:**
+**Drain or undrain fails with a polkit error:**
 
-- Ensure the same PSK is deployed to all servers
-- Re-encrypt secrets if the key was changed
+- `Access denied` or an `org.freedesktop.systemd1.manage-units` denial in `journalctl -u db-guardian.service` means the polkit rule did not match; confirm the daemon runs as `db-guardian` and that the request names `db-databases.target` with verb `start` or `stop`.
+- `journalctl -u polkit` records the action, unit and verb the rule evaluated.
 
 ## References
 
