@@ -112,28 +112,20 @@ in
         rules = builtins.filter (rule: rule.ipv4 != null || rule.ipv6 != null) (
           (mkRules openPorts.tcp "tcp") ++ (mkRules openPorts.udp "udp")
         );
-        mkLines =
-          delete: rule:
+        mkRule =
+          rule:
           builtins.filter (line: line != "") [
-            (optionalString (rule.ipv4 != null)
-              "iptables ${if delete then "-D" else "-A"} nixos-fw -p ${rule.proto} --source ${rule.ipv4} --dport ${toString rule.port} -j nixos-fw-accept${
-                if delete then " || true" else ""
-              }"
-            )
-            (optionalString (rule.ipv6 != null)
-              "ip6tables ${if delete then "-D" else "-A"} nixos-fw -p ${rule.proto} --source ${rule.ipv6} --dport ${toString rule.port} -j nixos-fw-accept${
-                if delete then " || true" else ""
-              }"
-            )
+            (optionalString (
+              rule.ipv4 != null
+            ) "ip saddr ${rule.ipv4} ${rule.proto} dport ${toString rule.port} accept")
+            (optionalString (
+              rule.ipv6 != null
+            ) "ip6 saddr ${rule.ipv6} ${rule.proto} dport ${toString rule.port} accept")
           ];
-        mkCommands =
-          delete: builtins.concatStringsSep "\n" (flatten (map (rule: mkLines delete rule) rules));
+        ruleset = builtins.concatStringsSep "\n" (flatten (map mkRule rules));
       in
       mkIf (rules != [ ]) {
-        networking.firewall = {
-          extraCommands = mkCommands false;
-          extraStopCommands = mkCommands true;
-        };
+        networking.firewall.extraInputRules = ruleset;
       }
     )
   ];

@@ -76,19 +76,34 @@ in
           capSysAdmin = true;
         };
 
-        networking.firewall = {
-          extraCommands = ''
-            iptables -t nat -A PREROUTING -p tcp -m addrtype --dst-type LOCAL --dport 47989 -j REDIRECT --to-port 48989
-            ip6tables -t nat -A PREROUTING -p tcp -m addrtype --dst-type LOCAL --dport 47989 -j REDIRECT --to-port 48989
-            iptables -A nixos-fw -p tcp --dport 48989 -m conntrack --ctorigdstport 47989 -j nixos-fw-accept
-            ip6tables -A nixos-fw -p tcp --dport 48989 -m conntrack --ctorigdstport 47989 -j nixos-fw-accept
+        networking = {
+          firewall.extraInputRules = ''
+            meta l4proto tcp ct original proto-dst 47989 tcp dport 48989 accept
           '';
-          extraStopCommands = ''
-            iptables -t nat -D PREROUTING -p tcp -m addrtype --dst-type LOCAL --dport 47989 -j REDIRECT --to-port 48989 || true
-            ip6tables -t nat -D PREROUTING -p tcp -m addrtype --dst-type LOCAL --dport 47989 -j REDIRECT --to-port 48989 || true
-            iptables -D nixos-fw -p tcp --dport 48989 -m conntrack --ctorigdstport 47989 -j nixos-fw-accept || true
-            ip6tables -D nixos-fw -p tcp --dport 48989 -m conntrack --ctorigdstport 47989 -j nixos-fw-accept || true
-          '';
+
+          # The redirect lives in its own table: the nftables module owns and
+          # rebuilds every declared table, so there is nothing to delete by hand.
+          nftables.tables = {
+            sunshine-redirect4 = {
+              family = "ip";
+              content = ''
+                chain prerouting {
+                  type nat hook prerouting priority dstnat; policy accept;
+                  meta l4proto tcp fib daddr type local tcp dport 47989 redirect to :48989
+                }
+              '';
+            };
+
+            sunshine-redirect6 = {
+              family = "ip6";
+              content = ''
+                chain prerouting {
+                  type nat hook prerouting priority dstnat; policy accept;
+                  meta l4proto tcp fib daddr type local tcp dport 47989 redirect to :48989
+                }
+              '';
+            };
+          };
         };
 
         systemd.user.sockets.sunshine-proxy = {

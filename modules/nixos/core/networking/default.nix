@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -27,11 +28,15 @@ in
     networking = {
       enableIPv6 = true;
 
+      nftables.enable = true;
+
       firewall = {
         logRefusedConnections = false;
         logRefusedPackets = false;
         logReversePathDrops = false;
       };
     };
+
+    virtualisation.docker.extraPackages = mkIf config.virtualisation.docker.enable [ pkgs.iptables ];
   };
 }

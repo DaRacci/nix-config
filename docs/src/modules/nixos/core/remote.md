@@ -58,7 +58,7 @@ External inbound TCP **47989** is firewall-redirected to internal proxy port **4
 
 | Stage                 | What happens                                                                                                                                                                                                                             |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Firewall redirect** | `iptables` NAT prerouting rule redirects inbound TCP `:47989` to local `:48989`. A conntrack-based filter accept allows only redirected traffic into `:48989`; `:48989` is not broadly exposed.                                          |
+| **Firewall redirect** | An `nftables` NAT prerouting chain (`sunshine-redirect4` / `sunshine-redirect6`) redirects inbound TCP `:47989` to local `:48989`. An `extraInputRules` rule matching `ct original proto-dst 47989` allows only redirected traffic into `:48989`; `:48989` is not broadly exposed. |
 | **Socket activation** | `sunshine-proxy.socket` listens on TCP `:48989`. First connection activates `sunshine-proxy.service`.                                                                                                                                    |
 | **Proxy start**       | `sunshine-proxy.service` pulls in `sunshine.service` via systemd dependencies, then the packaged `sunshine-proxy-wrapper` helper polls until port 47989 is open and exec-s into `systemd-socket-proxyd` forwarding to `127.0.0.1:47989`. |
 | **Active streaming**  | Sunshine handles Moonlight/Sunshine client traffic on its standard port family. The proxy relays only the initial control connection transparently. Proxy `bindsTo` Sunshine — if Sunshine crashes proxy goes with it.                   |
@@ -78,9 +78,9 @@ No cycle: proxy starts Sunshine, proxy `bindsTo` Sunshine (proxy dies if Sunshin
 
 ```
 External client → TCP :47989
-    ↓ (NAT PREROUTING REDIRECT)
+    ↓ (nftables nat prerouting redirect)
 Local port :48989
-    ↓ (conntrack ctorigdstport 47989 match → nixos-fw-accept)
+    ↓ (ct original proto-dst 47989 match → accept in the nftables input chain)
 sunshine-proxy.socket
     ↓
 sunshine-proxy.service → sunshine.service (:47989)
