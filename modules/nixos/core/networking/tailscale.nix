@@ -21,7 +21,7 @@ in
     # tailscaled's own accept rules live in its own table, which cannot override
     # the drop policy of the NixOS firewall chains. Trusting the tunnel
     # interface reproduces what tailscaled's iptables INPUT rule used to do.
-    networking.firewall.trustedInterfaces = [ "tailscale0" ];
+    networking.firewall.trustedInterfaces = [ config.services.tailscale.interfaceName ];
 
     sops.secrets.TAILSCALE_AUTH_KEY = {
       sopsFile = "${self}/hosts/secrets.yaml";
