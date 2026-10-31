@@ -26,7 +26,7 @@ from time import monotonic, sleep
 from unittest import mock
 
 import websockets
-from pystemd.dbuslib import DBusError
+from pystemd.dbusexc import DBusBaseError
 from pystemd.systemd1 import Unit
 from websockets import serve
 
@@ -195,12 +195,12 @@ def run_systemctl(action: str, unit: str) -> tuple[bool, str]:
             dep_name = dep.decode()
             dep_obj = Unit(dep)
             dependency_objs[dep_name] = dep_obj
-    except (DBusError, OSError) as e:
+    except (DBusBaseError, OSError) as e:
         return False, f"Error loading unit {unit}: {e}"
 
     try:
         getattr(unit_obj.Unit, method_name)(b"replace")
-    except DBusError as e:
+    except DBusBaseError as e:
         return False, f"systemd error while running {action} on {unit}: {e}"
 
     return _wait_for_state(unit_obj, unit, dependency_objs, target_state)
@@ -324,7 +324,7 @@ async def handle_client(websocket, allowed_cns: frozenset[str]) -> None:
     except (
         TimeoutError,
         websockets.exceptions.WebSocketException,
-        DBusError,
+        DBusBaseError,
         OSError,
     ) as e:
         logger.error(f"Error handling client {client_id}: {e}")
@@ -405,6 +405,18 @@ def run_tests() -> None:
                 certfile="cert.pem", keyfile="key.pem"
             )
             created.load_verify_locations.assert_called_once_with(cafile="ca.pem")
+
+        def test_run_systemctl_reports_dbus_errors(self) -> None:
+            unit_factory = mock.MagicMock()
+            unit_factory.return_value.load.side_effect = DBusBaseError(
+                "org.freedesktop.DBus.Error.AccessDenied", "Access denied"
+            )
+
+            with mock.patch.object(server_module, "Unit", unit_factory):
+                success, message = run_systemctl("stop", "db-databases.target")
+
+            self.assertFalse(success)
+            self.assertIn("Error loading unit", message)
 
     class GuardianServerAsyncTests(unittest.IsolatedAsyncioTestCase):
         async def test_run_action_offloads_blocking_handler(self) -> None:
