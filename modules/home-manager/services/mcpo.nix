@@ -69,19 +69,15 @@ in
             {
               enableStrictShellChecks = false;
               name = "mcpo-start";
-              text =
-                [
-                  (lib.getExe cfg.package)
-                  "--hot-reload"
-                  "--port"
-                  "8182"
-                  "--config \"${config.sops.templates.mcpoConfiguration.path}\""
-                  (lib.optionalString (cfg.apiTokenFile != null)
-                    "--api-key $(cat \"${config.sops.secrets."MCP/API_TOKEN".path}\")"
-                  )
-                ]
-                |> builtins.filter (v: v != "")
-                |> lib.concatStringsSep " ";
+              text = ''
+                ${lib.optionalString (cfg.apiTokenFile != null) ''
+                  export MCPO_API_KEY="$(cat "${config.sops.secrets."MCP/API_TOKEN".path}")"
+                  [ -n "$MCPO_API_KEY" ] || { echo "mcpo: API token is empty" >&2; exit 1; }
+                ''}
+                # Requires overlays/patches/mcpo-api-key-env.patch: without it MCPO_API_KEY is
+                # ignored and mcpo starts unauthenticated while the guard above still passes.
+                exec ${lib.getExe cfg.package} --hot-reload --host 127.0.0.1 --port 8182 --config "${config.sops.templates.mcpoConfiguration.path}"
+              '';
             };
       };
 

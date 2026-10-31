@@ -51,6 +51,7 @@ in
       mcpo = (prev.python3Packages.callPackage inputs.mcpo { }).overridePythonAttrs (old: {
         patches = (old.patches or [ ]) ++ [
           ./patches/mcpo-union-repr-compat.patch
+          ./patches/mcpo-api-key-env.patch
         ];
       });
 
