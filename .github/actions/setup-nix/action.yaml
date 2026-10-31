@@ -29,7 +29,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: samueldr/lix-gha-installer-action@latest
+    - uses: samueldr/lix-gha-installer-action@38852f089fdd2f5aabeec42c59c8d180bb8a15e9 # latest
       with:
         extra_nix_config: |
           accept-flake-config = true
@@ -39,7 +39,7 @@ runs:
 
     # Setup TS so we can access the cache
     - name: Tailscale
-      uses: tailscale/github-action@v4
+      uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c # v4
       if: ${{ !env.ACT && inputs.TS_OAUTH_CLIENT_ID && inputs.TS_OAUTH_SECRET }}
       with:
         oauth-client-id: ${{ inputs.TS_OAUTH_CLIENT_ID }}
@@ -49,7 +49,7 @@ runs:
 
     # Taken from https://github.com/ryanccn/attic-action/issues/28#issuecomment-2743233082
     - name: Restore attic-client binary
-      uses: actions/cache@v5
+      uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
       id: attic-cache
       with:
         path: /tmp/attic-client
@@ -67,7 +67,7 @@ runs:
         nix copy --inputs-from ${{inputs.root}} --from file:///tmp/attic-client nixpkgs#attic-client
         nix profile install --inputs-from ${{inputs.root}} nixpkgs#attic-client
     - name: Setup Attic cache
-      uses: ryanccn/attic-action@v0
+      uses: ryanccn/attic-action@dc99f5eb1d5c0495aa26f7b56337b30011fa153e # v0
       if: ${{ !env.ACT && inputs.ATTIC_ENDPOINT && inputs.ATTIC_CACHE && inputs.ATTIC_TOKEN }}
       with:
         inputs-from: ${{ inputs.root }}
