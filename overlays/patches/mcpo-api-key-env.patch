@@ -1,0 +1,18 @@
+diff --git a/src/mcpo/__init__.py b/src/mcpo/__init__.py
+index 3193d45..5e14654 100644
+--- a/src/mcpo/__init__.py
++++ b/src/mcpo/__init__.py
+@@ -24,7 +24,12 @@ def main(
+     ] = ["*"],
+     api_key: Annotated[
+         Optional[str],
+-        typer.Option("--api-key", "-k", help="API key for authentication"),
++        typer.Option(
++            "--api-key",
++            "-k",
++            help="API key for authentication",
++            envvar="MCPO_API_KEY",
++        ),
+     ] = None,
+     strict_auth: Annotated[
+         Optional[bool],
