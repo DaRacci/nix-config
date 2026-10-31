@@ -26,7 +26,7 @@ jobs:
     outputs:
       matrix: ${{ steps.filtered-packages.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Get packages from flake
         id: get-packages
@@ -70,7 +70,7 @@ jobs:
 
       - name: Filter to changed packages
         id: filtered-packages
-        uses: workflow/nix-shell-action@v4.0.0
+        uses: workflow/nix-shell-action@031bcb0eb0396e0a585e86906809af10fe3bd499 # v4.0.0
         env:
           FULL_MATRIX: ${{ steps.get-packages.outputs.matrix }}
           EVENT_NAME: ${{ github.event_name }}
@@ -246,7 +246,7 @@ jobs:
     runs-on: ${{ matrix.arch == 'aarch64-linux' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     name: Build package ${{ matrix.package }} on ${{ matrix.arch }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: ./.github/actions/setup-nix
         with:
           arch: ${{ matrix.arch }}
