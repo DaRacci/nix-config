@@ -30,6 +30,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ env.BASE_BRANCH }}
+          persist-credentials: false
 
       - name: Build matrix
         id: build-matrix
@@ -92,6 +93,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ env.BASE_BRANCH }}
+          persist-credentials: false
 
       - name: Run nix-update
         id: update
