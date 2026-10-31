@@ -244,6 +244,7 @@ in
               ];
               RestrictNamespaces = true;
               LockPersonality = true;
+              MemoryDenyWriteExecute = true;
               RemoveIPC = true;
               UMask = "0077";
               SystemCallFilter = [ "@system-service" ];
