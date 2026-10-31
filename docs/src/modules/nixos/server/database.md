@@ -52,8 +52,9 @@ Lifecycle management is handled by the [DB Guardian](../../../components/db_guar
 
 - `POSTGRES/<DB_NAME_UPPER>_PASSWORD`: Per-database role password, provisioned during `postgresql-setup`.
 - `REDIS/PASSWORD`: Shared password for the primary Redis instance.
-- `db-guardian/CA_CERT`, `db-guardian/SERVER_CERT`, `db-guardian/SERVER_KEY`: Per-guardian-host TLS material, stored as binary SOPS files under `hosts/server/<host>/db-guardian-tls/`. Rotating any of them restarts `db-guardian.service` on that host.
-- `db-guardian/CLIENT_CERT`, `db-guardian/CLIENT_KEY`: Coordinator TLS material, stored under the database primary's host directory. Rotating either restarts `db-database-coordinator.service` on the primary.
+- `db-guardian/CA_CERT`: Trust anchor for both sides, stored as a binary SOPS file under `hosts/server/<host>/db-guardian-tls/`. It exists on every host that runs a guardian and on the database primary, and holds the DB Guardian intermediate rather than the fleet root.
+- `db-guardian/SERVER_CERT`, `db-guardian/SERVER_KEY`: Per-guardian-host server material, under the same directory. Rotating either restarts `db-guardian.service` on that host.
+- `db-guardian/CLIENT_CERT`, `db-guardian/CLIENT_KEY`: Coordinator material, under the database primary's host directory. Rotating either restarts `db-database-coordinator.service` on the primary.
 
 ## Operational Notes / Assumptions
 

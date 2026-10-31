@@ -161,8 +161,11 @@ Verify a live guardian, whose trust file is the intermediate rather than the roo
 ```bash
 openssl s_client -connect <host>:9876 \
   -CAfile guardian-intermediate.crt -cert CLIENT_CERT -key CLIENT_KEY \
-  -verify_hostname <host>
+  -verify_hostname <host> -partial_chain -verify_return_error
 ```
+
+`-partial_chain` is required here: without it a healthy guardian reports `Verify return code: 2 (unable to get issuer certificate)`, because the trust file is an intermediate and the check insists on reaching a self-signed root.
+`-verify_return_error` turns a failed verification into a failed check instead of a warning followed by a successful handshake.
 
 ## Trust store policy
 
