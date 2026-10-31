@@ -43,13 +43,18 @@ let
     else
       rhs;
 
-  # Binaries from plugin `extraPackages` are symlinked into this directory so they are
-  # available to the agent at runtime: the container does not inherit the systemd unit's
-  # PATH. It is a dedicated directory rather than the agent's Python virtualenv `bin/`, so
-  # the venv stays purely a Python environment and delivery does not depend on its layout.
-  # The host must put this directory on PATH for login shells — see
-  # `hosts/server/nixai/ai-agent.nix`.
-  agentBinDir = "/home/hermes/.local/nix-agent-bin";
+  # Binaries from plugin `extraPackages` are symlinked into the agent's virtualenv bin
+  # directory, because that is a directory the gateway is *launched* with: the hermes
+  # container entrypoint prepends `$HOME/.venv/bin` to PATH before it execs the gateway
+  # (upstream `nix/nixosModules.nix`). PATH edits made from a login shell — `.profile`,
+  # `.bashrc` — never reach the gateway process, so they cannot make a directory visible
+  # to it. `mkdir -p` before each link keeps delivery working when the venv directory is
+  # missing or has just been recreated; `ln` alone silently drops the binary in that case.
+  # The postStart hook runs as root, so a directory it has to create is handed back to the
+  # agent user — otherwise a root-owned `~/.venv` would stop the entrypoint from ever
+  # provisioning the virtualenv.
+  agentHome = "/home/hermes";
+  agentBinDir = "${agentHome}/.venv/bin";
 
   # Create a simple option and config module for plugins.
   mkPluginModule =
@@ -84,7 +89,7 @@ let
           };
 
           # When hermes-agent runs inside a container it doesnt inherit the PATH from the systemd unit which includes the extraPackages,
-          # so we symlink the binaries into a dedicated bin dir (see `agentBinDir`) so they are available to the agent at runtime.
+          # so we symlink the binaries into the venv bin dir (see `agentBinDir`) that the container entrypoint puts on the gateway's PATH.
           #
           # This does come with some caveats, such as for plugins that rely on the presence of a binary to register themselves,
           # since this is ran as a postStart hook, the agent may have already started and not had the binary available at the time of plugin registration, so the plugin may not be loaded.
@@ -101,7 +106,7 @@ let
                   else
                     elemAt (splitString "/" binaryPath) (length (splitString "/" binaryPath) - 1);
               in
-              "mkdir -p ${agentBinDir} && ln -sfn ${binaryPath} ${agentBinDir}/${binaryName}"
+              "mkdir -p ${agentBinDir} && chown --reference=${agentHome} ${agentHome}/.venv ${agentBinDir} 2>/dev/null; ln -sfn ${binaryPath} ${agentBinDir}/${binaryName}"
             );
         }
       );

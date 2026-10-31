@@ -201,14 +201,6 @@ in
         || echo 'export HERMES_HOME=/data/.hermes' >> /home/hermes/.profile
     ''
 
-    # Plugin `extraPackages` binaries are delivered into /home/hermes/.local/nix-agent-bin
-    # (modules/nixos/ai/agents/hermes/lib.nix). Login shells need that directory on PATH.
-    ''
-      touch /home/hermes/.profile
-      grep -q 'nix-agent-bin' /home/hermes/.profile \
-        || echo 'case ":$PATH:" in *:/home/hermes/.local/nix-agent-bin:*) ;; *) export PATH="/home/hermes/.local/nix-agent-bin:$PATH" ;; esac' >> /home/hermes/.profile
-    ''
-
     ''
       pkill -f "sshd.*-f /etc/ssh/sshd_config_hermes" 2>/dev/null || true
       sleep 1
