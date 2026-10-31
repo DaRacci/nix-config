@@ -38,6 +38,8 @@ repr
 revisioned
 rfkill
 sandboxed
+SAN
+SANs
 screencopy
 snake_case
 stdlib
