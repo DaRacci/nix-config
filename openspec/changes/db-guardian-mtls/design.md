@@ -74,7 +74,9 @@ Each guardian host gets a `serverAuth` leaf signed by the guardian intermediate,
 
 - `<host>` — the bare short name, which is what `--hosts` contains today (`guardian.nix:231`, `guardian.nix:263`)
 - `<host>.localdomain` — the configured `networking.domain` (`hosts/server/shared/default.nix:33`)
-- `<host>.${server.proxy.domain}` — for parity with the Alloy leaf profile
+- `<host>.${server.proxy.domain}` — only on hosts that define that option, for parity with the Alloy leaf profile
+
+**Correction: the third SAN does not exist on the guardian hosts.** `server.proxy.domain` is undefined on `nixcloud`, `nixdev` and `nixserv` (only `nixio` defines `racci.dev`), so a SAN cannot be generated from it there; the issued leaves carry the bare name and `<host>.localdomain`. Nothing in this change dials the proxy name, and the bare name — the one the coordinator uses — is present.
 
 **Rationale.** The client uses `ssl.create_default_context(cafile=…)`, which sets `CERT_REQUIRED` and `check_hostname` and never consults the subject CN. Verification therefore matches against SANs only. The short names in `--hosts` are the ones that must be present; a certificate with only a fully qualified name would be rejected by `check_hostname` before any guardian logic runs.
 

@@ -133,7 +133,9 @@ The system SHALL issue guardian certificates from a `DB Guardian Intermediate CA
 #### Scenario: Server certificates are per host
 
 - **WHEN** server certificates are issued for guardian hosts
-- **THEN** each host SHALL receive its own leaf whose subject alternative names include the bare hostname, `<host>.localdomain`, and `<host>.${server.proxy.domain}`, and no certificate SHALL be shared between hosts
+- **THEN** each host SHALL receive its own leaf whose subject alternative names include the bare hostname and `<host>.localdomain`, plus `<host>.${server.proxy.domain}` on hosts where that option is defined, and no certificate SHALL be shared between hosts
+
+A SAN cannot be generated from an option that has no value, and `server.proxy.domain` is undefined on the guardian hosts, so their leaves carry the bare name and `<host>.localdomain`. The bare name is the one the coordinator dials.
 
 #### Scenario: Single coordinator identity
 
