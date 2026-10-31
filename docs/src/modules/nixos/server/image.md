@@ -35,7 +35,7 @@ because the Proxmox LXC image variant sets `boot.isContainer = true` and therefo
 We override this behaviour for `build-vm` so that a runnable QEMU VM can be built from such hosts with the following options:
 
 - `boot.isContainer = false`: restores the initrd and normal VM boot.
-- `boot.loader.initScript.enable = false`: avoids a unique-option conflict on `system.build.installBootLoader` between the grub and init-script loaders.
+- `boot.loader.initScript.enable = true` together with `boot.loader.grub.enable = false`: avoids a unique-option conflict on `system.build.installBootLoader` between the grub and init-script loaders.
 - `virtualisation.qemu.consoles = [ "tty0" "ttyS0,115200n8" ]`: routes boot logs and `/dev/console` to the serial port so they are visible with `-nographic` (the last `console=` becomes `/dev/console`).
 - `systemd.services."serial-getty@ttyS0".enable = true`: enables root autologin on the serial console so the VM is usable with `-nographic`.
 
