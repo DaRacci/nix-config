@@ -190,6 +190,8 @@ in
           export MCPO_API_KEY="$(cat "''${CREDENTIALS_DIRECTORY}/apiToken")"
           [ -n "$MCPO_API_KEY" ] || { echo "mcpo: apiToken is empty" >&2; exit 1; }
         ''}
+        # Requires overlays/patches/mcpo-api-key-env.patch: without it MCPO_API_KEY is
+        # ignored and mcpo starts unauthenticated while the guard above still passes.
         exec ${lib.getExe cfg.package} --host 127.0.0.1 --config "''${CREDENTIALS_DIRECTORY}/config.json"
       '';
     };
