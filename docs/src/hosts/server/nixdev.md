@@ -14,7 +14,7 @@ It runs the self-hosted development services: continuous integration, Coder work
 
 ### CI / Automation
 
-- **Woodpecker CI**: Self-hosted CI server + local Docker-backed agent, supporting GitHub and Codeberg forges. Served on its own vhost with a separate gRPC agent endpoint.
+- **Woodpecker CI**: Self-hosted CI server + local Docker-backed agent, supporting GitHub and Codeberg forges. Served on its own vhost with a separate gRPC agent endpoint. Registration is closed; accounts are provisioned manually and enumerated in `WOODPECKER_ADMIN`.
 - **GitHub Actions runners**: A pool of 10 self-hosted `nixos-runner-*` runners for the `nix-config` repo.
 
 ### Workspaces
