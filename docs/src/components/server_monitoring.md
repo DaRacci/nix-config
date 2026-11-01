@@ -133,15 +133,17 @@ The bare host name is required because the relay connects to `https://<host>:124
 Server certificates use `extendedKeyUsage = serverAuth`.
 The client certificate uses `commonName = alloy-capture-relay` and `extendedKeyUsage = clientAuth`.
 
-The manual procedure below assumes `alloy-intermediate.crt` and `alloy-intermediate.key` from the [Internal mTLS CA](../security/internal_mtls_ca.md) procedure.
+The manual procedure below assumes `root.crt`, `alloy-intermediate.crt` and `alloy-intermediate.key`
+from the [Internal mTLS CA](../security/internal_mtls_ca.md) procedure.
 `<io-primary>` is the host that defines `server.proxy.domain`.
 
 For new hosts, use the `provision-alloy-certs` helper.
 It reads the Fleet root and the Alloy intermediate from a KeePassXC vault, issues the certificates,
-SOPS-encrypts the output, and merges each new leaf back into the same vault:
+SOPS-encrypts the output, and merges each new leaf back into the same vault.
+It takes the hosts to provision and defaults to every server host when they are omitted:
 
 ```bash
-provision-alloy-certs --vault pki.kdbx --vault-password-file vault-pass nixdb nixauth nixstor
+provision-alloy-certs --vault pki.kdbx --vault-password-file vault-pass nixai
 ```
 
 The vault must contain `root/Fleet mTLS Root CA` with a `cert.pem` attachment
@@ -158,7 +160,7 @@ The manual procedure below remains the reference for the certificate profiles.
 ```bash
 domain="$(nix eval --raw .#nixosConfigurations.<io-primary>.config.server.proxy.domain)"
 
-for host in nixai nixarr nixauth nixcloud nixdb nixdev nixio nixmon nixserv nixstor; do
+for host in nixai nixarr nixcloud nixdev nixio nixmon nixserv; do
   openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out "$host.key"
   openssl req -new -key "$host.key" -subj "/CN=$host" -out "$host.csr"
   openssl x509 -req -in "$host.csr" -CA alloy-intermediate.crt -CAkey alloy-intermediate.key \
@@ -178,7 +180,7 @@ cat client.crt alloy-intermediate.crt > client-chain.crt
 Store each certificate as a binary SOPS file under the host directory, then encrypt it in place:
 
 ```sh
-for host in nixai nixarr nixauth nixcloud nixdb nixdev nixio nixmon nixserv nixstor; do
+for host in nixai nixarr nixcloud nixdev nixio nixmon nixserv; do
   mkdir -p "hosts/server/$host/alloy"
   cp root.crt "hosts/server/$host/alloy/CA_CERT"
   cp "$host-chain.crt" "hosts/server/$host/alloy/SERVER_CERT"
