@@ -38,7 +38,11 @@ jobs:
         with:
           flakes: nixpkgs#rumdl
           script: |
-            rumdl check docs/ AGENTS.md
+            mkdir -p .devenv
+            pwd > .devenv/root
+            nix develop .#default \
+              --override-input devenv-root "file+file://$PWD/.devenv/root" \
+              --command bash -c 'rumdl check docs/ AGENTS.md'
 
   generate-matrix:
     runs-on: self-hosted

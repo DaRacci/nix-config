@@ -7,8 +7,8 @@ when:
     path:
       - "docs/**"
       - "AGENTS.md"
-      - "flake/dev/rumdl.nix"
-      - "flake/dev/excludes.nix"
+      - "flake/dev/devenv.nix"
+      - "flake/dev/treefmt.nix"
       - "ci/vale/**"
       - "flake/dev/scripts/**"
       - ".vale.ini"
@@ -29,4 +29,8 @@ steps:
     image: registry.racci.dev/lix-woodpecker:latest
     pull: true
     commands: |
-      nix run .#rumdl -- check docs/ AGENTS.md
+      mkdir -p .devenv
+      pwd > .devenv/root
+      nix develop .#default \
+        --override-input devenv-root "file+file://$PWD/.devenv/root" \
+        --command bash -c 'rumdl check docs/ AGENTS.md'

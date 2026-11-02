@@ -43,7 +43,9 @@ The generated `.rumdl.toml` enables reversed link syntax, empty links, undefined
 references, unused definitions, whitespace in destinations, fragments that name no heading, relative links that point at
 no file, anchors that collide, heading levels that skip a level, emphasis used as a heading, fenced code that declares no
 language, and consecutive blank lines.
-CI runs it as `nix run .#rumdl -- check docs/ AGENTS.md`, and the git hook runs it on every staged Markdown file.
+CI enters the development shell with `nix develop .#default`, which writes `.rumdl.toml` the same way direnv does,
+then runs `rumdl check docs/ AGENTS.md`.
+The git hook runs it on every staged Markdown file.
 
 Its line-length and reflow modes stay off: `AU-English/SentencePerLine` owns the sentence layout, and `mdformat` keeps the
 manual wraps.
