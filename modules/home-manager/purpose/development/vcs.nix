@@ -24,6 +24,12 @@ let
     export OPENROUTER_API_KEY="$(cat ${config.sops.secrets.OPENROUTER_API_KEY.path})"
     exec ${pkgs.jj-desc}/bin/jj-desc "$@"
   '';
+
+  allowedSignersFile =
+    (pkgs.writeTextFile {
+      name = "allowed-signers";
+      text = concatStringsSep "\n" [ "${cfg.user.email} ${cfg.user.publicKey}" ];
+    }).outPath;
 in
 {
   options.purpose.development.vcs = {
@@ -171,13 +177,7 @@ in
           signByDefault = true;
         };
 
-        settings.gpg.ssh.allowedSignersFile =
-          (pkgs.writeTextFile {
-            name = "allowed-signers";
-            text = concatStringsSep "\n" [
-              "${config.programs.git.settings.user.email} ${cfg.user.publicKey}"
-            ];
-          }).outPath;
+        settings.gpg.ssh.allowedSignersFile = allowedSignersFile;
       };
 
       programs.jujutsu.settings = {
@@ -186,6 +186,7 @@ in
         signing = {
           behavior = "drop"; # Lazyily sign commits at push time only via `git.sign-on-push`
           backend = "ssh";
+          backends.ssh.allowed-signers = allowedSignersFile;
           key = cfg.user.publicKey;
         };
       };
