@@ -47,7 +47,7 @@ Its line-length and reflow modes stay off: `AU-English/SentencePerLine` owns the
 manual wraps.
 
 `mdBook` generates the search page at build time, so the link to it has no source file to resolve against.
-`[per-file-ignores]` excludes `MD057` for `docs/src/index.md` and `docs/src/SUMMARY.md`, and for nothing else.
+The generated `[per-file-ignores]` excludes `MD057` for `docs/src/index.md` and `docs/src/SUMMARY.md`, and for nothing else.
 
 ## Dictionaries
 

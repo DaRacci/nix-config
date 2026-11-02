@@ -7,7 +7,8 @@ when:
     path:
       - "docs/**"
       - "AGENTS.md"
-      - ".rumdl.toml"
+      - "flake/dev/rumdl.nix"
+      - "flake/dev/excludes.nix"
       - "ci/vale/**"
       - "flake/dev/scripts/**"
       - ".vale.ini"
@@ -28,4 +29,4 @@ steps:
     image: registry.racci.dev/lix-woodpecker:latest
     pull: true
     commands: |
-      nix run nixpkgs#rumdl -- check docs/ AGENTS.md
+      nix run .#rumdl -- check docs/ AGENTS.md

@@ -12,8 +12,15 @@
       system,
       ...
     }:
+    let
+      rumdl = import "${self}/flake/dev/rumdl.nix" { inherit pkgs; };
+    in
     {
       packages = lib.mkMerge [
+        {
+          rumdl-config = rumdl.config;
+          rumdl = rumdl.wrapper;
+        }
         (import "${self}/pkgs" {
           inherit
             self

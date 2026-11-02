@@ -24,7 +24,7 @@ This is my interpretation of the perfect nix flake, this powers my desktops, lap
 
 The repository uses an **automatic discovery system** that scans the filesystem to build configurations:
 
-```
+```text
 .
 ├─ home              # Root for all user homes (auto-discovered)
 │  ├─── {username}   # User-specific configurations
@@ -60,19 +60,10 @@ The flake automatically discovers:
 
 <!-- STOP DOCS -->
 
-## Getting Started
+## Documentation
 
-- **[Creating New Hosts](./docs/Creating-Hosts.md)** - Step-by-step guide to add new hosts to your configuration
-- **[Creating New Users](./docs/Creating-Users.md)** - Instructions for adding new user configurations
-- **[Installation Guide](./docs/Installation.md)** - Complete installation and setup instructions
-
-## Things on the TODO
-
-> These probably won't happen honestly
-
-- Cosmic Desktop once stabilized
-- Declarative disk management with disko for all hosts
-- Automated backup strategies for persistent data
+All documentation is generated using [mdBook] and can be found in the `docs/` directory.
+This is available at [https://daracci.github.io/nix-config](https://daracci.github.io/nix-config).
 
 ## Resources ive used as inspiration or based components on
 
@@ -84,6 +75,7 @@ Huge thanks to the people who worked on these repositories.
 
 [home-manager]: https://github.com/nix-community/home-manager
 [impermanence]: https://github.com/nix-community/impermanence
+[mdbook]: https://github.com/rust-lang/mdBook
 [nixos]: https://nixos.org/
 [sops]: https://github.com/mozilla/sops
 [sops-nix]: https://github.com/Mic92/sops-nix

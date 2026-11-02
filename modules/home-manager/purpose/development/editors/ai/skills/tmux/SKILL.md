@@ -112,13 +112,13 @@ output=$(tmux capture-pane -t job -p)
 echo "$output"
 ```
 
-### Conditional session
+## Conditional session
 
 ```bash
 tmux has -t myserver || tmux new-session -d -s myserver 'command'
 ```
 
-### Clean up
+## Clean up
 
 ```bash
 tmux kill-session -t backend

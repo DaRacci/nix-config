@@ -6,6 +6,7 @@ result
 .devenv
 .pre-commit-config.yaml
 .luarc.json
+.rumdl.toml
 
 .cache/
 
