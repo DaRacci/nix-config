@@ -2,20 +2,23 @@
 
 Prose in `docs/` and `AGENTS.md` is checked with [Vale], using an Australian English spelling style and a sentence-per-line layout.
 The Vale configuration lives in `.vale.ini` and `ci/vale/`.
-The rumdl configuration is generated into `.rumdl.toml` by the development shell, from `flake/dev/devenv.nix`.
+The rumdl configuration has one source, `flake/dev/rumdl.nix`.
+The development shell writes it into the gitignored `.rumdl.toml`, and the flake builds the same settings into the `rumdl-config` derivation.
 
 ## Layout
 
-| Path                                            | Purpose                                             |
-| ----------------------------------------------- | --------------------------------------------------- |
-| `.vale.ini`                                     | selects the linted paths and the `AU-English` style |
-| `ci/vale/styles/AU-English/Spelling.yml`        | the spelling rule and the dictionaries it loads     |
-| `ci/vale/styles/AU-English/Terms.yml`           | generated: host name and term casing rule           |
-| `ci/vale/styles/AU-English/SentencePerLine.yml` | the one-sentence-per-line rule                      |
-| `ci/vale/styles/config/scripts/`                | the line-aware script behind that rule              |
-| `ci/vale/styles/config/dictionaries/`           | the dictionaries and allow-lists the rules read     |
-| `flake/dev/scripts/vale-tech-dictionary.nu`     | builds the `tech` dictionary from the cspell lists  |
-| `.rumdl.toml`                                   | generated: the [rumdl] link and structure rules     |
+| Path                                            | Purpose                                                  |
+| ----------------------------------------------- | -------------------------------------------------------- |
+| `.vale.ini`                                     | selects the linted paths and the `AU-English` style      |
+| `ci/vale/styles/AU-English/Spelling.yml`        | the spelling rule and the dictionaries it loads          |
+| `ci/vale/styles/AU-English/Terms.yml`           | generated: host name and term casing rule                |
+| `ci/vale/styles/AU-English/SentencePerLine.yml` | the one-sentence-per-line rule                           |
+| `ci/vale/styles/config/scripts/`                | the line-aware script behind that rule                   |
+| `ci/vale/styles/config/dictionaries/`           | the dictionaries and allow-lists the rules read          |
+| `flake/dev/scripts/vale-tech-dictionary.nu`     | builds the `tech` dictionary from the cspell lists       |
+| `flake/dev/rumdl.nix`                           | the [rumdl] rules, the excludes and the per-file ignores |
+| `flake/dev/excludes.nix`                        | the paths `treefmt`, [rumdl] and the hooks skip          |
+| `.rumdl.toml`                                   | generated and gitignored: written from `rumdl.nix`       |
 
 ## Prose Layout
 
@@ -39,18 +42,20 @@ Emphasis markers on a line do not affect the check.
 ## Markup Checks
 
 [rumdl] checks links and heading structure.
-The generated `.rumdl.toml` enables reversed link syntax, empty links, undefined
+`flake/dev/rumdl.nix` enables reversed link syntax, empty links, undefined
 references, unused definitions, whitespace in destinations, fragments that name no heading, relative links that point at
 no file, anchors that collide, heading levels that skip a level, emphasis used as a heading, fenced code that declares no
 language, and consecutive blank lines.
-CI runs it as `nix run .#rumdl -- check docs/ AGENTS.md`, and the git hook runs it on every staged Markdown file.
+CI enters no development shell, so it runs the flake wrapper instead.
+The wrapper passes the packaged `rumdl-config` to `--config`: `nix run .#rumdl -- check docs/ AGENTS.md`.
+The git hook runs the plain `rumdl` binary on every staged Markdown file, and in the development shell that binary reads the `.rumdl.toml` the shell wrote.
 
 Its line-length and reflow modes stay off: `AU-English/SentencePerLine` owns the sentence layout, and `mdformat` keeps the
 manual wraps.
 
 `mdBook` generates the search page at build time, so the link to it has no source file to resolve against.
 The generated `[per-file-ignores]` excludes `MD057` for `docs/src/index.md` and `docs/src/SUMMARY.md`, and for nothing else.
-The generated file also takes its exclude globs from `treefmt`'s global excludes, so the two tools skip the same paths.
+`flake/dev/rumdl.nix` and `treefmt` both take their excludes from `flake/dev/excludes.nix`, so the two tools skip the same paths.
 
 ## Dictionaries
 
