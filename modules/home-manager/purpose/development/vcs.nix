@@ -49,7 +49,11 @@ in
 
     user = {
       email = mkOption {
-        description = "The email to use for version control operations, this is your commit email.";
+        description = ''
+          The email to use for version control operations, this is your commit email.
+
+          If this is left empty while this module is enabled, you will receive an eval error.
+        '';
         type = nullOr str;
         default = null;
       };
@@ -89,6 +93,10 @@ in
           assertion = cfg.enable -> config.purpose.development.enable;
           message = "The development purpose must be enabled to use `purpose.development.vcs` options.";
         }
+        {
+          assertion = cfg.enable -> (cfg.user.email != null);
+          message = "The email must be set to use `purpose.development.vcs` options.";
+        }
       ];
     }
 
@@ -110,10 +118,7 @@ in
 
           settings = {
             user = {
-              inherit (cfg.user) name;
-            }
-            // optionalAttrs (cfg.user.email != null) {
-              inherit (cfg.user) email;
+              inherit (cfg.user) name email;
             };
 
             init.defaultBranch = "master";
@@ -215,10 +220,7 @@ in
           enable = true;
           settings = {
             user = {
-              inherit (cfg.user) name;
-            }
-            // optionalAttrs (cfg.user.email != null) {
-              inherit (cfg.user) email;
+              inherit (cfg.user) name email;
             };
 
             ui = {
