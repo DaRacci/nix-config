@@ -86,4 +86,4 @@ each guardian presents a per-host server certificate, and both sides trust only 
 ## References
 
 - [DB Guardian](../../../components/db_guardian.md)
-- [Database Coordinator](../../../hosts/server/nixdb.md)
+- [Database Coordinator](../../../hosts/server/nixio.md)
