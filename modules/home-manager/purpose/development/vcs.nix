@@ -19,7 +19,7 @@ let
   cfg = config.purpose.development.vcs;
 
   jj-desc-wrapped = pkgs.writeShellScriptBin "jj-desc" ''
-    export LLM_MODEL="deepseek/deepseek-v4.1-flash"
+    export LLM_MODEL="~deepseek/deepseek-flash-latest"
     export LLM_PROVIDER="openrouter"
     export OPENROUTER_API_KEY="$(cat ${config.sops.secrets.OPENROUTER_API_KEY.path})"
     exec ${pkgs.jj-desc}/bin/jj-desc "$@"
