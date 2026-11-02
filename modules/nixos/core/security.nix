@@ -29,13 +29,6 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Remove once inputs updated but pkgs dont build on it atm so no bump :)
-    #TODO:https://github.com/NixOS/nixpkgs/pull/576390
-    security.pki.caCertificateBlacklist = [
-      # CVE-2026-111943
-      "Comodo AAA Services root"
-    ];
-
     security = {
       lockKernelModules = false;
       protectKernelImage = true;
