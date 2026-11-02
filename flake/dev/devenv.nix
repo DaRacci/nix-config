@@ -13,6 +13,24 @@
     }:
     let
       devTools = import ./scripts { inherit pkgs lib; };
+
+      # prek matches excludes as regexes; treefmt writes gitignore globs.
+      # Convert the glob subset treefmt uses into anchored regexes.
+      globToRegex =
+        glob:
+        let
+          escaped = lib.strings.escapeRegex glob;
+        in
+        "^"
+        + (
+          escaped
+          |> builtins.replaceStrings [ "\\*\\*/" ] [ "(?:.*/)?" ]
+          |> builtins.replaceStrings [ "/\\*\\*" ] [ "(?:/.*)" ]
+          |> builtins.replaceStrings [ "\\*\\*" ] [ ".*" ]
+          |> builtins.replaceStrings [ "\\*" ] [ "[^/]*" ]
+          |> builtins.replaceStrings [ "\\?" ] [ "[^/]" ]
+        )
+        + "$";
     in
     {
       devenv.shells = rec {
@@ -131,13 +149,20 @@
 
           git-hooks = {
             package = pkgs.prek;
+            excludes = map globToRegex config.treefmt.settings.global.excludes;
             hooks = {
               check-added-large-files.enable = true;
               check-case-conflicts.enable = true;
               check-executables-have-shebangs.enable = true;
               check-shebang-scripts-are-executable.enable = true;
               check-merge-conflicts.enable = true;
-              detect-private-keys.enable = true;
+              detect-private-keys = {
+                enable = true;
+                excludes = [
+                  "modules/nixos/server/image.nix"
+                  "docs/src/modulex/nixos/server/image.md"
+                ];
+              };
               fix-byte-order-marker.enable = true;
               mixed-line-endings.enable = true;
               trim-trailing-whitespace.enable = true;

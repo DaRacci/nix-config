@@ -16,6 +16,13 @@ Or directly with `nix`:
 nix develop --override-input devenv-root file+file://<path-to-nix-config>/.devenv/root
 ```
 
+## Git Hooks
+
+The shell installs `prek` hooks through `devenv`, covering repository hygiene, `nil`, `vale`, `rumdl`, and `treefmt`.
+
+The hook excludes reuse `treefmt`'s global exclude globs, including its defaults.
+`prek` matches excludes as regexes, so the globs are converted to anchored regexes before use.
+
 ## Helper Commands
 
 The shell also exposes repository helper commands from `flake/dev/scripts/`.
