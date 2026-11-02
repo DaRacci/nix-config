@@ -33,7 +33,15 @@ in
 
   config = mkMerge [
     (mkIf cfg.enable {
-      programs.atuin.enable = true;
+      programs = {
+        atuin.enable = true;
+        zoxide.enable = true;
+      };
+
+      user.persistence.directories = [
+        ".local/share/atuin"
+        ".local/share/zoxide"
+      ];
     })
 
     (mkIf cfg.enableFish {
@@ -52,7 +60,6 @@ in
         inputs.bash-env-json.packages.${pkgs.stdenv.hostPlatform.system}.default
       ];
 
-      programs.zoxide.enable = true;
       programs.nushell = {
         enable = true;
 
@@ -127,10 +134,8 @@ in
         };
       };
 
-      user.persistence = {
-        directories = [ ".local/share/zoxide" ];
-        files = [ ".config/nushell/history.txt" ];
-      };
+      user.persistence.files = [ ".config/nushell/history.txt" ];
+
     })
   ];
 }
