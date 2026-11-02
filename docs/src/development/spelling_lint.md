@@ -1,7 +1,8 @@
 # Prose Lint
 
 Prose in `docs/` and `AGENTS.md` is checked with [Vale], using an Australian English spelling style and a sentence-per-line layout.
-The configuration lives in `.vale.ini`, `.rumdl.toml` and `ci/vale/`.
+The Vale configuration lives in `.vale.ini` and `ci/vale/`.
+The rumdl configuration is generated into `.rumdl.toml` by the development shell, from `flake/dev/devenv.nix`.
 
 ## Layout
 
@@ -14,7 +15,7 @@ The configuration lives in `.vale.ini`, `.rumdl.toml` and `ci/vale/`.
 | `ci/vale/styles/config/scripts/`                | the line-aware script behind that rule              |
 | `ci/vale/styles/config/dictionaries/`           | the dictionaries and allow-lists the rules read     |
 | `flake/dev/scripts/vale-tech-dictionary.nu`     | builds the `tech` dictionary from the cspell lists  |
-| `.rumdl.toml`                                   | enables the [rumdl] link and structure rules        |
+| `.rumdl.toml`                                   | generated: the [rumdl] link and structure rules     |
 
 ## Prose Layout
 
@@ -37,17 +38,19 @@ Emphasis markers on a line do not affect the check.
 
 ## Markup Checks
 
-[rumdl] checks links and heading structure. `.rumdl.toml` enables reversed link syntax, empty links, undefined
+[rumdl] checks links and heading structure.
+The generated `.rumdl.toml` enables reversed link syntax, empty links, undefined
 references, unused definitions, whitespace in destinations, fragments that name no heading, relative links that point at
 no file, anchors that collide, heading levels that skip a level, emphasis used as a heading, fenced code that declares no
 language, and consecutive blank lines.
-It runs as `rumdl check docs/ AGENTS.md` in CI, and the git hook runs it on every staged Markdown file.
+CI runs it as `nix run .#rumdl -- check docs/ AGENTS.md`, and the git hook runs it on every staged Markdown file.
 
 Its line-length and reflow modes stay off: `AU-English/SentencePerLine` owns the sentence layout, and `mdformat` keeps the
 manual wraps.
 
 `mdBook` generates the search page at build time, so the link to it has no source file to resolve against.
 The generated `[per-file-ignores]` excludes `MD057` for `docs/src/index.md` and `docs/src/SUMMARY.md`, and for nothing else.
+The generated file also takes its exclude globs from `treefmt`'s global excludes, so the two tools skip the same paths.
 
 ## Dictionaries
 
