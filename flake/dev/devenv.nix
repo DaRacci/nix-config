@@ -14,6 +14,8 @@
     let
       devTools = import ./scripts { inherit pkgs lib; };
 
+      rumdl = import ./rumdl.nix { inherit pkgs; };
+
       # prek matches excludes as regexes; treefmt writes gitignore globs.
       # Convert the glob subset treefmt uses into anchored regexes.
       globToRegex =
@@ -119,33 +121,7 @@
             VALE_TECH_DICTIONARY = "${devTools.vale-tech-dictionary}";
           };
 
-          files.".rumdl.toml".toml = {
-            global = {
-              enable = [
-                "MD001" # heading levels increment by one
-                "MD011" # reversed link syntax
-                "MD012" # no consecutive blank lines
-                "MD036" # emphasis is not a heading
-                "MD040" # fenced code declares a language
-                "MD042" # no empty links
-                "MD051" # fragments must reference existing headings
-                "MD052" # reference links must be defined
-                "MD053" # reference definitions must be used
-                "MD057" # relative links must point to existing files
-                "MD062" # no whitespace in link destinations
-                "MD080" # heading anchors must be unique
-              ];
-
-              exclude = config.treefmt.settings.global.excludes;
-            };
-
-            # mdBook generates the search page at build time,
-            # so the link to it has no source file to resolve against.
-            per-file-ignores = {
-              "docs/src/index.md" = [ "MD057" ];
-              "docs/src/SUMMARY.md" = [ "MD057" ];
-            };
-          };
+          files.".rumdl.toml".toml = rumdl.settings;
 
           git-hooks = {
             package = pkgs.prek;
@@ -160,7 +136,7 @@
                 enable = true;
                 excludes = [
                   "modules/nixos/server/image.nix"
-                  "docs/src/modulex/nixos/server/image.md"
+                  "docs/src/modules/nixos/server/image.md"
                 ];
               };
               fix-byte-order-marker.enable = true;

@@ -38,7 +38,7 @@ jobs:
         with:
           flakes: nixpkgs#rumdl
           script: |
-            rumdl check docs/ AGENTS.md
+            nix run .#rumdl -- check docs/ AGENTS.md
 
   generate-matrix:
     runs-on: self-hosted

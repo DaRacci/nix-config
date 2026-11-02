@@ -9,6 +9,8 @@ when:
       - "AGENTS.md"
       - "flake/dev/rumdl.nix"
       - "flake/dev/excludes.nix"
+      - "flake/dev/treefmt.nix"
+      - "flake/dev/devenv.nix"
       - "ci/vale/**"
       - "flake/dev/scripts/**"
       - ".vale.ini"
