@@ -11,7 +11,6 @@ let
     mkMerge
     mkOption
     mkEnableOption
-    optionalAttrs
     literalExpression
     concatStringsSep
     ;

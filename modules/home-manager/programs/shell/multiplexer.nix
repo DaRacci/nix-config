@@ -14,7 +14,7 @@ let
 in
 {
   options.programSets.shell.multiplexer = {
-    enable = mkEnableOption "shell multiplexer" {
+    enable = mkEnableOption "shell multiplexer" // {
       default = config.programSets.shell.enable;
       defaultText = literalExpression "config.programSets.shell.enable";
     };

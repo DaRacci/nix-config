@@ -28,22 +28,22 @@ in
       defaultText = "true if the device is not a server and shell is enabled";
     };
 
-    enableModernReplacements = mkEnableOption "modern replacements" {
+    enableModernReplacements = mkEnableOption "modern replacements" // {
       default = cfg.enable;
       defaultText = "true if shell tools are enabled";
     };
 
-    enableNetworkTools = mkEnableOption "network tools" {
+    enableNetworkTools = mkEnableOption "network tools" // {
       default = cfg.enable;
       defaultText = "true if shell tools are enabled";
     };
 
-    enableSystemTools = mkEnableOption "system information tools" {
+    enableSystemTools = mkEnableOption "system information tools" // {
       default = cfg.enable;
       defaultText = "true if shell tools are enabled";
     };
 
-    enableTUI = mkEnableOption "TUI tools" {
+    enableTUI = mkEnableOption "TUI tools" // {
       default = cfg.enable;
       defaultText = "true if shell tools are enabled";
     };
