@@ -50,6 +50,8 @@ Service-specific leaf details live in:
 - Leaf private keys: stored in SOPS for the consuming service.
 - Root and intermediate certificates are public and may be distributed.
 
+The provisioning helpers stream CA private keys read from the vault into memory and pass them to OpenSSL on standard input; they never write those keys to the work directory.
+
 If an intermediate key is compromised, rotate that intermediate and reissue its leaves.
 The other service and the root remain unaffected.
 
@@ -106,6 +108,7 @@ The helper appends ` Intermediate CA` to the prefix.
 It reads the root certificate and key from `root/Fleet mTLS Root CA`, issues a five-year intermediate
 with `pathlen:0` and `keyCertSign,cRLSign`, verifies it against the root,
 and merges it into the vault under `intermediate/<slug>/<common name>` with `cert.pem` and `key.pem` attachments.
+The root private key is streamed into memory for signing and is not written to the work directory.
 Use `--vault-group` for an explicit destination group, and `--days`, `--path-length`, or `--key-bits` to change the profile.
 
 Create a service intermediate manually with the equivalent steps:

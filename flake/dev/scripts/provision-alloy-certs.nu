@@ -87,7 +87,7 @@ def main [
 
       let server_leaves = $selected_hosts | each {|host|
         (
-          provision-leaf $output $work.path $host "alloy" "server" $ca.root $ca.key
+          provision-leaf $output $work.path $host "alloy" "server" $ca.root --ca-key-data $ca.key
             --issuer-cert $ca.cert
             --name $host --common-name $host
             --san [ $"DNS:($host)" $"DNS:($host).localdomain" $"DNS:($host).($domain)" "IP:127.0.0.1" ]
@@ -101,7 +101,7 @@ def main [
 
       let client_leaves = if $include_client {
         [ (
-          provision-leaf $output $work.path $client_host "alloy" "client" $ca.root $ca.key
+          provision-leaf $output $work.path $client_host "alloy" "client" $ca.root --ca-key-data $ca.key
             --issuer-cert $ca.cert
             --name "alloy-client" --common-name $CLIENT_COMMON_NAME
             --san [ $"DNS:($CLIENT_COMMON_NAME)" ]
@@ -160,7 +160,7 @@ def read-ca [
 
   let intermediate = vault-ca-pair $credentials $work $intermediate_entry --name "alloy-intermediate" --cert-attachment $cert_attachment --key-attachment $key_attachment
   validate-ca-cert $intermediate.cert --common-name $intermediate_common_name
-  validate-key-pair $intermediate.cert $intermediate.key
+  validate-key-pair $intermediate.cert --key-data $intermediate.key
   verify-leaf $intermediate.cert $root
 
   { root: $root, cert: $intermediate.cert, key: $intermediate.key }

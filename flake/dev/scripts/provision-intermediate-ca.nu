@@ -63,12 +63,12 @@ def main [
     } else {
       let root = vault-ca-pair $credentials $work.path $root_entry --name "root" --cert-attachment $cert_attachment --key-attachment $key_attachment
       validate-ca-cert $root.cert --common-name $root_common_name --self-signed
-      validate-key-pair $root.cert $root.key
+      validate-key-pair $root.cert --key-data $root.key
 
       let material = (
         issue-ca --work-dir $work.path --name "intermediate"
           --common-name $common_name
-          --ca-cert $root.cert --ca-key $root.key
+          --ca-cert $root.cert --ca-key-data $root.key
           --serial ($work.path | path join "root.srl")
           --days $days --path-length $path_length --key-bits $key_bits
       )

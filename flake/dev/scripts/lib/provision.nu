@@ -60,7 +60,8 @@ export def provision-leaf [
   service: string # Service directory under the host
   kind: string # server or client
   ca_cert: path # Certificate written to CA_CERT
-  ca_key: path # Issuing CA private key
+  ca_key?: any # Issuing CA private key path
+  --ca-key-data: any = null # Issuing CA private key PEM passed on standard input
   --issuer-cert: any = null # Certificate that issues the leaf; defaults to ca_cert
   --name: string # Leaf file base name
   --common-name: string # Subject common name
@@ -86,7 +87,7 @@ export def provision-leaf [
       --san $san
       --key-usage $key_usage
       --extended-key-usage $extended_key_usage
-      --ca-cert $issuer --ca-key $ca_key
+      --ca-cert $issuer --ca-key $ca_key --ca-key-data $ca_key_data
       --serial ($work | path join $"($serial_name).srl")
       --verify
   )

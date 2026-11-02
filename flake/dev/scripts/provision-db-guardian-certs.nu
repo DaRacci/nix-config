@@ -81,11 +81,11 @@ def main [
     } else {
       let material = vault-ca-pair $credentials $work.path $intermediate_entry --name "db-guardian-intermediate" --cert-attachment $cert_attachment --key-attachment $key_attachment
       validate-ca-cert $material.cert --common-name $intermediate_common_name
-      validate-key-pair $material.cert $material.key
+      validate-key-pair $material.cert --key-data $material.key
 
       let server_leaves = $guardian_hosts | each {|host|
         (
-          provision-leaf $output $work.path $host "db-guardian-tls" "server" $material.cert $material.key
+          provision-leaf $output $work.path $host "db-guardian-tls" "server" $material.cert --ca-key-data $material.key
             --name $host --common-name $host
             --san [ $"DNS:($host)" $"DNS:($host).localdomain" ]
             --key-usage "critical,digitalSignature,keyEncipherment"
@@ -98,7 +98,7 @@ def main [
 
       let client_leaves = if $include_client {
         [ (
-          provision-leaf $output $work.path $primary "db-guardian-tls" "client" $material.cert $material.key
+          provision-leaf $output $work.path $primary "db-guardian-tls" "client" $material.cert --ca-key-data $material.key
             --name "db-guardian-client" --common-name $CLIENT_COMMON_NAME
             --san [ $"DNS:($CLIENT_COMMON_NAME)" ]
             --key-usage "critical,digitalSignature"

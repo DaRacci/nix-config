@@ -157,7 +157,9 @@ Issue and rotate them with the procedure in [Internal mTLS CA](../security/inter
 ### Provisioning certificates
 
 The `provision-db-guardian-certs` helper issues the guardian leaves and SOPS-encrypts them into `hosts/server/<host>/db-guardian-tls/`.
-It reads the DB Guardian intermediate certificate and key from a KeePassXC vault, so the offline key is never written to disk.
+It reads the DB Guardian intermediate certificate from a KeePassXC vault and writes it to the work directory.
+The intermediate private key is streamed from the vault into memory and passed to OpenSSL on standard input, so it is never written to disk.
+The work directory still holds plaintext leaf keys until they are encrypted; protect it, and note that a `--work-dir` you supply is not removed.
 Create the intermediate with the offline Fleet root key first, as described in [Internal mTLS CA](../security/internal_mtls_ca.md); the helper only issues leaves.
 
 ```bash
