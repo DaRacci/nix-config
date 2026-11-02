@@ -167,7 +167,8 @@ provision-db-guardian-certs --vault /path/to/fleet.kdbx
 The guardian hosts and the database primary are derived from the flake.
 Every non-primary server with PostgreSQL or Redis databases receives `CA_CERT`, `SERVER_CERT`, and `SERVER_KEY`; the database primary receives `CA_CERT`, `CLIENT_CERT`, and `CLIENT_KEY`.
 Pass host names to restrict the guardian set, `--skip-client` to leave the coordinator certificate alone, or `--force` to rotate.
-Use `--vault-password-file` or `--vault-key-file` for a vault that is not prompted interactively.
+Pass `--vault-password-file` to avoid an interactive prompt.
+A key-file-only vault needs both `--vault-key-file` and `--vault-no-password`; `--vault-key-file` alone still prompts for the password.
 
 The helper selects the KeePassXC entry `intermediate/db-guardian/DB Guardian Intermediate CA` and reads the `cert.pem` and `key.pem` attachments.
 Override the entry with `--intermediate-entry`, or the attachment names with `--cert-attachment` and `--key-attachment`.
@@ -252,7 +253,3 @@ systemctl stop db-databases.target
 
 - `Access denied` or an `org.freedesktop.systemd1.manage-units` denial in `journalctl -u db-guardian.service` means the polkit rule did not match; confirm the daemon runs as `db-guardian` and that the request names `db-databases.target` with verb `start` or `stop`.
 - `journalctl -u polkit` records the action, unit and verb the rule evaluated.
-
-## References
-
-- [Database Coordinator](../hosts/server/nixdb.md)

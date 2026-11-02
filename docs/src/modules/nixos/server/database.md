@@ -13,10 +13,10 @@ Guardian](../../../components/db_guardian.md), and automated password handling v
 
 The module is implemented across several files in `modules/nixos/server/database/`:
 
-- **Main file**: [default.nix](../../../../modules/nixos/server/database/default.nix): Core options and connection management.
-- **Supporting file**: [postgres.nix](../../../../modules/nixos/server/database/postgres.nix): PostgreSQL-specific provisioning and secrets.
-- **Supporting file**: [redis.nix](../../../../modules/nixos/server/database/redis.nix): Redis-specific ID mappings and security.
-- **Supporting file**: [guardian.nix](../../../../modules/nixos/server/database/guardian.nix): Lifecycle synchronisation and the [DB Guardian](../../../components/db_guardian.md).
+- **Main file**: [default.nix](../../../../../modules/nixos/server/database/default.nix): Core options and connection management.
+- **Supporting file**: [postgres.nix](../../../../../modules/nixos/server/database/postgres.nix): PostgreSQL-specific provisioning and secrets.
+- **Supporting file**: [redis.nix](../../../../../modules/nixos/server/database/redis.nix): Redis-specific ID mappings and security.
+- **Supporting file**: [guardian.nix](../../../../../modules/nixos/server/database/guardian.nix): Lifecycle synchronisation and the [DB Guardian](../../../components/db_guardian.md).
 
 ### Options
 
