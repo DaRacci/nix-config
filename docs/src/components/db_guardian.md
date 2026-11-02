@@ -18,7 +18,7 @@ The system consists of two components:
 
    - WebSocket-over-TLS server that listens for commands from the coordinator
    - Requires a client certificate issued by the DB Guardian intermediate CA and only accepts the common names in `server.database.guardian.allowedClientCommonNames`
-   - Runs as the unprivileged `db-guardian` user; a polkit rule grants it start and stop on `db-databases.target` only
+   - Runs as the unprivileged `db-guardian` user; a Polkit rule grants it start and stop on `db-databases.target` only
    - Executes drain/undrain commands by controlling `db-databases.target`
 
 1. **Guardian Client** (runs on the Database Coordinator)
@@ -251,7 +251,7 @@ systemctl stop db-databases.target
 - Check reconciliation runs: `journalctl -u db-database-coordinator-reconcile.service`
 - The coordinator is restarted by `postgresql.service` and `redis.service`, retries failed undrains every 30 seconds, and re-asserts undrain every 5 minutes while active
 
-**Drain or undrain fails with a polkit error:**
+**Drain or undrain fails with a Polkit error:**
 
-- `Access denied` or an `org.freedesktop.systemd1.manage-units` denial in `journalctl -u db-guardian.service` means the polkit rule did not match; confirm the daemon runs as `db-guardian` and that the request names `db-databases.target` with verb `start` or `stop`.
+- `Access denied` or an `org.freedesktop.systemd1.manage-units` denial in `journalctl -u db-guardian.service` means the Polkit rule did not match; confirm the daemon runs as `db-guardian` and that the request names `db-databases.target` with verb `start` or `stop`.
 - `journalctl -u polkit` records the action, unit and verb the rule evaluated.

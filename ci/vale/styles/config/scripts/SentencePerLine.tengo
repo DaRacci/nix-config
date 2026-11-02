@@ -1,0 +1,95 @@
+text := import("text")
+
+// Same boundary the markup rule used to match
+pattern := "([a-z0-9`)\\]]{2,}[.!?]|[a-z0-9]+ \\*+[.!?])[\"'')\\_]{0,4}[ \\t]+[A-Z]"
+
+char_at := func(s, i) {
+	return text.substr(s, i, i+1)
+}
+
+// Replace emphasis markers with spaces so bold and italic text counts as prose.
+strip_emphasis := func(line) {
+	out := ""
+	for i := 0; i < len(line); i++ {
+		ch := char_at(line, i)
+		if ch == "*" || ch == "_" || ch == "~" {
+			out += " "
+		} else {
+			out += ch
+		}
+	}
+	return out
+}
+
+// Replace each inline code span with asterisks (vale supports masking this way).
+mask_code := func(line) {
+	out := ""
+	i := 0
+	for i < len(line) {
+		if char_at(line, i) != "`" {
+			out += char_at(line, i)
+			i++
+			continue
+		}
+		open_length := 0
+		for i+open_length < len(line) && char_at(line, i+open_length) == "`" {
+			open_length++
+		}
+		closing := -1
+		j := i + open_length
+		for j < len(line) {
+			if char_at(line, j) == "`" {
+				run := 0
+				for j+run < len(line) && char_at(line, j+run) == "`" {
+					run++
+				}
+				if run == open_length {
+					closing = j
+					break
+				}
+				j += run
+			} else {
+				j++
+			}
+		}
+		if closing == -1 {
+			out += text.substr(line, i, i+open_length)
+			i += open_length
+			continue
+		}
+		span := closing + open_length - i
+		for k := 0; k < span; k++ {
+			out += "*"
+		}
+		i = closing + open_length
+	}
+	return out
+}
+
+matches := []
+fence := false
+offset := 0
+for line in text.split(scope, "\n") {
+	trimmed := text.trim_space(line)
+	if text.has_prefix(trimmed, "```") || text.has_prefix(trimmed, "~~~") {
+		fence = !fence
+		offset += len(line) + 1
+		continue
+	}
+	if fence {
+		offset += len(line) + 1
+		continue
+	}
+	if text.has_prefix(trimmed, "#") || text.has_prefix(trimmed, "|") || text.has_prefix(trimmed, "{{#include") {
+		offset += len(line) + 1
+		continue
+	}
+	masked := mask_code(strip_emphasis(line))
+	found := text.re_find(pattern, masked, -1)
+	if found != undefined {
+		for match in found {
+			matches = append(matches, {begin: offset + match[0].begin, end: offset + match[0].end})
+		}
+	}
+	offset += len(line) + 1
+}

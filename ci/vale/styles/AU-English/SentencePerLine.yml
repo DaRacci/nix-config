@@ -1,6 +1,5 @@
-extends: existence
+extends: script
 message: "Start a new line after the sentence ending here: '%s'"
 level: error
-scope: [paragraph, list, blockquote]
-raw:
-  - '([a-z0-9`)\]]{2,}[.!?]|[a-z0-9]+ \*+[.!?])["'')_]{0,4}[ \t]+[A-Z]'
+scope: raw
+script: SentencePerLine.tengo

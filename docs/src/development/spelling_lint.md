@@ -11,6 +11,7 @@ The configuration lives in `.vale.ini`, `.rumdl.toml` and `ci/vale/`.
 | `ci/vale/styles/AU-English/Spelling.yml`        | the spelling rule and the dictionaries it loads     |
 | `ci/vale/styles/AU-English/Terms.yml`           | generated: host name and term casing rule           |
 | `ci/vale/styles/AU-English/SentencePerLine.yml` | the one-sentence-per-line rule                      |
+| `ci/vale/styles/config/scripts/`                | the line-aware script behind that rule              |
 | `ci/vale/styles/config/dictionaries/`           | the dictionaries and allow-lists the rules read     |
 | `flake/dev/scripts/vale-tech-dictionary.nu`     | builds the `tech` dictionary from the cspell lists  |
 | `.rumdl.toml`                                   | enables the [rumdl] link and structure rules        |
@@ -30,8 +31,9 @@ No formatter rewrites the prose.
 `treefmt` runs `mdformat` with the `keep` wrap mode, so breaks written by hand survive `nix fmt`,
 and `mdformat` reflowing a paragraph at a fixed width would put the sentences back on one line.
 
-The rule skips tables and headings, because neither can hold a line break.
-A line that starts with emphasis can trip the rule, so start such a line with plain text.
+The rule reads the raw Markdown source line by line, so a line break always counts as a break.
+It skips fenced code, tables and headings, because none of them can hold a line break.
+Emphasis markers on a line do not affect the check.
 
 ## Markup Checks
 
