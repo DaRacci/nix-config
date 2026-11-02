@@ -5,14 +5,15 @@
   ...
 }:
 {
-  self,
   config,
   pkgs,
   lib,
+  hostDirectory,
   ...
 }:
 let
   inherit (lib)
+    concatMap
     concatStringsSep
     escapeShellArgs
     getExe
@@ -46,6 +47,57 @@ let
   postgresPort = getIOPrimaryHostAttr "services.postgresql.settings.port";
   redisPort = (getIOPrimaryHostAttr "services.redis.servers")."".port;
 
+  guardianSopsFile = service: name: {
+    sopsFile = "${hostDirectory}/db-guardian-tls/${name}";
+    format = "binary";
+    restartUnits = [ service ];
+  };
+
+  guardianServerArgs = [
+    "--host"
+    "0.0.0.0"
+    "--port"
+    (toString guardianPort)
+    "--ca-cert"
+    "%d/ca-cert"
+    "--server-cert"
+    "%d/server-cert"
+    "--server-key"
+    "%d/server-key"
+  ]
+  ++ concatMap (cn: [
+    "--allowed-cn"
+    cn
+  ]) cfg.guardian.allowedClientCommonNames;
+
+  guardianClientArgs = [
+    "--hosts"
+    (concatStringsSep "," serversWithDatabases)
+    "--ca-cert"
+    "%d/ca-cert"
+    "--client-cert"
+    "%d/client-cert"
+    "--client-key"
+    "%d/client-key"
+  ];
+
+  guardianServerCommand = escapeShellArgs guardianServerArgs;
+  guardianUndrainCommand = escapeShellArgs (
+    guardianClientArgs
+    ++ [
+      "--action"
+      "undrain"
+      "--fail-fast"
+    ]
+  );
+  guardianDrainCommand = escapeShellArgs (
+    guardianClientArgs
+    ++ [
+      "--action"
+      "drain"
+    ]
+  );
+
   waitForDbPrimaryCommand = escapeShellArgs [
     (getExe' pkgs.wait-for-db-tools "wait-for-db-primary")
     cfg.host
@@ -69,23 +121,52 @@ in
       '';
       apply = map (n: if hasSuffix ".service" n then n else "${n}.service");
     };
+
+    guardian.allowedClientCommonNames = mkOption {
+      type = listOf str;
+      default = [ "db-guardian-coordinator" ];
+      description = ''
+        Client certificate common names the guardian accepts.
+        Guardian leaves are issued only by the DB Guardian intermediate CA, so this list
+        decides which of those client identities may drive the database availability target.
+      '';
+    };
   };
 
   config = mkMerge [
     {
-      sops.secrets."DB_GUARDIAN_PSK" = {
-        sopsFile = "${self}/hosts/server/secrets.yaml";
-        # Restart whichever side of the guardian owns the PSK on this host.
-        # sops-nix uses try-restart, which errors on units that do not exist, so only list units this host actually defines.
-        restartUnits =
-          optional (!isThisIOPrimaryHost && thisHostHasDatabaseDependencies) "db-guardian.service"
-          ++ optional (
-            isThisIOPrimaryHost && (builtins.length serversWithDatabases) > 0
-          ) "db-database-coordinator.service";
-      };
+      assertions = [
+        {
+          assertion = cfg.guardian.allowedClientCommonNames != [ ];
+          message = "server.database.guardian.allowedClientCommonNames must not be empty";
+        }
+      ];
     }
-
     (mkIf (!isThisIOPrimaryHost && thisHostHasDatabaseDependencies) {
+      sops.secrets = {
+        "db-guardian/CA_CERT" = guardianSopsFile "db-guardian.service" "CA_CERT";
+        "db-guardian/SERVER_CERT" = guardianSopsFile "db-guardian.service" "SERVER_CERT";
+        "db-guardian/SERVER_KEY" = guardianSopsFile "db-guardian.service" "SERVER_KEY";
+      };
+
+      users.groups.db-guardian = { };
+
+      users.users.db-guardian = {
+        isSystemUser = true;
+        group = "db-guardian";
+      };
+
+      security.polkit.extraConfig = ''
+        polkit.addRule(function(action, subject) {
+          if (action.id == "org.freedesktop.systemd1.manage-units" &&
+              action.lookup("unit") == "db-databases.target" &&
+              (action.lookup("verb") == "start" || action.lookup("verb") == "stop") &&
+              subject.user == "db-guardian") {
+            return polkit.Result.YES;
+          }
+        });
+      '';
+
       server = {
         network.openPortsForSubnet.tcp = [ guardianPort ];
 
@@ -133,22 +214,41 @@ in
               Type = "simple";
               Restart = "always";
               RestartSec = "5s";
-              LoadCredential = [ "psk:${config.sops.secrets."DB_GUARDIAN_PSK".path}" ];
+              User = "db-guardian";
+              Group = "db-guardian";
+              LoadCredential = [
+                "ca-cert:${config.sops.secrets."db-guardian/CA_CERT".path}"
+                "server-cert:${config.sops.secrets."db-guardian/SERVER_CERT".path}"
+                "server-key:${config.sops.secrets."db-guardian/SERVER_KEY".path}"
+              ];
 
-              ExecStart = ''
-                ${getExe pkgs.db-guardian-server} \
-                  --host 0.0.0.0 \
-                  --port ${toString guardianPort} \
-                  --psk-file %d/psk
-              '';
+              ExecStart = "${getExe pkgs.db-guardian-server} ${guardianServerCommand}";
 
-              # Run as root to allow systemctl commands
-              # Security hardening still applied where possible
               ProtectHome = true;
+              ProtectSystem = "strict";
               PrivateTmp = true;
               PrivateDevices = true;
               ProtectKernelTunables = true;
               ProtectKernelModules = true;
+              ProtectControlGroups = true;
+              ProtectClock = true;
+              ProtectHostname = true;
+              ProtectProc = "invisible";
+              NoNewPrivileges = true;
+              CapabilityBoundingSet = [ ];
+              AmbientCapabilities = [ ];
+              RestrictAddressFamilies = [
+                "AF_UNIX"
+                "AF_INET"
+                "AF_INET6"
+              ];
+              RestrictNamespaces = true;
+              LockPersonality = true;
+              MemoryDenyWriteExecute = true;
+              RemoveIPC = true;
+              UMask = "0077";
+              SystemCallFilter = [ "@system-service" ];
+              SystemCallErrorNumber = "EPERM";
             };
           };
         }
@@ -195,6 +295,12 @@ in
     })
 
     (mkIf (isThisIOPrimaryHost && (builtins.length serversWithDatabases) > 0) {
+      sops.secrets = {
+        "db-guardian/CA_CERT" = guardianSopsFile "db-database-coordinator.service" "CA_CERT";
+        "db-guardian/CLIENT_CERT" = guardianSopsFile "db-database-coordinator.service" "CLIENT_CERT";
+        "db-guardian/CLIENT_KEY" = guardianSopsFile "db-database-coordinator.service" "CLIENT_KEY";
+      };
+
       systemd.services = {
         db-database-coordinator = rec {
           description = "Coordinate database availability with remote clients via WebSocket";
@@ -223,22 +329,15 @@ in
             RestartSec = "30s";
             TimeoutStartSec = "120s";
             TimeoutStopSec = "90s";
-            LoadCredential = [ "psk:${config.sops.secrets."DB_GUARDIAN_PSK".path}" ];
+            LoadCredential = [
+              "ca-cert:${config.sops.secrets."db-guardian/CA_CERT".path}"
+              "client-cert:${config.sops.secrets."db-guardian/CLIENT_CERT".path}"
+              "client-key:${config.sops.secrets."db-guardian/CLIENT_KEY".path}"
+            ];
 
-            ExecStart = ''
-              ${getExe pkgs.db-guardian-client} \
-                --action undrain \
-                --hosts ${concatStringsSep "," serversWithDatabases} \
-                --psk-file %d/psk \
-                --fail-fast
-            '';
+            ExecStart = "${getExe pkgs.db-guardian-client} ${guardianUndrainCommand}";
 
-            ExecStop = ''
-              ${getExe pkgs.db-guardian-client} \
-                --action drain \
-                --hosts ${concatStringsSep "," serversWithDatabases} \
-                --psk-file %d/psk
-            '';
+            ExecStop = "${getExe pkgs.db-guardian-client} ${guardianDrainCommand}";
           };
         };
 
@@ -255,15 +354,13 @@ in
           serviceConfig = {
             Type = "oneshot";
             TimeoutStartSec = "120s";
-            LoadCredential = [ "psk:${config.sops.secrets."DB_GUARDIAN_PSK".path}" ];
+            LoadCredential = [
+              "ca-cert:${config.sops.secrets."db-guardian/CA_CERT".path}"
+              "client-cert:${config.sops.secrets."db-guardian/CLIENT_CERT".path}"
+              "client-key:${config.sops.secrets."db-guardian/CLIENT_KEY".path}"
+            ];
 
-            ExecStart = ''
-              ${getExe pkgs.db-guardian-client} \
-                --action undrain \
-                --hosts ${concatStringsSep "," serversWithDatabases} \
-                --psk-file %d/psk \
-                --fail-fast
-            '';
+            ExecStart = "${getExe pkgs.db-guardian-client} ${guardianUndrainCommand}";
           };
         };
       };

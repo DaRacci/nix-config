@@ -9,11 +9,16 @@ export def issue-leaf [
   --key-usage: string = "critical,digitalSignature" # keyUsage extension value
   --extended-key-usage: string = "clientAuth" # extendedKeyUsage extension value
   --ca-cert: path # Issuing CA certificate
-  --ca-key: path # Issuing CA private key
+  --ca-key: any = null # Issuing CA private key path
+  --ca-key-data: any = null # Issuing CA private key PEM passed on standard input
   --serial: path # CA serial file
   --days: int = 730 # Certificate lifetime
   --verify # Verify the issued leaf against the CA
 ] {
+  if $ca_key == null and $ca_key_data == null {
+    error make { msg: "issue-leaf needs --ca-key or --ca-key-data" }
+  }
+
   let key = $work_dir | path join $"($name).key"
   let csr = $work_dir | path join $"($name).csr"
   let cert = $work_dir | path join $"($name).crt"
@@ -39,7 +44,11 @@ export def issue-leaf [
 
   ^openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out $key
   ^openssl req -new -key $key -subj $"/CN=($common_name)" -out $csr
-  ^openssl x509 -req -in $csr -CA $ca_cert -CAkey $ca_key -CAserial $serial -CAcreateserial -days $days -sha256 -out $cert -extensions v3 -extfile $ext
+  if $ca_key_data == null {
+    ^openssl x509 -req -in $csr -CA $ca_cert -CAkey $ca_key -CAserial $serial -CAcreateserial -days $days -sha256 -out $cert -extensions v3 -extfile $ext
+  } else {
+    $ca_key_data | ^openssl x509 -req -in $csr -CA $ca_cert -CAkey /dev/stdin -CAserial $serial -CAcreateserial -days $days -sha256 -out $cert -extensions v3 -extfile $ext
+  }
 
   if $verify {
     verify-leaf $cert $ca_cert
@@ -58,13 +67,18 @@ export def issue-ca [
   --name: string # Base file name for the generated files
   --common-name: string # Subject common name
   --ca-cert: path # Issuing CA certificate
-  --ca-key: path # Issuing CA private key
+  --ca-key: any = null # Issuing CA private key path
+  --ca-key-data: any = null # Issuing CA private key PEM passed on standard input
   --serial: path # Issuing CA serial file
   --days: int = 1825 # Certificate lifetime
   --path-length: int = 0 # Maximum CA depth below this intermediate
   --key-bits: int = 4096 # RSA key size
   --key-usage: string = "critical,keyCertSign,cRLSign" # keyUsage extension value
 ] {
+  if $ca_key == null and $ca_key_data == null {
+    error make { msg: "issue-ca needs --ca-key or --ca-key-data" }
+  }
+
   let key = $work_dir | path join $"($name).key"
   let csr = $work_dir | path join $"($name).csr"
   let cert = $work_dir | path join $"($name).crt"
@@ -82,7 +96,11 @@ export def issue-ca [
 
   ^openssl genpkey -algorithm RSA -pkeyopt $"rsa_keygen_bits:($key_bits)" -out $key
   ^openssl req -new -key $key -subj $"/CN=($common_name)" -out $csr
-  ^openssl x509 -req -in $csr -CA $ca_cert -CAkey $ca_key -CAserial $serial -CAcreateserial -days $days -sha256 -out $cert -extensions v3 -extfile $ext
+  if $ca_key_data == null {
+    ^openssl x509 -req -in $csr -CA $ca_cert -CAkey $ca_key -CAserial $serial -CAcreateserial -days $days -sha256 -out $cert -extensions v3 -extfile $ext
+  } else {
+    $ca_key_data | ^openssl x509 -req -in $csr -CA $ca_cert -CAkey /dev/stdin -CAserial $serial -CAcreateserial -days $days -sha256 -out $cert -extensions v3 -extfile $ext
+  }
 
   { key: $key, csr: $csr, cert: $cert }
 }
@@ -123,10 +141,23 @@ export def validate-ca-cert [
 }
 
 # Validate that a certificate and private key match.
-export def validate-key-pair [cert: path, key: path] {
+export def validate-key-pair [
+  cert: path # Certificate to check
+  key?: any # Private key path
+  --key-data: any = null # Private key PEM passed on standard input
+] {
+  if $key == null and $key_data == null {
+    error make { msg: "validate-key-pair needs a key path or --key-data" }
+  }
+
   let cert_public_key = ^openssl x509 -in $cert -noout -pubkey | str trim
-  let key_public_key = ^openssl pkey -in $key -pubout | str trim
+  let key_label = if $key_data == null { $key } else { "standard input" }
+  let key_public_key = if $key_data == null {
+    ^openssl pkey -in $key -pubout | str trim
+  } else {
+    $key_data | ^openssl pkey -in /dev/stdin -pubout | str trim
+  }
   if $cert_public_key != $key_public_key {
-    error make { msg: $"($cert) and ($key) do not match" }
+    error make { msg: $"($cert) and ($key_label) do not match" }
   }
 }

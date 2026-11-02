@@ -69,6 +69,7 @@ The helper appends ` Intermediate CA` to the prefix, so this example issues `Bac
 It reads the root certificate and key from `root/Fleet mTLS Root CA`, issues a five-year intermediate
 with `pathlen:0` and `keyCertSign,cRLSign`, verifies it against the root,
 and merges it through `pki2kdbx` with `cert.pem` and `key.pem` attachments.
+The root private key is streamed into memory for signing and is not written to the work directory.
 Override the root entry, root common name, or attachment names with the matching flags.
 Use `--vault-group` to choose the destination group; otherwise `pki2kdbx` derives it from the common name.
 `--days`, `--path-length`, and `--key-bits` control the certificate profile, and `--dry-run` prints the plan.

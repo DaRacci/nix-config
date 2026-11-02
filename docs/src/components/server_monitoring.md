@@ -150,6 +150,7 @@ The vault must contain `root/Fleet mTLS Root CA` with a `cert.pem` attachment
 and `intermediate/alloy-dynamic-capture/Alloy Dynamic Capture Intermediate CA` with `cert.pem` and `key.pem` attachments.
 Override them with `--root-entry` / `--root-common-name` and `--intermediate-entry` / `--intermediate-common-name`.
 The root and intermediate are validated against those common names before anything is issued.
+The intermediate private key is streamed into memory for signing and is not written to the work directory.
 
 Pass `--include-client` to also reissue the `nixmon` relay client certificate;
 the client certificate is skipped by default, and `--skip-client` states that explicitly.

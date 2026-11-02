@@ -7,7 +7,7 @@ let
   inherit (python3Packages) buildPythonApplication websockets pystemd;
 
   commonDrv = component: {
-    version = "1.1.0";
+    version = "1.2.0";
     pname = "db-guardian-${component}";
 
     format = "other";

@@ -115,22 +115,66 @@ export def vault-pem-attachment [
   }
 }
 
-# Export a CA certificate and private key from a vault entry into the work directory.
+# Read a PEM attachment into memory without writing it to disk.
+export def vault-pem-attachment-data [
+  credentials: record # Result of `vault-credentials`
+  entry: string # Entry path inside the vault
+  attachment: string # Attachment name
+  --label: any = null # Expected PEM label, for example PRIVATE KEY
+] {
+  let auth = if $credentials.no_password {
+    ["--no-password"]
+  } else {
+    []
+  }
+  let key = if $credentials.key_file == null {
+    []
+  } else {
+    ["--key-file" $credentials.key_file]
+  }
+  let args = ["attachment-export" "--quiet" "--stdout"] ++ $auth ++ $key ++ [
+    $credentials.path
+    $entry
+    $attachment
+  ]
+
+  let result = if $credentials.no_password {
+    ^keepassxc-cli ...$args | complete
+  } else {
+    $credentials.password | ^keepassxc-cli ...$args | complete
+  }
+
+  if $result.exit_code != 0 {
+    error make {
+      msg: $"Could not export ($attachment) from KeePassXC entry ($entry): ($result.stderr | str trim)"
+    }
+  }
+
+  let pem = $result.stdout
+  if not ($pem | str starts-with "-----BEGIN") {
+    error make { msg: $"KeePassXC entry ($entry) attachment ($attachment) does not contain a PEM file" }
+  }
+  if $label != null and not ($pem | str contains $"-----BEGIN ($label)-----") {
+    error make {
+      msg: $"KeePassXC entry ($entry) attachment ($attachment) does not contain a PEM ($label)"
+    }
+  }
+  $pem
+}
+
+# Export a CA certificate to the work directory and return its private key in memory.
 export def vault-ca-pair [
   credentials: record # Result of `vault-credentials`
-  work: path # Directory receiving the exported files
+  work: path # Directory receiving the exported certificate
   entry: string # Entry path inside the vault
-  --name: string = "intermediate" # Base file name for the exported files
+  --name: string = "intermediate" # Base file name for the exported certificate
   --cert-attachment: string = "cert.pem" # Attachment holding the CA certificate
   --key-attachment: string = "key.pem" # Attachment holding the CA private key
 ] {
   let cert = $work | path join $"($name).crt"
-  let key = $work | path join $"($name).key"
 
   vault-pem-attachment $credentials $entry $cert_attachment $cert --label "CERTIFICATE"
-  vault-pem-attachment $credentials $entry $key_attachment $key
-
-  ^chmod 600 $key
+  let key = vault-pem-attachment-data $credentials $entry $key_attachment
 
   { cert: $cert, key: $key }
 }
