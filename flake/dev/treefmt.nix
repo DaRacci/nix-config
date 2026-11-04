@@ -43,7 +43,7 @@
       settings = {
         formatter = {
           shellcheck.excludes = [ ".envrc" ];
-          prettier.includes = [ "*.{yaml,yml}" ];
+          prettier.includes = inputs.nixpkgs.lib.mkForce [ "*.{yaml,yml}" ];
         };
         global.excludes = [
           ".opencode/**"

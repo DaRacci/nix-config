@@ -32,6 +32,9 @@ No formatter rewrites the prose.
 `treefmt` runs `mdformat` with the `keep` wrap mode, so breaks written by hand survive `nix fmt`,
 and `mdformat` reflowing a paragraph at a fixed width would put the sentences back on one line.
 
+`prettier` is restricted to YAML, so `mdformat` is the only formatter that touches Markdown.
+Both match `*.md` by default and lay out tables differently, which makes `treefmt` rewrite the same files on every run.
+
 The rule reads the raw Markdown source line by line, so a line break always counts as a break.
 It skips fenced code, tables and headings, because none of them can hold a line break.
 Emphasis markers on a line do not affect the check.
