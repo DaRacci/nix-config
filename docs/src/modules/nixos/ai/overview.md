@@ -16,7 +16,7 @@ It provides first-class NixOS modules for AI-related daemons and services that a
 | Location                     | Purpose                           | Examples                                                |
 | ---------------------------- | --------------------------------- | ------------------------------------------------------- |
 | `modules/nixos/ai/agents/`   | Agent container modules           | AI Agent, with per-feature files under `agents/hermes/` |
-| `modules/nixos/ai/services/` | AI infrastructure/sidecar daemons | Mnemosyne sync server, MCPO                             |
+| `modules/nixos/ai/services/` | AI infrastructure/sidecar daemons | Mnemosyne sync server                             |
 
 The `ai/` tree owns both the agent container and the standalone services it consumes.
 

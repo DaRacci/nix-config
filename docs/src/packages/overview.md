@@ -23,9 +23,6 @@ These are packages that are either not available in `nixpkgs` or require custom 
   - `lidarr-plugins`: Lidarr plugins branch.
   - `list-ephemeral`: Utility to identify ephemeral paths, trace file access, and generate persistence snippets.
   - `lix-woodpecker`: Woodpecker CI runner.
-  - `mcp-sequential-thinking`: MCP server for step-by-step reasoning.
-  - `mcp-server-amazon`: MCP server for Amazon services interaction.
-  - `proton-mcp`: MCP server for ProtonMail.
   - `compressor`: Python tool that hashes image/video files, detects media from magic headers, caches WebP image conversions and AV1 MP4 video conversions.
     For videos, it samples 3 random segments to estimate compression ratio and auto-skip expansion cases.
     Those sample encodes now use live HandBrake JSON progress too, with per-sample ETA plus total sample ETA in Rich progress bars.

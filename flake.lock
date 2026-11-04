@@ -136,18 +136,6 @@
         "url": "https://git.lix.systems/lix-project/lix/archive/release-2.94.tar.gz"
       }
     },
-    "mcpo": {
-      "flake": false,
-      "locked": {
-        "narHash": "sha256-b1tINFQwCoxiGX2bp7afUid15z0ZCy8TxEh8lJAt8Xg=",
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/codgician/nixpkgs/refs/heads/mcpo-init/pkgs/development/python-modules/mcpo/default.nix"
-      },
-      "original": {
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/codgician/nixpkgs/refs/heads/mcpo-init/pkgs/development/python-modules/mcpo/default.nix"
-      }
-    },
     "nix2container": {
       "inputs": {
         "nixpkgs": "nixpkgs"
@@ -276,7 +264,6 @@
         "flake-utils": "flake-utils",
         "hermes-agent": "hermes-agent",
         "lix": "lix",
-        "mcpo": "mcpo",
         "nix2container": "nix2container",
         "nixpkgs": "nixpkgs_2",
         "systems": "systems",

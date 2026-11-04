@@ -55,12 +55,6 @@
     };
 
     # Upstream & PR Programs
-    #TODO:https://github.com/NixOS/nixpkgs/pull/410836
-    mcpo = {
-      url = "https://raw.githubusercontent.com/codgician/nixpkgs/refs/heads/mcpo-init/pkgs/development/python-modules/mcpo/default.nix";
-      flake = false;
-      type = "file";
-    };
     #TODO:https://github.com/NixOS/nixpkgs/pull/485360
     tabby = {
       url = "https://raw.githubusercontent.com/dillonfrederica/nixpkgs/refs/heads/tabby-0.32.0/pkgs/by-name/ta/tabby/package.nix";

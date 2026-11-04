@@ -31,7 +31,7 @@ Builders typically take parameters for hostnames, user names, and modules.
 
 `lib/builders/default.nix` owns the single nixpkgs import used by every system, home, and package set.
 Its `config` sets `allowUnfree`, `permittedInsecurePackages`, CUDA/ROCm support,
-and the `problems.handlers` entries that downgrade known-broken packages (currently `fastmcp-slim`) from an evaluation error to a warning.
+and the `problems.handlers` entries that downgrade known-broken packages from an evaluation error to a warning.
 
 ### Common Workflows
 

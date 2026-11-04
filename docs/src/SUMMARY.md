@@ -34,7 +34,6 @@
 - [Overview](modules/nixos/overview.md)
 - [Services](modules/nixos/services/default.md)
   - [Huntress](modules/nixos/services/huntress.md)
-  - [MCPO](modules/nixos/services/mcpo.md)
   - [Metrics](modules/nixos/services/metrics.md)
   - [Tailscale](modules/nixos/services/tailscale.md)
 - [Core](modules/nixos/core/default.md)

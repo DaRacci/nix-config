@@ -24,7 +24,6 @@ These modules allow for modular and reusable configurations across different hos
     - [SSH Module](nixos/server/ssh.md)
   - [Services](nixos/services/default.md)
     - [Huntress](nixos/services/huntress.md)
-    - [MCPO](nixos/services/mcpo.md)
     - [Metrics](nixos/services/metrics.md)
     - [Tailscale](nixos/services/tailscale.md)
   - [AI Modules](nixos/ai/overview.md)

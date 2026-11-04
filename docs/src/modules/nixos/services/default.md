@@ -20,6 +20,5 @@ Nested service modules emit generated fragments for options, which are included 
 ## References
 
 - [Huntress](huntress.md)
-- [MCPO](mcpo.md)
 - [Metrics](metrics.md)
 - [Tailscale](tailscale.md)

@@ -195,7 +195,6 @@ in
               webfetch = "allow";
             };
 
-            # Duplicated from hosts/server/nixai/backend.nix since no support for openai.json tool servers
             mcp = {
               nixos = {
                 type = "local";
