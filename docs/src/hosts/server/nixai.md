@@ -3,7 +3,7 @@
 ## Purpose
 
 `nixai` is the AI infrastructure host.
-It runs the AI agent, local inference via Ollama, the Open WebUI chat interface, Mnemosyne memory sync, and voice services.
+It runs the AI agent, local inference via Ollama, Mnemosyne memory sync, and voice services.
 
 ## Entry Point
 
@@ -22,7 +22,7 @@ It runs the AI agent, local inference via Ollama, the Open WebUI chat interface,
 ### Local Inference
 
 - Runs local models on the host's AMD iGPU (ROCm/Vulkan), loading a small set of chat and embedding models.
-- Used by Open WebUI and the agent for local model access.
+- Used by the agent for local model access.
 
 ### Mnemosyne (`mnemosyne.nix`)
 
@@ -47,7 +47,7 @@ It runs the AI agent, local inference via Ollama, the Open WebUI chat interface,
 ## Operational Notes / Assumptions
 
 - Ollama relies on the AMD iGPU; ROCm on the iGPU is noted as unreliable upstream, so the config pins an override and waits on a Vulkan fix.
-- Open WebUI, the agent dashboard, Mnemosyne, and the voice/whisper endpoints are exposed through the IO Coordinator reverse proxy.
+- The agent dashboard, Mnemosyne, and the voice/whisper endpoints are exposed through the IO Coordinator reverse proxy.
 - The agent's SSH port is opened to the subnet for administration.
 - The gateway control directory (`/var/lib/hermes/.hermes`) is narrowed to `0750` by an appended `systemd.tmpfiles` rule
   in [`hermes/core.nix`](../../../../modules/nixos/ai/agents/hermes/core.nix):
@@ -57,7 +57,6 @@ It runs the AI agent, local inference via Ollama, the Open WebUI chat interface,
 ## References
 
 - [Hermes Agent](https://hermes-agent.nousresearch.com/)
-- [Open WebUI](https://github.com/open-webui/open-webui)
 - [Ollama](https://ollama.com)
 - [Mnemosyne](../../modules/nixos/ai/mnemosyne.md)
 - [IO Coordinator](../../hosts/server/nixio.md)
