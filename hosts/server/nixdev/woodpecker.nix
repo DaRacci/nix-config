@@ -72,6 +72,13 @@
       # WOODPECKER_FORGEJO = "true";
       WOODPECKER_FORGEJO_URL = "https://codeberg.org";
 
+      # Woodpecker resolves the whole pipeline config in one 5s budget by
+      # default: a listing of .woodpecker/ plus one sequential fetch per file.
+      # Codeberg answers each of those in ~1-2s, so the seven config files in
+      # this repo take ~8s and every pipeline dies with "could not load config
+      # from forge: context deadline exceeded" before a single step runs.
+      WOODPECKER_FORGE_TIMEOUT = "60s";
+
       WOODPECKER_SERVER_ADDR = ":8000";
       WOODPECKER_GRPC_ADDR = ":9000";
     };

@@ -60,6 +60,8 @@ a Docker registry, and a ForgeSync mirror job.
 ## Operational Notes / Assumptions
 
 - Runs Docker with auto-pruning for workspaces and CI workloads.
+- Woodpecker fetches pipeline configuration from Codeberg over its API, which costs roughly 1-2s per request.
+- `WOODPECKER_FORGE_TIMEOUT` is raised to 60s: the default 5s budget covers the whole `.woodpecker/` listing plus every config file in it, which takes ~8s from this host.
 - Woodpecker, n8n, Coder, the registry, and CI are exposed through the IO Coordinator reverse proxy.
 - Databases are provided by the Database Coordinator; n8n and Woodpecker depend on the database availability target.
 
