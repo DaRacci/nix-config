@@ -5,5 +5,4 @@
   user = import ./user;
   purpose = import ./purpose;
   security = import ./security;
-  services = import ./services;
 }
