@@ -78,7 +78,7 @@
         "flake-parts": [
           "flake-parts"
         ],
-        "home-manager": "home-manager",
+        "home-manager": [],
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -88,37 +88,17 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1793305799,
-        "narHash": "sha256-kQw9pjvLfQn9zi/TOCBV+WrM26mQIEeLdmzxMzAgkz4=",
-        "owner": "NousResearch",
+        "lastModified": 1793679430,
+        "narHash": "sha256-Ecr/dhNnSwt6iVvZfm3WOuX500yPNZPt7B6vemGaYhk=",
+        "owner": "DaRacci",
         "repo": "hermes-agent",
-        "rev": "088f657ecf77674c7b8e2ededf4e3576d82e042c",
+        "rev": "8b805b3eeb4647e4e6b9d25c4b4a50f95fe1ce59",
         "type": "github"
       },
       "original": {
-        "owner": "NousResearch",
+        "owner": "DaRacci",
+        "ref": "integration",
         "repo": "hermes-agent",
-        "type": "github"
-      }
-    },
-    "home-manager": {
-      "inputs": {
-        "nixpkgs": [
-          "hermes-agent",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1792703141,
-        "narHash": "sha256-3X34FaSeMJXMx8CK/BN6sZ9knwNauuiJXQhLM+bQQuI=",
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "rev": "6750249c69969d09d952efaf3fab88a2bdac7ec6",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "home-manager",
         "type": "github"
       }
     },

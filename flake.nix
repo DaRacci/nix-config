@@ -64,9 +64,10 @@
 
     # Built by the overlays, so it must be visible to every partition's pkgs.
     hermes-agent = {
-      url = "github:NousResearch/hermes-agent";
+      url = "github:DaRacci/hermes-agent/integration";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-parts.follows = "flake-parts";
+      inputs.home-manager.follows = "";
     };
 
     # Misc Flake Inputs for other Inputs

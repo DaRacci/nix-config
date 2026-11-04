@@ -35,7 +35,10 @@ These are packages that are either not available in `nixpkgs` or require custom 
   - `monocoque`: Sim-racing dashboard and telemetry tool.
   - `orca-slicer-git-sync`: Watches an OrcaSlicer profile repository,
     commits batched changes with profile-aware commit messages, and optionally pushes to a configured remote.
-  - `python`: Packages for home assistant python components.
+  - `python`: Python packages for Home Assistant components and Hermes Agent plugins.
+    The Hermes plugins build against the interpreter exposed by the `hermes-agent` flake input, so they match the agent's Python version.
+    `mnemosyne-hermes` receives `mnemosyne-memory` explicitly, because that input's package set does not include this repository's overlay packages.
+    `mnemosyne-memory` likewise receives `fastembed-hermes`, which the overlay builds from the same interpreter.
   - `screenshot`: Wayland screenshot helper that captures an area or output, stores timestamped files, and optionally opens or annotates the result.
   - `ssh-relay`: WSL SSH agent relay helper that bridges a Windows named pipe into a local Unix socket.
   - `ssh-to-age-keys`: Converts one or more SSH private keys into a deduplicated `keys.txt` age key file.

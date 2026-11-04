@@ -48,79 +48,33 @@ in
       })
     ])
     // {
-      hermes-agent =
-        let
-          haFlake = inputs.hermes-agent;
-          hermesAgentSrc = prev.applyPatches {
-            name = "hermes-agent-patched";
-            src = haFlake.outPath;
-            patches = [
-              # TODO:https://github.com/NousResearch/hermes-agent/pull/87820
-              ./patches/hermes-agent-desktop-renderer-typecheck-isolation.patch
-              # TODO:https://github.com/NousResearch/hermes-agent/pull/93896
-              ./patches/hermes-agent-home-aware-managed.patch
-            ];
-          };
-          # pm/lock.json pins every pm tool; upstream packages.nix builds them
-          # and drops the callPackage helper attributes.
-          pmPackages = lib.filterAttrs (_: lib.isDerivation) (
-            final.callPackage (hermesAgentSrc + "/nix/pm-packages.nix") { }
-          );
-          # The release tag is date-style (v2026.9.24) and hermes_cli/__init__.py
-          # hardcodes the same date. Upstream's nix/packages.nix leaves the version
-          # at its "0.0.0" default, which blocks plugin installers that enforce a
-          # minimum Hermes version, so read it from the flake source. The patched
-          # tree cannot be used: applyPatches is a derivation, and readFile cannot
-          # force a build.
-          hermesVersion =
-            let
-              initPath = haFlake.outPath + "/hermes_cli/__init__.py";
-              initPy = builtins.readFile initPath;
-              initLines = lib.splitString "\n" initPy;
-              dateLine = lib.findFirst (line: lib.hasPrefix "__release_date__" line) "" initLines;
-              parsed = builtins.match ''[^"]*"([^"]*)".*'' dateLine;
-            in
-            if parsed == null then
-              throw "hermes-agent: no __release_date__ in hermes_cli/__init__.py"
-            else
-              builtins.head parsed;
-        in
-        final.callPackage (hermesAgentSrc + "/nix/hermes-agent.nix") {
-          uv2nix = haFlake.inputs.uv2nix;
-          pyproject-nix = haFlake.inputs.pyproject-nix;
-          pyproject-build-systems = haFlake.inputs.pyproject-build-systems;
-          npm-lockfile-fix =
-            haFlake.inputs.npm-lockfile-fix.packages.${final.stdenv.hostPlatform.system}.default;
-          inherit pmPackages;
-          rev = haFlake.rev or null;
-          version = hermesVersion;
-        };
-
       lm_sensors-perlless = prev.lm_sensors.overrideAttrs (oldAttrs: {
         buildInputs = oldAttrs.buildInputs |> (lib.remove prev.perl);
       });
 
-      fastembed-hermes = final.hermes-agent.python.pkgs.fastembed.overridePythonAttrs (old: {
-        dependencies = builtins.filter (
-          dep:
-          let
-            name = lib.getName dep;
-          in
-          # Hermes uv2nix env already has these deps and complains about colisions.
-          !(builtins.any (n: lib.hasInfix n name) [
-            "huggingface-hub"
-            "numpy"
-            "onnxruntime"
-            "pillow"
-            "requests"
-            "snowballstemmer"
-            "tokenizers"
-            "tqdm"
-          ])
-        ) old.dependencies;
-        dontCheckRuntimeDeps = true;
-        pythonImportsCheck = [ ];
-      });
+      fastembed-hermes =
+        inputs.hermes-agent.packages.${final.stdenv.hostPlatform.system}.default.python.pkgs.fastembed.overridePythonAttrs
+          (old: {
+            dependencies = builtins.filter (
+              dep:
+              let
+                name = lib.getName dep;
+              in
+              # Hermes uv2nix env already has these deps and complains about collisions.
+              !(builtins.any (n: lib.hasInfix n name) [
+                "huggingface-hub"
+                "numpy"
+                "onnxruntime"
+                "pillow"
+                "requests"
+                "snowballstemmer"
+                "tokenizers"
+                "tqdm"
+              ])
+            ) old.dependencies;
+            dontCheckRuntimeDeps = true;
+            pythonImportsCheck = [ ];
+          });
     };
 
   modifications = final: prev: {

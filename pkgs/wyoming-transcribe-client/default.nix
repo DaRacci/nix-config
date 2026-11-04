@@ -16,7 +16,6 @@ writeShellApplication {
   '';
   meta = {
     description = "Wyoming protocol client that sends WAV audio to a faster-whisper server and writes transcript .txt";
-    homepage = "https://github.com/NousResearch/hermes-agent";
     license = lib.licenses.mit;
     maintainers = [ racci ];
     platforms = lib.platforms.linux;

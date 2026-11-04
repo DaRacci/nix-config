@@ -10,7 +10,7 @@ The module is provider-oriented: `default.nix` holds universal defaults, while e
 - **Main file**: [default.nix](../../../../../modules/nixos/ai/agents/default.nix)
 - **Hermes features**: [hermes/default.nix](../../../../../modules/nixos/ai/agents/hermes/default.nix)
 - **Upstream**: [Hermes Agent](https://github.com/nousresearch/hermes-agent)
-- **Package**: The module routes `services.hermes-agent.package` through the local `pkgs.hermes-agent` overlay, which carries a few patches.
+- **Package**: The input and used package is a personal fork including our own patches and open PRs from upstream.
 
 ### File layout
 

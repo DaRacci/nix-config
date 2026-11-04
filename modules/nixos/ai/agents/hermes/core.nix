@@ -1,4 +1,5 @@
 {
+  inputs,
   config,
   lib,
   pkgs,
@@ -18,7 +19,7 @@ in
     services = {
       hermes-agent = {
         enable = true;
-        package = pkgs.hermes-agent;
+        package = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
         container.enable = true;
 
         extraDependencyGroups = [

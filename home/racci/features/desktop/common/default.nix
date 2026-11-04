@@ -35,7 +35,7 @@ in
       fragments
       gnome-online-accounts-gtk
       picard
-      pkgs.hermes-desktop
+      inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.desktop
     ];
 
     file.".hermes/desktop-plugins/fleet-graph".source = "${inputs.fleet-graph}/desktop-plugin";

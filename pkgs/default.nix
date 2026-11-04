@@ -8,7 +8,8 @@ let
   # Hermes requires plugins to be compiled in the same python version.
   # hermes-agent exposes the interpreter it was built with (pm/lock.json), so
   # take the plugin packages from that set rather than a hardcoded python3NNPackages.
-  hermesPythonVersion = pkgs.hermes-agent.python.pkgs;
+  hermesPythonVersion =
+    inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default.python.pkgs;
 in
 {
   # VR Stuff
@@ -31,8 +32,12 @@ in
   split-tree-overlay = pkgs.callPackage ./split-tree-overlay { };
 
   # Hermes Agent Python Plugins
-  mnemosyne-memory = hermesPythonVersion.callPackage ./python/mnemosyne-memory.nix { };
-  mnemosyne-hermes = hermesPythonVersion.callPackage ./python/mnemosyne-hermes.nix { };
+  mnemosyne-memory = hermesPythonVersion.callPackage ./python/mnemosyne-memory.nix {
+    inherit (pkgs) fastembed-hermes;
+  };
+  mnemosyne-hermes = hermesPythonVersion.callPackage ./python/mnemosyne-hermes.nix {
+    inherit (pkgs) mnemosyne-memory;
+  };
   mnemosyne-memory-all = pkgs.mnemosyne-memory.overridePythonAttrs (old: {
     dependencies = lib.unique (old.dependencies ++ old.passthru.optional-dependencies.all);
   });
@@ -86,6 +91,4 @@ in
 
   jj-desc = pkgs.callPackage ./jj-desc { };
   jj-pre-push = pkgs.python3Packages.callPackage ./jj-pre-push { };
-
-  hermes-desktop = pkgs.hermes-agent.hermesDesktop;
 }
