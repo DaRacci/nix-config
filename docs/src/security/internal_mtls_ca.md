@@ -30,13 +30,13 @@ Leaf certificates are never CAs.
 
 Keep the used domain aligned with `server.proxy.domain`.
 
-| Consumer                       | Intermediate                            | Leaf profile                                                                                                              | Trust store file                                          |
+| Consumer | Intermediate | Leaf profile | Trust store file |
 | ------------------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| SeaweedFS gRPC and Caddy proxy | `SeaweedFS Intermediate CA`             | `serverAuth` + `clientAuth`, SANs for `seaweedfs.${server.proxy.domain}` and `<service>.seaweedfs.${server.proxy.domain}` | `hosts/server/nixio/seaweedfs-tls/CA`                     |
-| Alloy dynamic capture API      | `Alloy Dynamic Capture Intermediate CA` | `serverAuth`, SANs for `<host>`, `<host>.localdomain`, `<host>.${server.proxy.domain}`, `127.0.0.1`                       | `hosts/server/<host>/alloy/CA_CERT`                       |
-| Alloy capture relay client     | `Alloy Dynamic Capture Intermediate CA` | `clientAuth`, CN `alloy-capture-relay`                                                                                    | `hosts/server/nixmon/alloy/CA_CERT`                       |
-| DB Guardian server             | `DB Guardian Intermediate CA`           | `serverAuth`, SANs for `<host>` and `<host>.localdomain`                                                                  | `hosts/server/<host>/db-guardian-tls/CA_CERT`             |
-| DB Guardian coordinator client | `DB Guardian Intermediate CA`           | `clientAuth`, CN `db-guardian-coordinator`                                                                                | `hosts/server/<database primary>/db-guardian-tls/CA_CERT` |
+| SeaweedFS gRPC and Caddy proxy | `SeaweedFS Intermediate CA` | `serverAuth` + `clientAuth`, SANs for `seaweedfs.${server.proxy.domain}` and `<service>.seaweedfs.${server.proxy.domain}` | `hosts/server/nixio/seaweedfs-tls/CA` |
+| Alloy dynamic capture API | `Alloy Dynamic Capture Intermediate CA` | `serverAuth`, SANs for `<host>`, `<host>.localdomain`, `<host>.${server.proxy.domain}`, `127.0.0.1` | `hosts/server/<host>/alloy/CA_CERT` |
+| Alloy capture relay client | `Alloy Dynamic Capture Intermediate CA` | `clientAuth`, CN `alloy-capture-relay` | `hosts/server/nixmon/alloy/CA_CERT` |
+| DB Guardian server | `DB Guardian Intermediate CA` | `serverAuth`, SANs for `<host>` and `<host>.localdomain` | `hosts/server/<host>/db-guardian-tls/CA_CERT` |
+| DB Guardian coordinator client | `DB Guardian Intermediate CA` | `clientAuth`, CN `db-guardian-coordinator` | `hosts/server/<database primary>/db-guardian-tls/CA_CERT` |
 
 Service-specific leaf details live in:
 
@@ -60,21 +60,21 @@ The other service and the root remain unaffected.
 TLS material is stored as binary SOPS files, not inline YAML values.
 `sops.secrets` declarations point at these files with `format = "binary"`.
 
-| Purpose                  | Path                                                          |
+| Purpose | Path |
 | ------------------------ | ------------------------------------------------------------- |
-| SeaweedFS trust bundle   | `hosts/server/nixio/seaweedfs-tls/CA`                         |
-| SeaweedFS leaf chain     | `hosts/server/nixio/seaweedfs-tls/<SERVICE>_CRT`              |
-| SeaweedFS leaf key       | `hosts/server/nixio/seaweedfs-tls/<SERVICE>_KEY`              |
-| Alloy trust root         | `hosts/server/<host>/alloy/CA_CERT`                           |
-| Alloy server chain       | `hosts/server/<host>/alloy/SERVER_CERT`                       |
-| Alloy server key         | `hosts/server/<host>/alloy/SERVER_KEY`                        |
-| Alloy client chain       | `hosts/server/nixmon/alloy/CLIENT_CERT`                       |
-| Alloy client key         | `hosts/server/nixmon/alloy/CLIENT_KEY`                        |
-| DB Guardian trust file   | `hosts/server/<host>/db-guardian-tls/CA_CERT`                 |
-| DB Guardian server chain | `hosts/server/<host>/db-guardian-tls/SERVER_CERT`             |
-| DB Guardian server key   | `hosts/server/<host>/db-guardian-tls/SERVER_KEY`              |
+| SeaweedFS trust bundle | `hosts/server/nixio/seaweedfs-tls/CA` |
+| SeaweedFS leaf chain | `hosts/server/nixio/seaweedfs-tls/<SERVICE>_CRT` |
+| SeaweedFS leaf key | `hosts/server/nixio/seaweedfs-tls/<SERVICE>_KEY` |
+| Alloy trust root | `hosts/server/<host>/alloy/CA_CERT` |
+| Alloy server chain | `hosts/server/<host>/alloy/SERVER_CERT` |
+| Alloy server key | `hosts/server/<host>/alloy/SERVER_KEY` |
+| Alloy client chain | `hosts/server/nixmon/alloy/CLIENT_CERT` |
+| Alloy client key | `hosts/server/nixmon/alloy/CLIENT_KEY` |
+| DB Guardian trust file | `hosts/server/<host>/db-guardian-tls/CA_CERT` |
+| DB Guardian server chain | `hosts/server/<host>/db-guardian-tls/SERVER_CERT` |
+| DB Guardian server key | `hosts/server/<host>/db-guardian-tls/SERVER_KEY` |
 | DB Guardian client chain | `hosts/server/<database primary>/db-guardian-tls/CLIENT_CERT` |
-| DB Guardian client key   | `hosts/server/<database primary>/db-guardian-tls/CLIENT_KEY`  |
+| DB Guardian client key | `hosts/server/<database primary>/db-guardian-tls/CLIENT_KEY` |
 
 The service intermediate is not a trust anchor, and relying parties receive the intermediate from the peer's certificate chain.
 The DB Guardian is the exception: its `CA_CERT` holds the intermediate certificate rather than the root.

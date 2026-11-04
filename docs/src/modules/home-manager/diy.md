@@ -28,11 +28,11 @@ This gives a full revision history of slicer settings with zero manual effort.
 
 Commit messages are generated automatically based on the type of filesystem event and the location of the file within the repository:
 
-| Event                | Commit message format              |
+| Event | Commit message format |
 | -------------------- | ---------------------------------- |
-| File added / created | `feat(<type>): added <name>`       |
-| File modified        | `refactor(<type>): updated <name>` |
-| File deleted         | `chore(<type>): removed <name>`    |
+| File added / created | `feat(<type>): added <name>` |
+| File modified | `refactor(<type>): updated <name>` |
+| File deleted | `chore(<type>): removed <name>` |
 
 Where:
 

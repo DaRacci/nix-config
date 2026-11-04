@@ -23,18 +23,18 @@ As the `monitoringPrimaryHost`, `nixmon` runs the collector services defined by 
 
 ### Declared secrets
 
-| Secret key                              | Purpose                            |
+| Secret key | Purpose |
 | --------------------------------------- | ---------------------------------- |
-| `MONITORING/OLTP/BEARER_TOKEN`          | Bearer token for OTLP ingestion    |
-| `MONITORING/GRAFANA/SECRET_KEY`         | Grafana session secret             |
-| `MONITORING/GRAFANA/OAUTH_SECRET`       | Kanidm OAuth2 secret for Grafana   |
-| `MONITORING/HOME_ASSISTANT/WEBHOOK_URL` | Home Assistant alert webhook       |
-| `MONITORING/NEXTCLOUD_TALK/WEBHOOK_URL` | Nextcloud Talk alert webhook       |
-| `MONITORING/MINIO_PROMETHEUS_TOKEN`     | Prometheus token for MinIO metrics |
-| `PROXMOX/USER`                          | Proxmox API user                   |
-| `PROXMOX/TOKEN_ID`                      | Proxmox API token ID               |
-| `PROXMOX/TOKEN_SECRET`                  | Proxmox API token secret           |
-| `S3FS_AUTH/LOKI`                        | S3 credentials for Loki storage    |
+| `MONITORING/OLTP/BEARER_TOKEN` | Bearer token for OTLP ingestion |
+| `MONITORING/GRAFANA/SECRET_KEY` | Grafana session secret |
+| `MONITORING/GRAFANA/OAUTH_SECRET` | Kanidm OAuth2 secret for Grafana |
+| `MONITORING/HOME_ASSISTANT/WEBHOOK_URL` | Home Assistant alert webhook |
+| `MONITORING/NEXTCLOUD_TALK/WEBHOOK_URL` | Nextcloud Talk alert webhook |
+| `MONITORING/MINIO_PROMETHEUS_TOKEN` | Prometheus token for MinIO metrics |
+| `PROXMOX/USER` | Proxmox API user |
+| `PROXMOX/TOKEN_ID` | Proxmox API token ID |
+| `PROXMOX/TOKEN_SECRET` | Proxmox API token secret |
+| `S3FS_AUTH/LOKI` | S3 credentials for Loki storage |
 
 ## Operational Notes / Assumptions
 

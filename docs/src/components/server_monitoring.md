@@ -52,19 +52,19 @@ Monitoring is enabled by default on all servers, this can be disabled with `serv
 `node_exporter` runs with `--collector.disable-defaults` and only enables the collectors listed below.
 This avoids the upstream default set, which includes many hardware, filesystem, and kernel collectors that are useless or misleading inside an LXC.
 
-| Collector    | Virtual hosts | Physical hosts | Why                                                                                                                             |
+| Collector | Virtual hosts | Physical hosts | Why |
 | ------------ | ------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `filesystem` | yes           | yes            | Root and bind-mount free space inside the container. The Proxmox exporter reports storage allocation, not per-mount free space. |
-| `systemd`    | yes           | yes            | Unit state and failed units inside the container. The host cannot see these.                                                    |
-| `cpu`        | no            | yes            | CPU, memory, disk, and network dashboards/alerts use `pve_*` metrics for LXCs. Host metrics still use `node_*`.                 |
-| `meminfo`    | no            | yes            | Same as above.                                                                                                                  |
-| `netdev`     | no            | yes            | Same as above.                                                                                                                  |
-| `diskstats`  | no            | yes            | Per-device I/O on physical hosts. Container I/O comes from `pve_disk_*`.                                                        |
-| `loadavg`    | no            | yes            | Host load average. LXC load is host-wide unless `lxcfs` virtualises it.                                                         |
-| `pressure`   | no            | yes            | PSI is not reliably namespaced in containers.                                                                                   |
-| `stat`       | no            | yes            | Host boot time and context-switch counters.                                                                                     |
-| `time`       | no            | yes            | Host clock synchronisation state.                                                                                               |
-| `vmstat`     | no            | yes            | Host virtual-memory counters.                                                                                                   |
+| `filesystem` | yes | yes | Root and bind-mount free space inside the container. The Proxmox exporter reports storage allocation, not per-mount free space. |
+| `systemd` | yes | yes | Unit state and failed units inside the container. The host cannot see these. |
+| `cpu` | no | yes | CPU, memory, disk, and network dashboards/alerts use `pve_*` metrics for LXCs. Host metrics still use `node_*`. |
+| `meminfo` | no | yes | Same as above. |
+| `netdev` | no | yes | Same as above. |
+| `diskstats` | no | yes | Per-device I/O on physical hosts. Container I/O comes from `pve_disk_*`. |
+| `loadavg` | no | yes | Host load average. LXC load is host-wide unless `lxcfs` virtualises it. |
+| `pressure` | no | yes | PSI is not reliably namespaced in containers. |
+| `stat` | no | yes | Host boot time and context-switch counters. |
+| `time` | no | yes | Host clock synchronisation state. |
+| `vmstat` | no | yes | Host virtual-memory counters. |
 
 ### NixOS Build Metadata
 
@@ -72,30 +72,30 @@ A oneshot service writes `/var/lib/prometheus-node-exporter/textfile/nixos.prom`
 
 The textfile collector exposes:
 
-| Metric                                   | Description                                                                                 |
+| Metric | Description |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `nixos_system_install_timestamp_seconds` | Unix timestamp of the current system activation.                                            |
-| `nixos_system_build_info`                | Gauge with `version`, `code_name`, `nixpkgs_revision`, and `configuration_revision` labels. |
+| `nixos_system_install_timestamp_seconds` | Unix timestamp of the current system activation. |
+| `nixos_system_build_info` | Gauge with `version`, `code_name`, `nixpkgs_revision`, and `configuration_revision` labels. |
 
 ## Secrets
 
 ### Declared secrets
 
-| Secret key                              | Purpose                                                   |
+| Secret key | Purpose |
 | --------------------------------------- | --------------------------------------------------------- |
-| `MONITORING/OLTP/BEARER_TOKEN`          | Bearer token for OTLP HTTP ingestion                      |
-| `MONITORING/GRAFANA/SECRET_KEY`         | Grafana secret key                                        |
-| `MONITORING/GRAFANA/OAUTH_SECRET`       | Kanidm OAuth2 secret for Grafana                          |
-| `MONITORING/HOME_ASSISTANT/WEBHOOK_URL` | Home Assistant alert webhook                              |
-| `MONITORING/NEXTCLOUD_TALK/WEBHOOK_URL` | Nextcloud Talk alert webhook                              |
-| `MONITORING/ALLOY_DYNAMIC/CA_CERT`      | mTLS CA trust bundle for the dynamic capture API          |
-| `MONITORING/ALLOY_DYNAMIC/SERVER_CERT`  | mTLS server certificate chain for the dynamic capture API |
-| `MONITORING/ALLOY_DYNAMIC/SERVER_KEY`   | mTLS server key for the dynamic capture API               |
-| `MONITORING/ALLOY_DYNAMIC/CLIENT_CERT`  | mTLS client certificate chain used by the Grafana relay   |
-| `MONITORING/ALLOY_DYNAMIC/CLIENT_KEY`   | mTLS client key used by the Grafana manual-trigger relay  |
-| `PROXMOX/USER`                          | Proxmox metrics user                                      |
-| `PROXMOX/TOKEN_ID`                      | Proxmox token name                                        |
-| `PROXMOX/TOKEN_SECRET`                  | Proxmox token secret                                      |
+| `MONITORING/OLTP/BEARER_TOKEN` | Bearer token for OTLP HTTP ingestion |
+| `MONITORING/GRAFANA/SECRET_KEY` | Grafana secret key |
+| `MONITORING/GRAFANA/OAUTH_SECRET` | Kanidm OAuth2 secret for Grafana |
+| `MONITORING/HOME_ASSISTANT/WEBHOOK_URL` | Home Assistant alert webhook |
+| `MONITORING/NEXTCLOUD_TALK/WEBHOOK_URL` | Nextcloud Talk alert webhook |
+| `MONITORING/ALLOY_DYNAMIC/CA_CERT` | mTLS CA trust bundle for the dynamic capture API |
+| `MONITORING/ALLOY_DYNAMIC/SERVER_CERT` | mTLS server certificate chain for the dynamic capture API |
+| `MONITORING/ALLOY_DYNAMIC/SERVER_KEY` | mTLS server key for the dynamic capture API |
+| `MONITORING/ALLOY_DYNAMIC/CLIENT_CERT` | mTLS client certificate chain used by the Grafana relay |
+| `MONITORING/ALLOY_DYNAMIC/CLIENT_KEY` | mTLS client key used by the Grafana manual-trigger relay |
+| `PROXMOX/USER` | Proxmox metrics user |
+| `PROXMOX/TOKEN_ID` | Proxmox token name |
+| `PROXMOX/TOKEN_SECRET` | Proxmox token secret |
 
 The `MONITORING/ALLOY_DYNAMIC/*` entries are sops-nix secret names backed by binary files under `hosts/server/<host>/alloy/`.
 
@@ -208,12 +208,12 @@ Capture is enabled for all servers in `hosts/server/shared/default.nix` and acce
 
 The module configures four virtual hosts on Monitoring Coordinator:
 
-| Service    | Subdomain                           | Access                        |
+| Service | Subdomain | Access |
 | ---------- | ----------------------------------- | ----------------------------- |
-| Grafana    | `grafana.${server.proxy.domain}`    | Public                        |
-| OTLP       | `otlp.${server.proxy.domain}`       | Public, bearer token required |
-| Prometheus | `prometheus.${server.proxy.domain}` | LAN                           |
-| Loki       | `loki.${server.proxy.domain}`       | LAN                           |
+| Grafana | `grafana.${server.proxy.domain}` | Public |
+| OTLP | `otlp.${server.proxy.domain}` | Public, bearer token required |
+| Prometheus | `prometheus.${server.proxy.domain}` | LAN |
+| Loki | `loki.${server.proxy.domain}` | LAN |
 
 Grafana remains protected by the existing Kanidm-backed login flow.
 The OTLP ingestion endpoint is intended for machine-to-machine clients and requires an `Authorization: Bearer <token>` header on every request.
@@ -225,13 +225,13 @@ These are defined in `hosts/server/nixmon/default.nix` and collected by the IO C
 
 The following alerts are configured by default:
 
-| Alert               | Condition                                | Severity |
+| Alert | Condition | Severity |
 | ------------------- | ---------------------------------------- | -------- |
-| `HostDown`          | `up{job="node"} == 0` for 2 minutes      | Critical |
+| `HostDown` | `up{job="node"} == 0` for 2 minutes | Critical |
 | `DiskSpaceCritical` | Root filesystem < 10% free for 5 minutes | Critical |
-| `HighCPUUsage`      | CPU usage > 90% for 5 minutes            | Warning  |
-| `HighMemoryUsage`   | Memory usage > 90% for 5 minutes         | Warning  |
-| `ServiceDown`       | `up{job!="node"} == 0` for 2 minutes     | Critical |
+| `HighCPUUsage` | CPU usage > 90% for 5 minutes | Warning |
+| `HighMemoryUsage` | Memory usage > 90% for 5 minutes | Warning |
+| `ServiceDown` | `up{job!="node"} == 0` for 2 minutes | Critical |
 
 Alerts are routed to:
 

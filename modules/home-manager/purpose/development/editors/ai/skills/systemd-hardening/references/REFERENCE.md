@@ -107,43 +107,43 @@ If working, apply to permanent unit configuration.
 
 Options that break FUSE filesystem daemons:
 
-| Option                        | Why it breaks                                                      | Fix                                                                |
+| Option | Why it breaks | Fix |
 | ----------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ |
-| `ProtectKernelModules=true`   | Blocks `/proc/modules` access needed by `fusermount3`              | Set `false`                                                        |
-| `ProtectKernelLogs=true`      | Blocks `/dev/kmsg` access used by FUSE                             | Set `false`                                                        |
-| `ProtectKernelTunables=true`  | Blocks `/sys` access for FUSE setup                                | Set `false`                                                        |
+| `ProtectKernelModules=true` | Blocks `/proc/modules` access needed by `fusermount3` | Set `false` |
+| `ProtectKernelLogs=true` | Blocks `/dev/kmsg` access used by FUSE | Set `false` |
+| `ProtectKernelTunables=true` | Blocks `/sys` access for FUSE setup | Set `false` |
 | `SystemCallErrorNumber=EPERM` | `fusermount3` calls `mount(2)` via setuid — seccomp EPERM kills it | Omit `SystemCallErrorNumber`; allow `@mount` in `SystemCallFilter` |
-| `PrivateMounts=true`          | Isolates mount namespace — FUSE mount invisible to host            | Set `false` for host-visible mounts                                |
-| `ProtectSystem=strict`        | `/dev/fuse` may not be accessible                                  | Set `false` or use `DeviceAllow=/dev/fuse`                         |
-| `PrivateDevices=true`         | Blocks `/dev/fuse` device                                          | Set `false`                                                        |
+| `PrivateMounts=true` | Isolates mount namespace — FUSE mount invisible to host | Set `false` for host-visible mounts |
+| `ProtectSystem=strict` | `/dev/fuse` may not be accessible | Set `false` or use `DeviceAllow=/dev/fuse` |
+| `PrivateDevices=true` | Blocks `/dev/fuse` device | Set `false` |
 
 Safe for FUSE daemons (verified working):
 
-| Option                                            | Notes                                                       |
+| Option | Notes |
 | ------------------------------------------------- | ----------------------------------------------------------- |
-| `User`/`Group`                                    | Run as non-root user                                        |
-| `ProtectClock=true`                               | No effect on FUSE                                           |
-| `ProtectHostname=true`                            | No effect on FUSE                                           |
-| `RestrictRealtime=true`                           | No effect on FUSE                                           |
-| `RestrictSUIDSGID=true`                           | FUSE doesn't create setuid files                            |
-| `LockPersonality=true`                            | No effect on FUSE                                           |
-| `MemoryDenyWriteExecute=true`                     | FUSE daemons typically don't JIT                            |
+| `User`/`Group` | Run as non-root user |
+| `ProtectClock=true` | No effect on FUSE |
+| `ProtectHostname=true` | No effect on FUSE |
+| `RestrictRealtime=true` | No effect on FUSE |
+| `RestrictSUIDSGID=true` | FUSE doesn't create setuid files |
+| `LockPersonality=true` | No effect on FUSE |
+| `MemoryDenyWriteExecute=true` | FUSE daemons typically don't JIT |
 | `SystemCallFilter=[ "@system-service" "@mount" ]` | Required — `@mount` allows `fusermount3` to call `mount(2)` |
 
 ### Kernel overlay mounts (`mount -t overlay`)
 
-| Option                     | Why it breaks                             | Fix                 |
+| Option | Why it breaks | Fix |
 | -------------------------- | ----------------------------------------- | ------------------- |
-| `RestrictNamespaces=true`  | May interfere with overlay internals      | Set `false`         |
-| `PrivateMounts=true`       | Mount invisible outside service namespace | Set `false`         |
-| `CapabilityBoundingSet=""` | No `CAP_SYS_ADMIN` → mount fails          | Add `CAP_SYS_ADMIN` |
+| `RestrictNamespaces=true` | May interfere with overlay internals | Set `false` |
+| `PrivateMounts=true` | Mount invisible outside service namespace | Set `false` |
+| `CapabilityBoundingSet=""` | No `CAP_SYS_ADMIN` → mount fails | Add `CAP_SYS_ADMIN` |
 
 ### Nix daemon
 
-| Option                        | Why it breaks                                      | Fix                                                  |
+| Option | Why it breaks | Fix |
 | ----------------------------- | -------------------------------------------------- | ---------------------------------------------------- |
-| `RestrictNamespaces=true`     | Blocks user namespaces needed for sandboxed builds | Set `false`                                          |
-| `SystemCallErrorNumber=EPERM` | Blocks `clone(2)` with namespace flags             | Omit `SystemCallErrorNumber` or relax syscall filter |
+| `RestrictNamespaces=true` | Blocks user namespaces needed for sandboxed builds | Set `false` |
+| `SystemCallErrorNumber=EPERM` | Blocks `clone(2)` with namespace flags | Omit `SystemCallErrorNumber` or relax syscall filter |
 
 ## FUSE-specific capability requirements
 

@@ -27,9 +27,9 @@ Other hosts configure `nix.distributedBuilds` and connect to it as a remote buil
 
 ### Declared secrets
 
-| Secret key                | Purpose                 |
+| Secret key | Purpose |
 | ------------------------- | ----------------------- |
-| `ATTIC_ENVIRONMENT`       | Attic environment file  |
+| `ATTIC_ENVIRONMENT` | Attic environment file |
 | `POSTGRES/ATTIC_PASSWORD` | Attic database password |
 
 ## Operational Notes / Assumptions

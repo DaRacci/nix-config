@@ -84,23 +84,23 @@ If a reconciliation run fails, the timer retries at the next interval.
 
 #### On Client Servers
 
-| Unit                            | Type    | Description                                         |
+| Unit | Type | Description |
 | ------------------------------- | ------- | --------------------------------------------------- |
-| `db-guardian.service`           | simple  | WebSocket server for receiving commands             |
-| `db-databases.target`           | target  | Represents "databases are online"                   |
-| `wait-for-db-primary.service`   | oneshot | Waits for the database primary host to be reachable |
-| `wait-for-db-databases.service` | oneshot | Waits for databases at boot (runs once)             |
+| `db-guardian.service` | simple | WebSocket server for receiving commands |
+| `db-databases.target` | target | Represents "databases are online" |
+| `wait-for-db-primary.service` | oneshot | Waits for the database primary host to be reachable |
+| `wait-for-db-databases.service` | oneshot | Waits for databases at boot (runs once) |
 
 The target is bound to `wait-for-db-databases.service` and is also wanted by it.
 Restarting the readiness check therefore restarts the target instead of leaving it inactive.
 
 #### On the Database Coordinator
 
-| Unit                                        | Type    | Description                                                         |
+| Unit | Type | Description |
 | ------------------------------------------- | ------- | ------------------------------------------------------------------- |
-| `db-database-coordinator.service`           | oneshot | Sends undrain on start, drain on stop; retries failed undrains      |
-| `db-database-coordinator-reconcile.service` | oneshot | Re-sends undrain to all clients                                     |
-| `db-database-coordinator-reconcile.timer`   | timer   | Runs reconciliation every 5 minutes while the coordinator is active |
+| `db-database-coordinator.service` | oneshot | Sends undrain on start, drain on stop; retries failed undrains |
+| `db-database-coordinator-reconcile.service` | oneshot | Re-sends undrain to all clients |
+| `db-database-coordinator-reconcile.timer` | timer | Runs reconciliation every 5 minutes while the coordinator is active |
 
 ### Protocol Reference
 
@@ -130,10 +130,10 @@ Connections are mutually authenticated with TLS.
 There is no shared secret in the protocol: the coordinator proves its identity with a client certificate, and the guardian proves its own with a per-host server certificate.
 Both sides trust the **DB Guardian Intermediate CA** and nothing else, so a certificate issued by another service's intermediate is rejected during the handshake.
 
-| Identity                  | Leaf profile | Issued to                          | Allowed by the guardian |
+| Identity | Leaf profile | Issued to | Allowed by the guardian |
 | ------------------------- | ------------ | ---------------------------------- | ----------------------- |
-| `<host>` guardian server  | `serverAuth` | Every guardian host, one leaf each | n/a                     |
-| `db-guardian-coordinator` | `clientAuth` | The database primary host only     | Common name allowlist   |
+| `<host>` guardian server | `serverAuth` | Every guardian host, one leaf each | n/a |
+| `db-guardian-coordinator` | `clientAuth` | The database primary host only | Common name allowlist |
 
 The guardian rejects a connection whose client certificate common name is not in `server.database.guardian.allowedClientCommonNames`, and refuses to start at all when that list is empty.
 An empty list is a Nix evaluation error, so a misconfigured generation cannot be built.
@@ -143,13 +143,13 @@ An empty list is a Nix evaluation error, so a misconfigured generation cannot be
 Certificate material is stored as binary SOPS files and passed to the units as systemd credentials.
 No secret is a YAML value.
 
-| Secret key                | Owner | Group | Restart unit                                                                     | Purpose                                             |
+| Secret key | Owner | Group | Restart unit | Purpose |
 | ------------------------- | ----- | ----- | -------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `db-guardian/CA_CERT`     | root  | root  | `db-guardian.service` (clients), `db-database-coordinator.service` (coordinator) | Intermediate CA certificate used as the trust store |
-| `db-guardian/SERVER_CERT` | root  | root  | `db-guardian.service`                                                            | Server leaf and intermediate chain                  |
-| `db-guardian/SERVER_KEY`  | root  | root  | `db-guardian.service`                                                            | Server leaf private key                             |
-| `db-guardian/CLIENT_CERT` | root  | root  | `db-database-coordinator.service`                                                | Coordinator leaf and intermediate chain             |
-| `db-guardian/CLIENT_KEY`  | root  | root  | `db-database-coordinator.service`                                                | Coordinator leaf private key                        |
+| `db-guardian/CA_CERT` | root | root | `db-guardian.service` (clients), `db-database-coordinator.service` (coordinator) | Intermediate CA certificate used as the trust store |
+| `db-guardian/SERVER_CERT` | root | root | `db-guardian.service` | Server leaf and intermediate chain |
+| `db-guardian/SERVER_KEY` | root | root | `db-guardian.service` | Server leaf private key |
+| `db-guardian/CLIENT_CERT` | root | root | `db-database-coordinator.service` | Coordinator leaf and intermediate chain |
+| `db-guardian/CLIENT_KEY` | root | root | `db-database-coordinator.service` | Coordinator leaf private key |
 
 The files live in `hosts/server/<host>/db-guardian-tls/` and are encrypted to that host's recipients only, so a guardian cannot decrypt another guardian's key.
 Issue and rotate them with the procedure in [Internal mTLS CA](../security/internal_mtls_ca.md).

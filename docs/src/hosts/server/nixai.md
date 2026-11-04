@@ -37,12 +37,12 @@ It runs the AI agent, local inference via Ollama, Mnemosyne memory sync, and voi
 
 ### Declared secrets
 
-| Secret key                    | Purpose                  |
+| Secret key | Purpose |
 | ----------------------------- | ------------------------ |
 | `AI_AGENT/OPENROUTER_API_KEY` | OpenRouter model API key |
-| `AI_AGENT/DISCORD_BOT_TOKEN`  | Discord bot token        |
-| `AI_AGENT/API_SERVER_TOKEN`   | Agent API server auth    |
-| `MNEMOSYNE_SYNC_KEY`          | Mnemosyne sync API key   |
+| `AI_AGENT/DISCORD_BOT_TOKEN` | Discord bot token |
+| `AI_AGENT/API_SERVER_TOKEN` | Agent API server auth |
+| `MNEMOSYNE_SYNC_KEY` | Mnemosyne sync API key |
 
 ## Operational Notes / Assumptions
 

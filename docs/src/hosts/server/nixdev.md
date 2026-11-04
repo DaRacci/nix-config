@@ -38,24 +38,24 @@ a Docker registry, and a ForgeSync mirror job.
 
 ### Declared secrets
 
-| Secret key                                                 | Purpose                           |
+| Secret key | Purpose |
 | ---------------------------------------------------------- | --------------------------------- |
-| `GITHUB_TOKEN`                                             | Token for the self-hosted runners |
-| `POSTGRES/N8N_PASSWORD`                                    | n8n database password             |
-| `POSTGRES/CODER_PASSWORD`                                  | Coder database password           |
-| `POSTGRES/WOODPECKER_PASSWORD`                             | Woodpecker database password      |
-| `POSTGRES/WINDMILL_PASSWORD`                               | Windmill database password        |
-| `REDIS_PASSWORD`                                           | n8n Redis password                |
-| `N8N/ENCRYPTION_KEY`                                       | n8n encryption key                |
-| `N8N/RUNNER_AUTH_TOKEN`                                    | n8n task runner auth              |
-| `WOODPECKER/GRPC_SECRET`                                   | Woodpecker gRPC secret            |
-| `WOODPECKER/AGENT_SECRET`                                  | Woodpecker agent secret           |
-| `WOODPECKER/GITHUB_CLIENT` / `GITHUB_SECRET`               | GitHub forge OAuth                |
-| `WOODPECKER/CODEBERG_CLIENT` / `CODEBERG_SECRET`           | Codeberg forge OAuth              |
-| `REGISTRY/SECRET`                                          | Registry shared secret            |
-| `REGISTRY/HTPASSWD`                                        | Registry auth htpasswd            |
-| `REGISTRY/S3_ACCESS_KEY` / `S3_SECRET_KEY`                 | S3 storage credentials            |
-| `FORGESYNC/SOURCE_TOKEN` / `TARGET_TOKEN` / `MIRROR_TOKEN` | ForgeSync tokens                  |
+| `GITHUB_TOKEN` | Token for the self-hosted runners |
+| `POSTGRES/N8N_PASSWORD` | n8n database password |
+| `POSTGRES/CODER_PASSWORD` | Coder database password |
+| `POSTGRES/WOODPECKER_PASSWORD` | Woodpecker database password |
+| `POSTGRES/WINDMILL_PASSWORD` | Windmill database password |
+| `REDIS_PASSWORD` | n8n Redis password |
+| `N8N/ENCRYPTION_KEY` | n8n encryption key |
+| `N8N/RUNNER_AUTH_TOKEN` | n8n task runner auth |
+| `WOODPECKER/GRPC_SECRET` | Woodpecker gRPC secret |
+| `WOODPECKER/AGENT_SECRET` | Woodpecker agent secret |
+| `WOODPECKER/GITHUB_CLIENT` / `GITHUB_SECRET` | GitHub forge OAuth |
+| `WOODPECKER/CODEBERG_CLIENT` / `CODEBERG_SECRET` | Codeberg forge OAuth |
+| `REGISTRY/SECRET` | Registry shared secret |
+| `REGISTRY/HTPASSWD` | Registry auth htpasswd |
+| `REGISTRY/S3_ACCESS_KEY` / `S3_SECRET_KEY` | S3 storage credentials |
+| `FORGESYNC/SOURCE_TOKEN` / `TARGET_TOKEN` / `MIRROR_TOKEN` | ForgeSync tokens |
 
 ## Operational Notes / Assumptions
 

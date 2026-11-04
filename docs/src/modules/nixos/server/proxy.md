@@ -43,14 +43,14 @@ Extensions are self-contained modules that inject Caddy directives into virtual 
 Extensions register themselves via `server.proxy.extensions.<name>`, an attribute set of submodules.
 Each extension has:
 
-| Field                 | Type                                             | Default  | Description                                                                                                               |
+| Field | Type | Default | Description |
 | --------------------- | ------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `priority`            | `int`                                            | `100`    | Lower values = earlier Caddy config placement. Ranges: 0-49 reserved, 50-99 auth, 100-199 general, 200+ post-processing   |
-| `enable`              | `bool`                                           | `false`  | Globally enabled. Set via `mkDefault` based on detected config                                                            |
-| `consumesExtraConfig` | `bool`                                           | `false`  | When `true`, the extension embeds `vh._resolvedExtraConfig` in its output. `config.nix` skips appending raw `extraConfig` |
-| `config`              | `vhostName -> vhostAttrSet -> hostConfig -> str` | required | Per-vhost Caddy directive generator                                                                                       |
-| `globalConfig`        | `hostConfig -> str`                              | `_ → ""` | Top-level Caddy `globalConfig` directives                                                                                 |
-| `vhostModule`         | `nullOr deferredModule`                          | `null`   | Per-vhost option declarations                                                                                             |
+| `priority` | `int` | `100` | Lower values = earlier Caddy config placement. Ranges: 0-49 reserved, 50-99 auth, 100-199 general, 200+ post-processing |
+| `enable` | `bool` | `false` | Globally enabled. Set via `mkDefault` based on detected config |
+| `consumesExtraConfig` | `bool` | `false` | When `true`, the extension embeds `vh._resolvedExtraConfig` in its output. `config.nix` skips appending raw `extraConfig` |
+| `config` | `vhostName -> vhostAttrSet -> hostConfig -> str` | required | Per-vhost Caddy directive generator |
+| `globalConfig` | `hostConfig -> str` | `_ → ""` | Top-level Caddy `globalConfig` directives |
+| `vhostModule` | `nullOr deferredModule` | `null` | Per-vhost option declarations |
 
 #### Per-Vhost Extension Selection
 
@@ -105,13 +105,13 @@ Mutual exclusivity with Kanidm on the same vhost is enforced by the existing `co
 
 ### Migrated Extensions
 
-| Extension      | Priority | Purpose                                                     |
+| Extension | Priority | Purpose |
 | -------------- | -------- | ----------------------------------------------------------- |
-| `l4`           | 10       | L4 TCP/UDP forwarding (layer4 Caddy block + firewall ports) |
-| `kanidm`       | 50       | Kanidm OAuth2 authentication per vhost                      |
-| `api-key-auth` | 50       | Static API key authentication per vhost (with bypass paths) |
-| `dashboard`    | 200      | Auto-generate dashboard items                               |
-| `cloudflared`  | 200      | Cloudflared tunnel ingress                                  |
+| `l4` | 10 | L4 TCP/UDP forwarding (layer4 Caddy block + firewall ports) |
+| `kanidm` | 50 | Kanidm OAuth2 authentication per vhost |
+| `api-key-auth` | 50 | Static API key authentication per vhost (with bypass paths) |
+| `dashboard` | 200 | Auto-generate dashboard items |
+| `cloudflared` | 200 | Cloudflared tunnel ingress |
 
 ## Secrets
 

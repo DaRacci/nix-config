@@ -15,10 +15,10 @@ and Streaming (Sunshine) for low-latency game or desktop streaming.
 
 ## Architecture / Services / Scope
 
-| Sub-feature    | Implementation | Purpose                               |
+| Sub-feature | Implementation | Purpose |
 | -------------- | -------------- | ------------------------------------- |
-| Remote Desktop | xrdp           | Full desktop access over RDP          |
-| Streaming      | Sunshine       | Low-latency game or desktop streaming |
+| Remote Desktop | xrdp | Full desktop access over RDP |
+| Streaming | Sunshine | Low-latency game or desktop streaming |
 
 When `core.remote.enable = true`:
 
@@ -47,9 +47,9 @@ If Home Manager Hyprland is in Lua mode (`wayland.windowManager.hyprland.configT
 - **Screencopy permission**: routed through `wayland.windowManager.hyprland.custom-settings.permission.screenCopy`,
   which handles both Lua and `hyprlang` modes automatically.
 
-| Application           | Behaviour                                                                                                                                                                               |
+| Application | Behaviour |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Shared Desktop**    | Enables `HEADLESS-1` at client resolution and leaves physical monitors active.                                                                                                          |
+| **Shared Desktop** | Enables `HEADLESS-1` at client resolution and leaves physical monitors active. |
 | **Exclusive Desktop** | Enables `HEADLESS-1`, saves active physical monitor state to `$XDG_STATE_HOME/hyprland-disabled-monitors-pre-sunshine.json`, disables those monitors, then restores them on disconnect. |
 
 The socket proxy and Hyprland monitor helpers are shipped together in the shared `sunshine-tools` package
@@ -61,13 +61,13 @@ Sunshine stays on its standard port family rooted at **TCP/UDP 47989–47990+** 
 External inbound TCP **47989** is firewall-redirected to internal proxy port **48989**.
 The proxy wakes Sunshine and forwards to `127.0.0.1:47989`.
 
-| Stage                 | What happens                                                                                                                                                                                                                                                                       |
+| Stage | What happens |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Firewall redirect** | An `nftables` NAT prerouting chain (`sunshine-redirect4` / `sunshine-redirect6`) redirects inbound TCP `:47989` to local `:48989`. An `extraInputRules` rule matching `ct original proto-dst 47989` allows only redirected traffic into `:48989`; `:48989` is not broadly exposed. |
-| **Socket activation** | `sunshine-proxy.socket` listens on TCP `:48989`. First connection activates `sunshine-proxy.service`.                                                                                                                                                                              |
-| **Proxy start**       | `sunshine-proxy.service` pulls in `sunshine.service` via systemd dependencies, then the packaged `sunshine-proxy-wrapper` helper polls until port 47989 is open and exec-s into `systemd-socket-proxyd` forwarding to `127.0.0.1:47989`.                                           |
-| **Active streaming**  | Sunshine handles Moonlight/Sunshine client traffic on its standard port family. The proxy relays only the initial control connection transparently. Proxy `bindsTo` Sunshine — if Sunshine crashes proxy goes with it.                                                             |
-| **Idle stop**         | After 300s with no connection, `systemd-socket-proxyd` exits. Sunshine has `Restart=no` and `StopWhenUnneeded=true` with no remaining active referrer, so systemd stops it.                                                                                                        |
+| **Socket activation** | `sunshine-proxy.socket` listens on TCP `:48989`. First connection activates `sunshine-proxy.service`. |
+| **Proxy start** | `sunshine-proxy.service` pulls in `sunshine.service` via systemd dependencies, then the packaged `sunshine-proxy-wrapper` helper polls until port 47989 is open and exec-s into `systemd-socket-proxyd` forwarding to `127.0.0.1:47989`. |
+| **Active streaming** | Sunshine handles Moonlight/Sunshine client traffic on its standard port family. The proxy relays only the initial control connection transparently. Proxy `bindsTo` Sunshine — if Sunshine crashes proxy goes with it. |
+| **Idle stop** | After 300s with no connection, `systemd-socket-proxyd` exits. Sunshine has `Restart=no` and `StopWhenUnneeded=true` with no remaining active referrer, so systemd stops it. |
 
 #### Dependency Model
 

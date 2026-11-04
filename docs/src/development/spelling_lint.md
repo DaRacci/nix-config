@@ -6,16 +6,16 @@ The rumdl configuration is generated into `.rumdl.toml` by the development shell
 
 ## Layout
 
-| Path                                            | Purpose                                             |
+| Path | Purpose |
 | ----------------------------------------------- | --------------------------------------------------- |
-| `.vale.ini`                                     | selects the linted paths and the `AU-English` style |
-| `ci/vale/styles/AU-English/Spelling.yml`        | the spelling rule and the dictionaries it loads     |
-| `ci/vale/styles/AU-English/Terms.yml`           | generated: host name and term casing rule           |
-| `ci/vale/styles/AU-English/SentencePerLine.yml` | the one-sentence-per-line rule                      |
-| `ci/vale/styles/config/scripts/`                | the line-aware script behind that rule              |
-| `ci/vale/styles/config/dictionaries/`           | the dictionaries and allow-lists the rules read     |
-| `flake/dev/scripts/vale-tech-dictionary.nu`     | builds the `tech` dictionary from the cspell lists  |
-| `.rumdl.toml`                                   | generated: the [rumdl] link and structure rules     |
+| `.vale.ini` | selects the linted paths and the `AU-English` style |
+| `ci/vale/styles/AU-English/Spelling.yml` | the spelling rule and the dictionaries it loads |
+| `ci/vale/styles/AU-English/Terms.yml` | generated: host name and term casing rule |
+| `ci/vale/styles/AU-English/SentencePerLine.yml` | the one-sentence-per-line rule |
+| `ci/vale/styles/config/scripts/` | the line-aware script behind that rule |
+| `ci/vale/styles/config/dictionaries/` | the dictionaries and allow-lists the rules read |
+| `flake/dev/scripts/vale-tech-dictionary.nu` | builds the `tech` dictionary from the cspell lists |
+| `.rumdl.toml` | generated: the [rumdl] link and structure rules |
 
 ## Prose Layout
 

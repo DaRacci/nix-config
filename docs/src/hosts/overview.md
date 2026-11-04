@@ -27,7 +27,7 @@ Host-specific configurations live in `hosts/{device-type}/{hostname}/default.nix
 - **Adding new host**: Create directory for host in appropriate device type category and add `default.nix`.
 - **Modifying host**: Update `default.nix`, associated files in host directory, or relevant module under `modules/nixos/core/`.
 
----
+______________________________________________________________________
 
 ### Decky Loader Lifecycle
 

@@ -7,18 +7,18 @@ The layout spans several areas — read the map before editing.
 
 ## Where things live
 
-| Path                                                          | What                                                              |
+| Path | What |
 | ------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `home/shared/desktop/hyprland/`                               | Shared Nix module: base Hyprland options, NVIDIA tweaks           |
-| `home/racci/features/desktop/hyprland/`                       | Per-user config: Lua modules, looks, the split-tree layout, tests |
-| `home/racci/features/desktop/hyprland/lua/layout/split-tree/` | The layout                                                        |
-| `home/racci/features/desktop/hyprland/lua/default.lua`        | Layout entry point: `register`, `configure`, overlay launch       |
-| `home/racci/features/desktop/hyprland/tests/split-tree.lua`   | Test harness (no framework)                                       |
-| `modules/home-manager/core/hyprland/lua.nix`                  | Nix wiring + `@PLACEHOLDER@` substitution                         |
-| `modules/home-manager/core/hyprland/lua/binds.lua`            | Keybinds                                                          |
-| `modules/home-manager/core/hyprland/lua/opt/`                 | Optional Lua snippets                                             |
-| `pkgs/split-tree-overlay/`                                    | Rust overlay client for the drag preview                          |
-| `docs/src/modules/home-manager/hyprland-split-tree.md`        | Layout documentation (keep in sync)                               |
+| `home/shared/desktop/hyprland/` | Shared Nix module: base Hyprland options, NVIDIA tweaks |
+| `home/racci/features/desktop/hyprland/` | Per-user config: Lua modules, looks, the split-tree layout, tests |
+| `home/racci/features/desktop/hyprland/lua/layout/split-tree/` | The layout |
+| `home/racci/features/desktop/hyprland/lua/default.lua` | Layout entry point: `register`, `configure`, overlay launch |
+| `home/racci/features/desktop/hyprland/tests/split-tree.lua` | Test harness (no framework) |
+| `modules/home-manager/core/hyprland/lua.nix` | Nix wiring + `@PLACEHOLDER@` substitution |
+| `modules/home-manager/core/hyprland/lua/binds.lua` | Keybinds |
+| `modules/home-manager/core/hyprland/lua/opt/` | Optional Lua snippets |
+| `pkgs/split-tree-overlay/` | Rust overlay client for the drag preview |
+| `docs/src/modules/home-manager/hyprland-split-tree.md` | Layout documentation (keep in sync) |
 
 ## Environment
 

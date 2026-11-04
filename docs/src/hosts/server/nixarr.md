@@ -18,17 +18,17 @@ All downloading happens through a VPN tunnel so P2P traffic is isolated.
 
 ### Media Management ("arr" stack)
 
-| App          | Role                                         |
+| App | Role |
 | ------------ | -------------------------------------------- |
-| Radarr       | Movie management                             |
-| Sonarr       | TV series management                         |
-| Prowlarr     | Indexer management for the whole stack       |
-| Lidarr       | Music management                             |
-| Readarr      | Book management                              |
-| Bazarr       | Subtitle management                          |
+| Radarr | Movie management |
+| Sonarr | TV series management |
+| Prowlarr | Indexer management for the whole stack |
+| Lidarr | Music management |
+| Readarr | Book management |
+| Bazarr | Subtitle management |
 | Transmission | BitTorrent downloader (Flood UI, cross-seed) |
-| Sabnzbd      | Usenet downloader                            |
-| Seerr        | User-facing media request portal             |
+| Sabnzbd | Usenet downloader |
+| Seerr | User-facing media request portal |
 
 ### Networking / VPN
 
@@ -46,7 +46,7 @@ All downloading happens through a VPN tunnel so P2P traffic is isolated.
 
 ### Declared secrets
 
-| Secret key  | Purpose                                  |
+| Secret key | Purpose |
 | ----------- | ---------------------------------------- |
 | `wireguard` | WireGuard VPN config (binary, `wg.conf`) |
 

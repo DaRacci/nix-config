@@ -31,9 +31,9 @@ Directory containing wallpaper images.
 
 **Consumers:**
 
-| Consumer                    | How it uses the value                                             |
+| Consumer | How it uses the value |
 | --------------------------- | ----------------------------------------------------------------- |
-| Noctalia desktop shell      | Sets `programs.noctalia.settings.wallpaper.directory`             |
+| Noctalia desktop shell | Sets `programs.noctalia.settings.wallpaper.directory` |
 | GNOME azwallpaper extension | Sets `org/gnome/shell/extensions/azwallpaper slideshow-directory` |
 
 #### `core.profile.location.secret`
@@ -51,7 +51,7 @@ The module links the file to `~/.ssh/id_ed25519.pub`, so consumers can read a us
 
 **Consumers:**
 
-| Consumer                  | How it uses the value                                                                                       |
+| Consumer | How it uses the value |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `purpose.development.vcs` | Default for `purpose.development.vcs.user.publicKey`; supplies the signing key and the allowed-signers entry |
 

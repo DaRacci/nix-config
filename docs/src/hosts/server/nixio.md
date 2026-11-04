@@ -13,25 +13,25 @@ It handles all external traffic routing, VPN tunnelling, DNS filtering, and dash
 
 ### Services
 
-| Service              | Module / Path                      | Role                                                                  |
+| Service | Module / Path | Role |
 | -------------------- | ---------------------------------- | --------------------------------------------------------------------- |
-| **Caddy**            | `hosts/server/nixio/proxy.nix`     | Reverse-proxy and TLS termination for all cluster services            |
-| **Tailscale Tunnel** | `hosts/server/nixio/tunnel/`       | Mesh VPN connectivity, subnet routing, and ingress via Tailscale tags |
-| **Dashy Dashboard**  | `hosts/server/nixio/dashboard.nix` | Aggregated service dashboard displayed on the IO Coordinator          |
-| **AdGuard Home**     | `hosts/server/nixio/adguard.nix`   | Local DNS filtering and ad-blocking for the home network              |
-| **MinIO**            | `hosts/server/nixio/storage.nix`   | S3-compatible object storage for cluster services                     |
-| **Network Config**   | `default.nix`                      | Subnet declarations, IP forwarding (IPv4 + IPv6)                      |
+| **Caddy** | `hosts/server/nixio/proxy.nix` | Reverse-proxy and TLS termination for all cluster services |
+| **Tailscale Tunnel** | `hosts/server/nixio/tunnel/` | Mesh VPN connectivity, subnet routing, and ingress via Tailscale tags |
+| **Dashy Dashboard** | `hosts/server/nixio/dashboard.nix` | Aggregated service dashboard displayed on the IO Coordinator |
+| **AdGuard Home** | `hosts/server/nixio/adguard.nix` | Local DNS filtering and ad-blocking for the home network |
+| **MinIO** | `hosts/server/nixio/storage.nix` | S3-compatible object storage for cluster services |
+| **Network Config** | `default.nix` | Subnet declarations, IP forwarding (IPv4 + IPv6) |
 
 ## Secrets
 
 ### Declared secrets
 
-| Secret key                  | Purpose                          |
+| Secret key | Purpose |
 | --------------------------- | -------------------------------- |
-| `CLOUDFLARE/EMAIL`          | ACME DNS challenge account email |
-| `CLOUDFLARE/ZONE_API_TOKEN` | ACME DNS challenge zone token    |
-| `CLOUDFLARE/DNS_API_TOKEN`  | ACME DNS challenge API token     |
-| `MINIO_ROOT_CREDENTIALS`    | MinIO root user and password     |
+| `CLOUDFLARE/EMAIL` | ACME DNS challenge account email |
+| `CLOUDFLARE/ZONE_API_TOKEN` | ACME DNS challenge zone token |
+| `CLOUDFLARE/DNS_API_TOKEN` | ACME DNS challenge API token |
+| `MINIO_ROOT_CREDENTIALS` | MinIO root user and password |
 
 ## Operational Notes / Assumptions
 

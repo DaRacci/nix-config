@@ -13,14 +13,14 @@ General purpose application server for replacing cloud services with self-hosted
 
 ### Application Workloads
 
-| Workload       | Service          | File                                    | Domain              |
+| Workload | Service | File | Domain |
 | -------------- | ---------------- | --------------------------------------- | ------------------- |
-| Home Assistant | `home-assistant` | `hosts/server/nixcloud/home-assistant/` | `hassio.racci.dev`  |
-| Homebox        | `homebox`        | `hosts/server/nixcloud/homebox.nix`     | `homebox.racci.dev` |
-| Immich         | `immich`         | `hosts/server/nixcloud/immich.nix`      | `photos.racci.dev`  |
-| Music          | `navidrome`      | `hosts/server/nixcloud/music.nix`       | `music.racci.dev`   |
-| Nextcloud      | `nextcloud`      | `hosts/server/nixcloud/nextcloud.nix`   | `nc.racci.dev`      |
-| Search         | `searx`          | `hosts/server/nixcloud/search.nix`      | `search.racci.dev`  |
+| Home Assistant | `home-assistant` | `hosts/server/nixcloud/home-assistant/` | `hassio.racci.dev` |
+| Homebox | `homebox` | `hosts/server/nixcloud/homebox.nix` | `homebox.racci.dev` |
+| Immich | `immich` | `hosts/server/nixcloud/immich.nix` | `photos.racci.dev` |
+| Music | `navidrome` | `hosts/server/nixcloud/music.nix` | `music.racci.dev` |
+| Nextcloud | `nextcloud` | `hosts/server/nixcloud/nextcloud.nix` | `nc.racci.dev` |
+| Search | `searx` | `hosts/server/nixcloud/search.nix` | `search.racci.dev` |
 
 ## Operational Notes / Assumptions
 
