@@ -77,6 +77,7 @@
 - [Hyprland](modules/home-manager/hyprland.md)
 - [Hyprland Split-Tree Layout](modules/home-manager/hyprland-split-tree.md)
 - [Profile](modules/home-manager/profile.md)
+- [Shell Program Set](modules/home-manager/programs/shell.md)
 - [Programs](modules/home-manager/programs/list_ephemeral.md)
 
 # Packages
