@@ -1,9 +1,10 @@
-# Development — Language and Editor Integration
+# Development — Languages, Editors and Version Control
 
 ## Purpose
 
 The `purpose.development` Home-Manager modules describe language support once and render it into every enabled editor.
 Adding a language should not require editing Zed, VSCode, Helix, and OpenCode separately.
+The same purpose owns version control, so git and Jujutsu share one user identity and one signing key.
 
 ## Entry Point
 
@@ -87,7 +88,25 @@ so modules only declare `languages = [ "csharp" ]`, never `"C#"` and `"c-sharp"`
 - **VSCode** — `purpose.development.editors.vscode`.
 - **OpenCode** — `purpose.development.editors.ai`.
 
+### Version control
+
+`purpose.development.vcs` configures git and Jujutsu from the user identity declared once, and signs commits with `core.profile.identity.publicKey`.
+
+- **Entry point**: [`modules/home-manager/purpose/development/vcs.nix`](../../../../modules/home-manager/purpose/development/vcs.nix)
+- **Enabled by default**: `purpose.development.vcs.enable` defaults to `purpose.development.enable`; set it to false to keep the language tooling without version control.
+- **`user.email` is required**: it has no default, and evaluation fails while the module is enabled without it.
+- **`user.name`** defaults to the Home-Manager username with the first letter capitalised.
+- **`user.publicKey`** defaults to the contents of `core.profile.identity.publicKey`; when that file is missing the option stays `null` and signing is skipped instead of failing the build.
+- **`primaryVCS`** selects the installed tool set: `jujutsu` (the default) adds `jjui`, `jj-pre-push`, `watchman` and uses `meld` as the diff and merge editor, while `git` adds `gitui`.
+  Both variants install `gh`, `gh-dash` and `delta`.
+- **Signing** — when a key is available, git signs by default with the SSH key and verifies against a generated allowed-signers file; Jujutsu signs at push time only (`git.sign-on-push`) with the same key and the same allowed-signers file.
+- **`enableJJDescWrapper`** installs a `jj-desc` wrapper that supplies `LLM_MODEL`, `LLM_PROVIDER` and the `OPENROUTER_API_KEY` SOPS secret; the secret must be declared or the build fails.
+
 ### Options
+
+#### Version control
+
+{{#include ../../../generated/purpose-development-vcs-options.md}}
 
 #### Zed
 

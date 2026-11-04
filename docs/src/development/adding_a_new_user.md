@@ -8,50 +8,46 @@ To add a new user configuration:
 mkdir -p home/newuser
 ```
 
-## 2. Create User Configuration Files
+## 2. Create the Shared User Configuration
 
-Create host-specific configurations in `home/newuser/{hostname}.nix`:
+Every user directory must contain `hm-config.nix`; the flake only builds a Home-Manager configuration for users that have that file.
+It is imported next to `home/shared/global`, which imports every module under `modules/home-manager/`, so a user configuration sets options instead of importing feature directories.
 
 ```nix
-{ pkgs, lib, ... }:
+{ ... }:
 {
-  imports = [
-    # Import shared configurations
-    ./features/cli              # Common CLI tools
-    ./features/desktop/common   # Desktop environment basics
-  ];
-
-  # User-specific configuration
-  home = {
-    username = "newuser";
-    homeDirectory = "/home/newuser";
-    stateVersion = "25.05"; # Set this to the Home Manager state version from initial setup; keep it unchanged during normal NixOS or Home Manager upgrades, and only change it during a planned migration
+  core.profile = {
+    avatar.path = "/home/newuser/.face";
+    wallpaper.directory = "/home/newuser/Pictures/Wallpapers";
   };
 
-  # Add user-specific packages and configuration
-  programs = {
-    git = {
-      userName = "Your Name";
-      userEmail = "your.email@domain.com";
+  purpose = {
+    enable = true;
+    development = {
+      enable = true;
+      vcs.user.email = "newuser@example.com";
     };
   };
 }
 ```
 
-Create feature modules in `home/newuser/features/`:
+Leave `home.stateVersion` out of the file: it is set once for every user from the `state.version` file at the flake root.
 
-```bash
-mkdir -p home/newuser/features/{cli,desktop,development}
-```
+CLI tooling is no longer imported per user.
+`programSets.shell` is enabled by default on non-server hosts and supplies the shells, prompt, completions, multiplexer and common tools; set `programSets.shell.enable = false;` to opt out.
+See [Shell program set](../modules/home-manager/programs/shell.md) for what the set provides.
 
-## 3. Link User to Hosts
+## 3. Provide the User's Public Key
 
-The auto-discovery system will automatically link users to hosts if:
+`core.profile.identity.publicKey` defaults to `home/{username}/id_ed25519.pub` and asserts that the file exists.
+Put the user's OpenSSH public key there, or point the option at another path.
 
-- A file `home/{username}/{hostname}.nix` exists
-- The hostname matches an existing host configuration
+## 4. Optional: Host-Specific Configuration
 
-## 4. Test User Configuration
+A file named `home/newuser/{hostname}.nix` is imported automatically when the hostname matches an existing host configuration.
+Use it for machine-specific settings; anything shared between hosts belongs in `hm-config.nix`.
+
+## 5. Test User Configuration
 
 ```bash
 # Build home-manager configuration

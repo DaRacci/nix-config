@@ -33,6 +33,7 @@ These modules allow for modular and reusable configurations across different hos
   - [Flake Allocations](flake/allocations.md)
 - `modules/home-manager/`: Contains Home-Manager-specific modules.
   - `Programs`
+    - [Shell Program Set](home-manager/programs/shell.md)
     - [list-ephemeral](home-manager/programs/list_ephemeral.md)
   - [DIY & Making](home-manager/diy.md)
   - [Development](home-manager/development.md)
