@@ -316,31 +316,31 @@ in
             owner = "sayanarijit";
             repo = "trash-cli.xplr";
             rev = "2c5c8c64ec88c038e2075db3b1c123655dc446fa";
-            sha256 = "0vp4lf4v53hh4ipygnrf3vng8qk5izfaz1g498klvbrcxk7srf51";
+            sha256 = "1d833335p1avsrh5x91wkygy3wcyydzkr84vxh5m0kakbrwadgk1";
           };
           zoxide = fetchFromGitHub {
             owner = "sayanarijit";
             repo = "zoxide.xplr";
             rev = "e50fd35db5c05e750a74c8f54761922464c1ad5f";
-            sha256 = "1f9y6va4xyn7zxmvkqys1y0kvwfvffbrwxmnfqmz4m4psgwz7l1m";
+            sha256 = "0xj6awk8iqx86svq7hpbslaw02wlsksixjcdbhrzgasmgykaw8v6";
           };
           map = fetchFromGitHub {
             owner = "sayanarijit";
             repo = "map.xplr";
             rev = "ed774d21195246060ae2d9cae83f82c698e9d8e7";
-            sha256 = "1qidg97l5z2jrq3alsd38jfa7qcqv0njm1f7lsl8x5p7gl9cln8v";
+            sha256 = "0a5jm6yfszasvq5sn7f1sap7sdqrs5jclq4rj6zhf0d992bn9v34";
           };
           find = fetchFromGitHub {
             owner = "sayanarijit";
             repo = "find.xplr";
             rev = "5355d213a7063347f219975e71ddca4bdf8085c9";
-            sha256 = "1909p3hxvsb2pv252wzv32vm1vwj88w83rgffnahakkd0bwn0vsq";
+            sha256 = "0bvcjnfx1nqpzr5jrpl8f4x5wrh20j1jcdlfgszlg063x8523pqw";
           };
           dual-pane = fetchFromGitHub {
             owner = "sayanarijit";
             repo = "dual-pane.xplr";
             rev = "db470860912fb9f36ef397329c0e42c2f76187b8";
-            sha256 = "0xxrid3qx7pakzy8df9kh8hfm7jpwbrx5dh2695zl8k3byigb7qj";
+            sha256 = "1l013a22fl3hzm5izqspirk3szl8xbqidm1yf0124wdksc1qh28f";
           };
         };
       };
