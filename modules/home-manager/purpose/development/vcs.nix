@@ -274,19 +274,28 @@ in
                   revisions.refresh()
                   local selectedRevisions = revisions.checked()
                   if #selectedRevisions == 0 then
-                    selectedRevisions = { revisions.current() }
+                    local current = revisions.current()
+                    if current == nil then
+                      return
+                    end
+                    selectedRevisions = { current }
+                  end
+
+                  local function shellQuote(value)
+                    local quote = string.char(39)
+                    return quote .. value:gsub(quote, quote .. "\\" .. quote .. quote) .. quote
                   end
 
                   local toProcess = { }
-                  for _, rev in ipairs(selectedRevisions) do
-                    local description = rev.description()
-                    if description ~= nil and description ~= "" then
-                      local overwrite = choose("Overwrite description for " .. rev.id() .. "?", { "Yes", "No" })
+                  for _, changeId in ipairs(selectedRevisions) do
+                    local description = jj("log", "-r", changeId, "--no-graph", "-T", "description")
+                    if description ~= nil and description:match("%S") ~= nil then
+                      local overwrite = choose("Overwrite description for " .. changeId .. "?", { "Yes", "No" })
                       if overwrite == "Yes" then
-                        table.insert(toProcess, rev.id())
+                        table.insert(toProcess, changeId)
                       end
                     else
-                      table.insert(toProcess, rev.id())
+                      table.insert(toProcess, changeId)
                     end
                   end
 
@@ -294,8 +303,22 @@ in
                     return
                   end
 
-                  local result = exec_shell("jj-desc", "-r", unpack(toProcess))
-                  flash(result)
+                  local revset = table.concat(toProcess, "|")
+                  local outputFile = os.tmpname()
+                  local capture = "jj-desc -r \"$1\" 2>&1 | tee \"$2\""
+                  exec_shell("sh -c " .. shellQuote(capture) .. " sh " .. shellQuote(revset) .. " " .. shellQuote(outputFile))
+
+                  local output = ""
+                  local file = io.open(outputFile, "r")
+                  if file ~= nil then
+                    output = file:read("*a")
+                    file:close()
+                  end
+                  os.remove(outputFile)
+
+                  if output:match("%S") ~= nil then
+                    flash(output)
+                  end
 
                   revisions.refresh()
                 '';
