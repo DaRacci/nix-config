@@ -49,6 +49,7 @@ in
 
   wayland.windowManager.hyprland.custom-settings.lua.luaModules = [ ./lua/secrets.lua ];
 
+  programs.git.settings.gpg.ssh.program = "${pkgs._1password-gui}/bin/op-ssh-sign";
   programs.gpg.enable = true;
   services.gpg-agent = {
     enable = true;
