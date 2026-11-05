@@ -1,4 +1,5 @@
 {
+  self,
   inputs,
   config,
   pkgs,
@@ -24,6 +25,17 @@ let
   rendered = import ./render.nix {
     inherit lib languages;
   };
+
+  modelLib = import "${self}/modules/fragments/ai/models/lib.nix" { inherit lib; };
+
+  zedLanguageModels = lib.filterAttrs (_: settings: settings != { }) (
+    lib.listToAttrs (
+      map (provider: {
+        name = modelLib.providerName "zed" provider;
+        value = modelLib.providerSettings "zed" provider;
+      }) modelLib.providerNames
+    )
+  );
 
   findSkillDirs =
     startPath:
@@ -142,6 +154,8 @@ in
               args = [ "acp" ];
             };
           };
+
+          language_models = zedLanguageModels;
         };
 
         opencode = {

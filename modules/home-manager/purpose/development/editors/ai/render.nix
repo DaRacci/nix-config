@@ -2,7 +2,6 @@
 let
   inherit (lib)
     listToAttrs
-    map
     nameValuePair
     optionalAttrs
     recursiveUpdate

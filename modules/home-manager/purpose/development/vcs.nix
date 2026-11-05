@@ -1,4 +1,5 @@
 {
+  self,
   config,
   pkgs,
   lib,
@@ -17,10 +18,16 @@ let
   inherit (types) str enum nullOr;
   cfg = config.purpose.development.vcs;
 
+  modelLib = import "${self}/modules/fragments/ai/models/lib.nix" { inherit lib; };
+  jjDesc = config.ai.aliases.singleTurn;
+  jjDescProvider = modelLib.providerName "jj-desc" jjDesc.provider;
+  jjDescApiKeyEnv = modelLib.apiKeyEnv jjDesc.provider;
+  jjDescSecret = modelLib.secretReference "homeManager" jjDesc.provider;
+
   jj-desc-wrapped = pkgs.writeShellScriptBin "jj-desc" ''
-    export LLM_MODEL="~deepseek/deepseek-flash-latest"
-    export LLM_PROVIDER="openrouter"
-    export OPENROUTER_API_KEY="$(cat ${config.sops.secrets.OPENROUTER_API_KEY.path})"
+    export LLM_MODEL="${jjDesc.model}"
+    export LLM_PROVIDER="${jjDescProvider}"
+    export ${jjDescApiKeyEnv}="$(cat ${config.sops.secrets.${jjDescSecret}.path})"
     exec ${pkgs.jj-desc}/bin/jj-desc "$@"
   '';
 
@@ -79,8 +86,8 @@ in
     enableJJDescWrapper = mkEnableOption "jj-desc wrapper" // {
       default = false;
       longDescription = ''
-        Adds a small wrapper around `jj-desc` that sets the `LLM_MODEL`, `LLM_PROVIDER` and `OPENROUTER_API_KEY` environment variables for you.
-        This expects that you have the `OPENROUTER_API_KEY` secret available in your sops secrets, and will fail to build if it is not available.
+        Adds a small wrapper around `jj-desc` that uses the `ai.aliases.singleTurn` model alias.
+        `jj-desc` is a single-turn LLM consumer, so it does not use the agent fallback chains.
       '';
     };
   };
@@ -202,7 +209,7 @@ in
 
     (mkIf (cfg.enable && cfg.primaryVCS == "jujutsu") {
       sops.secrets = mkIf cfg.enableJJDescWrapper {
-        OPENROUTER_API_KEY = { };
+        ${jjDescSecret} = { };
       };
 
       home.packages = [

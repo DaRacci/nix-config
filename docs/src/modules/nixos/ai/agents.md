@@ -46,6 +46,30 @@ The module enables `services.hermes-agent` and adds optional components on top:
 - **Memory (Mnemosyne)** — with `services.ai-agent.memory.enable`, the memory provider switches to **Mnemosyne**,
   a local SQLite-backed memory system with semantic recall.
 
+## Model Providers
+
+Each model role is an ordered chain: `primary`, `vision`, `compression`, `simpleton`, and `brains`.
+The lowest `priority` value becomes the role's primary model, and the remaining entries become its ordered fallback chain.
+
+Priorities must be unique per chain.
+
+```nix
+ai.models.primary = [
+  {
+    provider = "opencode-go";
+    model = "deepseek-v4-flash";
+    priority = 0;
+  }
+  {
+    provider = "openrouter";
+    model = "~deepseek/deepseek-flash-latest";
+    priority = 1;
+  }
+];
+```
+
+The primary chain also applies to delegated child agents.
+
 ## Secrets
 
 Hermes requires API keys via environment files.
@@ -55,9 +79,11 @@ Configure via sops-nix:
 sops = {
   secrets = {
     "AI_AGENT/OPENROUTER_API_KEY" = { };
+    "AI_AGENT/OPENCODE_GO_API_KEY" = { };
   };
   templates."HERMES_ENV".content = ''
     OPENROUTER_API_KEY=${config.sops.placeholder."AI_AGENT/OPENROUTER_API_KEY"}
+    OPENCODE_GO_API_KEY=${config.sops.placeholder."AI_AGENT/OPENCODE_GO_API_KEY"}
   '';
 };
 

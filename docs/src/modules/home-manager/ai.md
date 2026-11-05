@@ -27,6 +27,35 @@ When enabled, the module:
 - Registers AI skills under `~/.agents/skills/<name>` via `home.file`.
 - Persists OpenCode state directories so they survive reboots on impermanence-based systems.
 
+### Model Chains
+
+The module imports the platform-neutral [`modules/fragments/ai/models`](../../../../modules/fragments/ai/models/default.nix) module,
+so Home Manager consumers read the same model chains as the NixOS agent:
+
+```nix
+ai.models.primary = [
+  {
+    provider = "opencode-go";
+    model = "deepseek-v4-flash";
+    priority = 0;
+  }
+  {
+    provider = "openrouter";
+    model = "~deepseek/deepseek-flash-latest";
+    priority = 1;
+  }
+];
+```
+
+Provider names for each service live in `modules/fragments/ai/providers.nix`.
+A service name defaults to the repository provider id unless explicitly overridden.
+Zed receives `opencode-go` as `opencode` with `show_go_models = true` and `show_zen_models = false`.
+
+Single-turn consumers are non-agentic: they make one model request and do not loop over the output.
+They use workload aliases from `modules/fragments/ai/aliases.nix`, currently `ai.aliases.singleTurn`.
+
+Zed and other Home Manager tools can resolve these chains with the `resolveChain` helper from `modules/fragments/ai/models/lib.nix`.
+
 ### Options
 
 {{#include ../../../generated/purpose-development-editors-ai-options.md}}

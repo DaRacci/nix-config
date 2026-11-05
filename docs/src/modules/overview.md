@@ -9,6 +9,8 @@ These modules allow for modular and reusable configurations across different hos
 
 ### Entry Points
 
+- `modules/fragments/`: Class-neutral module fragments imported explicitly by wrappers.
+  - [Fragments Overview](fragments/overview.md)
 - `modules/nixos/`: Contains NixOS-specific modules.
   - `Core Module`
     - [Display Manager](nixos/core/display_manager.md)

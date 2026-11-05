@@ -29,6 +29,10 @@
 
 - [Overview](modules/overview.md)
 
+# Fragments
+
+- [Overview](modules/fragments/overview.md)
+
 # NixOS Modules
 
 - [Overview](modules/nixos/overview.md)

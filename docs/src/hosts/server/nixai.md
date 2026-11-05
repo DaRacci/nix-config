@@ -15,6 +15,7 @@ It runs the AI agent, local inference via Ollama, Mnemosyne memory sync, and voi
 ### AI Agent
 
 - Containerised AI agent with a web dashboard, an OpenAI-compatible API server, and a webhook platform.
+- Primary model runs on OpenCode Go (`deepseek-v4-flash`), with OpenRouter as the fallback provider.
 - Memory is enabled, backed by Mnemosyne sync.
 - Voice is enabled, using the local Wyoming STT server.
 - A hardened SSH daemon is provisioned inside the container for agent administration.
@@ -39,7 +40,8 @@ It runs the AI agent, local inference via Ollama, Mnemosyne memory sync, and voi
 
 | Secret key | Purpose |
 | ----------------------------- | ------------------------ |
-| `AI_AGENT/OPENROUTER_API_KEY` | OpenRouter model API key |
+| `AI_AGENT/OPENROUTER_API_KEY` | OpenRouter model API key (fallback and auxiliary models) |
+| `AI_AGENT/OPENCODE_GO_API_KEY` | OpenCode Go model API key (primary model) |
 | `AI_AGENT/DISCORD_BOT_TOKEN` | Discord bot token |
 | `AI_AGENT/API_SERVER_TOKEN` | Agent API server auth |
 | `MNEMOSYNE_SYNC_KEY` | Mnemosyne sync API key |

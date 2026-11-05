@@ -1,4 +1,5 @@
 {
+  self,
   inputs,
   config,
   lib,
@@ -11,8 +12,23 @@ let
     mkIf
     ;
 
+  modelLib = import "${self}/modules/fragments/ai/models/lib.nix" { inherit lib; };
+
   cfg = config.services.ai-agent;
+  models = config.ai.models;
   hermes = config.services.hermes-agent;
+
+  primaryChain = modelLib.resolveChain models.primary;
+  visionChain = modelLib.resolveChain models.vision;
+  compressionChain = modelLib.resolveChain models.compression;
+  simpletonChain = modelLib.resolveChain models.simpleton;
+  brainsChain = modelLib.resolveChain models.brains;
+
+  auxiliaryModel = chain: {
+    provider = modelLib.providerName "hermes" chain.primary.provider;
+    inherit (chain.primary) model;
+    fallback_chain = modelLib.mapFallbacks "hermes" chain.fallbacks;
+  };
 in
 {
   config = mkIf cfg.enable {
@@ -44,9 +60,12 @@ in
         };
 
         model = {
-          base_url = "https://openrouter.ai/api/v1";
-          default = cfg.models.primary;
+          provider = modelLib.providerName "hermes" primaryChain.primary.provider;
+          base_url = modelLib.providerBaseUrls.${primaryChain.primary.provider};
+          default = primaryChain.primary.model;
         };
+
+        fallback_providers = modelLib.mapFallbacks "hermes" primaryChain.fallbacks;
 
         toolsets = [ "all" ];
         checkpoints.enabled = true;
@@ -89,41 +108,21 @@ in
         };
 
         auxiliary = {
-          approval = {
-            inherit (cfg.models) provider;
-            model = cfg.models.simpleton;
-          };
-          compression = {
-            inherit (cfg.models) provider;
-            model = cfg.models.compression;
-          };
-          curator = {
-            inherit (cfg.models) provider;
-            model = cfg.models.simpleton;
-          };
-          session_search = {
-            inherit (cfg.models) provider;
-            model = cfg.models.simpleton;
-          };
-          title_generation = {
-            inherit (cfg.models) provider;
-            model = cfg.models.compression;
-          };
-          triage_specifier = {
-            inherit (cfg.models) provider;
-            model = cfg.models.brains;
-          };
-          vision = {
-            inherit (cfg.models) provider;
-            model = cfg.models.vision;
-          };
+          approval = auxiliaryModel simpletonChain;
+          compression = auxiliaryModel compressionChain;
+          curator = auxiliaryModel simpletonChain;
+          session_search = auxiliaryModel simpletonChain;
+          title_generation = auxiliaryModel compressionChain;
+          triage_specifier = auxiliaryModel brainsChain;
+          vision = auxiliaryModel visionChain;
         };
 
         delegation = {
           max_concurrent_children = 24;
           max_spawn_depth = 3;
-          model = cfg.models.primary;
-          provider = cfg.models.provider;
+          provider = modelLib.providerName "hermes" primaryChain.primary.provider;
+          inherit (primaryChain.primary) model;
+          fallback_providers = modelLib.mapFallbacks "hermes" primaryChain.fallbacks;
         };
 
         terminal = {

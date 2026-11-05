@@ -100,7 +100,9 @@ so modules only declare `languages = [ "csharp" ]`, never `"C#"` and `"c-sharp"`
 - **`primaryVCS`** selects the installed tool set: `jujutsu` (the default) adds `jjui`, `jj-pre-push`, `watchman` and uses `meld` as the diff and merge editor, while `git` adds `gitui`.
   Both variants install `gh`, `gh-dash` and `delta`.
 - **Signing** — when a key is available, git signs by default with the SSH key and verifies against a generated allowed-signers file; Jujutsu signs at push time only (`git.sign-on-push`) with the same key and the same allowed-signers file.
-- **`enableJJDescWrapper`** installs a `jj-desc` wrapper that supplies `LLM_MODEL`, `LLM_PROVIDER` and the `OPENROUTER_API_KEY` SOPS secret; the secret must be declared or the build fails.
+- **`enableJJDescWrapper`** installs a `jj-desc` wrapper using `ai.aliases.singleTurn`.
+  `jj-desc` is a single-turn, non-agentic LLM consumer: one request, no repeated turns over generated output.
+  Its API-key secret is declared from the provider registry.
 
 ### Options
 

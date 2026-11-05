@@ -1,4 +1,5 @@
 {
+  ai = import ./ai;
   audio = import ./audio.nix;
   programs = import ./programs;
   core = import ./core;

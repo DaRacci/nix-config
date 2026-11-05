@@ -1,4 +1,5 @@
 {
+  self,
   config,
   lib,
   pkgs,
@@ -9,11 +10,13 @@ let
     mkEnableOption
     mkOption
     mkIf
+    optionalAttrs
     types
     ;
   inherit (types) str;
 
   hlib = import ./lib.nix { inherit lib; };
+  modelLib = import "${self}/modules/fragments/ai/models/lib.nix" { inherit lib; };
 
   mnemosyne-hermes = pkgs.mnemosyne-hermes.overridePythonAttrs (base: {
     dependencies =
@@ -27,6 +30,7 @@ let
   });
 
   cfg = config.services.ai-agent;
+  compressionChain = modelLib.resolveChain config.ai.models.compression;
 in
 {
   options.services.ai-agent.memory = {
@@ -39,8 +43,8 @@ in
 
     tokenReference = mkOption {
       type = str;
-      default = "AI_AGENT/MNEMOSYNE_OPENROUTER_API_KEY";
-      description = "The reference to the secret containing the OpenRouter API key for Mnemosyne.";
+      default = modelLib.secretReference "mnemosyne" compressionChain.primary.provider;
+      description = "The reference to the secret containing the API key for Mnemosyne's compression provider.";
     };
   };
 
@@ -65,10 +69,12 @@ in
           MNEMOSYNE_PROACTIVE_LINKING = "1";
           MNEMOSYNE_FACT_RECALL_ENABLED = "1";
 
-          MNEMOSYNE_LLM_MODEL = config.services.ai-agent.models.compression;
-          MNEMOSYNE_LLM_BASE_URL = "https://openrouter.ai/api/v1";
+          MNEMOSYNE_LLM_MODEL = compressionChain.primary.model;
+          MNEMOSYNE_LLM_BASE_URL = modelLib.providerBaseUrls.${compressionChain.primary.provider};
           MNEMOSYNE_LLM_MAX_TOKENS = "8192";
           MNEMOSYNE_LLM_N_CTX = "8192";
+        }
+        // optionalAttrs (compressionChain.primary.provider == "openrouter") {
           MNEMOSYNE_LLM_EXTRA_BODY = ''{"reasoning":{"effort":"low"},"provider":{"require_parameters":true,"quantizations":["fp8"],"sort":"price"}}'';
         };
       };

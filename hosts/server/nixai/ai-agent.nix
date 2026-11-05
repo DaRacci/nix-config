@@ -11,12 +11,14 @@ in
   sops = {
     secrets = {
       "AI_AGENT/OPENROUTER_API_KEY" = { };
+      "AI_AGENT/OPENCODE_GO_API_KEY" = { };
       "AI_AGENT/DISCORD_BOT_TOKEN" = { };
       "AI_AGENT/API_SERVER_TOKEN" = { };
     };
 
     templates."HERMES_ENV".content = lib.toShellVars {
       OPENROUTER_API_KEY = config.sops.placeholder."AI_AGENT/OPENROUTER_API_KEY";
+      OPENCODE_GO_API_KEY = config.sops.placeholder."AI_AGENT/OPENCODE_GO_API_KEY";
       SEARXNG_URL = "https://search.racci.dev";
 
       N8N_BASE_URL = "https://n8n.racci.dev";
@@ -80,6 +82,19 @@ in
       }
     '';
   };
+
+  ai.models.primary = [
+    {
+      provider = "opencode-go";
+      model = "deepseek-v4-flash";
+      priority = 0;
+    }
+    {
+      provider = "openrouter";
+      model = "~deepseek/deepseek-flash-latest";
+      priority = 1;
+    }
+  ];
 
   services = {
     ai-agent = {
