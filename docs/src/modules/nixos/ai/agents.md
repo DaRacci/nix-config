@@ -15,7 +15,7 @@ The module is provider-oriented: `default.nix` holds universal defaults, while e
 ### File layout
 
 - `default.nix` — entry point.
-  Declares only universal options shared by every agent backend: `enable` and `models`.
+  Declares only the universal `enable` option shared by every agent backend.
 - `hermes/default.nix` — import aggregator.
   Declares the local `services.ai-agent.settings` option, which deep-merges and is emitted once as `services.hermes-agent.settings`.
 - `hermes/lib.nix` — shared helpers.
@@ -24,7 +24,7 @@ The module is provider-oriented: `default.nix` holds universal defaults, while e
 - `hermes/memory.nix` — Mnemosyne long-term memory provider.
 - `hermes/post-start.nix` — `services.ai-agent.containerPostStart` commands.
 - `hermes/voice.nix` — voice input/output via Wyoming STT.
-- `hermes/scrapper.nix` — web search and extract scrapper.
+- `hermes/scraper.nix` — web search and extract scraper.
 - `hermes/platform/*` — messaging platforms.
 - `hermes/plugins/*` — Hermes plugins.
 
@@ -68,6 +68,8 @@ ai.models.primary = [
 ];
 ```
 
+Hermes receives the primary chain as `fallback_providers`,
+and each auxiliary setting receives its chain as `fallback_chain`.
 The primary chain also applies to delegated child agents.
 
 ## Secrets
@@ -164,7 +166,7 @@ Enable long-term memory with `services.ai-agent.memory.enable = true;`:
 
 This registers the `mnemosyne-hermes` plugin and writes these `settings.memory.mnemosyne` defaults:
 
-- `auto_sleep = true` with `sleep_threshold = 50` — working memory is consolidated into the episodic store once the threshold is reached.
+- `auto_sleep = true` with `sleep_threshold = 5` — working memory is consolidated into the episodic store once the threshold is reached.
 - `profile_isolation = true` — every Hermes profile in the container has its own bank at `mnemosyne/data/banks/<profile>/mnemosyne.db`.
 - `shared_surface_read = true` — `mnemosyne_recall` merges shared-surface results into private-bank recall and tags each result with its origin.
 - `tools = null` — expose every `mnemosyne_*` tool.

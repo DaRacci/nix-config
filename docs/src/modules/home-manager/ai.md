@@ -29,9 +29,6 @@ When enabled, the module:
 
 ### Model Chains
 
-The module imports the platform-neutral [`modules/fragments/ai/models`](../../../../modules/fragments/ai/models/default.nix) module,
-so Home Manager consumers read the same model chains as the NixOS agent:
-
 ```nix
 ai.models.primary = [
   {
@@ -53,8 +50,6 @@ Zed receives `opencode-go` as `opencode` with `show_go_models = true` and `show_
 
 Single-turn consumers are non-agentic: they make one model request and do not loop over the output.
 They use workload aliases from `modules/fragments/ai/aliases.nix`, currently `ai.aliases.singleTurn`.
-
-Zed and other Home Manager tools can resolve these chains with the `resolveChain` helper from `modules/fragments/ai/models/lib.nix`.
 
 ### Options
 
