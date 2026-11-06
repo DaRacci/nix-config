@@ -4,11 +4,15 @@ variables:
     - flake.nix
     - flake.lock
     - flake/modules.nix
+    - flake/packages.nix
     - flake/ci/**
     - flake/home-manager/**
     - home/**
     - lib/**
+    - modules/fragments/**
     - modules/home-manager/**
+    - overlays/**
+    - pkgs/**
 
 labels:
   platform: linux/amd64
@@ -21,60 +25,48 @@ when:
   - event: pull_request
     path: *trigger_paths
 
+depends_on:
+  - affected
+
 clone:
   - name: git
-    image: woodpeckerci/plugin-git
+    image: woodpeckerci/plugin-git@sha256:b49127ebd592cde07fb7a08c68025b1ea2f44f21cd4bd1440dbfe042a02c1581
     settings:
       partial: false
       depth: 0
+
+concurrency: 1
 
 matrix:
   HOME:
     - racci
 
 steps:
-  - name: decide-${HOME}
+  - name: decide
     image: registry.racci.dev/lix-woodpecker
     pull: true
-    commands: |
-      set -euo pipefail
-
-      SHOULD_BUILD=false
-      if [ "$${CI_PREV_PIPELINE_STATUS}" = "failure" ]; then
-        echo "Previous pipeline failed for $${HOME}, Building to check if it was a transient issue."
-        SHOULD_BUILD=true
-      else
-        echo "Previous pipeline state was $${CI_PREV_PIPELINE_STATUS} for $${HOME}, checking if it is affected by changes."
-        if [ -n "$${CI_PREV_COMMIT_SHA:-}" ]; then
-          RANGE="$${CI_PREV_COMMIT_SHA}..$${CI_COMMIT_SHA}"
-          if ! AFFECTED=$(nix run .#detect-affected-outputs -- homeConfigurations --json --range "$${RANGE}" --outputs "$${HOME}" 2>/dev/null); then
-            echo "Failed to detect affected outputs; building $${HOME} to be safe."
-            SHOULD_BUILD=true
-          elif echo "$${AFFECTED}" | jq -e --arg home "$${HOME}" 'has($home)' > /dev/null 2>&1; then
-            echo "Home $${HOME} is affected by changes, proceeding with build"
-            SHOULD_BUILD=true
-          else
-            echo "Home $${HOME} is not affected by changes, skipping build"
-          fi
-        else
-          echo "No previous commit SHA, building..."
-          SHOULD_BUILD=true
+    depends_on: [] # enable parallel steps
+    commands: |-
+      KEY=$(echo "$${CI_REPO}-$${CI_PIPELINE_NUMBER}" | tr '/' '_')
+      FILE="/ci-cache/$${KEY}/homes.json"
+      if [ -f "$${FILE}" ]; then
+        if jq -e --arg home "${HOME}" 'index($home)' "$${FILE}" >/dev/null; then
+          touch ".do-build-${HOME}"
         fi
-      fi
-
-      if [ "$${SHOULD_BUILD}" = "true" ]; then
-        touch .do-build
+      else
+        echo "Affected list missing; building ${HOME} to be safe"
+        touch ".do-build-${HOME}"
       fi
 
   - name: build-${HOME}
     image: registry.racci.dev/lix-woodpecker
     pull: true
-    depends_on: ["decide-${HOME}"]
+    depends_on: ["decide"]
     environment:
       BINARY_CACHE_TOKEN:
         from_secret: BINARY_CACHE_TOKEN
     commands: |-
-      if [ ! -f .do-build ]; then
+      if [ ! -f ".do-build-${HOME}" ]; then
         echo "Skipping build for ${HOME} - not affected by changes"
         exit 0
       fi
