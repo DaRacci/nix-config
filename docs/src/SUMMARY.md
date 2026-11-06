@@ -23,6 +23,7 @@
 - [Using a NixOS Module from a Fork of Nixpkgs](development/working_with_nixpkgs_prs.md)
 - [Default Development Shell](development/default-development-shell.md)
 - [Python Development Shell](development/python-development-shell.md)
+- [Tests](development/testing.md)
 - [Prose Lint](development/spelling_lint.md)
 
 # Modules

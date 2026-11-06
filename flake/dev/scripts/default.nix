@@ -113,6 +113,11 @@ in
     runtimeInputs = [ pkgs.git ];
   };
 
+  run-tests = writeNuApplicationWithLibs {
+    inherit pkgs sourceRoot;
+    name = "run-tests";
+  };
+
   get-symbol-value = writeNuApplicationWithLibs {
     inherit pkgs sourceRoot;
     name = "get-symbol-value";
