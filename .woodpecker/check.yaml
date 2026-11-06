@@ -7,6 +7,24 @@ when:
     branch: master
 
 steps:
+  - name: Evaluate home configurations
+    image: registry.racci.dev/lix-woodpecker:latest
+    pull: true
+    commands: |
+      set -eu
+
+      configs=$(nix eval --json .#homeConfigurations --apply builtins.attrNames | jq -r '.[]')
+      if [ -z "$configs" ]; then
+        echo "No home configurations found in .#homeConfigurations." >&2
+        exit 1
+      fi
+
+      printf '%s\n' "$configs" | while IFS= read -r config; do
+        echo "Evaluating homeConfigurations.$config"
+        nix eval --raw ".#homeConfigurations.\"$config\".activationPackage.drvPath"
+        echo
+      done
+
   - name: Build flake checks
     image: registry.racci.dev/lix-woodpecker:latest
     pull: true

@@ -24,6 +24,7 @@
 - [Default Development Shell](development/default-development-shell.md)
 - [Python Development Shell](development/python-development-shell.md)
 - [Prose Lint](development/spelling_lint.md)
+- [Continuous Integration](development/ci.md)
 
 # Modules
 
