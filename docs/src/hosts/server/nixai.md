@@ -15,7 +15,7 @@ It runs the AI agent, local inference via Ollama, Mnemosyne memory sync, and voi
 ### AI Agent
 
 - Containerised AI agent with a web dashboard, an OpenAI-compatible API server, and a webhook platform.
-- Primary model runs on OpenCode Go (`deepseek-v4-flash`), with OpenRouter as the fallback provider.
+- Primary model runs on OpenCode Go (`deepseek-v4.1-flash`), with OpenRouter as the fallback provider.
 - Memory is enabled, backed by Mnemosyne sync.
 - Voice is enabled, using the local Wyoming STT server.
 - A hardened SSH daemon is provisioned inside the container for agent administration.
