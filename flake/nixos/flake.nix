@@ -75,11 +75,6 @@
       url = "github:lukaswrz/forgesync";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    fleet-graph = {
-      url = "github:asmodaydoescoding/fleetgraph";
-      flake = false;
-    };
-
     # TEMPORARY: upstream nixpkgs removed the MinIO package and NixOS module.
     # Pinned to the revision this repo used before the removal until storage
     # moves off MinIO. Remove once hosts use SeaweedFS exclusively.

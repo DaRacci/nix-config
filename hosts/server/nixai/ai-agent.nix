@@ -146,8 +146,6 @@ in
       plugins = {
         agentiker-code-intel.enable = true;
         curator-evolver.enable = true;
-        fleet-graph.enable = true;
-        hermes-hora.enable = true;
         lightpanda.enable = true;
         openspec.enable = true;
         rtk-rewrite.enable = true;

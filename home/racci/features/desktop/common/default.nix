@@ -37,8 +37,6 @@ in
       picard
       inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.desktop
     ];
-
-    file.".hermes/desktop-plugins/fleet-graph".source = "${inputs.fleet-graph}/desktop-plugin";
   };
 
   core = {
