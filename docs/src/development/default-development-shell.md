@@ -16,6 +16,21 @@ Or directly with `nix`:
 nix develop --override-input devenv-root file+file://<path-to-nix-config>/.devenv/root
 ```
 
+## CI Shell
+
+The `ci` shell is a minimal subset of the default shell.
+It contains only `rumdl` and the generated `.rumdl.toml`, and uses `stdenvNoCC` because nothing is built in it, so CI documentation checks do not pull in the C toolchain or the rest of the development toolset.
+
+```bash
+nix develop .#ci --override-input devenv-root file+file://<path-to-nix-config>/.devenv/root
+```
+
+CI helper commands select it with `devenv-run --shell ci`:
+
+```bash
+nix run .#devenv-run -- --shell ci -- rumdl check docs/ AGENTS.md
+```
+
 ## Git Hooks
 
 The shell installs `prek` hooks through `devenv`, covering repository hygiene, `nil`, `vale`, `rumdl`, and `treefmt`.

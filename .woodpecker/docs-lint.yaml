@@ -15,6 +15,13 @@ when:
       - ".woodpecker/docs-lint.yaml"
   - event: manual
 
+clone:
+  - name: git
+    image: woodpeckerci/plugin-git@sha256:b49127ebd592cde07fb7a08c68025b1ea2f44f21cd4bd1440dbfe042a02c1581
+    settings:
+      partial: false
+      depth: 50
+
 steps:
   - name: Vale
     image: registry.racci.dev/lix-woodpecker:latest
@@ -28,9 +35,4 @@ steps:
   - name: rumdl
     image: registry.racci.dev/lix-woodpecker:latest
     pull: true
-    commands: |
-      mkdir -p .devenv
-      pwd > .devenv/root
-      nix develop .#default \
-        --override-input devenv-root "file+file://$PWD/.devenv/root" \
-        --command bash -c 'rumdl check docs/ AGENTS.md'
+    commands: nix run .#devenv-run -- --shell ci -- rumdl check docs/ AGENTS.md

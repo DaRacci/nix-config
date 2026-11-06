@@ -16,7 +16,21 @@ in
   create-pr = writeNuApplicationWithLibs {
     inherit pkgs sourceRoot;
     name = "create-pr";
-    runtimeInputs = [ pkgs.gh ];
+    runtimeInputs = [
+      pkgs.curl
+      pkgs.gh
+      pkgs.jq
+    ];
+  };
+
+  decide-affected = writeNuApplicationWithLibs {
+    inherit pkgs sourceRoot;
+    name = "decide-affected";
+  };
+
+  devenv-run = writeNuApplicationWithLibs {
+    inherit pkgs sourceRoot;
+    name = "devenv-run";
   };
 
   check-upstream-todos = writeNuApplicationWithLibs {
