@@ -25,6 +25,8 @@
 - [Python Development Shell](development/python-development-shell.md)
 - [Tests](development/testing.md)
 - [Prose Lint](development/spelling_lint.md)
+- [VM Tests](development/vm_tests.md)
+- [Woodpecker CI](development/woodpecker_ci.md)
 
 # Modules
 
