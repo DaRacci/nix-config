@@ -33,7 +33,7 @@ When enabled, the module:
 ai.models.primary = [
   {
     provider = "opencode-go";
-    model = "deepseek-v4-flash";
+    model = "deepseek-v4.1-flash";
     priority = 0;
   }
   {

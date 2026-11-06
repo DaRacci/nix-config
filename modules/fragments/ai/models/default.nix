@@ -66,8 +66,8 @@ let
       model = "xiaomi/mimo-v2.5";
     };
     compression = {
-      provider = "openrouter";
-      model = "~deepseek/deepseek-flash-latest";
+      provider = "opencode-go";
+      model = "deepseek-v4.1-flash";
     };
     simpleton = {
       provider = "openrouter";
