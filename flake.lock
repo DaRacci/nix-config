@@ -87,11 +87,11 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1793958892,
-        "narHash": "sha256-CSXX1+0cSNLdL2yENAshyVjNyXfi8sUZ58R242p15Cs=",
+        "lastModified": 1793963623,
+        "narHash": "sha256-oeSVowE7gRvK0NWSUjT2P+e4UsY7Vz1cqQUWzCqnV88=",
         "owner": "DaRacci",
         "repo": "hermes-agent",
-        "rev": "1b0d2f3c8b281989df43ad18f16f1bd39e6e6328",
+        "rev": "e566cbd52b95785d53cbf4368958b40188acb5d2",
         "type": "github"
       },
       "original": {
