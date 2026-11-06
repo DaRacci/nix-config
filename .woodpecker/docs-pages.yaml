@@ -1,0 +1,62 @@
+# Build the documentation and publish it to the Codeberg Pages branch.
+
+labels:
+  platform: linux/amd64
+
+when:
+  - event: manual
+  - event: push
+    branch: master
+    path:
+      - .woodpecker/docs-pages.yaml
+      - docs/**
+      - flake.nix
+      - flake.lock
+      - flake/**
+
+clone:
+  - name: git
+    image: woodpeckerci/plugin-git@sha256:b49127ebd592cde07fb7a08c68025b1ea2f44f21cd4bd1440dbfe042a02c1581
+    settings:
+      partial: false
+      depth: 0
+
+concurrency: 1
+
+steps:
+  - name: build-and-stage
+    image: registry.racci.dev/lix-woodpecker
+    pull: true
+    environment:
+      BINARY_CACHE_TOKEN:
+        from_secret: BINARY_CACHE_TOKEN
+    commands: |
+      set -euo pipefail
+
+      nix run .#setup-git
+      nix run .#setup-attic -- --watch
+
+      nix build .#docs
+      cp -aL result /tmp/pages
+      if [ -f docs/.domains ]; then cp docs/.domains /tmp/pages/.domains; fi
+
+      git checkout --orphan pages
+      git rm -rf .
+      git clean -fdx
+      cp -a /tmp/pages/. .
+      rm -rf /tmp/pages
+      git add -A
+      git commit -m "docs: publish site"
+
+  - name: push
+    image: appleboy/drone-git-push@sha256:6869b61d74d0fe403267e048ec419ca93a8249f83d90ececa04534d5282c432f
+    pull: true
+    depends_on: ["build-and-stage"]
+    settings:
+      remote: ${CI_REPO_CLONE_SSH_URL}
+      branch: pages
+      force: true
+      commit: false
+      empty_commit: false
+      ssh_key:
+        from_secret: FORGE_AUTH_KEY

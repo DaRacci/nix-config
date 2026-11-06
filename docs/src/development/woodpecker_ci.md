@@ -3,8 +3,6 @@
 CI runs on the self-hosted Woodpecker instance on `nixdev`.
 Woodpecker is attached to the Codeberg repository; the GitHub forge is
 intentionally disabled while GitHub is being phased out.
-The GitHub workflows that remain are only the Codeberg mirror and GitHub Pages
-deployment.
 
 ## Pipelines
 
@@ -16,6 +14,7 @@ deployment.
 | `ci-homes.yaml` | Build affected Home Manager configurations | pull requests, `master` pushes, manual |
 | `ci-packages.yaml` | Build affected packages on `x86_64-linux` | pull requests, `master` pushes, manual |
 | `docs-lint.yaml` | Vale and `rumdl` | Docs-related pull requests and `master` pushes, manual |
+| `docs-pages.yaml` | Build the docs and publish the `pages` branch | `master` pushes touching docs or flake files, manual |
 | `update-packages.yaml` | Run package `updateScript`s and open pull requests | `update-packages` cron, manual |
 | `update.yaml` | Update all `flake.lock` files and open one PR | `update-flake-inputs` cron, manual |
 | `lix.yaml` | Publish the `lix-woodpecker` image | `master` pushes touching `flake.lock` or `pkgs/lix-woodpecker/` |
@@ -66,3 +65,14 @@ There are no aarch64 hosts to attach an arm agent to, so `aarch64-linux` package
 CI helper applications are marked `passthru.ci = false` and excluded from the package build matrix.
 This keeps the matrix under Woodpecker's limit of 64 workflows.
 Real packages with `passthru.discovery = false` are still built.
+
+## Documentation deployment
+
+Docs are built by `docs-pages.yaml` and published to the `pages` branch on Codeberg.
+Codeberg Pages serves the site at `https://racci.codeberg.page/nix-config/`.
+
+## Known limitations
+
+- Matrices are committed, so a pull request that adds a new host or package is not built until the matrix update pull request lands on `master`.
+- `vulnix` gates host builds and has no whitelist; any finding fails the pipeline.
+- The `lix-woodpecker` image is pulled by tag, not digest.
