@@ -18,7 +18,28 @@ let
 in
 {
   config = mkIf cfg.enable {
-    programs.atuin.enable = true;
+    programs.atuin = {
+      enable = true;
+      flags = [ "--disable-up-arrow" ];
+      settings = {
+        dialect = "uk";
+
+        update_check = false;
+
+        auto_sync = true;
+        sync_frequency = "0";
+        sync_address = "https://atuin.racci.dev";
+
+        search_mode = "daemon-fuzzy";
+        filter_mode = "session-preload";
+
+        common_prefix = [
+          "sudo"
+          "nix run"
+          "nix shell"
+        ];
+      };
+    };
 
     user.persistence.directories = [ ".local/share/atuin" ];
 
