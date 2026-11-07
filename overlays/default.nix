@@ -88,7 +88,8 @@ in
 
     discord = prev.discord.override {
       withOpenASAR = true;
-      withVencord = true;
+      #TODO:https://github.com/NixOS/nixpkgs/pull/584169
+      withVencord = false;
     };
 
     bottles = prev.bottles.override {
