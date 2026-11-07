@@ -33,15 +33,8 @@ in
 
   config = mkMerge [
     (mkIf cfg.enable {
-      programs = {
-        atuin.enable = true;
-        zoxide.enable = true;
-      };
-
-      user.persistence.directories = [
-        ".local/share/atuin"
-        ".local/share/zoxide"
-      ];
+      programs.zoxide.enable = true;
+      user.persistence.directories = [ ".local/share/zoxide" ];
     })
 
     (mkIf cfg.enableFish {
@@ -135,7 +128,6 @@ in
       };
 
       user.persistence.files = [ ".config/nushell/history.txt" ];
-
     })
   ];
 }
