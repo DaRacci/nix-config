@@ -208,8 +208,8 @@ TagByMatch(Tags.diaglogueModal, {
   -- but the main window always uses a title in the format "FreeCAD [version]".
   {
     class = "org.freecad.FreeCAD",
-    title = "^(?!FreeCAD)(.*)$",
-  }
+    title = "negative:(?i)FreeCAD.*",
+  },
 })
 
 TagByMatch(Tags.barDropdown, {

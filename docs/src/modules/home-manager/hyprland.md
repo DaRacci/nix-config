@@ -216,6 +216,8 @@ Shared type definitions used across the modules:
 - `rule` — all typed window rule properties (float, fullscreen, opacity, size, move, `center`, monitor, workspace, and dozens more)
 - `windowMatch` — match condition types
   (`class, title, initialClass, initialTitle, tag, xwayland, float, fullscreen, pin, focus, group, modal, fullscreenstate, workspace, content, xdg_tag`)
+  - Match patterns are RE2 regexes: lookahead and lookbehind are unsupported.
+    Prefix a pattern with `negative:` to invert the match.
 
 ### Usage Example
 
