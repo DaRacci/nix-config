@@ -29,6 +29,7 @@ in
         "HA"
         "DEVICES"
         "SLEEPASANDROID"
+        "UPTIMEKUMA"
         "ZIGBEE2MQTT"
       ]
       |> map (
@@ -103,6 +104,15 @@ in
                 "readwrite homeassistant/+/%u/#"
                 "read homeassistant/status"
                 "read $SYS/#"
+              ];
+            };
+
+            uptimekuma = {
+              passwordFile = secrets."MQTT_PASSWORDS/UPTIMEKUMA".path;
+              acl = [
+                "read $SYS/broker/uptime"
+                "read zigbee2mqtt/bridge/state"
+                "read homeassistant/status"
               ];
             };
 

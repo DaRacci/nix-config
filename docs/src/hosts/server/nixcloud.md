@@ -22,6 +22,13 @@ General purpose application server for replacing cloud services with self-hosted
 | Nextcloud | `nextcloud` | `hosts/server/nixcloud/nextcloud.nix` | `nc.racci.dev` |
 | Search | `searx` | `hosts/server/nixcloud/search.nix` | `search.racci.dev` |
 
+### MQTT Broker
+
+- `mosquitto` listens on TCP 1883 and is exposed as `mqtt.racci.dev` through the IO Coordinator's L4 proxy.
+- System metrics are published under `$SYS/#`; anonymous access is disabled.
+- Accounts and ACLs are declared in `hosts/server/nixcloud/home-assistant/connectivity.nix`.
+  The `uptimekuma` account is read-only on `$SYS/broker/uptime`, `zigbee2mqtt/bridge/state`, and `homeassistant/status`.
+
 ## Operational Notes / Assumptions
 
 - All apps are exposed via the cluster's reverse proxy on the IO Coordinator.
