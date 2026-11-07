@@ -29,7 +29,7 @@ in
     preferXdgDirectories = true;
     activation.report-changes = config.lib.dag.entryAnywhere ''
       if [ ! -z "''${oldGenPath:-}" ]; then
-        ${lib.getExe pkgs.dix} "$oldGenPath" "$newGenPath"
+        ${lib.getExe pkgs.dix} diff "$oldGenPath" "$newGenPath"
       fi
     '';
     stateVersion = builtins.readFile "${self}/state.version";
