@@ -60,6 +60,7 @@
   - [WSL](modules/nixos/core/wsl.md)
 - [Server](modules/nixos/server/default.md)
   - [Dashboard](modules/nixos/server/dashboard.md)
+  - [Atuin](modules/nixos/server/atuin.md)
   - [Network](modules/nixos/server/network.md)
   - [Distributed Builds](modules/nixos/server/distributed_builds.md)
   - [Database](modules/nixos/server/database.md)

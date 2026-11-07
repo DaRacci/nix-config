@@ -3,6 +3,7 @@
 }:
 {
   imports = [
+    ./atuin.nix
     ./automation.nix
     ./ci.nix
     ./coder.nix
@@ -12,6 +13,8 @@
   ];
 
   server.dashboard.icon = "mdi-code-braces";
+
+  services.atuin.enable = true;
 
   virtualisation.docker = {
     enable = true;

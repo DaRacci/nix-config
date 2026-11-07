@@ -208,7 +208,7 @@ in
           assertion = !config.services.postgresql.enable;
           message = ''
             PostgreSQL is enabled & has databases configured, but you have configured databases for management with IO Hosts.
-            If this is on purpose and you want IO Hosts to manage these, set `services.postgresl.enable` to `false`.
+            If this is on purpose and you want IO Hosts to manage these, set `services.postgresql.enable` to `false`.
 
             Configured databases: ${toString config.services.postgresql.ensureDatabases}
           '';

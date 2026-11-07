@@ -5,7 +5,12 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkOrder getExe escapeShellArgs;
+  inherit (lib)
+    mkIf
+    mkOrder
+    getExe
+    escapeShellArgs
+    ;
   inherit (pkgs) writableTmpDirAsHomeHook;
 
   cfg = config.programSets.shell;
@@ -28,7 +33,7 @@ in
           ''
             ${getExe atuinCfg.package} init nu ${escapeShellArgs atuinCfg.flags} >> "$out"
           ''
-        }
+      }
     '';
   };
 }

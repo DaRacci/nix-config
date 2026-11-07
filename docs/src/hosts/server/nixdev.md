@@ -4,12 +4,12 @@
 
 `nixdev` is the development and CI host.
 It runs the self-hosted development services: continuous integration, Coder workspace platform, workflow automation,
-a Docker registry, and a ForgeSync mirror job.
+a Docker registry, a ForgeSync mirror job, and the Atuin shell history sync server.
 
 ## Entry Point
 
 - **Main file**: [`hosts/server/nixdev/default.nix`](../../../../hosts/server/nixdev/default.nix)
-- **Supporting files**: `automation.nix`, `ci.nix`, `coder.nix`, `forgesync.nix`, `registry.nix`, `woodpecker.nix`
+- **Supporting files**: `atuin.nix`, `automation.nix`, `ci.nix`, `coder.nix`, `forgesync.nix`, `registry.nix`, `woodpecker.nix`
 
 ## Architecture / Services / Scope
 
@@ -24,6 +24,13 @@ a Docker registry, and a ForgeSync mirror job.
 
 - **Coder**: Self-hosted development workspaces, backed by the Docker daemon.
   Coder users are granted Docker access.
+
+### Shell History Sync
+
+- **Atuin**: Shell history sync server exposed at `atuin.racci.dev` through the IO Coordinator reverse proxy.
+  It is provided by the [Atuin service module](../../modules/nixos/server/atuin.md) and enabled in the host's `atuin.nix`.
+  It stores history in PostgreSQL on the Database Coordinator.
+  Open registration is enabled so clients can create an account; disable it once the required accounts exist.
 
 ### Workflow Automation
 
@@ -41,6 +48,7 @@ a Docker registry, and a ForgeSync mirror job.
 | Secret key | Purpose |
 | ---------------------------------------------------------- | --------------------------------- |
 | `GITHUB_TOKEN` | Token for the self-hosted runners |
+| `POSTGRES/ATUIN_PASSWORD` | Atuin database password |
 | `POSTGRES/N8N_PASSWORD` | n8n database password |
 | `POSTGRES/CODER_PASSWORD` | Coder database password |
 | `POSTGRES/WOODPECKER_PASSWORD` | Woodpecker database password |
@@ -62,8 +70,8 @@ a Docker registry, and a ForgeSync mirror job.
 - Runs Docker with auto-pruning for workspaces and CI workloads.
 - Woodpecker fetches pipeline configuration from Codeberg over its API, which costs roughly 1-2s per request.
 - `WOODPECKER_FORGE_TIMEOUT` is raised to 60s: the default 5s budget covers the whole `.woodpecker/` listing plus every config file in it, which takes ~8s from this host.
-- Woodpecker, n8n, Coder, the registry, and CI are exposed through the IO Coordinator reverse proxy.
-- Databases are provided by the Database Coordinator; n8n and Woodpecker depend on the database availability target.
+- Woodpecker, n8n, Coder, the registry, CI, and Atuin are exposed through the IO Coordinator reverse proxy.
+- Databases are provided by the Database Coordinator; n8n, Woodpecker, and Atuin depend on the database availability target.
 
 ## References
 

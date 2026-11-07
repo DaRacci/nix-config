@@ -119,8 +119,8 @@ import ./mkLanguage.nix rec {
 
     home.packages = extraPackages;
 
-    xdg.configFile."nix-init/config.toml".text = pkgs.writers.writeTOML {
-      maintainers = [ config.programs.git.userName ];
+    xdg.configFile."nix-init/config.toml".source = pkgs.writers.writeTOML "config.toml" {
+      maintainers = [ config.purpose.development.vcs.user.name ];
       nixpkgs = ''builtins.getFlake "nixpkgs"'';
     };
   };
