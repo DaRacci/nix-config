@@ -37,7 +37,7 @@ The module asserts that every child switch is only enabled while its parent is, 
 
 - **History and navigation** — `atuin` and `zoxide` are enabled with the set, and their data directories are added to `user.persistence`.
 - **Fish** — enabled through `enableFish`, with history persisted.
-- **Nushell** — enabled through `enableNushell`, with `bash-env` integration for the Home-Manager session variables, a carapace-backed external completer, fish as a fallback completer and zoxide for directory jumps.
+- **Nushell** — enabled through `enableNushell`, with a carapace-backed external completer, fish as a fallback completer and zoxide for directory jumps.
 - **Prompt** — `starship` is enabled whenever the set is enabled.
 - **Completions** — `carapace` is enabled for non-server hosts.
   The Nushell integration is configured by hand rather than by the module, so it is switched off in `completions.nix`.

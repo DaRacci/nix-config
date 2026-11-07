@@ -68,52 +68,6 @@
         "type": "github"
       }
     },
-    "bash-env-json": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1786572290,
-        "narHash": "sha256-5wi9DxK2Up+lM3EY9YRyNRfkwmzqVbHPLAr0fOboWWo=",
-        "owner": "tesujimath",
-        "repo": "bash-env-json",
-        "rev": "54605ef06cab813c80e7d78262a1aac46949a21b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "tesujimath",
-        "repo": "bash-env-json",
-        "type": "github"
-      }
-    },
-    "bash-env-nushell": {
-      "inputs": {
-        "bash-env-json": [
-          "bash-env-json"
-        ],
-        "flake-utils": [
-          "flake-utils"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1792093546,
-        "narHash": "sha256-ZJLufQtDrmbx8UnvRwmmAQ1Ay8g6qlgDeXZKhQJlvo0=",
-        "owner": "tesujimath",
-        "repo": "bash-env-nushell",
-        "rev": "9bb9587d4f4138b7fcb4537d75274ec26d867e00",
-        "type": "github"
-      },
-      "original": {
-        "owner": "tesujimath",
-        "repo": "bash-env-nushell",
-        "type": "github"
-      }
-    },
     "caelestia-cli": {
       "inputs": {
         "caelestia-shell": "caelestia-shell",
@@ -587,8 +541,6 @@
     },
     "root": {
       "inputs": {
-        "bash-env-json": "bash-env-json",
-        "bash-env-nushell": "bash-env-nushell",
         "caelestia-cli": "caelestia-cli",
         "caelestia-shell": "caelestia-shell_2",
         "firefox-ultima": "firefox-ultima",

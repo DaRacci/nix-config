@@ -60,18 +60,6 @@
       url = "github:noctalia-dev/noctalia";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    bash-env-json = {
-      url = "github:tesujimath/bash-env-json";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    bash-env-nushell = {
-      url = "github:tesujimath/bash-env-nushell";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        bash-env-json.follows = "bash-env-json";
-        flake-utils.follows = "flake-utils";
-      };
-    };
     winapps = {
       url = "github:winapps-org/winapps";
       inputs = {

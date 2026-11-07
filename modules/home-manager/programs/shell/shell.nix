@@ -48,13 +48,9 @@ in
     })
 
     (mkIf cfg.enableNushell {
-      home.packages = [
-        inputs.bash-env-nushell.packages.${pkgs.stdenv.hostPlatform.system}.default
-        inputs.bash-env-json.packages.${pkgs.stdenv.hostPlatform.system}.default
-      ];
-
       programs.nushell = {
         enable = true;
+        loadSessionVariables = true;
 
         # FUCK YOU COPILOT!
         environmentVariables.NODE_SKIP_PLATFORM_CHECK = 1;
@@ -62,11 +58,6 @@ in
         shellAliases = {
           nuut = "sudo nu -i --env-config $nu.env-path --config $nu.config-path";
         };
-
-        extraEnv = ''
-          use "${inputs.bash-env-nushell}/bash-env.nu"
-          bash-env "${config.home.sessionVariablesPackage}/etc/profile.d/hm-session-vars.sh" | load-env
-        '';
 
         extraConfig = ''
           let carapace_completer = {|place: record|
