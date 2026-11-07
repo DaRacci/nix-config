@@ -49,7 +49,7 @@ The module enables `services.hermes-agent` and adds optional components on top:
 ## Model Providers
 
 Each model role is an ordered chain: `primary`, `vision`, `compression`, `simpleton`, and `brains`.
-The lowest `priority` value becomes the role's primary model, and the remaining entries become its ordered fallback chain.
+The lowest `priority` value becomes the roles primary model, and the remaining entries become its ordered fallback chain.
 
 Priorities must be unique per chain.
 
