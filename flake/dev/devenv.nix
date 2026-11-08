@@ -202,7 +202,7 @@
               before = [ "devenv:enterShell" ];
               exec = ''
                 skills_src="$DEVENV_ROOT/modules/home-manager/purpose/development/editors/ai/skills"
-                skills_dst="$DEVENV_ROOT/.opencode/skills"
+                skills_dst="$DEVENV_ROOT/.skills"
 
                 mkdir -p "$skills_dst"
                 touch "$skills_dst/.keep"

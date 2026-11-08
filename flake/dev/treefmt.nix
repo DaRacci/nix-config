@@ -46,7 +46,7 @@
           prettier.includes = inputs.nixpkgs.lib.mkForce [ "*.{yaml,yml}" ];
         };
         global.excludes = [
-          ".opencode/**"
+          ".agents/**"
           "openspec/**"
           "**/secrets.yaml"
           "**/ssh_host_ed25519_key.pub"
