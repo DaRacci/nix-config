@@ -6,7 +6,7 @@
 
 ## Entry Point
 
-- **Main file**: [`{relative path to host default.nix}`](../../hosts/server/nixdev/default.nix)
+- **Main file**: [`{relative path to host default.nix}`](../../../../hosts/server/nixdev/default.nix)
 - **Supporting files**: (List any other key files, e.g. `hardware.nix`, JSON mappings, secrets overrides)
 
 ## Architecture / Services / Scope

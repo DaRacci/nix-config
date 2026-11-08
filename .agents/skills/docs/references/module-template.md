@@ -6,7 +6,7 @@
 
 ## Entry Point
 
-- **Main file**: [`{relative path to module entry point}`](../../modules/nixos/services/tailscale.nix)
+- **Main file**: [`{relative path to module entry point}`](../../../../../modules/nixos/services/tailscale.nix)
 - **Supporting files**: (List any other key files, e.g. `options.nix`, `config.nix`, submodules)
 
 ## Architecture / Services / Scope
@@ -44,4 +44,4 @@
 ## References
 
 - [{Upstream reference or other relevant resource Title}](https://example.com)
-- [IO Coordinator](../../hosts/server/nixio.md) {example coordinator link; set coordinator paths relative to target page}
+- [IO Coordinator](../../../hosts/server/nixio.md) {example coordinator link; set coordinator paths relative to target page}
