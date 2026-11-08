@@ -9,6 +9,7 @@ It replaces the per-user `features/cli` imports that earlier revisions of this r
 
 - **Option and imports**: [`modules/home-manager/programs/shell/default.nix`](../../../../../modules/home-manager/programs/shell/default.nix)
 - **Shells**: [`shell.nix`](../../../../../modules/home-manager/programs/shell/shell.nix)
+- **History**: [`history.nix`](../../../../../modules/home-manager/programs/shell/history.nix)
 - **Prompt**: [`prompt.nix`](../../../../../modules/home-manager/programs/shell/prompt.nix)
 - **Completions**: [`completions.nix`](../../../../../modules/home-manager/programs/shell/completions.nix)
 - **Multiplexer**: [`multiplexer.nix`](../../../../../modules/home-manager/programs/shell/multiplexer.nix)
@@ -36,6 +37,7 @@ The module asserts that every child switch is only enabled while its parent is, 
 ### What the set provides
 
 - **History and navigation** — `atuin` and `zoxide` are enabled with the set, and their data directories are added to `user.persistence`.
+  Atuin keeps shell history in sync with the self-hosted server at `atuin.racci.dev`.
 - **Fish** — enabled through `enableFish`, with history persisted.
 - **Nushell** — enabled through `enableNushell`, with a carapace-backed external completer, fish as a fallback completer and zoxide for directory jumps.
 - **Prompt** — `starship` is enabled whenever the set is enabled.
