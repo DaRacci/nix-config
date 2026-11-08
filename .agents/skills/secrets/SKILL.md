@@ -11,12 +11,12 @@ Repo uses **sops-nix** with **age** encryption. Secrets are grouped by scope and
 
 ## Secret Locations
 
-| Location                               | Scope              |
-| -------------------------------------- | ------------------ |
-| `hosts/secrets.yaml`                   | Global - all hosts |
-| `hosts/server/secrets.yaml`            | All server hosts   |
-| `hosts/<type>/<hostname>/secrets.yaml` | Single host        |
-| `home/<username>/secrets.yaml`         | Single user        |
+| Location                               | Scope                                             |
+| -------------------------------------- | ------------------------------------------------- |
+| `hosts/secrets.yaml`                   | Shared; modules opt in with `sopsFile`            |
+| `hosts/server/secrets.yaml`            | Server-wide; no current module references it      |
+| `hosts/<type>/<hostname>/secrets.yaml` | Single host (default `core.sops.hostSecretsFile`) |
+| `home/<username>/secrets.yaml`         | Single user                                       |
 
 ## Adding New Secrets
 
@@ -26,7 +26,11 @@ Pick right secrets file based on who needs access.
 
 ### Step 2: Update `.sops.yaml` (if new path)
 
-If creating new secrets file, add rule to `.sops.yaml`:
+For repo-wide key changes, run `./flake/dev/scripts/update-sops.nu`.
+It regenerates `sops-keys.nix`, then rebuilds `.sops.yaml` from the
+host and user layout.
+
+If creating a new secrets file by hand, add a rule to `.sops.yaml`:
 
 ```yaml
 - path_regex: hosts/server/newhost/
@@ -146,8 +150,11 @@ sops.secrets."config-file" = {
 ### Age key sources
 
 1. **Host SSH keys**: converted to age format
-2. **User SSH keys**: in `home/<user>/id_ed25519.pub`
-3. **Admin key**: shared admin access
+1. **User SSH keys**: in `home/<user>/id_ed25519.pub`
+1. **Admin key**: shared admin access
+
+`sops-keys.nix` is the readable inventory of discovered recipients.
+`flake/dev/scripts/update-sops.nu` keeps it and `.sops.yaml` in sync.
 
 ### Converting SSH to age
 

@@ -6,7 +6,7 @@
 
 ## Entry Point
 
-- **Main file**: [`{relative path to host default.nix}`]({relative path})
+- **Main file**: [`{relative path to host default.nix}`](../../hosts/server/nixdev/default.nix)
 - **Supporting files**: (List any other key files, e.g. `hardware.nix`, JSON mappings, secrets overrides)
 
 ## Architecture / Services / Scope
@@ -35,5 +35,5 @@
 
 ## References
 
-- [{Upstream reference or other relevant resource Title}]({url})
-- [IO Coordinator](../../hosts/server/nixio.md)  {example coordinator link}
+- [{Upstream reference or other relevant resource Title}](https://example.com)
+- [IO Coordinator](../../hosts/server/nixio.md) {example coordinator link}

@@ -58,7 +58,7 @@ stdenv.mkDerivation rec {
 
 ```nix
 # pkgs/default.nix
-{ pkgs, ... }:
+{ inputs, pkgs, lib, ... }:
 {
   my-package = pkgs.callPackage ./my-package { };
 }

@@ -41,7 +41,7 @@ in
 
 1. Create file at `modules/nixos/<category>/<name>.nix`
 
-2. Define options and config:
+1. Define options and config:
 
    ```nix
    {
@@ -67,7 +67,7 @@ in
    }
    ```
 
-3. Register in parent `default.nix`:
+1. Register in parent `default.nix`:
 
    ```nix
    # modules/nixos/services/default.nix
@@ -79,7 +79,8 @@ in
    }
    ```
 
-4. Enable in host config:
+1. Enable in host config:
+
    ```nix
    # hosts/server/myhost/default.nix
    { services.myService.enable = true; }
@@ -89,7 +90,7 @@ in
 
 1. Create file at `modules/home-manager/<category>/<name>.nix`
 
-2. Define with optional `osConfig` access:
+1. Define with optional `osConfig` access:
 
    ```nix
    {
@@ -113,9 +114,10 @@ in
    }
    ```
 
-3. Register in parent `default.nix`
+1. Register in parent `default.nix`
 
-4. Enable in user config:
+1. Enable in user config:
+
    ```nix
    # home/<user>/hm-config.nix
    { purpose.myFeature.enable = true; }
@@ -141,8 +143,8 @@ in
 ```nix
 # modules/nixos/default.nix
 {
-  boot = import ./boot;
-  hardware = import ./hardware;
+  ai = import ./ai;
+  core = import ./core;
   services = import ./services;
 }
 ```
@@ -161,11 +163,11 @@ _: {
 
 ## Modifying Existing Modules
 
-1. Find module with `project-structure` skill
-2. Understand existing options with `nix eval`
-3. Add new options or extend config
-4. Test affected configs
-5. Run `nix fmt` on changed files
+1. Find module with `./flake/dev/scripts/module-graph.nu` or `rg`
+1. Understand existing options with `nix eval`
+1. Add new options or extend config
+1. Test affected configs
+1. Run `nix fmt` on changed files
 
 ## Extending Submodules Declared in Other Modules
 
@@ -220,16 +222,15 @@ submodule ({ config, ... }: {
 
 This creates **infinite recursion** — reading `config` inside `imports`
 means the submodule type depends on config values that haven't been resolved.
-Nix detects this and throws `"infinite recursion: you probably reference
-config in imports"`.
+Nix detects this and throws `"infinite recursion: you probably reference config in imports"`.
 
 ### When direct `options` merge works vs. `imports`
 
-| Approach | Works? | Use when |
-|----------|--------|----------|
-| Declare same `options.` path with `attrsOf (submodule ...)` | ✅ Yes | Adding new options to existing submodule entries |
-| Dynamic `imports` in submodule reading `config` | ❌ No | Circular — config needs submodule type, import needs config |
-| Static `imports` in submodule (no `config` access) | ✅ Yes | Importing known modules, no conditional logic |
+| Approach                                                    | Works? | Use when                                                    |
+| ----------------------------------------------------------- | ------ | ----------------------------------------------------------- |
+| Declare same `options.` path with `attrsOf (submodule ...)` | ✅ Yes | Adding new options to existing submodule entries            |
+| Dynamic `imports` in submodule reading `config`             | ❌ No  | Circular — config needs submodule type, import needs config |
+| Static `imports` in submodule (no `config` access)          | ✅ Yes | Importing known modules, no conditional logic               |
 | Wrap the whole `config` in `mkIf` inside imported submodule | ✅ Yes | Conditional config generation (but options always declared) |
 
 ### Key rules
@@ -245,7 +246,10 @@ config in imports"`.
 ### Read our real usage
 
 See the proxy extension registry for a complete example:
+
 - `modules/nixos/server/proxy/options.nix` — declares core vhost submodule
+- `modules/nixos/server/proxy/extensions/api-key-auth.nix` — injects API-key auth options
+- `modules/nixos/server/proxy/extensions/l4.nix` — injects L4 routing options
 - `modules/nixos/server/proxy/extensions/kanidm.nix` — injects `kanidm` option + owns all kanidm logic (auth, globalConfig, provisioning)
 - `modules/nixos/server/proxy/extensions/dashboard.nix` — no vhost options needed
 - `modules/nixos/server/proxy/extensions/cloudflared.nix` — no vhost options needed
@@ -259,11 +263,11 @@ See the proxy extension registry for a complete example:
 `mkSystem` passes `deviceType` via `specialArgs` (like `importExternals`), so it is available at module level without touching `config` — no circular dependency.
 
 1. Accept `deviceType` in the module's function parameters.
-2. Gate the device-specific submodule in `imports`.
-3. The submodule can use `mkIf` normally since it only loads on matching device types.
+1. Gate the device-specific submodule in `imports`.
+1. The submodule can use `mkIf` normally since it only loads on matching device types.
 
 ```nix
-# modules/nixos/ai/services/mnemosyne.nix
+# modules/nixos/services/example.nix
 {
   config,
   pkgs,
@@ -272,22 +276,22 @@ See the proxy extension registry for a complete example:
   ...
 }:
 {
-  imports = lib.optionals (deviceType == "server") [ ./mnemosyne-caddy.nix ];
+  imports = lib.optionals (deviceType == "server") [ ./example-server.nix ];
   ...
 }
 ```
 
 ```nix
-# The standalone submodule (mnemosyne-caddy.nix)
+# The standalone submodule (example-server.nix)
 {
   config,
   lib,
   ...
 }:
 let
-  cfg = config.services.mnemosyne;
+  cfg = config.services.example;
 in
-lib.mkIf (cfg.enable && cfg.caddy.enable) {
+lib.mkIf (cfg.enable && cfg.server.enable) {
   server.proxy.virtualHosts = lib.mkMerge [ ... ];
 }
 ```
@@ -299,6 +303,9 @@ specialArgs = {
   ...
 };
 ```
+
+No module currently uses this pattern.
+`deviceType` remains available from `lib/builders/mkSystem.nix`.
 
 ### Why not `imports` + `config`?
 
@@ -326,7 +333,7 @@ Reading `config` inside a module's `imports` creates a circular dependency:
 If the device-gated config is small, declare a stub option in a core module that always loads:
 
 ```nix
-# modules/nixos/core/default.nix
+# modules/nixos/core/example.nix
 options.server.proxy.virtualHosts = lib.mkOption {
   type = lib.types.attrsOf lib.types.anything;
   default = { };

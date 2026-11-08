@@ -27,7 +27,7 @@ VERIFICATION: Always check docs/ before completing any task.
 
 ```text
 If you modify: modules/nixos/services/tailscale.nix
-You MUST update: docs/modules/nixos/services/tailscale.md
+You MUST update: docs/src/modules/nixos/services/tailscale.md
 ```
 
 ### 2. 🧹 Code Formatting (MANDATORY)
@@ -53,7 +53,7 @@ VERIFICATION: Reference the `test` agent and `testing` skill for guidance on ide
 | Command | Purpose |
 | ------------------------------------------------------------------------------ | ----------- |
 | `nix build .#nixosConfigurations.<host>.config.system.build.toplevel` | Build host |
-| `nix build .#homeConfigurations."<user>@<host>".activationPackage` | Build home |
+| `nix build .#homeConfigurations.<user>.activationPackage` | Build home |
 | `nix fmt` | Format code |
 | `nix flake check --override-input devenv-root "file+file://$PWD/.devenv/root"` | Check flake |
 

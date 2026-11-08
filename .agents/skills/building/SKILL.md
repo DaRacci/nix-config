@@ -10,7 +10,7 @@ description: Build and evaluate NixOS and Home-Manager configurations
 | Command                                                               | Purpose                              |
 | --------------------------------------------------------------------- | ------------------------------------ |
 | `nix build .#nixosConfigurations.<host>.config.system.build.toplevel` | Build host NixOS system              |
-| `nix build .#homeConfigurations.<user>@<host>.activationPackage`      | Build Home-Manager activation        |
+| `nix build .#homeConfigurations.<user>.activationPackage`             | Build Home-Manager activation        |
 | `nix fmt`                                                             | Format code and check syntax         |
 | `nix flake check`                                                     | Evaluate all configs and run linters |
 | `nix flake show`                                                      | Show available outputs               |
@@ -42,8 +42,8 @@ nix build .#nixosConfigurations.nixmi.config.system.build.toplevel
 ### Build user home config
 
 ```bash
-# Build racci config on nixmi
-nix build .#homeConfigurations."racci@nixmi".activationPackage
+# Build racci home config
+nix build .#homeConfigurations.racci.activationPackage
 ```
 
 ### Evaluate without building
@@ -71,6 +71,6 @@ nix fmt modules/nixos/services/*.nix
 If build fails:
 
 1. Check error message for failing derivation
-2. Run `nix log <drv>` to see build logs
-3. Use `--show-trace` for eval errors: `nix build .#... --show-trace`
-4. For infinite recursion, check circular imports or option definitions
+1. Run `nix log <drv>` to see build logs
+1. Use `--show-trace` for eval errors: `nix build .#... --show-trace`
+1. For infinite recursion, check circular imports or option definitions

@@ -51,8 +51,9 @@ Use it for machine-specific settings; anything shared between hosts belongs in `
 
 ```bash
 # Build home-manager configuration
-home-manager build --flake .#newuser@hostname
+nix build .#homeConfigurations.newuser.activationPackage
 
-# Switch to new configuration
-home-manager switch --flake .#newuser@hostname
+# Or use home-manager directly
+home-manager build --flake .#newuser
+home-manager switch --flake .#newuser
 ```

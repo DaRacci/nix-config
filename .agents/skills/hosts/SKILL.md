@@ -9,12 +9,12 @@ description: Add and configure new NixOS host machines
 
 Each host needs these files in `hosts/<type>/<hostname>/`:
 
-| File | Required | Purpose |
-|------|----------|---------|
-| `default.nix` | Yes | Main config entry point |
-| `secrets.yaml` | Yes | SOPS-encrypted secrets like SSH key and passwords |
-| `ssh_host_ed25519_key.pub` | Yes | SSH public key for sops age encryption |
-| `hardware.nix` | For physical | Hardware-specific config for desktops and laptops |
+| File                       | Required     | Purpose                                           |
+| -------------------------- | ------------ | ------------------------------------------------- |
+| `default.nix`              | Yes          | Main config entry point                           |
+| `secrets.yaml`             | Yes          | SOPS-encrypted secrets like SSH key and passwords |
+| `ssh_host_ed25519_key.pub` | Yes          | SSH public key for sops age encryption            |
+| `hardware.nix`             | For physical | Hardware-specific config for desktops and laptops |
 
 ## Using Helper Script
 
@@ -29,10 +29,14 @@ nix run .#new-host -- desktop mynewdesktop
 This script:
 
 1. Creates host directory
-2. Generates SSH keypair
-3. Creates minimal `default.nix`
-4. Updates `.sops.yaml` with new host age key
-5. Creates encrypted `secrets.yaml`
+1. Generates SSH keypair
+1. Creates minimal `default.nix`
+1. Updates `.sops.yaml` with new host age key
+1. Creates encrypted `secrets.yaml`
+
+The generated `default.nix` always targets a Proxmox LXC container.
+Replace the import for physical machines and add `hardware.nix`.
+The script also prompts for the user names to add as age recipients.
 
 ## Manual Host Creation
 
@@ -105,38 +109,44 @@ sops hosts/server/myserver/secrets.yaml
 Hosts are auto-discovered. No manual flake registration needed. System:
 
 1. Scans `hosts/` for subdirectories
-2. Filters out `shared/` and `secrets.yaml`
-3. Registers each as `nixosConfiguration`
+1. Filters out `shared/` and `secrets.yaml`
+1. Registers each as `nixosConfiguration`
 
 ## Device Types
 
-| Type | Location | Characteristics |
-|------|----------|-----------------|
-| `server` | `hosts/server/` | Usually headless, often LXC |
-| `desktop` | `hosts/desktop/` | GUI, physical hardware |
-| `laptop` | `hosts/laptop/` | GUI, battery, physical hardware |
+| Type      | Location         | Characteristics                 |
+| --------- | ---------------- | ------------------------------- |
+| `server`  | `hosts/server/`  | Usually headless, often LXC     |
+| `desktop` | `hosts/desktop/` | GUI, physical hardware          |
+| `laptop`  | `hosts/laptop/`  | GUI, battery, physical hardware |
 
 ## Shared Configurations
 
-Configurations apply in this order:
+`mkSystem` imports host config alongside shared module sets:
 
-1. `hosts/shared/global/` - all hosts
-2. `hosts/<type>/shared/` - all hosts of that type
-3. `hosts/<type>/<hostname>/` - specific host
+1. `modules/nixos/<type>/` - device-type modules
+1. `hosts/<type>/shared/` - all hosts of that type
+1. `hosts/<type>/<hostname>/` - specific host
+
+There is no global `hosts/shared/`; cross-type config lives in
+`modules/nixos/`.
 
 ## Hardware Acceleration
 
-For CUDA or ROCm support, add host to `flake/nixos/flake-module.nix`:
+Accelerators are allocated per host in `flake/nixos/flake-module.nix`:
 
 ```nix
-accelerationHosts = {
-  cuda = [ "nixmi" "mynewhost" ];
-  rocm = [ "myamdhost" ];
+allocations.accelerators = {
+  nixmi = [ "cuda" ];
+  myamdhost = [ "rocm" ];
 };
 ```
+
+`cuda` enables `cudaSupport`; `rocm` enables `rocmSupport`
+(`lib/builders/default.nix`).
 
 ## Binding Users to Hosts
 
 Create `home/<username>/<hostname>.nix` to bind user to host. System auto-detects this file and includes user Home-Manager configuration.
 
-See also: `docs/Creating-Hosts.md`
+See also: `docs/src/development/adding_a_new_host.md`

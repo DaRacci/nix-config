@@ -27,7 +27,6 @@ Create `hosts/{device-type}/{hostname}/default.nix`:
     ./hardware.nix
 
     # Optional: device-specific modules
-    # "${self}/hosts/shared/optional/containers.nix"
     # "${self}/modules/nixos/custom-module.nix"
   ];
 
@@ -73,16 +72,12 @@ Create `hosts/{device-type}/{hostname}/hardware.nix`:
 
 ## 3. Add Hardware Acceleration (Optional)
 
-If your host supports hardware acceleration, add it to the acceleration lists in `flake.nix`:
+If your host supports hardware acceleration, add it to `allocations.accelerators` in `flake/nixos/flake-module.nix`:
 
 ```nix
-accelerationHosts = {
-  cuda = [
-    "your-new-host"  # Add here for CUDA support
-  ];
-  rocm = [
-    "your-amd-host"  # Add here for ROCm support
-  ];
+allocations.accelerators = {
+  your-new-host = [ "cuda" ];
+  your-amd-host = [ "rocm" ];
 };
 ```
 

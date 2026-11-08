@@ -20,23 +20,23 @@ Goal: make system configs, user environments, and shared modules easier to under
 ## Workflow
 
 1. **Analyze Changes**: Review implementation commits or code to understand change scope
-2. **Identify Impact**: Determine which files in `docs/src` need to create or update
-3. **Format Standard**: All Component, Host, and Module reference documentation MUST adhere to the appropriate reference template (see [Reference Templates](#reference-templates)). Other documentation (guides, index files) may vary but should remain consistent.
-4. **Configuration Drift**: Do not copy-paste exact configuration values (like IPs, specific package versions, or port numbers) into the documentation unless they are an immutable part of the architecture. Instead, describe the _intent_ or point to the code/generated docs. Configuration values drift over time and break documentation.
-5. **Draft Content**:
+1. **Identify Impact**: Determine which files in `docs/src` need to create or update
+1. **Format Standard**: All Component, Host, and Module reference documentation MUST adhere to the appropriate reference template (see [Reference Templates](#reference-templates)). Other documentation (guides, index files) may vary but should remain consistent.
+1. **Configuration Drift**: Do not copy-paste exact configuration values (like IPs, specific package versions, or port numbers) into the documentation unless they are an immutable part of the architecture. Instead, describe the _intent_ or point to the code/generated docs. Configuration values drift over time and break documentation.
+1. **Draft Content**:
    - Create or update Markdown files in `docs/src`
    - Use underscore filenames like `my_new_feature.md`
    - For modules, provide a high-level overview and link to relevant code or external resources
-6. **Update Summary**: Make sure new files are added to `docs/src/SUMMARY.md` so book structure stays correct.
-7. **Verify**: Check that Nix code examples are valid and build commands are accurate
+1. **Update Summary**: Make sure new files are added to `docs/src/SUMMARY.md` so book structure stays correct.
+1. **Verify**: Check that Nix code examples are valid and build commands are accurate
 
 ## Guardrails
 
 - **Location**: Documentation must live under `docs/src`.
 - **Option Documentation**: NEVER hand-document every single module option. For documented modules, you MUST use build-time generated option fragments included with `{{#include}}`; use prose only for special explanation, caveats, or examples.
 - **Configuration Drift**: Never hardcode configuration values (IPs, versions) if they are subject to change. Explain how it works instead of what exact value is currently set.
-- **Scope**: Do not document user-only modules (e.g., anything under `home/racci/features/cli/`). Focus on shared modules and system-wide configurations.
-- **Filenames**: Always use underscores (`_`) instead of hyphens (`-`) for documentation filenames.
+- **Scope**: Do not document user-only modules (e.g., anything under `home/racci/features/`). Focus on shared modules and system-wide configurations.
+- **Filenames**: Prefer underscores (`_`) for new documentation filenames; do not rename existing hyphenated pages.
 - **Style**: Keep explanations concise. Focus on _why_ something is configured a certain way rather than just _what_ the code does. Follow the appropriate reference template strictly for components, hosts, and modules.
 
 ## Reference Templates
@@ -57,20 +57,27 @@ Both templates share a common base (`Purpose`, `Entry Point`, `Architecture / Se
 
 ### Adding new module doc
 
-1. Start from the [Module Template](references/module-template.md) and create `docs/src/modules/my_service.md`:
+1. Start from the [Module Template](references/module-template.md) and create `docs/src/modules/nixos/<category>/my_service.md`:
+
    - a short overview,
    - the module entry point,
    - usage examples,
    - operational notes if needed,
    - and an option reference section that includes a generated fragment.
 
-2. Generate option fragment at build time from module's `options.json`, include it in page with `{{#include}}`, for example `docs/src/generated/my-service-options.md`.
+1. Generate the option fragment at build time from the module's `options.json`
+   and include it with a page-relative path, for example
+   `{{#include ../../../../generated/my-service-options.md}}`.
+   Fragments are written to `generated/<module-output-name>-options.md`
+   by the docs build, not committed under `docs/src/`.
 
-3. Update `docs/src/SUMMARY.md`:
+1. Update `docs/src/SUMMARY.md`:
+
    - register new page in book structure,
    - ensure generated-option workflow changes are reflected in docs build if needed.
 
-4. Prefer this pattern for future module docs:
+1. Prefer this pattern for future module docs:
+
    - prose in page,
    - exhaustive option reference in a generated include,
    - no manually maintained option tables unless there is a very specific reason.

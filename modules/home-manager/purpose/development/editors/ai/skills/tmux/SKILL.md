@@ -11,12 +11,12 @@ Terminal multiplexer for background jobs, output capture, and session control.
 
 | Command | Description |
 | ------------------------------------- | --------------------------------- |
-| `tmux new -d -s name 'cmd'` | Run command in background session |
+| `tmux new-session -d -s name 'cmd'` | Run command in background session |
 | `tmux capture-pane -t name -p` | Capture session output |
 | `tmux send-keys -t name 'text' Enter` | Send input to session |
 | `tmux kill-session -t name` | Kill session |
 | `tmux ls` | List sessions |
-| `tmux has -t name` | Check if session exists |
+| `tmux has-session -t name` | Check if session exists |
 
 ## Running Background Processes
 
@@ -31,7 +31,7 @@ tmux new-session -d -s build -c /path/to/project 'make build'
 tmux new-session -d -s task 'command; exec bash'
 
 # Run only if session does not already exist
-tmux has -t myserver || tmux new-session -d -s myserver 'command'
+tmux has-session -t myserver || tmux new-session -d -s myserver 'command'
 ```
 
 ## Capturing Output
@@ -80,7 +80,7 @@ tmux kill-session -t myserver
 tmux kill-server
 
 # Check whether session exists
-tmux has -t mysession
+tmux has-session -t mysession
 ```
 
 ## Wait for Completion
@@ -103,7 +103,7 @@ tmux new-session -d -s frontend 'bun run frontend'
 tmux new-session -d -s tests 'vitest --watch'
 ```
 
-# Run and capture output
+### Run and capture output
 
 ```bash
 tmux new-session -d -s job 'command'
@@ -115,7 +115,7 @@ echo "$output"
 ## Conditional session
 
 ```bash
-tmux has -t myserver || tmux new-session -d -s myserver 'command'
+tmux has-session -t myserver || tmux new-session -d -s myserver 'command'
 ```
 
 ## Clean up
@@ -130,7 +130,7 @@ tmux kill-server  # Kill all
 
 - Use `tmux new-session -d` for background jobs
 - Use `tmux capture-pane -p -S -` for whole scrollback
-- Use `tmux has -t name` to check whether session exists
+- Use `tmux has-session -t name` to check whether session exists
 - Use `tmux kill-server` to clean up all sessions
 - Use `-c /path` to set working directory
 - Use `exec bash` to keep session alive after command

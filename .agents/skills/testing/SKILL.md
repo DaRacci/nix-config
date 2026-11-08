@@ -17,14 +17,16 @@ Use module-graph script to find which hosts and homes are affected by changed fi
 ./flake/dev/scripts/module-graph.nu
 ```
 
-This outputs JSON showing which configs use each file:
+This outputs a JSON array of `{ file, hosts, homes }` records:
 
 ```json
-{
-  "file": "modules/nixos/services/tailscale.nix",
-  "hosts": ["nixdev", "nixmi", "nixcloud"],
-  "homes": []
-}
+[
+  {
+    "file": "modules/nixos/services/tailscale.nix",
+    "hosts": ["nixdev", "nixmi", "nixcloud"],
+    "homes": []
+  }
+]
 ```
 
 ## Minimum Test Requirements
@@ -48,7 +50,7 @@ nix build .#nixosConfigurations.<hostname>.config.system.build.toplevel
 ### Test home configuration
 
 ```bash
-nix build .#homeConfigurations."<user>@<host>".activationPackage
+nix build .#homeConfigurations.<user>.activationPackage
 ```
 
 ### Run full flake check
@@ -61,19 +63,20 @@ nix flake check --override-input devenv-root "file+file://$PWD/.devenv/root"
 
 1. Make changes to `modules/nixos/services/tailscale.nix`
 
-2. Run module-graph to find affected configs:
+1. Run module-graph to find affected configs:
 
    ```bash
    ./flake/dev/scripts/module-graph.nu | jq '.[] | select(.file | contains("tailscale"))'
    ```
 
-3. Pick one affected host and build it:
+1. Pick one affected host and build it:
 
    ```bash
    nix build .#nixosConfigurations.nixdev.config.system.build.toplevel
    ```
 
-4. If change also affects homes, build one:
+1. If change also affects homes, build one:
+
    ```bash
-   nix build .#homeConfigurations."racci@nixmi".activationPackage
+   nix build .#homeConfigurations.racci.activationPackage
    ```

@@ -33,14 +33,9 @@ Create `home/newuser/<hostname>.nix` for each host user will use:
 
 ```nix
 # home/newuser/nixmi.nix
-{ pkgs, lib, ... }:
+{ ... }:
 {
-  imports = [
-    # Import shared configurations
-    ../shared/features/cli
-    ../shared/desktop/common
-  ];
-
+  # Host-specific settings only; shared config belongs in hm-config.nix.
   programs.git = {
     userName = "Your Name";
     userEmail = "your.email@domain.com";
@@ -54,14 +49,20 @@ Create `home/newuser/<hostname>.nix` for each host user will use:
 # home/newuser/hm-config.nix
 { ... }:
 {
-  # Config shared across all hosts
-  programs.bash.enable = true;
+  core.profile = {
+    avatar.path = "/home/newuser/.face";
+    wallpaper.directory = "/home/newuser/Pictures/Wallpapers";
+  };
 
-  home.sessionVariables = {
-    EDITOR = "vim";
+  purpose = {
+    enable = true;
+    development.enable = true;
   };
 }
 ```
+
+`home.stateVersion` comes from the flake root's `state.version`; do not set it
+per user.
 
 ### 4. Create `os-config.nix` (optional)
 
@@ -84,7 +85,11 @@ System auto-links users to hosts based on file existence:
 
 - If `home/<username>/<hostname>.nix` exists, user is configured on that host
 - User `os-config.nix` is applied to host NixOS config
-- User Home-Manager config is built as `homeConfigurations."<user>@<host>"`
+- User Home-Manager config is built as `homeConfigurations.<user>`
+  (one per user with `hm-config.nix`)
+
+Standalone `homeConfigurations.<user>` builds do not have a hostname, so
+`home/<username>/<hostname>.nix` only applies through host integration.
 
 ## User Secrets
 
@@ -97,7 +102,8 @@ SSH_PRIVATE_KEY: |
   -----END OPENSSH PRIVATE KEY-----
 ```
 
-Update `.sops.yaml` to include user age key for that secrets path.
+Add the user's age key to `.sops.yaml`, or run
+`./flake/dev/scripts/update-sops.nu` to regenerate it from repo layout.
 
 ## Shared User Configurations
 
@@ -108,18 +114,11 @@ Common configs live in `home/shared/`:
 | `home/shared/global/`       | Applied to all users                 |
 | `home/shared/applications/` | App configs like browsers or editors |
 | `home/shared/desktop/`      | Desktop environment configs          |
-| `home/shared/features/cli/` | CLI tool configs                     |
+| `home/shared/features/`     | Opt-in features (`games`, `windows`) |
 
-Import these in user configs:
-
-```nix
-{
-  imports = [
-    ../shared/features/cli
-    ../shared/applications/browser.nix
-  ];
-}
-```
+Prefer enabling options in `hm-config.nix`; `home/shared/global` imports every
+module under `modules/home-manager/`. Import a shared file only when the config
+is not exposed as an option.
 
 ## Testing User Configuration
 
@@ -131,4 +130,4 @@ nix build .#homeConfigurations.newuser.activationPackage
 home-manager build --flake .#newuser
 ```
 
-See also: `docs/Creating-Users.md`
+See also: `docs/src/development/adding_a_new_user.md`

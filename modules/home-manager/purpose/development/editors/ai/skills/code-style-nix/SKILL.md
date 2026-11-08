@@ -14,7 +14,8 @@ description: Write Nix code using repo conventions
 
 | Context | Convention | Example |
 | --------------------- | ---------- | -------------------------------- |
-| Files and directories | kebab-case | `my-module.nix`, `home-manager/` |
+| Files | Match adjacent files; kebab-case for packages and scripts, camelCase for lib helpers | `new-host.nix`, `mkSystem.nix` |
+| Directories | kebab-case | `home-manager/` |
 | Nix attributes | camelCase | `myOption`, `enableFeature` |
 | Option paths | camelCase | `services.myService.enable` |
 
@@ -36,7 +37,8 @@ extraConfig = "...";
 
 ## Imports
 
-- Prefer relative imports: `./modules/foo.nix`
+- Use relative imports within a directory: `./hardware.nix`
+- Use `${self}/...` for cross-tree references
 - Group imports at top
 - Use list form for multiple imports:
 
