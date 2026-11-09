@@ -1,6 +1,7 @@
 {
   stdenv,
   lib,
+  pkgs,
 
   mkWindowsAppNoCC,
   fetchzip,
@@ -183,5 +184,10 @@ mkWindowsAppNoCC rec {
     platforms = platforms.linux;
     broken = !stdenv.hostPlatform.isx86;
     mainProgram = pname;
+  };
+
+  passthru.tests.install-and-launch = import ./tests/install-and-launch.nix {
+    inherit pkgs;
+    take-control-viewer = pkgs.take-control-viewer;
   };
 }
