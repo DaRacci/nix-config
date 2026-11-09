@@ -59,11 +59,24 @@ mkWindowsAppNoCC rec {
     # All Wine-managed processes are re-parented to the session leader, so PID ancestry tracking is useless here.
     # Instead, we watch the installer process and then use wineserver -k, which is scoped to $WINEPREFIX and safely kills only processes belonging to this prefix.
 
+    # Wine 11 ships Mono 10, and loading it crashes this native installer with a heap corruption error before it writes anything.
+    # Disable Mono and Gecko for the installer process; the viewer brings its own runtime.
+    export WINEDLLOVERRIDES="mscoree=d;mshtml=d;$WINEDLLOVERRIDES"
+
     wine ${src}/TakeControlViewerInstall* &
+    _installer_pid=$!
 
     # Wait for the application stack.
     # Its appearance means the installer reached its final stage and has written all files.
     while ! pgrep -f "TakeControlRDLdr.exe" > /dev/null 2>&1; do
+      # A vanished installer before the application stack means the install failed.
+      # mkWindowsApp ignores this callback's exit status, so stop the launcher before it marks the empty app layer as complete.
+      if ! kill -0 "$_installer_pid" 2> /dev/null; then
+        echo "take-control-viewer installer exited before writing TakeControlRDLdr.exe" >&2
+        wineserver -k
+        kill -TERM "$PPID"
+        exit 1
+      fi
       sleep 1
     done
 
@@ -76,6 +89,12 @@ mkWindowsAppNoCC rec {
     # Installation confirmed. Kill all processes in this WINEPREFIX so the
     # subsequent wineserver -w in mkWindowsApp returns promptly.
     wineserver -k
+
+    if [ ! -f "$WINEPREFIX/drive_c/users/$USER/AppData/Local/Take Control Viewer/TakeControlRDLdr.exe" ]; then
+      echo "take-control-viewer installer did not write TakeControlRDLdr.exe" >&2
+      kill -TERM "$PPID"
+      exit 1
+    fi
   '';
 
   winAppRun = ''
