@@ -92,6 +92,8 @@
         vscode.enable = true;
         helix.enable = true;
       };
+
+      vcs.enableJJDescWrapper = true;
     };
 
     gaming = {
