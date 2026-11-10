@@ -3,7 +3,6 @@
 }:
 {
   imports = [
-    ./atuin.nix
     ./automation.nix
     ./ci.nix
     ./coder.nix
