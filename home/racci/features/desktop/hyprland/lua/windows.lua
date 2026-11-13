@@ -15,7 +15,6 @@ ApplyToTag("popup", Tags.diaglogueModal, {
   float = true,
   center = true,
   pin = true,
-  stay_focused = true,
 })
 
 ApplyToTag("popup", Tags.developmentUtility, {
