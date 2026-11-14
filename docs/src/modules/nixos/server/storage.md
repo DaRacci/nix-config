@@ -13,7 +13,7 @@ This area provides:
 
 - **Main file**: `modules/nixos/server/storage/default.nix`
 - **Supporting file**: `modules/nixos/server/storage/bucket.nix`
-- **Supporting file**: `modules/nixos/server/storage/seaweedfs.nix`
+- **Supporting files**: `modules/nixos/server/storage/seaweedfs/default.nix` and `modules/nixos/server/storage/seaweedfs.nix`
 
 ## Architecture / Services / Scope
 
@@ -50,8 +50,8 @@ It is a breaking rename from `server.storage.bucketMounts` and each entry choose
 ### SeaweedFS Evaluation
 
 SeaweedFS is documented separately because it is not part of the current software filesystem workflow.
-The repository uses it as an evaluation deployment gated by `server.storagePrimaryHost` — SeaweedFS services
-and their Caddy proxy rules only activate on the host designated as the storage primary.
+The repository uses it as an evaluation deployment gated by `server.ioPrimaryHost` — SeaweedFS services
+and their Caddy proxy rules only activate on the host designated as the IO coordinator.
 The `swfsMount` mount module itself remains role-agnostic; host placement is determined by which host runs the services.
 
 MinIO services also live on the storage primary host.

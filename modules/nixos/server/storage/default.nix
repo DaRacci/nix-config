@@ -4,7 +4,7 @@
 {
   imports = [
     ./bucket.nix
-    ./seaweedfs.nix
+    ./seaweedfs
   ];
 
   options.server.storage = { };

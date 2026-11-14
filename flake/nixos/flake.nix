@@ -80,11 +80,6 @@
     # moves off MinIO. Remove once hosts use SeaweedFS exclusively.
     nixpkgs-minio.url = "github:NixOS/nixpkgs/1cabc318c11299f07ca53e3cb719854682fe6eb3";
 
-    seaweedfs = {
-      url = "https://raw.githubusercontent.com/liberodark/nixpkgs/refs/heads/seawedfs/nixos/modules/services/network-filesystems/seaweedfs.nix";
-      flake = false;
-      type = "file";
-    };
   };
 
   outputs = _: { };

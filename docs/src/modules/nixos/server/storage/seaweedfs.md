@@ -9,19 +9,22 @@ so the repository can test endpoint shape, proxy integration, and service behavi
 
 ## Entry Point
 
-- **Main file**: `modules/nixos/server/storage/seaweedfs.nix`
+- **Main entry file**: `modules/nixos/server/storage/seaweedfs/default.nix`
+- **Compatibility wrapper**: `modules/nixos/server/storage/seaweedfs.nix`
 - **Supporting file**: `modules/nixos/server/storage/default.nix`
+- **Component files**: `modules/nixos/server/storage/seaweedfs/{master,volume,filer,admin,worker,proxy,security,tmpfiles,options}.nix`
 
 ## Architecture / Services / Scope
 
 - **Evaluation only**: this deployment does not replace MinIO and does not perform any migration.
-- **Storage primary only**: the module is gated by `config.server.storagePrimaryHost == config.networking.hostName`.
+- **IO primary only**: the module is gated by `config.server.ioPrimaryHost == config.networking.hostName`.
 - **All-in-one topology**: the evaluation enables the SeaweedFS master, volume, filer, S3 endpoint, admin UI, and worker components on the coordinator host.
 - **Proxy surface**: endpoints are exposed through the existing `server.proxy.virtualHosts` integration instead of host-local Caddy configuration.
   Current surface includes the master, filer, S3-compatible, volume, and admin endpoints under the `seaweedfs.${data.site.domain}` subtree.
   Client-facing TLS terminates at Caddy; gRPC-backed component endpoints additionally get the backend transport settings required for SeaweedFS communication.
-- **Option surface**: the module uses the upstream `services.seaweedfs` option surface rather than introducing
-  a repository-local `server.storage.seaweedfs.*` option tree.
+- **Option surface**: the module keeps the upstream `services.seaweedfs.*` namespace.
+  This repository now vendors the module locally and extends it with repo-specific options,
+  including `services.seaweedfs.volume.publicUrl` and `extraArgs` on all component services.
 
 ## Secrets
 
@@ -61,6 +64,7 @@ and `<service>.seaweedfs.${data.site.domain}` for volume, filer, and admin.
 
 - The evaluation deployment is separate from `server.storage.swfsMount`.
   The storage abstraction can use `weed mount` for SeaweedFS-backed workload mounts without changing the evaluation topology described here.
+- `services.seaweedfs.volume.publicUrl` should match the external proxy hostname so volume servers advertise reachable URLs.
 - This deployment is intended to shake out integration details first; repository-local abstractions can be added later if SeaweedFS proves to be a good fit.
 
 ## References
