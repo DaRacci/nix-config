@@ -187,6 +187,7 @@ in
 
     ./ssh-shell
     ./storage
+    ./atuin.nix
     ./distributed-builds.nix
     ./image.nix
   ];
