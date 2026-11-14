@@ -62,7 +62,7 @@ in
   };
 
   # Persist the bookmarks if the user doesn't declaratively set them
-  user.persistence.files = lib.optionals (!(config.xdg.configFile ? "gtk-3.0/bookmarks")) [
+  user.files.persistence.files = lib.optionals (!(config.xdg.configFile ? "gtk-3.0/bookmarks")) [
     ".config/gtk-3.0/bookmarks"
   ];
 }

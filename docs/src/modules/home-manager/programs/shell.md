@@ -36,7 +36,7 @@ The module asserts that every child switch is only enabled while its parent is, 
 
 ### What the set provides
 
-- **History and navigation** — `atuin` and `zoxide` are enabled with the set, and their data directories are added to `user.persistence`.
+- **History and navigation** — `atuin` and `zoxide` are enabled with the set, and their data directories are added to `user.files.persistence`.
   Atuin keeps shell history in sync with the self-hosted server at `atuin.racci.dev`.
 - **Fish** — enabled through `enableFish`, with history persisted.
 - **Nushell** — enabled through `enableNushell`, with a carapace-backed external completer, fish as a fallback completer and zoxide for directory jumps.

@@ -98,8 +98,8 @@ let
   hostCfg = if osConfig != null && (osConfig ? host) then osConfig.host else null;
   hostPersistEnabled = hostCfg != null && (hostCfg ? persistence) && hostCfg.persistence.enable;
 
-  userDirs = map toDir config.user.persistence.directories;
-  userFiles = config.user.persistence.files;
+  userDirs = map toDir config.user.files.persistence.directories;
+  userFiles = config.user.files.persistence.files;
   hostDirs = if hostPersistEnabled then map toDir hostCfg.persistence.directories else [ ];
   hostFiles = if hostPersistEnabled then map toFile hostCfg.persistence.files else [ ];
 
@@ -122,8 +122,8 @@ in
 {
   options.programs.list-ephemeral = {
     enable = mkEnableOption "list-ephemeral helper" // {
-      default = hostPersistEnabled || config.user.persistence.enable;
-      defaultText = lib.literalExpression "hostPersistEnabled || config.user.persistence.enable";
+      default = hostPersistEnabled || config.user.files.persistence.enable;
+      defaultText = lib.literalExpression "hostPersistEnabled || config.user.files.persistence.enable";
     };
 
     extraExcludes = mkOption {

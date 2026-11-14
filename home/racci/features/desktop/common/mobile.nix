@@ -4,7 +4,7 @@ _: {
     indicator = true;
   };
 
-  user.persistence.directories = [ ".config/kdeconnect" ];
+  user.files.persistence.directories = [ ".config/kdeconnect" ];
   core.uwsm.sliceAllocation = {
     background = [ "kdeconnect" ];
     background-graphical = [ "kdeconnect-indicator" ];

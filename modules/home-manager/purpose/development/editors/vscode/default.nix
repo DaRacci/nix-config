@@ -249,7 +249,7 @@ in
         '';
       };
 
-      user.persistence.directories = [ ".config/Code/User/" ];
+      user.files.persistence.directories = [ ".config/Code/User/" ];
     })
 
     (mkIf (config ? stylix && config.stylix.enable) {

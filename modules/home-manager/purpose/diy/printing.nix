@@ -83,7 +83,7 @@ in
         pkgs.uvtools
       ];
 
-      user.persistence.directories = [
+      user.files.persistence.directories = [
         ".config/OrcaSlicer"
         ".local/share/orca-slicer"
         ".config/LycheeSlicer"

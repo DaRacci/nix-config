@@ -5,7 +5,7 @@ in
 {
   home.packages = [ bottles ];
 
-  user.persistence.directories = [
+  user.files.persistence.directories = [
     ".local/share/bottles"
     ".local/share/umu"
   ];

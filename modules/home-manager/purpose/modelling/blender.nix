@@ -20,6 +20,6 @@ in
   config = mkIf cfg.enable {
     home.packages = [ blender ];
 
-    user.persistence.directories = [ ".config/blender" ];
+    user.files.persistence.directories = [ ".config/blender" ];
   };
 }

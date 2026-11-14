@@ -1,5 +1,5 @@
 _: {
-  user.persistence = {
+  user.files.persistence = {
     directories = [
       ".local/share/icons"
       ".local/share/kwalletd"

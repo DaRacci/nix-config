@@ -194,7 +194,7 @@ The module:
   covering bar layouts with monitor overrides, shell panel/screen corners/screenshot/session actions, theme, wallpaper,
   calendar, control-center shortcuts, desktop/lockscreen widgets, notification layer, plugin settings, widget config, brightness, and more.
 - Does **not** declare top-level `colors` or `plugins` HM options, and does **not** manage raw JSON files directly.
-- Persists `~/.local/share/noctalia` via `user.persistence.directories`.
+- Persists `~/.local/share/noctalia` via `user.files.persistence.directories`.
 - Reads `core.profile.avatar.path` → `shell.avatar_path` and `core.profile.wallpaper.directory` → `wallpaper.directory`.
   Wallpaper fill mode is hardcoded (not a profile option).
 - Location is driven by `core.profile.location.secret` (a SOPS secret name).

@@ -36,5 +36,5 @@ in
   };
 
   dconf.enable = dconfEnabled;
-  user.persistence.directories = [ ".config/dconf" ];
+  user.files.persistence.directories = [ ".config/dconf" ];
 }

@@ -19,7 +19,7 @@ It integrates with Home-Manager to supply defaults, persisted paths, and program
 The module writes a generated config file consumed by the TUI:
 
 - Excludes default ephemeral paths (caches, logs, Electron app state, etc.) so they never appear as persistence candidates.
-- Supplies the currently persisted files and directories from `user.persistence` / `host.persistence`, which are marked as already persisted in the UI.
+- Supplies the currently persisted files and directories from `user.files.persistence` / `host.persistence`, which are marked as already persisted in the UI.
 - Supplies installed program names so the TUI can filter candidates by program context.
 
 ### Usage
@@ -63,7 +63,7 @@ list-ephemeral trace -- <cmd> [args...]
 
 The TUI generates Nix snippets based on path location:
 
-- Paths under `$HOME` are emitted as `user.persistence.files` or `user.persistence.directories` with paths relative to `$HOME`.
+- Paths under `$HOME` are emitted as `user.files.persistence.files` or `user.files.persistence.directories` with paths relative to `$HOME`.
 - Paths outside `$HOME` are emitted as `host.persistence.files` or `host.persistence.directories` with absolute paths.
 
 If the selection includes both kinds, the snippet contains both blocks.

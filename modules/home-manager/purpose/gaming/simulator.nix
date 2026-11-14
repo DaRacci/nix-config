@@ -17,6 +17,6 @@ in
   config = lib.mkIf (cfg.enable && cfg.enableRacing) {
     home.packages = [ boxflat ];
 
-    user.persistence.directories = [ ".config/boxflat" ];
+    user.files.persistence.directories = [ ".config/boxflat" ];
   };
 }

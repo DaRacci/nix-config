@@ -28,7 +28,7 @@ in
   config = mkIf cfg.enable {
     home.packages = [ cfg.lazerPackages ];
 
-    user.persistence.directories = [
+    user.files.persistence.directories = [
       ".local/share/osu"
     ];
   };

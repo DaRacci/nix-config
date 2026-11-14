@@ -54,7 +54,7 @@ in
     };
   };
 
-  user.persistence.directories = [
+  user.files.persistence.directories = [
     ".config/MusicBrainz"
     ".hermes"
     ".config/Hermes"

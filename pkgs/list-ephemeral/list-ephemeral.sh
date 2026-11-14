@@ -323,7 +323,7 @@ generate_snippet() {
   host_dirs=$(<"$TMPDIR/host_dirs")
 
   if [[ -n "$hm_files" || -n "$hm_dirs" ]]; then
-    snippet+=$'user.persistence = {\n'
+    snippet+=$'user.files.persistence = {\n'
     snippet+=$'  files = \n'
     snippet+=$(printf '%s\n' "$hm_files" | format_list "  ")
     snippet+=$';\n'

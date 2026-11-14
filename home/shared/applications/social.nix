@@ -15,7 +15,7 @@ in
     polari
   ];
 
-  user.persistence.directories = [
+  user.files.persistence.directories = [
     ".config/Vencord/settings"
     ".config/Nextcloud Talk"
     ".config/discord"

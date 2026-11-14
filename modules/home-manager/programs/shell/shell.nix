@@ -33,7 +33,7 @@ in
   config = mkMerge [
     (mkIf cfg.enable {
       programs.zoxide.enable = true;
-      user.persistence.directories = [ ".local/share/zoxide" ];
+      user.files.persistence.directories = [ ".local/share/zoxide" ];
     })
 
     (mkIf cfg.enableFish {
@@ -43,7 +43,7 @@ in
         package = if cfg.minimal then pkgs.fishMinimal else pkgs.fish;
       };
 
-      user.persistence.files = [ ".local/share/fish/fish_history" ];
+      user.files.persistence.files = [ ".local/share/fish/fish_history" ];
     })
 
     (mkIf cfg.enableNushell {
@@ -117,7 +117,7 @@ in
         };
       };
 
-      user.persistence.files = [ ".config/nushell/history.txt" ];
+      user.files.persistence.files = [ ".config/nushell/history.txt" ];
     })
   ];
 }

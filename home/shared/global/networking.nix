@@ -1,1 +1,1 @@
-_: { user.persistence.directories = [ ".cert" ]; }
+_: { user.files.persistence.directories = [ ".cert" ]; }

@@ -30,7 +30,7 @@ in
     "application/pdf" = "org.gnome.Papers.desktop";
   };
 
-  user.persistence = {
+  user.files.persistence = {
     directories = [
       ".config/libreoffice/4/user/config"
       ".config/news-flash"

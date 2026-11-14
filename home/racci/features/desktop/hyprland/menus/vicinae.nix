@@ -91,7 +91,7 @@ _: {
 
   wayland.windowManager.hyprland.custom-settings.lua.luaModules = [ ../lua/vicinae.lua ];
 
-  user.persistence.directories = [
+  user.files.persistence.directories = [
     ".config/vicinae"
     ".local/share/vicinae"
   ];

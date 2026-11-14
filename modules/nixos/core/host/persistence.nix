@@ -257,11 +257,11 @@ in
       ++ cfg.files;
 
       users = lib.pipe (attrNames config.home-manager.users) [
-        (filter (user: config.home-manager.users.${user}.user.persistence.enable))
+        (filter (user: config.home-manager.users.${user}.user.files.persistence.enable))
         (map (
           user:
           nameValuePair user {
-            inherit (config.home-manager.users.${user}.user.persistence) files directories;
+            inherit (config.home-manager.users.${user}.user.files.persistence) files directories;
           }
         ))
         lib.listToAttrs

@@ -75,7 +75,7 @@ in
       --artifact-server-path /tmp/artifacts
     '';
 
-    user.persistence.directories = [
+    user.files.persistence.directories = [
       "Projects"
 
       ".terraform.d"

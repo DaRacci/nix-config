@@ -23,7 +23,7 @@ in
 
   home.packages = [ handbrake ];
 
-  user.persistence.directories = [
+  user.files.persistence.directories = [
     ".config/obs-studio"
     ".config/ghb"
   ];

@@ -25,7 +25,7 @@ in
     raider
   ];
 
-  user.persistence.directories = [
+  user.files.persistence.directories = [
     # Online Accounts
     ".config/goa-1.0"
 

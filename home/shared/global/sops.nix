@@ -22,7 +22,7 @@ let
     [
       (getExe pkgs.ssh-to-age-keys)
       sshToAgeOutputDir
-      "${config.user.persistence.root}/.ssh/id_ed25519"
+      "${config.user.files.persistence.root}/.ssh/id_ed25519"
     ]
     ++ optionals hasSopsFile [ config.sops.secrets.SSH_PRIVATE_KEY.path ]
   );
@@ -32,7 +32,7 @@ in
     defaultSopsFile = "${self}/home/${username}/secrets.yaml";
     age.sshKeyPaths = [
       config.sops.secrets.SSH_PRIVATE_KEY.path
-      "${config.user.persistence.root}/.ssh/id_ed25519"
+      "${config.user.files.persistence.root}/.ssh/id_ed25519"
     ];
 
     secrets = {

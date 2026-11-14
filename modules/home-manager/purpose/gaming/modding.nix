@@ -28,7 +28,7 @@ in
       ++ (optional cfg.enableBeatSaber bs-manager)
       ++ (optionals cfg.enableThunderstore [ r2modman ]);
 
-    user.persistence.directories =
+    user.files.persistence.directories =
       (optional cfg.enableSatisfactory ".local/share/ficsit")
       ++ (optionals cfg.enableBeatSaber [
         ".config/bs-manager"

@@ -5,5 +5,5 @@ in
 {
   home.packages = [ obsidian ];
 
-  user.persistence.directories = [ ".config/obsidian" ];
+  user.files.persistence.directories = [ ".config/obsidian" ];
 }

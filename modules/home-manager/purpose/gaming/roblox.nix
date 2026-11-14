@@ -27,7 +27,7 @@ in
   config = mkIf cfg.enable {
     home.packages = [ cfg.vinegarPackage ];
 
-    user.persistence.directories = [ ".local/share/vinegar/" ];
+    user.files.persistence.directories = [ ".local/share/vinegar/" ];
 
     home.file.".config/vinegar/config.toml".text = ''
       # See how to configure Vinegar on the documentation website:

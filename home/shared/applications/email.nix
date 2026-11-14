@@ -36,7 +36,7 @@ in
   #   # };
   # };
 
-  user.persistence.directories = [
+  user.files.persistence.directories = [
     ".thunderbird"
 
     # Bridge

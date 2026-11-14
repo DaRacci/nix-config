@@ -26,7 +26,7 @@ in
       pkgs.kicad
     ];
 
-    user.persistence.directories = [
+    user.files.persistence.directories = [
       ".config/VCG"
       ".config/kicad"
       ".config/FreeCAD"

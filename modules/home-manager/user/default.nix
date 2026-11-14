@@ -13,9 +13,9 @@ let
 in
 {
   imports = [
+    ./files
+
     ./autorun.nix
-    ./backup.nix
-    ./persistence.nix
   ];
 
   options.user = {
@@ -52,6 +52,6 @@ in
       };
     };
 
-    user.persistence.files = [ ".ssh/known_hosts" ];
+    user.files.persistence.files = [ ".ssh/known_hosts" ];
   };
 }

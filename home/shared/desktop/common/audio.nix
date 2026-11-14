@@ -10,5 +10,5 @@
 
   core.uwsm.sliceAllocation.app = [ "easyeffects" ];
 
-  user.persistence.directories = [ ".config/easyeffects" ];
+  user.files.persistence.directories = [ ".config/easyeffects" ];
 }

@@ -587,8 +587,8 @@ in
 
   # FIXME - This shouldn't be hard coded to my profile.
   # Has a infinite recursion if config is used to make the list.
-  # user.persistence.directories = map (profile: ".mozilla/firefox/${profile}") (attrNames config.programs.firefox.profiles);
-  user.persistence.directories = [
+  # user.files.persistence.directories = map (profile: ".mozilla/firefox/${profile}") (attrNames config.programs.firefox.profiles);
+  user.files.persistence.directories = [
     ".mozilla/firefox/racci"
     ".floorp/racci"
   ];

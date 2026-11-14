@@ -41,7 +41,7 @@ in
       };
     };
 
-    user.persistence.directories = [ ".local/share/atuin" ];
+    user.files.persistence.directories = [ ".local/share/atuin" ];
 
     # Ordered so its *right* before the normal atuin hook
     # because the pty-proxy component MUST be loaded first.

@@ -42,7 +42,7 @@
 
   purpose.development.vcs.user.email = "me@racci.dev";
 
-  user.persistence.directories = [ ".config/goa-1.0" ];
+  user.files.persistence.directories = [ ".config/goa-1.0" ];
 
-  user.backup.enable = true;
+  user.files.backup.enable = true;
 }

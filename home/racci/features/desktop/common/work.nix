@@ -7,7 +7,7 @@ in
     teams-for-linux
   ];
 
-  user.persistence.directories = [
+  user.files.persistence.directories = [
     ".config/teams-for-linux"
   ];
 }

@@ -73,7 +73,7 @@ in
       };
     };
 
-    user.persistence.directories = [
+    user.files.persistence.directories = [
       ".config/alvr"
       ".android"
       ".config/wivrn"

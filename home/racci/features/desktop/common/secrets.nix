@@ -19,7 +19,7 @@ in
     bitwarden-cli
   ];
 
-  user.persistence = {
+  user.files.persistence = {
     files = [ ".config/1Password/1password.sqlite" ];
     directories = [
       ".config/1Password/settings"

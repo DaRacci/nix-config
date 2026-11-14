@@ -140,7 +140,7 @@ in
       // optionalAttrs hasHomeManager {
         home-manager.sharedModules = [
           {
-            user.persistence.directories = [ ".config/sunshine" ];
+            user.files.persistence.directories = [ ".config/sunshine" ];
           }
         ];
       }

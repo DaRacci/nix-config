@@ -18,11 +18,11 @@ let
     submodule
     ;
   inherit (lib) literalExpression;
-  cfg = config.user.persistence;
+  cfg = config.user.files.persistence;
 in
 
 {
-  options.user.persistence = {
+  options.user.files.persistence = {
     enable = mkEnableOption "persistence";
 
     root = mkOption {
@@ -95,7 +95,7 @@ in
       }
     ];
 
-    user.persistence.directories = [
+    user.files.persistence.directories = [
       "Documents"
       "Downloads"
       "Pictures"

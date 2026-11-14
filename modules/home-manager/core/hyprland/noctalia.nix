@@ -226,7 +226,7 @@ in
         custom-settings.lua.luaModules = [ ./lua/opt/noctalia.lua ];
       };
 
-      user.persistence = {
+      user.files.persistence = {
         directories = [ ".local/share/noctalia" ];
         files = [
           ".local/state/noctalia/settings.toml" # Allows runtime overrides.

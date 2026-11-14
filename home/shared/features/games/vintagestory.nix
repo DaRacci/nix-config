@@ -5,5 +5,5 @@ in
 {
   home.packages = [ vintagestory ];
 
-  user.persistence.directories = [ ".config/VintagestoryData/" ];
+  user.files.persistence.directories = [ ".config/VintagestoryData/" ];
 }

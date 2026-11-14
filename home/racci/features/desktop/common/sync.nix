@@ -13,7 +13,7 @@ in
     startInBackground = true;
   };
 
-  user.persistence.directories = [
+  user.files.persistence.directories = [
     ".config/Nextcloud"
   ];
 

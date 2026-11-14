@@ -18,7 +18,7 @@ in
       prismlauncher
     ];
 
-    user.persistence.directories = [
+    user.files.persistence.directories = [
       ".local/share/PrismLauncher"
     ];
   };

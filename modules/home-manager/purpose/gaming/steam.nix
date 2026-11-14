@@ -52,7 +52,7 @@ in
       "L+ %h/.local/share/Steam/steamapps - - - - %h/Games/SteamLibrary"
     ];
 
-    user.persistence = {
+    user.files.persistence = {
       files = [
         ".steam/registry.vdf"
         ".local/share/BeamNG.drive.ini"

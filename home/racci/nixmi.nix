@@ -11,7 +11,7 @@
     "${self}/home/shared/features/windows.nix"
   ];
 
-  user.persistence.enable = true;
+  user.files.persistence.enable = true;
 
   wayland.windowManager.hyprland.settings = {
     monitor = [

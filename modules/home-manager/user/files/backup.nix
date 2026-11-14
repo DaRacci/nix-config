@@ -9,18 +9,16 @@ let
   inherit (lib) mkIf mkEnableOption;
 in
 {
-  options.user.backup = {
+  options.user.files.backup = {
     enable = mkEnableOption "backup";
   };
 
-  config = mkIf config.user.backup.enable {
+  config = mkIf config.user.files.backup.enable {
     home.packages = [
       kopia
       kopia-ui
     ];
 
-    user.persistence.directories = [
-      ".config/kopia"
-    ];
+    user.files.persistence.directories = [ ".config/kopia" ];
   };
 }

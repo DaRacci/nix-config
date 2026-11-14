@@ -277,7 +277,7 @@ in
 
     xdg.mimeApps.defaultApplicationPackages = [ pkgs.zed-editor ];
 
-    user.persistence.directories = [
+    user.files.persistence.directories = [
       ".config/zed"
       ".local/share/zed"
       ".config/github-copilot" # Contains the copilot auth token

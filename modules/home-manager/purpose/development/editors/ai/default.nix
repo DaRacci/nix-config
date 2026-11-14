@@ -318,7 +318,7 @@ in
         )
       ];
 
-      user.persistence.directories = [
+      user.files.persistence.directories = [
         ".agents"
         ".local/share/opencode"
         ".local/state/opencode"
@@ -332,7 +332,7 @@ in
       ];
       programs.zed-editor.extensions = [ "zabby" ];
 
-      user.persistence.directories = [
+      user.files.persistence.directories = [
         ".tabby"
         ".tabby-agent"
       ];
