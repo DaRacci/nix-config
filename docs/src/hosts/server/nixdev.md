@@ -9,7 +9,7 @@ a Docker registry, a ForgeSync mirror job, and the Atuin shell history sync serv
 ## Entry Point
 
 - **Main file**: [`hosts/server/nixdev/default.nix`](../../../../hosts/server/nixdev/default.nix)
-- **Supporting files**: `atuin.nix`, `automation.nix`, `ci.nix`, `coder.nix`, `forgesync.nix`, `registry.nix`, `woodpecker.nix`
+- **Supporting files**: `automation.nix`, `ci.nix`, `coder.nix`, `forgesync.nix`, `registry.nix`, `woodpecker.nix`
 
 ## Architecture / Services / Scope
 
@@ -28,7 +28,8 @@ a Docker registry, a ForgeSync mirror job, and the Atuin shell history sync serv
 ### Shell History Sync
 
 - **Atuin**: Shell history sync server exposed at `atuin.racci.dev` through the IO Coordinator reverse proxy.
-  It is provided by the [Atuin service module](../../modules/nixos/server/atuin.md) and enabled in the host's `atuin.nix`.
+  It is provided by the [Atuin service module](../../modules/nixos/server/atuin.md)
+  and enabled with `services.atuin.enable` in `default.nix`.
   It stores history in PostgreSQL on the Database Coordinator.
   Open registration is enabled so clients can create an account; disable it once the required accounts exist.
 
