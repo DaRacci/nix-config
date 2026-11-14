@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  self,
+  ...
+}:
 let
   inherit (lib) filterEmpty flatten;
 
@@ -60,7 +65,7 @@ in
       secretsFile = config.sops.secrets."IMMICH/ENV".path;
       environment = {
         IMMICH_TRUSTED_PROXIES =
-          config.server.network.subnets
+          self.data.network.subnets
           |> map (subnet: [
             subnet.ipv4.cidr
             subnet.ipv6.cidr

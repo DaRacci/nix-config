@@ -1,9 +1,7 @@
-{
-  getIOPrimaryHostAttr,
-  ...
-}:
+_:
 {
   lib,
+  self,
   ...
 }:
 let
@@ -29,11 +27,6 @@ let
 in
 {
   options.server.proxy = {
-    domain = mkOption {
-      type = str;
-      description = "The base domain for all virtual hosts.";
-    };
-
     extensions = mkOption {
       description = "Registry of proxy extensions. Each extension provides config functions that are injected into vhost Caddy blocks, sorted by priority.";
       default = { };
@@ -114,9 +107,9 @@ in
                 default = [ ];
                 description = ''
                   A list of virtual host names that should be routed using this configuration.
-                  Options added here will inherit the base domain specified in <server.proxy.domain>.
+                  Options added here will inherit the base domain from `data.site.domain`.
                 '';
-                apply = list: map (alias: "${alias}.${getIOPrimaryHostAttr "server.proxy.domain"}") list;
+                apply = list: map (alias: "${alias}.${self.data.site.domain}") list;
               };
 
               listenPorts = mkOption {
@@ -139,9 +132,9 @@ in
 
               baseUrl = mkOption {
                 type = str;
-                default = "${subdomain}.${getIOPrimaryHostAttr "server.proxy.domain"}";
+                default = "${subdomain}.${self.data.site.domain}";
                 defaultText = literalExpression ''
-                  ''${subdomain}.''${getIOPrimaryHostAttr "server.proxy.domain"}
+                  ''${subdomain}.''${self.data.site.domain}
                 '';
                 description = "The base url including the configured base domain name.";
                 readOnly = true;

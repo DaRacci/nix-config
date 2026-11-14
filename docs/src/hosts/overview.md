@@ -20,6 +20,8 @@ Repository uses automatic discovery system to manage hosts based on device type.
 
 Host-specific configurations live in `hosts/{device-type}/{hostname}/default.nix`.
 
+Cross-host facts that hosts and modules share, such as network subnets, live in `data/` and are documented in [Shared Data](../data.md).
+
 ## Operational Notes / Assumptions
 
 ### Common Workflows

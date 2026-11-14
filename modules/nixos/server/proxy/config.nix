@@ -8,6 +8,7 @@
 {
   config,
   lib,
+  self,
   ...
 }:
 let
@@ -176,7 +177,7 @@ in
       security.acme.certs =
         config.services.caddy.virtualHosts
         |> lib.filterAttrs (
-          name: _: hasSuffix ".${cfg.domain}" name && !builtins.elem name noAcmeCertsDomains
+          name: _: hasSuffix ".${self.data.site.domain}" name && !builtins.elem name noAcmeCertsDomains
         )
         |> lib.mapAttrs (
           _name: vh: {

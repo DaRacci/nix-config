@@ -1,9 +1,5 @@
 {
-  isThisIOPrimaryHost,
-  getIOPrimaryHostAttr,
-  ...
-}:
-{
+  self,
   config,
   lib,
   ...
@@ -17,30 +13,11 @@ let
     optionalString
     ;
   inherit (lib.types)
-    submodule
     listOf
-    nullOr
     port
-    str
     ;
 
   cfg = config.server.network;
-
-  ipOptions = submodule {
-    options = {
-      cidr = mkOption {
-        default = null;
-        type = nullOr str;
-        description = "CIDR notation for the IP range.";
-      };
-
-      arpa = mkOption {
-        default = null;
-        type = nullOr str;
-        description = "ARPA notation for reverse DNS lookups.";
-      };
-    };
-  };
 in
 {
   options.server.network = {
@@ -57,46 +34,13 @@ in
         description = "List of UDP ports to open on the firewall for each subnet.";
       };
     };
-
-    subnets = mkOption {
-      default = { };
-      type = listOf (submodule {
-        options = {
-          dns = mkOption {
-            type = str;
-            description = "DNS server for the subnet.";
-          };
-
-          domain = mkOption {
-            type = str;
-            description = "Domain name for the subnet.";
-          };
-
-          ipv4 = mkOption {
-            default = { };
-            type = ipOptions;
-            description = "IPv4 configuration for the subnet.";
-          };
-
-          ipv6 = mkOption {
-            default = { };
-            type = ipOptions;
-            description = "IPv6 configuration for the subnet.";
-          };
-        };
-      });
-    };
   };
 
   config = mkMerge [
-    (mkIf (!isThisIOPrimaryHost) {
-      server.network.subnets = getIOPrimaryHostAttr "server.network.subnets";
-    })
-
     (
       let
         openPorts = cfg.openPortsForSubnet;
-        subnets = cfg.subnets;
+        subnets = self.data.network.subnets;
         mkRules =
           ports: proto:
           flatten (

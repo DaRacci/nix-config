@@ -5,6 +5,7 @@
 {
   config,
   lib,
+  self,
   ...
 }:
 let
@@ -40,7 +41,7 @@ in
       enable = true;
 
       ignoreIP =
-        config.server.network.subnets
+        self.data.network.subnets
         |> map (subnet: [
           subnet.ipv4.cidr
           subnet.ipv6.cidr

@@ -114,7 +114,7 @@ let
       example = "auth.example.com";
       description = ''
         The domain where Kanidm is hosted.
-        Defaults to auth.<server.proxy.domain> if not specified.
+        Defaults to auth.<data.site.domain> if not specified.
       '';
     };
 

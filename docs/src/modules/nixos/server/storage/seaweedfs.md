@@ -18,7 +18,7 @@ so the repository can test endpoint shape, proxy integration, and service behavi
 - **Storage primary only**: the module is gated by `config.server.storagePrimaryHost == config.networking.hostName`.
 - **All-in-one topology**: the evaluation enables the SeaweedFS master, volume, filer, S3 endpoint, admin UI, and worker components on the coordinator host.
 - **Proxy surface**: endpoints are exposed through the existing `server.proxy.virtualHosts` integration instead of host-local Caddy configuration.
-  Current surface includes the master, filer, S3-compatible, volume, and admin endpoints under the `seaweedfs.${server.proxy.domain}` subtree.
+  Current surface includes the master, filer, S3-compatible, volume, and admin endpoints under the `seaweedfs.${data.site.domain}` subtree.
   Client-facing TLS terminates at Caddy; gRPC-backed component endpoints additionally get the backend transport settings required for SeaweedFS communication.
 - **Option surface**: the module uses the upstream `services.seaweedfs` option surface rather than introducing
   a repository-local `server.storage.seaweedfs.*` option tree.
@@ -53,9 +53,9 @@ Leaves use both `serverAuth` and `clientAuth` because the same component certifi
 The root and intermediate private keys are kept offline.
 
 The CA hierarchy, key custody, issuance, and rotation are documented in [Internal mTLS CA](../../../../security/internal_mtls_ca.md).
-Component SANs must match the Caddy `tls_server_name` values: `seaweedfs.${server.proxy.domain}` for the master,
-and `<service>.seaweedfs.${server.proxy.domain}` for volume, filer, and admin.
-`server.proxy.domain` is the configured proxy domain.
+Component SANs must match the Caddy `tls_server_name` values: `seaweedfs.${data.site.domain}` for the master,
+and `<service>.seaweedfs.${data.site.domain}` for volume, filer, and admin.
+`data.site.domain` is the configured proxy domain.
 
 ## Operational Notes / Assumptions
 

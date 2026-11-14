@@ -4,7 +4,7 @@ use std/log
 use lib/common.nu *
 use lib/flake.nu *
 
-let FILE_LOCATION = $"($env.GIT_ROOT)/hosts/server/nixio/redis-mappings.json"
+let FILE_LOCATION = $"($env.GIT_ROOT)/data/redis/mappings.json"
 const MAX_DATABASES = 16
 
 # Assign a numeric id to each service into range [0..max-1].

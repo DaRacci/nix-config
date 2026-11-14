@@ -1,17 +1,15 @@
-{
-  getIOPrimaryHostAttr,
-  ...
-}:
+_:
 {
   config,
   lib,
+  self,
   ...
 }:
 let
   inherit (lib) mkIf;
 
   cfg = config.server.monitoring;
-  domain = getIOPrimaryHostAttr "server.proxy.domain";
+  domain = self.data.site.domain;
   listenAddress = "0.0.0.0";
 in
 {

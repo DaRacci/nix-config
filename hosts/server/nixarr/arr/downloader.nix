@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  self,
   ...
 }:
 {
@@ -10,7 +11,7 @@
       vpn.enable = true;
       flood.enable = true;
       peerPort = 51413;
-      extraAllowedIps = [ "100.100.0.0/16" ];
+      extraAllowedIps = self.data.network.ipv4Cidrs;
 
       privateTrackers.cross-seed = {
         enable = true;
@@ -50,7 +51,7 @@
     sabnzbd = {
       enable = true;
       vpn.enable = true;
-      whitelistRanges = [ "100.100.0.0/16" ];
+      whitelistRanges = self.data.network.ipv4Cidrs;
       whitelistHostnames = [ "sabnzbd.racci.dev" ];
     };
   };

@@ -28,9 +28,7 @@ let
 
   cfg = config.server.database.redis;
 
-  file = "${self}/hosts/server/${config.server.ioPrimaryHost}/redis-mappings.json";
-  staticDbIdMappings =
-    (if builtins.pathExists file then builtins.readFile file else "{}") |> builtins.fromJSON;
+  staticDbIdMappings = self.data.redis.mappings;
 
   redisPort = (getIOPrimaryHostAttr "services.redis.servers")."".port;
   hasRedisInstances = builtins.length (builtins.attrNames cfg) > 0;
@@ -150,8 +148,7 @@ in
         |> map (name: {
           assertion = staticDbIdMappings ? ${name};
           message = ''
-            Redis instance "${name}" does not have a static database_id mapping configured in
-            hosts/server/${config.server.ioPrimaryHost}/reddis-mappings.json.
+            Redis instance "${name}" does not have a static database_id mapping configured in `data/redis/mappings.json`.
 
             Run `update-redis-mappings` to automatically generate and insert the required mappings.
 

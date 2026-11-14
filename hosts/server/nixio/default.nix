@@ -51,39 +51,4 @@ in
     tags = [ "ingress" ];
     extraSetFlags = [ "--advertise-routes=192.168.2.0/24" ];
   };
-
-  server.network.subnets = [
-    {
-      dns = "100.100.100.100:53";
-      domain = "degu-beta.ts.net";
-      ipv4 = {
-        cidr = "100.64.0.0/10";
-        arpa = "64.100.in-addr.arpa";
-      };
-      ipv6 = {
-        cidr = "fd7a:115c:a1e0::/48";
-        arpa = "0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.e.1.a.c.5.1.1.a.7.d.f.ip6.arpa";
-      };
-    }
-    {
-      dns = "192.168.1.1:53";
-      domain = "home";
-      ipv4 = {
-        cidr = "192.168.1.0/24";
-        arpa = "1.168.192.in-addr.arpa";
-      };
-    }
-    {
-      dns = "192.168.2.1:53";
-      domain = "localdomain";
-      ipv4 = {
-        cidr = "192.168.2.0/24";
-        arpa = "2.168.192.in-addr.arpa";
-      };
-      ipv6 = {
-        cidr = "fc01::/64";
-        arpa = "0.0.0.0.0.0.1.0.c.f.ip6.arpa";
-      };
-    }
-  ];
 }

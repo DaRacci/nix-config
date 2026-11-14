@@ -9,6 +9,7 @@
 {
   config,
   lib,
+  self,
   ...
 }:
 let
@@ -19,7 +20,7 @@ let
   resolveKanidmContext =
     _name: vh:
     let
-      domain = getIOPrimaryHostAttr "server.proxy.domain";
+      domain = self.data.site.domain;
       sharedContexts = getIOPrimaryHostAttr "server.proxy.kanidmContexts";
       contextName = vh.kanidm.context;
       sharedContext = sharedContexts.${contextName} or null;

@@ -25,7 +25,7 @@ The system consists of three layers:
   - Prometheus for metrics aggregation
   - Loki for log aggregation with 90-day retention
   - Alertmanager for alert routing and notifications
-  - OTLP/HTTP ingestion on `otlp.${server.proxy.domain}` with bearer-token authentication
+  - OTLP/HTTP ingestion on `otlp.${data.site.domain}` with bearer-token authentication
 
 - **Visualisation** (runs on the Monitoring Coordinator)
 
@@ -125,17 +125,17 @@ Server certificates are valid for two years and include these SANs:
 
 - `DNS:<host>`
 - `DNS:<host>.localdomain`
-- `DNS:<host>.${server.proxy.domain}`
+- `DNS:<host>.${data.site.domain}`
 - `IP:127.0.0.1`
 
 The bare host name is required because the relay connects to `https://<host>:12445`.
-`server.proxy.domain` is the fleet's DNS suffix.
+`data.site.domain` is the fleet's DNS suffix.
 Server certificates use `extendedKeyUsage = serverAuth`.
 The client certificate uses `commonName = alloy-capture-relay` and `extendedKeyUsage = clientAuth`.
 
 The manual procedure below assumes `root.crt`, `alloy-intermediate.crt` and `alloy-intermediate.key`
 from the [Internal mTLS CA](../security/internal_mtls_ca.md) procedure.
-`<io-primary>` is the host that defines `server.proxy.domain`.
+`data.site.domain` is declared in `data/site.nix`.
 
 For new hosts, use the `provision-alloy-certs` helper.
 It reads the Fleet root and the Alloy intermediate from a KeePassXC vault, issues the certificates,
@@ -159,7 +159,7 @@ and the vault is backed up to `<db>.bak-<timestamp>` before each merge.
 The manual procedure below remains the reference for the certificate profiles.
 
 ```bash
-domain="$(nix eval --raw .#nixosConfigurations.<io-primary>.config.server.proxy.domain)"
+domain="$(nix eval --raw .#data.site.domain)"
 
 for host in nixai nixarr nixcloud nixdev nixio nixmon nixserv; do
   openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out "$host.key"
@@ -210,10 +210,10 @@ The module configures four virtual hosts on Monitoring Coordinator:
 
 | Service | Subdomain | Access |
 | ---------- | ----------------------------------- | ----------------------------- |
-| Grafana | `grafana.${server.proxy.domain}` | Public |
-| OTLP | `otlp.${server.proxy.domain}` | Public, bearer token required |
-| Prometheus | `prometheus.${server.proxy.domain}` | LAN |
-| Loki | `loki.${server.proxy.domain}` | LAN |
+| Grafana | `grafana.${data.site.domain}` | Public |
+| OTLP | `otlp.${data.site.domain}` | Public, bearer token required |
+| Prometheus | `prometheus.${data.site.domain}` | LAN |
+| Loki | `loki.${data.site.domain}` | LAN |
 
 Grafana remains protected by the existing Kanidm-backed login flow.
 The OTLP ingestion endpoint is intended for machine-to-machine clients and requires an `Authorization: Bearer <token>` header on every request.
@@ -387,7 +387,7 @@ curl -s 'http://localhost:3100/loki/api/v1/labels' | jq
 
 - Verify `MONITORING/GRAFANA/OAUTH_SECRET` in the Monitoring Coordinator matches `KANIDM/OAUTH2/GRAFANA_SECRET` in the Identity Coordinator
 - Check Kanidm provisioning has the Grafana OAuth2 client configured
-- Verify DNS resolves `auth.${server.proxy.domain}` correctly
+- Verify DNS resolves `auth.${data.site.domain}` correctly
 
 **Prometheus targets showing as down:**
 
@@ -398,7 +398,7 @@ curl -s 'http://localhost:3100/loki/api/v1/labels' | jq
 **Proxmox metrics missing:**
 
 - Verify `PROXMOX/TOKEN_ID` and `PROXMOX/TOKEN_SECRET` are valid
-- Check PVE API is accessible from Monitoring Coordinator: `curl -k https://pve.${server.proxy.domain}/api2/json`
+- Check PVE API is accessible from Monitoring Coordinator: `curl -k https://pve.${data.site.domain}/api2/json`
 - Review PVE exporter logs: `journalctl -u prometheus-pve-exporter.service`
 
 ## References

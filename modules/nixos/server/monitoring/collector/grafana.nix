@@ -1,10 +1,8 @@
-{
-  getIOPrimaryHostAttr,
-  ...
-}:
+_:
 {
   config,
   lib,
+  self,
   ...
 }:
 let
@@ -14,7 +12,7 @@ let
   grafanaCfg = cfg.collector.grafana;
   captureCfg = cfg.logs.capture;
   relayCfg = captureCfg.relay;
-  domain = getIOPrimaryHostAttr "server.proxy.domain";
+  domain = self.data.site.domain;
 
   sanitiseHost = host: builtins.replaceStrings [ "." "_" ] [ "-" "-" ] host;
 

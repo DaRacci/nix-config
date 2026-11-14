@@ -3,6 +3,7 @@ _:
   config,
   pkgs,
   lib,
+  self,
   ...
 }:
 {
@@ -14,8 +15,6 @@ _:
     "CLOUDFLARE/DNS_API_TOKEN" = { };
     "CLOUDFLARE/ZONE_API_TOKEN" = { };
   };
-
-  server.proxy.domain = "racci.dev";
 
   systemd.services = {
     caddy = rec {
@@ -47,7 +46,7 @@ _:
       ];
       hash = "sha256-gmWRIqOqsPGiLpYfwIpI/v+GMFd/zknFMMsJFwF6iSg=";
     };
-    email = "admin@racci.dev";
+    email = self.data.site.adminEmail;
 
     globalConfig = ''
       # Certs are handled by acme
@@ -69,8 +68,8 @@ _:
       (default) {
         # Allow embedding in iframes for specific hosts
         header {
-          X-Frame-Options "ALLOW-FROM https://dashboard.racci.dev"
-          Content-Security-Policy "frame-ancestors 'self' https://dashboard.racci.dev"
+          X-Frame-Options "ALLOW-FROM https://dashboard.${self.data.site.domain}"
+          Content-Security-Policy "frame-ancestors 'self' https://dashboard.${self.data.site.domain}"
         }
       }
 
@@ -114,7 +113,7 @@ _:
   security.acme = {
     acceptTerms = true;
     defaults = {
-      email = "admin@racci.dev";
+      email = self.data.site.adminEmail;
       dnsResolver = "1.1.1.1:53";
       dnsProvider = "cloudflare";
       credentialFiles = {

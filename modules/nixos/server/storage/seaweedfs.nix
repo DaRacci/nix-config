@@ -2,6 +2,7 @@
   config,
   inputs,
   lib,
+  self,
   hostDirectory,
   importExternals ? true,
   ...
@@ -27,7 +28,7 @@ let
   sopsPh = config.sops.placeholder;
 
   baseDir = "/var/lib/seaweedfs";
-  master = [ "seaweedfs.${config.server.proxy.domain}:443" ];
+  master = [ "seaweedfs.${self.data.site.domain}:443" ];
 
   sopsCertAndKeys = {
     owner = "seaweedfs";
@@ -94,7 +95,7 @@ let
         reverse_proxy localhost:${toString attr.grpcPort} {
           transport http {
             tls_trust_pool file ${config.sops.secrets."SEAWEEDFS/TLS/CA".path}
-            tls_server_name "${domain}.${config.server.proxy.domain}"
+            tls_server_name "${domain}.${self.data.site.domain}"
             tls_client_auth ${config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_CRT".path} ${
               config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_KEY".path
             }
@@ -229,7 +230,7 @@ in
         s3 = {
           enable = true;
           allowDeleteBucketNotEmpty = false;
-          domainName = "s3.seaweedfs.${config.server.proxy.domain}";
+          domainName = "s3.seaweedfs.${self.data.site.domain}";
         };
       };
     };
@@ -368,7 +369,7 @@ in
         serviceConfig = {
           ExecStart = ''
             ${cfg.package}/bin/weed worker \
-              -admin=admin.seaweedfs.${config.server.proxy.domain}:443.10443 \
+              -admin=admin.seaweedfs.${self.data.site.domain}:443.10443 \
               -jobType=vacuum,volume_balance,erasure_coding,admin_script
           '';
           WorkingDirectory = "/var/lib/seaweedfs/worker";

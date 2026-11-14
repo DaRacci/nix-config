@@ -2,6 +2,7 @@
   config,
   pkgs,
   lib,
+  self,
   ...
 }:
 let
@@ -50,11 +51,11 @@ in
       enable = true;
       settings =
         let
-          certDirectory = config.security.acme.certs."auth.racci.dev".directory;
+          certDirectory = config.security.acme.certs."auth.${self.data.site.domain}".directory;
         in
         rec {
           version = "2";
-          domain = "auth.racci.dev";
+          domain = "auth.${self.data.site.domain}";
           origin = "https://${domain}";
 
           bindaddress = "[::]:8443";
@@ -63,7 +64,7 @@ in
           tls_chain = "${certDirectory}/fullchain.pem";
 
           http_client_address_info.x-forward-for =
-            config.server.network.subnets
+            self.data.network.subnets
             |> map (subnet: [
               subnet.ipv4.cidr
               subnet.ipv6.cidr
@@ -105,8 +106,8 @@ in
       systems.oauth2 = {
         nextcloud = {
           displayName = "Nextcloud";
-          originUrl = "https://nc.racci.dev/apps/user_oidc/code";
-          originLanding = "https://nc.racci.dev";
+          originUrl = "https://nc.${self.data.site.domain}/apps/user_oidc/code";
+          originLanding = "https://nc.${self.data.site.domain}";
           basicSecretFile = config.sops.secrets."KANIDM/OAUTH2/NEXTCLOUD_SECRET".path;
 
           scopeMaps.cloud = [
@@ -119,8 +120,8 @@ in
 
         hassio = {
           displayName = "Home Assistant";
-          originUrl = "https://hassio.racci.dev/auth/oidc/callback";
-          originLanding = "https://hassio.racci.dev/auth/oidc/welcome";
+          originUrl = "https://hassio.${self.data.site.domain}/auth/oidc/callback";
+          originLanding = "https://hassio.${self.data.site.domain}/auth/oidc/welcome";
           basicSecretFile = config.sops.secrets."KANIDM/OAUTH2/HASSIO_SECRET".path;
 
           scopeMaps.family = [
@@ -134,11 +135,11 @@ in
         immich = {
           displayName = "Immich";
           originUrl = [
-            "https://photos.racci.dev/auth/login"
-            "https://photos.racci.dev/user-settings"
+            "https://photos.${self.data.site.domain}/auth/login"
+            "https://photos.${self.data.site.domain}/user-settings"
             "app.immich:///oauth-callback"
           ];
-          originLanding = "https://photos.racci.dev";
+          originLanding = "https://photos.${self.data.site.domain}";
           basicSecretFile = config.sops.secrets."KANIDM/OAUTH2/IMMICH_SECRET".path;
 
           scopeMaps.cloud = [
@@ -157,8 +158,8 @@ in
 
         grafana = {
           displayName = "Grafana";
-          originUrl = "https://grafana.racci.dev/login/generic_oauth";
-          originLanding = "https://grafana.racci.dev";
+          originUrl = "https://grafana.${self.data.site.domain}/login/generic_oauth";
+          originLanding = "https://grafana.${self.data.site.domain}";
           public = true;
 
           scopeMaps.sysadmin = [
@@ -177,8 +178,8 @@ in
 
         hermes = {
           displayName = "Agent Dashboard";
-          originUrl = "https://agent.racci.dev/auth/callback";
-          originLanding = "https://agent.racci.dev";
+          originUrl = "https://agent.${self.data.site.domain}/auth/callback";
+          originLanding = "https://agent.${self.data.site.domain}";
           public = true;
 
           scopeMaps.cloud = [
@@ -215,7 +216,7 @@ in
   };
 
   systemd.services.kanidm = {
-    after = [ "acme-auth.racci.dev.service" ];
+    after = [ "acme-auth.${self.data.site.domain}.service" ];
     serviceConfig.LoadCredential =
       let
         inherit (config.sops) secrets;
@@ -229,7 +230,7 @@ in
   security.acme = {
     acceptTerms = true;
     defaults = {
-      email = "admin@racci.dev";
+      email = self.data.site.adminEmail;
       dnsResolver = "1.1.1.1:53";
       dnsProvider = "cloudflare";
       credentialFiles = {

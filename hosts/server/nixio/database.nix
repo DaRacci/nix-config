@@ -3,6 +3,7 @@
   config,
   pkgs,
   lib,
+  self,
   ...
 }:
 {
@@ -88,7 +89,7 @@
         local   all       all             trust
         local   all       all             scram-sha-256
       ''
-      + (lib.pipe config.server.network.subnets [
+      + (lib.pipe self.data.network.subnets [
         (map (
           subnet:
           [ "host  all  all  ${subnet.ipv4.cidr}  scram-sha-256" ]
@@ -119,7 +120,7 @@
     # TODO - can i integrate this with the backup service?
     pgadmin = {
       enable = true;
-      initialEmail = "admin@racci.dev";
+      initialEmail = self.data.site.adminEmail;
       initialPasswordFile = config.sops.secrets."PGADMIN_PASSWORD".path;
       settings = {
         DEFAULT_BINARY_PATHS = {

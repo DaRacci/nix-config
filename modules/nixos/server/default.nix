@@ -182,7 +182,6 @@ in
     (importModule ./dashboard.nix { })
     (importModule ./fail2ban.nix { })
     (importModule ./monitoring { })
-    (importModule ./network.nix { })
     (importModule ./proxy { })
 
     ./ssh-shell
@@ -190,6 +189,7 @@ in
     ./atuin.nix
     ./distributed-builds.nix
     ./image.nix
+    ./network.nix
   ];
 
   options.server = {

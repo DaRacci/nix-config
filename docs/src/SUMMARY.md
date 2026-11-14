@@ -13,6 +13,10 @@
 
 - [Internal mTLS CA](security/internal_mtls_ca.md)
 
+# Shared Data
+
+- [Overview](data.md)
+
 # Development
 
 - [Adding a new User](development/adding_a_new_user.md)

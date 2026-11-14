@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  self,
+  ...
+}:
 {
   server = {
     dashboard.items.adguard = {
@@ -15,10 +20,10 @@
   };
 
   systemd.services.adguardhome = {
-    requires = [ "acme-adguard.racci.dev.service" ];
+    requires = [ "acme-adguard.${self.data.site.domain}.service" ];
     serviceConfig.LoadCredential =
       let
-        certDir = config.security.acme.certs."adguard.racci.dev".directory;
+        certDir = config.security.acme.certs."adguard.${self.data.site.domain}".directory;
       in
       [
         "cert.pem:${certDir}/cert.pem"
@@ -62,7 +67,7 @@
           anonymize_client_ip = false;
           upstream_mode = "parallel";
           upstream_dns =
-            (lib.pipe config.server.network.subnets [
+            (lib.pipe self.data.network.subnets [
               (map (subnet: "[/${subnet.domain}/]${subnet.dns}"))
             ])
             ++ [
@@ -89,7 +94,7 @@
             "::1/128"
           ];
 
-          private_networks = lib.trivial.pipe config.server.network.subnets [
+          private_networks = lib.trivial.pipe self.data.network.subnets [
             (map (subnet: [
               subnet.ipv4.cidr
               subnet.ipv6.cidr
@@ -104,7 +109,7 @@
 
           use_private_ptr_resolvers = true;
           local_ptr_upstreams =
-            lib.trivial.pipe config.server.network.subnets [
+            lib.trivial.pipe self.data.network.subnets [
               (map (
                 subnet:
                 [
@@ -124,33 +129,33 @@
         };
 
         user_rules =
-          lib.trivial.pipe config.server.network.subnets [
+          lib.trivial.pipe self.data.network.subnets [
             (map (
               subnet:
               [
-                "*.racci.dev^$client=${subnet.ipv4.cidr},dnsrewrite=${config.system.name}.${subnet.domain}"
+                "*.${self.data.site.domain}^$client=${subnet.ipv4.cidr},dnsrewrite=${config.system.name}.${subnet.domain}"
               ]
               ++ lib.optionals (subnet.ipv6.cidr != null) [
-                "*.racci.dev^$client=${subnet.ipv6.cidr},dnsrewrite=${config.system.name}.${subnet.domain}"
+                "*.${self.data.site.domain}^$client=${subnet.ipv6.cidr},dnsrewrite=${config.system.name}.${subnet.domain}"
               ]
             ))
             lib.flatten
           ]
           ++ [
-            "@@||nextcloud.racci.dev^$dnsrewrite" # Nextcloud isn't hosted internally yet.
-            "@@||cloud.racci.dev^$dnsrewrite" # Digital Ocean DNS
+            "@@||nextcloud.${self.data.site.domain}^$dnsrewrite" # Nextcloud isn't hosted internally yet.
+            "@@||cloud.${self.data.site.domain}^$dnsrewrite" # Digital Ocean DNS
             "@@||s.youtube.com^$important" # Fix YouTube history for IOS App
             "@@||ipinfo.io^$important" # Blocked by HaGeZi's but needed.
             "@@||api.loganalytics.io^$important" # Blocked by HaGeZi's but needed for Azure Log Analytics.
 
             # Proxmox serves its HTTPS itself, no proxy.
-            "@@||proxmox.racci.dev^$dnsrewrite"
-            "pve.racci.dev^$important,dnsrewrite=proxmox.localdomain"
+            "@@||proxmox.${self.data.site.domain}^$dnsrewrite"
+            "pve.${self.data.site.domain}^$important,dnsrewrite=proxmox.localdomain"
           ];
 
         tls = {
           enabled = true;
-          server_name = "adguard.racci.dev";
+          server_name = "adguard.${self.data.site.domain}";
 
           port_https = 8443;
           port_dns_over_tls = 853;

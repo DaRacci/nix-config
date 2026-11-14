@@ -48,9 +48,9 @@ When a service defines a database in `server.database.postgres`:
 Redis management uses a similar aggregation pattern:
 
 - **Database IDs**: Because Redis uses numeric IDs (0-15),
-  the system uses a static mapping file (`redis-mappings.json`) on the Database Coordinator to ensure consistent ID assignment across the fleet.
+  the system uses the shared mapping file `data/redis/mappings.json` to ensure consistent ID assignment across the fleet.
 - **Password Management**: A shared password for the primary Redis instance is managed via `REDIS/PASSWORD` in SOPS.
-- **Tooling**: Use the `update-redis-mappings` command on the Database Coordinator to update the mapping file when adding new Redis clients.
+- **Tooling**: Use the `update-redis-mappings` command to update the shared mapping file when adding new Redis clients.
 
 ### DB Guardian Coordination
 
@@ -86,4 +86,5 @@ each guardian presents a per-host server certificate, and both sides trust only 
 ## References
 
 - [DB Guardian](../../../components/db_guardian.md)
+- [Shared Data](../../../data.md)
 - [Database Coordinator](../../../hosts/server/nixio.md)

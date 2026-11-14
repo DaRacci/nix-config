@@ -4,7 +4,15 @@
   lib,
   ...
 }:
+let
+  shared = import ../data { inherit lib; };
+in
 {
+  flake = {
+    data = shared.data;
+    validate = shared.validate;
+  };
+
   imports = [
     inputs.flake-parts.flakeModules.partitions
 

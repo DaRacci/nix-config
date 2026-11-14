@@ -51,7 +51,7 @@
           "**/secrets.yaml"
           "**/ssh_host_ed25519_key.pub"
           "hosts/server/nixcloud/provisioning.json"
-          "hosts/server/nixio/redis-mappings.json"
+          "data/redis/mappings.json"
           "hosts/server/nixio/tunnel/credentials.json"
         ];
       };

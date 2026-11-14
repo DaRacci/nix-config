@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  self,
   ...
 }:
 {
@@ -25,7 +26,7 @@
       server_port = 8123;
       use_x_forwarded_for = true;
       trusted_proxies =
-        config.server.network.subnets
+        self.data.network.subnets
         |> map (subnet: [
           subnet.ipv4.cidr
           subnet.ipv6.cidr

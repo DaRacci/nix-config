@@ -33,6 +33,7 @@ These modules allow for modular and reusable configurations across different hos
     - [Mnemosyne](nixos/ai/mnemosyne.md)
 - `modules/flake/`: Flake-level modules for cross-host configuration.
   - [Flake Allocations](flake/allocations.md)
+- `data/`: Shared repository facts and their validation, documented in [Shared Data](../data.md).
 - `modules/home-manager/`: Contains Home-Manager-specific modules.
   - `Programs`
     - [Shell Program Set](home-manager/programs/shell.md)

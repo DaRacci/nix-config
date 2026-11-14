@@ -2,8 +2,8 @@
 
 ## Purpose
 
-The network module coordinates network subnet definitions and firewall rules,
-allowing for centralised configuration of subnets and automatic propagation of these settings to other servers in the cluster.
+The network module coordinates network subnet definitions and firewall rules.
+Subnets come from the shared `data/network.nix` file and apply to every server host.
 
 ## Entry Point
 
@@ -15,17 +15,18 @@ allowing for centralised configuration of subnets and automatic propagation of t
 
 ## Architecture / Services / Scope
 
-- This module uses `getIOPrimaryHostAttr` to fetch the `server.network.subnets` configuration from the IO Coordinator
-  (`server.ioPrimaryHost`), ensuring all servers in the cluster are aware of the network structure defined there.
+- Subnets are read directly from `self.data.network.subnets`, documented in [Shared Data](../../../data.md).
+  There is no per-host subnet option.
 - The module generates `ip saddr` / `ip6 saddr` accept rules for the specified ports, allowing traffic only from the defined subnets.
 - These rules are appended to the `nftables` input chain through the `networking.firewall.extraInputRules` option.
   They apply to new and untracked flows only; established connections are accepted earlier by `conntrack`.
 
 ## Operational Notes / Assumptions
 
-- Subnets and per-subnet open ports are declared on the IO Coordinator via `server.network.subnets` and `server.network.openPortsForSubnet`.
+- Subnets are declared in `data/network.nix`; hosts do not declare them.
+- Per-host open ports are declared through `server.network.openPortsForSubnet`.
 
 ## References
 
-- [IO Coordinator](../../../hosts/server/nixio.md)
+- [Shared Data](../../../data.md)
 - [NixOS Networking](https://nixos.org/manual/nixos/stable/#sec-firewall)

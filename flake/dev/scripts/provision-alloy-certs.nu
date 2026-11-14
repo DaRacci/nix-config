@@ -127,17 +127,7 @@ def main [
 
 def proxy-domain [] {
   try {
-    flake-eval r#'
-      let
-        cfgs = flake.nixosConfigurations;
-        servers = builtins.filter (
-          name: cfgs.${name}.config.host.device.role == "server"
-        ) (builtins.attrNames cfgs);
-        io = builtins.head (
-          builtins.filter (name: cfgs.${name}.config.server.ioPrimaryHost == name) servers
-        );
-      in cfgs.${io}.config.server.proxy.domain
-    '# --raw | str trim
+    flake-eval r#'flake.data.site.domain'# --raw | str trim
   } catch {|err|
     fail $"Could not derive the proxy domain; pass --domain explicitly: ($err.msg)"
   }
