@@ -104,6 +104,14 @@ let
           ''}
           crypto key sign-verify {env.${contextToEnvPrefix resolved.context}_SHARED_KEY}
           enable identity provider ${resolved.context}
+          # The portal ACL only admits its own role names.
+          # Kanidm only sends group SPNs, so the issued token would be rejected
+          # and its cookie deleted on the next request.
+          # Access control stays in the authorization policies.
+          transform user {
+            match realm ${resolved.context}
+            action add roles authp/user
+          }
           ui {
             theme basic
             ${optionalString (config.server.proxy.kanidmPortalCss != null) ''

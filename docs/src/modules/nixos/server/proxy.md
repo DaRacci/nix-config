@@ -155,6 +155,12 @@ Groups may be declared on the context or on the virtual host; the union is used.
 A context whose hosts resolve no groups fails an assertion, because Kanidm then issues no token at all
 and every login ends on an `Access Denied` page.
 
+Each portal also carries a `transform user` block that adds the `authp/user` role to the issued token.
+The portal's own access list only admits its reserved roles (`authp/admin`, `authp/user`, `authp/guest`),
+while Kanidm sends group SPNs only. Without the transform the login succeeds, the access token is issued,
+and the portal then rejects that token on the next request and deletes its cookie, which restarts the login.
+This role is not an authorization decision: `allowGroups` on the policy is.
+
 Path gating uses `server.proxy.virtualHosts.<name>.kanidm`:
 
 | Option | Default | Effect |
