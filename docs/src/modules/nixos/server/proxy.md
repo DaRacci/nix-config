@@ -94,7 +94,7 @@ Extensions with lower priority numbers generate config earlier.
 1. Import in `proxy/default.nix`.
 1. Set `server.proxy.extensions.<name>` with priority, config function, etc.
 1. Declare per-vhost options via `options.server.proxy.virtualHosts` with `attrsOf (submodule ...)`.
-1. Use `proxyLib` for helpers: `replaceLocalHost`, `resolveKanidmContext`, `hasAnyKanidm`.
+1. Use `proxyLib` for helpers: `replaceLocalHost`, `resolveKanidmContext`, `hasAnyKanidm`, `portalName`, `sanitiseName`.
 
 ### API Key Auth Extension
 
@@ -119,11 +119,42 @@ Mutual exclusivity with Kanidm on the same vhost is enforced by the existing `co
 
 Authentication requires specific secrets per context, managed via sops-nix:
 
-1. `KANIDM/OAUTH2/<UPPER_CONTEXT>_SECRET`: Provisioning secret for Kanidm systems.
-1. `OAUTH_<PREFIX>_CLIENT_SECRET`: The OAuth2 client secret for Caddy.
-1. `<PREFIX>_SHARED_KEY`: A shared key used by Caddy to sign and verify authentication tokens.
+1. `KANIDM/OAUTH2/<UPPER_CONTEXT>_SECRET`: OAuth2 client secret. The Identity Coordinator uses it for Kanidm provisioning; the IO Coordinator uses the same value for Caddy.
+1. `PROXY_AUTH/KANIDM/<UPPER_CONTEXT>_SHARED_KEY`: Shared key used by Caddy to sign and verify authentication tokens.
 
-These are automatically managed if Kanidm provisioning is enabled on the same host.
+On the IO Coordinator, the module renders `PROXY_AUTH/KANIDM/<UPPER_CONTEXT>_ENV` and loads it as a Caddy environment file with `OAUTH_<UPPER_CONTEXT>_CLIENT_SECRET` and `<UPPER_CONTEXT>_SHARED_KEY`.
+The OAuth2 secret value must match between the Identity Coordinator and IO Coordinator hosts when they are separate.
+
+### Kanidm Session Sharing and Path Gating
+
+By default each virtual host gets its own `authentication portal` and a host-only cookie,
+so two hosts sharing one OAuth context still prompt twice.
+Sharing a session is opt-in per context via `server.proxy.kanidmContexts.<context>`:
+
+| Option | Default | Effect |
+| ------------------ | -------- | -------------------------------------------------------------------------------------------- |
+| `sharedPortal` | `false` | One portal named `<context>_portal` for every vhost using the context, instead of one per vhost |
+| `cookieDomain` | `null` | Emits `cookie domain <value>`; required when `sharedPortal` is set. A leading dot is stripped. |
+
+With both set, the session cookie is scoped to the parent domain and validated by one portal instance,
+so a login on one host is accepted on the others. The cookie prefix is derived from the context name
+(`<UPPER_CONTEXT>_SESSION_ID`, `<UPPER_CONTEXT>_ACCESS_TOKEN`), and the matching policy cookie names are emitted for every vhost in that context.
+Enabling this renames cookies, so existing sessions are dropped once.
+
+The login redirect target is a same-host path, `/auth/oauth2/<context>`,
+and `/auth/*` is matched with a `handle` so it resolves before the `authorize` handle.
+
+Path gating uses `server.proxy.virtualHosts.<name>.kanidm`:
+
+| Option | Default | Effect |
+| ------------- | -------- | --------------------------------------------------------------------------------------------- |
+| `bypassPaths` | `[ ]` | Paths that never require authentication |
+| `protectedPaths` | `[ ]` | Paths that require authentication; everything else is served unauthenticated |
+
+An empty `protectedPaths` means the whole host requires authentication.
+Both lists can be combined, and `bypassPaths` wins for the paths it lists.
+Use `protectedPaths` for hosts that mix browser and machine traffic, such as a storage component
+whose UI should be gated while its data plane stays reachable.
 
 ### API Key Auth
 

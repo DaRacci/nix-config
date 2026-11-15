@@ -17,6 +17,8 @@ let
 
   contextToEnvPrefix = context: builtins.replaceStrings [ "-" ] [ "_" ] (toUpper context);
 
+  sanitiseName = name: builtins.replaceStrings [ "-" "." ] [ "_" "_" ] name;
+
   resolveKanidmContext =
     _name: vh:
     let
@@ -44,6 +46,8 @@ let
             allowGroups = [ ];
           };
       mergedAllowGroups = lib.unique (baseContext.allowGroups ++ vh.kanidm.allowGroups);
+      cookieDomain =
+        if (sharedContext.cookieDomain or null) != null then sharedContext.cookieDomain else vh.baseUrl;
     in
     {
       context = contextName;
@@ -53,8 +57,18 @@ let
       allowGroups = mergedAllowGroups;
       inherit (vh.kanidm) bypassPaths;
       inherit domain;
-      cookieDomain = vh.baseUrl;
+      inherit cookieDomain;
+      sharedPortal = sharedContext.sharedPortal or false;
+      cookiePrefix =
+        if (sharedContext.cookieDomain or null) != null then toUpper (sanitiseName contextName) else null;
     };
+
+  portalName =
+    name: resolved:
+    if resolved.sharedPortal then
+      "${sanitiseName resolved.context}_portal"
+    else
+      "${sanitiseName name}_portal";
 
   hasAnyKanidm =
     getAllAttrsFunc "server.proxy.virtualHosts" (
@@ -124,6 +138,8 @@ let
   proxyLib = {
     inherit
       contextToEnvPrefix
+      sanitiseName
+      portalName
       resolveKanidmContext
       hasAnyKanidm
       collectKanidmContexts

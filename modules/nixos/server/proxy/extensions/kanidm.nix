@@ -1,5 +1,6 @@
 {
   proxyLib,
+  isThisIOPrimaryHost,
   ...
 }:
 {
@@ -21,6 +22,7 @@ let
   inherit (types)
     str
     int
+    bool
     nullOr
     listOf
     attrsOf
@@ -29,6 +31,8 @@ let
 
   inherit (proxyLib)
     contextToEnvPrefix
+    sanitiseName
+    portalName
     resolveKanidmContext
     hasAnyKanidm
     collectKanidmContexts
@@ -64,20 +68,37 @@ let
 
   generateAuthenticationPortals =
     kanidmVirtualHosts:
-    kanidmVirtualHosts
-    |> builtins.attrNames
+    let
+      portals =
+        kanidmVirtualHosts
+        |> builtins.attrNames
+        |> map (
+          name:
+          let
+            vh = kanidmVirtualHosts.${name};
+            resolved = resolveKanidmContext name vh;
+          in
+          {
+            portal = portalName name resolved;
+            inherit resolved;
+          }
+        )
+        |> lib.foldl' (
+          acc: entry: if builtins.hasAttr entry.portal acc then acc else acc // { ${entry.portal} = entry; }
+        ) { };
+    in
+    portals
+    |> builtins.attrValues
     |> map (
-      name:
-      let
-        vh = kanidmVirtualHosts.${name};
-        resolved = resolveKanidmContext name vh;
-        envPrefix = contextToEnvPrefix resolved.context;
-      in
+      { portal, resolved }:
       ''
-        authentication portal ${name}_portal {
+        authentication portal ${portal} {
           crypto default token lifetime ${toString resolved.tokenLifetime}
           cookie domain "${resolved.cookieDomain}"
-          crypto key sign-verify {env.${envPrefix}_SHARED_KEY}
+          ${optionalString (resolved.cookiePrefix != null) ''
+            set cookie name prefix ${resolved.cookiePrefix}
+          ''}
+          crypto key sign-verify {env.${contextToEnvPrefix resolved.context}_SHARED_KEY}
           enable identity provider ${resolved.context}
         }
       ''
@@ -97,8 +118,12 @@ let
       in
       ''
         authorization policy ${name}_policy {
-          set auth url https://${resolved.cookieDomain}/auth/oauth2/${resolved.context}
+          set auth url /auth/oauth2/${resolved.context}
           crypto key sign-verify {env.${envPrefix}_SHARED_KEY}
+          ${optionalString (resolved.cookiePrefix != null) ''
+            set session_id cookie name ${resolved.cookiePrefix}_SESSION_ID
+            set access_token cookie name ${resolved.cookiePrefix}_ACCESS_TOKEN
+          ''}
           ${
             resolved.allowGroups |> map (group: "allow groups ${group}") |> builtins.concatStringsSep "\n    "
           }
@@ -146,6 +171,30 @@ let
     };
   };
 
+  contextOnlyOptions = {
+    sharedPortal = mkOption {
+      type = bool;
+      default = false;
+      description = ''
+        Serve one authentication portal for every virtual host using this context.
+        A single portal means a single session, so a login on one host is valid on the others
+        once they share `cookieDomain`.
+      '';
+    };
+
+    cookieDomain = mkOption {
+      type = nullOr str;
+      default = null;
+      example = "example.com";
+      description = ''
+        Cookie domain for the portal session cookies.
+        When set, the cookie is shared by every host under this domain,
+        which is what makes authentication carry across those hosts.
+        A leading dot is accepted and stripped by the plugin.
+      '';
+    };
+  };
+
   kanidmContextsWithVirtualHosts =
     let
       contexts = collectKanidmContexts;
@@ -175,6 +224,33 @@ let
       }
     ) contexts
     |> lib.filterAttrs (_: ctx: builtins.length (builtins.attrValues ctx.virtualHosts) > 0);
+
+  allKanidmVirtualHosts = collectKanidmVirtualHosts;
+
+  portalContexts =
+    allKanidmVirtualHosts
+    |> builtins.attrNames
+    |> map (
+      name:
+      let
+        resolved = resolveKanidmContext name allKanidmVirtualHosts.${name};
+      in
+      {
+        portal = portalName name resolved;
+        context = resolved.context;
+      }
+    )
+    |> lib.foldl' (
+      acc: entry: acc // { ${entry.portal} = (acc.${entry.portal} or [ ]) ++ [ entry.context ]; }
+    ) { };
+
+  portalsWithMixedContexts = lib.filterAttrs (
+    _: contexts: builtins.length (unique contexts) > 1
+  ) portalContexts;
+
+  contextsMissingCookieDomain = lib.filterAttrs (
+    _: ctx: ctx.sharedPortal && ctx.cookieDomain == null
+  ) config.server.proxy.kanidmContexts;
 in
 {
   options = {
@@ -182,7 +258,7 @@ in
       description = "Shared Kanidm OAuth2 context configurations.";
       default = { };
       type = attrsOf (submodule {
-        options = commonKanidmOptions;
+        options = commonKanidmOptions // contextOnlyOptions;
       });
     };
 
@@ -209,7 +285,20 @@ in
                         "/health"
                         "/api/webhooks/*"
                       ];
-                      description = "List of path patterns that should bypass authentication.";
+                      description = "List of path patterns that never require authentication.";
+                    };
+
+                    protectedPaths = mkOption {
+                      type = listOf str;
+                      default = [ ];
+                      example = [ "/ui/*" ];
+                      description = ''
+                        Path patterns that require authentication.
+                        When empty, the whole host requires authentication.
+                        When set, only matching paths do and every other path is served
+                        without authentication, which keeps machine endpoints reachable.
+                        `bypassPaths` still takes precedence for the paths it lists.
+                      '';
                     };
                   };
                 })
@@ -222,6 +311,17 @@ in
   };
 
   config = {
+    assertions = [
+      {
+        assertion = contextsMissingCookieDomain == { };
+        message = "server.proxy.kanidmContexts.<name>.sharedPortal requires cookieDomain, otherwise the shared portal cannot carry a session across hosts.";
+      }
+      {
+        assertion = portalsWithMixedContexts == { };
+        message = "Duplicate Kanidm portal name across contexts. A shared portal is named after its context, so no virtual host may be named after that context.";
+      }
+    ];
+
     server.proxy.extensions.kanidm = {
       priority = 50;
       consumesExtraConfig = true;
@@ -233,22 +333,39 @@ in
           ""
         else
           let
-            sanitiseName = builtins.replaceStrings [ "-" "." ] [ "_" "_" ] name;
+            resolved = resolveKanidmContext name vh;
+            portal = portalName name resolved;
+            matcherName = sanitiseName name;
+            extra = vh._resolvedExtraConfig;
+            protectedPaths = vh.kanidm.protectedPaths;
           in
           ''
             ${optionalString (vh.kanidm.bypassPaths != [ ]) ''
-              @bypass_auth_${sanitiseName} path ${builtins.concatStringsSep " " vh.kanidm.bypassPaths}
-              handle @bypass_auth_${sanitiseName} {
-                ${vh._resolvedExtraConfig}
+              @bypass_auth_${matcherName} path ${builtins.concatStringsSep " " vh.kanidm.bypassPaths}
+              handle @bypass_auth_${matcherName} {
+                ${extra}
               }
             ''}
-            route /auth/* {
-              authenticate with ${name}_portal
+            @auth_path_${matcherName} path /auth/*
+            handle @auth_path_${matcherName} {
+              authenticate with ${portal}
             }
-            handle {
-              authorize with ${name}_policy
-              ${vh._resolvedExtraConfig}
-            }
+            ${optionalString (protectedPaths != [ ]) ''
+              @protect_auth_${matcherName} path ${builtins.concatStringsSep " " protectedPaths}
+              handle @protect_auth_${matcherName} {
+                authorize with ${name}_policy
+                ${extra}
+              }
+              handle {
+                ${extra}
+              }
+            ''}
+            ${optionalString (protectedPaths == [ ]) ''
+              handle {
+                authorize with ${name}_policy
+                ${extra}
+              }
+            ''}
           '';
 
       globalConfig =
@@ -271,8 +388,35 @@ in
       vhostModule = null;
     };
 
-    sops.secrets =
-      mkIf
+    sops.secrets = lib.mkMerge [
+      (mkIf (isThisIOPrimaryHost && hasAnyKanidm) (
+        builtins.listToAttrs (
+          lib.concatMap (
+            contextName:
+            let
+              upperContext = lib.toUpper contextName;
+              value = {
+                owner = "caddy";
+                group = "caddy";
+                mode = "0400";
+                restartUnits = [ "caddy.service" ];
+              };
+            in
+            [
+              {
+                name = "KANIDM/OAUTH2/${upperContext}_SECRET";
+                inherit value;
+              }
+              {
+                name = "PROXY_AUTH/KANIDM/${upperContext}_SHARED_KEY";
+                inherit value;
+              }
+            ]
+          ) (builtins.attrNames kanidmContextsWithVirtualHosts)
+        )
+      ))
+
+      (mkIf
         (config.services.kanidm.server.enable && config.services.kanidm.provision.enable && hasAnyKanidm)
         (
           builtins.listToAttrs (
@@ -286,7 +430,40 @@ in
               };
             }) (builtins.attrNames kanidmContextsWithVirtualHosts)
           )
-        );
+        )
+      )
+    ];
+
+    sops.templates = mkIf (isThisIOPrimaryHost && hasAnyKanidm) (
+      builtins.listToAttrs (
+        map (
+          contextName:
+          let
+            upperContext = lib.toUpper contextName;
+          in
+          {
+            name = "PROXY_AUTH/KANIDM/${upperContext}_ENV";
+            value = {
+              owner = "caddy";
+              group = "caddy";
+              mode = "0400";
+              content = ''
+                OAUTH_${upperContext}_CLIENT_SECRET=${
+                  config.sops.placeholder."KANIDM/OAUTH2/${upperContext}_SECRET"
+                }
+                ${upperContext}_SHARED_KEY=${config.sops.placeholder."PROXY_AUTH/KANIDM/${upperContext}_SHARED_KEY"}
+              '';
+            };
+          }
+        ) (builtins.attrNames kanidmContextsWithVirtualHosts)
+      )
+    );
+
+    systemd.services.caddy.serviceConfig.EnvironmentFile = mkIf (isThisIOPrimaryHost && hasAnyKanidm) (
+      map (contextName: config.sops.templates."PROXY_AUTH/KANIDM/${lib.toUpper contextName}_ENV".path) (
+        builtins.attrNames kanidmContextsWithVirtualHosts
+      )
+    );
 
     services.kanidm.provision.systems.oauth2 =
       mkIf
