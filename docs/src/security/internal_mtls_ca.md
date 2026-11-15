@@ -86,6 +86,10 @@ Pinning the intermediate is what makes the separate CA meaningful; the peer's ch
 DB Guardian leaves are issued by `provision-db-guardian-certs`, which reads the DB Guardian intermediate from a KeePassXC vault.
 See [DB Guardian](../components/db_guardian.md#provisioning-certificates) for the helper and the following procedure for the certificate profiles it implements.
 
+SeaweedFS leaves are issued by `provision-seaweedfs-certs`, which reads the SeaweedFS intermediate from the vault.
+See [SeaweedFS](../modules/nixos/server/storage/seaweedfs.md#provisioning-certificates) for the profiles it implements,
+including the master hostname alias.
+
 Create the root once:
 
 ```bash

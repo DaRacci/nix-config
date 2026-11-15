@@ -74,6 +74,21 @@ The master leaf currently carries only the `seaweedfs.${data.site.domain}` SAN.
 `master.seaweedfs.${data.site.domain}` serves HTTP and gRPC, but clients keep dialing the old hostname
 (`services.seaweedfs.*.master` in `default.nix`) until that leaf is reissued with the new SAN.
 
+### Provisioning certificates
+
+Leaves are issued by `provision-seaweedfs-certs`, which reads the Fleet root and the SeaweedFS intermediate from a KeePassXC vault:
+
+```bash
+provision-seaweedfs-certs --vault pki.kdbx --vault-password-file vault-pass
+```
+
+It writes the `CA` bundle (root plus intermediate) and one `<SERVICE>_CRT`/`<SERVICE>_KEY` pair per component,
+each chain ordered leaf first then intermediate, and encrypts all of them as binary SOPS files.
+Components default to master, volume, filer, admin, client, and worker.
+Pass component names to limit a run and `--force` to rotate them, so `--force master` reissues only the master leaf.
+That is the rotation that adds the `master.seaweedfs.${data.site.domain}` SAN.
+Use `--dry-run` to print the planned SAN sets without writing anything.
+
 ## Operational Notes / Assumptions
 
 - **Volume data plane stays open**: only `/ui/*` and `/status` on the volume vhost require authentication.

@@ -112,4 +112,16 @@ in
       pki2kdbx
     ];
   };
+
+  provision-seaweedfs-certs = writeNuApplicationWithLibs {
+    inherit pkgs;
+    sourceRoot = ./.;
+    name = "provision-seaweedfs-certs";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.keepassxc
+      pkgs.openssl
+      pkgs.sops
+    ];
+  };
 }
