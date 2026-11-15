@@ -36,6 +36,42 @@ so the repository can test endpoint shape, proxy integration, and service behavi
   This repository now vendors the module locally and extends it with repo-specific options,
   including `services.seaweedfs.volume.publicUrl` and `extraArgs` on all component services.
 
+## S3 identities
+
+Identities and their IAM policies are declared under `services.seaweedfs.filer.s3`:
+
+```nix
+services.seaweedfs.filer.s3 = {
+  policies.attic = {
+    Version = "2012-10-17";
+    Statement = [
+      {
+        Effect = "Allow";
+        Action = [ "s3:ListBucket" "s3:GetBucketLocation" ];
+        Resource = "arn:aws:s3:::attic";
+      }
+      {
+        Effect = "Allow";
+        Action = [ "s3:GetObject" "s3:PutObject" "s3:DeleteObject" ];
+        Resource = "arn:aws:s3:::attic/*";
+      }
+    ];
+  };
+
+  identities.attic.policies = [ "attic" ];
+};
+```
+
+`services.seaweedfs.filer.s3.config` is the freeform S3 configuration document.
+The `identities` and `policies` options are rendered into it, and any other key passes through unchanged.
+Identity and policy lists are concatenated, and a name declared both ways is rejected.
+Policy attribute names are the policy names identities reference, and the identity name is the S3 user name.
+
+An identity reads `S3/<NAME>_ACCESS_KEY` and `S3/<NAME>_SECRET_KEY` from SOPS and passes them to the filer as
+`S3_<NAME>_ACCESS_KEY` and `S3_<NAME>_SECRET_KEY` through a rendered environment file.
+`accessKeySecret`, `accessKeyEnv`, and the `secretKey` equivalents override those names,
+while `accessKey` and `secretKey` take a literal value instead of a reference.
+
 ## Secrets
 
 SeaweedFS SOPS entries are separate from MinIO secrets and are used for:

@@ -23,6 +23,7 @@ in
   imports = [
     ./options.nix
     ./security.nix
+    ./s3.nix
     ./tmpfiles.nix
     ./master.nix
     ./volume.nix

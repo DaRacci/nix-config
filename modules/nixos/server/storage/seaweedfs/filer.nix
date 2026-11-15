@@ -33,7 +33,7 @@ let
         "s3.cert.file" = cfg.filer.s3.cert.file;
         "s3.key.file" = cfg.filer.s3.cert.key;
         "s3.auditLogConfig" = cfg.filer.s3.auditLogConfig;
-        "s3.config" = cfg.filer.s3.config;
+        "s3.config" = cfg.filer.s3.configFile;
         "s3.externalUrl" = cfg.filer.s3.externalUrl;
       };
 

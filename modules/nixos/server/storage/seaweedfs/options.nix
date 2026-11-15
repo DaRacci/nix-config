@@ -13,6 +13,8 @@ let
     ;
 
   inherit (lib.types)
+    attrs
+    attrsOf
     bool
     float
     ints
@@ -23,6 +25,7 @@ let
     path
     port
     str
+    submodule
     ;
 
   swLib = import ./lib.nix {
@@ -439,15 +442,107 @@ in
             };
 
             config = mkOption {
+              type = attrs;
+              default = { };
+              description = ''
+                Freeform S3 configuration document.
+                The `identities` and `policies` options are rendered into it, and any other key passes through unchanged.
+              '';
+            };
+
+            configFile = mkOption {
               type = nullOr path;
               default = null;
-              description = "S3 config file path.";
+              internal = true;
+              description = "Rendered S3 configuration file path.";
             };
 
             externalUrl = mkOption {
               type = nullOr str;
               default = null;
               description = "External S3 URL advertised by SeaweedFS.";
+            };
+
+            identities = mkOption {
+              type = attrsOf (
+                submodule (
+                  { name, ... }:
+                  let
+                    upperName = lib.toUpper (lib.replaceStrings [ "-" "." ] [ "_" "_" ] name);
+                  in
+                  {
+                    options = {
+                      accessKey = mkOption {
+                        type = nullOr str;
+                        default = null;
+                        description = ''
+                          Literal access key.
+                          When null, the key is read from the environment variable named by `accessKeyEnv`.
+                        '';
+                      };
+
+                      accessKeyEnv = mkOption {
+                        type = str;
+                        default = "S3_${upperName}_ACCESS_KEY";
+                        description = "Environment variable the filer expands for the access key.";
+                      };
+
+                      accessKeySecret = mkOption {
+                        type = str;
+                        default = "S3/${upperName}_ACCESS_KEY";
+                        description = "SOPS secret that populates `accessKeyEnv`.";
+                      };
+
+                      secretKey = mkOption {
+                        type = nullOr str;
+                        default = null;
+                        description = ''
+                          Literal secret key.
+                          When null, the key is read from the environment variable named by `secretKeyEnv`.
+                        '';
+                      };
+
+                      secretKeyEnv = mkOption {
+                        type = str;
+                        default = "S3_${upperName}_SECRET_KEY";
+                        description = "Environment variable the filer expands for the secret key.";
+                      };
+
+                      secretKeySecret = mkOption {
+                        type = str;
+                        default = "S3/${upperName}_SECRET_KEY";
+                        description = "SOPS secret that populates `secretKeyEnv`.";
+                      };
+
+                      policies = mkOption {
+                        type = listOf str;
+                        default = [ ];
+                        description = "Policy names from `services.seaweedfs.filer.s3.policies`.";
+                      };
+
+                      disabled = mkOption {
+                        type = bool;
+                        default = false;
+                        description = "Reject every request made with this identity.";
+                      };
+                    };
+                  }
+                )
+              );
+              default = { };
+              description = ''
+                S3 identities, keyed by identity name.
+                They are rendered into `services.seaweedfs.filer.s3.config` alongside whatever that option declares.
+              '';
+            };
+
+            policies = mkOption {
+              type = attrsOf attrs;
+              default = { };
+              description = ''
+                IAM policy documents keyed by policy name.
+                Identities reference them through `services.seaweedfs.filer.s3.identities.<name>.policies`.
+              '';
             };
           };
 
