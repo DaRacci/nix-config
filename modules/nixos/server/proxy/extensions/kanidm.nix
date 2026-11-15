@@ -121,7 +121,7 @@ let
       in
       ''
         authorization policy ${name}_policy {
-          set auth url /auth/oauth2/${resolved.context}
+          set auth url https://${vh.baseUrl}/auth/oauth2/${resolved.context}
           crypto key sign-verify {env.${envPrefix}_SHARED_KEY}
           ${optionalString (resolved.cookiePrefix != null) ''
             set session_id cookie name ${resolved.cookiePrefix}_SESSION_ID
@@ -348,9 +348,9 @@ in
                 ${extra}
               }
             ''}
-            @auth_path_${matcherName} path /auth/*
+            @auth_path_${matcherName} path /auth /auth/*
             handle @auth_path_${matcherName} {
-              authenticate with ${portal}
+              authenticate with ${portal} at /auth
             }
             ${optionalString (protectedPaths != [ ]) ''
               @protect_auth_${matcherName} path ${builtins.concatStringsSep " " protectedPaths}

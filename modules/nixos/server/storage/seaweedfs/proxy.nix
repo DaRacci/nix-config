@@ -48,7 +48,7 @@ let
       ports = [ attr.port ];
       kanidm = attr.kanidm or null;
       extraConfig = ''
-        reverse_proxy http://localhost:${toString attr.port}
+        reverse_proxy http://127.0.0.1:${toString attr.port}
       '';
     };
 
@@ -69,7 +69,7 @@ let
           }
         }
 
-        reverse_proxy localhost:${toString attr.grpcPort} {
+        reverse_proxy 127.0.0.1:${toString attr.grpcPort} {
           transport http {
             tls_trust_pool file ${config.sops.secrets."SEAWEEDFS/TLS/CA".path}
             tls_server_name "${hostname}.${self.data.site.domain}"

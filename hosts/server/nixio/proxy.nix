@@ -42,9 +42,9 @@ _:
       plugins = [
         "github.com/mholt/caddy-l4@v0.1.1"
         "github.com/WeidiDeng/caddy-cloudflare-ip@v0.0.0-20231130002422-f53b62aa13cb"
-        "github.com/greenpau/caddy-security@v1.1.62"
+        "github.com/greenpau/caddy-security@v1.6.2"
       ];
-      hash = "sha256-gmWRIqOqsPGiLpYfwIpI/v+GMFd/zknFMMsJFwF6iSg=";
+      hash = "sha256-Ko9W1zjNgZItUaMWrGzw/aJwcHFrf6Pai/Z3aHs5hYI=";
     };
     email = self.data.site.adminEmail;
 

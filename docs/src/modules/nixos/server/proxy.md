@@ -141,8 +141,11 @@ so a login on one host is accepted on the others. The cookie prefix is derived f
 (`<UPPER_CONTEXT>_SESSION_ID`, `<UPPER_CONTEXT>_ACCESS_TOKEN`), and the matching policy cookie names are emitted for every vhost in that context.
 Enabling this renames cookies, so existing sessions are dropped once.
 
-The login redirect target is a same-host path, `/auth/oauth2/<context>`,
-and `/auth/*` is matched with a `handle` so it resolves before the `authorize` handle.
+The policy points at the absolute OAuth2 endpoint of its own host, `https://<host>/auth/oauth2/<context>`,
+which the plugin uses to build the provider callback and the post-login redirect.
+Both `/auth` and `/auth/*` are matched with a `handle` so the portal resolves before the `authorize` handle,
+and the `authenticate` handler declares that mount with `at /auth`,
+which requires caddy-security v1.6 or newer.
 
 Path gating uses `server.proxy.virtualHosts.<name>.kanidm`:
 
