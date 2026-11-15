@@ -167,7 +167,7 @@ let
           inherit description after wants;
           serviceConfig = {
             ExecStart = mkWeedCommand component flags extraArgs;
-            inherit workingDir;
+            WorkingDirectory = workingDir;
           };
         };
       };
