@@ -27,6 +27,81 @@ let
     "WORKER"
   ];
 
+  mkComponentOptions =
+    {
+      name,
+      httpPort ? null,
+      grpcPort ? null,
+      grpcPortNullable ? false,
+      ip ? "127.0.0.1",
+      ipBind ? true,
+      dataDir ? null,
+      metricsPort ? true,
+      metricsIp ? null,
+      extraArgs ? true,
+      extraOptions ? { },
+    }:
+    {
+      enable = lib.mkEnableOption "SeaweedFS ${name} service";
+    }
+    // lib.optionalAttrs (httpPort != null) {
+      port = lib.mkOption {
+        type = lib.types.port;
+        default = httpPort;
+        description = "${name} HTTP listen port.";
+      };
+    }
+    // lib.optionalAttrs (grpcPort != null || grpcPortNullable) {
+      grpcPort = lib.mkOption {
+        type = if grpcPortNullable then lib.types.nullOr lib.types.port else lib.types.port;
+        default = grpcPort;
+        description = "${name} gRPC listen port.";
+      };
+    }
+    // lib.optionalAttrs (ip != null) {
+      ip = lib.mkOption {
+        type = lib.types.str;
+        default = ip;
+        description = "${name} advertised IP or hostname.";
+      };
+    }
+    // lib.optionalAttrs (ip != null && ipBind) {
+      ipBind = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+        description = "${name} bind IP. Empty uses ip.";
+      };
+    }
+    // lib.optionalAttrs (dataDir != null) {
+      dataDir = lib.mkOption {
+        type = lib.types.str;
+        default = dataDir;
+        description = "${name} data directory.";
+      };
+    }
+    // lib.optionalAttrs metricsPort {
+      metricsPort = lib.mkOption {
+        type = lib.types.nullOr lib.types.port;
+        default = null;
+        description = "${name} metrics port.";
+      };
+    }
+    // lib.optionalAttrs (metricsIp != null) {
+      metricsIp = lib.mkOption {
+        type = lib.types.str;
+        default = metricsIp;
+        description = "${name} metrics bind IP.";
+      };
+    }
+    // lib.optionalAttrs extraArgs {
+      extraArgs = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "Extra CLI args passed to weed ${name}.";
+      };
+    }
+    // extraOptions;
+
   mkCommonSystemdService =
     {
       needsMaster ? true,
@@ -105,6 +180,7 @@ in
     isIOPrimary
     isEnabled
     grpcTLSServices
+    mkComponentOptions
     mkCommonSystemdService
     mkWeedCommand
     mkWeedService

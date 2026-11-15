@@ -14,11 +14,25 @@ let
     listToAttrs
     mapAttrsToList
     mkIf
+    mkOption
     optionals
     optionalAttrs
     optionalString
     removeAttrs
     toJSON
+    ;
+
+  inherit (lib.types)
+    attrs
+    attrsOf
+    bool
+    ints
+    listOf
+    nullOr
+    path
+    port
+    str
+    submodule
     ;
 
   swLib = import ./lib.nix {
@@ -152,6 +166,223 @@ let
   );
 in
 {
+  options.services.seaweedfs.filer.s3 = swLib.mkComponentOptions {
+    name = "s3";
+    httpPort = 8333;
+    grpcPortNullable = true;
+    ip = null;
+    ipBind = false;
+    metricsPort = false;
+    extraOptions = {
+      httpsPort = mkOption {
+        type = nullOr port;
+        default = null;
+        description = "S3 HTTPS listen port.";
+      };
+
+      allowDeleteBucketNotEmpty = mkOption {
+        type = bool;
+        default = false;
+        description = "Allow deleting non-empty buckets.";
+      };
+
+      allowEmptyFolder = mkOption {
+        type = bool;
+        default = true;
+        description = "Allow empty folders.";
+      };
+
+      allowedOrigins = mkOption {
+        type = str;
+        default = "*";
+        description = "S3 CORS allowed origins.";
+      };
+
+      domainName = mkOption {
+        type = nullOr str;
+        default = null;
+        description = "Virtual-hosted-style S3 domain suffix.";
+      };
+
+      dataCenter = mkOption {
+        type = str;
+        default = "";
+        description = "Preferred data center for S3 reads/writes.";
+      };
+
+      cert = {
+        file = mkOption {
+          type = nullOr path;
+          default = null;
+          description = "S3 TLS certificate file path.";
+        };
+
+        key = mkOption {
+          type = nullOr path;
+          default = null;
+          description = "S3 TLS private key file path.";
+        };
+      };
+
+      auditLogConfig = mkOption {
+        type = nullOr path;
+        default = null;
+        description = "S3 audit log config path.";
+      };
+
+      config = mkOption {
+        type = attrs;
+        default = { };
+        description = ''
+          Freeform S3 configuration document.
+          The `identities` and `policies` options are rendered into it, and any other key passes through unchanged.
+        '';
+      };
+
+      configFile = mkOption {
+        type = nullOr path;
+        default = null;
+        internal = true;
+        description = "Rendered S3 configuration file path.";
+      };
+
+      externalUrl = mkOption {
+        type = nullOr str;
+        default = null;
+        description = "External S3 URL advertised by SeaweedFS.";
+      };
+
+      identities = mkOption {
+        type = attrsOf (
+          submodule (
+            { name, ... }:
+            let
+              upperName = lib.toUpper (lib.replaceStrings [ "-" "." ] [ "_" "_" ] name);
+            in
+            {
+              options = {
+                accessKey = mkOption {
+                  type = nullOr str;
+                  default = null;
+                  description = ''
+                    Literal access key.
+                    When null, the key is read from the environment variable named by `accessKeyEnv`.
+                  '';
+                };
+
+                accessKeyEnv = mkOption {
+                  type = str;
+                  default = "S3_${upperName}_ACCESS_KEY";
+                  description = "Environment variable the filer expands for the access key.";
+                };
+
+                accessKeySecret = mkOption {
+                  type = str;
+                  default = "S3/${upperName}_ACCESS_KEY";
+                  description = "SOPS secret that populates `accessKeyEnv`.";
+                };
+
+                secretKey = mkOption {
+                  type = nullOr str;
+                  default = null;
+                  description = ''
+                    Literal secret key.
+                    When null, the key is read from the environment variable named by `secretKeyEnv`.
+                  '';
+                };
+
+                secretKeyEnv = mkOption {
+                  type = str;
+                  default = "S3_${upperName}_SECRET_KEY";
+                  description = "Environment variable the filer expands for the secret key.";
+                };
+
+                secretKeySecret = mkOption {
+                  type = str;
+                  default = "S3/${upperName}_SECRET_KEY";
+                  description = "SOPS secret that populates `secretKeyEnv`.";
+                };
+
+                policies = mkOption {
+                  type = listOf str;
+                  default = [ ];
+                  description = "Policy names from `services.seaweedfs.filer.s3.policies`.";
+                };
+
+                disabled = mkOption {
+                  type = bool;
+                  default = false;
+                  description = "Reject every request made with this identity.";
+                };
+              };
+            }
+          )
+        );
+        default = { };
+        description = ''
+          S3 identities, keyed by identity name.
+          Setting any identity renders `services.seaweedfs.filer.s3.config` from these options,
+          so a manual `services.seaweedfs.filer.s3.config` and this option are mutually exclusive.
+        '';
+      };
+
+      policies = mkOption {
+        type = attrsOf attrs;
+        default = { };
+        description = ''
+          IAM policy documents keyed by policy name.
+          Identities reference them through `services.seaweedfs.filer.s3.identities.<name>.policies`.
+        '';
+      };
+
+      buckets = mkOption {
+        type = attrsOf (submodule {
+          options = {
+            owner = mkOption {
+              type = str;
+              description = "Identity name that owns the bucket.";
+            };
+
+            withLock = mkOption {
+              type = bool;
+              default = false;
+              description = "Enable S3 Object Lock, which also enables versioning.";
+            };
+
+            versioning = mkOption {
+              type = nullOr (
+                lib.types.enum [
+                  "Enabled"
+                  "Suspended"
+                ]
+              );
+              default = null;
+              description = ''
+                Versioning status.
+                Null leaves the bucket unconfigured, and Object Lock does not allow suspending versioning.
+              '';
+            };
+
+            quotaMB = mkOption {
+              type = nullOr ints.positive;
+              default = null;
+              description = ''
+                Bucket quota in MiB.
+                The quota is recorded on the bucket; exceeding it does not block writes without a
+                `s3.bucket.quota.enforce` pass.
+              '';
+            };
+          };
+        });
+        default = { };
+        description = ''
+          Buckets created at boot, keyed by bucket name.
+          The owner must be an identity from `services.seaweedfs.filer.s3.identities`.
+        '';
+      };
+    };
+  };
+
   config = mkIf (swLib.isEnabled && s3.enable) {
     assertions = [
       {

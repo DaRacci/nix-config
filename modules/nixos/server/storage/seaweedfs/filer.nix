@@ -6,7 +6,20 @@
 let
   inherit (lib)
     concatStringsSep
+    mkIf
+    mkMerge
+    mkOption
     optionals
+    ;
+
+  inherit (lib.types)
+    bool
+    ints
+    lines
+    listOf
+    nullOr
+    port
+    str
     ;
 
   swLib = import ./lib.nix {
@@ -73,14 +86,132 @@ let
   };
 in
 {
-  config = swLib.mkWeedService {
-    component = "filer";
-    description = "SeaweedFS Filer Server";
-    flags = filerFlags // s3Flags // webdavFlags;
-    extraArgs =
-      optionals cfg.filer.s3.enable cfg.filer.s3.extraArgs
-      ++ optionals cfg.filer.webdav.enable cfg.filer.webdav.extraArgs
-      ++ cfg.filer.extraArgs;
-    workingDir = cfg.filer.dataDir;
+  options.services.seaweedfs.filer = swLib.mkComponentOptions {
+    name = "filer";
+    httpPort = 8888;
+    grpcPort = 18888;
+    dataDir = "${swLib.baseDir}/filer";
+    extraOptions = {
+      publicPort = mkOption {
+        type = nullOr port;
+        default = null;
+        description = "Filer readonly public port override.";
+      };
+
+      collection = mkOption {
+        type = str;
+        default = "";
+        description = "Default filer collection.";
+      };
+
+      defaultReplicaPlacement = mkOption {
+        type = str;
+        default = "";
+        description = "Default filer replica placement.";
+      };
+
+      master = mkOption {
+        type = listOf str;
+        default = [ ];
+        description = "Master addresses list.";
+      };
+
+      maxMB = mkOption {
+        type = ints.positive;
+        default = 4;
+        description = "Split files larger than this size.";
+      };
+
+      disableHttp = mkOption {
+        type = bool;
+        default = false;
+        description = "Disable filer HTTP API and only allow gRPC.";
+      };
+
+      allowedOrigins = mkOption {
+        type = str;
+        default = "*";
+        description = "CORS allowed origins.";
+      };
+
+      exposeDirectoryData = mkOption {
+        type = bool;
+        default = true;
+        description = "Expose directory metadata in filer UI.";
+      };
+
+      tomlConfig = mkOption {
+        type = nullOr lines;
+        default = null;
+        description = "Direct TOML content for filer.toml.";
+      };
+
+      webdav = swLib.mkComponentOptions {
+        name = "webdav";
+        httpPort = 7333;
+        ip = null;
+        ipBind = false;
+        metricsPort = false;
+        extraOptions = {
+          path = mkOption {
+            type = str;
+            default = "/";
+            description = "Remote filer path exposed over WebDAV.";
+          };
+
+          collection = mkOption {
+            type = str;
+            default = "";
+            description = "WebDAV collection name.";
+          };
+
+          cacheDir = mkOption {
+            type = str;
+            default = "${swLib.baseDir}/webdav-cache";
+            description = "WebDAV local cache directory.";
+          };
+
+          cacheCapacityMB = mkOption {
+            type = ints.positive;
+            default = 1000;
+            description = "WebDAV cache size in MB.";
+          };
+
+          disk = mkOption {
+            type = str;
+            default = "";
+            description = "WebDAV disk type label.";
+          };
+
+          replication = mkOption {
+            type = str;
+            default = "";
+            description = "WebDAV replication strategy.";
+          };
+        };
+      };
+    };
   };
+
+  config = mkMerge [
+    (mkIf swLib.isEnabled {
+      assertions = [
+        {
+          assertion = !cfg.filer.enable || cfg.filer.master != [ ];
+          message = "services.seaweedfs.filer.master must not be empty when filer service is enabled.";
+        }
+      ];
+    })
+
+    (swLib.mkWeedService {
+      component = "filer";
+      description = "SeaweedFS Filer Server";
+      flags = filerFlags // s3Flags // webdavFlags;
+      extraArgs =
+        optionals cfg.filer.s3.enable cfg.filer.s3.extraArgs
+        ++ optionals cfg.filer.webdav.enable cfg.filer.webdav.extraArgs
+        ++ cfg.filer.extraArgs;
+      workingDir = cfg.filer.dataDir;
+    })
+  ];
 }

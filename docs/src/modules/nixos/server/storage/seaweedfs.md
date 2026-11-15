@@ -12,7 +12,7 @@ so the repository can test endpoint shape, proxy integration, and service behavi
 - **Main entry file**: `modules/nixos/server/storage/seaweedfs/default.nix`
 - **Compatibility wrapper**: `modules/nixos/server/storage/seaweedfs.nix`
 - **Supporting file**: `modules/nixos/server/storage/default.nix`
-- **Component files**: `modules/nixos/server/storage/seaweedfs/{master,volume,filer,admin,worker,proxy,security,tmpfiles,options}.nix`
+- **Component files**: `modules/nixos/server/storage/seaweedfs/{master,volume,filer,admin,worker,proxy,security,s3,tmpfiles,lib,options}.nix`
 
 ## Architecture / Services / Scope
 
