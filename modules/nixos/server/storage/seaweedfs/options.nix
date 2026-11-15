@@ -544,6 +544,52 @@ in
                 Identities reference them through `services.seaweedfs.filer.s3.identities.<name>.policies`.
               '';
             };
+
+            buckets = mkOption {
+              type = attrsOf (submodule {
+                options = {
+                  owner = mkOption {
+                    type = str;
+                    description = "Identity name that owns the bucket.";
+                  };
+
+                  withLock = mkOption {
+                    type = bool;
+                    default = false;
+                    description = "Enable S3 Object Lock, which also enables versioning.";
+                  };
+
+                  versioning = mkOption {
+                    type = nullOr (
+                      lib.types.enum [
+                        "Enabled"
+                        "Suspended"
+                      ]
+                    );
+                    default = null;
+                    description = ''
+                      Versioning status.
+                      Null leaves the bucket unconfigured, and Object Lock does not allow suspending versioning.
+                    '';
+                  };
+
+                  quotaMB = mkOption {
+                    type = nullOr ints.positive;
+                    default = null;
+                    description = ''
+                      Bucket quota in MiB.
+                      The quota is recorded on the bucket; exceeding it does not block writes without a
+                      `s3.bucket.quota.enforce` pass.
+                    '';
+                  };
+                };
+              });
+              default = { };
+              description = ''
+                Buckets created at boot, keyed by bucket name.
+                The owner must be an identity from `services.seaweedfs.filer.s3.identities`.
+              '';
+            };
           };
 
         tomlConfig = mkOption {

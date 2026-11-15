@@ -72,6 +72,32 @@ An identity reads `S3/<NAME>_ACCESS_KEY` and `S3/<NAME>_SECRET_KEY` from SOPS an
 `accessKeySecret`, `accessKeyEnv`, and the `secretKey` equivalents override those names,
 while `accessKey` and `secretKey` take a literal value instead of a reference.
 
+### Buckets
+
+Buckets are created by a `seaweedfs-s3-init` oneshot, keyed by bucket name:
+
+```nix
+services.seaweedfs.filer.s3.buckets.attic = {
+  owner = "attic";
+  versioning = "Enabled"; # optional
+  quotaMB = 51200;        # optional
+};
+```
+
+The owner is recorded on the bucket, which is what lets that identity reach it;
+a bucket with no owner is only reachable by admin identities.
+`withLock = true` enables S3 Object Lock, which also enables versioning and blocks suspending it.
+`versioning` sets the versioning status, and `quotaMB` records a bucket quota.
+
+Quota values are recorded only.
+Turning an exceeded quota into a read-only bucket is a separate `s3.bucket.quota.enforce` pass, which this module does not schedule.
+
+Everything else a bucket can carry, such as lifecycle rules, tags, CORS, encryption, ACLs,
+and bucket policies, lives in S3 API state rather than in filer directory metadata managed here.
+Those stay with the S3 client or the admin UI, and are not reconciled at boot.
+
+The unit runs after the master and filer, feeds every bucket command in one shell session, and treats `already exists` as success, so it is safe on every boot.
+
 ## Secrets
 
 SeaweedFS SOPS entries are separate from MinIO secrets and are used for:
