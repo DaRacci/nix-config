@@ -168,6 +168,8 @@ Secrets are auto-generated via sops at `PROXY_AUTH/<VHOST_NAME>_API_KEY`, inject
   dashboard with default titles and icons derived from the host name.
 - **Layer 4 Forwarding**: L4 forwarding uses the `caddy.layer4` plugin for non-HTTP traffic like database connections or SSH.
   Managed by the `l4` extension (`modules/nixos/server/proxy/extensions/l4.nix`), which auto-enables when any vhost has `l4 != null`.
+- **Kanidm Bootstrap Ordering**: OAuth identity providers use delayed metadata discovery (`delay_start` with retries).
+  This avoids startup deadlocks when the metadata endpoint is served through the same Caddy instance.
 
 ## References
 

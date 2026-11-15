@@ -60,6 +60,9 @@ let
           client_id "${ctx.context}"
           client_secret {env.OAUTH_${envPrefix}_CLIENT_SECRET}
           metadata_url https://${ctx.authDomain}/oauth2/openid/${ctx.context}/.well-known/openid-configuration
+          delay_start 10
+          retry_attempts 12
+          retry_interval 5
           scopes ${builtins.concatStringsSep " " ctx.scopes}
         }
       ''
@@ -177,8 +180,7 @@ let
       default = false;
       description = ''
         Serve one authentication portal for every virtual host using this context.
-        A single portal means a single session, so a login on one host is valid on the others
-        once they share `cookieDomain`.
+        A single portal means a single session, so a login on one host is valid on the others once they share `cookieDomain`.
       '';
     };
 
