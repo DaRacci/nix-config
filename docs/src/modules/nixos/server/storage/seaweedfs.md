@@ -20,8 +20,18 @@ so the repository can test endpoint shape, proxy integration, and service behavi
 - **IO primary only**: the module is gated by `config.server.ioPrimaryHost == config.networking.hostName`.
 - **All-in-one topology**: the evaluation enables the SeaweedFS master, volume, filer, S3 endpoint, admin UI, and worker components on the coordinator host.
 - **Proxy surface**: endpoints are exposed through the existing `server.proxy.virtualHosts` integration instead of host-local Caddy configuration.
-  Current surface includes the master, filer, S3-compatible, volume, and admin endpoints under the `seaweedfs.${data.site.domain}` subtree.
+  Current surface includes the master UI, filer, S3-compatible, volume, and admin endpoints under the `seaweedfs.${data.site.domain}` subtree.
+  The master is served on `master.seaweedfs.${data.site.domain}` with `seaweedfs.${data.site.domain}` kept as an alias.
   Client-facing TLS terminates at Caddy; gRPC-backed component endpoints additionally get the backend transport settings required for SeaweedFS communication.
+- **Master HTTP API is disabled**: `services.seaweedfs.master.disableHttp` removes `/dir/assign`, `/dir/lookup`, `/vol/*`, `/col/delete`, `/submit`, and the `/{fileId}` redirect.
+  Those routes hand out file IDs and JWT write tokens without authentication, so only the master UI stays reachable over HTTP.
+- **Operator auth**: admin and filer require Kanidm, and the master UI and volume UI are gated by path.
+  All four share the `seaweedfs` Kanidm context, which is restricted to `sysadmin@auth.racci.dev`
+  and uses one shared portal with the `seaweedfs.${data.site.domain}` cookie domain, so a login on any of them covers the rest.
+  The S3 endpoint uses S3 SigV4/IAM rather than Kanidm and exposes a `*.s3.seaweedfs.${data.site.domain}` alias for virtual-hosted-style requests.
+  The worker is not exposed through Caddy.
+- **gRPC client restriction**: `security.toml` sets `allowed_commonNames` per gRPC service.
+  These allowlists apply to direct gRPC peers; Caddy re-originates gRPC connections using each component's own certificate.
 - **Option surface**: the module keeps the upstream `services.seaweedfs.*` namespace.
   This repository now vendors the module locally and extends it with repo-specific options,
   including `services.seaweedfs.volume.publicUrl` and `extraArgs` on all component services.
@@ -60,8 +70,15 @@ Component SANs must match the Caddy `tls_server_name` values: `seaweedfs.${data.
 and `<service>.seaweedfs.${data.site.domain}` for volume, filer, and admin.
 `data.site.domain` is the configured proxy domain.
 
+The master leaf currently carries only the `seaweedfs.${data.site.domain}` SAN.
+`master.seaweedfs.${data.site.domain}` serves HTTP and gRPC, but clients keep dialing the old hostname
+(`services.seaweedfs.*.master` in `default.nix`) until that leaf is reissued with the new SAN.
+
 ## Operational Notes / Assumptions
 
+- **Volume data plane stays open**: only `/ui/*` and `/status` on the volume vhost require authentication.
+  Chunk reads by file ID and the `publicUrl` path used by the filer remain unauthenticated,
+  which is why the volume cannot sit fully behind Kanidm.
 - The evaluation deployment is separate from `server.storage.swfsMount`.
   The storage abstraction can use `weed mount` for SeaweedFS-backed workload mounts without changing the evaluation topology described here.
 - `services.seaweedfs.volume.publicUrl` should match the external proxy hostname so volume servers advertise reachable URLs.

@@ -27,14 +27,18 @@ let
       service,
       port,
       grpcPort ? null,
+      grpcServerName ? null,
       aliases ? [ ],
+      kanidm ? null,
     }:
     {
       inherit
         service
         port
         grpcPort
+        grpcServerName
         aliases
+        kanidm
         ;
       withGrpc = grpcPort != null;
     };
@@ -44,15 +48,15 @@ let
     nameValuePair subdomain {
       aliases = attr.aliases or [ ];
       ports = [ attr.port ];
-      # TODO: Secure behind kanidm.
+      kanidm = attr.kanidm or null;
       extraConfig = ''
         reverse_proxy http://localhost:${toString attr.port}
       '';
     };
 
-  mkVHostGrpc =
-    domain: attr:
-    nameValuePair "${domain}:10443" {
+  mkVHostGrpcFor =
+    hostname: attr:
+    nameValuePair "${hostname}:10443" {
       useAcmeCerts = false;
       ports = [ attr.grpcPort ];
       extraConfig = ''
@@ -70,7 +74,12 @@ let
         reverse_proxy localhost:${toString attr.grpcPort} {
           transport http {
             tls_trust_pool file ${config.sops.secrets."SEAWEEDFS/TLS/CA".path}
-            tls_server_name "${domain}.${self.data.site.domain}"
+            tls_server_name "${
+              if attr.grpcServerName != null then
+                "${attr.grpcServerName}.${self.data.site.domain}"
+              else
+                "${hostname}.${self.data.site.domain}"
+            }"
             tls_client_auth ${config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_CRT".path} ${
               config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_KEY".path
             }
@@ -79,12 +88,28 @@ let
       '';
     };
 
+  # Aliases are bare subdomains; the vhost module derives the base URL from the name.
+  # They keep the previous gRPC hostname serving the same backend,
+  # so a rename does not cut off clients that still dial the old name.
+  mkVHostGrpc =
+    domain: attr: map (hostname: mkVHostGrpcFor hostname attr) ([ domain ] ++ attr.aliases);
+
   proxyEntries =
     (optionalAttrs cfg.master.enable {
-      seaweedfs = mkProxyEntry {
+      "master.seaweedfs" = mkProxyEntry {
         service = "master";
         port = cfg.master.port;
         grpcPort = cfg.master.grpcPort;
+        aliases = [ "seaweedfs" ];
+        grpcServerName = "seaweedfs";
+        kanidm = {
+          context = "seaweedfs";
+          protectedPaths = [ "/*" ];
+          bypassPaths = [
+            "/healthz"
+            "/readyz"
+          ];
+        };
       };
     })
     // (optionalAttrs cfg.filer.enable {
@@ -92,6 +117,9 @@ let
         service = "filer";
         port = cfg.filer.port;
         grpcPort = cfg.filer.grpcPort;
+        kanidm = {
+          context = "seaweedfs";
+        };
       };
     })
     // (optionalAttrs (cfg.filer.enable && cfg.filer.s3.enable) {
@@ -106,6 +134,13 @@ let
         service = "volume";
         port = cfg.volume.port;
         grpcPort = cfg.volume.grpcPort;
+        kanidm = {
+          context = "seaweedfs";
+          protectedPaths = [
+            "/ui/*"
+            "/status"
+          ];
+        };
       };
     })
     // (optionalAttrs cfg.admin.enable {
@@ -113,6 +148,9 @@ let
         service = "admin";
         port = cfg.admin.port;
         grpcPort = cfg.admin.grpcPort;
+        kanidm = {
+          context = "seaweedfs";
+        };
       };
     });
 
@@ -121,6 +159,12 @@ in
 {
   config = mkIf swLib.isEnabled (mkMerge [
     {
+      server.proxy.kanidmContexts.seaweedfs = {
+        allowGroups = [ "sysadmin@auth.racci.dev" ];
+        sharedPortal = true;
+        cookieDomain = "seaweedfs.${self.data.site.domain}";
+      };
+
       server.proxy.virtualHosts =
         proxyEntries
         |> attrsToList

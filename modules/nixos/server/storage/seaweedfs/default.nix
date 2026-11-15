@@ -17,6 +17,9 @@ let
 
   cfg = config.services.seaweedfs;
 
+  # Clients still dial the pre-rename hostname.
+  # `master.seaweedfs` is served as well, but the master leaf certificate has no SAN for it yet,
+  # so switching this value must wait for a reissued `SEAWEEDFS/TLS/MASTER_CRT`.
   defaultMaster = [ "seaweedfs.${self.data.site.domain}:443" ];
 in
 {
@@ -41,6 +44,8 @@ in
           enable = true;
           peers = [ "none" ];
           volumeSizeLimitMB = 8192;
+          # The HTTP API hands out file IDs and JWT write tokens unauthenticated.
+          disableHttp = true;
         };
 
         volume = {

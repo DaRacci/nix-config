@@ -8,6 +8,7 @@ let
   inherit (lib)
     concatStringsSep
     mkIf
+    optionalString
     recursiveUpdate
     toLower
     ;
@@ -39,6 +40,15 @@ let
     }) swLib.grpcTLSServices
     |> lib.foldl' recursiveUpdate { };
 
+  grpcAllowedCommonNames = {
+    MASTER = "master,volume,filer,admin,worker,client";
+    VOLUME = "master,volume,filer,admin,worker,client";
+    FILER = "master,volume,filer,admin,worker,client";
+    ADMIN = "admin,worker,client";
+    WORKER = "admin,worker,client";
+    CLIENT = null;
+  };
+
   commonSecretToml = ''
     [cors.allowed_origins]
     values = "*"
@@ -54,6 +64,9 @@ let
         [grpc.${toLower service}]
         cert = "${config.sops.secrets."SEAWEEDFS/TLS/${service}_CRT".path}"
         key = "${config.sops.secrets."SEAWEEDFS/TLS/${service}_KEY".path}"
+        ${optionalString (grpcAllowedCommonNames.${service} != null) ''
+          allowed_commonNames = "${grpcAllowedCommonNames.${service}}"
+        ''}
       '') swLib.grpcTLSServices
       |> concatStringsSep "\n"
     }
