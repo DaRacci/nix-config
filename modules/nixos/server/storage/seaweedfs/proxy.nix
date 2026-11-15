@@ -27,7 +27,6 @@ let
       service,
       port,
       grpcPort ? null,
-      grpcServerName ? null,
       aliases ? [ ],
       kanidm ? null,
     }:
@@ -36,7 +35,6 @@ let
         service
         port
         grpcPort
-        grpcServerName
         aliases
         kanidm
         ;
@@ -74,12 +72,7 @@ let
         reverse_proxy localhost:${toString attr.grpcPort} {
           transport http {
             tls_trust_pool file ${config.sops.secrets."SEAWEEDFS/TLS/CA".path}
-            tls_server_name "${
-              if attr.grpcServerName != null then
-                "${attr.grpcServerName}.${self.data.site.domain}"
-              else
-                "${hostname}.${self.data.site.domain}"
-            }"
+            tls_server_name "${hostname}.${self.data.site.domain}"
             tls_client_auth ${config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_CRT".path} ${
               config.sops.secrets."SEAWEEDFS/TLS/${toUpper attr.service}_KEY".path
             }
@@ -101,7 +94,6 @@ let
         port = cfg.master.port;
         grpcPort = cfg.master.grpcPort;
         aliases = [ "seaweedfs" ];
-        grpcServerName = "seaweedfs";
         kanidm = {
           context = "seaweedfs";
           protectedPaths = [ "/*" ];

@@ -66,13 +66,10 @@ Leaves use both `serverAuth` and `clientAuth` because the same component certifi
 The root and intermediate private keys are kept offline.
 
 The CA hierarchy, key custody, issuance, and rotation are documented in [Internal mTLS CA](../../../../security/internal_mtls_ca.md).
-Component SANs must match the Caddy `tls_server_name` values: `seaweedfs.${data.site.domain}` for the master,
+Component SANs must match the Caddy `tls_server_name` values: `master.seaweedfs.${data.site.domain}` for the master,
 and `<service>.seaweedfs.${data.site.domain}` for volume, filer, and admin.
+The master leaf also carries `seaweedfs.${data.site.domain}`, which stays a vhost alias for the pre-rename hostname.
 `data.site.domain` is the configured proxy domain.
-
-The master leaf currently carries only the `seaweedfs.${data.site.domain}` SAN.
-`master.seaweedfs.${data.site.domain}` serves HTTP and gRPC, but clients keep dialing the old hostname
-(`services.seaweedfs.*.master` in `default.nix`) until that leaf is reissued with the new SAN.
 
 ### Provisioning certificates
 
