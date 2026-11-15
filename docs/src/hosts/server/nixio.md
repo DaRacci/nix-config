@@ -20,7 +20,7 @@ It handles all external traffic routing, VPN tunnelling, DNS filtering, and dash
 | **Dashy Dashboard** | `hosts/server/nixio/dashboard.nix` | Aggregated service dashboard displayed on the IO Coordinator |
 | **AdGuard Home** | `hosts/server/nixio/adguard.nix` | Local DNS filtering and ad-blocking for the home network |
 | **MinIO** | `hosts/server/nixio/storage.nix` | S3-compatible object storage for cluster services |
-| **Network Config** | `default.nix` | Subnet declarations, IP forwarding (IPv4 + IPv6) |
+| **Network Config** | `default.nix` | IP forwarding (IPv4 + IPv6) and the tailnet ingress tag; subnets come from [Shared Data](../../data.md) |
 
 ## Secrets
 
