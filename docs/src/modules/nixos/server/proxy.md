@@ -167,6 +167,19 @@ Both lists can be combined, and `bypassPaths` wins for the paths it lists.
 Use `protectedPaths` for hosts that mix browser and machine traffic, such as a storage component
 whose UI should be gated while its data plane stays reachable.
 
+### Portal Theme
+
+Every portal emits a `ui` block that selects the `basic` theme and a stylesheet from
+`server.proxy.kanidmPortalCss`:
+
+| Option | Default | Effect |
+| -------------------- | ------------------------------ | -------------------------------------------------------------------- |
+| `kanidmPortalCss` | the module's `portal.css` | Stylesheet served with the portal; the default overrides the theme variables with a dark palette |
+
+`portal.css` only overrides CSS variables (`--brand-*`) and `color-scheme`, so it keeps working
+when the plugin changes its markup. Set the option to `null` to fall back to the plugin's own colours.
+The file is read from its store path at request time, so it needs no `caddy adapt` cycle.
+
 ### API Key Auth
 
 Secrets are auto-generated via sops at `PROXY_AUTH/<VHOST_NAME>_API_KEY`, injected via systemd `LoadCredential`.

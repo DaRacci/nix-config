@@ -24,6 +24,7 @@ let
     int
     bool
     nullOr
+    path
     listOf
     attrsOf
     submodule
@@ -103,6 +104,12 @@ let
           ''}
           crypto key sign-verify {env.${contextToEnvPrefix resolved.context}_SHARED_KEY}
           enable identity provider ${resolved.context}
+          ui {
+            theme basic
+            ${optionalString (config.server.proxy.kanidmPortalCss != null) ''
+              custom css path ${config.server.proxy.kanidmPortalCss}
+            ''}
+          }
         }
       ''
     )
@@ -257,6 +264,16 @@ let
 in
 {
   options = {
+    server.proxy.kanidmPortalCss = mkOption {
+      type = nullOr path;
+      default = ../portal.css;
+      description = ''
+        Stylesheet applied to every Kanidm authentication portal.
+        Defaults to the dark theme shipped with this module.
+        Set to null to use the plugin's own styling.
+      '';
+    };
+
     server.proxy.kanidmContexts = mkOption {
       description = "Shared Kanidm OAuth2 context configurations.";
       default = { };

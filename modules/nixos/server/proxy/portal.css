@@ -1,0 +1,35 @@
+/*
+ * Dark theme for the caddy-security authentication portal.
+ * Loads after the basic theme, so these values win.
+ * Only theme variables are overridden; no selectors are guesses.
+ */
+:root {
+  color-scheme: dark;
+
+  --brand-page: #11151c;
+  --brand-surface: #171d26;
+  --brand-soft: #1e2631;
+  --brand-ink: #e6edf7;
+  --brand-muted: #9aa8bd;
+  --brand-primary: #5b8def;
+  --brand-on-primary: #0b0f14;
+  --brand-primary-hover: #7aa6f5;
+  --brand-border: #2b3542;
+  --brand-control-border: #46566b;
+  --brand-focus: #5b8def;
+  --brand-shadow: 0 12px 40px #00000059, 0 2px 6px #00000033;
+
+  /* Both backdrop images are light-themed gradients. */
+  --brand-page-image: none;
+  --brand-banner-image: none;
+}
+
+/*
+ * The basic theme pins the page to light explicitly,
+ * so the dark scheme needs to be restated here.
+ */
+body.basic-theme {
+  color-scheme: dark;
+  background-color: var(--brand-page);
+  color: var(--brand-ink);
+}
