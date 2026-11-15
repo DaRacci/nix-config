@@ -207,11 +207,10 @@ let
       let
         vhsUsingContext = lib.filterAttrs (_: vh: vh.kanidm.context == contextName) virtualHosts;
         vhList = builtins.attrValues vhsUsingContext;
-        allGroups =
-          vhList
-          |> map (vh: vh.kanidm.allowGroups)
-          |> flatten
-          |> unique;
+        # `ctx.allowGroups` is already resolved against the context definition,
+        # so this covers context-level and per-virtual-host groups alike.
+        # Every allowed group needs a scope map, otherwise Kanidm denies the login.
+        allGroups = unique (ctx.allowGroups ++ (vhList |> map (vh: vh.kanidm.allowGroups) |> flatten));
         groupsWithoutDomain = allGroups |> map (g: builtins.head (lib.splitString "@" g));
       in
       ctx
@@ -253,6 +252,8 @@ let
   contextsMissingCookieDomain = lib.filterAttrs (
     _: ctx: ctx.sharedPortal && ctx.cookieDomain == null
   ) config.server.proxy.kanidmContexts;
+
+  contextsWithoutGroups = lib.filterAttrs (_: ctx: ctx.groups == [ ]) kanidmContextsWithVirtualHosts;
 in
 {
   options = {
@@ -321,6 +322,10 @@ in
       {
         assertion = portalsWithMixedContexts == { };
         message = "Duplicate Kanidm portal name across contexts. A shared portal is named after its context, so no virtual host may be named after that context.";
+      }
+      {
+        assertion = contextsWithoutGroups == { };
+        message = "A Kanidm context must resolve at least one group through `allowGroups` (on the context or on the virtual host). Kanidm only issues a token to groups listed in the OAuth2 client scope map, so an empty list makes every login fail with Access Denied.";
       }
     ];
 

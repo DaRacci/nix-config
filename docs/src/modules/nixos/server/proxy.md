@@ -147,6 +147,14 @@ Both `/auth` and `/auth/*` are matched with a `handle` so the portal resolves be
 and the `authenticate` handler declares that mount with `at /auth`,
 which requires caddy-security v1.6 or newer.
 
+`allowGroups` feeds two places: the `allow groups` lines of the Caddy policy, and the scope map of the
+Kanidm OAuth2 client that the extension provisions for the context.
+Each group in the resolved set gets a scope map entry carrying the context `scopes`,
+with the domain stripped (`sysadmin`, not `sysadmin@auth.racci.dev`).
+Groups may be declared on the context or on the virtual host; the union is used.
+A context whose hosts resolve no groups fails an assertion, because Kanidm then issues no token at all
+and every login ends on an `Access Denied` page.
+
 Path gating uses `server.proxy.virtualHosts.<name>.kanidm`:
 
 | Option | Default | Effect |
