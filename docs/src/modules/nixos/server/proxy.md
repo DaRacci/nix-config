@@ -184,6 +184,21 @@ Both lists can be combined, and `bypassPaths` wins for the paths it lists.
 Use `protectedPaths` for hosts that mix browser and machine traffic, such as a storage component
 whose UI should be gated while its data plane stays reachable.
 
+### Signing Out
+
+Applications behind the proxy have no session of their own, so a logout button in their UI does nothing.
+`logoutPath` intercepts such a path instead of proxying it:
+
+| Option | Default | Effect |
+| ------------ | --------- | ------------------------------------------------------------------------------------ |
+| `logoutPath` | `null` | Path that clears the proxy cookies and ends the Kanidm session |
+
+On that path the extension emits `Set-Cookie` deletions for `<PREFIX>_ACCESS_TOKEN`,
+`<PREFIX>_SESSION_ID` and `<PREFIX>_REDIRECT_URL`, then redirects to
+`https://<authDomain>/ui/logout`. Clearing only the proxy cookies is not enough: Kanidm would
+authenticate the next request silently.
+Kanidm ignores post-logout redirect parameters, so the browser ends on the Kanidm login page.
+
 ### Portal Theme
 
 Every portal emits a `ui` block that selects the `basic` theme and a stylesheet from

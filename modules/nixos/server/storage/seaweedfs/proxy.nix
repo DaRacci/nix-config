@@ -142,6 +142,7 @@ let
         grpcPort = cfg.admin.grpcPort;
         kanidm = {
           context = "seaweedfs";
+          logoutPath = "/logout";
         };
       };
     });

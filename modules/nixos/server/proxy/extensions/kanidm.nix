@@ -349,6 +349,17 @@ in
                         `bypassPaths` still takes precedence for the paths it lists.
                       '';
                     };
+
+                    logoutPath = mkOption {
+                      type = nullOr str;
+                      default = null;
+                      example = "/logout";
+                      description = ''
+                        Path that signs the user out instead of being proxied.
+                        It clears the proxy cookies and ends the Kanidm session,
+                        so the next request cannot be silently re-authenticated.
+                      '';
+                    };
                   };
                 })
               );
@@ -391,12 +402,38 @@ in
             matcherName = sanitiseName name;
             extra = vh._resolvedExtraConfig;
             protectedPaths = vh.kanidm.protectedPaths;
+            cookiePrefix = if resolved.cookiePrefix != null then resolved.cookiePrefix else "AUTHP";
+            # Deletions must repeat the domain the portal used when it set them.
+            deleteCookie =
+              name:
+              "${cookiePrefix}_${name}=; Path=/;${
+                optionalString (resolved.cookieDomain != null) " Domain=${resolved.cookieDomain};"
+              } Max-Age=0; Secure; HttpOnly;";
+            cookieDeletions =
+              lib.concatMapStrings
+                (name: ''
+                  header +Set-Cookie "${deleteCookie name}"
+                '')
+                [
+                  "ACCESS_TOKEN"
+                  "SESSION_ID"
+                  "REDIRECT_URL"
+                ];
           in
           ''
             ${optionalString (vh.kanidm.bypassPaths != [ ]) ''
               @bypass_auth_${matcherName} path ${builtins.concatStringsSep " " vh.kanidm.bypassPaths}
               handle @bypass_auth_${matcherName} {
                 ${extra}
+              }
+            ''}
+            ${optionalString (vh.kanidm.logoutPath != null) ''
+              # The application has no session of its own, so a logout button there
+              # means nothing. Drop the proxy cookies and end the Kanidm session.
+              @logout_${matcherName} path ${vh.kanidm.logoutPath}
+              handle @logout_${matcherName} {
+                ${cookieDeletions}
+                redir https://${resolved.authDomain}/ui/logout 303
               }
             ''}
             @auth_path_${matcherName} path /auth /auth/*
