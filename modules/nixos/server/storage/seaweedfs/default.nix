@@ -42,8 +42,8 @@ in
           enable = true;
           peers = [ "none" ];
           volumeSizeLimitMB = 8192;
-          # The HTTP API hands out file IDs and JWT write tokens unauthenticated.
-          disableHttp = true;
+          # The admin UI reads volume PublicUrl from the master's /dir/status.
+          # HTTP stays on loopback and its public vhost requires Kanidm.
         };
 
         volume = {

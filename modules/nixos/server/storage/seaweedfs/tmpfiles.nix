@@ -82,13 +82,13 @@ in
       (mkServiceDir {
         component = "admin";
         path = cfg.admin.dataDir;
-        security = "master";
+        security = "admin";
       })
 
       (mkServiceDir {
         component = "worker";
         path = cfg.worker.workingDir;
-        security = "master";
+        security = "admin";
       })
 
       (mkIf (cfg.filer.enable && cfg.filer.webdav.enable) {

@@ -23,8 +23,10 @@ so the repository can test endpoint shape, proxy integration, and service behavi
   Current surface includes the master UI, filer, S3-compatible, volume, and admin endpoints under the `seaweedfs.${data.site.domain}` subtree.
   The master is served on `master.seaweedfs.${data.site.domain}` with `seaweedfs.${data.site.domain}` kept as an alias.
   Client-facing TLS terminates at Caddy; gRPC-backed component endpoints additionally get the backend transport settings required for SeaweedFS communication.
-- **Master HTTP API is disabled**: `services.seaweedfs.master.disableHttp` removes `/dir/assign`, `/dir/lookup`, `/vol/*`, `/col/delete`, `/submit`, and the `/{fileId}` redirect.
-  Those routes hand out file IDs and JWT write tokens without authentication, so only the master UI stays reachable over HTTP.
+- **Master HTTP API stays on loopback**: the master HTTP server is enabled because the admin UI reads volume
+  `PublicUrl` from the master's `/dir/status`. Without it the admin falls back to the registered `ip:port`
+  of every volume server. The API binds `127.0.0.1`; the public `master.seaweedfs.${data.site.domain}`
+  vhost requires Kanidm, and internal components use gRPC.
 - **Operator auth**: admin and filer require Kanidm, and the master UI and volume UI are gated by path.
   All four share the `seaweedfs` Kanidm context, which is restricted to `sysadmin@auth.racci.dev`
   and uses one shared portal with the `seaweedfs.${data.site.domain}` cookie domain, so a login on any of them covers the rest.
@@ -156,6 +158,11 @@ Use `--dry-run` to print the planned SAN sets without writing anything.
 - The evaluation deployment is separate from `server.storage.swfsMount`.
   The storage abstraction can use `weed mount` for SeaweedFS-backed workload mounts without changing the evaluation topology described here.
 - `services.seaweedfs.volume.publicUrl` should match the external proxy hostname so volume servers advertise reachable URLs.
+  The admin UI links each volume server at `//<publicUrl>/ui/index.html`, so it must be a host without a scheme.
+- The admin and worker components use the `SEAWEEDFS/SECURITY/ADMIN` security template, which carries both the
+  master signing keys and the filer signing key. The admin UI's Users and Groups pages call the filer IAM gRPC API,
+  which only accepts admin Bearer tokens signed by `jwt.filer_signing.key`.
+  The same key also gates the admin's own worker and plugin gRPC servers, so the worker holds it too and signs its calls.
 - This deployment is intended to shake out integration details first; repository-local abstractions can be added later if SeaweedFS proves to be a good fit.
 
 ## References

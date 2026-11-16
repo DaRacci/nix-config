@@ -71,6 +71,26 @@ let
       |> concatStringsSep "\n"
     }
   '';
+
+  masterJwtToml = ''
+    [jwt.signing]
+    key = "${sopsPh."SEAWEEDFS/JWT/MASTER"}"
+    expires_after_seconds = 10
+
+    [jwt.signing.read]
+    key = "${sopsPh."SEAWEEDFS/JWT/MASTER_READ"}"
+    expires_after_seconds.read = 10
+  '';
+
+  filerJwtToml = ''
+    [jwt.filer_signing]
+    key = "${sopsPh."SEAWEEDFS/JWT/FILER"}"
+    expires_after_seconds = 10
+
+    [jwt.filer_signing.read]
+    key = "${sopsPh."SEAWEEDFS/JWT/FILER_READ"}"
+    expires_after_seconds.read = 10
+  '';
 in
 {
   config = mkIf swLib.isEnabled {
@@ -92,30 +112,23 @@ in
 
       templates = {
         "SEAWEEDFS/SECURITY/FILER" = sopsCertAndKeys // {
-          content = commonSecretToml + ''
-            [jwt.filer_signing]
-            key = "${sopsPh."SEAWEEDFS/JWT/FILER"}"
-            expires_after_seconds = 10
-
-            [jwt.filer_signing.read]
-            key = "${sopsPh."SEAWEEDFS/JWT/FILER_READ"}"
-            expires_after_seconds.read = 10
-
-            [filer.expose_directory_metadata]
-            enabled = true
-          '';
+          content =
+            commonSecretToml
+            + filerJwtToml
+            + ''
+              [filer.expose_directory_metadata]
+              enabled = true
+            '';
         };
 
         "SEAWEEDFS/SECURITY/MASTER" = sopsCertAndKeys // {
-          content = commonSecretToml + ''
-            [jwt.signing]
-            key = "${sopsPh."SEAWEEDFS/JWT/MASTER"}"
-            expires_after_seconds = 10
+          content = commonSecretToml + masterJwtToml;
+        };
 
-            [jwt.signing.read]
-            key = "${sopsPh."SEAWEEDFS/JWT/MASTER_READ"}"
-            expires_after_seconds.read = 10
-          '';
+        # Admin talks to master and to the filer IAM gRPC API.
+        # The filer only accepts admin Bearer tokens signed by its signing key.
+        "SEAWEEDFS/SECURITY/ADMIN" = sopsCertAndKeys // {
+          content = commonSecretToml + masterJwtToml + filerJwtToml;
         };
       };
     };
