@@ -85,16 +85,31 @@ let
           {
             portal = portalName name resolved;
             inherit resolved;
+            # Every host served by this portal may be a post-login destination.
+            hosts = unique ([ vh.baseUrl ] ++ vh.aliases);
           }
         )
         |> lib.foldl' (
-          acc: entry: if builtins.hasAttr entry.portal acc then acc else acc // { ${entry.portal} = entry; }
+          acc: entry:
+          if builtins.hasAttr entry.portal acc then
+            acc
+            // {
+              ${entry.portal} = acc.${entry.portal} // {
+                hosts = unique (acc.${entry.portal}.hosts ++ entry.hosts);
+              };
+            }
+          else
+            acc // { ${entry.portal} = entry; }
         ) { };
     in
     portals
     |> builtins.attrValues
     |> map (
-      { portal, resolved }:
+      {
+        portal,
+        resolved,
+        hosts,
+      }:
       ''
         authentication portal ${portal} {
           crypto default token lifetime ${toString resolved.tokenLifetime}
@@ -104,10 +119,16 @@ let
           ''}
           crypto key sign-verify {env.${contextToEnvPrefix resolved.context}_SHARED_KEY}
           enable identity provider ${resolved.context}
+
+          # Without a trusted target the portal discards `redirect_url` and sends users to its own portal page after login.
+          ${
+            hosts
+            |> map (host: "trust login redirect uri domain exact ${host} path prefix /")
+            |> builtins.concatStringsSep "\n"
+          }
+
           # The portal ACL only admits its own role names.
-          # Kanidm only sends group SPNs, so the issued token would be rejected
-          # and its cookie deleted on the next request.
-          # Access control stays in the authorization policies.
+          # Kanidm only sends group SPNs, so the issued token would be rejected and its cookie deleted on the next request.
           transform user {
             match realm ${resolved.context}
             action add roles authp/user

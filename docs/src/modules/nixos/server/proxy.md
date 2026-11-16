@@ -161,6 +161,17 @@ while Kanidm sends group SPNs only. Without the transform the login succeeds, th
 and the portal then rejects that token on the next request and deletes its cookie, which restarts the login.
 This role is not an authorization decision: `allowGroups` on the policy is.
 
+The portal only honours a post-login `redirect_url` that matches a declared trusted target.
+Every host and alias of a virtual host using the portal gets one:
+
+```text
+trust login redirect uri domain exact <host> path prefix /
+```
+
+Without it the login completes and the browser is sent to the plugin's own page, `/auth/portal`,
+instead of the page the user asked for. The plugin's `/auth/profile/` page is its own account UI and is
+not backed by an OAuth2 provider; it answers `oauth is not supported with profile API` and is unused here.
+
 Path gating uses `server.proxy.virtualHosts.<name>.kanidm`:
 
 | Option | Default | Effect |
