@@ -12,6 +12,7 @@
   wine,
   icoextract,
   imagemagick,
+  libnotify,
   writeShellScriptBin,
 
   xdotool,
@@ -24,8 +25,11 @@ let
   # mkWindowsApp reuses a fixed bottle under /tmp.
   # A killed launcher or a deleted layer leaves a dead unionfs mount there,
   # after which Wine sees an unreadable prefix and exits on every launch.
-  # Drop dead bottle mounts before the launcher reuses them.
+  # Also clear the install lock left behind by an interrupted install.
   wrapper = writeShellScriptBin "take-control-viewer" ''
+    _launcher=@LAUNCHER@
+    _recovered=
+
     if command -v findmnt > /dev/null 2>&1 && command -v pgrep > /dev/null 2>&1; then
       for _mnt in $(findmnt -rn -o TARGET -t fuse.unionfs 2> /dev/null); do
         case "$_mnt" in
@@ -34,12 +38,40 @@ let
         esac
 
         if ! pgrep -f -- "unionfs .*$_mnt" > /dev/null 2>&1; then
-          command -v fusermount3 > /dev/null 2>&1 && fusermount3 -uz "$_mnt" 2> /dev/null
+          if command -v fusermount3 > /dev/null 2>&1 && fusermount3 -uz "$_mnt" 2> /dev/null; then
+            _recovered=1
+          fi
         fi
       done
     fi
 
-    exec @LAUNCHER@ "$@"
+    # The launcher only removes its lock after a successful install.
+    # A leftover lock makes every later launch refuse to start.
+    if [ -n "$USER" ] && command -v sha256sum > /dev/null 2>&1 && command -v pgrep > /dev/null 2>&1; then
+      _run_hash=$(sed -n 's/^RUN_LAYER_HASH=//p' "$_launcher" 2> /dev/null)
+      if [ -n "$_run_hash" ]; then
+        _lock="/tmp/$(printf '%s %s' "$_run_hash" "$USER" | sha256sum | cut -d' ' -f1).lock"
+        if [ -d "$_lock" ] && ! pgrep -f -- 'bin/[.]launcher' > /dev/null 2>&1; then
+          if rmdir "$_lock" 2> /dev/null; then
+            _recovered=1
+          fi
+        fi
+      fi
+    fi
+
+    if [ -n "$_recovered" ]; then
+      ${libnotify}/bin/notify-send -i dialog-information "Take Control Viewer" "Recovered from an interrupted session." 2> /dev/null || true
+    fi
+
+    # Desktop launches have no terminal; keep the launcher output for diagnosis.
+    if [ ! -t 1 ] && [ -n "$HOME" ]; then
+      _state="''${XDG_STATE_HOME:-$HOME/.local/state}/take-control-viewer"
+      mkdir -p "$_state"
+      [ -f "$_state/launcher.log" ] && mv -f "$_state/launcher.log" "$_state/launcher.log.1"
+      exec "$_launcher" "$@" >> "$_state/launcher.log" 2>&1
+    fi
+
+    exec "$_launcher" "$@"
   '';
 in
 mkWindowsAppNoCC rec {
@@ -86,6 +118,18 @@ mkWindowsAppNoCC rec {
     # Disable Mono and Gecko for the installer process; the viewer brings its own runtime.
     export WINEDLLOVERRIDES="mscoree=d;mshtml=d;$WINEDLLOVERRIDES"
 
+    _install_failed () {
+      echo "take-control-viewer: $1" >&2
+      notify-send -i dialog-error "Take Control Viewer" "$1" 2> /dev/null || true
+      wineserver -k 2> /dev/null || true
+      # The launcher removes this lock only after a successful install.
+      rmdir "$LOCKFILE" 2> /dev/null || true
+      # mkWindowsApp ignores this callback's status, so stop the launcher before
+      # it marks the empty app layer as complete.
+      kill -TERM "$PPID"
+      exit 1
+    }
+
     wine ${src}/TakeControlViewerInstall* &
     _installer_pid=$!
 
@@ -93,12 +137,8 @@ mkWindowsAppNoCC rec {
     # Its appearance means the installer reached its final stage and has written all files.
     while ! pgrep -f "TakeControlRDLdr.exe" > /dev/null 2>&1; do
       # A vanished installer before the application stack means the install failed.
-      # mkWindowsApp ignores this callback's exit status, so stop the launcher before it marks the empty app layer as complete.
       if ! kill -0 "$_installer_pid" 2> /dev/null; then
-        echo "take-control-viewer installer exited before writing TakeControlRDLdr.exe" >&2
-        wineserver -k
-        kill -TERM "$PPID"
-        exit 1
+        _install_failed "Installer exited before writing TakeControlRDLdr.exe."
       fi
       sleep 1
     done
@@ -114,9 +154,7 @@ mkWindowsAppNoCC rec {
     wineserver -k
 
     if [ ! -f "$WINEPREFIX/drive_c/users/$USER/AppData/Local/Take Control Viewer/TakeControlRDLdr.exe" ]; then
-      echo "take-control-viewer installer did not write TakeControlRDLdr.exe" >&2
-      kill -TERM "$PPID"
-      exit 1
+      _install_failed "Installer did not write TakeControlRDLdr.exe."
     fi
   '';
 
@@ -126,7 +164,16 @@ mkWindowsAppNoCC rec {
     # (the clipboard/session helper that is present for exactly the duration of an active session),
     # and kill everything in the WINEPREFIX once the session ends.
 
-    wine "$WINEPREFIX/drive_c/users/$USER/AppData/Local/Take Control Viewer/TakeControlRDLdr.exe" -- "$ARGS" &
+    # A previously poisoned app layer would otherwise fail inside Wine with no clue.
+    _viewer="$WINEPREFIX/drive_c/users/$USER/AppData/Local/Take Control Viewer/TakeControlRDLdr.exe"
+    if [ ! -f "$_viewer" ]; then
+      echo "take-control-viewer: $_viewer is missing; the app layer is incomplete." >&2
+      notify-send -i dialog-error "Take Control Viewer" "Installation is incomplete. Retry with: WA_CLEAN_APP=1 take-control-viewer" 2> /dev/null || true
+      wineserver -k 2> /dev/null || true
+      return 1
+    fi
+
+    wine "$_viewer" -- "$ARGS" &
 
     # When a session starts the viewer also opens an empty, fixed-size placeholder window and never hides it under Wine, leaving a blank white box.
     # Unmap any such window while the app runs.
