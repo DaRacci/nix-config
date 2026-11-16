@@ -12,6 +12,7 @@
   wine,
   icoextract,
   imagemagick,
+  writeShellScriptBin,
 
   xdotool,
   xprop,
@@ -19,6 +20,27 @@
 let
   inherit (lib) licenses maintainers platforms;
   inherit (maintainers) racci;
+
+  # mkWindowsApp reuses a fixed bottle under /tmp.
+  # A killed launcher or a deleted layer leaves a dead unionfs mount there,
+  # after which Wine sees an unreadable prefix and exits on every launch.
+  # Drop dead bottle mounts before the launcher reuses them.
+  wrapper = writeShellScriptBin "take-control-viewer" ''
+    if command -v findmnt > /dev/null 2>&1 && command -v pgrep > /dev/null 2>&1; then
+      for _mnt in $(findmnt -rn -o TARGET -t fuse.unionfs 2> /dev/null); do
+        case "$_mnt" in
+          /tmp/*.mkwindowsapp/wineprefix) ;;
+          *) continue ;;
+        esac
+
+        if ! pgrep -f -- "unionfs .*$_mnt" > /dev/null 2>&1; then
+          command -v fusermount3 > /dev/null 2>&1 && fusermount3 -uz "$_mnt" 2> /dev/null
+        fi
+      done
+    fi
+
+    exec @LAUNCHER@ "$@"
+  '';
 in
 mkWindowsAppNoCC rec {
   inherit wine;
@@ -154,7 +176,8 @@ mkWindowsAppNoCC rec {
   installPhase = ''
     runHook preInstall
 
-    ln -s "$out/bin/.launcher" "$out/bin/${pname}"
+    cp ${wrapper}/bin/take-control-viewer "$out/bin/${pname}"
+    substituteInPlace "$out/bin/${pname}" --replace-fail "@LAUNCHER@" "$out/bin/.launcher"
 
     mkdir -p "$out/share/icons/hicolor/64x64/apps"
     icoextract ${src}/TakeControlViewerInstall* "/tmp/icon.ico"
