@@ -68,7 +68,14 @@ Links land in `profiles/<name>/home/`, the shell home the profile's shell and to
 
 ### What it never touches
 
-The module refuses to compile a policy that names host-owned or generated settings — `_config_version`, `mcp_servers`, `platform_toolsets`, `platforms.webhook`, `dashboard`, `telemetry.shared_metrics`, `skills.disabled`, `delegation.model`.
+The module refuses to compile a policy that names a host-owned or generated setting:
+a key equal to one of the roots below, or anywhere beneath it, fails the assertion.
+`profile-sync/lib.nix` holds the list; these are its roots:
+
+`_config_version`, `command_allowlist`, `context`, `dashboard`, `delegation.model`, `delegation.provider`,
+`display.pet`, `display.skin`, `gateway.profile_routes`, `kanban.dispatch_profiles`, `mcp_servers`,
+`memory.mnemosyne.ignore_patterns`, `memory.mnemosyne.reflect`, `memory.mnemosyne.sync_roles`, `moa`,
+`platform_toolsets`, `platforms.webhook`, `skills.disabled`, `telemetry.shared_metrics`, `tts`.
 
 ## Usage
 
@@ -88,8 +95,10 @@ The module refuses to compile a policy that names host-owned or generated settin
         "EXAMPLE_TOKEN"
       ];
       env.unset = [ "LEGACY_*" ];
+      # Two layers assigning different values to a locked key fails the build, so
+      # `feature.enabled` is left out of the profile deltas below.
       lock = {
-        settings = [ "feature.limit" ];
+        settings = [ "feature.enabled" ];
         env = [ "EXAMPLE_API_KEY" ];
       };
     };
