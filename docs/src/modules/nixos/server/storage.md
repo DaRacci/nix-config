@@ -7,7 +7,7 @@ Today that includes the `server.storage.swfsMount` mount abstraction and an eval
 This area provides:
 
 - declarative MinIO-backed and SeaweedFS-backed mounts through `server.storage.swfsMount`
-- a SeaweedFS evaluation deployment on the storage primary host
+- a SeaweedFS evaluation deployment on the IO primary host
 
 ## Entry Point
 
@@ -54,9 +54,9 @@ The repository uses it as an evaluation deployment gated by `server.ioPrimaryHos
 and their Caddy proxy rules only activate on the host designated as the IO coordinator.
 The `swfsMount` mount module itself remains role-agnostic; host placement is determined by which host runs the services.
 
-MinIO services also live on the storage primary host.
-The MinIO endpoint presented to mounts is served through the IO Coordinator reverse proxy,
-which routes to the MinIO instance on whichever host currently holds the storage primary role.
+MinIO services also live on the IO primary host.
+The MinIO endpoint presented to mounts is served through that host's reverse proxy,
+which forwards to the MinIO instance on the same host.
 MinIO is pinned to a pre-removal nixpkgs revision because upstream dropped both the package and module; SeaweedFS remains the intended replacement.
 
 See [SeaweedFS Evaluation](storage/seaweedfs.md) for details on scope, host gating, proxy behaviour, and security material.

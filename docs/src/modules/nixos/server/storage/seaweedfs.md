@@ -4,7 +4,7 @@
 
 SeaweedFS is deployed here as an evaluation-only storage service alongside MinIO.
 It exists to validate SeaweedFS as a possible replacement candidate without changing existing MinIO-backed workloads or the repository's migration posture.
-The evaluation deployment provides an all-in-one SeaweedFS stack on the storage primary host
+The evaluation deployment provides an all-in-one SeaweedFS stack on the IO primary host
 so the repository can test endpoint shape, proxy integration, and service behaviour in a realistic environment while keeping the current MinIO setup intact.
 
 ## Entry Point
@@ -106,7 +106,7 @@ SeaweedFS SOPS entries are separate from MinIO secrets and are used for:
 - **mTLS between Caddy and SeaweedFS components**
 - **JWT-based inter-component authentication inside SeaweedFS**
 
-These entries live under the `SEAWEEDFS` secret tree on the storage primary host and include both JWT material
+These entries live under the `SEAWEEDFS` secret tree on the IO primary host and include both JWT material
 and TLS certificates/keys for the SeaweedFS component set.
 
 ### TLS trust chain
@@ -119,10 +119,9 @@ Fleet mTLS Root CA
     └── master, volume, filer, admin, client, worker leaves
 ```
 
-`SEAWEEDFS/TLS/CA` is a PEM trust bundle.
-It contains the original flat `SeaweedFS CA` and the `Fleet mTLS Root CA` until the first Fleet rollout completes,
-because the currently deployed leaves may still be signed by the original CA.
-After all components run the Fleet chains, reduce it to the Fleet root only.
+`SEAWEEDFS/TLS/CA` is a PEM trust bundle that every component trusts.
+It predates the Fleet rollout, so it carries the original flat `SeaweedFS CA` alongside the `Fleet mTLS Root CA`.
+`--force-ca` reissues it as the Fleet root plus the SeaweedFS intermediate.
 TLS material is stored as binary SOPS files under `hosts/server/nixio/seaweedfs-tls/`: `CA`, `<SERVICE>_CRT`, and `<SERVICE>_KEY`.
 Each `SEAWEEDFS/TLS/<SERVICE>_CRT` value is a chain ordered leaf first, then the SeaweedFS intermediate.
 Leaves use both `serverAuth` and `clientAuth` because the same component certificate is used as a gRPC server and client certificate.
@@ -147,6 +146,7 @@ each chain ordered leaf first then intermediate, and encrypts all of them as bin
 Components default to master, volume, filer, admin, client, and worker.
 Pass component names to limit a run and `--force` to rotate them, so `--force master` reissues only the master leaf.
 That is the rotation that adds the `master.seaweedfs.${data.site.domain}` SAN.
+A leaf rotation never rewrites `CA`; it changes only when `--force-ca` is passed.
 Use `--dry-run` to print the planned SAN sets without writing anything.
 
 ## Operational Notes / Assumptions
