@@ -20,6 +20,7 @@ in
     ./dashboard.nix
     ./memory.nix
     ./post-start.nix
+    ./profile-sync.nix
     ./scraper.nix
     ./voice.nix
   ]

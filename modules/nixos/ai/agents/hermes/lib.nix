@@ -99,6 +99,28 @@ let
       );
     };
 
+  # hermes-agent.service is Type=simple, so a dependent unit has to probe for a live exec
+  # as the hermes user before it starts, not just order itself `after` the service.
+  waitForHermesExec =
+    pkgs:
+    {
+      user ? "hermes",
+      container ? "hermes-agent",
+      attempts ? 60,
+      intervalSec ? 2,
+    }:
+    pkgs.writeShellScript "wait-for-${container}-exec" ''
+      lastError=$(mktemp)
+      trap 'rm -f "$lastError"' EXIT
+      for ((i = 0; i < ${toString attempts}; i++)); do
+        ${getExe pkgs.docker} exec -u ${user} ${container} true 2>"$lastError" && exit 0
+        sleep ${toString intervalSec}
+      done
+      echo "${container} is not accepting exec after ~${toString (attempts * intervalSec)}s:" >&2
+      cat "$lastError" >&2
+      exit 1
+    '';
+
   hermesConfigType = lib.types.mkOptionType {
     name = "ai-agent-hermes-settings";
     description = "Hermes config attrs, deep-merged with list concatenation.";
@@ -112,5 +134,6 @@ in
     mergeDeep
     mkPluginModule
     hermesConfigType
+    waitForHermesExec
     ;
 }

@@ -76,6 +76,7 @@
 - [Flake Allocations](modules/flake/allocations.md)
 - [AI](modules/nixos/ai/overview.md)
   - [Agents](modules/nixos/ai/agents.md)
+  - [Profile Config Sync](modules/nixos/ai/profile-sync.md)
   - [Mnemosyne](modules/nixos/ai/mnemosyne.md)
 
 # Home-Manager Modules

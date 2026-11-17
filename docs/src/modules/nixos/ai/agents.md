@@ -23,6 +23,7 @@ The module is provider-oriented: `default.nix` holds universal defaults, while e
 - `hermes/dashboard.nix` — web dashboard unit and OIDC authentication.
 - `hermes/memory.nix` — Mnemosyne long-term memory provider.
 - `hermes/post-start.nix` — `services.ai-agent.containerPostStart` commands.
+- `hermes/profile-sync.nix` — per-profile `config.yaml` and `.env` reconciliation, plus the shared link matrix.
 - `hermes/voice.nix` — voice input/output via Wyoming STT.
 - `hermes/scraper.nix` — web search and extract scraper.
 - `hermes/platform/*` — messaging platforms.

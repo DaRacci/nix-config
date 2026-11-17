@@ -60,4 +60,12 @@ rec {
   toSnakeCase = str: concatStringsSep "_" (map toLower (splitFormattedString str));
 
   toKebabCase = str: concatStringsSep "-" (map toLower (splitFormattedString str));
+
+  # True when a string looks like a credential rather than a path or a plain value.
+  looksLikeCredential =
+    value:
+    match "eyJ[A-Za-z0-9_-]{8,}\\..*" value != null
+    || match "sk-[A-Za-z0-9_-]{16,}" value != null
+    || match "[0-9a-f]{32}" value != null
+    || match "gh[pousr]_[A-Za-z0-9]{20,}" value != null;
 }

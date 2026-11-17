@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "profile-sync"
+version = "0.1.0"
+description = "Reconcile Hermes profile config.yaml and .env against a nix-declared policy"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["ruamel.yaml"]
+
+[project.scripts]
+profile-sync = "profile_sync.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/profile_sync"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

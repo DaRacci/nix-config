@@ -50,6 +50,9 @@ in
   pyuptimekuma = pkgs.python3Packages.callPackage ./python/pyuptimekuma.nix { };
   pyarlo = pkgs.python3Packages.callPackage ./python/pyarlo.nix { };
 
+  # Hermes profile reconciliation
+  profile-sync = pkgs.python3Packages.callPackage ./python/profile-sync.nix { };
+
   # Scripts n stuff
   new-host = pkgs.callPackage ./helpers/new-host.nix { };
   list-ephemeral = pkgs.callPackage ./list-ephemeral { };
