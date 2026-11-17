@@ -13,7 +13,7 @@ This area provides:
 
 - **Main file**: `modules/nixos/server/storage/default.nix`
 - **Supporting file**: `modules/nixos/server/storage/bucket.nix`
-- **Supporting files**: `modules/nixos/server/storage/seaweedfs/default.nix` and `modules/nixos/server/storage/seaweedfs.nix`
+- **Supporting file**: `modules/nixos/server/storage/seaweedfs/default.nix`
 
 ## Architecture / Services / Scope
 
