@@ -23,4 +23,5 @@ The `ai/` tree owns both the agent container and the standalone services it cons
 ## References
 
 - [Agents](agents.md) — Hermes autonomous agent container and its per-feature modules
+- [Profile Config Sync](profile-sync.md) — Per-profile `config.yaml` and `.env` reconciliation against the nix policy
 - [Mnemosyne](mnemosyne.md) — Sync server, optional MCP server, and sync client orchestration for the Mnemosyne SQLite-based memory provider

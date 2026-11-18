@@ -30,6 +30,7 @@ These modules allow for modular and reusable configurations across different hos
     - [Tailscale](nixos/services/tailscale.md)
   - [AI Modules](nixos/ai/overview.md)
     - [Agents](nixos/ai/agents.md)
+    - [Profile Config Sync](nixos/ai/profile-sync.md)
     - [Mnemosyne](nixos/ai/mnemosyne.md)
 - `modules/flake/`: Flake-level modules for cross-host configuration.
   - [Flake Allocations](flake/allocations.md)
