@@ -10,22 +10,15 @@ let
     concatMap
     concatStringsSep
     filter
-    foldl'
     getExe
     length
     mkEnableOption
     mkIf
     mkOption
     optional
-    recursiveUpdate
     unique
     ;
-  inherit (lib.types)
-    attrsOf
-    nullOr
-    str
-    submodule
-    ;
+  inherit (lib.types) str;
   inherit (builtins) hasAttr;
   inherit (pkgs) docker;
 
@@ -33,6 +26,7 @@ let
   settingsArea = import ./profile-sync/settings.nix { inherit lib; };
   envArea = import ./profile-sync/env.nix { inherit lib; };
   linksArea = import ./profile-sync/links.nix { inherit lib; };
+  policyModule = import ./profile-sync/policy.nix { inherit lib; };
   hlib = import ./lib.nix { inherit lib; };
 
   cfg = config.services.ai-agent.profileSync;
@@ -43,27 +37,7 @@ let
 
   reconciler = pkgs.profile-sync;
 
-  areas = [
-    settingsArea
-    envArea
-  ];
-
-  vocabulary.options =
-    settingsArea.options
-    // envArea.options
-    // {
-      lock = settingsArea.lockOptions // envArea.lockOptions;
-    };
-
-  compileLayer = layer: foldl' recursiveUpdate { } (map (area: area.compile layer) areas);
-
-  policy = {
-    version = 1;
-    defaults = compileLayer cfg.defaults;
-    classes = builtins.mapAttrs (_: compileLayer) cfg.classes;
-    profiles = builtins.mapAttrs (_: compileLayer) cfg.profiles;
-    links = linksArea.compile cfg;
-  };
+  policy = policyModule.compile cfg;
 
   policyJson = builtins.toJSON policy;
   policyFile = pkgs.writeText "hermes-profile-sync-policy.json" policyJson;
@@ -121,51 +95,9 @@ in
       default = "3h";
       description = "How often the timer re-runs the reconciler.";
     };
-
-    defaults = mkOption {
-      type = submodule vocabulary;
-      default = { };
-      description = "The baseline every profile gets.";
-    };
-
-    classes = mkOption {
-      type = attrsOf (
-        submodule (
-          { ... }:
-          {
-            imports = [ vocabulary ];
-            options.inherits = mkOption {
-              type = nullOr str;
-              default = null;
-              description = "Another class whose vocabulary this one starts from.";
-            };
-          }
-        )
-      );
-      default = { };
-      description = "Reusable bundles of the same vocabulary.";
-    };
-
-    profiles = mkOption {
-      type = attrsOf (
-        submodule (
-          { ... }:
-          {
-            imports = [ vocabulary ];
-            options.class = mkOption {
-              type = nullOr str;
-              default = null;
-              description = "The class this profile belongs to.";
-            };
-          }
-        )
-      );
-      default = { };
-      description = "Per-profile deltas. A profile with no entry here gets `defaults` only, and the run report lists it as undeclared.";
-    };
-
-    links = linksArea.options.links;
-
+  }
+  // policyModule.options
+  // {
     policyJSON = mkOption {
       type = str;
       readOnly = true;

@@ -19,6 +19,7 @@ Precedence is override > profile > class > defaults, and a key no layer mentions
 | `env.unset` | keys or globs that must end up absent |
 | `env.keep` | exempts a key from an `unset` rule declared by a higher layer |
 | `lock` | keys a runtime override may not change |
+| `class` / `inherits` | the class a profile belongs to, and the class a class starts from; together they build the layer chain |
 
 ## Links
 

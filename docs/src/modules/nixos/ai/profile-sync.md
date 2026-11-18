@@ -9,8 +9,8 @@ Reconcile every Hermes profile's `config.yaml` and `.env` against a nix-declared
 - **Main file**: [profile-sync.nix](../../../../../modules/nixos/ai/agents/hermes/profile-sync.nix)
 - **Reconciler**: `pkgs/python/profile-sync.nix` — a packaged Python application with `ruamel.yaml`.
 
-The module splits into one file per area under `profile-sync/`: `settings.nix` (config keys), `env.nix` (`.env` keys) and `links.nix` (the profile-home symlink matrix).
-Each contributes its own option vocabulary and its own slice of the compiled policy, and `lib.nix` holds the shared helpers.
+The module splits into one file per area under `profile-sync/`: `settings.nix` (config keys), `env.nix` (`.env` keys), `identity.nix` (`class` and `inherits`) and `links.nix` (the profile-home symlink matrix).
+`policy.nix` declares the option surface and folds one compiled slice per area into the manifest, and `lib.nix` holds the helpers every part shares.
 
 ## Architecture / Services / Scope
 
@@ -21,6 +21,7 @@ Three layers, resolved per key:
 1. **profile artefact** — `profiles/<name>/config.yaml` and `profiles/<name>/.env`, written only by the reconciler.
 
 Precedence is **override > profile > class > defaults**.
+The manifest carries each layer's `class` and `inherits` verbatim, which is what lets the reconciler resolve the class chain, and a layer that declares neither compiles with neither key.
 A key no layer mentions is never touched, and a profile with no entry in `profiles` gets `defaults` only.
 
 Both units live on the host and reach into the container with `docker exec`:
