@@ -43,6 +43,8 @@ in
           EOF
         '';
 
-        server.network.openPortsForSubnet.tcp = [ config.services.prometheus.exporters.postgres.port ];
+        server.network.openPortsForSources.${config.server.monitoringPrimaryHost}.tcp = [
+          config.services.prometheus.exporters.postgres.port
+        ];
       };
 }

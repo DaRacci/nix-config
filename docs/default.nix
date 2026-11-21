@@ -60,6 +60,7 @@ let
       inherit modules;
       specialArgs = {
         inherit inputs lib self;
+        deviceType = null;
         hostDirectory = "${self}/hosts";
         importExternals = false;
         users = [ ];

@@ -225,5 +225,5 @@ in
     ''
   ];
 
-  server.network.openPortsForSubnet.tcp = [ 2222 ];
+  server.network.openPortsForSources.lan.tcp = [ 2222 ];
 }

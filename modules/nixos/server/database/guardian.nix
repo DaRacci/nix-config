@@ -55,7 +55,7 @@ let
 
   guardianServerArgs = [
     "--host"
-    "0.0.0.0"
+    "::"
     "--port"
     (toString guardianPort)
     "--ca-cert"
@@ -168,7 +168,7 @@ in
       '';
 
       server = {
-        network.openPortsForSubnet.tcp = [ guardianPort ];
+        network.openPortsForSources.${config.server.ioPrimaryHost}.tcp = [ guardianPort ];
 
         database.dependentServices =
           config.server.database.postgres // config.server.database.redis

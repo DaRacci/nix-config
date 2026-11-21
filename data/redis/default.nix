@@ -1,4 +1,4 @@
-{ v }:
+{ dataLib }:
 {
   data.mappings = builtins.fromJSON (builtins.readFile ./mappings.json);
 
@@ -7,8 +7,8 @@
     let
       ids = lib.attrValues data.redis.mappings;
     in
-    v.unique { values = ids; }
-    ++ v.range {
+    dataLib.unique { values = ids; }
+    ++ dataLib.range {
       min = 0;
       max = 15;
       values = ids;

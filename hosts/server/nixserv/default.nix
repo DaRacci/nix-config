@@ -105,5 +105,5 @@ in
     };
   };
 
-  networking.firewall.allowedTCPPorts = [ 8080 ];
+  server.network.openPortsForSources.${config.server.ioPrimaryHost}.tcp = [ 8080 ];
 }

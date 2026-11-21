@@ -3,12 +3,12 @@
     wyoming = {
       piper.servers.default = {
         enable = true;
-        uri = "tcp://0.0.0.0:10200";
+        uri = "tcp://[::]:10200";
         voice = "en_GB-cori-high";
       };
       faster-whisper.servers.default = {
         enable = true;
-        uri = "tcp://0.0.0.0:10300";
+        uri = "tcp://[::]:10300";
         device = "auto";
         language = "auto";
         model = "distil-small.en";

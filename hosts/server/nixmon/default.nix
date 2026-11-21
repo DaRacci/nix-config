@@ -1,4 +1,8 @@
-_: {
+{
+  config,
+  ...
+}:
+{
   sops.secrets = { };
 
   server = {
@@ -31,5 +35,5 @@ _: {
     };
   };
 
-  networking.firewall.allowedTCPPorts = [ 3001 ];
+  server.network.openPortsForSources.${config.server.ioPrimaryHost}.tcp = [ 3001 ];
 }

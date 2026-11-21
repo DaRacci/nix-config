@@ -37,7 +37,7 @@ in
     };
 
     services.atuin = {
-      host = "0.0.0.0";
+      host = "::";
       openRegistration = true;
 
       database = {

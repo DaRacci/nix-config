@@ -1,4 +1,4 @@
-{ v }:
+{ dataLib }:
 {
   data = {
     domain = "racci.dev";
@@ -7,7 +7,7 @@
 
   validate =
     lib: data:
-    v.keys {
+    dataLib.keys {
       expected = [
         "domain"
         "adminEmail"

@@ -111,7 +111,7 @@ in
                           entry = builtins.head entries;
                         in
                         ''
-                          ${entry.baseUrl}:${port} {
+                          :${port} {
                             ${entry.config}
                           }
                         ''

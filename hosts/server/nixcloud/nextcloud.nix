@@ -144,6 +144,7 @@ in
         allow_local_remote_servers = true;
         trusted_proxies = [
           "::1" # For notify_push
+          self.data.network.cluster.cidr
         ]
         ++ (self.data.network.subnets |> map (v: v.ipv4.cidr));
 
@@ -246,11 +247,12 @@ in
   networking = {
     firewall = {
       allowedUDPPorts = [ 3478 ];
-      allowedTCPPorts = [
-        80
-        443
-        3478
-      ];
+      allowedTCPPorts = [ 3478 ];
     };
   };
+
+  server.network.openPortsForSources.${config.server.ioPrimaryHost}.tcp = [
+    80
+    443
+  ];
 }

@@ -29,6 +29,8 @@ in
         icon = "mdi-transit-connection-variant";
       };
 
+      network.openPortsForSources.cluster.tcp = [ cfg.collector.otlp.port ];
+
       monitoring.logs.extraConfiguration = ''
         otelcol.auth.bearer "otlp" {
           token = sys.env("OTLP_BEARER_TOKEN")

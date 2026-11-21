@@ -34,7 +34,7 @@
 
       server = {
         port = 8888;
-        bind_address = "0.0.0.0";
+        bind_address = "::";
         base_url = "https://search.racci.dev";
         secret_key = "@SECRET_KEY@";
         public_instance = false;
@@ -663,7 +663,7 @@
       public = true;
       ports = [ config.services.searx.settings.server.port ];
       extraConfig = ''
-        reverse_proxy http://${config.services.searx.settings.server.bind_address}:${toString config.services.searx.settings.server.port}
+        reverse_proxy http://localhost:${toString config.services.searx.settings.server.port}
       '';
     };
   };

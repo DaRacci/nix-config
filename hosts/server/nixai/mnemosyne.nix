@@ -13,7 +13,7 @@
   server.proxy.virtualHosts."mnemosyne.racci.dev" = {
     ports = [ config.services.mnemosyne.server.sync.port ];
     extraConfig = ''
-      reverse_proxy ${config.services.mnemosyne.server.sync.host}:${toString config.services.mnemosyne.server.sync.port}
+      reverse_proxy http://localhost:${toString config.services.mnemosyne.server.sync.port}
     '';
   };
 
@@ -23,7 +23,7 @@
     server = {
       sync = {
         enable = true;
-        host = "0.0.0.0";
+        host = "::";
         port = 8765;
         apiKeyFile = config.sops.secrets.MNEMOSYNE_SYNC_KEY.path;
       };

@@ -28,7 +28,13 @@
     restartUnits = [ "wg.service" ];
   };
 
-  vpnNamespaces.wg.accessibleFrom = lib.mkForce (self.data.network.cidrs ++ [ "127.0.0.1" ]);
+  vpnNamespaces.wg.accessibleFrom = lib.mkForce (
+    self.data.network.cidrs
+    ++ [
+      self.data.network.cluster.cidr
+      "127.0.0.1"
+    ]
+  );
 
   hardware.graphics = {
     enable = true;

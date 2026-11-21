@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import socket
 import ssl
 import urllib.error
 import urllib.parse
@@ -147,8 +148,22 @@ class Handler(BaseHTTPRequestHandler):
         super().log_message(format, *args)
 
 
+def make_server(address: str):
+    if ":" not in address:
+        return HTTPServer((address, args.port), Handler)
+
+    class IPv6HTTPServer(HTTPServer):
+        address_family = socket.AF_INET6
+
+        def server_bind(self):
+            self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+            super().server_bind()
+
+    return IPv6HTTPServer((address, args.port), Handler)
+
+
 def main():
-    server = HTTPServer((args.listen_address, args.port), Handler)
+    server = make_server(args.listen_address)
     server.serve_forever()
 
 

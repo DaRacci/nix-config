@@ -88,6 +88,7 @@
         local   all       all             peer
         local   all       all             trust
         local   all       all             scram-sha-256
+        host    all       all       ${self.data.network.cluster.cidr}  scram-sha-256
       ''
       + (lib.pipe self.data.network.subnets [
         (map (
@@ -130,7 +131,7 @@
     };
   };
 
-  networking.firewall.allowedTCPPorts = [
+  server.network.openPortsForSources.cluster.tcp = [
     config.services.postgresql.settings.port
     config.services.couchdb.port
   ];

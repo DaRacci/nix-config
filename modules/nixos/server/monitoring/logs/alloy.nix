@@ -22,6 +22,7 @@ let
     optionalAttrs
     optionalString
     types
+    optional
     ;
   inherit (types) lines;
 
@@ -210,7 +211,7 @@ in
     capture = {
       enable = mkEnableOption "mTLS API to temporarily disable journal drops and limits";
     }
-    // (commonListenerOpts "capture API" "0.0.0.0" 12445)
+    // (commonListenerOpts "capture API" "::" 12445)
     // {
       allowedClientCommonNames = mkOption {
         type = types.listOf types.str;
@@ -509,7 +510,8 @@ in
         };
       };
 
-      server.network.openPortsForSubnet.tcp = lib.optional openCapturePort captureCfg.port;
+      server.network.openPortsForSources.${config.server.monitoringPrimaryHost}.tcp =
+        optional openCapturePort captureCfg.port;
     })
 
     (mkIf (cfg.collector.enable && captureCfg.enable && relayCfg.enable) {

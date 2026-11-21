@@ -23,6 +23,8 @@ in
       ];
     };
 
-    server.network.openPortsForSubnet.tcp = [ config.services.prometheus.exporters.process.port ];
+    server.network.openPortsForSources.${config.server.monitoringPrimaryHost}.tcp = [
+      config.services.prometheus.exporters.process.port
+    ];
   };
 }

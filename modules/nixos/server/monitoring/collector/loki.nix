@@ -25,6 +25,10 @@ in
         '';
       };
 
+    server.network.openPortsForSources.cluster.tcp = [
+      config.services.loki.configuration.server.http_listen_port
+    ];
+
     services.loki = {
       enable = true;
 

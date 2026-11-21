@@ -39,7 +39,7 @@ in
           cfg = config.services.immich;
         in
         ''
-          reverse_proxy http://${cfg.host}:${toString cfg.port}
+          reverse_proxy http://localhost:${toString cfg.port}
         '';
     };
 
@@ -60,18 +60,21 @@ in
   services = {
     immich = {
       enable = true;
-      host = "0.0.0.0";
+      host = "::";
 
       secretsFile = config.sops.secrets."IMMICH/ENV".path;
       environment = {
         IMMICH_TRUSTED_PROXIES =
-          self.data.network.subnets
-          |> map (subnet: [
-            subnet.ipv4.cidr
-            subnet.ipv6.cidr
-          ])
-          |> flatten
-          |> filterEmpty
+          (
+            self.data.network.subnets
+            |> map (subnet: [
+              subnet.ipv4.cidr
+              subnet.ipv6.cidr
+            ])
+            |> flatten
+            |> filterEmpty
+          )
+          ++ [ self.data.network.cluster.cidr ]
           |> lib.concatStringsSep ",";
       };
 
@@ -143,9 +146,7 @@ in
     };
   };
 
-  networking = {
-    firewall = {
-      allowedTCPPorts = [ config.services.immich.port ];
-    };
-  };
+  server.network.openPortsForSources.${config.server.ioPrimaryHost}.tcp = [
+    config.services.immich.port
+  ];
 }
