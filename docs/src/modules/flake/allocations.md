@@ -13,8 +13,7 @@ and which servers act as distributed builders — in a single place — and then
 - **Supporting files**:
   - **Supporting file**: [`modules/flake/apply/system.nix`](../../../../modules/flake/apply/system.nix) — maps allocations onto NixOS options per system
   - **Supporting file**: [`modules/flake/apply/home-manager.nix`](../../../../modules/flake/apply/home-manager.nix) — Home-Manager apply (placeholder)
-  - **Supporting file**: [`flake/nixos/flake-module.nix`](../../../../flake/nixos/flake-module.nix) — sets the actual allocation values
-    and declares the `allocations` flake output
+  - **Supporting file**: [`flake/nixos/flake-module.nix`](../../../../flake/nixos/flake-module.nix) — sets the actual allocation values and declares the `allocations` flake output
   - **Supporting file**: [`flake/default.nix`](../../../../flake/default.nix) — routes that output through the `nixos` partition
   - **Supporting file**: [`lib/builders/default.nix`](../../../../lib/builders/default.nix) — builder that consumes allocations
 
@@ -95,8 +94,7 @@ nix eval .#allocations --json
 ```
 
 The output holds the two declared trees, `accelerators` and `server`.
-It does not hold `allocations.hostTypes`, which the option module derives from host discovery rather than from a
-declaration.
+It does not hold `allocations.hostTypes`, which the option module derives from host discovery rather than from a declaration.
 
 ## References
 
