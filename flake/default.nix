@@ -53,6 +53,7 @@ in
   };
 
   partitionedAttrs = {
+    allocations = "nixos";
     nixosConfigurations = "nixos";
     homeConfigurations = "home-manager";
     githubActions = "ci";

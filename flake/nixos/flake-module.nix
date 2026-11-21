@@ -38,8 +38,7 @@ let
     )
     |> flatten
     |> listToAttrs;
-in
-{
+
   allocations = {
     accelerators = {
       nixmi = [ "cuda" ];
@@ -52,8 +51,13 @@ in
       distributedBuilders = [ "nixserv" ];
     };
   };
+in
+{
+  inherit allocations;
 
   flake = {
+    inherit allocations;
+
     nixosConfigurations = genAttrs hostNames (
       hostName:
       mkSystem hostName {
