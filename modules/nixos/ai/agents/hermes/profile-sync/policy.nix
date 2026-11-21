@@ -48,7 +48,6 @@ let
     }
   );
 
-  # Every area contributes its own slice of one layer's compiled form.
   areas = [
     settingsArea
     envArea
