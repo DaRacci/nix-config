@@ -13,21 +13,49 @@ let
     filterAttrs
     concatStringsSep
     optionalString
+    optional
+    unique
+    listToAttrs
+    nameValuePair
     strings
     ;
   inherit (strings) hasPrefix hasSuffix;
-  inherit (builtins) attrValues;
+  inherit (builtins) attrNames attrValues concatMap;
 
   clusterPostgresDatabases =
     fromAllServers [
-      (map (hostConfig: hostConfig.server.database.postgres))
-      lib.mergeAttrsList
+      (map (hostConfig: {
+        ${hostConfig.system.name} = hostConfig.server.database.postgres;
+      }))
+      mergeAttrsList
     ]
-    // config.server.database.postgres;
-  clusterPostgresRules =
-    attrValues clusterPostgresDatabases
-    |> map (db: "host  ${db.database}  ${db.user}  ${self.data.network.cluster.cidr}  scram-sha-256")
-    |> lib.unique;
+    // {
+      ${config.system.name} = config.server.database.postgres;
+    };
+
+  declaringHosts = attrNames (filterAttrs (_: databases: databases != { }) clusterPostgresDatabases);
+
+  databasePorts = [
+    config.services.postgresql.settings.port
+    config.services.couchdb.port
+  ];
+
+  postgresSources =
+    host:
+    [ "${self.data.network.cluster.hosts.${host}}/128" ]
+    ++ optional (host == config.system.name) "127.0.0.1/32"
+    ++ optional (host == config.system.name) "::1/128";
+
+  postgresRule = address: db: "host  ${db.database}  ${db.user}  ${address}  scram-sha-256";
+
+  clusterPostgresRules = unique (
+    concatMap (
+      host:
+      concatMap (address: map (postgresRule address) (attrValues clusterPostgresDatabases.${host})) (
+        postgresSources host
+      )
+    ) declaringHosts
+  );
 in
 {
   # For backups to be placed in the minio data directory.
@@ -146,8 +174,7 @@ in
     };
   };
 
-  server.network.openPortsForSources.cluster.tcp = [
-    config.services.postgresql.settings.port
-    config.services.couchdb.port
-  ];
+  server.network.openPortsForSources = listToAttrs (
+    map (host: nameValuePair host { tcp = databasePorts; }) declaringHosts
+  );
 }

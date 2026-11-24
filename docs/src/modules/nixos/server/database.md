@@ -32,6 +32,9 @@ The `server.database.host` option determines how services connect to databases.
 On the Database Coordinator (`config.server.ioPrimaryHost`), it defaults to `localhost`.
 On all other hosts, it defaults to `<ioPrimaryHost>.${data.network.cluster.domain}`.
 
+That hostname must resolve through the cluster network: `pg_hba` grants are scoped to the declaring host's cluster `/128`,
+so connections from the LAN or tailnet addresses are rejected even when the service itself runs on an allowed host.
+
 ### PostgreSQL Management
 
 When a service defines a database in `server.database.postgres`:
@@ -40,7 +43,8 @@ When a service defines a database in `server.database.postgres`:
 - **Password Management**: A SOPS secret is expected at `POSTGRES/<DB_NAME_UPPER>_PASSWORD`.
   Database names containing hyphens (`-`) replace them with underscores (`_`) when constructing the secret path.
   The system automatically sets this password for the role during the `postgresql-setup` service.
-- **Cluster Access**: `pg_hba` allows each declared database/user pair from the cluster CIDR with `scram-sha-256`.
+- **Cluster Access**: `pg_hba` allows each declared database/user pair from the declaring host's cluster address only (`<host address>/128`, `scram-sha-256`).
+  Databases declared on the Database Coordinator itself also get `127.0.0.1/32` and `::1/128` rules.
   No cluster-wide or subnet-wide `all/all` grant is emitted; LAN and tailnet clients are not accepted.
 - **Aggregated Configuration**: The Database Coordinator collects all PostgreSQL requirements from across the entire
   flake to ensure all necessary extensions and initial scripts are loaded.
