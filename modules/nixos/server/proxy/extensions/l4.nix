@@ -138,7 +138,7 @@ in
     }
 
     (mkIf isThisIOPrimaryHost {
-      networking.firewall =
+      server.network.openPortsForSources.lan =
         let
           l4Entries =
             collectAllAttrsFunc "server.proxy.virtualHosts" (
@@ -156,8 +156,8 @@ in
           udpPorts = builtins.filter (e: e.protocol == "udp") l4Entries |> map (e: e.port) |> unique;
         in
         {
-          allowedTCPPorts = tcpPorts;
-          allowedUDPPorts = udpPorts;
+          tcp = tcpPorts;
+          udp = udpPorts;
         };
     })
   ];
