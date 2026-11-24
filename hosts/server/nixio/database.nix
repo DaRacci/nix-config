@@ -11,7 +11,6 @@ let
     mergeAttrsList
     mapAttrs
     filterAttrs
-    pipe
     concatStringsSep
     optionalString
     strings
@@ -114,16 +113,7 @@ in
       ''
       + optionalString (clusterPostgresRules != [ ]) (
         "\n" + concatStringsSep "\n" clusterPostgresRules + "\n"
-      )
-      + (pipe self.data.network.subnets [
-        (map (
-          subnet:
-          [ "host  all  all  ${subnet.ipv4.cidr}  scram-sha-256" ]
-          ++ lib.optionals (subnet.ipv6.cidr != null) [ "host  all  all  ${subnet.ipv6.cidr}  scram-sha-256" ]
-        ))
-        lib.flatten
-        (builtins.concatStringsSep "\n")
-      ]);
+      );
 
       settings = {
         password_encryption = "scram-sha-256";

@@ -41,6 +41,7 @@ When a service defines a database in `server.database.postgres`:
   Database names containing hyphens (`-`) replace them with underscores (`_`) when constructing the secret path.
   The system automatically sets this password for the role during the `postgresql-setup` service.
 - **Cluster Access**: `pg_hba` allows each declared database/user pair from the cluster CIDR with `scram-sha-256`.
+  No cluster-wide or subnet-wide `all/all` grant is emitted; LAN and tailnet clients are not accepted.
 - **Aggregated Configuration**: The Database Coordinator collects all PostgreSQL requirements from across the entire
   flake to ensure all necessary extensions and initial scripts are loaded.
 
