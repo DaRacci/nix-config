@@ -101,12 +101,12 @@ in
 
     server.proxy.virtualHosts.prometheus =
       let
-        inherit (config.services.prometheus) port listenAddress;
+        inherit (config.services.prometheus) port;
       in
       {
         ports = [ port ];
         extraConfig = ''
-          reverse_proxy http://${listenAddress}:${toString port}
+          reverse_proxy http://localhost:${toString port}
         '';
       };
 
@@ -114,7 +114,7 @@ in
       enable = true;
       checkConfig = "syntax-only";
       port = 9090;
-      listenAddress = "0.0.0.0";
+      listenAddress = "::";
       extraFlags = optionals otlpCfg.enable [ "--web.enable-remote-write-receiver" ];
 
       retentionTime = cfg.retention.metrics;

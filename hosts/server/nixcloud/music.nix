@@ -14,7 +14,7 @@
         public = true;
         ports = [ config.services.navidrome.settings.Port ];
         extraConfig = ''
-          reverse_proxy http://${config.services.navidrome.settings.Address}:${toString config.services.navidrome.settings.Port}
+          reverse_proxy http://localhost:${toString config.services.navidrome.settings.Port}
         '';
       };
     };
@@ -24,7 +24,7 @@
     navidrome = {
       enable = true;
       settings = {
-        Address = "0.0.0.0";
+        Address = "::";
         BaseUrl = "https://music.racci.dev";
         MusicFolder = "/mnt/media/library/music";
       };

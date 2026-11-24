@@ -16,12 +16,12 @@ in
 
     server.proxy.virtualHosts.loki =
       let
-        inherit (config.services.loki.configuration.server) http_listen_port http_listen_address;
+        inherit (config.services.loki.configuration.server) http_listen_port;
       in
       {
         ports = [ http_listen_port ];
         extraConfig = ''
-          reverse_proxy http://${http_listen_address}:${toString http_listen_port}
+          reverse_proxy http://localhost:${toString http_listen_port}
         '';
       };
 
@@ -37,7 +37,7 @@ in
 
         server = {
           http_listen_port = 3100;
-          http_listen_address = "0.0.0.0";
+          http_listen_address = "::";
         };
 
         common = {

@@ -26,6 +26,7 @@ in
 
         services.prometheus.exporters.redis = {
           enable = true;
+          listenAddress = "::";
           extraFlags = [
             "--redis.password-file %d/redis-password"
           ];

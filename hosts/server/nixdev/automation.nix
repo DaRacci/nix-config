@@ -22,7 +22,7 @@ in
     in
     {
       enable = true;
-      openFirewall = true;
+      openFirewall = false;
 
       taskRunners = {
         enable = true;
@@ -52,6 +52,7 @@ in
         in
         sharedEnv
         // {
+          N8N_LISTEN_ADDRESS = "::";
           WEBHOOK_URL = "https://n8n.racci.dev/";
           N8N_PROXY_HOPS = "1";
 
@@ -93,7 +94,7 @@ in
       n8n = {
         public = true;
         extraConfig = ''
-          reverse_proxy http://0.0.0.0:${toString config.services.n8n.environment.N8N_PORT}
+          reverse_proxy http://localhost:${toString config.services.n8n.environment.N8N_PORT}
         '';
       };
     };

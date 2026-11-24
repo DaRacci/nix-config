@@ -5,6 +5,7 @@
 The monitoring module provides a comprehensive observability stack for the server cluster using Prometheus (metrics),
 Loki (logs), Grafana (visualisation), and Grafana Alloy for authenticated OTLP ingestion.
 All components are configured as reusable NixOS modules with automatic cross-host discovery.
+Internal HTTP backends in this stack bind the IPv6 wildcard (`::`, dual-stack) and are scraped or written to through `<host>.${data.network.cluster.domain}` names.
 
 The system consists of three layers:
 

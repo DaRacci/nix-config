@@ -65,7 +65,11 @@ in
       secretsFile = config.sops.secrets."IMMICH/ENV".path;
       environment = {
         IMMICH_TRUSTED_PROXIES =
-          (
+          [
+            "127.0.0.1"
+            "::1"
+          ]
+          ++ (
             self.data.network.subnets
             |> map (subnet: [
               subnet.ipv4.cidr

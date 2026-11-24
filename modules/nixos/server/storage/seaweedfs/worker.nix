@@ -41,7 +41,7 @@ in
     name = "worker";
     ip = null;
     ipBind = false;
-    metricsIp = "0.0.0.0";
+    metricsIp = "::";
     extraOptions = {
       admin = mkOption {
         type = str;

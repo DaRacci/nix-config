@@ -3,6 +3,9 @@
   lib,
   ...
 }:
+let
+  coderPort = 8080;
+in
 {
   sops = {
     templates.CODER_ENV.content =
@@ -28,9 +31,9 @@
       };
     };
     proxy.virtualHosts.coder = {
-      ports = [ 8080 ];
+      ports = [ coderPort ];
       extraConfig = ''
-        reverse_proxy http://${config.services.coder.listenAddress}
+        reverse_proxy http://localhost:${toString coderPort}
       '';
     };
   };
@@ -38,7 +41,7 @@
   services.coder = {
     enable = true;
     accessUrl = "https://coder.racci.dev";
-    listenAddress = "0.0.0.0:8080";
+    listenAddress = "[::]:${toString coderPort}";
 
     environment.file = config.sops.templates.CODER_ENV.path;
 

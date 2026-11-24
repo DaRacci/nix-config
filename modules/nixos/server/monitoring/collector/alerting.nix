@@ -94,7 +94,7 @@ in
       services.prometheus.alertmanager = {
         enable = true;
         port = 9093;
-        listenAddress = "0.0.0.0";
+        listenAddress = "::";
 
         configuration = {
           global = {

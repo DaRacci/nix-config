@@ -14,7 +14,7 @@ in
     services.prometheus.exporters.fail2ban = {
       enable = true;
       port = 9191;
-      listenAddress = "0.0.0.0";
+      listenAddress = "::";
     };
 
     server.network.openPortsForSources.${config.server.monitoringPrimaryHost}.tcp = [

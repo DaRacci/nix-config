@@ -34,7 +34,7 @@ in
           in
           {
             secret = placeholder."REGISTRY/SECRET";
-            addr = "0.0.0.0:${toString srvCfg.port}";
+            addr = "[::]:${toString srvCfg.port}";
             host = "https://registry.racci.dev";
             relativeurls = false;
 

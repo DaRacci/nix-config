@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   self,
   ...
@@ -143,10 +144,19 @@ in
 
         allow_local_remote_servers = true;
         trusted_proxies = [
+          "127.0.0.1"
           "::1" # For notify_push
           self.data.network.cluster.cidr
         ]
-        ++ (self.data.network.subnets |> map (v: v.ipv4.cidr));
+        ++ (
+          self.data.network.subnets
+          |> map (v: [
+            v.ipv4.cidr
+            v.ipv6.cidr
+          ])
+          |> lib.flatten
+          |> lib.filterEmpty
+        );
 
         twofactor_enforced = true;
         twofactor_enforced_groups = [ ];

@@ -5,6 +5,9 @@
   self,
   ...
 }:
+let
+  clusterHost = self.data.network.cluster.hosts.${config.networking.hostName};
+in
 {
   imports = [
     inputs.nixarr.nixosModules.default
@@ -47,6 +50,7 @@
       enable = true;
       vpnTestService.enable = true;
       wgConf = config.sops.secrets.wireguard.path;
+      proxyListenAddr = "[${clusterHost}]";
     };
 
     jellyfin.enable = true;

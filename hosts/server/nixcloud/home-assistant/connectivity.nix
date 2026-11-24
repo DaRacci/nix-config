@@ -65,7 +65,6 @@ in
       enable = true;
       openFirewall = true;
       address = "::";
-      remoteBuildAddress = "::";
     };
 
     matterjs-server = {

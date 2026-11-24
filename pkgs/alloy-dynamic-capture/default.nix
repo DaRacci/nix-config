@@ -25,6 +25,7 @@ let
         mkdir -p $out/bin
         cp ${./. + "/${component}.py"} $out/bin/alloy-dynamic-capture-${component}
         chmod +x $out/bin/alloy-dynamic-capture-${component}
+        cp ${./alloy_lib.py} $out/bin/alloy_lib.py
 
         runHook postInstall
       '';

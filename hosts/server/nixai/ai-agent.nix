@@ -126,7 +126,10 @@ in
       };
 
       platform = {
-        apiServer.enable = true;
+        apiServer = {
+          enable = true;
+          host = "::";
+        };
 
         discord = {
           enable = true;
