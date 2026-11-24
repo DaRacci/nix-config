@@ -10,7 +10,7 @@
     ];
   };
 
-  server.proxy.virtualHosts."mnemosyne.racci.dev" = {
+  server.proxy.virtualHosts.mnemosyne = {
     ports = [ config.services.mnemosyne.server.sync.port ];
     extraConfig = ''
       reverse_proxy http://localhost:${toString config.services.mnemosyne.server.sync.port}
