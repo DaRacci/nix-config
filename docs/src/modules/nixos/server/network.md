@@ -32,6 +32,9 @@ Subnets come from the shared `data/network.nix` file and apply to every server h
 - Per-host open ports are declared through `server.network.openPortsForSources`.
 - Ports reachable by every cluster host use `openPortsForSources.cluster`;
   prefer naming a single host when only one consumer needs the port.
+- The tailscale interface is not trusted.
+  Tailnet traffic is matched against the same rules as LAN traffic;
+  add the service to `openPortsForSources.lan` if it must be reachable over the tailnet.
 - The `/etc/hosts` entries are exact names; resolvers do not apply a search domain to them.
   Anything that talks to another host over the cluster must use the `.cluster` suffix.
 
