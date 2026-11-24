@@ -32,7 +32,7 @@ let
       [
         {
           ipv6 = cluster.cidr;
-          iface = "eth1";
+          iface = cluster.interface;
         }
       ]
     else if source == "lan" then
@@ -45,7 +45,7 @@ let
       [
         {
           ipv6 = cluster.hosts.${source};
-          iface = "eth1";
+          iface = cluster.interface;
         }
       ]
     else
@@ -115,7 +115,7 @@ in
 
   config = mkMerge [
     (mkIf (clusterHost != null) {
-      networking.interfaces.eth1 = {
+      networking.interfaces.${cluster.interface} = {
         useDHCP = false;
         ipv6.addresses = [
           {
@@ -128,8 +128,6 @@ in
       networking.extraHosts = concatStringsSep "\n" (
         mapAttrsToList (name: address: "${address} ${name}.${cluster.domain}") cluster.hosts
       );
-
-      networking.search = [ cluster.domain ];
     })
 
     (

@@ -68,13 +68,14 @@ let
     "${builtins.substring 0 4 hash}:${builtins.substring 4 4 hash}:${builtins.substring 8 4 hash}:${builtins.substring 12 4 hash}";
 
   clusterHosts = (lib.builders.getHostsByType self).server;
-  cluster = {
+  cluster = rec {
     vlan = 42;
     zone = "clusterzone";
     vnet = "cluster";
+    interface = "eth1";
     domain = "cluster";
     prefixLength = 64;
-    cidr = "${clusterPrefix}::/64";
+    cidr = "${clusterPrefix}::/${toString prefixLength}";
     hosts = builtins.listToAttrs (
       map (name: {
         inherit name;
