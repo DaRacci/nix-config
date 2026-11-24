@@ -40,6 +40,7 @@ When a service defines a database in `server.database.postgres`:
 - **Password Management**: A SOPS secret is expected at `POSTGRES/<DB_NAME_UPPER>_PASSWORD`.
   Database names containing hyphens (`-`) replace them with underscores (`_`) when constructing the secret path.
   The system automatically sets this password for the role during the `postgresql-setup` service.
+- **Cluster Access**: `pg_hba` allows each declared database/user pair from the cluster CIDR with `scram-sha-256`.
 - **Aggregated Configuration**: The Database Coordinator collects all PostgreSQL requirements from across the entire
   flake to ensure all necessary extensions and initial scripts are loaded.
 

@@ -6,6 +6,30 @@
   self,
   ...
 }:
+let
+  inherit (lib)
+    mergeAttrsList
+    mapAttrs
+    filterAttrs
+    pipe
+    concatStringsSep
+    optionalString
+    strings
+    ;
+  inherit (strings) hasPrefix hasSuffix;
+  inherit (builtins) attrValues;
+
+  clusterPostgresDatabases =
+    fromAllServers [
+      (map (hostConfig: hostConfig.server.database.postgres))
+      lib.mergeAttrsList
+    ]
+    // config.server.database.postgres;
+  clusterPostgresRules =
+    attrValues clusterPostgresDatabases
+    |> map (db: "host  ${db.database}  ${db.user}  ${self.data.network.cluster.cidr}  scram-sha-256")
+    |> lib.unique;
+in
 {
   # For backups to be placed in the minio data directory.
   users.users.postgres.extraGroups = [ "minio" ];
@@ -32,12 +56,11 @@
   }
   // fromAllServers [
     (map (config: config.sops.secrets))
-    lib.mergeAttrsList
-    (lib.filterAttrs (
-      _name: secret:
-      lib.strings.hasPrefix "POSTGRES/" secret.name && lib.hasSuffix "_PASSWORD" secret.name
+    mergeAttrsList
+    (filterAttrs (
+      _name: secret: hasPrefix "POSTGRES/" secret.name && hasSuffix "_PASSWORD" secret.name
     ))
-    (builtins.mapAttrs (
+    (mapAttrs (
       _: value:
       (removeAttrs value [ "sopsFileHash" ])
       // {
@@ -88,9 +111,11 @@
         local   all       all             peer
         local   all       all             trust
         local   all       all             scram-sha-256
-        host    all       all       ${self.data.network.cluster.cidr}  scram-sha-256
       ''
-      + (lib.pipe self.data.network.subnets [
+      + optionalString (clusterPostgresRules != [ ]) (
+        "\n" + concatStringsSep "\n" clusterPostgresRules + "\n"
+      )
+      + (pipe self.data.network.subnets [
         (map (
           subnet:
           [ "host  all  all  ${subnet.ipv4.cidr}  scram-sha-256" ]
