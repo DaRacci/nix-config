@@ -34,7 +34,6 @@ General purpose application server for replacing cloud services with self-hosted
 - All apps are exposed via the cluster's reverse proxy on the IO Coordinator.
 - Applications using OAuth2/OIDC/SSO use the Identity Coordinator for authentication and authorisation.
 - Database services for these apps are provided by the cluster Database Coordinator via `server.database.postgres.*`.
-- Home Assistant's recorder URL is stored in the encrypted `POSTGRESQL_URL` secret; it must point at `nixio.cluster` because LAN/tailnet pg_hba grants were removed.
 - Media storage for Nextcloud and Immich uses SeaweedFS mounts on the Storage Coordinator.
 - Nextcloud has no declarative admin account: nixpkgs removed the `adminuser`/`adminpassFile` options.
   Create the admin after installation with `nextcloud-occ user:add <username>` followed by `nextcloud-occ group:adduser admin <username>`.
