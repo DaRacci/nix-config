@@ -33,9 +33,9 @@ Keep the used domain aligned with `data.site.domain`.
 | Consumer | Intermediate | Leaf profile | Trust store file |
 | ------------------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
 | SeaweedFS gRPC and Caddy proxy | `SeaweedFS Intermediate CA` | `serverAuth` + `clientAuth`, SANs for `seaweedfs.${data.site.domain}` and `<service>.seaweedfs.${data.site.domain}` | `hosts/server/nixio/seaweedfs-tls/CA` |
-| Alloy dynamic capture API | `Alloy Dynamic Capture Intermediate CA` | `serverAuth`, SANs for `<host>`, `<host>.localdomain`, `<host>.${data.site.domain}`, `127.0.0.1` | `hosts/server/<host>/alloy/CA_CERT` |
+| Alloy dynamic capture API | `Alloy Dynamic Capture Intermediate CA` | `serverAuth`, SANs for `<host>`, `<host>.localdomain`, `<host>.${data.site.domain}`, `<host>.${data.network.cluster.domain}`, `127.0.0.1` | `hosts/server/<host>/alloy/CA_CERT` |
 | Alloy capture relay client | `Alloy Dynamic Capture Intermediate CA` | `clientAuth`, CN `alloy-capture-relay` | `hosts/server/nixmon/alloy/CA_CERT` |
-| DB Guardian server | `DB Guardian Intermediate CA` | `serverAuth`, SANs for `<host>` and `<host>.localdomain` | `hosts/server/<host>/db-guardian-tls/CA_CERT` |
+| DB Guardian server | `DB Guardian Intermediate CA` | `serverAuth`, SANs for `<host>`, `<host>.localdomain`, and `<host>.${data.network.cluster.domain}` | `hosts/server/<host>/db-guardian-tls/CA_CERT` |
 | DB Guardian coordinator client | `DB Guardian Intermediate CA` | `clientAuth`, CN `db-guardian-coordinator` | `hosts/server/<database primary>/db-guardian-tls/CA_CERT` |
 
 Service-specific leaf details live in:

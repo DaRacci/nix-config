@@ -29,8 +29,8 @@ The module is implemented across several files in `modules/nixos/server/database
 ### Connection Management
 
 The `server.database.host` option determines how services connect to databases.
-On the Database Coordinator (`config.server.databasePrimaryHost`), it defaults to `localhost`.
-On all other hosts, it defaults to the value of `config.server.databasePrimaryHost`.
+On the Database Coordinator (`config.server.ioPrimaryHost`), it defaults to `localhost`.
+On all other hosts, it defaults to `<ioPrimaryHost>.${data.network.cluster.domain}`.
 
 ### PostgreSQL Management
 

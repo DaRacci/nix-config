@@ -127,9 +127,10 @@ Server certificates are valid for two years and include these SANs:
 - `DNS:<host>`
 - `DNS:<host>.localdomain`
 - `DNS:<host>.${data.site.domain}`
+- `DNS:<host>.${data.network.cluster.domain}`
 - `IP:127.0.0.1`
 
-The bare host name is required because the relay connects to `https://<host>:12445`.
+The relay reaches capture APIs over the cluster network at `https://<host>.${data.network.cluster.domain}:12445`.
 `data.site.domain` is the fleet's DNS suffix.
 Server certificates use `extendedKeyUsage = serverAuth`.
 The client certificate uses `commonName = alloy-capture-relay` and `extendedKeyUsage = clientAuth`.
@@ -167,7 +168,7 @@ for host in nixai nixarr nixcloud nixdev nixio nixmon nixserv; do
   openssl req -new -key "$host.key" -subj "/CN=$host" -out "$host.csr"
   openssl x509 -req -in "$host.csr" -CA alloy-intermediate.crt -CAkey alloy-intermediate.key \
     -CAcreateserial -days 730 -sha256 -out "$host.crt" -extensions v3 \
-    -extfile <(printf '[v3]\nbasicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth\nsubjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid,issuer\nsubjectAltName=DNS:%s,DNS:%s.localdomain,DNS:%s.%s,IP:127.0.0.1\n' "$host" "$host" "$host" "$domain")
+    -extfile <(printf '[v3]\nbasicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth\nsubjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid,issuer\nsubjectAltName=DNS:%s,DNS:%s.localdomain,DNS:%s.%s,DNS:%s.cluster,IP:127.0.0.1\n' "$host" "$host" "$host" "$domain" "$host")
   cat "$host.crt" alloy-intermediate.crt > "$host-chain.crt"
 done
 

@@ -7,6 +7,7 @@
   lib,
   pkgs,
   hostDirectory,
+  self,
   ...
 }:
 let
@@ -27,7 +28,8 @@ let
   inherit (types) lines;
 
   cfg = config.server.monitoring;
-  lokiHost = config.server.monitoringPrimaryHost;
+  clusterDomain = self.data.network.cluster.domain;
+  lokiHost = "${config.server.monitoringPrimaryHost}.${clusterDomain}";
   otlpCfg = cfg.collector.otlp;
 
   rateLimitCfg = cfg.logs.rateLimit;
@@ -254,7 +256,7 @@ in
           default =
             serverConfigurations
             |> builtins.filter (c: c.server.monitoring.enable && c.server.monitoring.logs.enable)
-            |> map (c: c.host.name);
+            |> map (c: "${c.host.name}.${clusterDomain}");
           description = "Hosts the relay is allowed to trigger for expanded capture.";
         };
 

@@ -9,6 +9,7 @@
   pkgs,
   lib,
   hostDirectory,
+  self,
   ...
 }:
 let
@@ -33,11 +34,14 @@ let
 
   cfg = config.server.database;
 
-  serversWithDatabases = getOthersWhere (
-    cfg:
-    (builtins.attrNames cfg.server.database.postgres) != [ ]
-    || (builtins.attrNames cfg.server.database.redis) != [ ]
-  );
+  clusterDomain = self.data.network.cluster.domain;
+  serversWithDatabases =
+    getOthersWhere (
+      cfg:
+      (builtins.attrNames cfg.server.database.postgres) != [ ]
+      || (builtins.attrNames cfg.server.database.redis) != [ ]
+    )
+    |> map (name: "${name}.${clusterDomain}");
   thisHostHasPostgresDatabases = builtins.length (builtins.attrNames cfg.postgres) > 0;
   thisHostHasRedisDatabases = builtins.length (builtins.attrNames cfg.redis) > 0;
   thisHostHasDatabaseDependencies = thisHostHasPostgresDatabases || thisHostHasRedisDatabases;
