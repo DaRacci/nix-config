@@ -20,7 +20,7 @@ Subnets come from the shared `data/network.nix` file and apply to every server h
 - `server.network.openPortsForSources` takes named sources and opens the listed TCP/UDP ports for them:
   - `cluster` matches the private cluster CIDR and only on the cluster interface.
   - A hostname from `data.network.cluster.hosts` matches that host's cluster address and only on the cluster interface.
-  - `lan` matches every external subnet on any interface.
+  - `lan` matches every external subnet on any interface except the cluster interface.
 - Rules are appended to the `nftables` input chain through the `networking.firewall.extraInputRules` option.
   They apply to new and untracked flows only; established connections are accepted earlier by `conntrack`.
 - Every server host also gets the cluster interface (`data.network.cluster.interface`) and `<host>.cluster` host records.

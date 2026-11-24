@@ -7,12 +7,15 @@
 let
   inherit (lib)
     concatStringsSep
+    elem
+    filterAttrs
     flatten
     mapAttrsToList
     mkIf
     mkMerge
     mkOption
     optionalString
+    unique
     ;
   inherit (lib.types)
     attrsOf
@@ -24,6 +27,14 @@ let
   cfg = config.server.network;
   cluster = self.data.network.cluster;
   clusterHost = cluster.hosts.${config.networking.hostName} or null;
+  knownSources = [
+    "cluster"
+    "lan"
+  ]
+  ++ builtins.attrNames cluster.hosts;
+  unknownSources = builtins.filter (source: !(elem source knownSources)) (
+    builtins.attrNames cfg.openPortsForSources
+  );
 
   # Resolve a named source to the addresses and interface it lives on.
   resolveSource =
@@ -40,6 +51,7 @@ let
         ipv4 = subnet.ipv4.cidr;
         ipv6 = subnet.ipv6.cidr;
         iface = null;
+        excludeIface = cluster.interface;
       }) self.data.network.subnets
     else if cluster.hosts ? ${source} then
       [
@@ -49,7 +61,7 @@ let
         }
       ]
     else
-      throw "server.network.openPortsForSources: unknown source '${source}'";
+      [ ];
 
   mkSourceRules =
     source: sourceCfg:
@@ -69,16 +81,20 @@ let
           map (
             port:
             let
-              iface = optionalString (resolved.iface != null) "iifname \"${resolved.iface}\" ";
+              iface =
+                optionalString (resolved.iface != null) "iifname \"${resolved.iface}\" "
+                + optionalString (
+                  (resolved.excludeIface or null) != null
+                ) "iifname != \"${resolved.excludeIface}\" ";
               dport = toString port.port;
             in
             [
               (optionalString (
                 (resolved.ipv4 or null) != null
-              ) "${iface}ip saddr ${resolved.ipv4} ${port.proto} dport { ${dport} } accept")
+              ) "${iface}ip saddr ${resolved.ipv4} ${port.proto} dport ${dport} accept")
               (optionalString (
                 (resolved.ipv6 or null) != null
-              ) "${iface}ip6 saddr ${resolved.ipv6} ${port.proto} dport { ${dport} } accept")
+              ) "${iface}ip6 saddr ${resolved.ipv6} ${port.proto} dport ${dport} accept")
             ]
           ) ports
         ) (resolveSource source)
@@ -114,6 +130,19 @@ in
   };
 
   config = mkMerge [
+    {
+      assertions = [
+        {
+          assertion = clusterHost != null;
+          message = "server.network: ${config.networking.hostName} has no entry in data.network.cluster.hosts; rename the host directory or update data/network.nix";
+        }
+        {
+          assertion = unknownSources == [ ];
+          message = "server.network.openPortsForSources: unknown sources ${concatStringsSep ", " unknownSources}";
+        }
+      ];
+    }
+
     (mkIf (clusterHost != null) {
       networking.interfaces.${cluster.interface} = {
         useDHCP = false;
@@ -132,8 +161,11 @@ in
 
     (
       let
-        rules = flatten (
-          mapAttrsToList (source: sourceCfg: mkSourceRules source sourceCfg) cfg.openPortsForSources
+        activeSources = filterAttrs (
+          _: sourceCfg: sourceCfg.tcp != [ ] || sourceCfg.udp != [ ]
+        ) cfg.openPortsForSources;
+        rules = unique (
+          flatten (mapAttrsToList (source: sourceCfg: mkSourceRules source sourceCfg) activeSources)
         );
         ruleset = concatStringsSep "\n" rules;
       in
