@@ -39,8 +39,9 @@ because the firewall rule translations only take effect under this backend and a
 - Docker hosts get `pkgs.iptables` added to the Docker daemon's `PATH`,
   because `dockerd` shells out to `iptables` for container NAT and the `nftables` backend no longer installs that binary.
   The `iptables` package in nixpkgs is the `nftables`-compatible build.
-- Tailscale hosts trust the interface named by `services.tailscale.interfaceName` at the firewall and run `tailscaled` in `nftables` mode.
-  An accept rule inside the tailscaled table cannot override the drop policy of the NixOS input chain, so the interface has to be trusted explicitly.
+- Tailscale hosts run `tailscaled` in `nftables` mode.
+  The tailscale interface is not trusted: tailnet traffic is matched against the same source rules as LAN traffic.
+  Only the tailscale UDP port is opened on that interface.
 - Modules must not emit raw `iptables` rules: the backend asserts that `networking.firewall.extraCommands` and `extraStopCommands` are empty.
   Use `extraInputRules`, `extraForwardRules`, or a table under `networking.nftables.tables`.
 

@@ -20,7 +20,7 @@ When `services.atuin.enable` is set:
 ## Operational Notes / Assumptions
 
 - Consumption is per-host: set `services.atuin.enable = true` on the host that should run the server.
-- The server listens on `0.0.0.0` so the IO Coordinator can reach it over the backend network.
+- The server listens on `::` (dual-stack) so the IO Coordinator can reach it over the cluster network.
 - `database.createLocally = false` avoids local PostgreSQL setup.
   Atuin connects to PostgreSQL on the Database Coordinator using `ATUIN_DB_URI`.
 - Open registration is enabled to allow the initial account creation; disable it once the required accounts exist.
