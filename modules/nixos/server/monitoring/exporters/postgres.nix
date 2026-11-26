@@ -23,7 +23,7 @@ in
         services = {
           prometheus.exporters.postgres = {
             enable = true;
-            listenAddress = "::";
+            listenAddress = "[::]";
           };
 
           postgresql = {

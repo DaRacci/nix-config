@@ -61,7 +61,7 @@ in
     services.prometheus.exporters.node = {
       enable = true;
       port = 9100;
-      listenAddress = "::";
+      listenAddress = "[::]";
 
       # enabledCollectors is additive, so defaults must be disabled explicitly.
       extraFlags = [

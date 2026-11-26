@@ -117,7 +117,7 @@ in
       enable = true;
       checkConfig = "syntax-only";
       port = 9090;
-      listenAddress = "::";
+      listenAddress = "[::]";
       extraFlags = optionals otlpCfg.enable [ "--web.enable-remote-write-receiver" ];
 
       retentionTime = cfg.retention.metrics;

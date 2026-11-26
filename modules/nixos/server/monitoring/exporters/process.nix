@@ -13,7 +13,7 @@ in
   config = mkIf (cfg.enable && cfg.exporters.process.enable) {
     services.prometheus.exporters.process = {
       enable = true;
-      listenAddress = "::";
+      listenAddress = "[::]";
       settings.process_names = [
         # Remove nix store path from process name.
         {
