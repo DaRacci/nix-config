@@ -36,7 +36,7 @@ in
       type = str;
       default = ioHostAddress;
       defaultText = literalExpression ''
-        if isThisIOPrimaryHost then "localhost" else "${config.server.ioPrimaryHost}.${clusterDomain}"
+        if isThisIOPrimaryHost then "localhost" else "''${config.server.ioPrimaryHost}.''${clusterDomain}"
       '';
       description = ''
         The hostname or IP address to use when connecting to managed databases.
