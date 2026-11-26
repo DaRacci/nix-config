@@ -37,7 +37,8 @@ All downloading happens through a VPN tunnel so P2P traffic is isolated.
 - The VPN config is provided as a sops binary secret (`wg.conf`) that restarts `wg.service` when rotated.
 - Access to VPN-isolated apps is allowed from the LAN and the configured tailnet;
   see the [Tailscale module documentation](../../modules/nixos/services/tailscale.md) for the cluster's tailnet integration.
-- Nixarr's generated nginx proxies listen only on this host's cluster address (`nixarr.vpn.proxyListenAddr`),so the IO Coordinator reaches them over `<host>.cluster`.
+- Nixarr's generated nginx proxies listen only on this host's cluster address (`nixarr.vpn.proxyListenAddr`),
+  so the IO Coordinator reaches them over `<host>.cluster`.
 
 ### Authentication
 
