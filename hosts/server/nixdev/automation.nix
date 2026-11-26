@@ -93,6 +93,7 @@ in
     proxy.virtualHosts = {
       n8n = {
         public = true;
+        ports = [ (lib.toInt config.services.n8n.environment.N8N_PORT) ];
         extraConfig = ''
           reverse_proxy http://localhost:${toString config.services.n8n.environment.N8N_PORT}
         '';
