@@ -10,7 +10,6 @@ let
 
   cfg = config.server.monitoring;
   domain = self.data.site.domain;
-  listenAddress = "0.0.0.0";
 in
 {
   config = mkIf (cfg.enable && cfg.collector.enable && cfg.collector.otlp.enable) {
@@ -19,7 +18,7 @@ in
         public = true;
         ports = [ cfg.collector.otlp.port ];
         extraConfig = ''
-          reverse_proxy http://${listenAddress}:${toString cfg.collector.otlp.port}
+          reverse_proxy http://localhost:${toString cfg.collector.otlp.port}
         '';
       };
 
@@ -28,6 +27,8 @@ in
         url = "https://${cfg.collector.otlp.subdomain}.${domain}";
         icon = "mdi-transit-connection-variant";
       };
+
+      network.openPortsForSources.cluster.tcp = [ cfg.collector.otlp.port ];
 
       monitoring.logs.extraConfiguration = ''
         otelcol.auth.bearer "otlp" {
@@ -50,7 +51,7 @@ in
 
         otelcol.receiver.otlp "default" {
           http {
-            endpoint = "0.0.0.0:${toString cfg.collector.otlp.port}"
+            endpoint = "[::]:${toString cfg.collector.otlp.port}"
             auth     = otelcol.auth.bearer.otlp.handler
           }
 

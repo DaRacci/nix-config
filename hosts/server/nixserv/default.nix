@@ -9,6 +9,8 @@ let
     owner = config.services.atticd.user;
     inherit (config.services.atticd) group;
   };
+
+  port = 8080;
 in
 {
   sops.secrets = {
@@ -28,8 +30,9 @@ in
       };
     };
 
-    proxy.virtualHosts = {
-      cache.extraConfig = ''
+    proxy.virtualHosts.cache = {
+      ports = [ port ];
+      extraConfig = ''
         encode {
           zstd
           match {
@@ -37,9 +40,10 @@ in
           }
         }
 
-        reverse_proxy http://127.0.0.1:8080
+        reverse_proxy http://localhost:${toString port}
       '';
     };
+
   };
 
   environment.systemPackages = [ attic-client ];
@@ -63,7 +67,7 @@ in
       package = pkgs.attic-server;
       environmentFile = config.sops.secrets.ATTIC_ENVIRONMENT.path;
       settings = {
-        listen = "[::]:8080";
+        listen = "[::]:${toString port}";
         allowed-hosts = [ ];
         api-endpoint = "https://cache.racci.dev/";
         soft-delete-caches = false;
@@ -104,6 +108,4 @@ in
       };
     };
   };
-
-  networking.firewall.allowedTCPPorts = [ 8080 ];
 }

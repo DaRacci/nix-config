@@ -1,11 +1,14 @@
-{ lib }:
+{
+  self,
+  lib,
+}:
 let
-  v = import ./_lib.nix { inherit lib; };
+  dataLib = import ./_lib.nix { inherit lib; };
 
   modules = {
-    network = import ./network.nix { inherit v; };
-    redis = import ./redis { inherit v; };
-    site = import ./site.nix { inherit v; };
+    network = import ./network.nix { inherit self lib dataLib; };
+    redis = import ./redis { inherit dataLib; };
+    site = import ./site.nix { inherit dataLib; };
   };
 
   data =

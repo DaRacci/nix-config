@@ -6,6 +6,57 @@
   self,
   ...
 }:
+let
+  inherit (lib)
+    mergeAttrsList
+    mapAttrs
+    filterAttrs
+    concatStringsSep
+    optionalString
+    optional
+    unique
+    listToAttrs
+    nameValuePair
+    strings
+    ;
+  inherit (strings) hasPrefix hasSuffix;
+  inherit (builtins) attrNames attrValues concatMap;
+
+  clusterPostgresDatabases =
+    fromAllServers [
+      (map (hostConfig: {
+        ${hostConfig.system.name} = hostConfig.server.database.postgres;
+      }))
+      mergeAttrsList
+    ]
+    // {
+      ${config.system.name} = config.server.database.postgres;
+    };
+
+  declaringHosts = attrNames (filterAttrs (_: databases: databases != { }) clusterPostgresDatabases);
+
+  databasePorts = [
+    config.services.postgresql.settings.port
+    config.services.couchdb.port
+  ];
+
+  postgresSources =
+    host:
+    [ "${self.data.network.cluster.hosts.${host}}/128" ]
+    ++ optional (host == config.system.name) "127.0.0.1/32"
+    ++ optional (host == config.system.name) "::1/128";
+
+  postgresRule = address: db: "host  ${db.database}  ${db.user}  ${address}  scram-sha-256";
+
+  clusterPostgresRules = unique (
+    concatMap (
+      host:
+      concatMap (address: map (postgresRule address) (attrValues clusterPostgresDatabases.${host})) (
+        postgresSources host
+      )
+    ) declaringHosts
+  );
+in
 {
   # For backups to be placed in the minio data directory.
   users.users.postgres.extraGroups = [ "minio" ];
@@ -32,12 +83,11 @@
   }
   // fromAllServers [
     (map (config: config.sops.secrets))
-    lib.mergeAttrsList
-    (lib.filterAttrs (
-      _name: secret:
-      lib.strings.hasPrefix "POSTGRES/" secret.name && lib.hasSuffix "_PASSWORD" secret.name
+    mergeAttrsList
+    (filterAttrs (
+      _name: secret: hasPrefix "POSTGRES/" secret.name && hasSuffix "_PASSWORD" secret.name
     ))
-    (builtins.mapAttrs (
+    (mapAttrs (
       _: value:
       (removeAttrs value [ "sopsFileHash" ])
       // {
@@ -64,7 +114,7 @@
     couchdb = {
       enable = false;
       package = pkgs.couchdb3;
-      bindAddress = "0.0.0.0";
+      bindAddress = "::";
       extraConfigFiles = [
         config.sops.secrets."COUCHDB_SETTINGS".path
       ];
@@ -89,15 +139,9 @@
         local   all       all             trust
         local   all       all             scram-sha-256
       ''
-      + (lib.pipe self.data.network.subnets [
-        (map (
-          subnet:
-          [ "host  all  all  ${subnet.ipv4.cidr}  scram-sha-256" ]
-          ++ lib.optionals (subnet.ipv6.cidr != null) [ "host  all  all  ${subnet.ipv6.cidr}  scram-sha-256" ]
-        ))
-        lib.flatten
-        (builtins.concatStringsSep "\n")
-      ]);
+      + optionalString (clusterPostgresRules != [ ]) (
+        "\n" + concatStringsSep "\n" clusterPostgresRules + "\n"
+      );
 
       settings = {
         password_encryption = "scram-sha-256";
@@ -130,8 +174,7 @@
     };
   };
 
-  networking.firewall.allowedTCPPorts = [
-    config.services.postgresql.settings.port
-    config.services.couchdb.port
-  ];
+  server.network.openPortsForSources = listToAttrs (
+    map (host: nameValuePair host { tcp = databasePorts; }) declaringHosts
+  );
 }

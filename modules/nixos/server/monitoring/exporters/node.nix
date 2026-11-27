@@ -61,7 +61,7 @@ in
     services.prometheus.exporters.node = {
       enable = true;
       port = 9100;
-      listenAddress = "0.0.0.0";
+      listenAddress = "[::]";
 
       # enabledCollectors is additive, so defaults must be disabled explicitly.
       extraFlags = [
@@ -108,6 +108,8 @@ in
       };
     };
 
-    server.network.openPortsForSubnet.tcp = [ config.services.prometheus.exporters.node.port ];
+    server.network.openPortsForSources.${config.server.monitoringPrimaryHost}.tcp = [
+      config.services.prometheus.exporters.node.port
+    ];
   };
 }

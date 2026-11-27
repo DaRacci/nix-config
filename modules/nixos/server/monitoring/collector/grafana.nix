@@ -63,13 +63,13 @@ in
     {
       server.proxy.virtualHosts.grafana =
         let
-          inherit (config.services.grafana.settings.server) http_port http_addr;
+          inherit (config.services.grafana.settings.server) http_port;
         in
         {
           public = true;
           ports = [ http_port ];
           extraConfig = ''
-            reverse_proxy http://${http_addr}:${toString http_port}
+            reverse_proxy http://localhost:${toString http_port}
           '';
         };
 
@@ -78,7 +78,7 @@ in
 
         settings = {
           server = {
-            http_addr = "0.0.0.0";
+            http_addr = "::";
             http_port = 3000;
             domain = "grafana.${domain}";
             root_url = "https://grafana.${domain}";

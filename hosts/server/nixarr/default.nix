@@ -5,6 +5,9 @@
   self,
   ...
 }:
+let
+  clusterHost = self.data.network.cluster.hosts.${config.networking.hostName};
+in
 {
   imports = [
     inputs.nixarr.nixosModules.default
@@ -28,7 +31,13 @@
     restartUnits = [ "wg.service" ];
   };
 
-  vpnNamespaces.wg.accessibleFrom = lib.mkForce (self.data.network.cidrs ++ [ "127.0.0.1" ]);
+  vpnNamespaces.wg.accessibleFrom = lib.mkForce (
+    self.data.network.cidrs
+    ++ [
+      self.data.network.cluster.cidr
+      "127.0.0.1"
+    ]
+  );
 
   hardware.graphics = {
     enable = true;
@@ -41,6 +50,7 @@
       enable = true;
       vpnTestService.enable = true;
       wgConf = config.sops.secrets.wireguard.path;
+      proxyListenAddr = "[${clusterHost}]";
     };
 
     jellyfin.enable = true;

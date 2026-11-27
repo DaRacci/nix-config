@@ -97,6 +97,9 @@ let
     if isIOPrimaryHost host then
       str
     else
+      let
+        clusterHost = "${host}.${self.data.network.cluster.domain}";
+      in
       builtins.replaceStrings [
         "localhost"
         "0.0.0.0"
@@ -104,7 +107,7 @@ let
         "[::]"
         "[::1]"
         "::1"
-      ] (builtins.genList (_: host) 6) str;
+      ] (builtins.genList (_: clusterHost) 6) str;
 
   getExtensionsForVhost =
     _vhostName: vhostAttr: _hostCfg:

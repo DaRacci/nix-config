@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  deviceType ? null,
   ...
 }:
 let
@@ -34,6 +35,8 @@ let
   dashboardStartTimeoutSec = dashboardReadinessBudgetSec + 30;
 in
 {
+  imports = lib.optionals (deviceType == "server") [ ./dashboard-server.nix ];
+
   options.services.ai-agent.dashboard = {
     enable = mkEnableOption "Hermes web dashboard";
 
@@ -119,14 +122,16 @@ in
             attempts = dashboardReadinessAttempts;
             intervalSec = dashboardReadinessIntervalSec;
           };
-          ExecStart = "${lib.getExe pkgs.bash} -c 'env > /tmp/hermes-dashboard.env; exec docker exec -u hermes --env-file /tmp/hermes-dashboard.env hermes-agent /data/current-package/bin/hermes dashboard --host 0.0.0.0 --no-open --port ${toString cfg.dashboard.port}'";
+          ExecStart = "${lib.getExe pkgs.bash} -c 'env > /tmp/hermes-dashboard.env; exec docker exec -u hermes --env-file /tmp/hermes-dashboard.env hermes-agent /data/current-package/bin/hermes dashboard --host :: --no-open --port ${toString cfg.dashboard.port}'";
           Restart = "always";
           RestartSec = 5;
           SupplementaryGroups = [ "docker" ];
           ReadWritePaths = [ "/var/run/docker.sock" ];
         };
       };
+    })
 
+    (mkIf (cfg.enable && cfg.dashboard.enable && deviceType != "server") {
       networking.firewall.allowedTCPPorts = [ cfg.dashboard.port ];
     })
 

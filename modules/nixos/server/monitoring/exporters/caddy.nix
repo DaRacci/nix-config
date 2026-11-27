@@ -25,7 +25,7 @@ in
         '';
       };
 
-      server.network.openPortsForSubnet.tcp = [ 3019 ];
+      server.network.openPortsForSources.${config.server.monitoringPrimaryHost}.tcp = [ 3019 ];
     })
 
     (mkIf (cfg.enable && cfg.exporters.caddy.enable && cfg.logs.enable) {

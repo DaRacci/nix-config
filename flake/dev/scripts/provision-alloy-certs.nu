@@ -63,6 +63,7 @@ def main [
     let all_hosts = list-server-hosts
     let selected_hosts = if ($hosts | is-empty) { $all_hosts } else { $hosts }
     let domain = if $domain == null { proxy-domain } else { $domain }
+    let cluster_domain = cluster-domain
 
     for host in $selected_hosts {
       if not ($host in $all_hosts) {
@@ -90,7 +91,7 @@ def main [
           provision-leaf $output $work.path $host "alloy" "server" $ca.root --ca-key-data $ca.key
             --issuer-cert $ca.cert
             --name $host --common-name $host
-            --san [ $"DNS:($host)" $"DNS:($host).localdomain" $"DNS:($host).($domain)" "IP:127.0.0.1" ]
+            --san [ $"DNS:($host)" $"DNS:($host).localdomain" $"DNS:($host).($domain)" $"DNS:($host).($cluster_domain)" "IP:127.0.0.1" ]
             --key-usage "critical,digitalSignature,keyEncipherment"
             --extended-key-usage "serverAuth"
             --serial-name "alloy-intermediate"
@@ -130,6 +131,14 @@ def proxy-domain [] {
     flake-eval r#'flake.data.site.domain'# --raw | str trim
   } catch {|err|
     fail $"Could not derive the proxy domain; pass --domain explicitly: ($err.msg)"
+  }
+}
+
+def cluster-domain [] {
+  try {
+    flake-eval r#'flake.data.network.cluster.domain'# --raw | str trim
+  } catch {|err|
+    fail $"Could not derive the cluster domain: ($err.msg)"
   }
 }
 

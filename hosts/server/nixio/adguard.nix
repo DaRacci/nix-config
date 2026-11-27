@@ -46,7 +46,10 @@
         ];
 
         dns = rec {
-          bind_hosts = [ "0.0.0.0" ];
+          bind_hosts = [
+            "0.0.0.0"
+            "::"
+          ];
           port = 53;
 
           hostsfile_enabled = false;

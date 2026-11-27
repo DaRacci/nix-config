@@ -1,4 +1,8 @@
-{ v }:
+{
+  self,
+  lib,
+  dataLib,
+}:
 let
   normalize =
     subnet:
@@ -54,6 +58,32 @@ let
   ipv4Cidrs = builtins.filter (cidr: cidr != null) (map (subnet: subnet.ipv4.cidr) subnets);
   ipv6Cidrs = builtins.filter (cidr: cidr != null) (map (subnet: subnet.ipv6.cidr) subnets);
 
+  clusterPrefix = "fd10:10:10:1";
+
+  clusterIid =
+    name:
+    let
+      hash = builtins.hashString "sha256" name;
+    in
+    "${builtins.substring 0 4 hash}:${builtins.substring 4 4 hash}:${builtins.substring 8 4 hash}:${builtins.substring 12 4 hash}";
+
+  clusterHosts = (lib.builders.getHostsByType self).server;
+  cluster = rec {
+    vlan = 42;
+    zone = "clusterzone";
+    vnet = "cluster";
+    interface = "eth1";
+    domain = "cluster";
+    prefixLength = 64;
+    cidr = "${clusterPrefix}::/${toString prefixLength}";
+    hosts = builtins.listToAttrs (
+      map (name: {
+        inherit name;
+        value = "${clusterPrefix}:${clusterIid name}";
+      }) clusterHosts
+    );
+  };
+
   ipKeys = [
     "cidr"
     "arpa"
@@ -65,22 +95,30 @@ in
       subnets
       ipv4Cidrs
       ipv6Cidrs
+      cluster
       ;
     cidrs = ipv4Cidrs ++ ipv6Cidrs;
   };
 
   validate =
-    _lib: data:
+    lib: data:
     let
       subnets = data.network.subnets;
       domains = map (subnet: subnet.domain) subnets;
       cidrs = data.network.cidrs;
+      cluster = data.network.cluster;
+      clusterAddresses = builtins.attrValues cluster.hosts;
+      duplicateClusterAddresses =
+        clusterAddresses
+        |> builtins.groupBy (address: address)
+        |> lib.filterAttrs (_: addresses: builtins.length addresses > 1)
+        |> builtins.attrNames;
     in
-    v.unique { values = domains; }
-    ++ v.unique { values = cidrs; }
+    dataLib.unique { values = domains; }
+    ++ dataLib.unique { values = cidrs; }
     ++ builtins.concatMap (
       subnet:
-      v.keys {
+      dataLib.keys {
         expected = [
           "dns"
           "domain"
@@ -89,11 +127,11 @@ in
         ];
         actual = builtins.attrNames subnet;
       }
-      ++ v.keys {
+      ++ dataLib.keys {
         expected = ipKeys;
         actual = builtins.attrNames subnet.ipv4;
       }
-      ++ v.keys {
+      ++ dataLib.keys {
         expected = ipKeys;
         actual = builtins.attrNames subnet.ipv6;
       }
@@ -101,5 +139,29 @@ in
     ++ map (subnet: {
       assertion = subnet.ipv4.cidr != null || subnet.ipv6.cidr != null;
       message = "subnet ${subnet.domain or "unnamed"} has no CIDR";
-    }) subnets;
+    }) subnets
+    ++ [
+      {
+        assertion = cluster.vlan >= 1 && cluster.vlan <= 4094;
+        message = "cluster VLAN must be between 1 and 4094";
+      }
+      {
+        assertion =
+          builtins.match "[A-Za-z][A-Za-z0-9]*" cluster.vnet != null
+          && builtins.stringLength cluster.vnet <= 8;
+        message = "cluster VNet ID must be alphanumeric, start with a letter, and be at most 8 characters";
+      }
+      {
+        assertion = cluster.hosts != { };
+        message = "cluster hosts must not be empty";
+      }
+      {
+        assertion = duplicateClusterAddresses == [ ];
+        message = "duplicate cluster host addresses: ${toString duplicateClusterAddresses}";
+      }
+      {
+        assertion = builtins.all (address: lib.hasPrefix "${clusterPrefix}:" address) clusterAddresses;
+        message = "cluster host addresses must use the ${clusterPrefix}::/64 prefix";
+      }
+    ];
 }

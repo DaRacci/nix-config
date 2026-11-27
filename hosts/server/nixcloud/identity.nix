@@ -64,13 +64,16 @@ in
           tls_chain = "${certDirectory}/fullchain.pem";
 
           http_client_address_info.x-forward-for =
-            self.data.network.subnets
-            |> map (subnet: [
-              subnet.ipv4.cidr
-              subnet.ipv6.cidr
-            ])
-            |> flatten
-            |> filterEmpty;
+            (
+              self.data.network.subnets
+              |> map (subnet: [
+                subnet.ipv4.cidr
+                subnet.ipv6.cidr
+              ])
+              |> flatten
+              |> filterEmpty
+            )
+            ++ [ self.data.network.cluster.cidr ];
 
           online_backup = {
             versions = 7;
@@ -246,5 +249,5 @@ in
     };
   };
 
-  networking.firewall.allowedTCPPorts = [ 8443 ];
+  server.network.openPortsForSources.${config.server.ioPrimaryHost}.tcp = [ 8443 ];
 }

@@ -1,11 +1,12 @@
 {
+  self,
   inputs,
   config,
   lib,
   ...
 }:
 let
-  shared = import ../data { inherit lib; };
+  shared = import ../data { inherit self lib; };
 in
 {
   flake = {

@@ -508,8 +508,8 @@ async def async_main(argv: list[str]) -> int:
     parser.add_argument(
         "--host",
         type=str,
-        default=os.environ.get("GUARDIAN_HOST", "0.0.0.0"),
-        help="Host to bind to (default: 0.0.0.0)",
+        default=os.environ.get("GUARDIAN_HOST", "::"),
+        help="Host to bind to (default: ::)",
     )
     parser.add_argument(
         "--ca-cert",

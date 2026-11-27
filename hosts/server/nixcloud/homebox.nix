@@ -22,7 +22,7 @@
           cfg = config.services.homebox.settings;
         in
         ''
-          reverse_proxy http://${cfg.HBOX_WEB_HOST}:${toString cfg.HBOX_WEB_PORT}
+          reverse_proxy http://localhost:${toString cfg.HBOX_WEB_PORT}
         '';
     };
 
@@ -39,7 +39,7 @@
           HBOX_MODE = "production";
           HBOX_OPTIONS_ALLOW_REGISTRATION = "true";
 
-          HBOX_WEB_HOST = "0.0.0.0";
+          HBOX_WEB_HOST = "::";
           HBOX_WEB_PORT = "7745";
 
           HBOX_DATABASE_TYPE = "postgres";

@@ -5,6 +5,7 @@
 {
   config,
   lib,
+  self,
   ...
 }:
 let
@@ -18,37 +19,39 @@ let
 
   cfg = config.server.monitoring;
   otlpCfg = cfg.collector.otlp;
+  clusterDomain = self.data.network.cluster.domain;
+  clusterHost = c: "${c.host.name}.${clusterDomain}";
 
   # Build scrape targets from all server configurations
   nodeTargets =
     serverConfigurations
     |> builtins.filter (c: c.server.monitoring.enable && c.server.monitoring.exporters.node.enable)
-    |> map (c: "${c.host.name}:9100");
+    |> map (c: "${clusterHost c}:9100");
 
   caddyTargets =
     serverConfigurations
     |> builtins.filter (c: c.server.monitoring.enable && c.server.monitoring.exporters.caddy.enable)
-    |> map (c: "${c.host.name}:3019");
+    |> map (c: "${clusterHost c}:3019");
 
   postgresTargets =
     serverConfigurations
     |> builtins.filter (c: c.server.monitoring.enable && c.server.monitoring.exporters.postgres.enable)
-    |> map (c: "${c.host.name}:9187");
+    |> map (c: "${clusterHost c}:9187");
 
   redisTargets =
     serverConfigurations
     |> builtins.filter (c: c.server.monitoring.enable && c.server.monitoring.exporters.redis.enable)
-    |> map (c: "${c.host.name}:9121");
+    |> map (c: "${clusterHost c}:9121");
 
   fail2banTargets =
     serverConfigurations
     |> builtins.filter (c: c.server.monitoring.enable && c.server.monitoring.exporters.fail2ban.enable)
-    |> map (c: "${c.host.name}:9191");
+    |> map (c: "${clusterHost c}:9191");
 
   processTargets =
     serverConfigurations
     |> builtins.filter (c: c.server.monitoring.enable && c.server.monitoring.exporters.process.enable)
-    |> map (c: "${c.host.name}:9256");
+    |> map (c: "${clusterHost c}:9256");
 
   # Collect declarative scrape configs from all servers (postgres pattern).
   # Each host declares server.monitoring.scrapeConfigs.<name> = { port = X; ... };
@@ -101,12 +104,12 @@ in
 
     server.proxy.virtualHosts.prometheus =
       let
-        inherit (config.services.prometheus) port listenAddress;
+        inherit (config.services.prometheus) port;
       in
       {
         ports = [ port ];
         extraConfig = ''
-          reverse_proxy http://${listenAddress}:${toString port}
+          reverse_proxy http://localhost:${toString port}
         '';
       };
 
@@ -114,7 +117,7 @@ in
       enable = true;
       checkConfig = "syntax-only";
       port = 9090;
-      listenAddress = "0.0.0.0";
+      listenAddress = "[::]";
       extraFlags = optionals otlpCfg.enable [ "--web.enable-remote-write-receiver" ];
 
       retentionTime = cfg.retention.metrics;

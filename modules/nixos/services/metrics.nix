@@ -173,7 +173,7 @@ let
     };
 
     notifications = {
-      push_url = "http://${config.host.name}:9175/notifications";
+      push_url = "http://localhost:9175/notifications";
       listen = ":9175";
     };
 

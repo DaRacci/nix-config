@@ -228,7 +228,8 @@ systemctl stop db-databases.target
 **Connections fail with a certificate error:**
 
 - `certificate verify failed: unable to get local issuer certificate` on the guardian means the coordinator's chain does not reach the DB Guardian intermediate CA; confirm `CLIENT_CERT` carries the leaf followed by the intermediate.
-- `Hostname mismatch` or `IP address mismatch` on the coordinator means the dialled name is missing from the guardian's server certificate; the SAN set must contain the bare hostname used in `--hosts`.
+- `Hostname mismatch` or `IP address mismatch` on the coordinator means the dialled name is missing from the guardian's server certificate;
+  the SAN set must contain `<host>.${data.network.cluster.domain}`, which is the name passed in `--hosts`.
 - `certificate has expired` means the leaf is past its validity; reissue it with the procedure in [Internal mTLS CA](../security/internal_mtls_ca.md).
 
 **Guardian rejects the client with `certificate common name ... is not in the allowlist`:**

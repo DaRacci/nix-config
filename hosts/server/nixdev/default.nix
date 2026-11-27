@@ -1,4 +1,5 @@
 {
+  config,
   ...
 }:
 {
@@ -21,9 +22,8 @@
   };
 
   networking.firewall = {
-    allowedTCPPorts = [
-      8080
-      2525
-    ];
+    allowedTCPPorts = [ 2525 ];
   };
+
+  server.network.openPortsForSources.${config.server.ioPrimaryHost}.tcp = [ 8080 ];
 }

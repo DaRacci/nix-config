@@ -49,8 +49,11 @@ Errors are prefixed with `data.<file>:`.
 
 ## Current Slices
 
-- `network` — subnets plus CIDR lists derived from them.
-  `validate` checks subnet keys, IP keys, and that every subnet has a CIDR.
+- `network` — subnets plus CIDR lists derived from them, and the private cluster network.
+  The cluster slice holds the VLAN, SDN zone, VNet and interface names, the IPv6 ULA prefix, and one derived address per host.
+  `cidr` is derived from the prefix length, so the two cannot drift.
+  `validate` checks subnet keys, IP keys, that every subnet has a CIDR, and the cluster invariants.
+  Cluster addresses are derived from the host directory name, so renaming a host directory changes that host's address.
 - `redis` — generated database ID mappings.
 - `site` — public domain and administrative email.
 

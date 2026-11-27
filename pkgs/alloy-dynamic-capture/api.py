@@ -4,7 +4,9 @@ import argparse
 import json
 import ssl
 import subprocess
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler
+
+from alloy_lib import make_server
 
 
 def parse_args() -> argparse.Namespace:
@@ -198,7 +200,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
-    server = HTTPServer((args.listen_address, args.port), Handler)
+    server = make_server(args.listen_address, args.port, Handler)
 
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.minimum_version = ssl.TLSVersion.TLSv1_2

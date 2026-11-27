@@ -13,6 +13,7 @@ in
   config = mkIf (cfg.enable && cfg.exporters.process.enable) {
     services.prometheus.exporters.process = {
       enable = true;
+      listenAddress = "[::]";
       settings.process_names = [
         # Remove nix store path from process name.
         {
@@ -23,6 +24,8 @@ in
       ];
     };
 
-    server.network.openPortsForSubnet.tcp = [ config.services.prometheus.exporters.process.port ];
+    server.network.openPortsForSources.${config.server.monitoringPrimaryHost}.tcp = [
+      config.services.prometheus.exporters.process.port
+    ];
   };
 }

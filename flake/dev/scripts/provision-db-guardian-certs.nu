@@ -87,7 +87,7 @@ def main [
         (
           provision-leaf $output $work.path $host "db-guardian-tls" "server" $material.cert --ca-key-data $material.key
             --name $host --common-name $host
-            --san [ $"DNS:($host)" $"DNS:($host).localdomain" ]
+            --san [ $"DNS:($host)" $"DNS:($host).localdomain" $"DNS:($host).($topology.domain)" ]
             --key-usage "critical,digitalSignature,keyEncipherment"
             --extended-key-usage "serverAuth"
             --serial-name "db-guardian-intermediate"
@@ -139,6 +139,7 @@ def cluster-topology [] {
         ) servers;
       in {
         inherit primary guardians servers;
+        domain = flake.data.network.cluster.domain;
       }
     '# --json | from json
   } catch {|err|

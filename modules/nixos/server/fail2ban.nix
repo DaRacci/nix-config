@@ -41,13 +41,16 @@ in
       enable = true;
 
       ignoreIP =
-        self.data.network.subnets
-        |> map (subnet: [
-          subnet.ipv4.cidr
-          subnet.ipv6.cidr
-        ])
-        |> flatten
-        |> filterEmpty;
+        (
+          self.data.network.subnets
+          |> map (subnet: [
+            subnet.ipv4.cidr
+            subnet.ipv6.cidr
+          ])
+          |> flatten
+          |> filterEmpty
+        )
+        ++ [ self.data.network.cluster.cidr ];
       maxretry = 5;
 
       jails = {

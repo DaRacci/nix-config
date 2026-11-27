@@ -64,12 +64,12 @@ in
     esphome = {
       enable = true;
       openFirewall = true;
-      address = "0.0.0.0";
+      address = "::";
     };
 
     matterjs-server = {
       enable = true;
-      listenAddress = "0.0.0.0";
+      listenAddress = "::";
       extraArgs = [
         "--bluetooth-adapter=0"
         "--primary-interface=eth0"
@@ -85,8 +85,6 @@ in
 
       listeners = [
         {
-          address = "0.0.0.0";
-
           acl = [
             # allow reading of system topics
             "topic read $SYS/#"

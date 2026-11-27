@@ -26,12 +26,15 @@ in
 
         services.prometheus.exporters.redis = {
           enable = true;
+          listenAddress = "[::]";
           extraFlags = [
             "--redis.password-file %d/redis-password"
           ];
         };
 
-        server.network.openPortsForSubnet.tcp = [ config.services.prometheus.exporters.redis.port ];
+        server.network.openPortsForSources.${config.server.monitoringPrimaryHost}.tcp = [
+          config.services.prometheus.exporters.redis.port
+        ];
 
         systemd.services.prometheus-redis-exporter.serviceConfig.LoadCredential = [
           "redis-password:${config.sops.templates."redis-exporter-password".path}"

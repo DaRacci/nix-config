@@ -112,7 +112,7 @@ in
     }
 
     (mkIf (!isThisIOPrimaryHost) {
-      server.network.openPortsForSubnet.tcp =
+      server.network.openPortsForSources.${config.server.ioPrimaryHost}.tcp =
         cfg.virtualHosts
         |> builtins.attrValues
         |> map (vh: vh.ports)

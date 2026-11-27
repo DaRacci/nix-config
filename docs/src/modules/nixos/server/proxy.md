@@ -26,10 +26,12 @@ and the primary IO host to ensure ports are open and traffic is correctly routed
 
 ### File Layout
 
-- **`default.nix`** — Logic and helpers: resolving OAuth contexts and mapping local addresses to backend hostnames.
+- **`default.nix`** — Logic and helpers: resolving OAuth contexts and mapping local addresses to `<host>.${data.network.cluster.domain}` backend hostnames.
+  Vhosts defined on the IO primary keep local addresses; vhosts from other hosts are rewritten to that host's cluster FQDN.
 - **`options.nix`** — Option definitions for virtual hosts and shared contexts.
 - **`config.nix`** — Caddy integration: generation of `services.caddy.virtualHosts` and ACME certificate requests.
   L4 (TCP/UDP) forwarding is handled by the `l4` extension, not by `config.nix`.
+  L4 listeners bind all addresses (`:port`); their ports are opened through `openPortsForSources.lan`, so only LAN sources reach them.
 - **`kanidm.nix`** — Authentication security: generates the Caddy `security` block, including identity providers, portals, and authorisation policies.
 - **`extensions.nix`** — System integration: connects the proxy to the dashboard, Cloudflared tunnels, and automates Kanidm client provisioning.
 

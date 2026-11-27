@@ -16,6 +16,7 @@ let
     ];
     specialArgs = {
       inherit inputs lib;
+      deviceType = null;
       hostDirectory = "${self}/hosts";
       importExternals = false;
       users = [ ];

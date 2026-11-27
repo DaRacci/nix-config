@@ -6,6 +6,7 @@
 {
   config,
   lib,
+  self,
   ...
 }:
 let
@@ -18,6 +19,10 @@ let
   inherit (types) str;
 
   cfg = config.server.database;
+
+  clusterDomain = self.data.network.cluster.domain;
+  ioHostAddress =
+    if isThisIOPrimaryHost then "localhost" else "${config.server.ioPrimaryHost}.${clusterDomain}";
 in
 {
   imports = [
@@ -29,9 +34,9 @@ in
   options.server.database = {
     host = mkOption {
       type = str;
-      default = if isThisIOPrimaryHost then "localhost" else config.server.ioPrimaryHost;
+      default = ioHostAddress;
       defaultText = literalExpression ''
-        if isThisIOPrimaryHost then "localhost" else config.server.ioPrimaryHost
+        if isThisIOPrimaryHost then "localhost" else "''${config.server.ioPrimaryHost}.''${clusterDomain}"
       '';
       description = ''
         The hostname or IP address to use when connecting to managed databases.
